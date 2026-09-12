@@ -1,5 +1,5 @@
 import { StorageAdapter } from './adapter';
-import { Review, ReviewInput, ReviewStats } from '../../types';
+import { Review, ReviewInput, ReviewStats, CollectionForm } from '../../types';
 
 export class RestApiAdapter implements StorageAdapter {
   name = 'Custom REST API';
@@ -87,5 +87,35 @@ export class RestApiAdapter implements StorageAdapter {
       featuredCount: reviews.filter(r => r.isFeatured).length,
       ratingBreakdown,
     };
+  }
+
+  async getCollectionForm(projectId?: string): Promise<CollectionForm | null> {
+    try {
+      const res = await fetch(`${this.baseUrl}/collection-form?projectId=${projectId || ''}`);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  }
+
+  async updateCollectionForm(id: string, updates: Partial<CollectionForm>): Promise<CollectionForm> {
+    const res = await fetch(`${this.baseUrl}/collection-forms/${id}`, {
+      method: 'PATCH',
+      headers: this.headers,
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) throw new Error('Failed to update collection form via REST API');
+    return await res.json();
+  }
+
+  async createCollectionForm(form: Omit<CollectionForm, 'id' | 'createdAt' | 'updatedAt'>): Promise<CollectionForm> {
+    const res = await fetch(`${this.baseUrl}/collection-forms`, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify(form),
+    });
+    if (!res.ok) throw new Error('Failed to create collection form via REST API');
+    return await res.json();
   }
 }

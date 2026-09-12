@@ -1,4 +1,4 @@
-import { Review, ReviewInput, ReviewStats } from '../../types';
+import { Review, ReviewInput, ReviewStats, CollectionForm } from '../../types';
 
 export interface StorageAdapter {
   name: string;
@@ -10,4 +10,9 @@ export interface StorageAdapter {
   deleteReview(id: string): Promise<boolean>;
   getStats(projectId?: string): Promise<ReviewStats>;
   resetToSampleData?(projectId?: string): Promise<void>;
+  
+  // Phase 2: Collection Form Management
+  getCollectionForm(projectId?: string): Promise<CollectionForm | null>;
+  updateCollectionForm(id: string, updates: Partial<CollectionForm>): Promise<CollectionForm>;
+  createCollectionForm(form: Omit<CollectionForm, 'id' | 'createdAt' | 'updatedAt'>): Promise<CollectionForm>;
 }

@@ -1,5 +1,5 @@
 import { StorageAdapter } from './adapter';
-import { Review, ReviewInput, ReviewStats } from '../../types';
+import { Review, ReviewInput, ReviewStats, CollectionForm } from '../../types';
 import { INITIAL_REVIEWS } from '../seedData';
 
 const STORAGE_KEY_PREFIX = 'reviewvault_testimonials_project_';
@@ -137,5 +137,72 @@ export class LocalStorageAdapter implements StorageAdapter {
     const targetProject = projectId || 'proj-demo-1';
     const seeded = INITIAL_REVIEWS.map(r => ({ ...r, projectId: targetProject }));
     this.saveReviews(seeded, targetProject);
+  }
+
+  // Phase 2: Collection Form Management
+  private getFormStorageKey(projectId?: string): string {
+    return `reviewvault_collection_form_${projectId || 'default'}`;
+  }
+
+  async getCollectionForm(projectId?: string): Promise<CollectionForm | null> {
+    const target = projectId || 'proj-demo-1';
+    const key = this.getFormStorageKey(target);
+    const data = localStorage.getItem(key);
+    if (!data) {
+      const defaultForm: CollectionForm = {
+        id: 'form-' + target,
+        projectId: target,
+        publicSlug: target === 'proj-demo-1' ? 'pulse-feedback' : `${target}-feedback`,
+        title: 'Share Your Experience',
+        description: 'Your honest feedback helps our team and community grow.',
+        isActive: true,
+        allowVideo: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(key, JSON.stringify(defaultForm));
+      return defaultForm;
+    }
+    try {
+      return JSON.parse(data) as CollectionForm;
+    } catch {
+      return null;
+    }
+  }
+
+  async updateCollectionForm(id: string, updates: Partial<CollectionForm>): Promise<CollectionForm> {
+    const target = updates.projectId || 'proj-demo-1';
+    const key = this.getFormStorageKey(target);
+    const existing = await this.getCollectionForm(target);
+    const updated: CollectionForm = {
+      ...(existing || {
+        id,
+        projectId: target,
+        publicSlug: 'feedback',
+        title: 'Share Your Experience',
+        description: '',
+        isActive: true,
+        allowVideo: true,
+        createdAt: new Date().toISOString(),
+      }),
+      ...updates,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(key, JSON.stringify(updated));
+    return updated;
+  }
+
+  async createCollectionForm(form: Omit<CollectionForm, 'id' | 'createdAt' | 'updatedAt'>): Promise<CollectionForm> {
+    const newId = 'form-' + Math.random().toString(36).substring(2, 9);
+    const created: CollectionForm = {
+      ...form,
+      id: newId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    const key = this.getFormStorageKey(form.projectId);
+    localStorage.setItem(key, JSON.stringify(created));
+    return created;
   }
 }

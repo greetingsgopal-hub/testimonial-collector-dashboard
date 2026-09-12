@@ -260,4 +260,98 @@ export class SupabaseAdapter implements StorageAdapter {
       },
     };
   }
+
+  async getCollectionForm(projectId?: string): Promise<CollectionForm | null> {
+    const supabase = getSupabase();
+    let query = supabase.from('collection_forms').select('*');
+    if (projectId) {
+      query = query.eq('project_id', projectId);
+    }
+    const { data, error } = await query.limit(1).maybeSingle();
+    if (error || !data) return null;
+    return {
+      id: data.id,
+      projectId: data.project_id,
+      publicSlug: data.public_slug,
+      title: data.title,
+      description: data.description,
+      isActive: data.is_active,
+      allowVideo: data.allow_video,
+      settings: data.settings,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    };
+  }
+
+  async updateCollectionForm(id: string, updates: Partial<CollectionForm>): Promise<CollectionForm> {
+    const supabase = getSupabase();
+    const row: any = {};
+    if (updates.title !== undefined) row.title = updates.title;
+    if (updates.description !== undefined) row.description = updates.description;
+    if (updates.publicSlug !== undefined) row.public_slug = updates.publicSlug;
+    if (updates.isActive !== undefined) row.is_active = updates.isActive;
+    if (updates.allowVideo !== undefined) row.allow_video = updates.allowVideo;
+    if (updates.settings !== undefined) row.settings = updates.settings;
+    row.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('collection_forms')
+      .update(row)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error || !data) {
+      throw new Error(`Failed to update collection form: ${error?.message || 'Unknown error'}`);
+    }
+
+    return {
+      id: data.id,
+      projectId: data.project_id,
+      publicSlug: data.public_slug,
+      title: data.title,
+      description: data.description,
+      isActive: data.is_active,
+      allowVideo: data.allow_video,
+      settings: data.settings,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    };
+  }
+
+  async createCollectionForm(form: Omit<CollectionForm, 'id' | 'createdAt' | 'updatedAt'>): Promise<CollectionForm> {
+    const supabase = getSupabase();
+    const row = {
+      project_id: form.projectId,
+      public_slug: form.publicSlug,
+      title: form.title,
+      description: form.description,
+      is_active: form.isActive ?? true,
+      allow_video: form.allowVideo ?? true,
+      settings: form.settings || {},
+    };
+
+    const { data, error } = await supabase
+      .from('collection_forms')
+      .insert(row)
+      .select()
+      .single();
+
+    if (error || !data) {
+      throw new Error(`Failed to create collection form: ${error?.message || 'Unknown error'}`);
+    }
+
+    return {
+      id: data.id,
+      projectId: data.project_id,
+      publicSlug: data.public_slug,
+      title: data.title,
+      description: data.description,
+      isActive: data.is_active,
+      allowVideo: data.allow_video,
+      settings: data.settings,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    };
+  }
 }

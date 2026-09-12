@@ -6,7 +6,7 @@ import { SuccessModal } from '../components/collector/SuccessModal';
 import { Review, ReviewInput, CollectionForm, Project } from '../types';
 import { storage } from '../lib/storage';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
-import { Sparkles, AlertCircle, ArrowLeft, Building2 } from 'lucide-react';
+import { Sparkles, AlertCircle, ArrowLeft, Building2, Clock } from 'lucide-react';
 
 const INITIAL_FORM_STATE: ReviewInput = {
   name: '',
@@ -29,6 +29,7 @@ export const PublicCollectorPage = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isClosed, setIsClosed] = useState(false);
 
   const [formData, setFormData] = useState<ReviewInput>(INITIAL_FORM_STATE);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,6 +39,7 @@ export const PublicCollectorPage = () => {
     const loadPublicForm = async () => {
       setIsLoading(true);
       setError(null);
+      setIsClosed(false);
 
       try {
         if (!collectionSlug) {
@@ -52,11 +54,16 @@ export const PublicCollectorPage = () => {
             .from('collection_forms')
             .select('*')
             .eq('public_slug', collectionSlug)
-            .eq('is_active', true)
             .maybeSingle();
 
           if (formErr || !formRow) {
-            setError(`Collection form "${collectionSlug}" was not found or is currently inactive.`);
+            setError(`Collection form "${collectionSlug}" was not found.`);
+            setIsLoading(false);
+            return;
+          }
+
+          if (!formRow.is_active) {
+            setIsClosed(true);
             setIsLoading(false);
             return;
           }
@@ -89,18 +96,21 @@ export const PublicCollectorPage = () => {
             createdAt: projRow.created_at,
           } : null);
         } else {
-          // Local/Demo Mode fallback for testing: support default slugs
-          if (collectionSlug === 'pulse-feedback' || collectionSlug === 'demo-feedback') {
-            setFormConfig({
-              id: 'form-demo-1',
-              projectId: 'proj-demo-1',
-              publicSlug: collectionSlug,
-              title: 'Share Your Experience with Pulse AI',
-              description: 'We would love to hear how Pulse AI helped you scale.',
-              isActive: true,
-              allowVideo: true,
-              createdAt: new Date().toISOString(),
-            });
+          // Local/Demo Mode storage lookup
+          const demoForm = await storage.getCollectionForm('proj-demo-1');
+          if (
+            demoForm && 
+            (collectionSlug === demoForm.publicSlug || 
+             collectionSlug === 'pulse-feedback' || 
+             collectionSlug === 'demo-feedback')
+          ) {
+            if (!demoForm.isActive) {
+              setIsClosed(true);
+              setIsLoading(false);
+              return;
+            }
+
+            setFormConfig(demoForm);
             setProject({
               id: 'proj-demo-1',
               workspaceId: 'ws-demo-1',
@@ -109,7 +119,7 @@ export const PublicCollectorPage = () => {
               createdAt: new Date().toISOString(),
             });
           } else {
-            setError(`Collection form "${collectionSlug}" was not found in the database.`);
+            setError(`Collection form "${collectionSlug}" was not found.`);
           }
         }
       } catch (err: any) {
@@ -151,6 +161,32 @@ export const PublicCollectorPage = () => {
     );
   }
 
+  if (isClosed) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 text-center">
+        <div className="ambient-glow" />
+        <div className="glass-panel max-w-md p-8 rounded-2xl border border-white/15 space-y-4 relative z-10 shadow-2xl">
+          <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto">
+            <Clock className="w-6 h-6" />
+          </div>
+          <h2 className="text-xl font-bold font-display text-white">Collection Paused</h2>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            This testimonial collection form is currently closed and not accepting new responses. Thank you for your interest!
+          </p>
+          <div className="pt-2">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-semibold text-zinc-300 transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Return to ReviewVault</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (error || !formConfig) {
     return (
       <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 text-center">
@@ -161,7 +197,7 @@ export const PublicCollectorPage = () => {
           </div>
           <h3 className="text-xl font-bold font-display text-white">Form Unavailable</h3>
           <p className="text-xs text-zinc-400 leading-relaxed">
-            {error || 'This testimonial collection form does not exist or has been paused by the owner.'}
+            {error || 'This testimonial collection form does not exist.'}
           </p>
           <div className="pt-2">
             <Link
@@ -240,10 +276,8 @@ export const PublicCollectorPage = () => {
       {submittedReview && (
         <SuccessModal
           review={submittedReview}
+          isPublicView={true}
           onClose={() => setSubmittedReview(null)}
-          onGoToDashboard={() => {
-            setSubmittedReview(null);
-          }}
           onResetForm={() => setFormData(INITIAL_FORM_STATE)}
         />
       )}

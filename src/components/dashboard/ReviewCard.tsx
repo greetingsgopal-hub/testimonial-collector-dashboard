@@ -82,13 +82,22 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           <div className="flex items-center gap-1">
             {/* Quick Star / Feature toggle */}
             <button
+              disabled={review.status !== 'approved'}
               onClick={() => onToggleFeatured(review.id, review.isFeatured)}
               className={`p-1.5 rounded-lg transition-colors ${
-                review.isFeatured
+                review.status !== 'approved'
+                  ? 'opacity-30 cursor-not-allowed text-zinc-600'
+                  : review.isFeatured
                   ? 'text-amber-400 bg-amber-400/10 hover:bg-amber-400/20'
                   : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'
               }`}
-              title={review.isFeatured ? 'Remove from Featured' : 'Mark as Featured'}
+              title={
+                review.status !== 'approved'
+                  ? 'Only approved testimonials can be featured'
+                  : review.isFeatured
+                  ? 'Remove from Featured'
+                  : 'Mark as Featured'
+              }
             >
               <Star className={`w-4 h-4 ${review.isFeatured ? 'fill-amber-400' : ''}`} />
             </button>

@@ -6,8 +6,9 @@ import { Review } from '../../types';
 interface SuccessModalProps {
   review: Review | null;
   onClose: () => void;
-  onGoToDashboard: () => void;
+  onGoToDashboard?: () => void;
   onResetForm: () => void;
+  isPublicView?: boolean;
 }
 
 export const SuccessModal: React.FC<SuccessModalProps> = ({
@@ -15,6 +16,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
   onClose,
   onGoToDashboard,
   onResetForm,
+  isPublicView = false,
 }) => {
   const [copied, setCopied] = React.useState(false);
 
@@ -52,26 +54,28 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
           Thank you, {review.name.split(' ')[0]}!
         </h3>
         <p className="text-sm text-zinc-300 mb-6 leading-relaxed">
-          Your testimonial has been submitted successfully and sent to moderation. We deeply appreciate you sharing your experience!
+          Your testimonial has been submitted successfully and sent to moderation. It will appear on our website once approved by our team.
         </p>
 
-        {/* Review Reference ID */}
-        <div className="p-3 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center justify-between text-xs text-zinc-400 mb-6">
-          <span className="flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-brand-400" />
-            Ref: <code className="text-zinc-200 font-mono">{review.id}</code>
-          </span>
-          <button
-            onClick={handleCopyId}
-            className="flex items-center gap-1 px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors"
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
-          </button>
-        </div>
+        {/* Review Reference ID (Only shown in dashboard testing mode, hidden for public visitors) */}
+        {!isPublicView && (
+          <div className="p-3 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center justify-between text-xs text-zinc-400 mb-6">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-brand-400" />
+              Ref: <code className="text-zinc-200 font-mono">{review.id}</code>
+            </span>
+            <button
+              onClick={handleCopyId}
+              className="flex items-center gap-1 px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copied' : 'Copy'}</span>
+            </button>
+          </div>
+        )}
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className={`grid ${isPublicView ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
           <button
             onClick={() => {
               onResetForm();
@@ -80,19 +84,21 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
             className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-sm font-medium text-zinc-200 transition-colors"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>Submit Another</span>
+            <span>Submit Another Testimonial</span>
           </button>
 
-          <button
-            onClick={() => {
-              onClose();
-              onGoToDashboard();
-            }}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-pink-600 hover:from-brand-500 hover:to-pink-500 text-sm font-semibold text-white shadow-glow-sm transition-all"
-          >
-            <span>View in Dashboard</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          {!isPublicView && onGoToDashboard && (
+            <button
+              onClick={() => {
+                onClose();
+                onGoToDashboard();
+              }}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-pink-600 hover:from-brand-500 hover:to-pink-500 text-sm font-semibold text-white shadow-glow-sm transition-all"
+            >
+              <span>View in Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
     </div>

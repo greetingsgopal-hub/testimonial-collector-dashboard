@@ -148,13 +148,22 @@ export const ReviewTable: React.FC<ReviewTableProps> = ({
                   <div className="flex items-center justify-end gap-1">
                     {/* Star Featured */}
                     <button
+                      disabled={review.status !== 'approved'}
                       onClick={() => onToggleFeatured(review.id, review.isFeatured)}
                       className={`p-1.5 rounded-lg transition-colors ${
-                        review.isFeatured
+                        review.status !== 'approved'
+                          ? 'opacity-30 cursor-not-allowed text-zinc-600'
+                          : review.isFeatured
                           ? 'text-amber-400 bg-amber-400/10'
                           : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'
                       }`}
-                      title="Toggle Featured"
+                      title={
+                        review.status !== 'approved'
+                          ? 'Only approved testimonials can be featured'
+                          : review.isFeatured
+                          ? 'Remove from Featured'
+                          : 'Mark as Featured'
+                      }
                     >
                       <Star className={`w-3.5 h-3.5 ${review.isFeatured ? 'fill-amber-400' : ''}`} />
                     </button>
