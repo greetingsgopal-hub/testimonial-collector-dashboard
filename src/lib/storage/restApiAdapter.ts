@@ -1,5 +1,5 @@
 import { StorageAdapter } from './adapter';
-import { Review, ReviewInput, ReviewStats, CollectionForm } from '../../types';
+import { Review, ReviewInput, ReviewStats, CollectionForm, Project } from '../../types';
 
 export class RestApiAdapter implements StorageAdapter {
   name = 'Custom REST API';
@@ -92,6 +92,16 @@ export class RestApiAdapter implements StorageAdapter {
   async getCollectionForm(projectId?: string): Promise<CollectionForm | null> {
     try {
       const res = await fetch(`${this.baseUrl}/collection-form?projectId=${projectId || ''}`);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  }
+
+  async getCollectionFormBySlug(publicSlug: string): Promise<{ form: CollectionForm; project: Project } | null> {
+    try {
+      const res = await fetch(`${this.baseUrl}/c/${publicSlug}`);
       if (!res.ok) return null;
       return await res.json();
     } catch {

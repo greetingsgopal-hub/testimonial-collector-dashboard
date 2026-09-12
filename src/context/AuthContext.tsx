@@ -1,11 +1,32 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  User as FirebaseUser,
+} from 'firebase/auth';
+import {
+  collection,
+  doc,
+  getDocs,
+  setDoc,
+  query,
+  where,
+} from 'firebase/firestore';
+import { auth, db, isFirebaseConfigured } from '../lib/firebase';
 import { Workspace, Project, CollectionForm } from '../types';
 
+export interface AuthUser {
+  id: string;
+  uid: string;
+  email: string | null;
+  displayName?: string | null;
+}
+
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: AuthUser | null;
   workspace: Workspace | null;
   project: Project | null;
   collectionForm: CollectionForm | null;
@@ -24,15 +45,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const DEMO_USER: User = {
+const DEMO_USER: AuthUser = {
   id: 'demo-user-001',
-  app_metadata: {},
-  user_metadata: { full_name: 'Demo Founder' },
-  aud: 'authenticated',
-  created_at: new Date().toISOString(),
+  uid: 'demo-user-001',
   email: 'founder@demo.reviewvault.dev',
-  role: 'authenticated',
-  updated_at: new Date().toISOString(),
+  displayName: 'Demo Founder',
 };
 
 const DEMO_WORKSPACE: Workspace = {
@@ -65,176 +82,154 @@ const DEMO_FORM: CollectionForm = {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [collectionForm, setCollectionForm] = useState<CollectionForm | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
-    // Only allow demo mode if explicitly set in localStorage AND supabase is not configured
-    return localStorage.getItem('reviewvault_demo_mode') === 'true' && !isSupabaseConfigured;
+    return localStorage.getItem('reviewvault_demo_mode') === 'true' && !isFirebaseConfigured;
   });
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // Initialize workspace, project, and collection form for the user
-  const initUserTenancy = async (currentUser: User) => {
-    if (!supabase) return;
+  // Initialize workspace, project, and collection form for the user in Firestore
+  const initUserTenancy = async (currentUser: AuthUser) => {
+    if (!db) return;
 
     try {
       // 1. Fetch or create workspace
-      const { data: workspaces, error: wsError } = await supabase
-        .from('workspaces')
-        .select('*')
-        .eq('owner_id', currentUser.id);
-
-      if (wsError) throw wsError;
+      const wsQuery = query(collection(db, 'workspaces'), where('ownerId', '==', currentUser.uid));
+      const wsSnapshot = await getDocs(wsQuery);
 
       let currentWs: Workspace;
 
-      if (!workspaces || workspaces.length === 0) {
+      if (wsSnapshot.empty) {
         const userPrefix = (currentUser.email || 'user').split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
-        const defaultSlug = `${userPrefix}-ws-${currentUser.id.substring(0, 6)}`;
-        
-        const { data: newWs, error: createWsErr } = await supabase
-          .from('workspaces')
-          .insert({
-            owner_id: currentUser.id,
-            name: `${userPrefix.toUpperCase()}'s Workspace`,
-            slug: defaultSlug,
-            plan: 'free',
-          })
-          .select()
-          .single();
+        const defaultSlug = `${userPrefix}-ws-${currentUser.uid.substring(0, 6)}`;
+        const wsRef = doc(collection(db, 'workspaces'));
+        const now = new Date().toISOString();
 
-        if (createWsErr) throw createWsErr;
+        const wsData = {
+          ownerId: currentUser.uid,
+          name: `${userPrefix.toUpperCase()}'s Workspace`,
+          slug: defaultSlug,
+          plan: 'free' as const,
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        await setDoc(wsRef, wsData);
         currentWs = {
-          id: newWs.id,
-          ownerId: newWs.owner_id,
-          name: newWs.name,
-          slug: newWs.slug,
-          plan: newWs.plan,
-          createdAt: newWs.created_at,
-          updatedAt: newWs.updated_at,
+          id: wsRef.id,
+          ...wsData,
         };
       } else {
-        const row = workspaces[0];
+        const row = wsSnapshot.docs[0];
+        const data = row.data();
         currentWs = {
           id: row.id,
-          ownerId: row.owner_id,
-          name: row.name,
-          slug: row.slug,
-          plan: row.plan,
-          createdAt: row.created_at,
-          updatedAt: row.updated_at,
+          ownerId: data.ownerId,
+          name: data.name,
+          slug: data.slug,
+          plan: data.plan,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
         };
       }
       setWorkspace(currentWs);
 
       // 2. Fetch or create project
-      const { data: projects, error: projError } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('workspace_id', currentWs.id);
-
-      if (projError) throw projError;
+      const projQuery = query(collection(db, 'projects'), where('workspaceId', '==', currentWs.id));
+      const projSnapshot = await getDocs(projQuery);
 
       let currentProj: Project;
 
-      if (!projects || projects.length === 0) {
+      if (projSnapshot.empty) {
         const projSlug = `${currentWs.slug}-project`;
-        const { data: newProj, error: createProjErr } = await supabase
-          .from('projects')
-          .insert({
-            workspace_id: currentWs.id,
-            name: 'Main Product',
-            slug: projSlug,
-          })
-          .select()
-          .single();
+        const projRef = doc(collection(db, 'projects'));
+        const now = new Date().toISOString();
 
-        if (createProjErr) throw createProjErr;
+        const projData = {
+          workspaceId: currentWs.id,
+          ownerId: currentUser.uid,
+          name: 'Main Product',
+          slug: projSlug,
+          websiteUrl: '',
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        await setDoc(projRef, projData);
         currentProj = {
-          id: newProj.id,
-          workspaceId: newProj.workspace_id,
-          name: newProj.name,
-          slug: newProj.slug,
-          websiteUrl: newProj.website_url,
-          createdAt: newProj.created_at,
-          updatedAt: newProj.updated_at,
+          id: projRef.id,
+          ...projData,
         };
       } else {
-        const row = projects[0];
+        const row = projSnapshot.docs[0];
+        const data = row.data();
         currentProj = {
           id: row.id,
-          workspaceId: row.workspace_id,
-          name: row.name,
-          slug: row.slug,
-          websiteUrl: row.website_url,
-          createdAt: row.created_at,
-          updatedAt: row.updated_at,
+          workspaceId: data.workspaceId,
+          name: data.name,
+          slug: data.slug,
+          websiteUrl: data.websiteUrl,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
         };
       }
       setProject(currentProj);
 
       // 3. Fetch or create collection form
-      const { data: forms, error: formError } = await supabase
-        .from('collection_forms')
-        .select('*')
-        .eq('project_id', currentProj.id);
+      const formQuery = query(collection(db, 'collection_forms'), where('projectId', '==', currentProj.id));
+      const formSnapshot = await getDocs(formQuery);
 
-      if (formError) throw formError;
-
-      if (!forms || forms.length === 0) {
+      if (formSnapshot.empty) {
         const formSlug = `${currentProj.slug}-feedback`;
-        const { data: newForm, error: createFormErr } = await supabase
-          .from('collection_forms')
-          .insert({
-            project_id: currentProj.id,
-            public_slug: formSlug,
-            title: `Share your experience with ${currentProj.name}`,
-            description: 'Your honest feedback helps us grow and serve you better.',
-            is_active: true,
-          })
-          .select()
-          .single();
+        const formRef = doc(collection(db, 'collection_forms'));
+        const now = new Date().toISOString();
 
-        if (createFormErr) throw createFormErr;
+        const formData = {
+          projectId: currentProj.id,
+          ownerId: currentUser.uid,
+          publicSlug: formSlug,
+          title: `Share your experience with ${currentProj.name}`,
+          description: 'Your honest feedback helps us grow and serve you better.',
+          isActive: true,
+          allowVideo: true,
+          settings: {},
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        await setDoc(formRef, formData);
         setCollectionForm({
-          id: newForm.id,
-          projectId: newForm.project_id,
-          publicSlug: newForm.public_slug,
-          title: newForm.title,
-          description: newForm.description,
-          isActive: newForm.is_active,
-          allowVideo: newForm.allow_video,
-          settings: newForm.settings,
-          createdAt: newForm.created_at,
-          updatedAt: newForm.updated_at,
+          id: formRef.id,
+          ...formData,
         });
       } else {
-        const row = forms[0];
+        const row = formSnapshot.docs[0];
+        const data = row.data();
         setCollectionForm({
           id: row.id,
-          projectId: row.project_id,
-          publicSlug: row.public_slug,
-          title: row.title,
-          description: row.description,
-          isActive: row.is_active,
-          allowVideo: row.allow_video,
-          settings: row.settings,
-          createdAt: row.created_at,
-          updatedAt: row.updated_at,
+          projectId: data.projectId,
+          publicSlug: data.publicSlug,
+          title: data.title,
+          description: data.description,
+          isActive: data.isActive,
+          allowVideo: data.allowVideo,
+          settings: data.settings,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
         });
       }
     } catch (err: any) {
-      console.error('[AuthContext] Failed to initialize tenant workspace/project:', err);
+      console.error('[AuthContext] Failed to initialize tenant workspace/project in Firestore:', err);
       setAuthError(err.message || 'Failed to initialize tenant workspace');
     }
   };
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) {
+    if (!isFirebaseConfigured || !auth) {
       if (isDemoMode) {
         setUser(DEMO_USER);
         setWorkspace(DEMO_WORKSPACE);
@@ -245,24 +240,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    // Check active Supabase session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        initUserTenancy(session.user).finally(() => setIsLoading(false));
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        const authUser: AuthUser = {
+          id: firebaseUser.uid,
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+        };
+        setUser(authUser);
+        await initUserTenancy(authUser);
       } else {
-        setIsLoading(false);
-      }
-    });
-
-    // Listen to auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await initUserTenancy(session.user);
-      } else {
+        setUser(null);
         setWorkspace(null);
         setProject(null);
         setCollectionForm(null);
@@ -270,71 +259,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => unsubscribe();
   }, [isDemoMode]);
 
   const signUp = async (email: string, password: string) => {
     setAuthError(null);
-    if (!isSupabaseConfigured || !supabase) {
-      return { 
-        success: false, 
-        error: 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.' 
+    if (!isFirebaseConfigured || !auth) {
+      return {
+        success: false,
+        error: 'Firebase is not configured. Please set VITE_FIREBASE_* environment variables.',
       };
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const authUser: AuthUser = {
+        id: userCredential.user.uid,
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        displayName: userCredential.user.displayName,
+      };
+      setUser(authUser);
+      await initUserTenancy(authUser);
+      return { success: true };
+    } catch (error: any) {
       setAuthError(error.message);
       return { success: false, error: error.message };
     }
-
-    if (data.user) {
-      setUser(data.user);
-      await initUserTenancy(data.user);
-    }
-
-    return { success: true };
   };
 
   const signIn = async (email: string, password: string) => {
     setAuthError(null);
-    if (!isSupabaseConfigured || !supabase) {
-      return { 
-        success: false, 
-        error: 'Supabase is not configured. Please provide VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in environment variables.' 
+    if (!isFirebaseConfigured || !auth) {
+      return {
+        success: false,
+        error: 'Firebase is not configured. Please set VITE_FIREBASE_* environment variables.',
       };
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const authUser: AuthUser = {
+        id: userCredential.user.uid,
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        displayName: userCredential.user.displayName,
+      };
+      setUser(authUser);
+      await initUserTenancy(authUser);
+      return { success: true };
+    } catch (error: any) {
       setAuthError(error.message);
       return { success: false, error: error.message };
     }
-
-    if (data.user) {
-      setUser(data.user);
-      await initUserTenancy(data.user);
-    }
-
-    return { success: true };
   };
 
   const signOut = async () => {
-    if (supabase && isSupabaseConfigured) {
-      await supabase.auth.signOut();
+    if (auth && isFirebaseConfigured) {
+      await firebaseSignOut(auth);
     }
     setUser(null);
-    setSession(null);
     setWorkspace(null);
     setProject(null);
     setCollectionForm(null);
@@ -343,28 +327,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     setAuthError(null);
-    if (!isSupabaseConfigured || !supabase) {
-      return { 
-        success: false, 
-        error: 'Supabase is not configured. Password recovery requires cloud Supabase credentials.' 
+    if (!isFirebaseConfigured || !auth) {
+      return {
+        success: false,
+        error: 'Firebase is not configured. Password recovery requires VITE_FIREBASE_* credentials.',
       };
     }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-
-    if (error) {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true };
+    } catch (error: any) {
       setAuthError(error.message);
       return { success: false, error: error.message };
     }
-
-    return { success: true };
   };
 
   const enableDemoMode = () => {
-    if (isSupabaseConfigured) {
-      console.warn('[Security] Demo mode is disabled in production when Supabase is configured.');
+    if (isFirebaseConfigured) {
+      console.warn('[Security] Demo mode is disabled in production when Firebase is configured.');
       return;
     }
     localStorage.setItem('reviewvault_demo_mode', 'true');
@@ -394,7 +375,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         user,
-        session,
         workspace,
         project,
         collectionForm,

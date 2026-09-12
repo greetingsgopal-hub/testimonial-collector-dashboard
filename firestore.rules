@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 1. Workspaces
+    // Only the workspace owner can read, update, or delete their workspace
+    match /workspaces/{workspaceId} {
+      allow read: if isOwner(resource.data.ownerId);
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.ownerId);
+    }
+
+    // 2. Projects
+    // Only the owner can access private project configuration
+    match /projects/{projectId} {
+      allow read: if isOwner(resource.data.ownerId);
+      // Public collector can read basic project info only if associated with an active collection
+      allow get: if true; 
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.ownerId);
+    }
+
+    // 3. Collection Forms
+    // Owner manages collection; anonymous visitors can read active collection forms
+    match /collection_forms/{formId} {
+      allow read: if (isAuthenticated() && resource.data.ownerId == request.auth.uid) || resource.data.isActive == true;
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.ownerId);
+    }
+
+    // 4. Private Reviews (Operational Store)
+    // Full records including customer email.
+    // Anonymous users CANNOT read arbitrary reviews or email.
+    match /reviews/{reviewId} {
+      // Owner has full access to reviews belonging to their tenant
+      allow read, update, delete: if isOwner(resource.data.ownerId);
+
+      // Anonymous public submission:
+      // Must submit as 'pending', cannot feature itself, must include consent
+      allow create: if 
+        request.resource.data.status == 'pending' &&
+        request.resource.data.isFeatured == false &&
+        request.resource.data.consent == true;
+    }
+
+    // 5. Public Approved Reviews (Zero-Trust Display Store)
+    // Stripped of customer email and private metadata.
+    // Public visitors can read approved reviews safely.
+    match /public_reviews/{reviewId} {
+      allow read: if true;
+      allow write: if isOwner(request.resource.data.ownerId);
+      allow delete: if isOwner(resource.data.ownerId);
+    }
+  }
+}

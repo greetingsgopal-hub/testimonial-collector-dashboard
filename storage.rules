@@ -1,0 +1,28 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Public avatars and testimonial media
+    // Stored under public/{tenantId}/...
+    match /public/{tenantId}/{allPaths=**} {
+      // Anyone can view public media
+      allow read: if true;
+      
+      // Upload limits: image only, max 5MB
+      allow write: if (
+        request.resource.size < 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*')
+      );
+    }
+
+    // Owner-only private uploads
+    match /tenants/{tenantId}/{allPaths=**} {
+      allow read, write: if isAuthenticated() && request.auth.uid == tenantId;
+    }
+  }
+}

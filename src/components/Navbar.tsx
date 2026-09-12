@@ -144,14 +144,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <span className="relative flex h-2 w-2">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                backend.type === 'supabase' ? 'bg-emerald-400' : 'bg-amber-400'
+                backend.type === 'firebase' ? 'bg-emerald-400' : 'bg-amber-400'
               }`}></span>
               <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                backend.type === 'supabase' ? 'bg-emerald-500' : 'bg-amber-500'
+                backend.type === 'firebase' ? 'bg-emerald-500' : 'bg-amber-500'
               }`}></span>
             </span>
             <Database className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="hidden lg:inline">{backend.type === 'supabase' ? 'Supabase' : 'Demo DB'}</span>
+            <span className="hidden lg:inline">{backend.type === 'firebase' ? 'Firebase' : 'Demo DB'}</span>
           </button>
 
           {/* User profile & Sign out */}

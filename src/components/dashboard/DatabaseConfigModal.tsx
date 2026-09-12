@@ -9,7 +9,7 @@ import {
   CheckCircle2, 
   Server, 
   Cloud,
-  FileCode
+  ShieldCheck
 } from 'lucide-react';
 import { getActiveBackendInfo } from '../../lib/storage';
 
@@ -17,30 +17,34 @@ interface DatabaseConfigModalProps {
   onClose: () => void;
 }
 
-const SUPABASE_ENV_SNIPPET = `# Supabase Cloud Database (PostgreSQL)
-VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`;
+const FIREBASE_ENV_SNIPPET = `# Firebase Cloud Configuration
+VITE_FIREBASE_API_KEY=AIzaSy...
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
+VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef123456`;
 
 const NETLIFY_DEPLOY_SNIPPET = `# Netlify CLI deployment
 npm run build
 npx netlify deploy --prod --dir=dist`;
 
 export const DatabaseConfigModal: React.FC<DatabaseConfigModalProps> = ({ onClose }) => {
-  const [activeTab, setActiveTab] = useState<'supabase' | 'rest' | 'netlify'>('supabase');
+  const [activeTab, setActiveTab] = useState<'firebase' | 'rest' | 'netlify'>('firebase');
   const [copiedEnv, setCopiedEnv] = useState(false);
-  const [copiedSql, setCopiedSql] = useState(false);
+  const [copiedRules, setCopiedRules] = useState(false);
   const backend = getActiveBackendInfo();
 
   const handleCopyEnv = () => {
-    navigator.clipboard.writeText(SUPABASE_ENV_SNIPPET);
+    navigator.clipboard.writeText(FIREBASE_ENV_SNIPPET);
     setCopiedEnv(true);
     setTimeout(() => setCopiedEnv(false), 2000);
   };
 
-  const handleCopySqlLocation = () => {
-    navigator.clipboard.writeText('-- Run the contents of schema.sql in your Supabase SQL Editor');
-    setCopiedSql(true);
-    setTimeout(() => setCopiedSql(false), 2000);
+  const handleCopyRules = () => {
+    navigator.clipboard.writeText('Deploy firestore.rules and storage.rules using the Firebase Console or Firebase CLI');
+    setCopiedRules(true);
+    setTimeout(() => setCopiedRules(false), 2000);
   };
 
   return (
@@ -55,10 +59,10 @@ export const DatabaseConfigModal: React.FC<DatabaseConfigModalProps> = ({ onClos
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-bold text-white font-display">
-                Plug In Your Database & Deploy
+                Plug In Your Backend & Deploy
               </h3>
               <p className="text-xs text-zinc-400">
-                Connect Supabase (Postgres) or your custom backend in minutes.
+                Connect Firebase (Auth + Cloud Firestore) or your custom API in minutes.
               </p>
             </div>
           </div>
@@ -86,15 +90,15 @@ export const DatabaseConfigModal: React.FC<DatabaseConfigModalProps> = ({ onClos
         {/* Tab Switcher */}
         <div className="px-6 pt-4 flex items-center gap-2 border-b border-zinc-800/80">
           <button
-            onClick={() => setActiveTab('supabase')}
+            onClick={() => setActiveTab('firebase')}
             className={`flex items-center gap-1.5 pb-3 text-xs font-semibold border-b-2 transition-colors ${
-              activeTab === 'supabase'
+              activeTab === 'firebase'
                 ? 'border-brand-500 text-brand-400'
                 : 'border-transparent text-zinc-400 hover:text-zinc-200'
             }`}
           >
             <Cloud className="w-3.5 h-3.5" />
-            <span>Supabase (PostgreSQL)</span>
+            <span>Firebase (Firestore + Auth)</span>
           </button>
 
           <button
@@ -124,34 +128,34 @@ export const DatabaseConfigModal: React.FC<DatabaseConfigModalProps> = ({ onClos
 
         {/* Tab Body */}
         <div className="p-6 space-y-5 overflow-y-auto">
-          {activeTab === 'supabase' && (
+          {activeTab === 'firebase' && (
             <div className="space-y-4">
               <div className="p-4 rounded-xl bg-zinc-900/70 border border-zinc-800 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase text-zinc-300 flex items-center gap-1.5">
-                    <FileCode className="w-4 h-4 text-emerald-400" />
-                    Step 1: Run SQL Schema
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    Step 1: Security Rules (Zero Trust)
                   </span>
                   <a
-                    href="https://supabase.com/dashboard"
+                    href="https://console.firebase.google.com/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1"
                   >
-                    <span>Supabase Dashboard</span>
+                    <span>Firebase Console</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                  We have included a complete, production-ready <code className="text-brand-300 font-mono">schema.sql</code> file in the project root. It includes the <code className="text-zinc-300 font-mono">reviews</code> table, fast indexes, and Row Level Security (RLS) policies.
+                  We have included production-ready <code className="text-brand-300 font-mono">firestore.rules</code> and <code className="text-brand-300 font-mono">storage.rules</code> in the project root. These enforce strict multi-tenant boundaries and customer email privacy.
                 </p>
                 <div className="pt-1">
                   <button
-                    onClick={handleCopySqlLocation}
+                    onClick={handleCopyRules}
                     className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-medium text-zinc-200 flex items-center gap-1.5 transition-colors"
                   >
-                    {copiedSql ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>File: schema.sql (Copy instruction)</span>
+                    {copiedRules ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>Deploy firestore.rules & storage.rules</span>
                   </button>
                 </div>
               </div>
@@ -171,10 +175,10 @@ export const DatabaseConfigModal: React.FC<DatabaseConfigModalProps> = ({ onClos
                   </button>
                 </div>
                 <pre className="p-3 rounded-lg bg-zinc-950 border border-zinc-800/80 font-mono text-xs text-zinc-300 overflow-x-auto">
-                  {SUPABASE_ENV_SNIPPET}
+                  {FIREBASE_ENV_SNIPPET}
                 </pre>
                 <p className="text-[11px] text-zinc-500">
-                  Add these to your <code className="text-zinc-300">.env</code> file locally or in Netlify site settings. ReviewVault will automatically switch from LocalStorage to Supabase on reload!
+                  Add these to your <code className="text-zinc-300">.env</code> locally or in Netlify site environment variables. ReviewVault will automatically connect to Firebase!
                 </p>
               </div>
             </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Lock, Mail, ArrowRight, AlertCircle, CheckCircle2, Play } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { isSupabaseConfigured } from '../lib/supabaseClient';
+import { isFirebaseConfigured } from '../lib/firebase';
 
 export const SignupPage = () => {
   const [email, setEmail] = useState('');
@@ -84,14 +84,14 @@ export const SignupPage = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4 sm:px-0">
         <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 shadow-2xl space-y-5">
           
-          {!isSupabaseConfigured && (
+          {!isFirebaseConfigured && (
             <div className="p-3.5 rounded-xl bg-brand-500/10 border border-brand-500/25 text-xs text-brand-300 space-y-2">
               <div className="font-semibold flex items-center gap-1.5 text-white">
                 <AlertCircle className="w-4 h-4 text-brand-400" />
-                <span>Supabase Cloud Not Configured</span>
+                <span>Firebase Cloud Not Configured</span>
               </div>
               <p className="leading-relaxed text-zinc-300">
-                To enable live cloud user registration, add your Supabase credentials in <code className="text-brand-300 font-mono">.env</code>. Or start immediately in <strong>Demo Mode</strong>.
+                To enable live cloud user registration, add your Firebase credentials in <code className="text-brand-300 font-mono">.env</code>. Or start immediately in <strong>Demo Mode</strong>.
               </p>
               <button
                 type="button"

@@ -5,7 +5,6 @@ import { LivePreviewCard } from '../components/collector/LivePreviewCard';
 import { SuccessModal } from '../components/collector/SuccessModal';
 import { Review, ReviewInput, CollectionForm, Project } from '../types';
 import { storage } from '../lib/storage';
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { Sparkles, AlertCircle, ArrowLeft, Building2, Clock } from 'lucide-react';
 
 const INITIAL_FORM_STATE: ReviewInput = {
@@ -48,80 +47,21 @@ export const PublicCollectorPage = () => {
           return;
         }
 
-        if (isSupabaseConfigured && supabase) {
-          // Cloud Supabase lookup
-          const { data: formRow, error: formErr } = await supabase
-            .from('collection_forms')
-            .select('*')
-            .eq('public_slug', collectionSlug)
-            .maybeSingle();
-
-          if (formErr || !formRow) {
-            setError(`Collection form "${collectionSlug}" was not found.`);
-            setIsLoading(false);
-            return;
-          }
-
-          if (!formRow.is_active) {
-            setIsClosed(true);
-            setIsLoading(false);
-            return;
-          }
-
-          const { data: projRow } = await supabase
-            .from('projects')
-            .select('*')
-            .eq('id', formRow.project_id)
-            .maybeSingle();
-
-          setFormConfig({
-            id: formRow.id,
-            projectId: formRow.project_id,
-            publicSlug: formRow.public_slug,
-            title: formRow.title,
-            description: formRow.description,
-            isActive: formRow.is_active,
-            allowVideo: formRow.allow_video,
-            settings: formRow.settings,
-            createdAt: formRow.created_at,
-            updatedAt: formRow.updated_at,
-          });
-
-          setProject(projRow ? {
-            id: projRow.id,
-            workspaceId: projRow.workspace_id,
-            name: projRow.name,
-            slug: projRow.slug,
-            websiteUrl: projRow.website_url,
-            createdAt: projRow.created_at,
-          } : null);
-        } else {
-          // Local/Demo Mode storage lookup
-          const demoForm = await storage.getCollectionForm('proj-demo-1');
-          if (
-            demoForm && 
-            (collectionSlug === demoForm.publicSlug || 
-             collectionSlug === 'pulse-feedback' || 
-             collectionSlug === 'demo-feedback')
-          ) {
-            if (!demoForm.isActive) {
-              setIsClosed(true);
-              setIsLoading(false);
-              return;
-            }
-
-            setFormConfig(demoForm);
-            setProject({
-              id: 'proj-demo-1',
-              workspaceId: 'ws-demo-1',
-              name: 'Pulse AI',
-              slug: 'pulse-ai',
-              createdAt: new Date().toISOString(),
-            });
-          } else {
-            setError(`Collection form "${collectionSlug}" was not found.`);
-          }
+        const result = await storage.getCollectionFormBySlug(collectionSlug);
+        if (!result) {
+          setError(`Collection form "${collectionSlug}" was not found.`);
+          setIsLoading(false);
+          return;
         }
+
+        if (!result.form.isActive) {
+          setIsClosed(true);
+          setIsLoading(false);
+          return;
+        }
+
+        setFormConfig(result.form);
+        setProject(result.project);
       } catch (err: any) {
         console.error('[PublicCollector] Error loading form:', err);
         setError('Failed to load collection form. Please try again later.');

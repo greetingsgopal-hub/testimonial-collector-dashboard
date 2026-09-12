@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Lock, Mail, ArrowRight, AlertCircle, Play } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { isSupabaseConfigured } from '../lib/supabaseClient';
+import { isFirebaseConfigured } from '../lib/firebase';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -72,14 +72,14 @@ export const LoginPage = () => {
         <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 shadow-2xl space-y-5">
           
           {/* Cloud vs Demo Notice */}
-          {!isSupabaseConfigured && (
+          {!isFirebaseConfigured && (
             <div className="p-3.5 rounded-xl bg-brand-500/10 border border-brand-500/25 text-xs text-brand-300 space-y-2">
               <div className="font-semibold flex items-center gap-1.5 text-white">
                 <AlertCircle className="w-4 h-4 text-brand-400" />
-                <span>Supabase Cloud Not Configured</span>
+                <span>Firebase Cloud Not Configured</span>
               </div>
               <p className="leading-relaxed text-zinc-300">
-                To enable live cloud authentication, add <code className="text-brand-300 font-mono">VITE_SUPABASE_URL</code> to your environment. You can also explore instantly in <strong>Demo Mode</strong>.
+                To enable live cloud authentication, add <code className="text-brand-300 font-mono">VITE_FIREBASE_API_KEY</code> to your environment. You can also explore instantly in <strong>Demo Mode</strong>.
               </p>
               <button
                 type="button"

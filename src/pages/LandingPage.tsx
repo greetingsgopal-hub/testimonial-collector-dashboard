@@ -82,7 +82,7 @@ export const LandingPage = () => {
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center relative z-10">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 text-brand-300 text-xs font-semibold mb-6 border border-brand-500/25 animate-fade-in">
           <ShieldCheck className="w-4 h-4 text-brand-400" />
-          <span>Multi-Tenant • Row Level Security • Supabase Powered</span>
+          <span>Multi-Tenant • Security Rules • Firebase Powered</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-extrabold font-display text-white tracking-tight leading-[1.15] max-w-4xl mx-auto">
@@ -130,9 +130,9 @@ export const LandingPage = () => {
             <div className="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-400 flex items-center justify-center">
               <Lock className="w-4 h-4" />
             </div>
-            <h4 className="text-sm font-bold text-white">Strict Multi-Tenant RLS</h4>
+            <h4 className="text-sm font-bold text-white">Strict Multi-Tenant Rules</h4>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Every workspace, project, and testimonial has verified cryptographic ownership back to your Supabase account.
+              Every workspace, project, and testimonial has verified cryptographic ownership back to your Firebase account.
             </p>
           </div>
 

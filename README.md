@@ -2,7 +2,7 @@
 
 An ultra-modern, clean, single-page React and Tailwind CSS application functioning as a **Testimonial Collector and Moderation Dashboard**, inspired by the open-source architecture of [reviews-kits](https://github.com/reviews-kits-team/reviews-kits).
 
-Stripped of monorepo bloat and complex microservices, ReviewVault is 100% turnkey: it works out-of-the-box in the browser, plugs into Supabase / PostgreSQL or any REST backend with minimal configuration, and deploys directly to Netlify.
+Stripped of monorepo bloat and complex microservices, ReviewVault is 100% turnkey: it works out-of-the-box in the browser, plugs into Firebase (Auth + Cloud Firestore) or any REST backend with minimal configuration, and deploys directly to Netlify.
 
 ---
 
@@ -33,9 +33,9 @@ Stripped of monorepo bloat and complex microservices, ReviewVault is 100% turnke
 
 - 🔌 **Pluggable Database Layer**:
   - **LocalStorage Adapter**: Default fallback, works offline and immediately in-browser with seed data.
-  - **Supabase Adapter**: Connects directly to Supabase PostgreSQL using PostgREST.
+  - **Firebase Adapter**: Connects to Cloud Firestore & Firebase Authentication with multi-tenant Security Rules.
   - **REST API Adapter**: For any custom backend (Node, Express, Hono, FastAPI, etc.).
-  - Includes [`schema.sql`](./schema.sql) with table schemas, indexes, and Row Level Security (RLS) policies.
+  - Includes [`firestore.rules`](./firestore.rules) and [`storage.rules`](./storage.rules) for zero-trust multi-tenant security and customer email privacy.
 
 - 🚀 **Netlify Deployment Ready**:
   - Preconfigured [`netlify.toml`](./netlify.toml) and [`public/_redirects`](./public/_redirects) for single-page application routing and high-performance caching.
@@ -62,16 +62,21 @@ npm run build
 
 ---
 
-## 🗄️ Database Setup (Supabase / PostgreSQL)
+## 🗄️ Backend Setup (Firebase)
 
-1. Create a project at [supabase.com](https://supabase.com).
-2. Open the **SQL Editor** in your Supabase dashboard and execute the contents of [`schema.sql`](./schema.sql).
-3. Copy your project credentials into `.env`:
+1. Create a project at [console.firebase.google.com](https://console.firebase.google.com).
+2. Enable **Authentication** (Email/Password), **Cloud Firestore**, and **Storage**.
+3. Deploy [`firestore.rules`](./firestore.rules) and [`storage.rules`](./storage.rules).
+4. Copy your web app configuration credentials into `.env`:
    ```env
-   VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-   VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   VITE_FIREBASE_API_KEY=AIzaSy...
+   VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your-project-id
+   VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
+   VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef123456
    ```
-4. Reload the app. ReviewVault will automatically detect the credentials and switch to your live database!
+5. Reload the app. ReviewVault will automatically connect to Firebase!
 
 ---
 

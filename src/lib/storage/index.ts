@@ -1,19 +1,19 @@
 import { StorageAdapter } from './adapter';
 import { LocalStorageAdapter } from './localStorageAdapter';
-import { SupabaseAdapter } from './supabaseAdapter';
-import { isSupabaseConfigured } from '../supabaseClient';
+import { FirebaseAdapter } from './firebaseAdapter';
+import { isFirebaseConfigured } from '../firebase';
 
 export * from './adapter';
-export { SupabaseAdapter, LocalStorageAdapter };
+export { FirebaseAdapter, LocalStorageAdapter };
 
 function initializeStorage(): StorageAdapter {
-  if (isSupabaseConfigured) {
-    console.log('[Storage] Initialized Multi-Tenant Supabase Adapter');
-    return new SupabaseAdapter();
+  if (isFirebaseConfigured) {
+    console.log('[Storage] Initialized Multi-Tenant Firebase Adapter');
+    return new FirebaseAdapter();
   }
 
   console.warn(
-    '[Storage] Supabase is NOT configured. Running in Local Development / Demo Mode. Real production data will not be persisted to cloud until VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.'
+    '[Storage] Firebase is NOT configured. Running in Local Development / Demo Mode. Real production data will not be persisted to cloud until VITE_FIREBASE_* environment variables are set.'
   );
   return new LocalStorageAdapter();
 }
@@ -21,13 +21,13 @@ function initializeStorage(): StorageAdapter {
 export const storage = initializeStorage();
 
 export function getActiveBackendInfo() {
-  if (isSupabaseConfigured) {
+  if (isFirebaseConfigured) {
     return {
-      type: 'supabase' as const,
-      name: 'Supabase Cloud (Multi-Tenant PostgreSQL)',
-      status: 'Connected & Enforcing RLS',
+      type: 'firebase' as const,
+      name: 'Firebase Cloud Firestore (Multi-Tenant)',
+      status: 'Connected & Enforcing Security Rules',
       isProductionReady: true,
-      url: import.meta.env.VITE_SUPABASE_URL,
+      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
     };
   }
 

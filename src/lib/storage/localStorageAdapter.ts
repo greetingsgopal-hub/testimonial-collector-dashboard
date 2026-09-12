@@ -1,5 +1,5 @@
 import { StorageAdapter } from './adapter';
-import { Review, ReviewInput, ReviewStats, CollectionForm } from '../../types';
+import { Review, ReviewInput, ReviewStats, CollectionForm, Project } from '../../types';
 import { INITIAL_REVIEWS } from '../seedData';
 
 const STORAGE_KEY_PREFIX = 'reviewvault_testimonials_project_';
@@ -191,6 +191,48 @@ export class LocalStorageAdapter implements StorageAdapter {
     };
     localStorage.setItem(key, JSON.stringify(updated));
     return updated;
+  }
+
+  async getCollectionFormBySlug(publicSlug: string): Promise<{ form: CollectionForm; project: Project } | null> {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('reviewvault_form_')) {
+        try {
+          const val = localStorage.getItem(key);
+          if (val) {
+            const form = JSON.parse(val) as CollectionForm;
+            if (form.publicSlug === publicSlug) {
+              return {
+                form,
+                project: {
+                  id: form.projectId,
+                  workspaceId: 'ws-demo-1',
+                  name: 'Demo Product',
+                  slug: 'demo-product',
+                  createdAt: form.createdAt,
+                }
+              };
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+    }
+    const demoForm = await this.getCollectionForm('proj-demo-1');
+    if (demoForm && (demoForm.publicSlug === publicSlug || publicSlug === 'pulse-feedback')) {
+      return {
+        form: demoForm,
+        project: {
+          id: 'proj-demo-1',
+          workspaceId: 'ws-demo-1',
+          name: 'Pulse AI Product',
+          slug: 'pulse-ai',
+          createdAt: demoForm.createdAt,
+        }
+      };
+    }
+    return null;
   }
 
   async createCollectionForm(form: Omit<CollectionForm, 'id' | 'createdAt' | 'updatedAt'>): Promise<CollectionForm> {

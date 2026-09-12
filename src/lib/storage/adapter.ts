@@ -1,4 +1,4 @@
-import { Review, ReviewInput, ReviewStats, CollectionForm } from '../../types';
+import { Review, ReviewInput, ReviewStats, CollectionForm, Project } from '../../types';
 
 export interface StorageAdapter {
   name: string;
@@ -13,6 +13,7 @@ export interface StorageAdapter {
   
   // Phase 2: Collection Form Management
   getCollectionForm(projectId?: string): Promise<CollectionForm | null>;
+  getCollectionFormBySlug(publicSlug: string): Promise<{ form: CollectionForm; project: Project } | null>;
   updateCollectionForm(id: string, updates: Partial<CollectionForm>): Promise<CollectionForm>;
   createCollectionForm(form: Omit<CollectionForm, 'id' | 'createdAt' | 'updatedAt'>): Promise<CollectionForm>;
 }
