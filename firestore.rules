@@ -44,12 +44,18 @@ service cloud.firestore {
       // Owner has full access to reviews belonging to their tenant
       allow read, update, delete: if isOwner(resource.data.ownerId);
 
-      // Anonymous public submission:
-      // Must submit as 'pending', cannot feature itself, must include consent
+      // Anonymous public submission (Strictly Validated):
+      // Must submit as 'pending', cannot feature itself, must include consent,
+      // and must target a genuinely active collectionForm with verified ownerId and projectId.
       allow create: if 
         request.resource.data.status == 'pending' &&
         request.resource.data.isFeatured == false &&
-        request.resource.data.consent == true;
+        request.resource.data.consent == true &&
+        request.resource.data.collectionFormId != null &&
+        exists(/databases/$(database)/documents/collection_forms/$(request.resource.data.collectionFormId)) &&
+        get(/databases/$(database)/documents/collection_forms/$(request.resource.data.collectionFormId)).data.isActive == true &&
+        request.resource.data.ownerId == get(/databases/$(database)/documents/collection_forms/$(request.resource.data.collectionFormId)).data.ownerId &&
+        request.resource.data.projectId == get(/databases/$(database)/documents/collection_forms/$(request.resource.data.collectionFormId)).data.projectId;
     }
 
     // 5. Public Approved Reviews (Zero-Trust Display Store)

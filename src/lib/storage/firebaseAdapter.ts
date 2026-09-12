@@ -93,18 +93,20 @@ export class FirebaseAdapter implements StorageAdapter {
     const auth = getFirebaseAuth();
     const currentUser = auth.currentUser;
 
-    const targetProjectId = projectId || review.projectId || 'default-project';
+    let targetProjectId = projectId || review.projectId || 'default-project';
     let targetOwnerId = currentUser?.uid || '';
 
-    // If submitted anonymously, lookup ownerId from the collectionForm or project
-    if (!targetOwnerId && review.collectionFormId) {
+    // If submitted anonymously or missing tenant keys, resolve directly from the valid collectionForm
+    if (review.collectionFormId) {
       try {
         const formSnap = await getDoc(doc(db, 'collection_forms', review.collectionFormId));
         if (formSnap.exists()) {
-          targetOwnerId = formSnap.data()?.ownerId || '';
+          const formData = formSnap.data();
+          if (formData?.ownerId) targetOwnerId = formData.ownerId;
+          if (formData?.projectId) targetProjectId = formData.projectId;
         }
       } catch (err) {
-        console.warn('[FirebaseAdapter] Could not pre-fetch collectionForm owner:', err);
+        console.warn('[FirebaseAdapter] Could not pre-fetch collectionForm owner/project:', err);
       }
     }
 
