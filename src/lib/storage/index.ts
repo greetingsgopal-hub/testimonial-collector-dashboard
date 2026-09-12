@@ -1,59 +1,41 @@
 import { StorageAdapter } from './adapter';
 import { LocalStorageAdapter } from './localStorageAdapter';
 import { SupabaseAdapter } from './supabaseAdapter';
-import { RestApiAdapter } from './restApiAdapter';
+import { isSupabaseConfigured } from '../supabaseClient';
 
 export * from './adapter';
+export { SupabaseAdapter, LocalStorageAdapter };
 
 function initializeStorage(): StorageAdapter {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-  if (supabaseUrl && supabaseAnonKey) {
-    console.log('[Storage] Initializing Supabase PostgreSQL Adapter');
-    return new SupabaseAdapter(supabaseUrl, supabaseAnonKey);
+  if (isSupabaseConfigured) {
+    console.log('[Storage] Initialized Multi-Tenant Supabase Adapter');
+    return new SupabaseAdapter();
   }
 
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const apiKey = import.meta.env.VITE_API_KEY;
-
-  if (apiUrl) {
-    console.log('[Storage] Initializing Custom REST API Adapter');
-    return new RestApiAdapter(apiUrl, apiKey);
-  }
-
-  console.log('[Storage] Using In-Browser LocalStorage Adapter (Seed Data Loaded)');
+  console.warn(
+    '[Storage] Supabase is NOT configured. Running in Local Development / Demo Mode. Real production data will not be persisted to cloud until VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.'
+  );
   return new LocalStorageAdapter();
 }
 
 export const storage = initializeStorage();
 
 export function getActiveBackendInfo() {
-  const isSupabase = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
-  const isApi = Boolean(import.meta.env.VITE_API_URL);
-
-  if (isSupabase) {
+  if (isSupabaseConfigured) {
     return {
       type: 'supabase' as const,
-      name: 'Supabase Cloud (PostgreSQL)',
-      status: 'Connected',
+      name: 'Supabase Cloud (Multi-Tenant PostgreSQL)',
+      status: 'Connected & Enforcing RLS',
+      isProductionReady: true,
       url: import.meta.env.VITE_SUPABASE_URL,
-    };
-  }
-
-  if (isApi) {
-    return {
-      type: 'api' as const,
-      name: 'Custom REST API',
-      status: 'Connected',
-      url: import.meta.env.VITE_API_URL,
     };
   }
 
   return {
     type: 'local' as const,
-    name: 'Browser LocalStorage (Zero-Config)',
-    status: 'Active (Ready to connect Database)',
-    url: 'Client-side LocalStorage',
+    name: 'Browser LocalStorage (Demo Mode)',
+    status: 'Demo Only (Cloud Database Unconfigured)',
+    isProductionReady: false,
+    url: 'In-Browser LocalStorage',
   };
 }

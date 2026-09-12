@@ -1,30 +1,16 @@
 import { StorageAdapter } from './adapter';
-import { Review, ReviewInput, ReviewStats } from '../../types';
+import { Review, ReviewInput, ReviewStats, CollectionForm, Project } from '../../types';
+import { getSupabase } from '../supabaseClient';
 
 export class SupabaseAdapter implements StorageAdapter {
-  name = 'Supabase Cloud (PostgreSQL)';
+  name = 'Supabase Cloud (Multi-Tenant PostgreSQL)';
   isCloud = true;
-  private url: string;
-  private anonKey: string;
 
-  constructor(url: string, anonKey: string) {
-    this.url = url.replace(/\/$/, '');
-    this.anonKey = anonKey;
-  }
-
-  private get headers() {
-    return {
-      'apikey': this.anonKey,
-      'Authorization': `Bearer ${this.anonKey}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation',
-    };
-  }
-
-  // Convert snake_case from DB to camelCase for App
   private mapRowToReview(row: any): Review {
     return {
       id: row.id,
+      projectId: row.project_id,
+      collectionFormId: row.collection_form_id,
       name: row.name,
       email: row.email,
       role: row.role,
@@ -46,9 +32,12 @@ export class SupabaseAdapter implements StorageAdapter {
     };
   }
 
-  // Convert camelCase from App to snake_case for DB
-  private mapReviewToRow(review: Partial<ReviewInput | Review>): any {
+  private mapReviewToRow(review: Partial<ReviewInput | Review>, projectId?: string): any {
     const row: any = {};
+    if (projectId || review.projectId) {
+      row.project_id = projectId || review.projectId;
+    }
+    if (review.collectionFormId !== undefined) row.collection_form_id = review.collectionFormId;
     if (review.name !== undefined) row.name = review.name;
     if (review.email !== undefined) row.email = review.email;
     if (review.role !== undefined) row.role = review.role;
@@ -67,78 +56,101 @@ export class SupabaseAdapter implements StorageAdapter {
     return row;
   }
 
-  async getReviews(): Promise<Review[]> {
-    const res = await fetch(`${this.url}/rest/v1/reviews?select=*&order=created_at.desc`, {
-      headers: this.headers,
-    });
-    if (!res.ok) {
-      throw new Error(`Supabase query failed: ${res.statusText}`);
+  async getReviews(projectId?: string): Promise<Review[]> {
+    const supabase = getSupabase();
+    let query = supabase
+      .from('reviews')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (projectId) {
+      query = query.eq('project_id', projectId);
     }
-    const data = await res.json();
-    return data.map(this.mapRowToReview);
+
+    const { data, error } = await query;
+    if (error) {
+      throw new Error(`Failed to load reviews from Supabase: ${error.message}`);
+    }
+    return (data || []).map(this.mapRowToReview);
   }
 
   async getReviewById(id: string): Promise<Review | null> {
-    const res = await fetch(`${this.url}/rest/v1/reviews?id=eq.${encodeURIComponent(id)}&select=*`, {
-      headers: this.headers,
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data.length) return null;
-    return this.mapRowToReview(data[0]);
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return this.mapRowToReview(data);
   }
 
-  async createReview(input: ReviewInput): Promise<Review> {
-    const payload = this.mapReviewToRow({
-      ...input,
-      status: input.status || 'pending',
-      source: input.source || 'form',
-      isFeatured: input.isFeatured || false,
-    });
-
-    const res = await fetch(`${this.url}/rest/v1/reviews`, {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Supabase insert failed: ${err}`);
+  async createReview(input: ReviewInput, projectId?: string): Promise<Review> {
+    const supabase = getSupabase();
+    const targetProjectId = projectId || input.projectId;
+    
+    if (!targetProjectId) {
+      throw new Error('Project ID is required to create a testimonial in a multi-tenant workspace.');
     }
 
-    const data = await res.json();
-    return this.mapRowToReview(data[0]);
+    const payload = this.mapReviewToRow(
+      {
+        ...input,
+        status: input.status || 'pending',
+        consent: true,
+        isFeatured: false,
+        source: input.source || 'form',
+      },
+      targetProjectId
+    );
+
+    const { data, error } = await supabase
+      .from('reviews')
+      .insert(payload)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to submit testimonial: ${error.message}`);
+    }
+
+    return this.mapRowToReview(data);
   }
 
   async updateReview(id: string, updates: Partial<Review>): Promise<Review> {
+    const supabase = getSupabase();
     const payload = this.mapReviewToRow(updates);
 
-    const res = await fetch(`${this.url}/rest/v1/reviews?id=eq.${encodeURIComponent(id)}`, {
-      method: 'PATCH',
-      headers: this.headers,
-      body: JSON.stringify(payload),
-    });
+    const { data, error } = await supabase
+      .from('reviews')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Supabase update failed: ${err}`);
+    if (error) {
+      throw new Error(`Failed to update review: ${error.message}`);
     }
 
-    const data = await res.json();
-    return this.mapRowToReview(data[0]);
+    return this.mapRowToReview(data);
   }
 
   async deleteReview(id: string): Promise<boolean> {
-    const res = await fetch(`${this.url}/rest/v1/reviews?id=eq.${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-      headers: this.headers,
-    });
-    return res.ok;
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from('reviews')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Failed to delete review: ${error.message}`);
+    }
+    return true;
   }
 
-  async getStats(): Promise<ReviewStats> {
-    const reviews = await this.getReviews();
+  async getStats(projectId?: string): Promise<ReviewStats> {
+    const reviews = await this.getReviews(projectId);
     const total = reviews.length;
     const approved = reviews.filter(r => r.status === 'approved');
     const pending = reviews.filter(r => r.status === 'pending');
@@ -167,6 +179,54 @@ export class SupabaseAdapter implements StorageAdapter {
       archivedCount: archived.length,
       featuredCount: featured.length,
       ratingBreakdown,
+    };
+  }
+
+  // Public helper to resolve form slug for public /c/:slug route
+  async getCollectionFormBySlug(publicSlug: string): Promise<{ form: CollectionForm; project: Project } | null> {
+    const supabase = getSupabase();
+    
+    // 1. Fetch form
+    const { data: formData, error: formError } = await supabase
+      .from('collection_forms')
+      .select('*')
+      .eq('public_slug', publicSlug)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (formError || !formData) return null;
+
+    // 2. Fetch project
+    const { data: projectData, error: projError } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('id', formData.project_id)
+      .maybeSingle();
+
+    if (projError || !projectData) return null;
+
+    return {
+      form: {
+        id: formData.id,
+        projectId: formData.project_id,
+        publicSlug: formData.public_slug,
+        title: formData.title,
+        description: formData.description,
+        isActive: formData.is_active,
+        allowVideo: formData.allow_video,
+        settings: formData.settings,
+        createdAt: formData.created_at,
+        updatedAt: formData.updated_at,
+      },
+      project: {
+        id: projectData.id,
+        workspaceId: projectData.workspace_id,
+        name: projectData.name,
+        slug: projectData.slug,
+        websiteUrl: projectData.website_url,
+        createdAt: projectData.created_at,
+        updatedAt: projectData.updated_at,
+      },
     };
   }
 }

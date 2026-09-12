@@ -15,12 +15,15 @@ import {
   Maximize2
 } from 'lucide-react';
 import { Review, WidgetType, WidgetSettings } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 
 interface WidgetStudioProps {
   reviews: Review[];
 }
 
 export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
+  const { project } = useAuth();
+  const projectSlug = project?.slug || 'pulse-ai';
   const [settings, setSettings] = useState<WidgetSettings>({
     type: 'wall',
     theme: 'dark',
@@ -62,9 +65,15 @@ export function TestimonialWidget() {
   );
 }`;
     } else if (codeType === 'html') {
-      snippet = `<!-- ReviewVault Embeddable Widget -->
-<div id="reviewvault-widget" data-type="${settings.type}" data-theme="${settings.theme}" data-featured="${settings.onlyFeatured}"></div>
-<script async src="https://cdn.jsdelivr.net/npm/@reviewvault/widget@1.0/embed.min.js"></script>`;
+      snippet = `<!-- ReviewVault Live Embed Iframe (Phase 1 Ready) -->
+<iframe 
+  src="${window.location.origin}/w/${projectSlug}" 
+  width="100%" 
+  height="480" 
+  frameborder="0" 
+  loading="lazy"
+  style="border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);"
+></iframe>`;
     } else {
       snippet = `// Fetch live approved reviews via API / storage adapter
 const reviews = await fetch('/api/reviews?status=approved&featured=${settings.onlyFeatured}').then(r => r.json());`;

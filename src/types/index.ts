@@ -1,8 +1,47 @@
 export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'archived';
 export type ReviewType = 'text' | 'video';
 
+export interface Workspace {
+  id: string;
+  ownerId: string;
+  name: string;
+  slug: string;
+  plan: 'free' | 'pro' | 'enterprise';
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface Project {
+  id: string;
+  workspaceId: string;
+  name: string;
+  slug: string;
+  websiteUrl?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface CollectionForm {
+  id: string;
+  projectId: string;
+  publicSlug: string;
+  title: string;
+  description: string;
+  isActive: boolean;
+  allowVideo: boolean;
+  settings?: {
+    theme?: 'dark' | 'light';
+    requireRating?: boolean;
+    brandColor?: string;
+  };
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface Review {
   id: string;
+  projectId?: string;
+  collectionFormId?: string;
   name: string;
   email: string;
   role: string;

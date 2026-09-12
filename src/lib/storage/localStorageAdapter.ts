@@ -2,67 +2,81 @@ import { StorageAdapter } from './adapter';
 import { Review, ReviewInput, ReviewStats } from '../../types';
 import { INITIAL_REVIEWS } from '../seedData';
 
-const STORAGE_KEY = 'reviewvault_testimonials_v1';
+const STORAGE_KEY_PREFIX = 'reviewvault_testimonials_project_';
 
 export class LocalStorageAdapter implements StorageAdapter {
-  name = 'Local Storage (In-Browser)';
+  name = 'Local Storage (Development/Demo Mode)';
   isCloud = false;
 
-  private loadReviews(): Review[] {
+  private getStorageKey(projectId?: string): string {
+    return `${STORAGE_KEY_PREFIX}${projectId || 'default'}`;
+  }
+
+  private loadReviews(projectId?: string): Review[] {
     try {
-      const data = localStorage.getItem(STORAGE_KEY);
+      const key = this.getStorageKey(projectId);
+      const data = localStorage.getItem(key);
       if (!data) {
-        // Initialize with default sample reviews
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_REVIEWS));
-        return INITIAL_REVIEWS;
+        // If this is a demo project or default, populate with demo reviews initially
+        if (!projectId || projectId === 'proj-demo-1' || projectId === 'default') {
+          const seeded = INITIAL_REVIEWS.map(r => ({ ...r, projectId: projectId || 'proj-demo-1' }));
+          localStorage.setItem(key, JSON.stringify(seeded));
+          return seeded;
+        }
+        return [];
       }
       return JSON.parse(data) as Review[];
     } catch (e) {
       console.error('Failed to parse reviews from localStorage', e);
-      return INITIAL_REVIEWS;
+      return [];
     }
   }
 
-  private saveReviews(reviews: Review[]): void {
+  private saveReviews(reviews: Review[], projectId?: string): void {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(reviews));
+      const key = this.getStorageKey(projectId);
+      localStorage.setItem(key, JSON.stringify(reviews));
     } catch (e) {
       console.error('Failed to save reviews to localStorage', e);
     }
   }
 
-  async getReviews(): Promise<Review[]> {
-    return this.loadReviews();
+  async getReviews(projectId?: string): Promise<Review[]> {
+    return this.loadReviews(projectId);
   }
 
   async getReviewById(id: string): Promise<Review | null> {
+    // Search across active keys or default
     const reviews = this.loadReviews();
     return reviews.find(r => r.id === id) || null;
   }
 
-  async createReview(input: ReviewInput): Promise<Review> {
-    const reviews = this.loadReviews();
+  async createReview(input: ReviewInput, projectId?: string): Promise<Review> {
+    const targetProject = projectId || input.projectId || 'proj-demo-1';
+    const reviews = this.loadReviews(targetProject);
+    
     const newReview: Review = {
       ...input,
       id: 'rev-' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36),
+      projectId: targetProject,
       source: input.source || 'form',
       status: input.status || 'pending',
-      isFeatured: input.isFeatured || false,
+      isFeatured: false,
       helpfulCount: 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
     reviews.unshift(newReview);
-    this.saveReviews(reviews);
+    this.saveReviews(reviews, targetProject);
     return newReview;
   }
 
   async updateReview(id: string, updates: Partial<Review>): Promise<Review> {
-    const reviews = this.loadReviews();
+    const reviews = this.loadReviews(updates.projectId);
     const index = reviews.findIndex(r => r.id === id);
     if (index === -1) {
-      throw new Error(`Review with id ${id} not found`);
+      throw new Error(`Review with id ${id} not found in project`);
     }
 
     const updated: Review = {
@@ -72,7 +86,7 @@ export class LocalStorageAdapter implements StorageAdapter {
     };
 
     reviews[index] = updated;
-    this.saveReviews(reviews);
+    this.saveReviews(reviews, updates.projectId || updated.projectId);
     return updated;
   }
 
@@ -86,8 +100,8 @@ export class LocalStorageAdapter implements StorageAdapter {
     return true;
   }
 
-  async getStats(): Promise<ReviewStats> {
-    const reviews = this.loadReviews();
+  async getStats(projectId?: string): Promise<ReviewStats> {
+    const reviews = this.loadReviews(projectId);
     const total = reviews.length;
     const approved = reviews.filter(r => r.status === 'approved');
     const pending = reviews.filter(r => r.status === 'pending');
@@ -119,7 +133,9 @@ export class LocalStorageAdapter implements StorageAdapter {
     };
   }
 
-  async resetToSampleData(): Promise<void> {
-    this.saveReviews(INITIAL_REVIEWS);
+  async resetToSampleData(projectId?: string): Promise<void> {
+    const targetProject = projectId || 'proj-demo-1';
+    const seeded = INITIAL_REVIEWS.map(r => ({ ...r, projectId: targetProject }));
+    this.saveReviews(seeded, targetProject);
   }
 }
