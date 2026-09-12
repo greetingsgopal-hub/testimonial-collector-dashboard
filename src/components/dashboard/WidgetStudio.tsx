@@ -23,7 +23,7 @@ interface WidgetStudioProps {
 
 export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
   const { project } = useAuth();
-  const projectSlug = project?.slug || 'pulse-ai';
+  const projectWidgetId = project?.id || '';
   const [settings, setSettings] = useState<WidgetSettings>({
     type: 'wall',
     theme: 'dark',
@@ -65,9 +65,9 @@ export function TestimonialWidget() {
   );
 }`;
     } else if (codeType === 'html') {
-      snippet = `<!-- ReviewVault Live Embed Iframe (Phase 1 Ready) -->
+      snippet = `<!-- ReviewVault Live Embed Iframe -->
 <iframe 
-  src="${window.location.origin}/w/${projectSlug}" 
+  src="${window.location.origin}/w/${projectWidgetId}" 
   width="100%" 
   height="480" 
   frameborder="0" 

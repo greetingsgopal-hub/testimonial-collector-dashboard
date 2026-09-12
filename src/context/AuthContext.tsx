@@ -18,6 +18,25 @@ import {
 import { auth, db, isFirebaseConfigured } from '../lib/firebase';
 import { Workspace, Project, CollectionForm } from '../types';
 
+/** Translate raw Firebase auth error codes into friendly, customer-readable messages. */
+function translateFirebaseError(error: any): string {
+  const code: string = error?.code || '';
+  const map: Record<string, string> = {
+    'auth/invalid-email':             'Please enter a valid email address.',
+    'auth/user-disabled':             'This account has been disabled. Please contact support.',
+    'auth/user-not-found':            'No account found with this email. Please check or sign up.',
+    'auth/wrong-password':            'Incorrect password. Please try again or use Forgot Password.',
+    'auth/invalid-credential':        'Incorrect email or password. Please try again.',
+    'auth/too-many-requests':         'Too many failed attempts. Please wait a moment and try again.',
+    'auth/email-already-in-use':      'An account with this email already exists. Please sign in instead.',
+    'auth/weak-password':             'Password must be at least 6 characters long.',
+    'auth/network-request-failed':    'Network error. Please check your connection and try again.',
+    'auth/popup-closed-by-user':      'Sign-in was cancelled. Please try again.',
+    'auth/requires-recent-login':     'Please sign out and sign in again to continue.',
+  };
+  return map[code] || error?.message || 'An unexpected error occurred. Please try again.';
+}
+
 export interface AuthUser {
   id: string;
   uid: string;
@@ -283,8 +302,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await initUserTenancy(authUser);
       return { success: true };
     } catch (error: any) {
-      setAuthError(error.message);
-      return { success: false, error: error.message };
+      const friendlyMessage = translateFirebaseError(error);
+      setAuthError(friendlyMessage);
+      return { success: false, error: friendlyMessage };
     }
   };
 
@@ -309,8 +329,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await initUserTenancy(authUser);
       return { success: true };
     } catch (error: any) {
-      setAuthError(error.message);
-      return { success: false, error: error.message };
+      const friendlyMessage = translateFirebaseError(error);
+      setAuthError(friendlyMessage);
+      return { success: false, error: friendlyMessage };
     }
   };
 
@@ -338,8 +359,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await sendPasswordResetEmail(auth, email);
       return { success: true };
     } catch (error: any) {
-      setAuthError(error.message);
-      return { success: false, error: error.message };
+      const friendlyMessage = translateFirebaseError(error);
+      setAuthError(friendlyMessage);
+      return { success: false, error: friendlyMessage };
     }
   };
 
@@ -355,6 +377,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setProject(DEMO_PROJECT);
     setCollectionForm(DEMO_FORM);
   };
+
 
   const disableDemoMode = () => {
     localStorage.removeItem('reviewvault_demo_mode');

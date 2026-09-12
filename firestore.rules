@@ -20,11 +20,12 @@ service cloud.firestore {
     }
 
     // 2. Projects
-    // Only the owner can access private project configuration
+    // Only the owner can access private project configuration.
+    // Public collector needs to read project name/slug to display branding — allowed for GET only
+    // (project docs contain no sensitive PII; name, slug, websiteUrl are non-secret branding data)
     match /projects/{projectId} {
-      allow read: if isOwner(resource.data.ownerId);
-      // Public collector can read basic project info only if associated with an active collection
-      allow get: if true; 
+      allow get: if isOwner(resource.data.ownerId) || true; // Public GET allowed for branding display
+      allow list: if isOwner(resource.data.ownerId);
       allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
       allow update, delete: if isOwner(resource.data.ownerId);
     }
@@ -61,10 +62,17 @@ service cloud.firestore {
     // 5. Public Approved Reviews (Zero-Trust Display Store)
     // Stripped of customer email and private metadata.
     // Public visitors can read approved reviews safely.
+    // Writes are only allowed to the authenticated owner of the PRIVATE review with the same ID.
+    // This prevents any user from injecting fake public reviews under a foreign project.
     match /public_reviews/{reviewId} {
       allow read: if true;
-      allow write: if isOwner(request.resource.data.ownerId);
-      allow delete: if isOwner(resource.data.ownerId);
+      // Owner can create/update a public_review only if the corresponding private review exists and belongs to them
+      allow create, update: if isAuthenticated() &&
+        request.resource.data.ownerId == request.auth.uid &&
+        exists(/databases/$(database)/documents/reviews/$(reviewId)) &&
+        get(/databases/$(database)/documents/reviews/$(reviewId)).data.ownerId == request.auth.uid;
+      allow delete: if isAuthenticated() &&
+        resource.data.ownerId == request.auth.uid;
     }
   }
 }

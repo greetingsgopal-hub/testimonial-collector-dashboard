@@ -338,13 +338,16 @@ export const DashboardPage = () => {
                     <span>Copy Form Link</span>
                   </button>
 
-                  <button
-                    onClick={handleSeedDemoData}
-                    className="w-full sm:w-auto px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-300 hover:text-white transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Load 6 Demo Reviews</span>
-                  </button>
+                  {/* Only show seed button in demo/local mode — not in Firebase production */}
+                  {storage.resetToSampleData && (
+                    <button
+                      onClick={handleSeedDemoData}
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-300 hover:text-white transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Load 6 Demo Reviews</span>
+                    </button>
+                  )}
                 </div>
               </div>
             ) : viewMode === 'grid' ? (
