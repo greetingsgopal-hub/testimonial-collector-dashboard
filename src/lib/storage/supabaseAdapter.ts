@@ -12,7 +12,7 @@ export class SupabaseAdapter implements StorageAdapter {
       projectId: row.project_id,
       collectionFormId: row.collection_form_id,
       name: row.name,
-      email: row.email,
+      email: row.email || '', // Stripped by DB RPC for anonymous visitors
       role: row.role,
       company: row.company || undefined,
       avatarUrl: row.avatar_url || undefined,
@@ -58,6 +58,37 @@ export class SupabaseAdapter implements StorageAdapter {
 
   async getReviews(projectId?: string): Promise<Review[]> {
     const supabase = getSupabase();
+
+    // Determine authentication context
+    const { data: { session } } = await supabase.auth.getSession();
+
+    // 1. ANONYMOUS VISITOR (e.g. Embedded Widget or Public Page)
+    if (!session) {
+      // Must provide a target project ID; anonymous callers cannot list all reviews across the DB
+      if (!projectId) {
+        console.warn('[Security] Anonymous queries without specific target project ID are rejected.');
+        return [];
+      }
+
+      // Query through the secure database RPC function
+      // Enforces:
+      // - target project must have an active collection form
+      // - returns only reviews where status = 'approved'
+      // - strictly omits private customer emails and metadata at SQL engine level
+      const { data, error } = await supabase.rpc('get_public_approved_reviews', {
+        target_project_id: projectId,
+      });
+
+      if (error) {
+        console.error('[Security] Failed to load public reviews via secure RPC:', error);
+        throw new Error(`Failed to load public reviews: ${error.message}`);
+      }
+
+      return (data || []).map(this.mapRowToReview);
+    }
+
+    // 2. AUTHENTICATED TENANT OWNER (Dashboard)
+    // Governed by PostgreSQL RLS reviews_owner_manage policy
     let query = supabase
       .from('reviews')
       .select('*')

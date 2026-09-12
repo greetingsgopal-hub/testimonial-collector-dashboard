@@ -238,35 +238,136 @@ WITH CHECK (
     )
 );
 
--- 3. Public viewing: Only approved reviews can be viewed by public (widgets/wall of love)
-CREATE POLICY "Public can view approved reviews"
-ON reviews FOR SELECT
-TO anon, authenticated
-USING (status = 'approved');
-
--- Security Hardening: Revoke SELECT on private customer email from anon role
+-- 3. Public viewing: Revoke direct table SELECT from anon completely.
+-- Anonymous visitors can NEVER query the reviews table directly.
 REVOKE SELECT ON reviews FROM anon;
-GRANT SELECT (
-    id, 
-    project_id, 
-    collection_form_id, 
-    name, 
-    role, 
-    company, 
-    avatar_url, 
-    rating, 
-    title, 
-    content, 
-    type, 
-    video_url, 
-    tags, 
-    source, 
-    status, 
-    is_featured, 
-    consent, 
-    created_at, 
-    updated_at
-) ON reviews TO anon;
+DROP POLICY IF EXISTS "Public can view approved reviews" ON reviews;
+
+-- Project columns protection: prevent anon from reading workspace_id or internal fields
+REVOKE SELECT ON projects FROM anon;
+GRANT SELECT (id, name, slug, website_url, created_at) ON projects TO anon;
+
+-- -------------------------------------------------------------------------
+-- Secure Public Retrieval Functions (RPC)
+-- Ensures an anonymous visitor can ONLY retrieve approved reviews belonging
+-- to the specific active project/collection requested, with sensitive fields
+-- (customer email, consent metadata, source) strictly stripped at DB level.
+-- -------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.get_public_approved_reviews(target_project_id UUID)
+RETURNS TABLE (
+    id UUID,
+    project_id UUID,
+    collection_form_id UUID,
+    name VARCHAR(255),
+    role VARCHAR(255),
+    company VARCHAR(255),
+    avatar_url TEXT,
+    rating INTEGER,
+    title VARCHAR(255),
+    content TEXT,
+    type review_type,
+    video_url TEXT,
+    tags TEXT[],
+    created_at TIMESTAMPTZ
+) 
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    -- 1. Parameter enforcement: cannot query without specific target_project_id
+    IF target_project_id IS NULL THEN
+        RETURN;
+    END IF;
+
+    -- 2. Project & Active Collection Validation: project must exist and have an active collection
+    IF NOT EXISTS (
+        SELECT 1 FROM collection_forms 
+        WHERE collection_forms.project_id = target_project_id 
+        AND collection_forms.is_active = true
+    ) THEN
+        RETURN;
+    END IF;
+
+    -- 3. Return ONLY approved reviews for the target project
+    -- Notice: email, consent, source, and internal metadata are EXCLUDED
+    RETURN QUERY
+    SELECT 
+        r.id,
+        r.project_id,
+        r.collection_form_id,
+        r.name,
+        r.role,
+        r.company,
+        r.avatar_url,
+        r.rating,
+        r.title,
+        r.content,
+        r.type,
+        r.video_url,
+        r.tags,
+        r.created_at
+    FROM reviews r
+    WHERE r.project_id = target_project_id
+      AND r.status = 'approved'
+    ORDER BY r.created_at DESC;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_public_reviews_by_slug(collection_slug TEXT)
+RETURNS TABLE (
+    id UUID,
+    project_id UUID,
+    collection_form_id UUID,
+    name VARCHAR(255),
+    role VARCHAR(255),
+    company VARCHAR(255),
+    avatar_url TEXT,
+    rating INTEGER,
+    title VARCHAR(255),
+    content TEXT,
+    type review_type,
+    video_url TEXT,
+    tags TEXT[],
+    created_at TIMESTAMPTZ
+) 
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    IF collection_slug IS NULL OR TRIM(collection_slug) = '' THEN
+        RETURN;
+    END IF;
+
+    RETURN QUERY
+    SELECT 
+        r.id,
+        r.project_id,
+        r.collection_form_id,
+        r.name,
+        r.role,
+        r.company,
+        r.avatar_url,
+        r.rating,
+        r.title,
+        r.content,
+        r.type,
+        r.video_url,
+        r.tags,
+        r.created_at
+    FROM reviews r
+    JOIN collection_forms cf ON cf.id = r.collection_form_id
+    WHERE cf.public_slug = collection_slug
+      AND cf.is_active = true
+      AND r.status = 'approved'
+    ORDER BY r.created_at DESC;
+END;
+$$;
+
+-- Allow public anonymous and authenticated callers to execute the secure RPCs
+GRANT EXECUTE ON FUNCTION public.get_public_approved_reviews(UUID) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_public_reviews_by_slug(TEXT) TO anon, authenticated;
 
 
 -- -------------------------------------------------------------------------
