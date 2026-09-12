@@ -244,6 +244,31 @@ ON reviews FOR SELECT
 TO anon, authenticated
 USING (status = 'approved');
 
+-- Security Hardening: Revoke SELECT on private customer email from anon role
+REVOKE SELECT ON reviews FROM anon;
+GRANT SELECT (
+    id, 
+    project_id, 
+    collection_form_id, 
+    name, 
+    role, 
+    company, 
+    avatar_url, 
+    rating, 
+    title, 
+    content, 
+    type, 
+    video_url, 
+    tags, 
+    source, 
+    status, 
+    is_featured, 
+    consent, 
+    created_at, 
+    updated_at
+) ON reviews TO anon;
+
+
 -- -------------------------------------------------------------------------
 -- Helper Trigger for Automatic Initial Workspace and Project upon Signup
 -- -------------------------------------------------------------------------

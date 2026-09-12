@@ -15,6 +15,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { Review, ReviewStatus } from '../../types';
+import { sanitizeUrl } from '../../lib/security';
 
 interface ReviewDetailModalProps {
   review: Review | null;
@@ -184,14 +185,14 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
           </div>
 
           {/* Video Attachment */}
-          {review.type === 'video' && review.videoUrl && (
+          {review.type === 'video' && sanitizeUrl(review.videoUrl) && (
             <div className="p-3.5 rounded-xl bg-zinc-900/80 border border-pink-500/20 flex items-center justify-between">
               <div className="flex items-center gap-2 text-pink-400 text-xs font-medium">
                 <Video className="w-4 h-4" />
                 <span>Video Testimonial attached</span>
               </div>
               <a
-                href={review.videoUrl}
+                href={sanitizeUrl(review.videoUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-xs text-zinc-300 hover:text-white bg-zinc-800 px-3 py-1.5 rounded-lg transition-colors"

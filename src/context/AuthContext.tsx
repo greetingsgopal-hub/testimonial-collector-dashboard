@@ -363,6 +363,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const enableDemoMode = () => {
+    if (isSupabaseConfigured) {
+      console.warn('[Security] Demo mode is disabled in production when Supabase is configured.');
+      return;
+    }
     localStorage.setItem('reviewvault_demo_mode', 'true');
     setIsDemoMode(true);
     setUser(DEMO_USER);

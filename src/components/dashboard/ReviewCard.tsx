@@ -12,6 +12,7 @@ import {
   Clock
 } from 'lucide-react';
 import { Review, ReviewStatus } from '../../types';
+import { sanitizeUrl } from '../../lib/security';
 
 interface ReviewCardProps {
   review: Review;
@@ -133,10 +134,10 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
         </p>
 
         {/* Video Link Pill if video */}
-        {review.type === 'video' && review.videoUrl && (
+        {review.type === 'video' && sanitizeUrl(review.videoUrl) && (
           <div className="mb-3">
             <a
-              href={review.videoUrl}
+              href={sanitizeUrl(review.videoUrl)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 text-xs font-medium border border-pink-500/20 transition-colors"
