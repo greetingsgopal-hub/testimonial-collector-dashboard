@@ -12,6 +12,7 @@ import { storage } from '../lib/storage';
 import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
 import { useAuth } from '../context/AuthContext';
+import { usePageSeo } from '../lib/seo';
 import { 
   Sparkles, 
   Send, 
@@ -23,6 +24,11 @@ import {
 } from 'lucide-react';
 
 export const DashboardPage = () => {
+  usePageSeo({
+    title: 'Dashboard — ReviewVault',
+    description: 'ReviewVault customer review management and moderation dashboard.',
+  });
+
   const { project, collectionForm } = useAuth();
   const [activeView, setActiveView] = useState<'dashboard' | 'widgets'>('dashboard');
 

@@ -158,7 +158,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setWorkspace(currentWs);
 
       // 2. Fetch or create project
-      const projQuery = query(collection(db, 'projects'), where('workspaceId', '==', currentWs.id));
+      const projQuery = query(
+        collection(db, 'projects'),
+        where('ownerId', '==', currentUser.uid),
+        where('workspaceId', '==', currentWs.id)
+      );
       const projSnapshot = await getDocs(projQuery);
 
       let currentProj: Project;
@@ -199,7 +203,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setProject(currentProj);
 
       // 3. Fetch or create collection form
-      const formQuery = query(collection(db, 'collection_forms'), where('projectId', '==', currentProj.id));
+      const formQuery = query(
+        collection(db, 'collection_forms'),
+        where('ownerId', '==', currentUser.uid),
+        where('projectId', '==', currentProj.id)
+      );
       const formSnapshot = await getDocs(formQuery);
 
       if (formSnapshot.empty) {

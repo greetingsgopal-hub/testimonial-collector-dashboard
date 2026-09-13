@@ -6,6 +6,8 @@ import { SuccessModal } from '../components/collector/SuccessModal';
 import { Review, ReviewInput, CollectionForm, Project } from '../types';
 import { storage } from '../lib/storage';
 import { Sparkles, AlertCircle, ArrowLeft, Building2, Clock } from 'lucide-react';
+import { usePageSeo } from '../lib/seo';
+import { analytics } from '../lib/analytics';
 
 const INITIAL_FORM_STATE: ReviewInput = {
   name: '',
@@ -29,6 +31,20 @@ export const PublicCollectorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isClosed, setIsClosed] = useState(false);
+
+  const pageTitle = formConfig?.title
+    ? `${formConfig.title} — ReviewVault`
+    : project?.name
+    ? `Submit Testimonial for ${project.name} — ReviewVault`
+    : 'Submit Your Testimonial — ReviewVault';
+
+  const pageDescription =
+    formConfig?.description || 'Submit your verified feedback and customer testimonial.';
+
+  usePageSeo({
+    title: pageTitle,
+    description: pageDescription,
+  });
 
   const [formData, setFormData] = useState<ReviewInput>(INITIAL_FORM_STATE);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,6 +102,7 @@ export const PublicCollectorPage = () => {
         },
         formConfig?.projectId
       );
+      analytics.publicCollectionSubmitted();
       setSubmittedReview(created);
     } finally {
       setIsSubmitting(false);

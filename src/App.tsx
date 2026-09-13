@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { LandingPage } from './pages/LandingPage';
@@ -8,17 +9,42 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { PublicCollectorPage } from './pages/PublicCollectorPage';
 import { PublicWidgetPage } from './pages/PublicWidgetPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsPage } from './pages/TermsPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { initAnalytics, trackPageView } from './lib/analytics';
+
+/**
+ * Route listener to track high-level page views in analytics (if configured)
+ */
+function AnalyticsRouteTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+
+  return null;
+}
 
 export function App() {
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+
   return (
     <AuthProvider>
       <BrowserRouter>
+        <AnalyticsRouteTracker />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
           <Route path="/c/:collectionSlug" element={<PublicCollectorPage />} />
           <Route path="/w/:publicWidgetId" element={<PublicWidgetPage />} />
 
@@ -40,8 +66,8 @@ export function App() {
             }
           />
 
-          {/* Catch-all fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Custom Branded 404 Catch-All */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

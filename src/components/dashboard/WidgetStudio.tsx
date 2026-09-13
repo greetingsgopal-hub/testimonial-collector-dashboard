@@ -342,7 +342,7 @@ const reviews = await fetch('/api/reviews?status=approved&featured=${settings.on
                       {settings.showAvatar && review.avatarUrl && (
                         <img
                           src={review.avatarUrl}
-                          alt={review.name}
+                          alt={review.name ? `${review.name}'s profile photo` : 'Customer avatar'}
                           className="w-7 h-7 rounded-full object-cover"
                         />
                       )}
@@ -389,7 +389,7 @@ const reviews = await fetch('/api/reviews?status=approved&featured=${settings.on
                         {settings.showAvatar && currentReview.avatarUrl && (
                           <img
                             src={currentReview.avatarUrl}
-                            alt={currentReview.name}
+                            alt={currentReview.name ? `${currentReview.name}'s profile photo` : 'Customer avatar'}
                             className="w-10 h-10 rounded-full object-cover ring-2 ring-brand-500/40"
                           />
                         )}
@@ -460,7 +460,7 @@ const reviews = await fetch('/api/reviews?status=approved&featured=${settings.on
                         {feat.avatarUrl && (
                           <img
                             src={feat.avatarUrl}
-                            alt={feat.name}
+                            alt={feat.name ? `${feat.name}'s profile photo` : 'Customer avatar'}
                             className="w-10 h-10 rounded-full object-cover"
                           />
                         )}
@@ -490,7 +490,7 @@ const reviews = await fetch('/api/reviews?status=approved&featured=${settings.on
                       <img
                         key={i}
                         src={r.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'}
-                        alt={r.name}
+                        alt={r.name ? `${r.name}'s avatar` : 'Customer avatar'}
                         className="w-6 h-6 rounded-full ring-2 ring-zinc-900 object-cover"
                       />
                     ))}

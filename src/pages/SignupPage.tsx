@@ -3,8 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Lock, Mail, ArrowRight, AlertCircle, CheckCircle2, Play } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { isFirebaseConfigured } from '../lib/firebase';
+import { usePageSeo } from '../lib/seo';
+import { analytics } from '../lib/analytics';
 
 export const SignupPage = () => {
+  usePageSeo({
+    title: 'Create Your ReviewVault Account',
+    description: 'Sign up for ReviewVault to create your testimonial collection link and embed social proof on your website.',
+  });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -39,6 +46,7 @@ export const SignupPage = () => {
     try {
       const res = await signUp(email, password);
       if (res.success) {
+        analytics.signupCompleted();
         setSuccessMessage('Account created successfully! Initializing workspace...');
         setTimeout(() => {
           navigate('/dashboard');

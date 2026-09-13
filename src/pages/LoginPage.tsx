@@ -3,8 +3,14 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Lock, Mail, ArrowRight, AlertCircle, Play } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { isFirebaseConfigured } from '../lib/firebase';
+import { usePageSeo } from '../lib/seo';
 
 export const LoginPage = () => {
+  usePageSeo({
+    title: 'Log in — ReviewVault',
+    description: 'Log in to your ReviewVault account to manage and moderate customer testimonials.',
+  });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);

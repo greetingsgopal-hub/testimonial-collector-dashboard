@@ -2,8 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Sparkles, Mail, ArrowRight, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { usePageSeo } from '../lib/seo';
 
 export const ForgotPasswordPage = () => {
+  usePageSeo({
+    title: 'Reset Password — ReviewVault',
+    description: 'Reset your ReviewVault password to regain access to your dashboard.',
+  });
+
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);

@@ -50,11 +50,16 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
           <CheckCircle2 className="w-8 h-8" />
         </div>
 
+        {/* Clear Status Badge */}
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs font-semibold mb-3">
+          <span>Received • Awaiting Review</span>
+        </div>
+
         <h3 className="text-2xl font-bold font-display text-white mb-2">
-          Thank you, {review.name.split(' ')[0]}!
+          Thank you — your testimonial has been received
         </h3>
         <p className="text-sm text-zinc-300 mb-6 leading-relaxed">
-          Your testimonial has been submitted successfully and sent to moderation. It will appear on our website once approved by our team.
+          It has been sent to the business owner for review. You don't need to do anything else.
         </p>
 
         {/* Review Reference ID (Only shown in dashboard testing mode, hidden for public visitors) */}

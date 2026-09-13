@@ -92,7 +92,7 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({ data }) => {
           {data.avatarUrl ? (
             <img
               src={data.avatarUrl}
-              alt={data.name || 'Avatar'}
+              alt={data.name ? `${data.name}'s profile avatar` : 'Customer avatar preview'}
               className="w-12 h-12 rounded-full object-cover ring-2 ring-brand-500/30 shadow-md"
               onError={(e) => {
                 // fallback if image fails

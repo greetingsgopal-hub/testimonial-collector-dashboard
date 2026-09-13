@@ -3,13 +3,21 @@ import { useParams } from 'react-router-dom';
 import { Review } from '../types';
 import { storage } from '../lib/storage';
 import { Star } from 'lucide-react';
+import { usePageSeo } from '../lib/seo';
+import { analytics } from '../lib/analytics';
 
 export const PublicWidgetPage = () => {
+  usePageSeo({
+    title: 'Customer Testimonials — ReviewVault',
+    description: 'Verified customer testimonials powered by ReviewVault.',
+  });
+
   const { publicWidgetId } = useParams<{ publicWidgetId: string }>();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    analytics.widgetPageViewed();
     const fetchWidgetReviews = async () => {
       try {
         setIsLoading(true);
@@ -69,7 +77,7 @@ export const PublicWidgetPage = () => {
               {r.avatarUrl ? (
                 <img
                   src={r.avatarUrl}
-                  alt={r.name}
+                  alt={r.name ? `${r.name}'s profile photo` : 'Customer photo'}
                   className="w-7 h-7 rounded-full object-cover"
                 />
               ) : (

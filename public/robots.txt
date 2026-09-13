@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /$
+Allow: /privacy-policy$
+Allow: /terms$
+Allow: /c/
+Allow: /w/
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /dashboard/*
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+
+Sitemap: https://cheery-hummingbird-7ecc95.netlify.app/sitemap.xml

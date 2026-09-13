@@ -35,7 +35,7 @@ export class FirebaseAdapter implements StorageAdapter {
       videoUrl: data.videoUrl || undefined,
       tags: Array.isArray(data.tags) ? data.tags : [],
       source: data.source || 'form',
-      status: data.status || 'pending',
+      status: data.status || (!data.email ? 'approved' : 'pending'),
       isFeatured: Boolean(data.isFeatured),
       consent: Boolean(data.consent),
       helpfulCount: data.helpfulCount || 0,
@@ -61,12 +61,53 @@ export class FirebaseAdapter implements StorageAdapter {
       return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } else {
       // Anonymous visitor / public widget: query public_reviews (only approved, no emails)
-      let q = query(collection(db, 'public_reviews'));
+      let list: Review[] = [];
       if (projectId) {
-        q = query(collection(db, 'public_reviews'), where('projectId', '==', projectId));
+        // 1. Query by direct projectId match
+        const qByProj = query(collection(db, 'public_reviews'), where('projectId', '==', projectId));
+        const snap = await getDocs(qByProj);
+        list = snap.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
+
+        // 2. Fallback: Query by collectionFormId match
+        if (list.length === 0) {
+          const qByForm = query(collection(db, 'public_reviews'), where('collectionFormId', '==', projectId));
+          const snapForm = await getDocs(qByForm);
+          list = snapForm.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
+        }
+
+        // 3. Fallback: If identifier is a publicSlug on an active collectionForm, resolve its projectId
+        if (list.length === 0) {
+          try {
+            const formSnap = await getDocs(
+              query(
+                collection(db, 'collection_forms'),
+                where('publicSlug', '==', projectId),
+                where('isActive', '==', true)
+              )
+            );
+            if (!formSnap.empty) {
+              const formData = formSnap.docs[0].data();
+              const formDocId = formSnap.docs[0].id;
+              if (formData?.projectId) {
+                const qResolved = query(collection(db, 'public_reviews'), where('projectId', '==', formData.projectId));
+                const snapResolved = await getDocs(qResolved);
+                list = snapResolved.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
+              }
+              if (list.length === 0) {
+                const qResolvedForm = query(collection(db, 'public_reviews'), where('collectionFormId', '==', formDocId));
+                const snapResolvedForm = await getDocs(qResolvedForm);
+                list = snapResolvedForm.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
+              }
+            }
+          } catch (e) {
+            console.warn('[FirebaseAdapter] Could not resolve public widget by slug:', e);
+          }
+        }
+      } else {
+        const q = query(collection(db, 'public_reviews'));
+        const snapshot = await getDocs(q);
+        list = snapshot.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
       }
-      const snapshot = await getDocs(q);
-      const list = snapshot.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
       return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
   }
@@ -217,6 +258,7 @@ export class FirebaseAdapter implements StorageAdapter {
       videoUrl: review.videoUrl || null,
       tags: review.tags,
       isFeatured: review.isFeatured,
+      status: 'approved',
       createdAt: review.createdAt,
       updatedAt: review.updatedAt,
     };
