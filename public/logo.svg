@@ -1,17 +1,65 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
   <defs>
-    <linearGradient id="primary-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="pp-ring-grad" x1="6" y1="42" x2="42" y2="12" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="50%" stop-color="#d946ef" />
       <stop offset="100%" stop-color="#ec4899" />
     </linearGradient>
-    <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38bdf8" />
-      <stop offset="100%" stop-color="#818cf8" />
+    <linearGradient id="pp-star-grad" x1="20" y1="3" x2="28" y2="13" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#f59e0b" />
     </linearGradient>
   </defs>
+
   <rect width="48" height="48" rx="12" fill="#09090b" />
-  <rect x="1" y="1" width="46" height="46" rx="11" stroke="url(#primary-grad)" stroke-width="1.5" stroke-opacity="0.5" />
-  <path d="M14 26C14 21.5 16.8 17 21 15L22 17C19 18.5 18 20.8 17.8 22.5H22V31H14V26Z" fill="url(#primary-grad)" />
-  <path d="M26 26C26 21.5 28.8 17 33 15L34 17C31 18.5 30 20.8 29.8 22.5H34V31H26V26Z" fill="url(#primary-grad)" />
-  <circle cx="37" cy="14" r="3" fill="url(#accent-grad)" />
+  <rect x="1" y="1" width="46" height="46" rx="11" stroke="url(#pp-ring-grad)" stroke-width="1.2" stroke-opacity="0.3" />
+
+  <!-- Outer Verification Badge Ring / Crest -->
+  <path
+    d="M 17 11.5 A 16 16 0 1 0 31 11.5"
+    stroke="url(#pp-ring-grad)"
+    stroke-width="2.8"
+    stroke-linecap="round"
+  />
+
+  <!-- Geometric Panda Ears -->
+  <circle cx="16" cy="17" r="3.2" fill="#c084fc" />
+  <circle cx="32" cy="17" r="3.2" fill="#c084fc" />
+
+  <!-- Angled Panda Eye Patches -->
+  <rect
+    x="16.8"
+    y="22"
+    width="4.2"
+    height="6.8"
+    rx="2.1"
+    transform="rotate(-18 18.9 25.4)"
+    fill="#c084fc"
+  />
+  <rect
+    x="26.8"
+    y="22"
+    width="4.2"
+    height="6.8"
+    rx="2.1"
+    transform="rotate(18 28.9 25.4)"
+    fill="#c084fc"
+  />
+
+  <!-- Inner Pupil Highlights -->
+  <circle cx="19.5" cy="24" r="0.9" fill="#09090b" opacity="0.9" />
+  <circle cx="28.5" cy="24" r="0.9" fill="#09090b" opacity="0.9" />
+
+  <!-- Subtle Nose Mark -->
+  <path
+    d="M 22.8 31 C 23.4 30.6 24.6 30.6 25.2 31 C 25 31.8 23 31.8 22.8 31 Z"
+    fill="#c084fc"
+    opacity="0.8"
+  />
+
+  <!-- 4-Point Praise Star Crown -->
+  <path
+    d="M 24 4 Q 24 9 28 9 Q 24 9 24 14 Q 24 9 20 9 Q 24 9 24 4 Z"
+    fill="url(#pp-star-grad)"
+  />
 </svg>

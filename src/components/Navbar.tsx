@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { 
-  Sparkles, 
   LayoutDashboard, 
   Code2, 
   Database,
@@ -13,6 +12,8 @@ import {
 } from 'lucide-react';
 import { getActiveBackendInfo } from '../lib/storage';
 import { useAuth } from '../context/AuthContext';
+
+import { PandaPraiseIcon } from './PandaPraiseLogo';
 
 interface NavbarProps {
   activeView: 'dashboard' | 'widgets';
@@ -47,14 +48,12 @@ export const Navbar: React.FC<NavbarProps> = ({
         
         {/* Brand & Workspace Context */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-pink-500 p-[1px] shadow-glow-sm">
-            <div className="w-full h-full bg-zinc-950 rounded-[11px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-brand-400" />
-            </div>
-          </div>
+          <PandaPraiseIcon size={36} colorMode="gradient" className="shrink-0" />
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-base sm:text-lg text-white tracking-tight">Panda Praise</span>
+              <span className="font-display font-extrabold text-base sm:text-lg text-white tracking-tight">
+                Panda <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Praise</span>
+              </span>
               {isDemoMode && (
                 <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
                   Demo Mode

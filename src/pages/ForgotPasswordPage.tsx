@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Mail, ArrowRight, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Mail, ArrowRight, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
+import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
 
 export const ForgotPasswordPage = () => {
   usePageSeo({
@@ -47,13 +48,11 @@ export const ForgotPasswordPage = () => {
       <div className="ambient-glow" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center z-10">
-        <Link to="/" className="inline-flex items-center gap-2 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-pink-500 p-[1px] shadow-glow-sm">
-            <div className="w-full h-full bg-zinc-950 rounded-[11px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-brand-400" />
-            </div>
-          </div>
-          <span className="font-display font-bold text-xl text-white">Panda Praise</span>
+        <Link to="/" className="inline-flex items-center gap-3 mb-4">
+          <PandaPraiseIcon size={40} colorMode="gradient" className="shrink-0" />
+          <span className="font-display font-extrabold text-xl text-white tracking-tight">
+            Panda <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Praise</span>
+          </span>
         </Link>
         <h2 className="text-2xl sm:text-3xl font-bold font-display text-white tracking-tight">
           Reset your password

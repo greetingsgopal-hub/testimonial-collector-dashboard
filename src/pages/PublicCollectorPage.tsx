@@ -5,9 +5,10 @@ import { LivePreviewCard } from '../components/collector/LivePreviewCard';
 import { SuccessModal } from '../components/collector/SuccessModal';
 import { Review, ReviewInput, CollectionForm, Project } from '../types';
 import { storage } from '../lib/storage';
-import { Sparkles, AlertCircle, ArrowLeft, Building2, Clock } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Building2, Clock } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
+import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
 
 const INITIAL_FORM_STATE: ReviewInput = {
   name: '',
@@ -178,11 +179,7 @@ export const PublicCollectorPage = () => {
       <header className="w-full border-b border-zinc-800/80 glass-panel py-4 px-4 sm:px-8 relative z-20">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-600 to-pink-500 p-[1px]">
-              <div className="w-full h-full bg-zinc-950 rounded-[7px] flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-brand-400" />
-              </div>
-            </div>
+            <PandaPraiseIcon size={28} colorMode="gradient" className="shrink-0" />
             {project && (
               <span className="font-display font-semibold text-sm text-white flex items-center gap-1.5">
                 <Building2 className="w-3.5 h-3.5 text-zinc-400" />

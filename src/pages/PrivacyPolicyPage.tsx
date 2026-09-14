@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Sparkles, Shield, ArrowLeft, Lock, Eye, Server, Cookie, Mail, FileText } from 'lucide-react';
+import { Shield, ArrowLeft, Lock, Eye, Server, Cookie, Mail, FileText } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
+import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
 
 export const PrivacyPolicyPage = () => {
   usePageSeo({
@@ -18,13 +19,11 @@ export const PrivacyPolicyPage = () => {
       <header className="sticky top-0 z-40 w-full glass-panel border-b border-zinc-800/80 backdrop-blur-xl">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-pink-500 p-[1px] shadow-glow-sm">
-              <div className="w-full h-full bg-zinc-950 rounded-[11px] flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-brand-400" />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-lg text-white tracking-tight">Panda Praise</span>
+            <PandaPraiseIcon size={36} colorMode="gradient" className="shrink-0" />
+            <div className="flex items-center gap-1.5">
+              <span className="font-display font-extrabold text-lg text-white tracking-tight">
+                Panda <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Praise</span>
+              </span>
             </div>
           </Link>
 
