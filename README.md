@@ -1,8 +1,8 @@
-# ReviewVault 🌟
+# Panda Praise 🐼
 
 An ultra-modern, clean, single-page React and Tailwind CSS application functioning as a **Testimonial Collector and Moderation Dashboard**, inspired by the open-source architecture of [reviews-kits](https://github.com/reviews-kits-team/reviews-kits).
 
-Stripped of monorepo bloat and complex microservices, ReviewVault is 100% turnkey: it works out-of-the-box in the browser, plugs into Firebase (Auth + Cloud Firestore) or any REST backend with minimal configuration, and deploys directly to Netlify.
+Stripped of monorepo bloat and complex microservices, Panda Praise is 100% turnkey: it works out-of-the-box in the browser, plugs into Firebase (Auth + Cloud Firestore) or any REST backend with minimal configuration, and deploys directly to Netlify.
 
 ---
 
@@ -76,7 +76,7 @@ npm run build
    VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
    VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef123456
    ```
-5. Reload the app. ReviewVault will automatically connect to Firebase!
+5. Reload the app. Panda Praise will automatically connect to Firebase!
 
 ---
 

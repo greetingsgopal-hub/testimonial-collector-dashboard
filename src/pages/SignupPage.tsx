@@ -8,8 +8,8 @@ import { analytics } from '../lib/analytics';
 
 export const SignupPage = () => {
   usePageSeo({
-    title: 'Create Your ReviewVault Account',
-    description: 'Sign up for ReviewVault to create your testimonial collection link and embed social proof on your website.',
+    title: 'Create Your Panda Praise Account',
+    description: 'Sign up for Panda Praise to create your testimonial collection link and embed social proof on your website.',
   });
 
   const [email, setEmail] = useState('');
@@ -78,7 +78,7 @@ export const SignupPage = () => {
               <Sparkles className="w-5 h-5 text-brand-400" />
             </div>
           </div>
-          <span className="font-display font-bold text-xl text-white">ReviewVault</span>
+          <span className="font-display font-bold text-xl text-white">Panda Praise</span>
         </Link>
         <h2 className="text-2xl sm:text-3xl font-bold font-display text-white tracking-tight">
           Create your account

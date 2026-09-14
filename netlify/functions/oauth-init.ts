@@ -14,7 +14,7 @@ export const handler: Handler = async (event) => {
     return {
       statusCode: 401,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'Unauthorized: Valid ReviewVault session required.' }),
+      body: JSON.stringify({ error: 'Unauthorized: Valid Panda Praise session required.' }),
     };
   }
 

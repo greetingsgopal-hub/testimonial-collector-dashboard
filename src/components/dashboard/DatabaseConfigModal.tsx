@@ -178,7 +178,7 @@ export const DatabaseConfigModal: React.FC<DatabaseConfigModalProps> = ({ onClos
                   {FIREBASE_ENV_SNIPPET}
                 </pre>
                 <p className="text-[11px] text-zinc-500">
-                  Add these to your <code className="text-zinc-300">.env</code> locally or in Netlify site environment variables. ReviewVault will automatically connect to Firebase!
+                  Add these to your <code className="text-zinc-300">.env</code> locally or in Netlify site environment variables. Panda Praise will automatically connect to Firebase!
                 </p>
               </div>
             </div>

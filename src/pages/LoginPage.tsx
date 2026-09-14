@@ -7,8 +7,8 @@ import { usePageSeo } from '../lib/seo';
 
 export const LoginPage = () => {
   usePageSeo({
-    title: 'Log in — ReviewVault',
-    description: 'Log in to your ReviewVault account to manage and moderate customer testimonials.',
+    title: 'Log in — Panda Praise',
+    description: 'Log in to your Panda Praise account to manage and moderate customer testimonials.',
   });
 
   const [email, setEmail] = useState('');
@@ -63,7 +63,7 @@ export const LoginPage = () => {
               <Sparkles className="w-5 h-5 text-brand-400" />
             </div>
           </div>
-          <span className="font-display font-bold text-xl text-white">ReviewVault</span>
+          <span className="font-display font-bold text-xl text-white">Panda Praise</span>
         </Link>
         <h2 className="text-2xl sm:text-3xl font-bold font-display text-white tracking-tight">
           Welcome back

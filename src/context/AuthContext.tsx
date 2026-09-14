@@ -67,7 +67,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const DEMO_USER: AuthUser = {
   id: 'demo-user-001',
   uid: 'demo-user-001',
-  email: 'founder@demo.reviewvault.dev',
+  email: 'founder@demo.pandapraise.dev',
   displayName: 'Demo Founder',
 };
 
@@ -107,7 +107,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [collectionForm, setCollectionForm] = useState<CollectionForm | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
-    return localStorage.getItem('reviewvault_demo_mode') === 'true' && !isFirebaseConfigured;
+    const isDemo = localStorage.getItem('pandapraise_demo_mode') === 'true' || localStorage.getItem('reviewvault_demo_mode') === 'true';
+    return isDemo && !isFirebaseConfigured;
   });
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -378,6 +379,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.warn('[Security] Demo mode is disabled in production when Firebase is configured.');
       return;
     }
+    localStorage.setItem('pandapraise_demo_mode', 'true');
     localStorage.setItem('reviewvault_demo_mode', 'true');
     setIsDemoMode(true);
     setUser(DEMO_USER);
@@ -388,6 +390,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
   const disableDemoMode = () => {
+    localStorage.removeItem('pandapraise_demo_mode');
     localStorage.removeItem('reviewvault_demo_mode');
     setIsDemoMode(false);
     setUser(null);

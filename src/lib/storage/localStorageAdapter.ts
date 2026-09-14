@@ -2,7 +2,8 @@ import { StorageAdapter } from './adapter';
 import { Review, ReviewInput, ReviewStats, CollectionForm, Project } from '../../types';
 import { INITIAL_REVIEWS } from '../seedData';
 
-const STORAGE_KEY_PREFIX = 'reviewvault_testimonials_project_';
+const STORAGE_KEY_PREFIX = 'pandapraise_testimonials_project_';
+const LEGACY_STORAGE_KEY_PREFIX = 'reviewvault_testimonials_project_';
 
 export class LocalStorageAdapter implements StorageAdapter {
   name = 'Local Storage (Development/Demo Mode)';
@@ -15,7 +16,16 @@ export class LocalStorageAdapter implements StorageAdapter {
   private loadReviews(projectId?: string): Review[] {
     try {
       const key = this.getStorageKey(projectId);
-      const data = localStorage.getItem(key);
+      let data = localStorage.getItem(key);
+      if (!data) {
+        // Check legacy reviewvault key for backward compatibility
+        const legacyKey = `${LEGACY_STORAGE_KEY_PREFIX}${projectId || 'default'}`;
+        const legacyData = localStorage.getItem(legacyKey);
+        if (legacyData) {
+          localStorage.setItem(key, legacyData);
+          data = legacyData;
+        }
+      }
       if (!data) {
         // If this is a demo project or default, populate with demo reviews initially
         if (!projectId || projectId === 'proj-demo-1' || projectId === 'default') {
@@ -36,6 +46,9 @@ export class LocalStorageAdapter implements StorageAdapter {
     try {
       const key = this.getStorageKey(projectId);
       localStorage.setItem(key, JSON.stringify(reviews));
+      // Keep legacy key updated for backwards compatibility
+      const legacyKey = `${LEGACY_STORAGE_KEY_PREFIX}${projectId || 'default'}`;
+      localStorage.setItem(legacyKey, JSON.stringify(reviews));
     } catch (e) {
       console.error('Failed to save reviews to localStorage', e);
     }
@@ -141,13 +154,24 @@ export class LocalStorageAdapter implements StorageAdapter {
 
   // Phase 2: Collection Form Management
   private getFormStorageKey(projectId?: string): string {
+    return `pandapraise_collection_form_${projectId || 'default'}`;
+  }
+
+  private getLegacyFormStorageKey(projectId?: string): string {
     return `reviewvault_collection_form_${projectId || 'default'}`;
   }
 
   async getCollectionForm(projectId?: string): Promise<CollectionForm | null> {
     const target = projectId || 'proj-demo-1';
     const key = this.getFormStorageKey(target);
-    const data = localStorage.getItem(key);
+    let data = localStorage.getItem(key);
+    if (!data) {
+      const legacyData = localStorage.getItem(this.getLegacyFormStorageKey(target));
+      if (legacyData) {
+        localStorage.setItem(key, legacyData);
+        data = legacyData;
+      }
+    }
     if (!data) {
       const defaultForm: CollectionForm = {
         id: 'form-' + target,
@@ -196,7 +220,7 @@ export class LocalStorageAdapter implements StorageAdapter {
   async getCollectionFormBySlug(publicSlug: string): Promise<{ form: CollectionForm; project: Project } | null> {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith('reviewvault_form_')) {
+      if (key && (key.startsWith('pandapraise_form_') || key.startsWith('reviewvault_form_') || key.startsWith('pandapraise_collection_form_') || key.startsWith('reviewvault_collection_form_'))) {
         try {
           const val = localStorage.getItem(key);
           if (val) {

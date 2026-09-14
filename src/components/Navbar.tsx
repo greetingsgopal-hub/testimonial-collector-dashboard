@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-base sm:text-lg text-white tracking-tight">ReviewVault</span>
+              <span className="font-display font-bold text-base sm:text-lg text-white tracking-tight">Panda Praise</span>
               {isDemoMode && (
                 <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
                   Demo Mode

@@ -54,7 +54,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
   const handleCopyCode = () => {
     let snippet = '';
     if (codeType === 'react') {
-      snippet = `// ReviewVault React Widget
+      snippet = `// Panda Praise React Widget
 import React from 'react';
 
 export function TestimonialWidget() {
@@ -65,7 +65,7 @@ export function TestimonialWidget() {
   );
 }`;
     } else if (codeType === 'html') {
-      snippet = `<!-- ReviewVault Live Embed Iframe -->
+      snippet = `<!-- Panda Praise Live Embed Iframe -->
 <iframe 
   src="${window.location.origin}/w/${projectWidgetId}" 
   width="100%" 
@@ -265,7 +265,7 @@ const reviews = await fetch('/api/reviews?status=approved&featured=${settings.on
                 <code>{`<TestimonialWidget type="${settings.type}" theme="${settings.theme}" />`}</code>
               )}
               {codeType === 'html' && (
-                <code>{`<div id="reviewvault-${settings.type}" data-theme="${settings.theme}"></div>`}</code>
+                <code>{`<div id="pandapraise-${settings.type}" data-theme="${settings.theme}"></div>`}</code>
               )}
               {codeType === 'json' && (
                 <code>{`GET /api/reviews?status=approved&limit=${settings.maxCount}`}</code>

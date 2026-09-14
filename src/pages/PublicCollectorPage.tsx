@@ -33,10 +33,10 @@ export const PublicCollectorPage = () => {
   const [isClosed, setIsClosed] = useState(false);
 
   const pageTitle = formConfig?.title
-    ? `${formConfig.title} — ReviewVault`
+    ? `${formConfig.title} — Panda Praise`
     : project?.name
-    ? `Submit Testimonial for ${project.name} — ReviewVault`
-    : 'Submit Your Testimonial — ReviewVault';
+    ? `Submit Testimonial for ${project.name} — Panda Praise`
+    : 'Submit Your Testimonial — Panda Praise';
 
   const pageDescription =
     formConfig?.description || 'Submit your verified feedback and customer testimonial.';
@@ -136,7 +136,7 @@ export const PublicCollectorPage = () => {
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-semibold text-zinc-300 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Return to ReviewVault</span>
+              <span>Return to Panda Praise</span>
             </Link>
           </div>
         </div>
@@ -162,7 +162,7 @@ export const PublicCollectorPage = () => {
               className="inline-flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 font-medium"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Return to ReviewVault Home</span>
+              <span>Return to Panda Praise Home</span>
             </Link>
           </div>
         </div>
@@ -192,7 +192,7 @@ export const PublicCollectorPage = () => {
           </div>
 
           <div className="text-[11px] text-zinc-500">
-            Powered by <Link to="/" className="text-zinc-400 hover:text-white font-medium underline">ReviewVault</Link>
+            Powered by <Link to="/" className="text-zinc-400 hover:text-white font-medium underline">Panda Praise</Link>
           </div>
         </div>
       </header>

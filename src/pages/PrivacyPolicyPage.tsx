@@ -4,8 +4,8 @@ import { usePageSeo } from '../lib/seo';
 
 export const PrivacyPolicyPage = () => {
   usePageSeo({
-    title: 'Privacy Policy — ReviewVault',
-    description: "ReviewVault's privacy policy explaining data collection, testimonial submitter privacy, and usage.",
+    title: 'Privacy Policy — Panda Praise',
+    description: "Panda Praise's privacy policy explaining data collection, testimonial submitter privacy, and usage.",
     canonical: 'https://cheery-hummingbird-7ecc95.netlify.app/privacy-policy',
   });
 
@@ -24,7 +24,7 @@ export const PrivacyPolicyPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-lg text-white tracking-tight">ReviewVault</span>
+              <span className="font-display font-bold text-lg text-white tracking-tight">Panda Praise</span>
             </div>
           </Link>
 
@@ -44,7 +44,7 @@ export const PrivacyPolicyPage = () => {
         <nav aria-label="Breadcrumb" className="mb-6">
           <ol className="flex items-center space-x-2 text-xs text-zinc-400">
             <li>
-              <Link to="/" className="hover:text-zinc-200 transition-colors">ReviewVault</Link>
+              <Link to="/" className="hover:text-zinc-200 transition-colors">Panda Praise</Link>
             </li>
             <li className="text-zinc-600" aria-hidden="true">/</li>
             <li className="text-zinc-200 font-medium" aria-current="page">Privacy Policy</li>
@@ -72,7 +72,7 @@ export const PrivacyPolicyPage = () => {
               <h2>1. Overview</h2>
             </div>
             <p>
-              ReviewVault provides software for business owners to collect testimonials from their customers, moderate feedback, and display approved social proof on their websites. This Privacy Policy explains in plain language what data is collected, how it is handled, and how your privacy is protected.
+              Panda Praise provides software for business owners to collect testimonials from their customers, moderate feedback, and display approved social proof on their websites. This Privacy Policy explains in plain language what data is collected, how it is handled, and how your privacy is protected.
             </p>
           </section>
 
@@ -86,12 +86,12 @@ export const PrivacyPolicyPage = () => {
             <div className="space-y-3 pl-2">
               <h3 className="text-sm font-semibold text-zinc-100">A. Account Information (Business Owners)</h3>
               <p>
-                When you create a ReviewVault account as a website owner or business operator, we collect your email address and authentication credentials. This information is used exclusively to provision your workspace, manage your collection forms, and give you access to your moderation dashboard.
+                When you create a Panda Praise account as a website owner or business operator, we collect your email address and authentication credentials. This information is used exclusively to provision your workspace, manage your collection forms, and give you access to your moderation dashboard.
               </p>
 
               <h3 className="text-sm font-semibold text-zinc-100">B. Testimonial Submitter Information (Customers)</h3>
               <p>
-                When customers submit feedback through a public ReviewVault collection link, they provide information directly to the business owner, including:
+                When customers submit feedback through a public Panda Praise collection link, they provide information directly to the business owner, including:
               </p>
               <ul className="list-disc list-inside space-y-1 text-zinc-400 pl-2">
                 <li>Full Name</li>
@@ -158,7 +158,7 @@ export const PrivacyPolicyPage = () => {
               <h2>5. Hosting and Infrastructure</h2>
             </div>
             <p>
-              ReviewVault utilizes industry-standard cloud infrastructure to host and deliver services:
+              Panda Praise utilizes industry-standard cloud infrastructure to host and deliver services:
             </p>
             <ul className="list-disc list-inside space-y-1 text-zinc-400 pl-2">
               <li><strong className="text-zinc-200">Google Firebase / Cloud Firestore:</strong> Authentication identity management, encrypted database storage, and file hosting. Data access is governed by security rules verifying tenant ownership.</li>
@@ -173,7 +173,7 @@ export const PrivacyPolicyPage = () => {
               <h2>6. Cookies and Analytics</h2>
             </div>
             <p>
-              ReviewVault does not use advertising trackers, marketing cookies, or behavioral profiling cookies. Essential local storage is used solely to maintain your authenticated login session.
+              Panda Praise does not use advertising trackers, marketing cookies, or behavioral profiling cookies. Essential local storage is used solely to maintain your authenticated login session.
             </p>
             <p>
               If Google Analytics is configured by the site operator, it operates in privacy-first mode with IP anonymization enabled, collecting only aggregated high-level page visit events. We never transmit names, emails, or testimonial content to analytics services.
@@ -213,7 +213,7 @@ export const PrivacyPolicyPage = () => {
       {/* Footer */}
       <footer className="border-t border-zinc-800/80 py-8 text-xs text-zinc-500 text-center relative z-10">
         <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span>ReviewVault • Testimonial Collector & Moderation Dashboard</span>
+          <span>Panda Praise • Testimonial Collector & Moderation Dashboard</span>
           <div className="flex items-center gap-4">
             <Link to="/" className="hover:text-zinc-300">Home</Link>
             <Link to="/terms" className="hover:text-zinc-300">Terms</Link>

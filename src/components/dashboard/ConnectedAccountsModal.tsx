@@ -234,9 +234,9 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
           )}
 
           <div className="p-3.5 rounded-xl bg-zinc-900/30 border border-zinc-800/60 text-[11px] text-zinc-500 space-y-1">
-            <p className="font-semibold text-zinc-400">ReviewVault Privacy & Security Guarantee:</p>
+            <p className="font-semibold text-zinc-400">Panda Praise Privacy & Security Guarantee:</p>
             <p>
-              • ReviewVault never stores client secrets or raw tokens in the browser or public databases.
+              • Panda Praise never stores client secrets or raw tokens in the browser or public databases.
             </p>
             <p>
               • Customer emails, internal document IDs, and reviewer IPs are strictly stripped before reaching social media.

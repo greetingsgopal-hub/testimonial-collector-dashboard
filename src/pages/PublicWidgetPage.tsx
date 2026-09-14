@@ -8,8 +8,8 @@ import { analytics } from '../lib/analytics';
 
 export const PublicWidgetPage = () => {
   usePageSeo({
-    title: 'Customer Testimonials — ReviewVault',
-    description: 'Verified customer testimonials powered by ReviewVault.',
+    title: 'Customer Testimonials — Panda Praise',
+    description: 'Verified customer testimonials powered by Panda Praise.',
   });
 
   const { publicWidgetId } = useParams<{ publicWidgetId: string }>();

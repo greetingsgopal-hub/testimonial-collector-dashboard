@@ -178,7 +178,7 @@ const PLATFORMS: Record<
 
 export const SocialCardModal: React.FC<SocialCardModalProps> = ({
   review,
-  projectName = 'ReviewVault',
+  projectName = 'Panda Praise',
   onClose,
 }) => {
   if (!review) return null;
@@ -358,7 +358,7 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
       }
     }
 
-    // 5. ReviewVault Verified Badge (Bottom right)
+    // 5. Panda Praise Verified Badge (Bottom right)
     if (showBadge) {
       const badgeText = `Verified by ${projectName}`;
       ctx.font = `600 20px "Inter", sans-serif`;

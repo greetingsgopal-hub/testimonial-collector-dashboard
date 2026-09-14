@@ -6,8 +6,8 @@ import { usePageSeo } from '../lib/seo';
 
 export const ForgotPasswordPage = () => {
   usePageSeo({
-    title: 'Reset Password — ReviewVault',
-    description: 'Reset your ReviewVault password to regain access to your dashboard.',
+    title: 'Reset Password — Panda Praise',
+    description: 'Reset your Panda Praise password to regain access to your dashboard.',
   });
 
   const [email, setEmail] = useState('');
@@ -53,7 +53,7 @@ export const ForgotPasswordPage = () => {
               <Sparkles className="w-5 h-5 text-brand-400" />
             </div>
           </div>
-          <span className="font-display font-bold text-xl text-white">ReviewVault</span>
+          <span className="font-display font-bold text-xl text-white">Panda Praise</span>
         </Link>
         <h2 className="text-2xl sm:text-3xl font-bold font-display text-white tracking-tight">
           Reset your password

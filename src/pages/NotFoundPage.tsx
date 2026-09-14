@@ -4,7 +4,7 @@ import { usePageSeo } from '../lib/seo';
 
 export const NotFoundPage = () => {
   usePageSeo({
-    title: 'Page Not Found — ReviewVault',
+    title: 'Page Not Found — Panda Praise',
     description: "The page you're looking for doesn't exist or may have moved.",
   });
 
@@ -21,7 +21,7 @@ export const NotFoundPage = () => {
                 <Sparkles className="w-5 h-5 text-brand-400" />
               </div>
             </div>
-            <span className="font-display font-bold text-lg text-white tracking-tight">ReviewVault</span>
+            <span className="font-display font-bold text-lg text-white tracking-tight">Panda Praise</span>
           </Link>
         </div>
       </header>
@@ -46,7 +46,7 @@ export const NotFoundPage = () => {
             className="w-full sm:w-auto px-6 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white text-sm font-medium border border-zinc-800 transition-colors flex items-center justify-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to ReviewVault</span>
+            <span>Back to Panda Praise</span>
           </Link>
 
           <Link
@@ -62,7 +62,7 @@ export const NotFoundPage = () => {
       {/* Footer */}
       <footer className="border-t border-zinc-800/80 py-6 text-xs text-zinc-500 text-center">
         <div className="max-w-7xl mx-auto px-4">
-          <span>ReviewVault • Testimonial Collector & Moderation Dashboard</span>
+          <span>Panda Praise • Testimonial Collector & Moderation Dashboard</span>
         </div>
       </footer>
     </div>

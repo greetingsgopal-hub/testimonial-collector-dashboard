@@ -4,8 +4,8 @@ import { usePageSeo } from '../lib/seo';
 
 export const TermsPage = () => {
   usePageSeo({
-    title: 'Terms of Service — ReviewVault',
-    description: 'Terms and conditions governing the use of ReviewVault for collecting, moderating, and embedding customer testimonials.',
+    title: 'Terms of Service — Panda Praise',
+    description: 'Terms and conditions governing the use of Panda Praise for collecting, moderating, and embedding customer testimonials.',
     canonical: 'https://cheery-hummingbird-7ecc95.netlify.app/terms',
   });
 
@@ -24,7 +24,7 @@ export const TermsPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-lg text-white tracking-tight">ReviewVault</span>
+              <span className="font-display font-bold text-lg text-white tracking-tight">Panda Praise</span>
             </div>
           </Link>
 
@@ -44,7 +44,7 @@ export const TermsPage = () => {
         <nav aria-label="Breadcrumb" className="mb-6">
           <ol className="flex items-center space-x-2 text-xs text-zinc-400">
             <li>
-              <Link to="/" className="hover:text-zinc-200 transition-colors">ReviewVault</Link>
+              <Link to="/" className="hover:text-zinc-200 transition-colors">Panda Praise</Link>
             </li>
             <li className="text-zinc-600" aria-hidden="true">/</li>
             <li className="text-zinc-200 font-medium" aria-current="page">Terms of Service</li>
@@ -72,7 +72,7 @@ export const TermsPage = () => {
               <h2>1. Agreement & Services Provided</h2>
             </div>
             <p>
-              By accessing or using ReviewVault ("the Service"), you agree to be bound by these Terms of Service. ReviewVault provides website owners and online businesses with software tools to create dedicated collection links, gather customer feedback, moderate testimonials through an administrative dashboard, and embed approved testimonials on their websites via embeddable widgets.
+              By accessing or using Panda Praise ("the Service"), you agree to be bound by these Terms of Service. Panda Praise provides website owners and online businesses with software tools to create dedicated collection links, gather customer feedback, moderate testimonials through an administrative dashboard, and embed approved testimonials on their websites via embeddable widgets.
             </p>
             <p>
               If you do not agree to these Terms, you may not use the Service.
@@ -97,10 +97,10 @@ export const TermsPage = () => {
               <h2>3. Testimonial Collection & Submitter Rights</h2>
             </div>
             <p>
-              When customers submit testimonials through your ReviewVault collection links, they provide explicit consent for the review content, name, role, and avatar to be displayed publicly. ReviewVault requires that all submitters agree to publish their feedback before submission.
+              When customers submit testimonials through your Panda Praise collection links, they provide explicit consent for the review content, name, role, and avatar to be displayed publicly. Panda Praise requires that all submitters agree to publish their feedback before submission.
             </p>
             <p>
-              Customer contact information (such as email addresses) is collected strictly for verification by the business owner and is never made publicly accessible through ReviewVault widgets.
+              Customer contact information (such as email addresses) is collected strictly for verification by the business owner and is never made publicly accessible through Panda Praise widgets.
             </p>
           </section>
 
@@ -114,7 +114,7 @@ export const TermsPage = () => {
               You retain total editorial discretion over testimonials submitted to your collections. You are solely responsible for reviewing and approving testimonials before publication. Testimonials do not appear on your website until you explicitly mark them as "approved" in your dashboard.
             </p>
             <p>
-              You may reject, archive, or delete testimonials at any time. ReviewVault does not claim ownership over the customer feedback submitted through your collections.
+              You may reject, archive, or delete testimonials at any time. Panda Praise does not claim ownership over the customer feedback submitted through your collections.
             </p>
           </section>
 
@@ -125,7 +125,7 @@ export const TermsPage = () => {
               <h2>5. Acceptable Use Policy</h2>
             </div>
             <p>
-              You agree not to use ReviewVault to:
+              You agree not to use Panda Praise to:
             </p>
             <ul className="list-disc list-inside space-y-1 text-zinc-400 pl-2">
               <li>Collect, store, or display defamatory, obscene, fraudulent, or unlawful content;</li>
@@ -143,7 +143,7 @@ export const TermsPage = () => {
               <h2>6. Intellectual Property</h2>
             </div>
             <p>
-              The ReviewVault platform, including its software code, user interface designs, logos, widget layouts, and documentation, is the exclusive property of ReviewVault and its licensors. You are granted a non-exclusive, revocable license to embed the ReviewVault widgets on your websites in accordance with these Terms.
+              The Panda Praise platform, including its software code, user interface designs, logos, widget layouts, and documentation, is the exclusive property of Panda Praise and its licensors. You are granted a non-exclusive, revocable license to embed the Panda Praise widgets on your websites in accordance with these Terms.
             </p>
           </section>
 
@@ -165,7 +165,7 @@ export const TermsPage = () => {
               <h2>8. Limitation of Liability</h2>
             </div>
             <p>
-              To the maximum extent permitted by applicable law, ReviewVault and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits, data, or goodwill arising out of or in connection with your access to or use of the Service.
+              To the maximum extent permitted by applicable law, Panda Praise and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits, data, or goodwill arising out of or in connection with your access to or use of the Service.
             </p>
           </section>
 
@@ -191,7 +191,7 @@ export const TermsPage = () => {
       {/* Footer */}
       <footer className="border-t border-zinc-800/80 py-8 text-xs text-zinc-500 text-center relative z-10">
         <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span>ReviewVault • Testimonial Collector & Moderation Dashboard</span>
+          <span>Panda Praise • Testimonial Collector & Moderation Dashboard</span>
           <div className="flex items-center gap-4">
             <Link to="/" className="hover:text-zinc-300">Home</Link>
             <Link to="/privacy-policy" className="hover:text-zinc-300">Privacy Policy</Link>

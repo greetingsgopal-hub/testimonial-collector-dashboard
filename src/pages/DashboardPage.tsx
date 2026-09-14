@@ -33,8 +33,8 @@ import {
 
 export const DashboardPage = () => {
   usePageSeo({
-    title: 'Dashboard — ReviewVault',
-    description: 'ReviewVault customer review management and moderation dashboard.',
+    title: 'Dashboard — Panda Praise',
+    description: 'Panda Praise customer review management and moderation dashboard.',
   });
 
   const { project, collectionForm } = useAuth();
@@ -493,7 +493,7 @@ export const DashboardPage = () => {
       {socialCardReview && (
         <SocialCardModal
           review={socialCardReview}
-          projectName={project?.name || 'ReviewVault'}
+          projectName={project?.name || 'Panda Praise'}
           onClose={() => setSocialCardReview(null)}
         />
       )}

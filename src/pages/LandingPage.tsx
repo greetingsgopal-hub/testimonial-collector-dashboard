@@ -24,7 +24,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Do my customers need to create an account?',
-    a: 'No. Customers can submit testimonials through your public collection link without creating a ReviewVault account.',
+    a: 'No. Customers can submit testimonials through your public collection link without creating a Panda Praise account.',
   },
   {
     q: 'Can I approve testimonials before they appear on my website?',
@@ -35,15 +35,15 @@ const FAQ_ITEMS = [
     a: 'No. Customer contact information is kept out of the public testimonial view.',
   },
   {
-    q: 'How does ReviewVault appear on my website?',
-    a: 'You install the ReviewVault widget on your website once using the provided embed code. After that, approved testimonials are loaded through the existing widget automatically.',
+    q: 'How does Panda Praise appear on my website?',
+    a: 'You install the Panda Praise widget on your website once using the provided embed code. After that, approved testimonials are loaded through the existing widget automatically.',
   },
 ];
 
 export const LandingPage = () => {
   usePageSeo({
-    title: 'ReviewVault — Collect and Display Customer Testimonials',
-    description: 'Collect customer testimonials with a simple shareable link, approve the best reviews, and display them automatically on your website with ReviewVault.',
+    title: 'Panda Praise — Collect and Display Customer Testimonials',
+    description: 'Collect customer testimonials with a simple shareable link, approve the best reviews, and display them automatically on your website with Panda Praise.',
     canonical: 'https://cheery-hummingbird-7ecc95.netlify.app/',
   });
 
@@ -84,7 +84,7 @@ export const LandingPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-lg text-white tracking-tight">ReviewVault</span>
+              <span className="font-display font-bold text-lg text-white tracking-tight">Panda Praise</span>
             </div>
           </Link>
 
@@ -154,7 +154,7 @@ export const LandingPage = () => {
         </h1>
 
         <p className="text-base sm:text-lg text-zinc-400 mt-6 max-w-2xl mx-auto leading-relaxed">
-          Embed the ReviewVault widget on your website once. When you approve new client testimonials in your dashboard, they appear in your live widget instantly—without touching code or asking a developer.
+          Embed the Panda Praise widget on your website once. When you approve new client testimonials in your dashboard, they appear in your live widget instantly—without touching code or asking a developer.
         </p>
 
         {/* Primary & Secondary CTAs */}
@@ -187,7 +187,7 @@ export const LandingPage = () => {
         <div className="mt-12 p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 max-w-2xl mx-auto text-xs text-zinc-400 flex items-center justify-center gap-2 text-center sm:text-left">
           <Sparkles className="w-4 h-4 text-amber-400 shrink-0 hidden sm:block" />
           <span>
-            <strong className="text-zinc-200">The ReviewVault Guarantee:</strong> Your website integration is a one-time setup. After that, your website stays fresh automatically whenever you approve feedback.
+            <strong className="text-zinc-200">The Panda Praise Guarantee:</strong> Your website integration is a one-time setup. After that, your website stays fresh automatically whenever you approve feedback.
           </span>
         </div>
       </section>
@@ -199,10 +199,10 @@ export const LandingPage = () => {
             <span>Simple 4-Step Workflow</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-white tracking-tight">
-            How ReviewVault Works
+            How Panda Praise Works
           </h2>
           <p className="text-sm text-zinc-400 mt-3 leading-relaxed">
-            Your website integration is a one-time installation. After that, ReviewVault handles the testimonial updates.
+            Your website integration is a one-time installation. After that, Panda Praise handles the testimonial updates.
           </p>
         </div>
 
@@ -222,7 +222,7 @@ export const LandingPage = () => {
                 Create your collection link
               </h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Create a ReviewVault collection and get a dedicated, shareable link for your business.
+                Create a Panda Praise collection and get a dedicated, shareable link for your business.
               </p>
             </div>
             <div className="pt-3 border-t border-zinc-800/60 text-[11px] text-zinc-500">
@@ -291,7 +291,7 @@ export const LandingPage = () => {
                 Display automatically
               </h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Install the ReviewVault widget on your website once. Approved testimonials appear automatically without changing website code.
+                Install the Panda Praise widget on your website once. Approved testimonials appear automatically without changing website code.
               </p>
             </div>
             <div className="pt-3 border-t border-zinc-800/60 text-[11px] text-zinc-500">
@@ -326,7 +326,7 @@ export const LandingPage = () => {
             Install Once. Your Approved Testimonials Update Automatically.
           </h2>
           <p className="text-sm text-zinc-400 mt-3 leading-relaxed">
-            The website owner installs the ReviewVault widget once. When you approve new client reviews in your dashboard, they appear in your live widget automatically—without touching website code or asking a developer for every new review.
+            The website owner installs the Panda Praise widget once. When you approve new client reviews in your dashboard, they appear in your live widget automatically—without touching website code or asking a developer for every new review.
           </p>
         </div>
 
@@ -358,7 +358,7 @@ export const LandingPage = () => {
                   ))}
                 </div>
                 <p className="text-xs text-zinc-200 leading-relaxed italic mb-3">
-                  "ReviewVault made collecting feedback effortless. Our conversion rate increased within weeks."
+                  "Panda Praise made collecting feedback effortless. Our conversion rate increased within weeks."
                 </p>
               </div>
               <div className="flex items-center gap-2.5 pt-2 border-t border-zinc-800/80">
@@ -422,7 +422,7 @@ export const LandingPage = () => {
           {/* Workflow callout strip */}
           <div className="mt-8 pt-6 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
             <div className="text-zinc-400 text-center sm:text-left">
-              <strong className="text-zinc-200">How it connects:</strong> Client submits via your link → You approve in ReviewVault → Widget updates in real time.
+              <strong className="text-zinc-200">How it connects:</strong> Client submits via your link → You approve in Panda Praise → Widget updates in real time.
             </div>
             <Link
               to="/signup"
@@ -449,7 +449,7 @@ export const LandingPage = () => {
             Frequently Asked Questions
           </h2>
           <p className="text-sm text-zinc-400 mt-2">
-            Everything you need to know about collecting and displaying testimonials with ReviewVault.
+            Everything you need to know about collecting and displaying testimonials with Panda Praise.
           </p>
         </div>
 
@@ -522,7 +522,7 @@ export const LandingPage = () => {
       <footer className="border-t border-zinc-800/80 py-10 text-xs text-zinc-500 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-display font-bold text-sm text-zinc-300">ReviewVault</span>
+            <span className="font-display font-bold text-sm text-zinc-300">Panda Praise</span>
             <span className="text-zinc-600">•</span>
             <span>Collect and Display Customer Testimonials Automatically</span>
           </div>
