@@ -101,3 +101,59 @@ export interface WidgetSettings {
   maxCount: number;
   onlyFeatured: boolean;
 }
+
+export type SocialPlatform = 'linkedin' | 'twitter' | 'facebook' | 'instagram';
+export type SocialConnectionStatus = 'connected' | 'expired' | 'revoked' | 'unauthorized' | 'not_connected';
+export type SocialPublicationStatus = 'draft' | 'publishing' | 'published' | 'failed' | 'revoked';
+
+export interface SocialConnection {
+  id: string;
+  ownerId: string;
+  platform: SocialPlatform;
+  platformUserId?: string;
+  platformAccountName: string;
+  platformProfilePicture?: string;
+  accountType?: 'member' | 'organization' | 'page';
+  scopes: string[];
+  status: SocialConnectionStatus;
+  tokenExpiresAt?: string;
+  connectedAt: string;
+  updatedAt?: string;
+}
+
+export interface SocialPublication {
+  id: string;
+  ownerId: string;
+  reviewId: string;
+  testimonialAuthor: string;
+  platform: SocialPlatform;
+  socialConnectionId: string;
+  platformPostId?: string;
+  platformPostUrl?: string;
+  status: SocialPublicationStatus;
+  caption: string;
+  mediaType: 'image' | 'text';
+  publishedAt?: string;
+  errorCode?: string;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface SocialPublishRequest {
+  reviewId: string;
+  platform: SocialPlatform;
+  caption: string;
+  mediaBase64?: string;
+}
+
+export interface SocialPublishResult {
+  success: boolean;
+  platform: SocialPlatform;
+  postId?: string;
+  postUrl?: string;
+  publishedAt?: string;
+  error?: string;
+  reauthRequired?: boolean;
+}
+

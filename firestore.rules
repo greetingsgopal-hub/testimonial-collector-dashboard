@@ -74,5 +74,21 @@ service cloud.firestore {
       allow delete: if isAuthenticated() &&
         resource.data.ownerId == request.auth.uid;
     }
+
+    // 6. Social Connections (Tenant-isolated credentials & account links)
+    // Only the owner can read, update, or delete their social account connection
+    match /social_connections/{connectionId} {
+      allow read: if isOwner(resource.data.ownerId);
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.ownerId);
+    }
+
+    // 7. Social Publications (Audit log and published post records)
+    // Only the owner can view and manage their publication records
+    match /social_publications/{publicationId} {
+      allow read: if isOwner(resource.data.ownerId);
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.ownerId);
+    }
   }
 }

@@ -96,4 +96,27 @@ export const analytics = {
     trackEvent('social_caption_copied', { platform }),
   socialIntentOpened: (platform: string) =>
     trackEvent('social_intent_opened', { platform }),
+  socialComposerOpened: (reviewId: string) =>
+    trackEvent('social_composer_opened', { review_id: reviewId }),
+  socialConnectStarted: (platform: string) =>
+    trackEvent('social_account_connect_started', { platform }),
+  socialConnectCompleted: (platform: string) =>
+    trackEvent('social_account_connected', { platform }),
+  socialConnectFailed: (platform: string, error?: string) =>
+    trackEvent('social_account_connect_failed', { platform, error: error || 'unknown' }),
+  socialAccountDisconnected: (platform: string) =>
+    trackEvent('social_account_disconnected', { platform }),
+  socialPublishStarted: (platform: string) =>
+    trackEvent('social_publish_started', { platform }),
+  socialPublishSucceeded: (platform: string, postId?: string) =>
+    trackEvent('social_publish_succeeded', { platform, post_id: postId || 'unknown' }),
+  socialPublishFailed: (platform: string, error?: string) =>
+    trackEvent('social_publish_failed', { platform, error: error || 'unknown' }),
+  socialReauthRequired: (platform: string) =>
+    trackEvent('social_reauth_required', { platform }),
+  socialPublishAllStarted: (count: number) =>
+    trackEvent('social_publish_all_started', { platform_count: count }),
+  socialPublishAllCompleted: () =>
+    trackEvent('social_publish_all_completed'),
 };
+

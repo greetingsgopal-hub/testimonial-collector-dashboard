@@ -9,6 +9,8 @@ import { SocialCardModal } from '../components/dashboard/SocialCardModal';
 import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { DatabaseConfigModal } from '../components/dashboard/DatabaseConfigModal';
 import { CollectionConfigModal } from '../components/dashboard/CollectionConfigModal';
+import { ConnectedAccountsModal } from '../components/dashboard/ConnectedAccountsModal';
+import { PublishHistoryModal } from '../components/dashboard/PublishHistoryModal';
 import { storage } from '../lib/storage';
 import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
@@ -21,7 +23,12 @@ import {
   Check, 
   ExternalLink,
   Settings,
-  Clock
+  Clock,
+  Link as LinkIcon,
+  History,
+  CheckCircle2,
+  AlertCircle,
+  X
 } from 'lucide-react';
 
 export const DashboardPage = () => {
@@ -62,10 +69,35 @@ export const DashboardPage = () => {
   const [socialCardReview, setSocialCardReview] = useState<Review | null>(null);
   const [showDatabaseModal, setShowDatabaseModal] = useState(false);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
+  const [showAccountsModal, setShowAccountsModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [socialNotification, setSocialNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [currentCollectionForm, setCurrentCollectionForm] = useState<CollectionForm | null>(collectionForm);
   const [copiedLink, setCopiedLink] = useState(false);
 
   const activeProjectId = project?.id;
+
+  // Handle OAuth callback redirects in query params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const socialConnected = params.get('social_connected');
+    const accountName = params.get('account_name');
+    const socialError = params.get('social_error');
+
+    if (socialConnected) {
+      setSocialNotification({
+        type: 'success',
+        message: `✓ Successfully connected ${socialConnected.toUpperCase()}${accountName ? ` as ${accountName}` : ''}! 1-Click Social Publishing is now enabled.`
+      });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (socialError) {
+      setSocialNotification({
+        type: 'error',
+        message: `Social Connection Notice: ${socialError}`
+      });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   // Load collection form for project if not already provided
   useEffect(() => {
@@ -248,11 +280,33 @@ export const DashboardPage = () => {
             {/* Configure Collection Form */}
             <button
               onClick={() => setShowCollectionModal(true)}
-              className="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-200 hover:text-white flex items-center gap-1.5 transition-colors"
+              className="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-200 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Configure collection form title, slug, and status"
             >
               <Settings className="w-3.5 h-3.5 text-brand-400" />
               <span>Configure Form</span>
+            </button>
+
+            {/* Connected Social Accounts */}
+            <button
+              id="dashboard-connected-accounts-btn"
+              onClick={() => setShowAccountsModal(true)}
+              className="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-200 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Manage connected social accounts (LinkedIn, X, etc.)"
+            >
+              <LinkIcon className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Social Accounts</span>
+            </button>
+
+            {/* Publishing Audit History */}
+            <button
+              id="dashboard-publish-history-btn"
+              onClick={() => setShowHistoryModal(true)}
+              className="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-200 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="View social publishing audit history"
+            >
+              <History className="w-3.5 h-3.5 text-cyan-400" />
+              <span>History</span>
             </button>
 
             <div className="flex items-center gap-2 p-1 bg-zinc-900/90 border border-zinc-800 rounded-xl flex-1 md:flex-initial">
@@ -261,7 +315,7 @@ export const DashboardPage = () => {
               </span>
               <button
                 onClick={handleCopyLink}
-                className="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-xs font-semibold text-white flex items-center gap-1.5 transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-xs font-semibold text-white flex items-center gap-1.5 transition-colors cursor-pointer"
                 title="Copy public link"
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -280,6 +334,32 @@ export const DashboardPage = () => {
             </a>
           </div>
         </div>
+
+        {/* Social Connection Feedback Notification */}
+        {socialNotification && (
+          <div
+            className={`p-3.5 rounded-xl border flex items-center justify-between text-xs animate-fade-in ${
+              socialNotification.type === 'success'
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {socialNotification.type === 'success' ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+              )}
+              <span>{socialNotification.message}</span>
+            </div>
+            <button
+              onClick={() => setSocialNotification(null)}
+              className="p-1 rounded text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* Priority Pending Moderation Alert */}
         {stats.pendingCount > 0 && (
@@ -433,6 +513,22 @@ export const DashboardPage = () => {
       {/* Database Config Modal */}
       {showDatabaseModal && (
         <DatabaseConfigModal onClose={() => setShowDatabaseModal(false)} />
+      )}
+
+      {/* Connected Social Accounts Modal */}
+      {showAccountsModal && (
+        <ConnectedAccountsModal
+          isOpen={showAccountsModal}
+          onClose={() => setShowAccountsModal(false)}
+        />
+      )}
+
+      {/* Social Publishing Audit History Modal */}
+      {showHistoryModal && (
+        <PublishHistoryModal
+          isOpen={showHistoryModal}
+          onClose={() => setShowHistoryModal(false)}
+        />
       )}
     </div>
   );
