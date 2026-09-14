@@ -16,6 +16,7 @@ interface ReviewTableProps {
   onToggleFeatured: (id: string, current: boolean) => void;
   onDelete: (id: string) => void;
   onOpenDetails: (review: Review) => void;
+  onOpenSocialCard?: (review: Review) => void;
 }
 
 export const ReviewTable: React.FC<ReviewTableProps> = ({
@@ -24,6 +25,7 @@ export const ReviewTable: React.FC<ReviewTableProps> = ({
   onToggleFeatured,
   onDelete,
   onOpenDetails,
+  onOpenSocialCard,
 }) => {
   const getStatusBadge = (status: ReviewStatus) => {
     switch (status) {
@@ -147,6 +149,7 @@ export const ReviewTable: React.FC<ReviewTableProps> = ({
                 <td className="py-3 px-4 whitespace-nowrap text-right" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
                     {/* Star Featured */}
+                    {/* Quick Star */}
                     <button
                       disabled={review.status !== 'approved'}
                       onClick={() => onToggleFeatured(review.id, review.isFeatured)}
@@ -167,6 +170,17 @@ export const ReviewTable: React.FC<ReviewTableProps> = ({
                     >
                       <Star className={`w-3.5 h-3.5 ${review.isFeatured ? 'fill-amber-400' : ''}`} />
                     </button>
+
+                    {/* Create Social Post (Approved only) */}
+                    {review.status === 'approved' && onOpenSocialCard && (
+                      <button
+                        onClick={() => onOpenSocialCard(review)}
+                        className="p-1.5 rounded-lg text-brand-400 hover:text-white hover:bg-brand-600/25 transition-colors"
+                        title="Create Social Post"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                      </button>
+                    )}
 
                     {/* Approve */}
                     <button

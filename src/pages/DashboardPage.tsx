@@ -5,6 +5,7 @@ import { ReviewFilters } from '../components/dashboard/ReviewFilters';
 import { ReviewCard } from '../components/dashboard/ReviewCard';
 import { ReviewTable } from '../components/dashboard/ReviewTable';
 import { ReviewDetailModal } from '../components/dashboard/ReviewDetailModal';
+import { SocialCardModal } from '../components/dashboard/SocialCardModal';
 import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { DatabaseConfigModal } from '../components/dashboard/DatabaseConfigModal';
 import { CollectionConfigModal } from '../components/dashboard/CollectionConfigModal';
@@ -58,6 +59,7 @@ export const DashboardPage = () => {
 
   // Modals
   const [inspectingReview, setInspectingReview] = useState<Review | null>(null);
+  const [socialCardReview, setSocialCardReview] = useState<Review | null>(null);
   const [showDatabaseModal, setShowDatabaseModal] = useState(false);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [currentCollectionForm, setCurrentCollectionForm] = useState<CollectionForm | null>(collectionForm);
@@ -366,6 +368,7 @@ export const DashboardPage = () => {
                     onToggleFeatured={handleToggleFeatured}
                     onDelete={handleDeleteReview}
                     onOpenDetails={(rev) => setInspectingReview(rev)}
+                    onOpenSocialCard={setSocialCardReview}
                   />
                 ))}
               </div>
@@ -376,6 +379,7 @@ export const DashboardPage = () => {
                 onToggleFeatured={handleToggleFeatured}
                 onDelete={handleDeleteReview}
                 onOpenDetails={(rev) => setInspectingReview(rev)}
+                onOpenSocialCard={setSocialCardReview}
               />
             )}
           </div>
@@ -399,6 +403,18 @@ export const DashboardPage = () => {
           onDelete={handleDeleteReview}
           onSaveTags={handleSaveTags}
           onEditReview={handleEditReview}
+          onOpenSocialCard={(rev) => {
+            setSocialCardReview(rev);
+          }}
+        />
+      )}
+
+      {/* Social Media Card Generator Modal */}
+      {socialCardReview && (
+        <SocialCardModal
+          review={socialCardReview}
+          projectName={project?.name || 'ReviewVault'}
+          onClose={() => setSocialCardReview(null)}
         />
       )}
 

@@ -25,6 +25,7 @@ interface ReviewDetailModalProps {
   onDelete: (id: string) => void;
   onSaveTags?: (id: string, tags: string[]) => void;
   onEditReview?: (id: string, updates: Partial<Review>) => Promise<void>;
+  onOpenSocialCard?: (review: Review) => void;
 }
 
 export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
@@ -35,6 +36,7 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
   onDelete,
   onSaveTags,
   onEditReview,
+  onOpenSocialCard,
 }) => {
   const [copiedContent, setCopiedContent] = useState(false);
   const [tags, setTags] = useState<string[]>(review?.tags || []);
@@ -435,6 +437,18 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
               <Archive className="w-4 h-4" />
               <span>Archive</span>
             </button>
+
+            {/* Create Social Post (Only for approved reviews) */}
+            {review.status === 'approved' && onOpenSocialCard && (
+              <button
+                onClick={() => onOpenSocialCard(review)}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-brand-600 to-pink-600 hover:from-brand-500 hover:to-pink-500 text-white shadow-glow-sm flex items-center gap-1.5 transition-all ml-1"
+                title="Create a branded social media graphic"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Create Social Post</span>
+              </button>
+            )}
           </div>
 
           {/* Delete */}

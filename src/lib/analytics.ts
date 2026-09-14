@@ -80,4 +80,12 @@ export const analytics = {
     trackEvent('public_collection_submitted'),
   widgetPageViewed: () =>
     trackEvent('widget_page_viewed'),
+  socialCardOpened: (format: string) =>
+    trackEvent('social_card_opened', { format }),
+  socialCardDownloaded: (format: string) =>
+    trackEvent('social_card_downloaded', { format }),
+  socialCardShared: (format: string) =>
+    trackEvent('social_card_shared', { format }),
+  socialCardTextCopied: () =>
+    trackEvent('social_card_text_copied'),
 };

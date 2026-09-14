@@ -113,6 +113,7 @@ export const LoginPage = () => {
               <div className="relative">
                 <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
                 <input
+                  id="login-email"
                   type="email"
                   placeholder="founder@company.com"
                   value={email}
@@ -138,6 +139,7 @@ export const LoginPage = () => {
               <div className="relative">
                 <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
                 <input
+                  id="login-password"
                   type="password"
                   placeholder="••••••••"
                   value={password}
@@ -149,6 +151,7 @@ export const LoginPage = () => {
             </div>
 
             <button
+              id="login-submit-btn"
               type="submit"
               disabled={isSubmitting}
               className="w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-glow flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"

@@ -20,6 +20,7 @@ interface ReviewCardProps {
   onToggleFeatured: (id: string, current: boolean) => void;
   onDelete: (id: string) => void;
   onOpenDetails: (review: Review) => void;
+  onOpenSocialCard?: (review: Review) => void;
 }
 
 export const ReviewCard: React.FC<ReviewCardProps> = ({
@@ -28,6 +29,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   onToggleFeatured,
   onDelete,
   onOpenDetails,
+  onOpenSocialCard,
 }) => {
   const formattedDate = new Date(review.createdAt).toLocaleDateString('en-US', {
     month: 'short',
@@ -101,6 +103,18 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             >
               <Star className={`w-4 h-4 ${review.isFeatured ? 'fill-amber-400' : ''}`} />
             </button>
+
+            {/* Create Social Post (Only for approved reviews) */}
+            {review.status === 'approved' && onOpenSocialCard && (
+              <button
+                onClick={() => onOpenSocialCard(review)}
+                className="p-1.5 rounded-lg text-brand-400 hover:text-white hover:bg-brand-600/25 transition-colors"
+                title="Create Social Post"
+                aria-label="Create Social Post"
+              >
+                <Sparkles className="w-4 h-4" />
+              </button>
+            )}
 
             {/* Open Detail Modal */}
             <button
