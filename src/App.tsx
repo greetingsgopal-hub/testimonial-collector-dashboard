@@ -11,6 +11,7 @@ import { PublicWidgetPage } from './pages/PublicWidgetPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
+import { BrandKitPage } from './pages/BrandKitPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { initAnalytics, trackPageView } from './lib/analytics';
 
@@ -45,6 +46,8 @@ export function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/brand" element={<BrandKitPage />} />
+          <Route path="/brand-kit" element={<BrandKitPage />} />
           <Route path="/c/:collectionSlug" element={<PublicCollectorPage />} />
           <Route path="/w/:publicWidgetId" element={<PublicWidgetPage />} />
 

@@ -16,30 +16,6 @@ export const PandaPraiseIcon: React.FC<{
   const isWhite = colorMode === 'white';
   const isBlack = colorMode === 'black';
 
-  const ringColor = isGradient
-    ? 'url(#pp-ring-grad)'
-    : isWhite
-    ? '#ffffff'
-    : isBlack
-    ? '#09090b'
-    : 'currentColor';
-
-  const starColor = isGradient
-    ? 'url(#pp-star-grad)'
-    : isWhite
-    ? '#ffffff'
-    : isBlack
-    ? '#09090b'
-    : 'currentColor';
-
-  const featureColor = isGradient
-    ? '#c084fc'
-    : isWhite
-    ? '#ffffff'
-    : isBlack
-    ? '#09090b'
-    : 'currentColor';
-
   return (
     <svg
       width={size}
@@ -48,72 +24,137 @@ export const PandaPraiseIcon: React.FC<{
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="Panda Praise Mark"
+      aria-label="Panda Praise Mark - 5-Star Testimonial Panda"
     >
       <defs>
-        <linearGradient id="pp-ring-grad" x1="6" y1="42" x2="42" y2="12" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#8b5cf6" />
-          <stop offset="50%" stopColor="#d946ef" />
+        {/* Soft glowing violet-purple aura */}
+        <linearGradient id="pp3-aura" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#a855f7" />
           <stop offset="100%" stopColor="#ec4899" />
         </linearGradient>
-        <linearGradient id="pp-star-grad" x1="20" y1="3" x2="28" y2="13" gradientUnits="userSpaceOnUse">
+
+        {/* 5-Star Testimonial Glow */}
+        <linearGradient id="pp3-star" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#fde047" />
           <stop offset="100%" stopColor="#f59e0b" />
         </linearGradient>
-        <filter id="pp-star-glow" x="14" y="0" width="20" height="20" filterUnits="userSpaceOnUse">
-          <feGaussianBlur stdDeviation="1.5" result="blur" />
+
+        <linearGradient id="pp3-ear-glow" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#c084fc" />
+          <stop offset="100%" stopColor="#9333ea" />
+        </linearGradient>
+
+        <filter id="pp3-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.2" result="blur" />
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
       </defs>
 
-      {/* Outer Verification Badge Ring / Crest */}
+      {/* Gentle Glowing Outline / Praise Halo */}
+      <circle
+        cx="24"
+        cy="24"
+        r="22"
+        stroke={isGradient ? 'url(#pp3-aura)' : isWhite ? '#ffffff' : isBlack ? '#18181b' : 'currentColor'}
+        strokeWidth="2"
+        strokeOpacity={isGradient ? 0.35 : 0.2}
+      />
+
+      {/* Cheerful Friendly Panda Ears */}
+      <circle
+        cx="12.5"
+        cy="13.5"
+        r="6.5"
+        fill={isWhite ? '#ffffff' : isBlack ? '#18181b' : '#1e1b4b'}
+      />
+      <circle
+        cx="12.5"
+        cy="13.5"
+        r="4"
+        fill={isGradient ? 'url(#pp3-ear-glow)' : isWhite ? '#e2e8f0' : isBlack ? '#3f3f46' : '#a855f7'}
+      />
+
+      <circle
+        cx="35.5"
+        cy="13.5"
+        r="6.5"
+        fill={isWhite ? '#ffffff' : isBlack ? '#18181b' : '#1e1b4b'}
+      />
+      <circle
+        cx="35.5"
+        cy="13.5"
+        r="4"
+        fill={isGradient ? 'url(#pp3-ear-glow)' : isWhite ? '#e2e8f0' : isBlack ? '#3f3f46' : '#a855f7'}
+      />
+
+      {/* Friendly Rounded Panda Face Base */}
+      <rect
+        x="8"
+        y="12"
+        width="32"
+        height="28"
+        rx="14"
+        fill={isWhite ? '#ffffff' : isBlack ? '#27272a' : '#f8fafc'}
+      />
+
+      {/* Soft Friendly Panda Eye Patches (curved, round, cheerful) */}
+      <ellipse
+        cx="16"
+        cy="23"
+        rx="5"
+        ry="6"
+        fill={isWhite ? '#09090b' : isBlack ? '#09090b' : '#1e1b4b'}
+      />
+      <ellipse
+        cx="32"
+        cy="23"
+        rx="5"
+        ry="6"
+        fill={isWhite ? '#09090b' : isBlack ? '#09090b' : '#1e1b4b'}
+      />
+
+      {/* Joyful Circular Pupils with Sparkle / Catchlight */}
+      <circle cx="16.5" cy="22.5" r="2.2" fill="#ffffff" />
+      <circle cx="17.5" cy="21.5" r="0.9" fill="#a855f7" />
+      <circle cx="31.5" cy="22.5" r="2.2" fill="#ffffff" />
+      <circle cx="32.5" cy="21.5" r="0.9" fill="#a855f7" />
+
+      {/* Cheerful Button Nose */}
+      <ellipse
+        cx="24"
+        cy="28"
+        rx="2.8"
+        ry="2"
+        fill={isWhite ? '#09090b' : isBlack ? '#09090b' : '#1e1b4b'}
+      />
+
+      {/* Warm Upward Smiling Mouth (Happy Panda) */}
       <path
-        d="M 17 9.5 A 19 19 0 1 0 31 9.5"
-        stroke={ringColor}
-        strokeWidth="3.2"
+        d="M 21.2 30.5 C 22.2 32.8 23.5 33.2 24 33.2 C 24.5 33.2 25.8 32.8 26.8 30.5"
+        stroke={isWhite ? '#09090b' : isBlack ? '#09090b' : '#1e1b4b'}
+        strokeWidth="1.8"
         strokeLinecap="round"
       />
 
-      {/* Geometric Panda Ears */}
-      <circle cx="15" cy="16" r="4" fill={featureColor} />
-      <circle cx="33" cy="16" r="4" fill={featureColor} />
-
-      {/* Characteristic Angled Panda Eye Patches */}
-      <rect
-        x="15.8"
-        y="22.5"
-        width="5"
-        height="8"
-        rx="2.5"
-        transform="rotate(-18 18.3 26.5)"
-        fill={featureColor}
-      />
-      <rect
-        x="27.2"
-        y="22.5"
-        width="5"
-        height="8"
-        rx="2.5"
-        transform="rotate(18 29.7 26.5)"
-        fill={featureColor}
-      />
-
-      {/* Subtle Inner Pupil Highlights */}
-      <circle cx="19.2" cy="25" r="1" fill="#09090b" opacity={isBlack ? 0.3 : 0.85} />
-      <circle cx="28.8" cy="25" r="1" fill="#09090b" opacity={isBlack ? 0.3 : 0.85} />
-
-      {/* Minimal Nose Mark */}
+      {/* 5-Star Testimonial Praise Stars on Cheeks (Concept 3 signature) */}
+      {/* Left Praise Star */}
       <path
-        d="M 22.5 33.5 C 23.2 33 24.8 33 25.5 33.5 C 25.2 34.5 22.8 34.5 22.5 33.5 Z"
-        fill={featureColor}
-        opacity="0.8"
+        d="M 10 30.5 L 11.2 32.8 L 13.7 33.2 L 11.8 34.9 L 12.3 37.4 L 10 36.1 L 7.7 37.4 L 8.2 34.9 L 6.3 33.2 L 8.8 32.8 Z"
+        fill={isGradient ? 'url(#pp3-star)' : isWhite ? '#ffffff' : '#f59e0b'}
+        filter={isGradient ? 'url(#pp3-glow)' : undefined}
+      />
+      {/* Right Praise Star */}
+      <path
+        d="M 38 30.5 L 39.2 32.8 L 41.7 33.2 L 39.8 34.9 L 40.3 37.4 L 38 36.1 L 35.7 37.4 L 36.2 34.9 L 34.3 33.2 L 36.8 32.8 Z"
+        fill={isGradient ? 'url(#pp3-star)' : isWhite ? '#ffffff' : '#f59e0b'}
+        filter={isGradient ? 'url(#pp3-glow)' : undefined}
       />
 
-      {/* 4-Point Praise Star Crown */}
+      {/* Top Praise Star Crown */}
       <path
-        d="M 24 1.5 Q 24 7 28.5 7 Q 24 7 24 12.5 Q 24 7 19.5 7 Q 24 7 24 1.5 Z"
-        fill={starColor}
-        filter={isGradient ? 'url(#pp-star-glow)' : undefined}
+        d="M 24 2.5 L 25.4 6 L 29.2 6.5 L 26.4 9.1 L 27.2 12.8 L 24 10.9 L 20.8 12.8 L 21.6 9.1 L 18.8 6.5 L 22.6 6 Z"
+        fill={isGradient ? 'url(#pp3-star)' : isWhite ? '#ffffff' : '#f59e0b'}
+        filter={isGradient ? 'url(#pp3-glow)' : undefined}
       />
     </svg>
   );

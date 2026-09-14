@@ -551,6 +551,9 @@ export const LandingPage = () => {
             <Link to="/terms" className="hover:text-zinc-300 transition-colors">
               Terms
             </Link>
+            <Link to="/brand-kit" className="text-purple-400 hover:text-purple-300 font-semibold transition-colors">
+              Brand Kit
+            </Link>
             <Link to="/login" className="hover:text-zinc-300 transition-colors">
               Log In
             </Link>
