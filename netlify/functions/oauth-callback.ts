@@ -2,21 +2,36 @@ import type { Handler } from '@netlify/functions';
 import { verifyOAuthState, encryptToken } from './_shared/crypto';
 import { exchangeLinkedInCode, getLinkedInProfile } from './_shared/linkedin';
 import { saveDocument } from './_shared/firestoreAdmin';
+import { checkRateLimit } from './_shared/rateLimit';
 
 export const handler: Handler = async (event) => {
+  const clientIp = event.headers['client-ip'] || event.headers['x-forwarded-for'] || 'unknown';
+  
+  // Rate limiting on callback: max 20 attempts per minute per IP
+  const rateCheck = checkRateLimit(`oauth_callback_${clientIp}`, 20, 60000);
+
   const query = event.queryStringParameters || {};
   const host = event.headers.host || 'cheery-hummingbird-7ecc95.netlify.app';
   const proto = event.headers['x-forwarded-proto'] || 'https';
   const baseUrl = `${proto}://${host}`;
 
-  // Handle user cancelled or denied error from LinkedIn
-  if (query.error) {
-    const errorMsg = query.error_description || query.error || 'Authorization was cancelled';
-    console.warn('[OAuthCallback] Platform returned error:', errorMsg);
+  if (!rateCheck.allowed) {
     return {
       statusCode: 302,
       headers: {
-        Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent(errorMsg)}`,
+        Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent('Too many requests. Please wait a moment.')}`,
+      },
+      body: '',
+    };
+  }
+
+  // Handle user cancelled or denied error from LinkedIn
+  if (query.error) {
+    console.warn('[OAuthCallback] Platform returned error:', query.error);
+    return {
+      statusCode: 302,
+      headers: {
+        Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent('Social authorization was cancelled or denied.')}`,
       },
       body: '',
     };
@@ -29,20 +44,20 @@ export const handler: Handler = async (event) => {
     return {
       statusCode: 302,
       headers: {
-        Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent('Missing authorization code or state')}`,
+        Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent('Missing authorization parameters.')}`,
       },
       body: '',
     };
   }
 
-  // Validate state (CSRF + tenant binding + 10-minute expiry)
+  // Validate state (CSRF + tenant binding + 10-minute expiry + nonce integrity)
   const stateResult = verifyOAuthState(state);
   if (!stateResult.valid || !stateResult.userId || !stateResult.platform) {
     console.error('[OAuthCallback] State verification failed:', stateResult.error);
     return {
       statusCode: 302,
       headers: {
-        Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent(stateResult.error || 'Invalid OAuth state')}`,
+        Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent(stateResult.error || 'Invalid or expired OAuth state.')}`,
       },
       body: '',
     };
@@ -56,6 +71,17 @@ export const handler: Handler = async (event) => {
       const clientSecret = process.env.LINKEDIN_CLIENT_SECRET || '';
       const redirectUri = process.env.LINKEDIN_REDIRECT_URI || `${baseUrl}/api/oauth-callback`;
 
+      if (!clientId || !clientSecret) {
+        console.error('[OAuthCallback] LinkedIn credentials missing in environment.');
+        return {
+          statusCode: 302,
+          headers: {
+            Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent('Server configuration error. Contact administrator.')}`,
+          },
+          body: '',
+        };
+      }
+
       // Exchange code for access token
       const tokenData = await exchangeLinkedInCode(code, redirectUri, clientId, clientSecret);
 
@@ -65,7 +91,7 @@ export const handler: Handler = async (event) => {
       const now = new Date().toISOString();
       const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000).toISOString();
 
-      // Secure connection document
+      // Secure connection document — tokens encrypted with AES-256-GCM
       const connectionDoc = {
         ownerId: userId,
         platform: 'linkedin',
@@ -99,7 +125,7 @@ export const handler: Handler = async (event) => {
     return {
       statusCode: 302,
       headers: {
-        Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent(`Unsupported platform ${platform}`)}`,
+        Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent('Unsupported platform.')}`,
       },
       body: '',
     };
@@ -108,7 +134,7 @@ export const handler: Handler = async (event) => {
     return {
       statusCode: 302,
       headers: {
-        Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent(err.message || 'Failed to exchange authorization token')}`,
+        Location: `${baseUrl}/dashboard?social_error=${encodeURIComponent('Failed to complete social authentication. Please try again.')}`,
       },
       body: '',
     };

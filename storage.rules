@@ -7,22 +7,30 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    // Public avatars and testimonial media
-    // Stored under public/{tenantId}/...
+    function isTenantOwner(tenantId) {
+      return isAuthenticated() && request.auth.uid == tenantId;
+    }
+
+    function isValidImage() {
+      return request.resource.size < 5 * 1024 * 1024 &&
+             request.resource.contentType.matches('image/(jpeg|png|webp|gif|svg\\+xml)');
+    }
+
+    // Public avatars and testimonial media:
+    // Anyone can read public media.
+    // Writes and deletes STRICTLY require authenticated tenant ownership to prevent
+    // unauthorized overwriting, defacement, or storage quota exhaustion.
     match /public/{tenantId}/{allPaths=**} {
-      // Anyone can view public media
       allow read: if true;
-      
-      // Upload limits: image only, max 5MB
-      allow write: if (
-        request.resource.size < 5 * 1024 * 1024 &&
-        request.resource.contentType.matches('image/.*')
-      );
+      allow create, update: if isTenantOwner(tenantId) && isValidImage();
+      allow delete: if isTenantOwner(tenantId);
     }
 
     // Owner-only private uploads
     match /tenants/{tenantId}/{allPaths=**} {
-      allow read, write: if isAuthenticated() && request.auth.uid == tenantId;
+      allow read: if isTenantOwner(tenantId);
+      allow create, update: if isTenantOwner(tenantId) && isValidImage();
+      allow delete: if isTenantOwner(tenantId);
     }
   }
 }

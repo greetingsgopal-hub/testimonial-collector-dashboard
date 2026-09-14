@@ -1,10 +1,23 @@
 import type { Handler } from '@netlify/functions';
 import { extractBearerToken, verifyFirebaseToken } from './_shared/firebaseAuth';
 import { generateOAuthState } from './_shared/crypto';
+import { getCorsHeaders, handleOptionsPreflight } from './_shared/cors';
+import { checkRateLimit } from './_shared/rateLimit';
 
 export const handler: Handler = async (event) => {
+  // Handle CORS Preflight
+  const preflight = handleOptionsPreflight(event);
+  if (preflight) return preflight;
+
+  const origin = event.headers.origin || event.headers.Origin;
+  const corsHeaders = getCorsHeaders(origin);
+
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+    return {
+      statusCode: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Method Not Allowed' }),
+    };
   }
 
   const token = extractBearerToken(event.headers.authorization || event.headers.Authorization);
@@ -13,14 +26,24 @@ export const handler: Handler = async (event) => {
   if (!user) {
     return {
       statusCode: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       body: JSON.stringify({ error: 'Unauthorized: Valid Panda Praise session required.' }),
+    };
+  }
+
+  // Rate Limiting: Max 10 OAuth init attempts per minute per user
+  const rateCheck = checkRateLimit(`oauth_init_${user.uid}`, 10, 60000);
+  if (!rateCheck.allowed) {
+    return {
+      statusCode: 429,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Too many requests. Please wait a moment before trying again.' }),
     };
   }
 
   try {
     const body = JSON.parse(event.body || '{}');
-    const platform = body.platform || 'linkedin';
+    const platform = typeof body.platform === 'string' ? body.platform.trim().toLowerCase() : 'linkedin';
 
     if (platform === 'linkedin') {
       const clientId = process.env.LINKEDIN_CLIENT_ID;
@@ -29,7 +52,7 @@ export const handler: Handler = async (event) => {
       if (!clientId) {
         return {
           statusCode: 503,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             error: 'LinkedIn OAuth is not configured on the server. LINKEDIN_CLIENT_ID must be set in Netlify environment variables.',
             configured: false,
@@ -45,7 +68,7 @@ export const handler: Handler = async (event) => {
 
       return {
         statusCode: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           authUrl,
           state,
@@ -56,15 +79,15 @@ export const handler: Handler = async (event) => {
 
     return {
       statusCode: 400,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: `Platform '${platform}' direct OAuth is coming in Phase B.` }),
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: `Direct OAuth for platform '${platform}' is not supported.` }),
     };
   } catch (err: any) {
-    console.error('[OAuthInit] Failed:', err);
+    console.error('[OAuthInit] Internal error:', err);
     return {
       statusCode: 500,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: err.message || 'Failed to initialize OAuth' }),
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Failed to initialize OAuth process. Please try again.' }),
     };
   }
 };

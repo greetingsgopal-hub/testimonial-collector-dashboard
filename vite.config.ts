@@ -78,7 +78,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  esbuild: {
+    drop: ['debugger'],
+  },
   build: {
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {

@@ -1,10 +1,22 @@
 import type { Handler } from '@netlify/functions';
 import { extractBearerToken, verifyFirebaseToken } from './_shared/firebaseAuth';
 import { getDocument, queryUserDocuments } from './_shared/firestoreAdmin';
+import { getCorsHeaders, handleOptionsPreflight } from './_shared/cors';
+import { checkRateLimit } from './_shared/rateLimit';
 
 export const handler: Handler = async (event) => {
+  const preflight = handleOptionsPreflight(event);
+  if (preflight) return preflight;
+
+  const origin = event.headers.origin || event.headers.Origin;
+  const corsHeaders = getCorsHeaders(origin);
+
   if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+    return {
+      statusCode: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Method Not Allowed' }),
+    };
   }
 
   const idToken = extractBearerToken(event.headers.authorization || event.headers.Authorization);
@@ -13,8 +25,18 @@ export const handler: Handler = async (event) => {
   if (!user) {
     return {
       statusCode: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       body: JSON.stringify({ error: 'Unauthorized' }),
+    };
+  }
+
+  // Rate Limiting: Max 40 requests per minute per user
+  const rateCheck = checkRateLimit(`status_${user.uid}`, 40, 60000);
+  if (!rateCheck.allowed) {
+    return {
+      statusCode: 429,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Too many requests. Please wait a moment.' }),
     };
   }
 
@@ -24,7 +46,7 @@ export const handler: Handler = async (event) => {
       platforms.map((p) => getDocument('social_connections', `${user.uid}_${p}`, idToken))
     );
 
-    // Build sanitized connections map
+    // Build sanitized connections map — NEVER expose accessToken or refreshToken
     const connections: Record<string, any> = {
       linkedin: { connected: false },
       twitter: { connected: false },
@@ -71,7 +93,7 @@ export const handler: Handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         connections,
         publications,
@@ -81,8 +103,8 @@ export const handler: Handler = async (event) => {
     console.error('[SocialStatus] Error:', err);
     return {
       statusCode: 500,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: err.message || 'Failed to fetch social status' }),
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Failed to retrieve social status.' }),
     };
   }
 };

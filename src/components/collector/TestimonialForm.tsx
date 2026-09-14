@@ -13,6 +13,7 @@ import {
   Link as LinkIcon 
 } from 'lucide-react';
 import { ReviewInput } from '../../types';
+import { validateReviewInput, sanitizeText, sanitizeUrl } from '../../lib/security';
 
 interface TestimonialFormProps {
   formData: ReviewInput;
@@ -86,29 +87,27 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
     e.preventDefault();
     setErrorMsg(null);
 
-    if (!formData.name.trim()) {
-      setErrorMsg('Please enter your full name.');
-      return;
-    }
-    if (!formData.email.trim() || !formData.email.includes('@')) {
-      setErrorMsg('Please provide a valid email address.');
-      return;
-    }
-    if (!formData.role.trim()) {
-      setErrorMsg('Please specify your role or job title.');
-      return;
-    }
-    if (!formData.content.trim() || formData.content.trim().length < 15) {
-      setErrorMsg('Please write a testimonial of at least 15 characters.');
-      return;
-    }
-    if (!formData.consent) {
-      setErrorMsg('Please check the permission box to allow featuring your review.');
+    const validation = validateReviewInput(formData);
+    if (!validation.valid) {
+      setErrorMsg(validation.error || 'Please fill in all required fields correctly.');
       return;
     }
 
+    // Sanitize payload fields
+    const sanitizedData: ReviewInput = {
+      ...formData,
+      name: sanitizeText(formData.name, 100),
+      email: formData.email.trim().toLowerCase().slice(0, 150),
+      role: sanitizeText(formData.role, 100),
+      company: formData.company ? sanitizeText(formData.company, 100) : undefined,
+      title: formData.title ? sanitizeText(formData.title, 150) : undefined,
+      content: sanitizeText(formData.content, 2500),
+      videoUrl: formData.videoUrl ? sanitizeUrl(formData.videoUrl) : undefined,
+      tags: formData.tags.map((t) => sanitizeText(t, 30)).filter(Boolean).slice(0, 10),
+    };
+
     try {
-      await onSubmit(formData);
+      await onSubmit(sanitizedData);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to submit review. Please try again.');
     }
