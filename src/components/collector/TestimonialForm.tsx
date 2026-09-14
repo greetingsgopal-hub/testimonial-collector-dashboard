@@ -2,18 +2,15 @@ import React, { useState } from 'react';
 import { 
   Star, 
   Send, 
-  Video, 
-  FileText, 
   Sparkles, 
   User, 
   Mail, 
   Briefcase, 
   Building2, 
-  Check, 
-  Link as LinkIcon 
+  Check 
 } from 'lucide-react';
 import { ReviewInput } from '../../types';
-import { validateReviewInput, sanitizeText, sanitizeUrl } from '../../lib/security';
+import { validateReviewInput, sanitizeText } from '../../lib/security';
 
 interface TestimonialFormProps {
   formData: ReviewInput;
@@ -96,13 +93,13 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
     // Sanitize payload fields
     const sanitizedData: ReviewInput = {
       ...formData,
+      type: 'text',
       name: sanitizeText(formData.name, 100),
       email: formData.email.trim().toLowerCase().slice(0, 150),
       role: sanitizeText(formData.role, 100),
       company: formData.company ? sanitizeText(formData.company, 100) : undefined,
       title: formData.title ? sanitizeText(formData.title, 150) : undefined,
       content: sanitizeText(formData.content, 2500),
-      videoUrl: formData.videoUrl ? sanitizeUrl(formData.videoUrl) : undefined,
       tags: formData.tags.map((t) => sanitizeText(t, 30)).filter(Boolean).slice(0, 10),
     };
 
@@ -128,35 +125,6 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         <p className="text-sm text-zinc-400 mt-1">
           Your honest experience helps us improve and helps others make informed decisions.
         </p>
-      </div>
-
-      {/* Mode Switch: Text vs Video */}
-      <div className="grid grid-cols-2 gap-2 p-1 bg-zinc-900/90 rounded-xl border border-zinc-800">
-        <button
-          type="button"
-          onClick={() => setFormData((prev) => ({ ...prev, type: 'text' }))}
-          className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-            formData.type === 'text'
-              ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700'
-              : 'text-zinc-400 hover:text-zinc-200'
-          }`}
-        >
-          <FileText className="w-4 h-4 text-brand-400" />
-          <span>Written Review</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setFormData((prev) => ({ ...prev, type: 'video' }))}
-          className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-            formData.type === 'video'
-              ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700'
-              : 'text-zinc-400 hover:text-zinc-200'
-          }`}
-        >
-          <Video className="w-4 h-4 text-pink-400" />
-          <span>Video Testimonial</span>
-        </button>
       </div>
 
       {/* Rating Picker */}
@@ -190,25 +158,6 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           </span>
         </div>
       </div>
-
-      {/* Video URL Input (if video type) */}
-      {formData.type === 'video' && (
-        <div className="animate-fade-in space-y-1">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
-            Video Link (Loom, YouTube, Vimeo, or MP4)
-          </label>
-          <div className="relative">
-            <LinkIcon className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
-            <input
-              type="url"
-              placeholder="https://www.loom.com/share/..."
-              value={formData.videoUrl || ''}
-              onChange={(e) => setFormData((prev) => ({ ...prev, videoUrl: e.target.value }))}
-              className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm"
-            />
-          </div>
-        </div>
-      )}
 
       {/* Review Headline / Title */}
       <div>

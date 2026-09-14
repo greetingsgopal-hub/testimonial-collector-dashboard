@@ -6,6 +6,7 @@ import { ReviewCard } from '../components/dashboard/ReviewCard';
 import { ReviewTable } from '../components/dashboard/ReviewTable';
 import { ReviewDetailModal } from '../components/dashboard/ReviewDetailModal';
 import { SocialCardModal } from '../components/dashboard/SocialCardModal';
+import { CarouselStudioModal } from '../components/dashboard/CarouselStudioModal';
 import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { DatabaseConfigModal } from '../components/dashboard/DatabaseConfigModal';
 import { CollectionConfigModal } from '../components/dashboard/CollectionConfigModal';
@@ -28,7 +29,8 @@ import {
   History,
   CheckCircle2,
   AlertCircle,
-  X
+  X,
+  Layers
 } from 'lucide-react';
 
 export const DashboardPage = () => {
@@ -67,6 +69,7 @@ export const DashboardPage = () => {
   // Modals
   const [inspectingReview, setInspectingReview] = useState<Review | null>(null);
   const [socialCardReview, setSocialCardReview] = useState<Review | null>(null);
+  const [showCarouselModal, setShowCarouselModal] = useState(false);
   const [showDatabaseModal, setShowDatabaseModal] = useState(false);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [showAccountsModal, setShowAccountsModal] = useState(false);
@@ -277,6 +280,17 @@ export const DashboardPage = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            {/* Social Carousel Studio (Canva-grade multi-review) */}
+            <button
+              id="dashboard-carousel-studio-btn"
+              onClick={() => setShowCarouselModal(true)}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:via-indigo-500 hover:to-pink-500 text-xs font-semibold text-white flex items-center gap-1.5 transition-all shadow-glow-sm cursor-pointer hover:scale-[1.02]"
+              title="Create multi-review social carousel for LinkedIn & Instagram"
+            >
+              <Layers className="w-3.5 h-3.5 text-white" />
+              <span>Social Carousel Studio</span>
+            </button>
+
             {/* Configure Collection Form */}
             <button
               onClick={() => setShowCollectionModal(true)}
@@ -495,6 +509,16 @@ export const DashboardPage = () => {
           review={socialCardReview}
           projectName={project?.name || 'Panda Praise'}
           onClose={() => setSocialCardReview(null)}
+        />
+      )}
+
+      {/* Multi-Review Social Carousel Studio Modal */}
+      {showCarouselModal && (
+        <CarouselStudioModal
+          approvedReviews={reviews.filter((r) => r.status === 'approved')}
+          projectName={project?.name || 'Panda Praise'}
+          websiteUrl={project?.websiteUrl || 'pandapraise.dev'}
+          onClose={() => setShowCarouselModal(false)}
         />
       )}
 

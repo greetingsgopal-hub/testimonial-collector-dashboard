@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Quote, Video, CheckCircle2, Building2 } from 'lucide-react';
+import { Star, Quote, CheckCircle2, Building2 } from 'lucide-react';
 import { ReviewInput } from '../../types';
 
 interface LivePreviewCardProps {
@@ -20,7 +20,7 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({ data }) => {
         {/* Subtle background glow */}
         <div className="absolute top-0 right-0 w-36 h-36 bg-brand-500/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
 
-        {/* Rating Stars & Type */}
+        {/* Rating Stars & Quote Icon */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-1">
             {stars.map((star) => (
@@ -35,14 +35,7 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({ data }) => {
             ))}
           </div>
 
-          {data.type === 'video' ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-pink-500/15 text-pink-400 text-xs font-medium border border-pink-500/30">
-              <Video className="w-3.5 h-3.5" />
-              Video Review
-            </span>
-          ) : (
-            <Quote className="w-6 h-6 text-zinc-700 group-hover:text-brand-400/40 transition-colors" />
-          )}
+          <Quote className="w-6 h-6 text-zinc-700 group-hover:text-brand-400/40 transition-colors" />
         </div>
 
         {/* Review Title if present */}
@@ -62,16 +55,6 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({ data }) => {
             </span>
           )}
         </p>
-
-        {/* Video Link Preview if applicable */}
-        {data.type === 'video' && data.videoUrl && (
-          <div className="mb-5 p-3 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center justify-between text-xs">
-            <span className="text-zinc-400 truncate max-w-[240px]">{data.videoUrl}</span>
-            <span className="text-pink-400 font-medium flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Video Linked
-            </span>
-          </div>
-        )}
 
         {/* Tags */}
         {data.tags && data.tags.length > 0 && (
