@@ -33,7 +33,7 @@ export const socialClient = {
     }
 
     try {
-      const res = await fetch('/api/oauth-init', {
+      const res = await fetch('/.netlify/functions/oauth-init', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,38 +61,34 @@ export const socialClient = {
     if (!token) return null;
 
     try {
-      const res = await fetch('/api/social-status', {
+      const res = await fetch('/.netlify/functions/social-status', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       if (!res.ok) {
-        console.warn('[SocialClient] Failed to fetch social status:', res.status);
         return null;
       }
+
       return res.json();
     } catch (err) {
-      console.error('[SocialClient] Error getting status:', err);
+      console.error('[SocialClient] getStatus error:', err);
       return null;
     }
   },
 
   /**
-   * One-click direct publish of an approved testimonial to a connected social platform.
+   * Publish an approved testimonial directly to the selected platform.
    */
   async publish(request: SocialPublishRequest): Promise<SocialPublishResult> {
     const token = await getAuthToken();
     if (!token) {
-      return {
-        success: false,
-        platform: request.platform,
-        error: 'Authentication session expired. Please sign in again.',
-      };
+      return { success: false, platform: request.platform, error: 'Authentication required. Please sign in.' };
     }
 
     try {
-      const res = await fetch('/api/social-publish', {
+      const res = await fetch('/.netlify/functions/social-publish', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,8 +102,8 @@ export const socialClient = {
         return {
           success: false,
           platform: request.platform,
-          error: data.error || `Publishing to ${request.platform} failed.`,
-          reauthRequired: Boolean(data.reauthRequired),
+          error: data.error || 'Publishing failed.',
+          reauthRequired: data.reauthRequired,
         };
       }
 
@@ -123,7 +119,7 @@ export const socialClient = {
       return {
         success: false,
         platform: request.platform,
-        error: err.message || 'Network error while publishing post.',
+        error: 'Network failure communicating with publishing server. Please retry.',
       };
     }
   },
@@ -133,10 +129,12 @@ export const socialClient = {
    */
   async disconnect(platform: SocialPlatform): Promise<{ success: boolean; error?: string }> {
     const token = await getAuthToken();
-    if (!token) return { success: false, error: 'Sign in required' };
+    if (!token) {
+      return { success: false, error: 'Authentication required.' };
+    }
 
     try {
-      const res = await fetch('/api/social-disconnect', {
+      const res = await fetch('/.netlify/functions/social-disconnect', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,11 +145,13 @@ export const socialClient = {
 
       const data = await res.json();
       if (!res.ok) {
-        return { success: false, error: data.error || 'Failed to disconnect account' };
+        return { success: false, error: data.error || 'Failed to disconnect account.' };
       }
+
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: err.message || 'Network error' };
+      console.error('[SocialClient] disconnect error:', err);
+      return { success: false, error: 'Network failure disconnecting account.' };
     }
   },
 };

@@ -4,9 +4,9 @@ import path from 'path';
 
 function netlifyFunctionsPlugin(): Plugin {
   const handleApi = async (req: any, res: any, next: any) => {
-    if (!req.url?.startsWith('/api/')) return next();
+    if (!req.url?.startsWith('/api/') && !req.url?.startsWith('/.netlify/functions/')) return next();
 
-    const pathname = req.url.split('?')[0].replace('/api/', '');
+    const pathname = req.url.split('?')[0].replace('/.netlify/functions/', '').replace('/api/', '');
     const searchParams = new URL(req.url, 'http://localhost').searchParams;
     const query = Object.fromEntries(searchParams.entries());
 
