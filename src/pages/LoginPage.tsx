@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { usePageSeo } from '../lib/seo';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
+import { GoogleIcon } from '../components/auth/GoogleIcon';
 
 export const LoginPage = () => {
   usePageSeo({
@@ -15,9 +16,10 @@ export const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const { signIn, enableDemoMode, authError } = useAuth();
+  const { signIn, signInWithGoogle, enableDemoMode, authError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -50,6 +52,23 @@ export const LoginPage = () => {
   const handleDemoLogin = () => {
     enableDemoMode();
     navigate('/dashboard', { replace: true });
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLocalError(null);
+    setIsGoogleSubmitting(true);
+    try {
+      const res = await signInWithGoogle();
+      if (res.success) {
+        navigate(redirectPath, { replace: true });
+      } else {
+        setLocalError(res.error || 'Failed to sign in with Google.');
+      }
+    } catch (err: any) {
+      setLocalError(err.message || 'An unexpected error occurred during Google sign-in.');
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
   };
 
   return (
@@ -96,6 +115,35 @@ export const LoginPage = () => {
               </button>
             </div>
           )}
+
+          {/* Google Sign-in */}
+          <button
+            id="google-login-btn"
+            type="button"
+            disabled={isSubmitting || isGoogleSubmitting}
+            onClick={handleGoogleSignIn}
+            className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 font-semibold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md cursor-pointer disabled:opacity-50 hover:shadow-lg"
+          >
+            {isGoogleSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />
+                <span>Connecting to Google...</span>
+              </>
+            ) : (
+              <>
+                <GoogleIcon className="w-4 h-4 shrink-0" />
+                <span>Continue with Google</span>
+              </>
+            )}
+          </button>
+
+          {/* Divider */}
+          <div className="relative flex items-center justify-center my-2">
+            <div className="border-t border-zinc-800 w-full" />
+            <span className="bg-zinc-900 px-3 text-[11px] uppercase tracking-wider text-zinc-500 font-medium absolute">
+              or continue with email
+            </span>
+          </div>
 
           {(localError || authError) && (
             <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 flex items-start gap-2 animate-fade-in">

@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
   onAuthStateChanged,
@@ -31,7 +33,11 @@ function translateFirebaseError(error: any): string {
     'auth/email-already-in-use':      'An account with this email already exists. Please sign in instead.',
     'auth/weak-password':             'Password must be at least 6 characters long.',
     'auth/network-request-failed':    'Network error. Please check your connection and try again.',
-    'auth/popup-closed-by-user':      'Sign-in was cancelled. Please try again.',
+    'auth/popup-closed-by-user':      'Google sign-in window was closed before completing.',
+    'auth/popup-blocked':             'Sign-in popup was blocked by your browser. Please allow popups for this site.',
+    'auth/cancelled-popup-request':   'Sign-in request was cancelled. Please try again.',
+    'auth/account-exists-with-different-credential': 'An account already exists with the same email using a different sign-in method.',
+    'auth/operation-not-allowed':     'Google sign-in is not yet enabled in the Firebase Console. Please enable Google under Authentication > Sign-in method.',
     'auth/requires-recent-login':     'Please sign out and sign in again to continue.',
   };
   return map[code] || error?.message || 'An unexpected error occurred. Please try again.';
@@ -55,6 +61,7 @@ interface AuthContextType {
   setAuthError: (err: string | null) => void;
   signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   enableDemoMode: () => void;
@@ -344,6 +351,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithGoogle = async () => {
+    setAuthError(null);
+    if (!isFirebaseConfigured || !auth) {
+      return {
+        success: false,
+        error: 'Firebase is not configured. Google Sign-In requires VITE_FIREBASE_* credentials.',
+      };
+    }
+
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const userCredential = await signInWithPopup(auth, provider);
+      const authUser: AuthUser = {
+        id: userCredential.user.uid,
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        displayName: userCredential.user.displayName,
+      };
+      setUser(authUser);
+      await initUserTenancy(authUser);
+      return { success: true };
+    } catch (error: any) {
+      const friendlyMessage = translateFirebaseError(error);
+      setAuthError(friendlyMessage);
+      return { success: false, error: friendlyMessage };
+    }
+  };
+
   const signOut = async () => {
     if (auth && isFirebaseConfigured) {
       await firebaseSignOut(auth);
@@ -418,6 +454,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthError,
         signUp,
         signIn,
+        signInWithGoogle,
         signOut,
         resetPassword,
         enableDemoMode,

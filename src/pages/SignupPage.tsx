@@ -6,6 +6,7 @@ import { isFirebaseConfigured } from '../lib/firebase';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
+import { GoogleIcon } from '../components/auth/GoogleIcon';
 
 export const SignupPage = () => {
   usePageSeo({
@@ -17,10 +18,11 @@ export const SignupPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const { signUp, enableDemoMode } = useAuth();
+  const { signUp, signInWithGoogle, enableDemoMode } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,6 +69,28 @@ export const SignupPage = () => {
     navigate('/dashboard');
   };
 
+  const handleGoogleSignup = async () => {
+    setLocalError(null);
+    setSuccessMessage(null);
+    setIsGoogleSubmitting(true);
+    try {
+      const res = await signInWithGoogle();
+      if (res.success) {
+        analytics.signupCompleted();
+        setSuccessMessage('Google account connected! Initializing workspace...');
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 800);
+      } else {
+        setLocalError(res.error || 'Failed to sign up with Google.');
+      }
+    } catch (err: any) {
+      setLocalError(err.message || 'An error occurred during Google sign-up.');
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="ambient-glow" />
@@ -110,6 +134,35 @@ export const SignupPage = () => {
               </button>
             </div>
           )}
+
+          {/* Google Sign-up */}
+          <button
+            id="google-signup-btn"
+            type="button"
+            disabled={isSubmitting || isGoogleSubmitting}
+            onClick={handleGoogleSignup}
+            className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 font-semibold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md cursor-pointer disabled:opacity-50 hover:shadow-lg"
+          >
+            {isGoogleSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />
+                <span>Connecting to Google...</span>
+              </>
+            ) : (
+              <>
+                <GoogleIcon className="w-4 h-4 shrink-0" />
+                <span>Sign up with Google</span>
+              </>
+            )}
+          </button>
+
+          {/* Divider */}
+          <div className="relative flex items-center justify-center my-2">
+            <div className="border-t border-zinc-800 w-full" />
+            <span className="bg-zinc-900 px-3 text-[11px] uppercase tracking-wider text-zinc-500 font-medium absolute">
+              or continue with email
+            </span>
+          </div>
 
           {localError && (
             <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 flex items-start gap-2 animate-fade-in">
