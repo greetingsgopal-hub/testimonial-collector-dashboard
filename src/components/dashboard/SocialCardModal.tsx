@@ -662,6 +662,11 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
       ).length
     : 0;
 
+  // Check if this specific testimonial has already been published to this platform
+  const existingPublication = statusData?.publications?.find(
+    (p) => p.reviewId === review.id && p.platform === selectedPlatform && p.status === 'published'
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto">
       <div className="glass-panel w-full max-w-5xl rounded-3xl border border-white/15 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[95vh]">
@@ -921,6 +926,34 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
                 )}
               </div>
 
+              {/* Already Published Notice with View Post */}
+              {existingPublication && !publishSuccess && (
+                <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-xs text-blue-300 flex items-center justify-between gap-3 animate-fade-in">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
+                    <div>
+                      <p className="font-semibold text-white">
+                        Already published to {PLATFORMS[selectedPlatform].name}
+                      </p>
+                      <p className="text-[11px] text-blue-300">
+                        Published on {new Date(existingPublication.publishedAt || existingPublication.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  {existingPublication.platformPostUrl && (
+                    <a
+                      href={existingPublication.platformPostUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-colors flex items-center gap-1 shrink-0"
+                    >
+                      <span>View Post</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
+              )}
+
               {/* Success Notification */}
               {publishSuccess && (
                 <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between gap-3 animate-fade-in">
@@ -966,12 +999,21 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
                       id="direct-publish-btn"
                       onClick={handleDirectPublish}
                       disabled={isPublishing || isPublishingAll}
-                      className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-glow-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
+                      className={`w-full sm:flex-1 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm shadow-glow-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 ${
+                        existingPublication
+                          ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
+                          : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white'
+                      }`}
                     >
                       {isPublishing ? (
                         <>
                           <RefreshCw className="w-4 h-4 animate-spin" />
                           <span>Publishing to {PLATFORMS[selectedPlatform].name}...</span>
+                        </>
+                      ) : existingPublication ? (
+                        <>
+                          <Send className="w-4 h-4 text-blue-400" />
+                          <span>Republish to {PLATFORMS[selectedPlatform].name}</span>
                         </>
                       ) : (
                         <>

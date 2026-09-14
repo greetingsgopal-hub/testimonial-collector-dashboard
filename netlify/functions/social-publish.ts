@@ -2,7 +2,7 @@ import type { Handler } from '@netlify/functions';
 import { extractBearerToken, verifyFirebaseToken } from './_shared/firebaseAuth';
 import { decryptToken } from './_shared/crypto';
 import { getDocument, saveDocument, queryUserDocuments } from './_shared/firestoreAdmin';
-import { publishLinkedInImagePost, publishLinkedInTextPost } from './_shared/linkedin';
+import { getSocialProvider } from './_shared/providers';
 
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -124,22 +124,14 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    // 5. Publish to Platform API
-    let publishResult: { postId: string; postUrl: string };
-
-    if (platform === 'linkedin') {
-      if (mediaBase64) {
-        publishResult = await publishLinkedInImagePost(accessToken, authorUrn, caption, mediaBase64);
-      } else {
-        publishResult = await publishLinkedInTextPost(accessToken, authorUrn, caption);
-      }
-    } else {
-      return {
-        statusCode: 400,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: `Platform ${platform} direct publishing is coming in Phase B.` }),
-      };
-    }
+    // 5. Publish to Platform API via Provider Abstraction
+    const provider = getSocialProvider(platform);
+    const publishResult = await provider.publish({
+      accessToken,
+      platformAccountId: authorUrn,
+      commentary: caption,
+      mediaBase64,
+    });
 
     // 6. Save Audit Record in social_publications
     const pubId = `pub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
