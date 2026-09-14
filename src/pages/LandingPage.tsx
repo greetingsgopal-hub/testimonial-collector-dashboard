@@ -11,7 +11,9 @@ import {
   Monitor, 
   Play,
   Star,
-  Code
+  Code,
+  Heart,
+  MessageSquarePlus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
@@ -108,6 +110,15 @@ export const LandingPage = () => {
               FAQ
             </button>
 
+            <Link
+              to="/c/pandapraise-feedback"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-semibold transition-all hover:scale-105 ml-1"
+              title="Leave a real customer testimonial for Panda Praise"
+            >
+              <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400/20" />
+              <span>Give Us a Review</span>
+            </Link>
+
             {user ? (
               <Link
                 to="/dashboard"
@@ -182,12 +193,21 @@ export const LandingPage = () => {
           </button>
         </div>
 
-        {/* Commercial Banner */}
-        <div className="mt-12 p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 max-w-2xl mx-auto text-xs text-zinc-400 flex items-center justify-center gap-2 text-center sm:text-left">
-          <Sparkles className="w-4 h-4 text-amber-400 shrink-0 hidden sm:block" />
-          <span>
-            <strong className="text-zinc-200">The Panda Praise Guarantee:</strong> Your website integration is a one-time setup. After that, your website stays fresh automatically whenever you approve feedback.
-          </span>
+        {/* Commercial Banner with Live Dogfooding Callout */}
+        <div className="mt-12 p-4 sm:p-4.5 rounded-2xl bg-zinc-900/70 border border-zinc-800 max-w-2xl mx-auto text-xs text-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-lg">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="w-4 h-4 text-purple-400 shrink-0 hidden sm:block" />
+            <span>
+              <strong className="text-zinc-200">See it live:</strong> We collect our own reviews using Panda Praise.
+            </span>
+          </div>
+          <Link
+            to="/c/pandapraise-feedback"
+            className="text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1.5 shrink-0 hover:underline px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 transition-colors"
+          >
+            <span>Experience Collector Form</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </section>
 
@@ -327,6 +347,33 @@ export const LandingPage = () => {
           <p className="text-sm text-zinc-400 mt-3 leading-relaxed">
             The website owner installs the Panda Praise widget once. When you approve new client reviews in your dashboard, they appear in your live widget automatically—without touching website code or asking a developer for every new review.
           </p>
+        </div>
+
+        {/* Real-World Dogfooding Showcase Banner */}
+        <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-purple-900/40 via-indigo-900/30 to-pink-900/40 border border-purple-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-xl">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center shrink-0">
+              <Sparkles className="w-6 h-6 text-purple-300" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                <span>We collect our own customer praise using Panda Praise!</span>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
+                  Live Product Loop
+                </span>
+              </div>
+              <p className="text-xs text-zinc-300 mt-1 max-w-xl leading-relaxed">
+                Test the client experience right now. Drop a quick 30-second review for Panda Praise and see how it works!
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/c/pandapraise-feedback"
+            className="shrink-0 px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold text-xs shadow-glow-sm flex items-center gap-2 transition-all hover:scale-105"
+          >
+            <MessageSquarePlus className="w-4 h-4" />
+            <span>Leave a Review for Panda Praise</span>
+          </Link>
         </div>
 
         {/* Live Widget Mockup Frame */}
@@ -550,6 +597,9 @@ export const LandingPage = () => {
             </Link>
             <Link to="/terms" className="hover:text-zinc-300 transition-colors">
               Terms
+            </Link>
+            <Link to="/c/pandapraise-feedback" className="text-pink-400 hover:text-pink-300 font-medium transition-colors">
+              Leave a Review
             </Link>
             <Link to="/login" className="hover:text-zinc-300 transition-colors">
               Log In

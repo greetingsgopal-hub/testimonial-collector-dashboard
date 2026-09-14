@@ -244,14 +244,21 @@ export class LocalStorageAdapter implements StorageAdapter {
       }
     }
     const demoForm = await this.getCollectionForm('proj-demo-1');
-    if (demoForm && (demoForm.publicSlug === publicSlug || publicSlug === 'pulse-feedback')) {
+    if (demoForm && (demoForm.publicSlug === publicSlug || publicSlug === 'pulse-feedback' || publicSlug === 'pandapraise-feedback' || publicSlug === 'pandapraise')) {
+      const isPandaPraise = publicSlug === 'pandapraise-feedback' || publicSlug === 'pandapraise';
       return {
-        form: demoForm,
+        form: {
+          ...demoForm,
+          title: isPandaPraise ? 'Share Your Experience with Panda Praise' : demoForm.title,
+          description: isPandaPraise
+            ? 'Help other founders and creators discover how Panda Praise automates testimonial collection and social publishing.'
+            : demoForm.description,
+        },
         project: {
           id: 'proj-demo-1',
           workspaceId: 'ws-demo-1',
-          name: 'Pulse AI Product',
-          slug: 'pulse-ai',
+          name: isPandaPraise ? 'Panda Praise' : 'Pulse AI Product',
+          slug: isPandaPraise ? 'pandapraise' : 'pulse-ai',
           createdAt: demoForm.createdAt,
         }
       };
