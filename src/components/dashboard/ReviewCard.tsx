@@ -9,7 +9,8 @@ import {
   ExternalLink, 
   Video, 
   MoreHorizontal,
-  Clock
+  Clock,
+  Globe
 } from 'lucide-react';
 import { Review, ReviewStatus } from '../../types';
 import { sanitizeUrl } from '../../lib/security';
@@ -74,6 +75,11 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
             {getStatusBadge(review.status)}
+            {review.status === 'approved' && (
+              <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" title="Broadcasting to website widget">
+                <Globe className="w-2.5 h-2.5" /> Widget Live
+              </span>
+            )}
             {review.isFeatured && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
                 <Sparkles className="w-3 h-3" /> Featured

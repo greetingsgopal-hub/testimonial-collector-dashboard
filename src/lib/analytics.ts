@@ -88,4 +88,12 @@ export const analytics = {
     trackEvent('social_card_shared', { format }),
   socialCardTextCopied: () =>
     trackEvent('social_card_text_copied'),
+  distributionViewed: (channel: 'website' | 'social') =>
+    trackEvent('distribution_viewed', { channel }),
+  socialPlatformSelected: (platform: string) =>
+    trackEvent('social_platform_selected', { platform }),
+  socialCaptionCopied: (platform: string) =>
+    trackEvent('social_caption_copied', { platform }),
+  socialIntentOpened: (platform: string) =>
+    trackEvent('social_intent_opened', { platform }),
 };

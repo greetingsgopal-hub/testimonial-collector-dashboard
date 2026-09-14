@@ -12,7 +12,9 @@ import {
   Video, 
   ExternalLink,
   Calendar,
-  ShieldCheck
+  ShieldCheck,
+  Globe,
+  Share2
 } from 'lucide-react';
 import { Review, ReviewStatus } from '../../types';
 import { sanitizeUrl } from '../../lib/security';
@@ -388,6 +390,70 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
               className="glass-input w-full px-3 py-1.5 rounded-lg text-xs text-zinc-300"
             />
           </div>
+
+          {/* Unified Distribution Hub (Approved Testimonials Only) */}
+          {review.status === 'approved' && (
+            <div className="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-brand-400" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-200">
+                    Publish & Distribution Hub
+                  </span>
+                </div>
+                <span className="text-[11px] text-zinc-500">2 Independent Channels</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {/* Channel 1: Website Widget */}
+                <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-emerald-500/25 flex flex-col justify-between space-y-3">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-white flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                        Website Widget
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <Check className="w-2.5 h-2.5" /> Live on Website
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-1.5 leading-relaxed">
+                      Your website widget updates automatically. No website changes or developer involvement required.
+                    </p>
+                  </div>
+                  <div className="text-[10px] text-zinc-500 flex items-center gap-1">
+                    <Check className="w-3 h-3 text-emerald-400" />
+                    <span>Broadcasting live to your embed code</span>
+                  </div>
+                </div>
+
+                {/* Channel 2: Social Media */}
+                <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-brand-500/25 flex flex-col justify-between space-y-3">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-white flex items-center gap-1.5">
+                        <Share2 className="w-3.5 h-3.5 text-brand-400" />
+                        Social Media
+                      </span>
+                      <span className="text-[10px] font-medium text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full border border-brand-500/20">
+                        Ready to Share
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-1.5 leading-relaxed">
+                      Turn this testimonial into a branded post for LinkedIn, X, Instagram, or Facebook.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => onOpenSocialCard?.(review)}
+                    className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-brand-600 to-pink-600 hover:from-brand-500 hover:to-pink-500 text-white font-semibold text-xs shadow-glow-sm flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Create Social Post</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Metadata & Consent */}
           <div className="flex items-center gap-2 text-xs text-emerald-400/80 bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10">
