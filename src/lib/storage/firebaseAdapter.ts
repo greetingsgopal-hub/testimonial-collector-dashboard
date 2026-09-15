@@ -60,54 +60,20 @@ export class FirebaseAdapter implements StorageAdapter {
       // Sort newest first
       return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } else {
-      // Anonymous visitor / public widget: query public_reviews (only approved, no emails)
-      let list: Review[] = [];
-      if (projectId) {
-        // 1. Query by direct projectId match
-        const qByProj = query(collection(db, 'public_reviews'), where('projectId', '==', projectId));
-        const snap = await getDocs(qByProj);
-        list = snap.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
-
-        // 2. Fallback: Query by collectionFormId match
-        if (list.length === 0) {
-          const qByForm = query(collection(db, 'public_reviews'), where('collectionFormId', '==', projectId));
-          const snapForm = await getDocs(qByForm);
-          list = snapForm.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
-        }
-
-        // 3. Fallback: If identifier is a publicSlug on an active collectionForm, resolve its projectId
-        if (list.length === 0) {
-          try {
-            const formSnap = await getDocs(
-              query(
-                collection(db, 'collection_forms'),
-                where('publicSlug', '==', projectId),
-                where('isActive', '==', true)
-              )
-            );
-            if (!formSnap.empty) {
-              const formData = formSnap.docs[0].data();
-              const formDocId = formSnap.docs[0].id;
-              if (formData?.projectId) {
-                const qResolved = query(collection(db, 'public_reviews'), where('projectId', '==', formData.projectId));
-                const snapResolved = await getDocs(qResolved);
-                list = snapResolved.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
-              }
-              if (list.length === 0) {
-                const qResolvedForm = query(collection(db, 'public_reviews'), where('collectionFormId', '==', formDocId));
-                const snapResolvedForm = await getDocs(qResolvedForm);
-                list = snapResolvedForm.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
-              }
-            }
-          } catch (e) {
-            console.warn('[FirebaseAdapter] Could not resolve public widget by slug:', e);
-          }
-        }
-      } else {
-        const q = query(collection(db, 'public_reviews'));
-        const snapshot = await getDocs(q);
-        list = snapshot.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
+      // Anonymous visitors may only query a specific project/widget.
+      // Never allow an unscoped public read of every tenant's published reviews.
+      if (!projectId) {
+        return [];
       }
+
+      const qByProj = query(
+        collection(db, 'public_reviews'),
+        where('projectId', '==', projectId),
+        where('status', '==', 'approved')
+      );
+      const snapshot = await getDocs(qByProj);
+      const list = snapshot.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
+
       return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
   }
@@ -319,8 +285,9 @@ export class FirebaseAdapter implements StorageAdapter {
 
   async getCollectionFormBySlug(publicSlug: string): Promise<{ form: CollectionForm; project: Project } | null> {
     const db = getFirebaseDb();
-    
-    // 1. Fetch form by slug
+
+    // Public visitors only need the active collection form. Do not expose the
+    // private project document (which contains owner/tenant metadata) to them.
     const q = query(
       collection(db, 'collection_forms'),
       where('publicSlug', '==', publicSlug),
@@ -335,10 +302,6 @@ export class FirebaseAdapter implements StorageAdapter {
     const formDoc = formSnapshot.docs[0];
     const formData = formDoc.data();
 
-    // 2. Fetch project
-    const projSnap = await getDoc(doc(db, 'projects', formData.projectId));
-    const projData = projSnap.exists() ? projSnap.data() : null;
-
     const form: CollectionForm = {
       id: formDoc.id,
       projectId: formData.projectId,
@@ -352,13 +315,15 @@ export class FirebaseAdapter implements StorageAdapter {
       updatedAt: formData.updatedAt,
     };
 
+    // Public project metadata is deliberately derived from the public form.
+    // This avoids requiring public read access to the private projects collection.
     const project: Project = {
-      id: projSnap.id,
-      workspaceId: projData?.workspaceId || '',
-      name: projData?.name || 'Product',
-      slug: projData?.slug || 'product',
-      websiteUrl: projData?.websiteUrl,
-      createdAt: projData?.createdAt || formData.createdAt,
+      id: formData.projectId,
+      workspaceId: '',
+      name: formData.publicBrandName || formData.settings?.brandName || formData.title || 'Customer Testimonials',
+      slug: formData.publicSlug || 'testimonials',
+      websiteUrl: formData.settings?.websiteUrl,
+      createdAt: formData.createdAt,
     };
 
     return { form, project };
