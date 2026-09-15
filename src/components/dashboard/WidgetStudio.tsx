@@ -252,6 +252,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                   React
                 </button>
               </div>
+            </div>
 
             {/* Code Box */}
             <div className="p-3 rounded-xl bg-zinc-950 font-mono text-[11px] text-zinc-400 border border-zinc-800/80 overflow-x-auto">
