@@ -7,7 +7,7 @@ export const TermsPage = () => {
   usePageSeo({
     title: 'Terms of Service — Panda Praise',
     description: 'Terms and conditions governing the use of Panda Praise for collecting, moderating, and embedding customer testimonials.',
-    canonical: 'https://cheery-hummingbird-7ecc95.netlify.app/terms',
+    canonical: `${window.location.origin}/terms`,
   });
 
   return (
