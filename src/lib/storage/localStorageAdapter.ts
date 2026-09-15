@@ -15,7 +15,6 @@ export class LocalStorageAdapter implements StorageAdapter {
     try {
       const key = this.getStorageKey(projectId);
       const data = localStorage.getItem(key);
-      }
       if (!data) {
         // If this is a demo project or default, populate with demo reviews initially
         if (!projectId || projectId === 'proj-demo-1' || projectId === 'default') {
