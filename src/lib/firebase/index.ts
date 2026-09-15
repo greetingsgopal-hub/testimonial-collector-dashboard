@@ -32,7 +32,9 @@ if (isFirebaseConfigured) {
 
     // App Check is optional until a production reCAPTCHA Enterprise site key is configured.
     // Once configured, Firebase will attach attestation tokens to client requests.
-    const appCheckSiteKey = import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY;
+    const appCheckSiteKey =
+      import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY ||
+      import.meta.env.VITE_FIREBASE_APPCHECK;
     if (appCheckSiteKey && typeof window !== 'undefined') {
       try {
         appCheck = initializeAppCheck(app, {
