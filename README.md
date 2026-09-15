@@ -37,8 +37,10 @@ Stripped of monorepo bloat and complex microservices, Panda Praise is 100% turnk
   - **REST API Adapter**: For any custom backend (Node, Express, Hono, FastAPI, etc.).
   - Includes [`firestore.rules`](./firestore.rules) and [`storage.rules`](./storage.rules) for zero-trust multi-tenant security and customer email privacy.
 
-- 🚀 **Netlify Deployment Ready**:
-  - Preconfigured [`netlify.toml`](./netlify.toml) and [`public/_redirects`](./public/_redirects) for single-page application routing and high-performance caching.
+- ☁️ **Cloudflare Production Deployment**:
+  - Frontend deploys as Vite static assets through Cloudflare Workers.
+  - SPA fallback is configured in [`wrangler.jsonc`](./wrangler.jsonc).
+  - Social OAuth/publishing remains on Netlify Functions as a separate server-side integration.
 
 ---
 
