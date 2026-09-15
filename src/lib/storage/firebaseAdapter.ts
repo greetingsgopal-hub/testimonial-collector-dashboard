@@ -56,11 +56,6 @@ export class FirebaseAdapter implements StorageAdapter {
         q = query(collection(db, 'reviews'), where('ownerId', '==', currentUser.uid), where('projectId', '==', projectId));
       }
       let snapshot = await getDocs(q);
-      // Fallback: If no reviews found for this specific projectId, query all reviews owned by this user
-      if (snapshot.empty && projectId) {
-        const fallbackQ = query(collection(db, 'reviews'), where('ownerId', '==', currentUser.uid));
-        snapshot = await getDocs(fallbackQ);
-      }
       const list = snapshot.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
       // Sort newest first
       return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
