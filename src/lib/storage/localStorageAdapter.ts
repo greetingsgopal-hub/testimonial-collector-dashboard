@@ -8,7 +8,7 @@ export class LocalStorageAdapter implements StorageAdapter {
   isCloud = false;
 
   private getStorageKey(projectId?: string): string {
-    return `${STORAGE_KEY_PREFIX}${projectId || 'default'}`;
+    return STORAGE_KEY_PREFIX + (projectId || 'default');
   }
 
   private loadReviews(projectId?: string): Review[] {
@@ -76,7 +76,7 @@ export class LocalStorageAdapter implements StorageAdapter {
     const reviews = this.loadReviews(updates.projectId);
     const index = reviews.findIndex(r => r.id === id);
     if (index === -1) {
-      throw new Error(`Review with id ${id} not found in project`);
+      throw new Error('Review with id ' + id + ' not found in project');
     }
 
     const updated: Review = {
@@ -152,7 +152,7 @@ export class LocalStorageAdapter implements StorageAdapter {
       const defaultForm: CollectionForm = {
         id: 'form-' + target,
         projectId: target,
-        publicSlug: target === 'proj-demo-1' ? 'pulse-feedback' : `${target}-feedback`,
+        publicSlug: target === 'proj-demo-1' ? 'pulse-feedback' : target + '-feedback',
         title: 'Share Your Experience',
         description: 'Your honest feedback helps our team and community grow.',
         isActive: true,
