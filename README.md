@@ -29,10 +29,10 @@ Stripped of monorepo bloat and complex microservices, Panda Praise is 100% turnk
   - **Carousel Slider**: Interactive testimonial carousel.
   - **Single Spotlight Card**: Highlight top customer reviews.
   - **Trust Badge**: Compact social proof pill.
-  - Ready-to-copy snippets for **React**, **HTML / iFrame**, or **REST API**.
+  - Ready-to-copy **HTML iframe** and **React/JSX iframe** embeds. Both point to the live Panda Praise widget and preserve the selected layout/theme/settings.
 
 - 🔌 **Pluggable Database Layer**:
-  - **LocalStorage Adapter**: Default fallback, works offline and immediately in-browser with seed data.
+  - **LocalStorage Adapter**: Development/demo fallback only; production data uses Firebase when configured.
   - **Firebase Adapter**: Connects to Cloud Firestore & Firebase Authentication with multi-tenant Security Rules.
   - **REST API Adapter**: For any custom backend (Node, Express, Hono, FastAPI, etc.).
   - Includes [`firestore.rules`](./firestore.rules) and [`storage.rules`](./storage.rules) for zero-trust multi-tenant security and customer email privacy.
@@ -67,7 +67,9 @@ npm run build
 1. Create a project at [console.firebase.google.com](https://console.firebase.google.com).
 2. Enable **Authentication** (Email/Password), **Cloud Firestore**, and **Storage**.
 3. Deploy [`firestore.rules`](./firestore.rules) and [`storage.rules`](./storage.rules).
-4. Copy your web app configuration credentials into `.env`:
+4. For production abuse protection, register Firebase App Check with reCAPTCHA Enterprise, set `VITE_FIREBASE_APPCHECK_SITE_KEY`, verify App Check metrics, then enable enforcement for Firestore. The client integration is optional until the site key is configured.
+5. Configure the remaining Firebase web credentials:
+
    ```env
    VITE_FIREBASE_API_KEY=AIzaSy...
    VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
@@ -76,7 +78,7 @@ npm run build
    VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
    VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef123456
    ```
-5. Reload the app. Panda Praise will automatically connect to Firebase!
+6. Reload the app. Panda Praise will automatically connect to Firebase!
 
 ---
 
