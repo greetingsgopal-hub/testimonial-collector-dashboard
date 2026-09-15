@@ -30,12 +30,18 @@ if (isFirebaseConfigured) {
   try {
     app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
 
-    // App Check is optional until a production reCAPTCHA Enterprise site key is configured.
-    // Once configured, Firebase will attach attestation tokens to client requests.
+    // App Check is deliberately opt-in.
+    // A misconfigured reCAPTCHA Enterprise key can cause Firebase Auth requests
+    // to surface as auth/internal-error even when Authentication itself is healthy.
+    // Enable it only after the production domain/key pair has been verified in
+    // Firebase Console > App Check.
     const appCheckSiteKey =
       import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY ||
       import.meta.env.VITE_FIREBASE_APPCHECK;
-    if (appCheckSiteKey && typeof window !== 'undefined') {
+    const appCheckEnabled =
+      import.meta.env.VITE_FIREBASE_APPCHECK_ENABLED === 'true';
+
+    if (appCheckEnabled && appCheckSiteKey && typeof window !== 'undefined') {
       try {
         appCheck = initializeAppCheck(app, {
           provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey),
@@ -43,6 +49,9 @@ if (isFirebaseConfigured) {
         });
       } catch (appCheckError) {
         console.error('[Firebase] App Check initialization error:', appCheckError);
+        // Do not let optional App Check initialization prevent Firebase Auth
+        // from initializing. Authentication remains available while App Check
+        // is configured separately.
       }
     }
 
