@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [collectionForm, setCollectionForm] = useState<CollectionForm | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
-    const isDemo = localStorage.getItem('pandapraise_demo_mode') === 'true' || localStorage.getItem('reviewvault_demo_mode') === 'true';
+    const isDemo = localStorage.getItem('pandapraise_demo_mode') === 'true';
     return isDemo && !isFirebaseConfigured;
   });
   const [authError, setAuthError] = useState<string | null>(null);
@@ -416,7 +416,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     localStorage.setItem('pandapraise_demo_mode', 'true');
-    localStorage.setItem('reviewvault_demo_mode', 'true');
     setIsDemoMode(true);
     setUser(DEMO_USER);
     setWorkspace(DEMO_WORKSPACE);
@@ -427,7 +426,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const disableDemoMode = () => {
     localStorage.removeItem('pandapraise_demo_mode');
-    localStorage.removeItem('reviewvault_demo_mode');
     setIsDemoMode(false);
     setUser(null);
     setWorkspace(null);
