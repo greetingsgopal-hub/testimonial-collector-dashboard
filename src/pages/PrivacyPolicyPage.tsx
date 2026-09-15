@@ -7,7 +7,7 @@ export const PrivacyPolicyPage = () => {
   usePageSeo({
     title: 'Privacy Policy — Panda Praise',
     description: "Panda Praise's privacy policy explaining data collection, testimonial submitter privacy, and usage.",
-    canonical: 'https://cheery-hummingbird-7ecc95.netlify.app/privacy-policy',
+    canonical: `${window.location.origin}/privacy-policy`,
   });
 
   return (
@@ -161,7 +161,8 @@ export const PrivacyPolicyPage = () => {
             </p>
             <ul className="list-disc list-inside space-y-1 text-zinc-400 pl-2">
               <li><strong className="text-zinc-200">Google Firebase / Cloud Firestore:</strong> Authentication identity management, encrypted database storage, and file hosting. Data access is governed by security rules verifying tenant ownership.</li>
-              <li><strong className="text-zinc-200">Netlify:</strong> Global content delivery network (CDN) and secure web hosting delivering the dashboard and embeddable widget scripts over encrypted HTTPS.</li>
+              <li><strong className="text-zinc-200">Cloudflare Workers:</strong> Global delivery and secure hosting for the Panda Praise frontend and embeddable widget assets over encrypted HTTPS.</li>
+                  <li><strong className="text-zinc-200">Netlify Functions:</strong> Serverless backend endpoints used for social OAuth and publishing operations.</li>
             </ul>
           </section>
 
