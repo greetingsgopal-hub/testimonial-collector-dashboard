@@ -36,7 +36,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
     onlyFeatured: false,
   });
 
-  const [codeType, setCodeType] = useState<'html' | 'react' | 'json'>('react');
+  const [codeType, setCodeType] = useState<'html' | 'react'>('html');
   const [copied, setCopied] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
 
@@ -51,37 +51,38 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
     ? (approvedReviews.reduce((acc, r) => acc + r.rating, 0) / approvedReviews.length).toFixed(1)
     : '5.0';
 
-  const handleCopyCode = () => {
-    let snippet = '';
+  const getEmbedUrl = () => {
+    const params = new URLSearchParams({
+      type: settings.type,
+      theme: settings.theme,
+      color: settings.primaryColor,
+      rating: settings.showRating ? '1' : '0',
+      avatar: settings.showAvatar ? '1' : '0',
+      date: settings.showDate ? '1' : '0',
+      company: settings.showCompany ? '1' : '0',
+      count: String(settings.maxCount),
+      featured: settings.onlyFeatured ? '1' : '0',
+    });
+    return window.location.origin + '/w/' + projectWidgetId + '?' + params.toString();
+  };
+
+  const getEmbedSnippet = () => {
+    const url = getEmbedUrl();
     if (codeType === 'react') {
-      snippet = `// Panda Praise React Widget
-import React from 'react';
-
-export function TestimonialWidget() {
-  return (
-    <div className="${settings.theme === 'dark' ? 'bg-zinc-950 text-white' : 'bg-white text-zinc-900'} p-8 rounded-2xl">
-      {/* Type: ${settings.type.toUpperCase()} - Rendered with ${slicedReviews.length} reviews */}
-    </div>
-  );
-}`;
-    } else if (codeType === 'html') {
-      snippet = `<!-- Panda Praise Live Embed Iframe -->
-<iframe 
-  src="${window.location.origin}/w/${projectWidgetId}" 
-  width="100%" 
-  height="480" 
-  frameborder="0" 
-  loading="lazy"
-  style="border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);"
-></iframe>`;
-    } else {
-      snippet = `// Fetch live approved reviews via API / storage adapter
-const reviews = await fetch('/api/reviews?status=approved&featured=${settings.onlyFeatured}').then(r => r.json());`;
+      return '<iframe src="' + url + '" width="100%" height="480" style={{border: 0, borderRadius: 16}} loading="lazy" title="Customer testimonials" />';
     }
+    return '<iframe src="' + url + '" width="100%" height="480" frameborder="0" loading="lazy" title="Customer testimonials" style="border:0;border-radius:16px;"></iframe>';
+  };
 
-    navigator.clipboard.writeText(snippet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyCode = async () => {
+    if (!projectWidgetId) return;
+    try {
+      await navigator.clipboard.writeText(getEmbedSnippet());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
   };
 
   return (
@@ -239,37 +240,22 @@ const reviews = await fetch('/api/reviews?status=approved&featured=${settings.on
               {/* Code type tabs */}
               <div className="flex items-center gap-1 text-[11px]">
                 <button
-                  onClick={() => setCodeType('react')}
-                  className={`px-2 py-0.5 rounded ${codeType === 'react' ? 'bg-brand-500/20 text-brand-300 font-semibold' : 'text-zinc-500 hover:text-zinc-300'}`}
-                >
-                  React
-                </button>
-                <button
                   onClick={() => setCodeType('html')}
                   className={`px-2 py-0.5 rounded ${codeType === 'html' ? 'bg-brand-500/20 text-brand-300 font-semibold' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
                   HTML
                 </button>
                 <button
-                  onClick={() => setCodeType('json')}
-                  className={`px-2 py-0.5 rounded ${codeType === 'json' ? 'bg-brand-500/20 text-brand-300 font-semibold' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  onClick={() => setCodeType('react')}
+                  className={`px-2 py-0.5 rounded ${codeType === 'react' ? 'bg-brand-500/20 text-brand-300 font-semibold' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
-                  JSON API
+                  React
                 </button>
               </div>
-            </div>
 
             {/* Code Box */}
             <div className="p-3 rounded-xl bg-zinc-950 font-mono text-[11px] text-zinc-400 border border-zinc-800/80 overflow-x-auto">
-              {codeType === 'react' && (
-                <code>{`<TestimonialWidget type="${settings.type}" theme="${settings.theme}" />`}</code>
-              )}
-              {codeType === 'html' && (
-                <code>{`<div id="pandapraise-${settings.type}" data-theme="${settings.theme}"></div>`}</code>
-              )}
-              {codeType === 'json' && (
-                <code>{`GET /api/reviews?status=approved&limit=${settings.maxCount}`}</code>
-              )}
+              <code>{getEmbedSnippet()}</code>
             </div>
 
             <button
