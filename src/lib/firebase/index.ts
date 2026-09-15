@@ -2,6 +2,7 @@ import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider, AppCheck } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -23,10 +24,26 @@ let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
 let storage: FirebaseStorage | null = null;
+let appCheck: AppCheck | null = null;
 
 if (isFirebaseConfigured) {
   try {
     app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
+
+    // App Check is optional until a production reCAPTCHA Enterprise site key is configured.
+    // Once configured, Firebase will attach attestation tokens to client requests.
+    const appCheckSiteKey = import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY;
+    if (appCheckSiteKey && typeof window !== 'undefined') {
+      try {
+        appCheck = initializeAppCheck(app, {
+          provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey),
+          isTokenAutoRefreshEnabled: true,
+        });
+      } catch (appCheckError) {
+        console.error('[Firebase] App Check initialization error:', appCheckError);
+      }
+    }
+
     auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);
@@ -35,7 +52,7 @@ if (isFirebaseConfigured) {
   }
 }
 
-export { app, auth, db, storage };
+export { app, auth, db, storage, appCheck };
 
 export function getFirebaseAuth(): Auth {
   if (!auth) {
