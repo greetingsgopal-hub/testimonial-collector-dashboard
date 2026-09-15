@@ -2,7 +2,7 @@
 
 An ultra-modern, clean, single-page React and Tailwind CSS application functioning as a **Testimonial Collector and Moderation Dashboard**, inspired by the open-source architecture of [reviews-kits](https://github.com/reviews-kits-team/reviews-kits).
 
-Stripped of monorepo bloat and complex microservices, Panda Praise is 100% turnkey: it works out-of-the-box in the browser, plugs into Firebase (Auth + Cloud Firestore) or any REST backend with minimal configuration, and deploys directly to Netlify.
+Stripped of monorepo bloat and complex microservices, Panda Praise is 100% turnkey: it works out-of-the-box in the browser, plugs into Firebase (Auth + Cloud Firestore) or any REST backend with minimal configuration, and deploys as a static React frontend on Cloudflare Workers. The social OAuth/publishing endpoints remain on Netlify Functions.
 
 ---
 
@@ -80,17 +80,16 @@ npm run build
 
 ---
 
-## 🌐 Deploy to Netlify
+## ☁️ Deploy the Frontend to Cloudflare Workers
 
-### Option A: Git Push (Continuous Deployment)
-1. Push this repository to GitHub or GitLab.
-2. Log in to [Netlify](https://app.netlify.com) and click **Add new site > Import an existing project**.
-3. Set build command: `npm run build` and publish directory: `dist`.
-4. Add your environment variables under **Site configuration > Environment variables**.
+1. Connect the GitHub repository to Cloudflare Workers.
+2. Build command: `npm run build`.
+3. Deploy command: `npx wrangler deploy`.
+4. `wrangler.jsonc` points Cloudflare at `dist/` and enables SPA fallback.
+5. Add the `VITE_FIREBASE_*` variables to the Cloudflare build environment.
 
-### Option B: Netlify Drop
-1. Run `npm run build`.
-2. Drag and drop the generated `dist` folder directly onto [app.netlify.com/drop](https://app.netlify.com/drop).
+### Netlify Functions
+The `netlify/functions/` directory remains the backend for social OAuth and publishing. Configure its server-side secrets in Netlify; never put those secrets in `VITE_*` variables or the browser bundle.
 
 ---
 
