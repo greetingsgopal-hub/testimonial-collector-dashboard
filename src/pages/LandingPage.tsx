@@ -47,7 +47,7 @@ export const LandingPage = () => {
   usePageSeo({
     title: 'Panda Praise — Collect and Display Customer Testimonials',
     description: 'Collect customer testimonials with a simple shareable link, approve the best reviews, and display them automatically on your website with Panda Praise.',
-    canonical: 'https://cheery-hummingbird-7ecc95.netlify.app/',
+    canonical: `${window.location.origin}/`,
   });
 
   const navigate = useNavigate();
