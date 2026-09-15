@@ -29,7 +29,7 @@ service cloud.firestore {
     // Public GET allowed for branding display on customer-facing collection forms
     // All modifications require authenticated ownership; ownerId cannot be mutated
     match /projects/{projectId} {
-      allow get: if isOwner(resource.data.ownerId) || true; // Public GET allowed for branding display
+      allow get: if isOwner(resource.data.ownerId);
       allow list: if isOwner(resource.data.ownerId);
       allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
       allow update: if isOwner(resource.data.ownerId) && isOwnerUnchanged();
@@ -50,30 +50,40 @@ service cloud.firestore {
     // Full records including customer email.
     // Anonymous users CANNOT read arbitrary reviews or emails.
     match /reviews/{reviewId} {
-      // Owner has full access to reviews belonging to their tenant
+      // Private operational records are tenant-isolated.
       allow read: if isOwner(resource.data.ownerId);
       allow update: if isOwner(resource.data.ownerId) && isOwnerUnchanged();
       allow delete: if isOwner(resource.data.ownerId);
 
-      // Anonymous public submission (Strictly Validated):
-      // Must submit as 'pending', cannot feature itself, must include consent,
-      // must target a genuinely active collectionForm with verified ownerId and projectId,
-      // and must satisfy length and rating bounds to prevent oversized payload attacks.
-      allow create: if 
+      // Anonymous public submission. App Check should be enforced in Firebase
+      // for production abuse protection; these rules provide the data-integrity boundary.
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'projectId', 'collectionFormId', 'ownerId', 'name', 'email', 'role', 'company',
+          'avatarUrl', 'rating', 'title', 'content', 'type', 'videoUrl', 'tags', 'source',
+          'status', 'isFeatured', 'consent', 'helpfulCount', 'createdAt', 'updatedAt'
+        ]) &&
         request.resource.data.status == 'pending' &&
+        request.resource.data.source == 'form' &&
         request.resource.data.isFeatured == false &&
         request.resource.data.consent == true &&
         request.resource.data.name is string &&
+        request.resource.data.name.size() >= 1 &&
         request.resource.data.name.size() <= 100 &&
         request.resource.data.email is string &&
         request.resource.data.email.size() <= 150 &&
+        request.resource.data.role is string &&
+        request.resource.data.role.size() <= 120 &&
         request.resource.data.content is string &&
         request.resource.data.content.size() >= 10 &&
         request.resource.data.content.size() <= 2500 &&
         request.resource.data.rating is number &&
         request.resource.data.rating >= 1 &&
         request.resource.data.rating <= 5 &&
-        request.resource.data.collectionFormId != null &&
+        request.resource.data.type in ['text', 'video'] &&
+        request.resource.data.tags is list &&
+        request.resource.data.tags.size() <= 10 &&
+        request.resource.data.collectionFormId is string &&
         exists(/databases/$(database)/documents/collection_forms/$(request.resource.data.collectionFormId)) &&
         get(/databases/$(database)/documents/collection_forms/$(request.resource.data.collectionFormId)).data.isActive == true &&
         request.resource.data.ownerId == get(/databases/$(database)/documents/collection_forms/$(request.resource.data.collectionFormId)).data.ownerId &&
@@ -86,7 +96,10 @@ service cloud.firestore {
     // Writes are only allowed to the authenticated owner of the PRIVATE review with the same ID.
     // Prevents injecting fake public reviews or mutating ownerId.
     match /public_reviews/{reviewId} {
-      allow read: if true;
+      // Only approved, email-free testimonial records are publicly readable.
+      // Public queries must include status == 'approved'.
+      allow read: if resource.data.status == 'approved';
+
       allow create: if isAuthenticated() &&
         request.resource.data.keys().hasOnly([
           'projectId', 'collectionFormId', 'ownerId', 'name', 'role', 'company', 'avatarUrl',
@@ -96,10 +109,13 @@ service cloud.firestore {
         request.resource.data.ownerId == request.auth.uid &&
         request.resource.data.status == 'approved' &&
         exists(/databases/$(database)/documents/reviews/$(reviewId)) &&
-        get(/databases/$(database)/documents/reviews/$(reviewId)).data.ownerId == request.auth.uid;
+        get(/databases/$(database)/documents/reviews/$(reviewId)).data.ownerId == request.auth.uid &&
+        get(/databases/$(database)/documents/reviews/$(reviewId)).data.projectId == request.resource.data.projectId &&
+        get(/databases/$(database)/documents/reviews/$(reviewId)).data.collectionFormId == request.resource.data.collectionFormId;
+
       allow update: if isAuthenticated() &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'projectId', 'collectionFormId', 'name', 'role', 'company', 'avatarUrl',
+          'projectId', 'collectionFormId', 'ownerId', 'name', 'role', 'company', 'avatarUrl',
           'rating', 'title', 'content', 'type', 'videoUrl', 'tags', 'isFeatured', 'status',
           'createdAt', 'updatedAt'
         ]) &&
@@ -107,9 +123,11 @@ service cloud.firestore {
         isOwnerUnchanged() &&
         request.resource.data.status == 'approved' &&
         exists(/databases/$(database)/documents/reviews/$(reviewId)) &&
-        get(/databases/$(database)/documents/reviews/$(reviewId)).data.ownerId == request.auth.uid;
-      allow delete: if isAuthenticated() &&
-        resource.data.ownerId == request.auth.uid;
+        get(/databases/$(database)/documents/reviews/$(reviewId)).data.ownerId == request.auth.uid &&
+        get(/databases/$(database)/documents/reviews/$(reviewId)).data.projectId == request.resource.data.projectId &&
+        get(/databases/$(database)/documents/reviews/$(reviewId)).data.collectionFormId == request.resource.data.collectionFormId;
+
+      allow delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
     }
 
     // 6. Social Connections (Tenant-isolated credentials & account links)
