@@ -283,64 +283,76 @@ export class FirebaseAdapter implements StorageAdapter {
       where('isActive', '==', true),
       limit(1)
     );
-    const formSnapshot = await getDocs(q);
 
-    if (formSnapshot.empty) {
-      // Preserve the legacy/demo public link for the production deployment even
-      // when the demo collection form has not been seeded into Firestore.
-      if (publicSlug === 'pulse-feedback') {
-        const now = new Date().toISOString();
-        return {
-          form: {
-            id: 'form-pulse-feedback',
-            projectId: 'proj-demo-1',
-            publicSlug: 'pulse-feedback',
-            title: 'Share Your Experience',
-            description: 'Your honest feedback helps our team and community grow.',
-            isActive: true,
-            allowVideo: true,
-            settings: {},
-            createdAt: now,
-            updatedAt: now,
-          },
-          project: {
-            id: 'proj-demo-1',
-            workspaceId: 'ws-demo-1',
-            name: 'Pulse AI Product',
-            slug: 'pulse-ai',
-            createdAt: now,
-          },
-        };
+    const createLegacyPulseForm = () => {
+      const now = new Date().toISOString();
+      return {
+        form: {
+          id: 'form-pulse-feedback',
+          projectId: 'proj-demo-1',
+          publicSlug: 'pulse-feedback',
+          title: 'Share Your Experience',
+          description: 'Your honest feedback helps our team and community grow.',
+          isActive: true,
+          allowVideo: true,
+          settings: {},
+          createdAt: now,
+          updatedAt: now,
+        },
+        project: {
+          id: 'proj-demo-1',
+          workspaceId: 'ws-demo-1',
+          name: 'Pulse AI Product',
+          slug: 'pulse-ai',
+          createdAt: now,
+        },
+      };
+    };
+
+    try {
+      const formSnapshot = await getDocs(q);
+
+      if (formSnapshot.empty) {
+        if (publicSlug === 'pulse-feedback') {
+          return createLegacyPulseForm();
+        }
+        return null;
       }
-      return null;
+
+      const formDoc = formSnapshot.docs[0];
+      const formData = formDoc.data();
+
+      const form: CollectionForm = {
+        id: formDoc.id,
+        projectId: formData.projectId,
+        publicSlug: formData.publicSlug,
+        title: formData.title,
+        description: formData.description,
+        isActive: formData.isActive,
+        allowVideo: formData.allowVideo,
+        settings: formData.settings,
+        createdAt: formData.createdAt,
+        updatedAt: formData.updatedAt,
+      };
+
+      const project: Project = {
+        id: formData.projectId,
+        workspaceId: '',
+        name: formData.publicBrandName || formData.settings?.brandName || formData.title || 'Customer Testimonials',
+        slug: formData.publicSlug || 'testimonials',
+        websiteUrl: formData.settings?.websiteUrl,
+        createdAt: formData.createdAt,
+      };
+
+      return { form, project };
+    } catch (error) {
+      // Keep the legacy/demo link usable while Firestore rules are being migrated.
+      if (publicSlug === 'pulse-feedback') {
+        console.warn('[Firebase] Using legacy pulse-feedback fallback after Firestore error:', error);
+        return createLegacyPulseForm();
+      }
+      throw error;
     }
-
-    const formDoc = formSnapshot.docs[0];
-    const formData = formDoc.data();
-
-    const form: CollectionForm = {
-      id: formDoc.id,
-      projectId: formData.projectId,
-      publicSlug: formData.publicSlug,
-      title: formData.title,
-      description: formData.description,
-      isActive: formData.isActive,
-      allowVideo: formData.allowVideo,
-      settings: formData.settings,
-      createdAt: formData.createdAt,
-      updatedAt: formData.updatedAt,
-    };
-
-    const project: Project = {
-      id: formData.projectId,
-      workspaceId: '',
-      name: formData.publicBrandName || formData.settings?.brandName || formData.title || 'Customer Testimonials',
-      slug: formData.publicSlug || 'testimonials',
-      websiteUrl: formData.settings?.websiteUrl,
-      createdAt: formData.createdAt,
-    };
-
-    return { form, project };
   }
 
   async getCollectionForm(projectId?: string): Promise<CollectionForm | null> {
