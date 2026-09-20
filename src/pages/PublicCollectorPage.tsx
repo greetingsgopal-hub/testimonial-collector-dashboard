@@ -4,7 +4,7 @@ import { TestimonialForm } from '../components/collector/TestimonialForm';
 import { LivePreviewCard } from '../components/collector/LivePreviewCard';
 import { SuccessModal } from '../components/collector/SuccessModal';
 import { Review, ReviewInput, CollectionForm, Project } from '../types';
-import { storage } from '../lib/storage';
+import { storage, getActiveBackendInfo } from '../lib/storage';
 import { AlertCircle, ArrowLeft, Building2, Clock } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
@@ -32,6 +32,7 @@ export const PublicCollectorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isClosed, setIsClosed] = useState(false);
+  const [debugDetails, setDebugDetails] = useState<string | null>(null);
 
   const pageTitle = formConfig?.title
     ? `${formConfig.title} — Panda Praise`
@@ -56,6 +57,7 @@ export const PublicCollectorPage = () => {
       setIsLoading(true);
       setError(null);
       setIsClosed(false);
+      setDebugDetails(null);
 
       try {
         if (!collectionSlug) {
@@ -80,7 +82,25 @@ export const PublicCollectorPage = () => {
         setFormConfig(result.form);
         setProject(result.project);
       } catch (err: any) {
-        console.error('[PublicCollector] Error loading form:', err);
+        const backend = getActiveBackendInfo();
+        const errorCode = err?.code || 'unknown';
+        const errorMessage = err?.message || String(err);
+        console.error('[PublicCollector] Error loading form:', {
+          code: errorCode,
+          message: errorMessage,
+          backend: backend.type,
+          firebaseProjectId: backend.type === 'firebase' ? backend.projectId : undefined,
+          collectionSlug,
+        });
+        if (new URLSearchParams(window.location.search).get('debug') === '1') {
+          setDebugDetails(JSON.stringify({
+            code: errorCode,
+            message: errorMessage,
+            backend: backend.type,
+            firebaseProjectId: backend.type === 'firebase' ? backend.projectId : undefined,
+            collectionSlug,
+          }, null, 2));
+        }
         setError('Failed to load collection form. Please try again later.');
       } finally {
         setIsLoading(false);
@@ -157,6 +177,11 @@ export const PublicCollectorPage = () => {
           <p className="text-xs text-zinc-400 leading-relaxed">
             {error || 'This testimonial collection form does not exist.'}
           </p>
+          {debugDetails && (
+            <pre className="mt-4 max-w-full overflow-auto rounded-xl bg-black/40 border border-white/10 p-3 text-left text-[10px] leading-relaxed text-amber-300 whitespace-pre-wrap">
+              {debugDetails}
+            </pre>
+          )}
           <div className="pt-2">
             <Link
               to="/"
