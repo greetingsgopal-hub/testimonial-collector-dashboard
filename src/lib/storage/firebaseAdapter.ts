@@ -25,7 +25,7 @@ export class FirebaseAdapter implements StorageAdapter {
       projectId: data.projectId,
       collectionFormId: data.collectionFormId,
       name: data.name,
-      email: data.email || '', // Stripped from public_reviews
+      email: data.email || '',
       role: data.role || '',
       company: data.company || undefined,
       avatarUrl: data.avatarUrl || undefined,
@@ -51,32 +51,28 @@ export class FirebaseAdapter implements StorageAdapter {
     const currentUser = auth.currentUser;
 
     if (currentUser) {
-      // Authenticated owner: retrieve from private 'reviews' collection
       let q = query(collection(db, 'reviews'), where('ownerId', '==', currentUser.uid));
       if (projectId) {
         q = query(collection(db, 'reviews'), where('ownerId', '==', currentUser.uid), where('projectId', '==', projectId));
       }
-      let snapshot = await getDocs(q);
+      const snapshot = await getDocs(q);
       const list = snapshot.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
-      // Sort newest first
-      return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } else {
-      // Anonymous visitors may only query a specific project/widget.
-      // Never allow an unscoped public read of every tenant's published reviews.
-      if (!projectId) {
-        return [];
-      }
-
-      const qByProj = query(
-        collection(db, 'public_reviews'),
-        where('projectId', '==', projectId),
-        where('status', '==', 'approved')
-      );
-      const snapshot = await getDocs(qByProj);
-      const list = snapshot.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
-
       return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
+
+    if (!projectId) {
+      return [];
+    }
+
+    const qByProj = query(
+      collection(db, 'public_reviews'),
+      where('projectId', '==', projectId),
+      where('status', '==', 'approved')
+    );
+    const snapshot = await getDocs(qByProj);
+    const list = snapshot.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
+
+    return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   async getReviewById(id: string): Promise<Review | null> {
@@ -104,7 +100,6 @@ export class FirebaseAdapter implements StorageAdapter {
     let targetProjectId = projectId || review.projectId || 'default-project';
     let targetOwnerId = currentUser?.uid || '';
 
-    // If submitted anonymously or missing tenant keys, resolve directly from the valid collectionForm
     if (review.collectionFormId) {
       try {
         const formSnap = await getDoc(doc(db, 'collection_forms', review.collectionFormId));
@@ -149,7 +144,6 @@ export class FirebaseAdapter implements StorageAdapter {
 
     const created = this.mapDocToReview(reviewRef.id, reviewData);
 
-    // If created directly as approved (e.g. by owner import), mirror to public_reviews
     if (created.status === 'approved') {
       await this.syncPublicReview(reviewRef.id, created, targetOwnerId);
     }
@@ -193,12 +187,9 @@ export class FirebaseAdapter implements StorageAdapter {
     const updated = this.mapDocToReview(id, mergedData);
     const ownerId = currentData.ownerId || currentUser?.uid || '';
 
-    // Synchronize public_reviews:
-    // Only approved reviews exist in public_reviews (email strictly excluded)
     if (updated.status === 'approved') {
       await this.syncPublicReview(id, updated, ownerId);
     } else {
-      // If rejected, pending, or archived, remove from public_reviews
       await this.removePublicReview(id);
     }
 
@@ -209,7 +200,6 @@ export class FirebaseAdapter implements StorageAdapter {
     const db = getFirebaseDb();
     const publicRef = doc(db, 'public_reviews', id);
 
-    // Notice: email is EXCLUDED from public_reviews
     const publicData = {
       projectId: review.projectId,
       collectionFormId: review.collectionFormId || null,
@@ -287,8 +277,6 @@ export class FirebaseAdapter implements StorageAdapter {
   async getCollectionFormBySlug(publicSlug: string): Promise<{ form: CollectionForm; project: Project } | null> {
     const db = getFirebaseDb();
 
-    // Public visitors only need the active collection form. Do not expose the
-    // private project document (which contains owner/tenant metadata) to them.
     const q = query(
       collection(db, 'collection_forms'),
       where('publicSlug', '==', publicSlug),
@@ -298,6 +286,32 @@ export class FirebaseAdapter implements StorageAdapter {
     const formSnapshot = await getDocs(q);
 
     if (formSnapshot.empty) {
+      // Preserve the legacy/demo public link for the production deployment even
+      // when the demo collection form has not been seeded into Firestore.
+      if (publicSlug === 'pulse-feedback') {
+        const now = new Date().toISOString();
+        return {
+          form: {
+            id: 'form-pulse-feedback',
+            projectId: 'proj-demo-1',
+            publicSlug: 'pulse-feedback',
+            title: 'Share Your Experience',
+            description: 'Your honest feedback helps our team and community grow.',
+            isActive: true,
+            allowVideo: true,
+            settings: {},
+            createdAt: now,
+            updatedAt: now,
+          },
+          project: {
+            id: 'proj-demo-1',
+            workspaceId: 'ws-demo-1',
+            name: 'Pulse AI Product',
+            slug: 'pulse-ai',
+            createdAt: now,
+          },
+        };
+      }
       return null;
     }
 
@@ -317,8 +331,6 @@ export class FirebaseAdapter implements StorageAdapter {
       updatedAt: formData.updatedAt,
     };
 
-    // Public project metadata is deliberately derived from the public form.
-    // This avoids requiring public read access to the private projects collection.
     const project: Project = {
       id: formData.projectId,
       workspaceId: '',
