@@ -11,6 +11,7 @@ import {
   deleteDoc,
   query,
   where,
+  limit,
   Timestamp,
 } from 'firebase/firestore';
 
@@ -291,7 +292,8 @@ export class FirebaseAdapter implements StorageAdapter {
     const q = query(
       collection(db, 'collection_forms'),
       where('publicSlug', '==', publicSlug),
-      where('isActive', '==', true)
+      where('isActive', '==', true),
+      limit(1)
     );
     const formSnapshot = await getDocs(q);
 
