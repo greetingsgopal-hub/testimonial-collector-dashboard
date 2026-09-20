@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Navbar } from '../components/Navbar';
+import { Navbar, DashboardView } from '../components/Navbar';
 import { MetricsCards } from '../components/dashboard/MetricsCards';
 import { ReviewFilters } from '../components/dashboard/ReviewFilters';
 import { ReviewCard } from '../components/dashboard/ReviewCard';
@@ -12,6 +12,9 @@ import { DatabaseConfigModal } from '../components/dashboard/DatabaseConfigModal
 import { CollectionConfigModal } from '../components/dashboard/CollectionConfigModal';
 import { ConnectedAccountsModal } from '../components/dashboard/ConnectedAccountsModal';
 import { PublishHistoryModal } from '../components/dashboard/PublishHistoryModal';
+import { ImportPage } from './ImportPage';
+import { WorkspaceSettings } from '../components/dashboard/WorkspaceSettings';
+import { SentimentDashboard } from '../components/dashboard/SentimentDashboard';
 import { storage } from '../lib/storage';
 import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
@@ -40,7 +43,7 @@ export const DashboardPage = () => {
   });
 
   const { project, collectionForm } = useAuth();
-  const [activeView, setActiveView] = useState<'dashboard' | 'widgets'>('dashboard');
+  const [activeView, setActiveView] = useState<DashboardView>('dashboard');
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<ReviewStats>({
@@ -403,6 +406,11 @@ export const DashboardPage = () => {
               onFilterByRating={(rating) => setFilters(prev => ({ ...prev, rating }))}
             />
 
+            {/* AI Sentiment Analysis */}
+            {reviews.length > 0 && (
+              <SentimentDashboard reviews={reviews} />
+            )}
+
             {/* Filters, View Switcher & Export */}
             <ReviewFilters
               filters={filters}
@@ -483,6 +491,20 @@ export const DashboardPage = () => {
         {activeView === 'widgets' && (
           <div className="animate-fade-in">
             <WidgetStudio reviews={reviews} />
+          </div>
+        )}
+
+        {/* VIEW 3: IMPORT HUB */}
+        {activeView === 'import' && (
+          <div className="animate-fade-in">
+            <ImportPage />
+          </div>
+        )}
+
+        {/* VIEW 4: WORKSPACE SETTINGS */}
+        {activeView === 'settings' && (
+          <div className="animate-fade-in">
+            <WorkspaceSettings />
           </div>
         )}
       </main>

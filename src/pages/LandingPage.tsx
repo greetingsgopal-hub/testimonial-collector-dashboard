@@ -103,6 +103,12 @@ export const LandingPage = () => {
             >
               Live Widget
             </button>
+            <Link
+              to="/pricing"
+              className="text-xs sm:text-sm font-medium text-zinc-400 hover:text-zinc-200 transition-colors px-2 py-1"
+            >
+              Pricing
+            </Link>
             <button
               onClick={() => scrollToSection('faq')}
               className="text-xs sm:text-sm font-medium text-zinc-400 hover:text-zinc-200 transition-colors px-2 py-1"
@@ -209,6 +215,56 @@ export const LandingPage = () => {
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
+      </section>
+
+      {/* Social Proof Bar */}
+      <section className="max-w-5xl mx-auto px-6 py-10 relative z-10">
+        <p className="text-center text-xs text-zinc-500 uppercase tracking-widest font-semibold mb-6">Trusted by 2,000+ businesses worldwide</p>
+        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-40">
+          {['SaaS Co.', 'StartupXYZ', 'DevTools', 'MarketPro', 'CloudBase', 'FinFlow'].map(name => (
+            <span key={name} className="text-lg font-bold text-zinc-300 tracking-tight">{name}</span>
+          ))}
+        </div>
+      </section>
+
+      {/* Use Cases — Senja-style */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10 border-t border-zinc-800/60">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-400 uppercase tracking-wider mb-2">Use Cases</div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-white">One platform, endless possibilities</h2>
+          <p className="text-sm text-zinc-400 mt-3 max-w-xl mx-auto">Whether you're a SaaS company, agency, freelancer, or e-commerce brand — Panda Praise adapts to your workflow.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[
+            { emoji: '🚀', title: 'SaaS & Software', desc: 'Boost conversions with social proof on your landing pages and pricing pages.' },
+            { emoji: '🏢', title: 'Agencies & Consultants', desc: 'Showcase client success stories and build credibility with prospects.' },
+            { emoji: '🛍️', title: 'E-Commerce', desc: 'Display product reviews and photo testimonials to increase buyer confidence.' },
+            { emoji: '📚', title: 'Course Creators', desc: 'Let student success stories sell your courses for you.' },
+            { emoji: '💼', title: 'Freelancers', desc: 'Build a Wall of Love that speaks louder than any portfolio.' },
+            { emoji: '🏥', title: 'Healthcare & Services', desc: 'Collect and display patient/client feedback with full consent management.' },
+          ].map(uc => (
+            <div key={uc.title} className="glass-panel p-6 rounded-2xl border border-zinc-800/80 hover:border-violet-500/30 transition-all">
+              <span className="text-2xl">{uc.emoji}</span>
+              <h3 className="text-sm font-bold text-white mt-3 mb-1">{uc.title}</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">{uc.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Import Sources / Integrations */}
+      <section className="max-w-5xl mx-auto px-6 py-16 relative z-10 border-t border-zinc-800/60">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">Integrations</div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-white">Import from 30+ platforms</h2>
+          <p className="text-sm text-zinc-400 mt-3 max-w-lg mx-auto">Already have reviews scattered across the web? Pull them all into one place.</p>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {['Google Reviews', 'G2', 'Trustpilot', 'Product Hunt', 'Capterra', 'Twitter / X', 'LinkedIn', 'Yelp', 'Shopify', 'App Store', 'Play Store', 'Facebook', 'Reddit', 'CSV Upload'].map(src => (
+            <span key={src} className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-zinc-300">{src}</span>
+          ))}
+        </div>
+        <p className="text-center text-xs text-zinc-500 mt-6">+ Zapier, webhooks, and REST API for custom integrations</p>
       </section>
 
       {/* How It Works Section */}

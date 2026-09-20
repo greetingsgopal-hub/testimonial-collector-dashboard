@@ -12,6 +12,9 @@ import { DashboardPage } from './pages/DashboardPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { OnboardingPage } from './pages/OnboardingPage';
+import { PricingPage } from './pages/PricingPage';
+import { WallOfLovePage } from './pages/WallOfLovePage';
 import { initAnalytics, trackPageView } from './lib/analytics';
 
 /**
@@ -42,13 +45,23 @@ export function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/c/:collectionSlug" element={<PublicCollectorPage />} />
           <Route path="/w/:publicWidgetId" element={<PublicWidgetPage />} />
+          <Route path="/love/:slug" element={<WallOfLovePage />} />
 
           {/* Protected Routes */}
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute>
+                <OnboardingPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={

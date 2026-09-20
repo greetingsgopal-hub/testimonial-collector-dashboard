@@ -8,16 +8,21 @@ import {
   Copy,
   Check,
   Building2,
-  FolderKanban
+  Crown,
+  Download,
+  Settings,
 } from 'lucide-react';
 import { getActiveBackendInfo } from '../lib/storage';
 import { useAuth } from '../context/AuthContext';
-
+import { ProjectSwitcher } from './dashboard/ProjectSwitcher';
 import { PandaPraiseIcon } from './PandaPraiseLogo';
+import { PLAN_PRICING } from '../lib/planLimits';
+
+export type DashboardView = 'dashboard' | 'widgets' | 'import' | 'settings';
 
 interface NavbarProps {
-  activeView: 'dashboard' | 'widgets';
-  setActiveView: (view: 'dashboard' | 'widgets') => void;
+  activeView: DashboardView;
+  setActiveView: (view: DashboardView) => void;
   pendingCount: number;
   onOpenDatabaseConfig: () => void;
 }
@@ -29,8 +34,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenDatabaseConfig,
 }) => {
   const backend = getActiveBackendInfo();
-  const { user, workspace, project, collectionForm, signOut, isDemoMode } = useAuth();
+  const { user, workspace, collectionForm, signOut, isDemoMode } = useAuth();
   const [copiedLink, setCopiedLink] = useState(false);
+
+  const plan = workspace?.plan || 'free';
+  const planName = PLAN_PRICING[plan].name;
 
   const collectionUrl = collectionForm
     ? `${window.location.origin}/c/${collectionForm.publicSlug}`
@@ -42,11 +50,18 @@ export const Navbar: React.FC<NavbarProps> = ({
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  const navTabs: { id: DashboardView; label: string; icon: typeof LayoutDashboard; badge?: number }[] = [
+    { id: 'dashboard', label: 'Reviews', icon: LayoutDashboard, badge: pendingCount },
+    { id: 'widgets', label: 'Widgets', icon: Code2 },
+    { id: 'import', label: 'Import', icon: Download },
+    { id: 'settings', label: 'Settings', icon: Settings },
+  ];
+
   return (
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-zinc-800/80 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
-        {/* Brand & Workspace Context */}
+        {/* Brand & Project Switcher */}
         <div className="flex items-center gap-3">
           <PandaPraiseIcon size={36} colorMode="gradient" className="shrink-0" />
           <div>
@@ -60,54 +75,44 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
               )}
             </div>
-            {/* Workspace & Project Pills */}
+            {/* Workspace name + Project Switcher */}
             <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 mt-0.5">
               <span className="flex items-center gap-1 text-zinc-300 font-medium">
                 <Building2 className="w-3 h-3 text-brand-400" />
                 {workspace?.name || 'My Workspace'}
               </span>
               <span>/</span>
-              <span className="flex items-center gap-1 text-zinc-400">
-                <FolderKanban className="w-3 h-3 text-zinc-500" />
-                {project?.name || 'Primary Project'}
-              </span>
+              <ProjectSwitcher />
             </div>
           </div>
         </div>
 
-        {/* View Switcher Tabs & Public Link Button */}
+        {/* View Switcher Tabs */}
         <nav className="flex items-center gap-2">
           <div className="flex items-center p-1 bg-zinc-900/90 rounded-xl border border-zinc-800/80 shadow-inner">
-            <button
-              id="nav-dashboard-btn"
-              onClick={() => setActiveView('dashboard')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                activeView === 'dashboard'
-                  ? 'bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
-              }`}
-            >
-              <LayoutDashboard className="w-4 h-4" />
-              <span>Reviews</span>
-              {pendingCount > 0 && (
-                <span className="ml-1 px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-amber-500 text-zinc-950 animate-pulse">
-                  {pendingCount}
-                </span>
-              )}
-            </button>
-
-            <button
-              id="nav-widgets-btn"
-              onClick={() => setActiveView('widgets')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                activeView === 'widgets'
-                  ? 'bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
-              }`}
-            >
-              <Code2 className="w-4 h-4" />
-              <span>Widgets</span>
-            </button>
+            {navTabs.map(tab => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  id={`nav-${tab.id}-btn`}
+                  onClick={() => setActiveView(tab.id)}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                    activeView === tab.id
+                      ? 'bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  {tab.badge && tab.badge > 0 && (
+                    <span className="ml-1 px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-amber-500 text-zinc-950 animate-pulse">
+                      {tab.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Quick Share Collection Link Button */}
@@ -134,6 +139,28 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right action controls */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Plan Badge */}
+          <div className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
+            ${plan === 'pro' ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' :
+              plan === 'starter' ? 'bg-violet-500/15 text-violet-300 border border-violet-500/30' :
+              'bg-white/5 text-zinc-400 border border-white/10'}`}>
+            {plan !== 'free' && <Crown className="w-3 h-3" />}
+            {planName}
+          </div>
+
+          {/* Upgrade Button (free users only) */}
+          {plan === 'free' && (
+            <a
+              href="/pricing"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+                       bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500
+                       text-white transition-all shadow-sm"
+            >
+              <Crown className="w-3 h-3" />
+              Upgrade
+            </a>
+          )}
+
           {/* Database indicator button */}
           <button
             id="database-config-btn"
