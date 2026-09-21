@@ -7,10 +7,21 @@ import {
   Mail, 
   Briefcase, 
   Building2, 
-  Check 
+  Check,
+  Wand2,
+  RotateCcw,
+  ShieldCheck,
+  Flame,
+  Zap
 } from 'lucide-react';
 import { ReviewInput } from '../../types';
 import { validateReviewInput, sanitizeText } from '../../lib/security';
+import { 
+  polishWithAI, 
+  calculateImpactScore, 
+  INSPIRATION_STARTERS, 
+  TestimonialTone 
+} from '../../lib/ai-assistant';
 
 interface TestimonialFormProps {
   formData: ReviewInput;
@@ -52,6 +63,40 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [newTagInput, setNewTagInput] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [tone, setTone] = useState<TestimonialTone>('enthusiastic');
+  const [originalContent, setOriginalContent] = useState<string | null>(null);
+  const [isPolishing, setIsPolishing] = useState(false);
+  const [aiSuccessBadge, setAiSuccessBadge] = useState<string | null>(null);
+
+  const impact = calculateImpactScore(formData.content);
+
+  const handlePolish = () => {
+    setIsPolishing(true);
+    setOriginalContent(formData.content);
+    setTimeout(() => {
+      const result = polishWithAI(formData.content, tone, {
+        role: formData.role,
+        company: formData.company,
+        name: formData.name,
+      });
+      setFormData((prev) => ({
+        ...prev,
+        content: result.polishedText,
+        title: prev.title || result.headline,
+        tags: Array.from(new Set([...prev.tags, ...result.suggestedTags])),
+      }));
+      setIsPolishing(false);
+      setAiSuccessBadge('✨ Polished with AI!');
+      setTimeout(() => setAiSuccessBadge(null), 3000);
+    }, 400);
+  };
+
+  const handleUndo = () => {
+    if (originalContent !== null) {
+      setFormData((prev) => ({ ...prev, content: originalContent }));
+      setOriginalContent(null);
+    }
+  };
 
   const activeRating = hoverRating !== null ? hoverRating : formData.rating;
 
@@ -174,43 +219,136 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         />
       </div>
 
-      {/* Testimonial Textarea */}
-      <div>
-        <div className="flex items-center justify-between mb-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-            Your Testimonial <span className="text-pink-500">*</span>
-          </label>
-          <span className="text-xs text-zinc-500">
-            {formData.content.length} characters
-          </span>
+      {/* Testimonial Textarea with AI Assistant */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              Your Testimonial <span className="text-pink-500">*</span>
+            </label>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-[10px] font-semibold text-purple-300">
+              <Sparkles className="w-2.5 h-2.5" />
+              AI Assistant
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* Impact score pill */}
+            <span className={`text-[11px] font-medium flex items-center gap-1 ${impact.color}`}>
+              <Flame className="w-3 h-3" />
+              {impact.label}
+            </span>
+            <span className="text-xs text-zinc-500">
+              {formData.content.length} chars
+            </span>
+          </div>
         </div>
+
+        {/* AI Assistant Quick Actions Bar */}
+        <div className="p-2.5 rounded-xl bg-zinc-900/90 border border-purple-500/20 flex flex-wrap items-center justify-between gap-2 shadow-inner">
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handlePolish}
+              disabled={isPolishing}
+              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm hover:shadow-purple-500/20 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <Wand2 className={`w-3.5 h-3.5 ${isPolishing ? 'animate-spin' : ''}`} />
+              <span>{isPolishing ? 'Enhancing...' : '✨ Polish with AI'}</span>
+            </button>
+
+            {originalContent !== null && (
+              <button
+                type="button"
+                onClick={handleUndo}
+                className="px-2 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                title="Undo AI edit"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Undo</span>
+              </button>
+            )}
+
+            {aiSuccessBadge && (
+              <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1 animate-fade-in">
+                <Check className="w-3 h-3" />
+                {aiSuccessBadge}
+              </span>
+            )}
+          </div>
+
+          {/* Tone Selector */}
+          <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-lg border border-zinc-800">
+            <span className="text-[10px] text-zinc-500 uppercase px-1">Tone:</span>
+            {(['enthusiastic', 'professional', 'concise'] as TestimonialTone[]).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTone(t)}
+                className={`px-2 py-0.5 rounded text-[10px] font-medium capitalize transition-colors ${
+                  tone === t
+                    ? 'bg-purple-600 text-white shadow-xs'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <textarea
           rows={4}
-          placeholder="Tell us what you loved, the results you achieved, or how it helped your team..."
+          placeholder="Tell us what you loved, the results you achieved, or how it helped your team... (or type rough notes and click ✨ Polish with AI!)"
           value={formData.content}
           onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
           className="glass-input w-full px-4 py-3 rounded-xl text-sm leading-relaxed"
           required
         />
         
-        {/* Helpful suggestion pills */}
-        <div className="flex flex-wrap items-center gap-1.5 mt-2">
-          <span className="text-[11px] text-zinc-500">Inspiration:</span>
-          {SUGGESTED_PROMPTS.map((prompt) => (
-            <button
-              key={prompt}
-              type="button"
-              onClick={() => {
-                setFormData((prev) => ({
-                  ...prev,
-                  content: prev.content ? `${prev.content} ${prompt} ` : `${prompt} `,
-                }));
-              }}
-              className="text-[11px] text-zinc-400 hover:text-brand-300 bg-zinc-900 hover:bg-zinc-800 px-2 py-0.5 rounded-md border border-zinc-800 transition-colors"
-            >
-              + {prompt}
-            </button>
-          ))}
+        {/* Inspiration Starters */}
+        <div className="space-y-1.5 pt-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] text-zinc-500 flex items-center gap-1">
+              <Zap className="w-3 h-3 text-amber-400" />
+              1-Click Starters:
+            </span>
+            {INSPIRATION_STARTERS.map((starter) => (
+              <button
+                key={starter.label}
+                type="button"
+                onClick={() => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    content: prev.content ? `${prev.content} ${starter.text}` : starter.text,
+                    title: prev.title || starter.headline,
+                  }));
+                }}
+                className="text-[11px] text-zinc-300 hover:text-purple-300 bg-zinc-900/90 hover:bg-purple-950/40 px-2.5 py-1 rounded-md border border-zinc-800 hover:border-purple-500/30 transition-all cursor-pointer"
+              >
+                {starter.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] text-zinc-500">Prompts:</span>
+            {SUGGESTED_PROMPTS.map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                onClick={() => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    content: prev.content ? `${prev.content} ${prompt} ` : `${prompt} `,
+                  }));
+                }}
+                className="text-[11px] text-zinc-400 hover:text-brand-300 bg-zinc-900 hover:bg-zinc-800 px-2 py-0.5 rounded-md border border-zinc-800 transition-colors"
+              >
+                + {prompt}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -238,7 +376,10 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
             Email Address <span className="text-pink-500">*</span>
-            <span className="text-[10px] text-zinc-500 lowercase ml-1">(kept private)</span>
+            <span className="text-[10px] text-zinc-400 lowercase ml-1.5 inline-flex items-center gap-0.5">
+              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              (kept private)
+            </span>
           </label>
           <div className="relative">
             <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
