@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   Sparkles, 
   ArrowRight, 
-  CheckCircle2, 
   ChevronDown, 
   Link2, 
   Send, 
@@ -77,23 +76,30 @@ export const LandingPage = () => {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-brand-500/30 selection:text-brand-200 relative overflow-hidden pb-20 sm:pb-0">
       
-      {/* Ambient background glow */}
+      {/* Top Announcement Bar — Senja Style */}
+      <div className="bg-gradient-to-r from-[#6701e6] via-[#7c3aed] to-[#ec4899] text-white text-xs sm:text-sm font-medium py-2.5 px-4 text-center relative z-50 flex items-center justify-center gap-2 shadow-sm">
+        <span className="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">New</span>
+        <span>Collect 2x more reviews with Video testimonials, AI Polish & Guided Prompts</span>
+        <Link to="/signup" className="underline font-bold hover:text-white/90 ml-1 hidden sm:inline">Try it free →</Link>
+      </div>
+
+      {/* Ambient background glow — Senja signature purple radial wash */}
       <div className="ambient-glow" />
 
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full glass-panel border-b border-zinc-800/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 w-full bg-zinc-950/85 border-b border-zinc-800/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <PandaPraiseIcon size={38} colorMode="gradient" className="shrink-0" />
             <div className="flex items-center gap-1.5">
-              <span className="font-display font-extrabold text-lg text-white tracking-tight">
-                Panda <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Praise</span>
+              <span className="font-display font-extrabold text-xl text-white tracking-tight">
+                Panda <span className="bg-gradient-to-r from-[#cba3ff] to-pink-400 bg-clip-text text-transparent">Praise</span>
               </span>
             </div>
           </Link>
 
           {/* Navigation Links */}
-          <nav className="flex items-center gap-2 sm:gap-4">
+          <nav className="flex items-center gap-2 sm:gap-4 font-sans">
             <button
               onClick={() => scrollToSection('how-it-works')}
               className="text-xs sm:text-sm font-medium text-zinc-400 hover:text-zinc-200 transition-colors px-2 py-1"
@@ -121,7 +127,7 @@ export const LandingPage = () => {
 
             <Link
               to="/c/pandapraise-feedback"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-semibold transition-all hover:scale-105 ml-1"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-semibold transition-all hover:scale-105 ml-1"
               title="Leave a real customer testimonial for Panda Praise"
             >
               <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400/20" />
@@ -131,7 +137,7 @@ export const LandingPage = () => {
             {user ? (
               <Link
                 to="/dashboard"
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 text-white text-xs sm:text-sm font-semibold shadow-glow-sm flex items-center gap-1.5 ml-2"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#7c3aed] to-[#6701e6] text-white text-xs sm:text-sm font-semibold shadow-glow-sm flex items-center gap-1.5 ml-2 hover:scale-[1.02] transition-all"
               >
                 <span>Dashboard</span>
                 <ArrowRight className="w-4 h-4" />
@@ -147,7 +153,7 @@ export const LandingPage = () => {
                 <Link
                   to="/signup"
                   onClick={() => analytics.signupStarted('header_nav')}
-                  className="px-3.5 sm:px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-semibold shadow-glow-sm transition-all"
+                  className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-semibold shadow-md transition-all hover:scale-[1.02]"
                 >
                   Sign Up
                 </Link>
@@ -157,49 +163,74 @@ export const LandingPage = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero Section — Senja Inspired */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24 pb-14 text-center relative z-10">
         {/* Core Differentiator Tag */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 text-brand-300 text-xs font-semibold mb-6 border border-brand-500/25 animate-fade-in">
-          <CheckCircle2 className="w-4 h-4 text-brand-400 shrink-0" />
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-500/10 text-violet-300 text-xs font-semibold mb-6 border border-violet-500/25 shadow-sm font-sans">
+          <Sparkles className="w-3.5 h-3.5 text-violet-400 shrink-0" />
           <span>Install Once • Updates Automatically • Zero Developer Involvement</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display text-white tracking-tight leading-[1.15] max-w-4xl mx-auto">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-display text-white tracking-tight leading-[1.1] max-w-4xl mx-auto">
           Collect customer testimonials, approve the best ones, and{' '}
-          <span className="bg-gradient-to-r from-brand-400 via-pink-400 to-amber-300 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#cba3ff] via-[#9954f2] to-pink-400 bg-clip-text text-transparent">
             display them automatically.
           </span>
         </h1>
 
-        <p className="text-base sm:text-lg text-zinc-400 mt-6 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-base sm:text-lg text-zinc-400 mt-6 max-w-2xl mx-auto leading-relaxed font-sans">
           Embed the Panda Praise widget on your website once. When you approve new client testimonials in your dashboard, they appear in your live widget instantly—without touching code or asking a developer.
         </p>
 
-        {/* Primary & Secondary CTAs */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4">
-          <Link
-            to="/signup"
-            onClick={() => {
-              analytics.ctaClicked('hero_primary', '/signup');
-              analytics.signupStarted('hero_primary');
-            }}
-            className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-brand-600 via-indigo-600 to-pink-600 hover:from-brand-500 hover:via-indigo-500 hover:to-pink-500 text-white font-semibold text-sm shadow-glow flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02]"
-          >
-            <span>Start Collecting Testimonials</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+        {/* Primary & Secondary CTAs with Senja signature beam glow */}
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="senja-hero-cta w-full sm:w-auto">
+            <div className="senja-cta-ring w-full sm:w-auto">
+              <Link
+                to="/signup"
+                onClick={() => {
+                  analytics.ctaClicked('hero_primary', '/signup');
+                  analytics.signupStarted('hero_primary');
+                }}
+                className="senja-btn-primary w-full sm:w-auto px-8 py-4 text-base sm:text-lg flex items-center justify-center gap-2.5 shadow-xl"
+              >
+                <span>Start Collecting For Free</span>
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
 
           <button
             onClick={() => {
               analytics.ctaClicked('see_how_it_works', '#how-it-works');
               scrollToSection('how-it-works');
             }}
-            className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white font-medium text-sm border border-zinc-800 flex items-center justify-center gap-2 transition-colors"
+            className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white font-semibold text-base border border-zinc-700/60 flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
           >
             <span>See How It Works</span>
             <ChevronDown className="w-4 h-4 text-zinc-400" />
           </button>
+        </div>
+
+        {/* Senja-Style Social Proof Stack & Cursive Annotation */}
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="flex items-center -space-x-2">
+            {INITIAL_REVIEWS.slice(0, 4).map((r, i) => (
+              <img
+                key={i}
+                src={r.avatarUrl}
+                alt={r.name}
+                className="w-8 h-8 rounded-full border-2 border-zinc-950 object-cover shadow-sm"
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2 font-sans">
+            <div className="flex text-amber-400 text-sm tracking-tighter">★★★★★</div>
+            <span className="text-xs text-zinc-300 font-medium">4.9 / 5.0 from 2,000+ happy businesses</span>
+          </div>
+          <span className="font-caveat text-xl text-purple-300 font-semibold -rotate-3 sm:ml-2">
+            no code needed ↗
+          </span>
         </div>
 
         {/* Commercial Banner with Live Dogfooding Callout */}
@@ -246,10 +277,10 @@ export const LandingPage = () => {
             { emoji: '💼', title: 'Freelancers', desc: 'Build a Wall of Love that speaks louder than any portfolio.' },
             { emoji: '🏥', title: 'Healthcare & Services', desc: 'Collect and display patient/client feedback with full consent management.' },
           ].map(uc => (
-            <div key={uc.title} className="glass-panel p-6 rounded-2xl border border-zinc-800/80 hover:border-violet-500/30 transition-all">
-              <span className="text-2xl">{uc.emoji}</span>
-              <h3 className="text-sm font-bold text-white mt-3 mb-1">{uc.title}</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">{uc.desc}</p>
+            <div key={uc.title} className="senja-card-clean p-6 shadow-md hover:border-violet-500/50 transition-all group">
+              <span className="text-3xl block mb-3 group-hover:scale-110 transition-transform">{uc.emoji}</span>
+              <h3 className="text-base font-bold text-white mb-1.5 font-display">{uc.title}</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed font-sans">{uc.desc}</p>
             </div>
           ))}
         </div>
@@ -264,7 +295,7 @@ export const LandingPage = () => {
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3">
           {['Google Reviews', 'G2', 'Trustpilot', 'Product Hunt', 'Capterra', 'Twitter / X', 'LinkedIn', 'Yelp', 'Shopify', 'App Store', 'Play Store', 'Facebook', 'Reddit', 'CSV Upload'].map(src => (
-            <span key={src} className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-zinc-300">{src}</span>
+            <span key={src} className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-zinc-900 border border-zinc-800 text-zinc-300 hover:border-violet-500/40 hover:text-white transition-colors">{src}</span>
           ))}
         </div>
         <p className="text-center text-xs text-zinc-500 mt-6">+ Zapier, webhooks, and REST API for custom integrations</p>
@@ -286,20 +317,20 @@ export const LandingPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Step 1 */}
-          <div className="glass-panel p-6 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4">
+          <div className="senja-card-clean p-6 hover:border-violet-500/40 transition-all flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-mono font-bold text-brand-400 bg-brand-500/10 px-2.5 py-1 rounded-lg border border-brand-500/20">
+                <span className="text-xs font-mono font-bold text-[#cba3ff] bg-[#6701e6]/15 px-2.5 py-1 rounded-lg border border-[#6701e6]/30">
                   Step 01
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
                   <Link2 className="w-4 h-4" />
                 </div>
               </div>
-              <h3 className="text-base font-bold text-white mb-2">
+              <h3 className="text-base font-bold text-white mb-2 font-display">
                 Create your collection link
               </h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-zinc-400 leading-relaxed font-sans">
                 Create a Panda Praise collection and get a dedicated, shareable link for your business.
               </p>
             </div>
@@ -309,20 +340,20 @@ export const LandingPage = () => {
           </div>
 
           {/* Step 2 */}
-          <div className="glass-panel p-6 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4">
+          <div className="senja-card-clean p-6 hover:border-pink-500/40 transition-all flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-mono font-bold text-pink-400 bg-pink-500/10 px-2.5 py-1 rounded-lg border border-pink-500/20">
+                <span className="text-xs font-mono font-bold text-pink-300 bg-pink-500/15 px-2.5 py-1 rounded-lg border border-pink-500/30">
                   Step 02
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
                   <Send className="w-4 h-4" />
                 </div>
               </div>
-              <h3 className="text-base font-bold text-white mb-2">
+              <h3 className="text-base font-bold text-white mb-2 font-display">
                 Send it to your customers
               </h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-zinc-400 leading-relaxed font-sans">
                 Customers submit their testimonial directly through your link without creating an account.
               </p>
             </div>
@@ -332,20 +363,20 @@ export const LandingPage = () => {
           </div>
 
           {/* Step 3 */}
-          <div className="glass-panel p-6 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4">
+          <div className="senja-card-clean p-6 hover:border-amber-500/40 transition-all flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
+                <span className="text-xs font-mono font-bold text-amber-300 bg-amber-500/15 px-2.5 py-1 rounded-lg border border-amber-500/30">
                   Step 03
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
               </div>
-              <h3 className="text-base font-bold text-white mb-2">
+              <h3 className="text-base font-bold text-white mb-2 font-display">
                 Review and approve
               </h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-zinc-400 leading-relaxed font-sans">
                 Approve the testimonials you want to publish. Reject spam or unwanted submissions with one click.
               </p>
             </div>
@@ -355,20 +386,20 @@ export const LandingPage = () => {
           </div>
 
           {/* Step 4 */}
-          <div className="glass-panel p-6 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4">
+          <div className="senja-card-clean p-6 hover:border-emerald-500/40 transition-all flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                <span className="text-xs font-mono font-bold text-emerald-300 bg-emerald-500/15 px-2.5 py-1 rounded-lg border border-emerald-500/30">
                   Step 04
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
                   <Monitor className="w-4 h-4" />
                 </div>
               </div>
-              <h3 className="text-base font-bold text-white mb-2">
+              <h3 className="text-base font-bold text-white mb-2 font-display">
                 Display automatically
               </h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-zinc-400 leading-relaxed font-sans">
                 Install the Panda Praise widget on your website once. Approved testimonials appear automatically without changing website code.
               </p>
             </div>

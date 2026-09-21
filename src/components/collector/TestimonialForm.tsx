@@ -647,7 +647,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         id="submit-testimonial-btn"
         type="submit"
         disabled={isSubmitting}
-        className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-brand-600 via-indigo-600 to-pink-600 hover:from-brand-500 hover:via-indigo-500 hover:to-pink-500 text-white font-semibold text-sm shadow-glow flex items-center justify-center gap-2 transition-all transform active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        className="w-full py-4 px-6 rounded-xl bg-gradient-to-b from-[#9954f2] to-[#6701e6] hover:from-[#a465f7] hover:to-[#7306fb] text-white font-bold text-base shadow-lg shadow-purple-600/25 border border-white/20 flex items-center justify-center gap-2 transition-all transform active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-display"
       >
         {isSubmitting ? (
           <>
