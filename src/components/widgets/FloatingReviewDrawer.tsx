@@ -359,7 +359,7 @@ export const FloatingReviewDrawer: React.FC<FloatingReviewDrawerProps> = ({
                 Verified Customer Feedback
               </span>
               <span className="font-semibold text-zinc-400">
-                Powered by Panda Praise 🐼
+                Powered by Panda Praise
               </span>
             </div>
           </div>

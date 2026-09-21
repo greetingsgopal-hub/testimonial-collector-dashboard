@@ -8,7 +8,6 @@ import { storage, getActiveBackendInfo } from '../lib/storage';
 import { AlertCircle, ArrowLeft, Building2, Clock } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
-import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
 
 const INITIAL_FORM_STATE: ReviewInput = {
   name: '',
@@ -204,17 +203,22 @@ export const PublicCollectorPage = () => {
       <header className="w-full border-b border-gray-200 bg-white/90 backdrop-blur-md py-4 px-4 sm:px-8 relative z-20">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <PandaPraiseIcon size={28} colorMode="gradient" className="shrink-0" />
+            <Link to="/" className="font-display font-bold text-sm text-gray-900 hover:text-[#6701e6] transition-colors">
+              Panda Praise
+            </Link>
             {project && (
-              <span className="font-display font-semibold text-sm text-gray-900 flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-gray-500" />
-                {project.name}
-              </span>
+              <>
+                <span className="text-gray-300">•</span>
+                <span className="font-display font-medium text-sm text-gray-700 flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-gray-400" />
+                  {project.name}
+                </span>
+              </>
             )}
           </div>
 
           <div className="text-[11px] text-gray-500 font-sans">
-            Powered by <Link to="/" className="text-[#6701e6] hover:underline font-semibold">Panda Praise 🐼</Link>
+            Powered by <Link to="/" className="text-[#6701e6] hover:underline font-semibold">Panda Praise</Link>
           </div>
         </div>
       </header>
