@@ -425,41 +425,41 @@ export const LandingPage = () => {
       </section>
 
       {/* Live Widget Example & Automatic Update Promise */}
-      <section id="widget-demo" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10 border-t border-zinc-800/60">
+      <section id="widget-demo" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10 border-t border-gray-200">
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-300 text-xs font-semibold mb-3 border border-brand-500/25">
-            <Code className="w-3.5 h-3.5 text-brand-400" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 text-[#6701e6] text-xs font-semibold mb-3 border border-purple-200">
+            <Code className="w-3.5 h-3.5 text-[#6701e6]" />
             <span>Zero-Maintenance Website Widget</span>
           </div>
-          <h2 className="text-2xl sm:text-4xl font-extrabold font-display text-white tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight">
             Install Once. Your Approved Testimonials Update Automatically.
           </h2>
-          <p className="text-sm text-zinc-400 mt-3 leading-relaxed">
+          <p className="text-sm text-gray-600 mt-3 leading-relaxed font-sans">
             The website owner installs the Panda Praise widget once. When you approve new client reviews in your dashboard, they appear in your live widget automatically—without touching website code or asking a developer for every new review.
           </p>
         </div>
 
         {/* Real-World Dogfooding Showcase Banner */}
-        <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-purple-900/40 via-indigo-900/30 to-pink-900/40 border border-purple-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-xl">
+        <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 border border-purple-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center shrink-0">
-              <Sparkles className="w-6 h-6 text-purple-300" />
+            <div className="w-12 h-12 rounded-2xl bg-[#6701e6]/10 border border-[#6701e6]/20 flex items-center justify-center shrink-0">
+              <Sparkles className="w-6 h-6 text-[#6701e6]" />
             </div>
             <div>
-              <div className="text-sm font-bold text-white flex flex-wrap items-center justify-center sm:justify-start gap-2">
+              <div className="text-sm font-bold text-gray-950 flex flex-wrap items-center justify-center sm:justify-start gap-2 font-display">
                 <span>We collect our own customer praise using Panda Praise!</span>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold border border-emerald-200">
                   Live Product Loop
                 </span>
               </div>
-              <p className="text-xs text-zinc-300 mt-1 max-w-xl leading-relaxed">
+              <p className="text-xs text-gray-600 mt-1 max-w-xl leading-relaxed font-sans">
                 Test the client experience right now. Drop a quick 30-second review for Panda Praise and see how it works!
               </p>
             </div>
           </div>
           <Link
             to="/c/pandapraise-feedback"
-            className="shrink-0 px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold text-xs shadow-glow-sm flex items-center gap-2 transition-all hover:scale-105"
+            className="shrink-0 px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white font-semibold text-xs shadow-md flex items-center gap-2 transition-all hover:scale-105"
           >
             <MessageSquarePlus className="w-4 h-4" />
             <span>Leave a Review for Panda Praise</span>
@@ -576,15 +576,15 @@ export const LandingPage = () => {
       </section>
 
       {/* Frequently Asked Questions Section */}
-      <section id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10 border-t border-zinc-800/60">
+      <section id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10 border-t border-gray-200">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-400 uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-700 uppercase tracking-wider mb-2">
             <span>Got Questions?</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-gray-950 tracking-tight">
             Frequently Asked Questions
           </h2>
-          <p className="text-sm text-zinc-400 mt-2">
+          <p className="text-sm text-gray-600 mt-2 font-sans">
             Everything you need to know about collecting and displaying testimonials with Panda Praise.
           </p>
         </div>
