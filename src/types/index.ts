@@ -307,7 +307,9 @@ export type WidgetType =
   | 'single_video'
   | 'rating_badge'
   | 'rating_badge_compact'
-  | 'email_signature';
+  | 'email_signature'
+  | 'floating_tab'
+  | 'social_toast';
 
 export interface WidgetSettings {
   type: WidgetType;
@@ -340,6 +342,10 @@ export interface WidgetSettings {
   ctaText?: string;
   ctaUrl?: string;
   ctaColor?: string;
+  // Floating Tab & Drawer Settings (Senja-style)
+  tabPosition?: 'bottom-right' | 'bottom-left' | 'side-right' | 'side-left';
+  tabText?: string;
+  tabAllowSubmit?: boolean;
   // Rich Snippets
   richSnippetsEnabled?: boolean;
 }

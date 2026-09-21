@@ -19,6 +19,9 @@ import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
+import { INITIAL_REVIEWS } from '../lib/seedData';
+import { FloatingReviewDrawer } from '../components/widgets/FloatingReviewDrawer';
+import { SocialProofToast } from '../components/widgets/SocialProofToast';
 
 const FAQ_ITEMS = [
   {
@@ -700,6 +703,20 @@ export const LandingPage = () => {
           </Link>
         </div>
       </div>
+
+      {/* Senja-Class Floating Review Tab & Drawer */}
+      <FloatingReviewDrawer
+        reviews={INITIAL_REVIEWS}
+        tabText="⭐ 4.9 (150+ Reviews)"
+        position="bottom-right"
+        primaryColor="#8b5cf6"
+      />
+
+      {/* Senja-Class Social Proof Toast Notifications */}
+      <SocialProofToast
+        reviews={INITIAL_REVIEWS}
+        position="bottom-left"
+      />
     </div>
   );
 };

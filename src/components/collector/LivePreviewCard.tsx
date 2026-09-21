@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Quote, CheckCircle2, Building2 } from 'lucide-react';
+import { Star, Quote, CheckCircle2, Building2, Play, Video } from 'lucide-react';
 import { ReviewInput } from '../../types';
 
 interface LivePreviewCardProps {
@@ -43,6 +43,22 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({ data }) => {
           <h4 className="text-base font-semibold text-white mb-2 font-display">
             "{data.title}"
           </h4>
+        )}
+
+        {/* Video Testimonial Preview */}
+        {data.videoUrl && (
+          <div className="mb-4 p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center text-white shrink-0 shadow-md">
+              <Play className="w-4 h-4 fill-white ml-0.5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-white flex items-center gap-1.5">
+                <Video className="w-3.5 h-3.5 text-purple-400" />
+                <span>Video Testimonial Attached</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 truncate">{data.videoUrl}</p>
+            </div>
+          </div>
         )}
 
         {/* Testimonial Content */}

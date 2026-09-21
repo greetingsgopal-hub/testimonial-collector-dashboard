@@ -12,7 +12,11 @@ import {
   RotateCcw,
   ShieldCheck,
   Flame,
-  Zap
+  Zap,
+  Video,
+  Gift,
+  MessageSquare,
+  HelpCircle
 } from 'lucide-react';
 import { ReviewInput } from '../../types';
 import { validateReviewInput, sanitizeText } from '../../lib/security';
@@ -31,12 +35,33 @@ interface TestimonialFormProps {
 }
 
 const RATING_DESCRIPTIONS: Record<number, string> = {
-  1: 'Disappointing (1/5)',
-  2: 'Needs Improvement (2/5)',
-  3: 'Met Expectations (3/5)',
-  4: 'Very Satisfied (4/5)',
-  5: 'Phenomenal! (5/5)',
+  1: '😞 Disappointing (1/5)',
+  2: '😐 Needs Improvement (2/5)',
+  3: '🙂 Met Expectations (3/5)',
+  4: '😊 Very Satisfied (4/5)',
+  5: '🚀 Absolutely Phenomenal! (5/5)',
 };
+
+const SENJA_GUIDED_QUESTIONS = [
+  {
+    icon: '🎯',
+    label: 'The Challenge',
+    prompt: 'What problem were you trying to solve before using this?',
+    starter: 'Before finding this, our biggest challenge was ',
+  },
+  {
+    icon: '📈',
+    label: 'The Outcome',
+    prompt: 'What specific metric or result improved the most?',
+    starter: 'Since adopting it, the most noticeable result has been ',
+  },
+  {
+    icon: '💬',
+    label: 'Recommendation',
+    prompt: 'What would you say to someone considering trying it?',
+    starter: 'To anyone considering this, I would say: ',
+  },
+];
 
 const SUGGESTED_PROMPTS = [
   'What problem did we solve for you?',
@@ -98,6 +123,8 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
     }
   };
 
+  const [isVideoMode, setIsVideoMode] = useState(formData.type === 'video');
+
   const activeRating = hoverRating !== null ? hoverRating : formData.rating;
 
   const handleRatingChange = (val: number) => {
@@ -138,7 +165,8 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
     // Sanitize payload fields
     const sanitizedData: ReviewInput = {
       ...formData,
-      type: 'text',
+      type: isVideoMode ? 'video' : 'text',
+      videoUrl: isVideoMode && formData.videoUrl ? sanitizeText(formData.videoUrl, 500) : undefined,
       name: sanitizeText(formData.name, 100),
       email: formData.email.trim().toLowerCase().slice(0, 150),
       role: sanitizeText(formData.role, 100),
@@ -171,6 +199,68 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           Your honest experience helps us improve and helps others make informed decisions.
         </p>
       </div>
+
+      {/* Mode Switcher (Senja-style: Text vs Video) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 bg-zinc-900/90 rounded-2xl border border-zinc-800">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              setIsVideoMode(false);
+              setFormData((p) => ({ ...p, type: 'text' }));
+            }}
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              !isVideoMode
+                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Write Review</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsVideoMode(true);
+              setFormData((p) => ({ ...p, type: 'video' }));
+            }}
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              isVideoMode
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Video className="w-3.5 h-3.5" />
+            <span>Video Review</span>
+          </button>
+        </div>
+
+        <span className="text-[11px] text-zinc-400 px-2 flex items-center gap-1 self-center sm:self-auto">
+          <Gift className="w-3.5 h-3.5 text-pink-400" />
+          <span>Reward unlocked on submission!</span>
+        </span>
+      </div>
+
+      {/* Video URL Input if in Video Mode */}
+      {isVideoMode && (
+        <div className="p-4 rounded-xl bg-purple-950/25 border border-purple-500/30 space-y-2 animate-fade-in">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-purple-300">
+            Video Link (Loom, YouTube, Vimeo, or MP4) <span className="text-pink-500">*</span>
+          </label>
+          <input
+            type="url"
+            placeholder="https://www.loom.com/share/... or https://youtube.com/watch?v=..."
+            value={formData.videoUrl || ''}
+            onChange={(e) => setFormData((p) => ({ ...p, videoUrl: e.target.value }))}
+            className="glass-input w-full px-4 py-2.5 rounded-xl text-xs sm:text-sm"
+            required={isVideoMode}
+          />
+          <p className="text-[11px] text-zinc-400">
+            Paste your Loom, YouTube, or Vimeo recording link. It will automatically render on the live social wall!
+          </p>
+        </div>
+      )}
 
       {/* Rating Picker */}
       <div>
@@ -332,7 +422,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] text-zinc-500">Prompts:</span>
+            <span className="text-[11px] text-zinc-500">Quick ideas:</span>
             {SUGGESTED_PROMPTS.map((prompt) => (
               <button
                 key={prompt}
@@ -348,6 +438,37 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
                 + {prompt}
               </button>
             ))}
+          </div>
+
+          {/* Guided 3-Question Prompt Cards (Senja style) */}
+          <div className="pt-2 border-t border-zinc-800/60">
+            <span className="text-[11px] font-semibold text-zinc-400 mb-1.5 flex items-center gap-1">
+              <HelpCircle className="w-3 h-3 text-purple-400" />
+              Not sure what to write? Click a question to start your draft:
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1.5">
+              {SENJA_GUIDED_QUESTIONS.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      content: prev.content ? `${prev.content} ${item.starter}` : item.starter,
+                    }));
+                  }}
+                  className="p-2.5 rounded-xl bg-zinc-900/70 hover:bg-zinc-800/80 border border-zinc-800 hover:border-purple-500/30 text-left transition-all group cursor-pointer"
+                >
+                  <div className="text-xs font-semibold text-purple-300 flex items-center gap-1 mb-1">
+                    <span>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 group-hover:text-zinc-300 leading-tight">
+                    {item.prompt}
+                  </p>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

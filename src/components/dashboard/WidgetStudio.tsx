@@ -12,10 +12,14 @@ import {
   Sliders,
   Layers,
   Award,
-  Maximize2
+  Maximize2,
+  MessageSquarePlus,
+  Bell
 } from 'lucide-react';
 import { Review, WidgetType, WidgetSettings } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { FloatingReviewDrawer } from '../widgets/FloatingReviewDrawer';
+import { SocialProofToast } from '../widgets/SocialProofToast';
 
 interface WidgetStudioProps {
   reviews: Review[];
@@ -106,6 +110,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
         {/* Widget Type Selector */}
         <div className="flex flex-wrap items-center gap-1.5 p-1 bg-zinc-900/90 rounded-xl border border-zinc-800 self-start md:self-auto">
           {[
+            { id: 'floating_tab', label: '⭐ Floating Review Tab', icon: MessageSquarePlus },
+            { id: 'social_toast', label: '🔔 Social Proof Toast', icon: Bell },
             { id: 'wall', label: 'Wall of Love', icon: Layers },
             { id: 'carousel', label: 'Carousel Slider', icon: Maximize2 },
             { id: 'spotlight', label: 'Single Card', icon: Sparkles },
@@ -496,6 +502,56 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                     Loved by <strong>{approvedReviews.length}+</strong> customers
                   </span>
                 </div>
+              </div>
+            )}
+
+            {/* 5. Senja Floating Review Tab & Drawer */}
+            {settings.type === 'floating_tab' && (
+              <div className="h-full flex flex-col items-center justify-center gap-4 py-8 relative min-h-[380px]">
+                <div className="text-center max-w-md space-y-2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-xs font-semibold uppercase tracking-wider border border-purple-500/20">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Senja-Class Interactive Floating Tab
+                  </div>
+                  <h4 className="text-base font-bold text-white">
+                    Click the floating button below to test the drawer!
+                  </h4>
+                  <p className="text-xs text-zinc-400">
+                    Visitors see this anchored on your site. Clicking it pops open your wall of reviews & collection form without leaving your page.
+                  </p>
+                </div>
+
+                <FloatingReviewDrawer
+                  reviews={reviews}
+                  project={project}
+                  tabText={settings.tabText || 'Reviews'}
+                  primaryColor={settings.primaryColor}
+                  position={settings.tabPosition || 'bottom-right'}
+                  allowSubmit={true}
+                />
+              </div>
+            )}
+
+            {/* 6. Social Proof Toast */}
+            {settings.type === 'social_toast' && (
+              <div className="h-full flex flex-col items-center justify-center gap-4 py-8 relative min-h-[380px]">
+                <div className="text-center max-w-md space-y-2 mb-8">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold uppercase tracking-wider border border-emerald-500/20">
+                    <Bell className="w-3.5 h-3.5" />
+                    Real-Time FOMO Popups
+                  </div>
+                  <h4 className="text-base font-bold text-white">
+                    Live Testimonial Notification Toast
+                  </h4>
+                  <p className="text-xs text-zinc-400">
+                    Subtly pops up in the corner of your website every few seconds to show real verified buyer feedback.
+                  </p>
+                </div>
+
+                <SocialProofToast
+                  reviews={reviews}
+                  position="bottom-left"
+                />
               </div>
             )}
 

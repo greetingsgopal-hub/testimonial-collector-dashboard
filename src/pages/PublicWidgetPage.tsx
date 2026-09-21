@@ -5,6 +5,8 @@ import { storage } from '../lib/storage';
 import { Star, Quote, ChevronLeft, ChevronRight, Award } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
+import { FloatingReviewDrawer } from '../components/widgets/FloatingReviewDrawer';
+import { SocialProofToast } from '../components/widgets/SocialProofToast';
 
 const DEFAULT_SETTINGS: WidgetSettings = {
   type: 'wall',
@@ -26,7 +28,7 @@ function parseSettings(): WidgetSettings {
 
   return {
     ...DEFAULT_SETTINGS,
-    type: ['wall', 'carousel', 'spotlight', 'badge'].includes(type || '') ? type as WidgetType : 'wall',
+    type: ['wall', 'carousel', 'spotlight', 'badge', 'floating_tab', 'social_toast'].includes(type || '') ? type as WidgetType : 'wall',
     theme: theme === 'light' ? 'light' : 'dark',
     primaryColor: /^#[0-9a-fA-F]{6}$/.test(color || '') ? color as string : DEFAULT_SETTINGS.primaryColor,
     showRating: params.get('rating') !== '0',
@@ -35,6 +37,8 @@ function parseSettings(): WidgetSettings {
     showCompany: params.get('company') !== '0',
     maxCount: Math.min(12, Math.max(1, Number(params.get('count')) || 6)),
     onlyFeatured: params.get('featured') === '1',
+    tabPosition: (params.get('position') as any) || 'bottom-right',
+    tabText: params.get('tabText') || undefined,
   };
 }
 
@@ -224,6 +228,23 @@ export const PublicWidgetPage = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {settings.type === 'floating_tab' && (
+        <FloatingReviewDrawer
+          reviews={reviews}
+          tabText={settings.tabText}
+          primaryColor={settings.primaryColor}
+          position={settings.tabPosition || 'bottom-right'}
+          defaultOpen={true}
+        />
+      )}
+
+      {settings.type === 'social_toast' && (
+        <SocialProofToast
+          reviews={reviews}
+          position={settings.tabPosition === 'bottom-right' ? 'bottom-right' : 'bottom-left'}
+        />
       )}
 
       <div className="text-center mt-3">
