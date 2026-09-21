@@ -40,6 +40,7 @@ function translateFirebaseError(error: any): string {
     'auth/cancelled-popup-request':   'Sign-in request was cancelled. Please try again.',
     'auth/account-exists-with-different-credential': 'An account already exists with the same email using a different sign-in method.',
     'auth/operation-not-allowed':     'Google sign-in is not yet enabled in the Firebase Console. Please enable Google under Authentication > Sign-in method.',
+    'auth/unauthorized-domain':       'This domain is not authorized for Firebase Authentication. Please ensure the production hostname is added to Authorized Domains in Firebase Console.',
     'auth/requires-recent-login':     'Please sign out and sign in again to continue.',
   };
   return map[code] || error?.message || 'An unexpected error occurred. Please try again.';
