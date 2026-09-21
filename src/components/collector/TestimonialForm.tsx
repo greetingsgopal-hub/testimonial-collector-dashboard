@@ -184,24 +184,24 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="glass-panel rounded-2xl p-6 sm:p-8 border border-white/10 space-y-6">
+    <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-xl space-y-6 text-gray-900 relative">
       
       {/* Form Header */}
       <div>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 text-xs font-semibold uppercase tracking-wider mb-2 border border-brand-500/20">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-[#6701e6] text-xs font-semibold uppercase tracking-wider mb-2 border border-purple-200/80">
           <Sparkles className="w-3.5 h-3.5" />
           Customer Voice
         </div>
-        <h2 className="text-2xl sm:text-3xl font-bold font-display text-white tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-gray-950 tracking-tight">
           Share Your Feedback
         </h2>
-        <p className="text-sm text-zinc-400 mt-1">
+        <p className="text-sm text-gray-600 mt-1 font-sans">
           Your honest experience helps us improve and helps others make informed decisions.
         </p>
       </div>
 
       {/* Mode Switcher (Senja-style: Text vs Video) */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 bg-zinc-900/90 rounded-2xl border border-zinc-800">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 bg-gray-100/90 rounded-2xl border border-gray-200">
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -211,8 +211,8 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
             }}
             className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
               !isVideoMode
-                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-[#6701e6] text-white shadow-sm'
+                : 'text-gray-600 hover:text-gray-950'
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5" />
@@ -227,8 +227,8 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
             }}
             className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
               isVideoMode
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-[#6701e6] text-white shadow-sm'
+                : 'text-gray-600 hover:text-gray-950'
             }`}
           >
             <Video className="w-3.5 h-3.5" />
@@ -236,16 +236,16 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           </button>
         </div>
 
-        <span className="text-[11px] text-zinc-400 px-2 flex items-center gap-1 self-center sm:self-auto">
-          <Gift className="w-3.5 h-3.5 text-pink-400" />
+        <span className="text-[11px] text-purple-700 font-medium px-2 flex items-center gap-1.5 self-center sm:self-auto">
+          <Gift className="w-3.5 h-3.5 text-purple-600" />
           <span>Reward unlocked on submission!</span>
         </span>
       </div>
 
       {/* Video URL Input if in Video Mode */}
       {isVideoMode && (
-        <div className="p-4 rounded-xl bg-purple-950/25 border border-purple-500/30 space-y-2 animate-fade-in">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-purple-300">
+        <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-2 animate-fade-in">
+          <label className="block text-xs font-bold uppercase tracking-wider text-[#6701e6]">
             Video Link (Loom, YouTube, Vimeo, or MP4) <span className="text-pink-500">*</span>
           </label>
           <input
@@ -253,10 +253,10 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
             placeholder="https://www.loom.com/share/... or https://youtube.com/watch?v=..."
             value={formData.videoUrl || ''}
             onChange={(e) => setFormData((p) => ({ ...p, videoUrl: e.target.value }))}
-            className="glass-input w-full px-4 py-2.5 rounded-xl text-xs sm:text-sm"
+            className="w-full px-4 py-2.5 rounded-xl text-xs sm:text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
             required={isVideoMode}
           />
-          <p className="text-[11px] text-zinc-400">
+          <p className="text-[11px] text-gray-500">
             Paste your Loom, YouTube, or Vimeo recording link. It will automatically render on the live social wall!
           </p>
         </div>
@@ -264,11 +264,11 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
 
       {/* Rating Picker */}
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
           Your Overall Rating <span className="text-pink-500">*</span>
         </label>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-1.5 p-2 rounded-xl bg-zinc-900/80 border border-zinc-800/80">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5 p-2 rounded-2xl bg-gray-50 border border-gray-200 shadow-xs">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 type="button"
@@ -276,19 +276,19 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(null)}
                 onClick={() => handleRatingChange(star)}
-                className="p-1 rounded-lg hover:scale-125 transition-transform duration-150 focus:outline-none"
+                className="p-1 rounded-lg hover:scale-125 transition-transform duration-150 focus:outline-none cursor-pointer"
               >
                 <Star
                   className={`w-7 h-7 sm:w-8 sm:h-8 ${
                     star <= activeRating
-                      ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]'
-                      : 'text-zinc-700 hover:text-zinc-500'
+                      ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]'
+                      : 'text-gray-300 hover:text-gray-400'
                   } transition-colors`}
                 />
               </button>
             ))}
           </div>
-          <span className="text-xs sm:text-sm font-medium text-amber-300">
+          <span className="text-xs sm:text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
             {RATING_DESCRIPTIONS[activeRating]}
           </span>
         </div>
@@ -296,7 +296,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
 
       {/* Review Headline / Title */}
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
           Headline (Optional)
         </label>
         <input
@@ -304,7 +304,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           placeholder="e.g. Best developer tool we adopted this year"
           value={formData.title || ''}
           onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-          className="glass-input w-full px-4 py-2.5 rounded-xl text-sm"
+          className="w-full px-4 py-2.5 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
           maxLength={100}
         />
       </div>
@@ -313,10 +313,10 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+            <label className="text-xs font-bold uppercase tracking-wider text-gray-700">
               Your Testimonial <span className="text-pink-500">*</span>
             </label>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-[10px] font-semibold text-purple-300">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-[10px] font-semibold text-[#6701e6]">
               <Sparkles className="w-2.5 h-2.5" />
               AI Assistant
             </span>
@@ -324,24 +324,24 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           
           <div className="flex items-center gap-2">
             {/* Impact score pill */}
-            <span className={`text-[11px] font-medium flex items-center gap-1 ${impact.color}`}>
+            <span className={`text-[11px] font-semibold flex items-center gap-1 ${impact.color}`}>
               <Flame className="w-3 h-3" />
               {impact.label}
             </span>
-            <span className="text-xs text-zinc-500">
+            <span className="text-xs text-gray-500">
               {formData.content.length} chars
             </span>
           </div>
         </div>
 
         {/* AI Assistant Quick Actions Bar */}
-        <div className="p-2.5 rounded-xl bg-zinc-900/90 border border-purple-500/20 flex flex-wrap items-center justify-between gap-2 shadow-inner">
+        <div className="p-2.5 rounded-2xl bg-purple-50/70 border border-purple-200/80 flex flex-wrap items-center justify-between gap-2 shadow-xs">
           <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={handlePolish}
               disabled={isPolishing}
-              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm hover:shadow-purple-500/20 transition-all cursor-pointer disabled:opacity-50"
+              className="px-3.5 py-1.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-50"
             >
               <Wand2 className={`w-3.5 h-3.5 ${isPolishing ? 'animate-spin' : ''}`} />
               <span>{isPolishing ? 'Enhancing...' : '✨ Polish with AI'}</span>
@@ -351,7 +351,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
               <button
                 type="button"
                 onClick={handleUndo}
-                className="px-2 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
                 title="Undo AI edit"
               >
                 <RotateCcw className="w-3 h-3" />
@@ -360,7 +360,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
             )}
 
             {aiSuccessBadge && (
-              <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1 animate-fade-in">
+              <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1 animate-fade-in">
                 <Check className="w-3 h-3" />
                 {aiSuccessBadge}
               </span>
@@ -368,17 +368,17 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           </div>
 
           {/* Tone Selector */}
-          <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-lg border border-zinc-800">
-            <span className="text-[10px] text-zinc-500 uppercase px-1">Tone:</span>
+          <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-gray-200 shadow-xs">
+            <span className="text-[10px] text-gray-500 uppercase px-1 font-semibold">Tone:</span>
             {(['enthusiastic', 'professional', 'concise'] as TestimonialTone[]).map((t) => (
               <button
                 key={t}
                 type="button"
                 onClick={() => setTone(t)}
-                className={`px-2 py-0.5 rounded text-[10px] font-medium capitalize transition-colors ${
+                className={`px-2.5 py-0.5 rounded-lg text-[10px] font-medium capitalize transition-colors cursor-pointer ${
                   tone === t
-                    ? 'bg-purple-600 text-white shadow-xs'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+                    ? 'bg-[#6701e6] text-white shadow-xs'
+                    : 'text-gray-600 hover:text-gray-950 hover:bg-gray-100'
                 }`}
               >
                 {t}
@@ -392,15 +392,15 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           placeholder="Tell us what you loved, the results you achieved, or how it helped your team... (or type rough notes and click ✨ Polish with AI!)"
           value={formData.content}
           onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
-          className="glass-input w-full px-4 py-3 rounded-xl text-sm leading-relaxed"
+          className="w-full px-4 py-3 rounded-2xl text-sm leading-relaxed bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
           required
         />
         
         {/* Inspiration Starters */}
-        <div className="space-y-1.5 pt-1">
+        <div className="space-y-2 pt-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] text-zinc-500 flex items-center gap-1">
-              <Zap className="w-3 h-3 text-amber-400" />
+            <span className="text-[11px] font-semibold text-gray-500 flex items-center gap-1">
+              <Zap className="w-3 h-3 text-amber-500" />
               1-Click Starters:
             </span>
             {INSPIRATION_STARTERS.map((starter) => (
@@ -414,7 +414,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
                     title: prev.title || starter.headline,
                   }));
                 }}
-                className="text-[11px] text-zinc-300 hover:text-purple-300 bg-zinc-900/90 hover:bg-purple-950/40 px-2.5 py-1 rounded-md border border-zinc-800 hover:border-purple-500/30 transition-all cursor-pointer"
+                className="text-[11px] text-gray-700 hover:text-[#6701e6] bg-white hover:bg-purple-50/80 px-2.5 py-1 rounded-lg border border-gray-200 hover:border-purple-300 transition-all cursor-pointer font-medium shadow-xs"
               >
                 {starter.label}
               </button>
@@ -422,7 +422,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] text-zinc-500">Quick ideas:</span>
+            <span className="text-[11px] text-gray-500 font-medium">Quick ideas:</span>
             {SUGGESTED_PROMPTS.map((prompt) => (
               <button
                 key={prompt}
@@ -433,17 +433,17 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
                     content: prev.content ? `${prev.content} ${prompt} ` : `${prompt} `,
                   }));
                 }}
-                className="text-[11px] text-zinc-400 hover:text-brand-300 bg-zinc-900 hover:bg-zinc-800 px-2 py-0.5 rounded-md border border-zinc-800 transition-colors"
+                className="text-[11px] text-gray-600 hover:text-[#6701e6] bg-gray-50 hover:bg-purple-50/50 px-2.5 py-0.5 rounded-md border border-gray-200 hover:border-purple-200 transition-colors cursor-pointer"
               >
                 + {prompt}
               </button>
             ))}
           </div>
 
-          {/* Guided 3-Question Prompt Cards (Senja style) */}
-          <div className="pt-2 border-t border-zinc-800/60">
-            <span className="text-[11px] font-semibold text-zinc-400 mb-1.5 flex items-center gap-1">
-              <HelpCircle className="w-3 h-3 text-purple-400" />
+          {/* Guided 3-Question Prompt Cards (Senja signature style) */}
+          <div className="pt-3 border-t border-gray-200">
+            <span className="text-[11px] font-bold text-gray-700 mb-2 flex items-center gap-1">
+              <HelpCircle className="w-3.5 h-3.5 text-[#6701e6]" />
               Not sure what to write? Click a question to start your draft:
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1.5">
@@ -457,13 +457,13 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
                       content: prev.content ? `${prev.content} ${item.starter}` : item.starter,
                     }));
                   }}
-                  className="p-2.5 rounded-xl bg-zinc-900/70 hover:bg-zinc-800/80 border border-zinc-800 hover:border-purple-500/30 text-left transition-all group cursor-pointer"
+                  className="p-3 rounded-2xl bg-purple-50/40 hover:bg-purple-50/90 border border-purple-200/70 hover:border-[#6701e6]/40 text-left transition-all group cursor-pointer shadow-xs"
                 >
-                  <div className="text-xs font-semibold text-purple-300 flex items-center gap-1 mb-1">
+                  <div className="text-xs font-bold text-[#6701e6] flex items-center gap-1.5 mb-1">
                     <span>{item.icon}</span>
                     <span>{item.label}</span>
                   </div>
-                  <p className="text-[11px] text-zinc-400 group-hover:text-zinc-300 leading-tight">
+                  <p className="text-[11px] text-gray-600 group-hover:text-gray-900 leading-tight">
                     {item.prompt}
                   </p>
                 </button>
@@ -477,17 +477,17 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Name */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
             Full Name <span className="text-pink-500">*</span>
           </label>
           <div className="relative">
-            <User className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
+            <User className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
             <input
               type="text"
               placeholder="Alex Rivera"
               value={formData.name}
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
               required
             />
           </div>
@@ -495,21 +495,21 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
 
         {/* Email */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
             Email Address <span className="text-pink-500">*</span>
-            <span className="text-[10px] text-zinc-400 lowercase ml-1.5 inline-flex items-center gap-0.5">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+            <span className="text-[10px] text-emerald-700 font-semibold lowercase ml-1.5 inline-flex items-center gap-0.5 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              <ShieldCheck className="w-3 h-3 text-emerald-600" />
               (kept private)
             </span>
           </label>
           <div className="relative">
-            <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
+            <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
             <input
               type="email"
               placeholder="alex@company.com"
               value={formData.email}
               onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-              className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
               required
             />
           </div>
@@ -517,17 +517,17 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
 
         {/* Role */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
             Role / Job Title <span className="text-pink-500">*</span>
           </label>
           <div className="relative">
-            <Briefcase className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
+            <Briefcase className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
             <input
               type="text"
               placeholder="Senior Engineer"
               value={formData.role}
               onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
-              className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
               required
             />
           </div>
@@ -535,17 +535,17 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
 
         {/* Company */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
             Company / Organization
           </label>
           <div className="relative">
-            <Building2 className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
+            <Building2 className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
             <input
               type="text"
               placeholder="Acme Corp"
               value={formData.company || ''}
               onChange={(e) => setFormData((prev) => ({ ...prev, company: e.target.value }))}
-              className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
             />
           </div>
         </div>
@@ -553,7 +553,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
 
       {/* Avatar Selection */}
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
           Avatar Photo (Image URL or Pick Preset)
         </label>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -562,19 +562,19 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
             placeholder="https://example.com/avatar.jpg"
             value={formData.avatarUrl || ''}
             onChange={(e) => setFormData((prev) => ({ ...prev, avatarUrl: e.target.value }))}
-            className="glass-input flex-1 w-full px-4 py-2 rounded-xl text-xs sm:text-sm"
+            className="flex-1 w-full px-4 py-2 rounded-xl text-xs sm:text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
           />
 
           {/* Quick preset choices */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-zinc-500">Presets:</span>
+            <span className="text-xs text-gray-500 font-medium">Presets:</span>
             {PRESET_AVATARS.map((url, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => setFormData((prev) => ({ ...prev, avatarUrl: url }))}
-                className={`w-7 h-7 rounded-full overflow-hidden border-2 transition-transform hover:scale-110 ${
-                  formData.avatarUrl === url ? 'border-brand-500 ring-2 ring-brand-500/50' : 'border-zinc-700'
+                className={`w-7 h-7 rounded-full overflow-hidden border-2 transition-transform hover:scale-110 cursor-pointer ${
+                  formData.avatarUrl === url ? 'border-[#6701e6] ring-2 ring-[#6701e6]/30' : 'border-gray-300'
                 }`}
               >
                 <img src={url} alt={`Preset ${idx + 1}`} className="w-full h-full object-cover" />
@@ -586,7 +586,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
 
       {/* Category / Topic Tags */}
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
           Tags / Highlights
         </label>
         <div className="flex flex-wrap gap-1.5 mb-2">
@@ -597,10 +597,10 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
                 key={tag}
                 type="button"
                 onClick={() => handleToggleTag(tag)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-brand-500/20 text-brand-300 border border-brand-500/40 shadow-sm'
-                    : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-zinc-200 hover:bg-zinc-800/60'
+                    ? 'bg-[#6701e6]/10 text-[#6701e6] border border-[#6701e6]/30 shadow-xs font-semibold'
+                    : 'bg-gray-100 text-gray-600 border border-gray-200 hover:text-gray-950 hover:bg-gray-200/70'
                 }`}
               >
                 {isSelected && <Check className="w-3 h-3 inline mr-1" />}
@@ -615,21 +615,21 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           value={newTagInput}
           onChange={(e) => setNewTagInput(e.target.value)}
           onKeyDown={handleAddCustomTag}
-          className="glass-input w-full px-3 py-1.5 rounded-lg text-xs text-zinc-300"
+          className="w-full px-3 py-2 rounded-xl text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
         />
       </div>
 
       {/* Consent Checkbox */}
-      <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800/80">
+      <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200">
         <label className="flex items-start gap-3 cursor-pointer select-none">
           <input
             type="checkbox"
             checked={formData.consent}
             onChange={(e) => setFormData((prev) => ({ ...prev, consent: e.target.checked }))}
-            className="mt-0.5 h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-brand-600 focus:ring-brand-500 focus:ring-offset-zinc-900 cursor-pointer"
+            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6] cursor-pointer"
             required
           />
-          <span className="text-xs text-zinc-300 leading-normal">
+          <span className="text-xs text-gray-700 leading-normal font-medium font-sans">
             I give permission to feature this testimonial on your public website, marketing materials, and social proof widgets.
           </span>
         </label>
@@ -637,7 +637,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
 
       {/* Error Message */}
       {errorMsg && (
-        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium animate-fade-in">
+        <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium animate-fade-in">
           {errorMsg}
         </div>
       )}
@@ -647,7 +647,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         id="submit-testimonial-btn"
         type="submit"
         disabled={isSubmitting}
-        className="w-full py-4 px-6 rounded-xl bg-gradient-to-b from-[#9954f2] to-[#6701e6] hover:from-[#a465f7] hover:to-[#7306fb] text-white font-bold text-base shadow-lg shadow-purple-600/25 border border-white/20 flex items-center justify-center gap-2 transition-all transform active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-display"
+        className="w-full py-4 px-6 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white font-bold text-base shadow-lg shadow-purple-600/25 border border-purple-400/20 flex items-center justify-center gap-2 transition-all transform active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-display"
       >
         {isSubmitting ? (
           <>
