@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Lock, Mail, ArrowRight, AlertCircle, Play } from 'lucide-react';
+import { AlertCircle, BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { isFirebaseConfigured } from '../lib/firebase';
 import { usePageSeo } from '../lib/seo';
-import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
 import { GoogleIcon } from '../components/auth/GoogleIcon';
 
-export const LoginPage = () => {
+export const LoginPage: React.FC = () => {
   usePageSeo({
-    title: 'Log in — Panda Praise',
+    title: 'Login to Panda Praise',
     description: 'Log in to your Panda Praise account to manage and moderate customer testimonials.',
   });
 
@@ -65,166 +63,165 @@ export const LoginPage = () => {
         setLocalError(res.error || 'Failed to sign in with Google.');
       }
     } catch (err: any) {
-      setLocalError(err.message || 'An unexpected error occurred during Google sign-in.');
+      setLocalError(err.message || 'An error occurred during Google sign-in.');
     } finally {
       setIsGoogleSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div className="ambient-glow" />
-
-      {/* Brand Header */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center z-10">
-        <Link to="/" className="inline-flex items-center gap-3 mb-4">
-          <PandaPraiseIcon size={40} colorMode="gradient" className="shrink-0" />
-          <span className="font-display font-extrabold text-xl text-white tracking-tight">
-            Panda <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Praise</span>
-          </span>
-        </Link>
-        <h2 className="text-2xl sm:text-3xl font-bold font-display text-white tracking-tight">
-          Welcome back
-        </h2>
-        <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-          Sign in to your private workspace & moderation dashboard.
-        </p>
-      </div>
-
-      {/* Form Container */}
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4 sm:px-0">
-        <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 shadow-2xl space-y-5">
+    <div className="min-h-screen bg-white text-gray-900 flex font-sans selection:bg-purple-500/20 selection:text-purple-900">
+      
+      {/* ── Left Column: Login Form ── */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 md:px-16 xl:px-24 py-12">
+        <div className="w-full max-w-md mx-auto">
           
-          {/* Cloud vs Demo Notice */}
-          {!isFirebaseConfigured && (
-            <div className="p-3.5 rounded-xl bg-brand-500/10 border border-brand-500/25 text-xs text-brand-300 space-y-2">
-              <div className="font-semibold flex items-center gap-1.5 text-white">
-                <AlertCircle className="w-4 h-4 text-brand-400" />
-                <span>Firebase Cloud Not Configured</span>
-              </div>
-              <p className="leading-relaxed text-zinc-300">
-                To enable live cloud authentication, add <code className="text-brand-300 font-mono">VITE_FIREBASE_API_KEY</code> to your environment. You can also explore instantly in <strong>Demo Mode</strong>.
-              </p>
-              <button
-                type="button"
-                onClick={handleDemoLogin}
-                className="w-full py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition-colors border border-zinc-700 cursor-pointer"
-              >
-                <Play className="w-3.5 h-3.5 text-brand-400" />
-                <span>Continue with Instant Demo Mode</span>
-              </button>
-            </div>
-          )}
-
-          {/* Google Sign-in */}
-          <button
-            id="google-login-btn"
-            type="button"
-            disabled={isSubmitting || isGoogleSubmitting}
-            onClick={handleGoogleSignIn}
-            className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 font-semibold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md cursor-pointer disabled:opacity-50 hover:shadow-lg"
-          >
-            {isGoogleSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />
-                <span>Connecting to Google...</span>
-              </>
-            ) : (
-              <>
-                <GoogleIcon className="w-4 h-4 shrink-0" />
-                <span>Continue with Google</span>
-              </>
-            )}
-          </button>
-
-          {/* Divider */}
-          <div className="relative flex items-center justify-center my-2">
-            <div className="border-t border-zinc-800 w-full" />
-            <span className="bg-zinc-900 px-3 text-[11px] uppercase tracking-wider text-zinc-500 font-medium absolute">
-              or continue with email
-            </span>
+          {/* Brand Purple Heart Symbol */}
+          <div className="mb-6">
+            <Link to="/" className="inline-block transition-transform hover:scale-105" title="Panda Praise Home">
+              <svg width="38" height="36" viewBox="0 0 24 24" fill="#6701e6" className="text-[#6701e6]">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </Link>
           </div>
 
+          <h1 className="text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight">
+            Welcome back
+          </h1>
+          <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+            Sign in to manage and share your customer testimonials.
+          </p>
+
           {(localError || authError) && (
-            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 flex items-start gap-2 animate-fade-in">
+            <div className="mt-4 p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{localError || authError}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
-                Work Email Address
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                Email
               </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
-                <input
-                  id="login-email"
-                  type="email"
-                  placeholder="founder@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm"
-                  required
-                />
-              </div>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6701e6] focus:border-[#6701e6] text-sm text-gray-900 placeholder-gray-400 bg-white transition-all shadow-xs"
+              />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                <label className="text-xs font-semibold text-gray-700">
                   Password
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs text-brand-400 hover:text-brand-300 transition-colors"
+                  className="text-xs text-[#6701e6] hover:underline"
                 >
                   Forgot password?
                 </Link>
               </div>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
-                <input
-                  id="login-password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm"
-                  required
-                />
-              </div>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6701e6] focus:border-[#6701e6] text-sm text-gray-900 placeholder-gray-400 bg-white transition-all shadow-xs"
+              />
             </div>
 
             <button
-              id="login-submit-btn"
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-glow flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full py-3 rounded-lg bg-black hover:bg-gray-800 text-white font-bold text-sm transition-colors shadow-xs cursor-pointer disabled:opacity-50 mt-5"
             >
-              {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Signing in...</span>
-                </>
-              ) : (
-                <>
-                  <span>Sign In to Dashboard</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              {isSubmitting ? 'Logging in...' : 'Log in'}
+            </button>
+
+            <button
+              type="button"
+              disabled={isSubmitting || isGoogleSubmitting}
+              onClick={handleGoogleSignIn}
+              className="w-full py-2.5 px-4 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-800 font-semibold text-sm flex items-center justify-center gap-2.5 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+            >
+              <GoogleIcon className="w-4 h-4 shrink-0" />
+              <span>{isGoogleSubmitting ? 'Connecting...' : 'Sign in with Google'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              className="w-full py-2 px-4 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <span>⚡ Open Demo Workspace</span>
             </button>
           </form>
 
-          <div className="pt-2 text-center text-xs text-zinc-400 border-t border-zinc-800">
+          <p className="mt-8 text-xs text-gray-600">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-brand-400 hover:text-brand-300 font-semibold">
-              Sign up free
+            <Link to="/signup" className="text-[#6701e6] font-bold hover:underline">
+              Sign up for free
             </Link>
-          </div>
+          </p>
         </div>
       </div>
+
+      {/* ── Right Column: Testimonials Showcase ── */}
+      <div className="hidden lg:flex lg:w-1/2 bg-[#6701e6] p-10 xl:p-14 flex-col justify-center relative overflow-hidden text-white">
+        <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-purple-900/40 blur-3xl" />
+
+        <div className="relative z-10 max-w-lg mx-auto w-full space-y-6">
+          <div className="rounded-3xl bg-white/10 border border-white/15 p-6 xl:p-7 backdrop-blur-md shadow-2xl">
+            <div className="flex items-start gap-4">
+              <img
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
+                alt="Devin Lee"
+                className="w-16 h-16 rounded-2xl object-cover ring-2 ring-white/20 shrink-0"
+              />
+              <div>
+                <div className="flex text-amber-400 text-sm mb-1.5">★★★★★</div>
+                <p className="text-base sm:text-lg font-bold leading-snug">
+                  It took mere minutes to get set up and add GORGEOUS testimonials to my website
+                </p>
+                <p className="text-xs text-white/80 mt-2">
+                  Devin Lee <span className="text-emerald-400 font-medium">/ Systems Strategist</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-white/10 border border-white/15 p-6 xl:p-7 backdrop-blur-md shadow-2xl">
+            <div className="flex items-start gap-4">
+              <img
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80"
+                alt="Jamie Northrup"
+                className="w-16 h-16 rounded-2xl object-cover ring-2 ring-white/20 shrink-0"
+              />
+              <div>
+                <div className="flex text-amber-400 text-sm mb-1.5">★★★★★</div>
+                <p className="text-base sm:text-lg font-bold leading-snug">
+                  Took me less than 5 minutes to start collecting
+                </p>
+                <p className="text-xs text-white/80 mt-2">
+                  Jamie Northrup <span className="text-emerald-400 font-medium">/ Minimalist Hustler</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute bottom-6 right-6 w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-lg">
+          <BookOpen className="w-4 h-4" />
+        </div>
+      </div>
+
     </div>
   );
 };
