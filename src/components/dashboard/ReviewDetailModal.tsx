@@ -11,10 +11,11 @@ import {
   Mail, 
   Video, 
   ExternalLink,
-  Calendar,
   ShieldCheck,
   Globe,
-  Share2
+  Share2,
+  Edit3,
+  Save
 } from 'lucide-react';
 import { Review, ReviewStatus } from '../../types';
 import { sanitizeUrl } from '../../lib/security';
@@ -104,23 +105,23 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
   const canBeFeatured = review.status === 'approved';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="glass-panel w-full max-w-2xl rounded-2xl border border-white/15 shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white w-full max-w-2xl rounded-2xl border border-gray-200 shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-zinc-800 flex items-center justify-between">
+        <div className="p-5 sm:p-6 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
               Review Inspection
             </span>
-            <span className="font-mono text-xs text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+            <span className="font-mono text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">
               {review.id}
             </span>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -130,211 +131,201 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
         <div className="p-5 sm:p-6 space-y-6 overflow-y-auto">
           
           {/* Reviewer Profile Card */}
-          <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
               {review.avatarUrl ? (
                 <img
                   src={review.avatarUrl}
                   alt={review.name}
-                  className="w-14 h-14 rounded-full object-cover ring-2 ring-brand-500/30 shadow-md"
+                  className="w-14 h-14 rounded-full object-cover ring-2 ring-purple-200 shadow-xs"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center font-bold text-white text-lg shadow-md">
+                <div className="w-14 h-14 rounded-full bg-purple-100 text-[#6701e6] flex items-center justify-center font-bold text-lg shadow-xs border border-purple-200">
                   {review.name.charAt(0).toUpperCase()}
                 </div>
               )}
 
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-1.5">
+                <h3 className="text-base font-bold text-gray-900 flex items-center gap-1.5">
                   <span>{review.name}</span>
                   {review.isFeatured && (
-                    <Sparkles className="w-4 h-4 text-amber-400 fill-amber-400" />
+                    <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
                   )}
                 </h3>
-                <p className="text-xs text-zinc-300 mt-0.5">
+                <p className="text-xs text-gray-600 mt-0.5">
                   {review.role} {review.company ? `• ${review.company}` : ''}
                 </p>
                 {review.email && (
-                  <div className="flex items-center gap-1 text-[11px] text-zinc-400 mt-1">
-                    <Mail className="w-3 h-3 text-zinc-500" />
+                  <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-1">
+                    <Mail className="w-3 h-3 text-gray-400" />
                     <span>{review.email}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Featured State Toggle (Enforced: Approved only) */}
-            <div className="flex flex-col sm:items-end gap-1.5">
-              <button
-                disabled={!canBeFeatured}
-                onClick={() => onToggleFeatured(review.id, review.isFeatured)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  !canBeFeatured
-                    ? 'opacity-40 cursor-not-allowed bg-zinc-900 border border-zinc-800 text-zinc-500'
-                    : review.isFeatured
-                    ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30 hover:bg-amber-400/30'
-                    : 'bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700'
-                }`}
-                title={canBeFeatured ? 'Toggle featured status' : 'Only approved testimonials can be featured'}
-              >
-                <Star className={`w-3.5 h-3.5 ${review.isFeatured ? 'fill-amber-400' : ''}`} />
-                <span>
-                  {review.isFeatured
-                    ? 'Featured Testimonial'
-                    : canBeFeatured
-                    ? 'Mark as Featured'
-                    : 'Featured (Approved Only)'}
-                </span>
-              </button>
-              <span className="text-[11px] text-zinc-500 flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {new Date(review.createdAt).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
-              </span>
-            </div>
+            {/* Quick Feature Toggle */}
+            <button
+              disabled={!canBeFeatured}
+              onClick={() => onToggleFeatured(review.id, review.isFeatured)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-center cursor-pointer ${
+                !canBeFeatured
+                  ? 'opacity-40 cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400'
+                  : review.isFeatured
+                  ? 'bg-amber-100 border border-amber-300 text-amber-800 shadow-xs'
+                  : 'bg-white hover:bg-gray-100 border border-gray-300 text-gray-700'
+              }`}
+              title={!canBeFeatured ? 'Only approved reviews can be marked as featured' : ''}
+            >
+              <Star className={`w-3.5 h-3.5 ${review.isFeatured ? 'fill-amber-500 text-amber-500' : ''}`} />
+              <span>{review.isFeatured ? 'Featured Review' : 'Mark as Featured'}</span>
+            </button>
           </div>
 
-          {/* EDIT MODE vs VIEW MODE */}
+          {/* Edit Review Form / Display View */}
           {isEditing ? (
-            <div className="p-4 rounded-xl bg-zinc-900/90 border border-brand-500/30 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
-                <span className="text-xs font-bold uppercase tracking-wider text-brand-400">
-                  Moderator Editing Mode
+            <div className="p-4 rounded-xl bg-purple-50/50 border border-purple-200 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#6701e6] uppercase tracking-wider flex items-center gap-1.5">
+                  <Edit3 className="w-3.5 h-3.5" />
+                  Edit Customer Feedback
                 </span>
-                <span className="text-[11px] text-zinc-400">
-                  Correct typos or formatting without distorting feedback.
-                </span>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="text-xs text-gray-500 hover:text-gray-900 cursor-pointer"
+                >
+                  Cancel
+                </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Customer Name</label>
+                  <label className="text-xs text-gray-700 font-semibold mb-1 block">Author Name</label>
                   <input
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="glass-input w-full px-3 py-1.5 rounded-lg text-xs text-white"
+                    className="w-full px-3 py-2 rounded-lg text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
                   />
                 </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-gray-700 font-semibold mb-1 block">Role / Title</label>
+                    <input
+                      type="text"
+                      value={editRole}
+                      onChange={(e) => setEditRole(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-700 font-semibold mb-1 block">Company</label>
+                    <input
+                      type="text"
+                      value={editCompany}
+                      onChange={(e) => setEditCompany(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Role / Job Title</label>
+                  <label className="text-xs text-gray-700 font-semibold mb-1 block">Title / Headline</label>
                   <input
                     type="text"
-                    value={editRole}
-                    onChange={(e) => setEditRole(e.target.value)}
-                    className="glass-input w-full px-3 py-1.5 rounded-lg text-xs text-white"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Company</label>
-                  <input
-                    type="text"
-                    value={editCompany}
-                    onChange={(e) => setEditCompany(e.target.value)}
-                    className="glass-input w-full px-3 py-1.5 rounded-lg text-xs text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Rating (Stars)</label>
+                  <label className="text-xs text-gray-700 font-semibold mb-1 block">Rating (1 to 5 Stars)</label>
                   <select
                     value={editRating}
                     onChange={(e) => setEditRating(Number(e.target.value))}
-                    className="glass-input w-full px-3 py-1.5 rounded-lg text-xs text-white"
+                    className="w-full px-3 py-2 rounded-lg text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
                   >
                     {[5, 4, 3, 2, 1].map((num) => (
-                      <option key={num} value={num} className="bg-zinc-900 text-white">
-                        {num} Stars
+                      <option key={num} value={num}>
+                        {num} Star{num > 1 ? 's' : ''}
                       </option>
                     ))}
                   </select>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-[11px] font-medium text-zinc-400 mb-1">Testimonial Headline</label>
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  placeholder="Headline or summary (optional)"
-                  className="glass-input w-full px-3 py-1.5 rounded-lg text-xs text-white"
-                />
-              </div>
+                <div>
+                  <label className="text-xs text-gray-700 font-semibold mb-1 block">Feedback Content</label>
+                  <textarea
+                    rows={4}
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] resize-none"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-[11px] font-medium text-zinc-400 mb-1">Testimonial Text</label>
-                <textarea
-                  rows={4}
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  className="glass-input w-full px-3 py-2 rounded-lg text-xs text-white leading-relaxed resize-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-800">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="px-3 py-1.5 rounded-lg text-xs text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveEdit}
-                  disabled={isSavingEdit}
-                  className="px-4 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-xs font-semibold text-white transition-colors"
-                >
-                  {isSavingEdit ? 'Saving...' : 'Save Edits'}
-                </button>
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-gray-100 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    disabled={isSavingEdit}
+                    onClick={handleSaveEdit}
+                    className="px-4 py-1.5 rounded-lg text-xs font-bold bg-[#6701e6] hover:bg-[#5200bd] text-white flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>{isSavingEdit ? 'Saving...' : 'Save Changes'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
-            /* Rating & Content View */
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((s) => (
                     <Star
                       key={s}
-                      className={`w-5 h-5 ${
-                        s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-zinc-700'
+                      className={`w-4 h-4 ${
+                        s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200'
                       }`}
                     />
                   ))}
-                  <span className="text-sm font-bold text-amber-300 ml-2">
-                    {review.rating}.0 / 5.0
+                  <span className="text-xs font-bold text-gray-700 ml-1.5">
+                    {review.rating}.0 Rating
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-medium text-zinc-300 transition-colors"
+                    onClick={handleCopy}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-gray-700 transition-colors cursor-pointer"
                   >
-                    <span>Edit Testimonial</span>
+                    {copiedContent ? <CheckCheck className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-gray-500" />}
+                    <span>{copiedContent ? 'Copied' : 'Copy Quote'}</span>
                   </button>
 
                   <button
-                    onClick={handleCopy}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-medium text-zinc-300 transition-colors"
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#6701e6] font-semibold cursor-pointer px-2 py-1 rounded-lg hover:bg-gray-100"
                   >
-                    {copiedContent ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedContent ? 'Copied' : 'Copy Quote'}</span>
+                    <Edit3 className="w-3 h-3" />
+                    <span>Edit</span>
                   </button>
                 </div>
               </div>
 
               {review.title && (
-                <h4 className="text-lg font-semibold text-white font-display">
+                <h4 className="text-lg font-bold text-gray-900 font-display">
                   "{review.title}"
                 </h4>
               )}
 
-              <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-zinc-200 text-sm leading-relaxed italic">
+              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm leading-relaxed italic">
                 "{review.content}"
               </div>
             </div>
@@ -342,8 +333,8 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
 
           {/* Video Attachment */}
           {review.type === 'video' && sanitizeUrl(review.videoUrl) && (
-            <div className="p-3.5 rounded-xl bg-zinc-900/80 border border-pink-500/20 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-pink-400 text-xs font-medium">
+            <div className="p-3.5 rounded-xl bg-pink-50 border border-pink-200 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-pink-700 text-xs font-semibold">
                 <Video className="w-4 h-4" />
                 <span>Video Testimonial attached</span>
               </div>
@@ -351,7 +342,7 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
                 href={sanitizeUrl(review.videoUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-zinc-300 hover:text-white bg-zinc-800 px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-1 text-xs text-pink-700 hover:text-pink-900 bg-white border border-pink-200 px-3 py-1.5 rounded-lg transition-colors"
               >
                 <span>Open Video Link</span>
                 <ExternalLink className="w-3 h-3" />
@@ -361,19 +352,19 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
 
           {/* Tags Manager */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
               Assigned Tags
             </label>
             <div className="flex flex-wrap gap-1.5 mb-2">
               {tags.map((t) => (
                 <span
                   key={t}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200"
                 >
                   #{t}
                   <button
                     onClick={() => handleRemoveTag(t)}
-                    className="hover:text-red-400 ml-1"
+                    className="hover:text-rose-600 ml-1 cursor-pointer"
                     title="Remove tag"
                   >
                     ×
@@ -387,65 +378,65 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
               onKeyDown={handleAddTag}
-              className="glass-input w-full px-3 py-1.5 rounded-lg text-xs text-zinc-300"
+              className="w-full px-3.5 py-2 rounded-xl text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6]"
             />
           </div>
 
           {/* Unified Distribution Hub (Approved Testimonials Only) */}
           {review.status === 'approved' && (
-            <div className="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-3">
+            <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-brand-400" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-200">
+                  <Sparkles className="w-4 h-4 text-[#6701e6]" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-800">
                     Publish & Distribution Hub
                   </span>
                 </div>
-                <span className="text-[11px] text-zinc-500">2 Independent Channels</span>
+                <span className="text-[11px] text-gray-500">2 Independent Channels</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 {/* Channel 1: Website Widget */}
-                <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-emerald-500/25 flex flex-col justify-between space-y-3">
+                <div className="p-3.5 rounded-xl bg-white border border-emerald-200 flex flex-col justify-between space-y-3 shadow-2xs">
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-white flex items-center gap-1.5">
-                        <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-emerald-600" />
                         Website Widget
                       </span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <Check className="w-2.5 h-2.5" /> Live on Website
                       </span>
                     </div>
-                    <p className="text-[11px] text-zinc-400 mt-1.5 leading-relaxed">
+                    <p className="text-[11px] text-gray-600 mt-1.5 leading-relaxed">
                       Your website widget updates automatically. No website changes or developer involvement required.
                     </p>
                   </div>
-                  <div className="text-[10px] text-zinc-500 flex items-center gap-1">
-                    <Check className="w-3 h-3 text-emerald-400" />
+                  <div className="text-[10px] text-gray-500 flex items-center gap-1 font-medium">
+                    <Check className="w-3 h-3 text-emerald-600" />
                     <span>Broadcasting live to your embed code</span>
                   </div>
                 </div>
 
                 {/* Channel 2: Social Media */}
-                <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-brand-500/25 flex flex-col justify-between space-y-3">
+                <div className="p-3.5 rounded-xl bg-white border border-purple-200 flex flex-col justify-between space-y-3 shadow-2xs">
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-white flex items-center gap-1.5">
-                        <Share2 className="w-3.5 h-3.5 text-brand-400" />
+                      <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                        <Share2 className="w-3.5 h-3.5 text-[#6701e6]" />
                         Social Media
                       </span>
-                      <span className="text-[10px] font-medium text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full border border-brand-500/20">
+                      <span className="text-[10px] font-bold text-[#6701e6] bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
                         Ready to Share
                       </span>
                     </div>
-                    <p className="text-[11px] text-zinc-400 mt-1.5 leading-relaxed">
+                    <p className="text-[11px] text-gray-600 mt-1.5 leading-relaxed">
                       Turn this testimonial into a branded post for LinkedIn, X, Instagram, or Facebook.
                     </p>
                   </div>
                   <button
                     onClick={() => onOpenSocialCard?.(review)}
-                    className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-brand-600 to-pink-600 hover:from-brand-500 hover:to-pink-500 text-white font-semibold text-xs shadow-glow-sm flex items-center justify-center gap-1.5 transition-all"
+                    className="w-full py-2 px-3 rounded-lg bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Create Social Post</span>
@@ -456,22 +447,22 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
           )}
 
           {/* Metadata & Consent */}
-          <div className="flex items-center gap-2 text-xs text-emerald-400/80 bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10">
-            <ShieldCheck className="w-4 h-4 shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-emerald-800 bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+            <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600" />
             <span>Reviewer granted marketing & public website display consent upon submission.</span>
           </div>
         </div>
 
         {/* Footer Moderation Actions */}
-        <div className="p-4 sm:p-5 border-t border-zinc-800 bg-zinc-900/60 flex flex-wrap items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-t border-gray-100 bg-gray-50 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             {/* Approve */}
             <button
               onClick={() => onUpdateStatus(review.id, 'approved')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                 review.status === 'approved'
-                  ? 'bg-emerald-500 text-zinc-950 shadow-sm'
-                  : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'
               }`}
             >
               <Check className="w-4 h-4" />
@@ -481,10 +472,10 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
             {/* Reject */}
             <button
               onClick={() => onUpdateStatus(review.id, 'rejected')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                 review.status === 'rejected'
-                  ? 'bg-red-500 text-white shadow-sm'
-                  : 'bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'
               }`}
             >
               <X className="w-4 h-4" />
@@ -494,10 +485,10 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
             {/* Archive */}
             <button
               onClick={() => onUpdateStatus(review.id, 'archived')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                 review.status === 'archived'
-                  ? 'bg-zinc-700 text-white'
-                  : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700'
+                  ? 'bg-gray-800 text-white'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200'
               }`}
             >
               <Archive className="w-4 h-4" />
@@ -508,7 +499,7 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
             {review.status === 'approved' && onOpenSocialCard && (
               <button
                 onClick={() => onOpenSocialCard(review)}
-                className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-brand-600 to-pink-600 hover:from-brand-500 hover:to-pink-500 text-white shadow-glow-sm flex items-center gap-1.5 transition-all ml-1"
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-50 hover:bg-purple-100 text-[#6701e6] border border-purple-200 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs ml-1"
                 title="Create a branded social media graphic"
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -523,7 +514,7 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
               onDelete(review.id);
               onClose();
             }}
-            className="px-3.5 py-2 rounded-xl text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Trash2 className="w-4 h-4" />
             <span>Delete Permanently</span>

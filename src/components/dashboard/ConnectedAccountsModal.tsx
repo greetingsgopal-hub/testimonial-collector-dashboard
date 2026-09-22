@@ -109,24 +109,24 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
+      <div className="relative w-full max-w-2xl bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-zinc-800/80 flex items-center justify-between bg-zinc-900/40">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
               <span>Connected Social Accounts</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
                 OAuth 2.0 Secure
               </span>
             </h2>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-gray-500 mt-0.5">
               Connect once to unlock instant 1-click social distribution for all approved customer wins.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -135,8 +135,8 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
         {/* Content */}
         <div className="p-6 overflow-y-auto space-y-4">
           {error && (
-            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300 flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <p className="font-semibold">Connection Notice</p>
                 <p>{error}</p>
@@ -145,8 +145,8 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
           )}
 
           {loading ? (
-            <div className="py-12 flex flex-col items-center justify-center gap-3 text-zinc-400">
-              <RefreshCw className="w-6 h-6 animate-spin text-brand-400" />
+            <div className="py-12 flex flex-col items-center justify-center gap-3 text-gray-500">
+              <RefreshCw className="w-6 h-6 animate-spin text-[#6701e6]" />
               <p className="text-xs">Checking account connection status...</p>
             </div>
           ) : (
@@ -159,32 +159,32 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
                 return (
                   <div
                     key={p.id}
-                    className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-zinc-700/80 transition-colors"
+                    className="p-4 rounded-xl bg-gray-50 border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-purple-300 transition-colors"
                   >
                     <div className="space-y-1 sm:max-w-[65%]">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-white">{p.name}</span>
+                        <span className="font-bold text-sm text-gray-900">{p.name}</span>
                         {isConnected && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                             <CheckCircle2 className="w-3 h-3" />
                             <span>Connected</span>
                           </span>
                         )}
                         {isExpired && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
                             <AlertCircle className="w-3 h-3" />
                             <span>Expired</span>
                           </span>
                         )}
                       </div>
 
-                      <p className="text-xs text-zinc-400">{p.description}</p>
+                      <p className="text-xs text-gray-600">{p.description}</p>
 
                       {isConnected && conn?.accountName && (
-                        <p className="text-xs text-zinc-300 font-medium pt-0.5">
-                          Account: <span className="text-white">{conn.accountName}</span>
+                        <p className="text-xs text-gray-800 font-medium pt-0.5">
+                          Account: <span className="font-bold text-gray-950">{conn.accountName}</span>
                           {conn.connectedAt && (
-                            <span className="text-zinc-500 font-normal">
+                            <span className="text-gray-500 font-normal">
                               {' '}
                               • Connected {new Date(conn.connectedAt).toLocaleDateString()}
                             </span>
@@ -193,7 +193,7 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
                       )}
 
                       {p.note && !isConnected && (
-                        <p className="text-[11px] text-zinc-500 italic">{p.note}</p>
+                        <p className="text-[11px] text-gray-500 italic">{p.note}</p>
                       )}
                     </div>
 
@@ -202,7 +202,7 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
                         <button
                           onClick={() => handleDisconnect(p.id)}
                           disabled={disconnecting === p.id}
-                          className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950/40 text-zinc-300 hover:text-rose-300 border border-zinc-700 hover:border-rose-700/50 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-gray-700 hover:text-rose-700 border border-gray-300 hover:border-rose-300 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs"
                         >
                           <Unlink className="w-3.5 h-3.5" />
                           <span>{disconnecting === p.id ? 'Disconnecting...' : 'Disconnect'}</span>
@@ -211,7 +211,7 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
                         <button
                           onClick={() => handleConnect(p.id)}
                           disabled={connecting === p.id}
-                          className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
                         >
                           <RefreshCw className={`w-3.5 h-3.5 ${connecting === p.id ? 'animate-spin' : ''}`} />
                           <span>{connecting === p.id ? 'Redirecting...' : `Reconnect ${p.name}`}</span>
@@ -220,7 +220,7 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
                         <button
                           onClick={() => handleConnect(p.id)}
                           disabled={connecting === p.id}
-                          className="px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-sm"
+                          className="px-3.5 py-1.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           <span>{connecting === p.id ? 'Redirecting...' : `Connect ${p.name}`}</span>
@@ -233,8 +233,8 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
             </div>
           )}
 
-          <div className="p-3.5 rounded-xl bg-zinc-900/30 border border-zinc-800/60 text-[11px] text-zinc-500 space-y-1">
-            <p className="font-semibold text-zinc-400">Panda Praise Privacy & Security Guarantee:</p>
+          <div className="p-3.5 rounded-xl bg-purple-50/50 border border-purple-100 text-[11px] text-gray-600 space-y-1">
+            <p className="font-bold text-[#6701e6]">Panda Praise Privacy & Security Guarantee:</p>
             <p>
               • Panda Praise never stores client secrets or raw tokens in the browser or public databases.
             </p>
@@ -248,10 +248,10 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-zinc-800/80 bg-zinc-900/40 flex justify-end">
+        <div className="px-6 py-3 border-t border-gray-100 bg-gray-50/50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition-colors cursor-pointer"
+            className="px-5 py-2 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
           >
             Done
           </button>

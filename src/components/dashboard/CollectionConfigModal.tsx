@@ -100,23 +100,23 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="glass-panel w-full max-w-xl rounded-2xl border border-white/15 shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white w-full max-w-xl rounded-2xl border border-gray-200 shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-zinc-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 flex items-center justify-center">
+        <div className="p-5 sm:p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-purple-50 text-[#6701e6] flex items-center justify-center border border-purple-100">
               <Globe className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Collection Settings</h3>
-              <p className="text-xs text-zinc-400">Configure your customer-facing collection form</p>
+              <h3 className="text-base font-bold text-gray-900">Collection Settings</h3>
+              <p className="text-xs text-gray-500">Configure your customer-facing collection form</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -125,15 +125,15 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSave} className="p-5 sm:p-6 space-y-5 overflow-y-auto">
           {error && (
-            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-300 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Shareable Link Box */}
-          <div className="p-4 rounded-xl bg-zinc-900/90 border border-zinc-800 space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400">
+          <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-500">
               Shareable Public URL
             </label>
             <div className="flex items-center gap-2">
@@ -141,12 +141,12 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
                 type="text"
                 readOnly
                 value={publicUrl}
-                className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-xs font-mono text-zinc-300 focus:outline-none"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-gray-300 text-xs font-mono text-gray-800 focus:outline-none"
               />
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="px-3 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-xs font-semibold text-white flex items-center gap-1.5 shrink-0 transition-colors"
+                className="px-3 py-2 rounded-lg bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer shadow-xs"
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? 'Copied' : 'Copy'}</span>
@@ -155,7 +155,7 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
                 href={publicUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white shrink-0 transition-colors"
+                className="p-2 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-600 hover:text-gray-900 shrink-0 transition-colors cursor-pointer"
                 title="Preview public page"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -165,7 +165,7 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
 
           {/* Title */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
               Collection Title *
             </label>
             <input
@@ -174,13 +174,13 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Share Your Experience with Acme"
-              className="glass-input w-full px-3.5 py-2 rounded-xl text-sm text-white"
+              className="w-full px-3.5 py-2 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6]"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
               Instructions / Prompt for Customers
             </label>
             <textarea
@@ -188,17 +188,17 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What questions or topics should customers address?"
-              className="glass-input w-full px-3.5 py-2 rounded-xl text-xs text-white leading-relaxed resize-none"
+              className="w-full px-3.5 py-2 rounded-xl text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6] leading-relaxed resize-none"
             />
           </div>
 
           {/* Public Slug */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
               URL Identifier (Slug) *
             </label>
             <div className="flex items-center">
-              <span className="px-3 py-2 bg-zinc-900 border border-r-0 border-zinc-800 rounded-l-xl text-xs font-mono text-zinc-500 select-none">
+              <span className="px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-xl text-xs font-mono text-gray-500 select-none">
                 /c/
               </span>
               <input
@@ -207,10 +207,10 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
                 value={publicSlug}
                 onChange={handleSlugChange}
                 placeholder="e.g. pulse-feedback"
-                className="glass-input flex-1 px-3 py-2 rounded-r-xl text-xs font-mono text-white"
+                className="flex-1 px-3 py-2 rounded-r-xl text-xs font-mono bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6]"
               />
             </div>
-            <p className="text-[11px] text-zinc-500 mt-1">
+            <p className="text-[11px] text-gray-500 mt-1">
               Lowercase letters, numbers, and hyphens only. Must be unique across the platform.
             </p>
           </div>
@@ -222,20 +222,20 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
               onClick={() => setIsActive(!isActive)}
               className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
                 isActive
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                  : 'bg-zinc-900/60 border-zinc-800 text-zinc-400'
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : 'bg-gray-50 border-gray-200 text-gray-500'
               }`}
             >
               <div>
-                <div className="text-xs font-semibold">Active for Submissions</div>
-                <div className="text-[10px] text-zinc-500">
+                <div className="text-xs font-bold">Active for Submissions</div>
+                <div className="text-[10px] text-gray-500">
                   {isActive ? 'Accepting new responses' : 'Closed / Paused'}
                 </div>
               </div>
               {isActive ? (
-                <ToggleRight className="w-6 h-6 text-emerald-400" />
+                <ToggleRight className="w-6 h-6 text-emerald-600" />
               ) : (
-                <ToggleLeft className="w-6 h-6 text-zinc-600" />
+                <ToggleLeft className="w-6 h-6 text-gray-400" />
               )}
             </div>
 
@@ -244,37 +244,37 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
               onClick={() => setAllowVideo(!allowVideo)}
               className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
                 allowVideo
-                  ? 'bg-brand-500/10 border-brand-500/30 text-brand-300'
-                  : 'bg-zinc-900/60 border-zinc-800 text-zinc-400'
+                  ? 'bg-purple-50 border-purple-200 text-[#6701e6]'
+                  : 'bg-gray-50 border-gray-200 text-gray-500'
               }`}
             >
               <div>
-                <div className="text-xs font-semibold">Accept Video Links</div>
-                <div className="text-[10px] text-zinc-500">
+                <div className="text-xs font-bold">Accept Video Links</div>
+                <div className="text-[10px] text-gray-500">
                   {allowVideo ? 'Loom / YouTube / Vimeo enabled' : 'Text-only form'}
                 </div>
               </div>
               {allowVideo ? (
-                <ToggleRight className="w-6 h-6 text-brand-400" />
+                <ToggleRight className="w-6 h-6 text-[#6701e6]" />
               ) : (
-                <ToggleLeft className="w-6 h-6 text-zinc-600" />
+                <ToggleLeft className="w-6 h-6 text-gray-400" />
               )}
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-4 border-t border-zinc-800 flex items-center justify-end gap-2.5">
+          <div className="pt-4 border-t border-gray-100 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-xs font-semibold text-white flex items-center gap-1.5 transition-all shadow-glow-sm disabled:opacity-50"
+              className="px-5 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:opacity-50"
             >
               <Save className="w-3.5 h-3.5" />
               <span>{isSaving ? 'Saving...' : 'Save Collection Settings'}</span>

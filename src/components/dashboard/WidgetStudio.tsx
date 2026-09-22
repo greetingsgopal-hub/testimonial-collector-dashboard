@@ -30,8 +30,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
   const projectWidgetId = project?.id || '';
   const [settings, setSettings] = useState<WidgetSettings>({
     type: 'wall',
-    theme: 'dark',
-    primaryColor: '#8b5cf6',
+    theme: 'light',
+    primaryColor: '#6701e6',
     showRating: true,
     showAvatar: true,
     showDate: true,
@@ -93,27 +93,27 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
     <div className="space-y-6">
       
       {/* Studio Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-6 rounded-2xl border border-white/10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-200 shadow-xs">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 text-xs font-semibold uppercase tracking-wider mb-2 border border-brand-500/20">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-[#6701e6] text-xs font-bold uppercase tracking-wider mb-2 border border-purple-200">
             <Sparkles className="w-3.5 h-3.5" />
             Social Proof Studio
           </div>
-          <h2 className="text-2xl font-bold font-display text-white tracking-tight">
+          <h2 className="text-2xl font-bold font-display text-gray-950 tracking-tight">
             Embeddable Testimonial Widgets
           </h2>
-          <p className="text-sm text-zinc-400 mt-1">
+          <p className="text-sm text-gray-500 mt-1">
             Showcase your best customer feedback on your landing pages, docs, or checkout flow with zero performance hit.
           </p>
         </div>
 
         {/* Widget Type Selector */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-zinc-900/90 rounded-xl border border-zinc-800 self-start md:self-auto">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-gray-100 rounded-xl border border-gray-200 self-start md:self-auto">
           {[
-            { id: 'floating_tab', label: '⭐ Floating Review Tab', icon: MessageSquarePlus },
-            { id: 'social_toast', label: '🔔 Social Proof Toast', icon: Bell },
+            { id: 'floating_tab', label: '⭐ Floating Tab', icon: MessageSquarePlus },
+            { id: 'social_toast', label: '🔔 Social Toast', icon: Bell },
             { id: 'wall', label: 'Wall of Love', icon: Layers },
-            { id: 'carousel', label: 'Carousel Slider', icon: Maximize2 },
+            { id: 'carousel', label: 'Carousel', icon: Maximize2 },
             { id: 'spotlight', label: 'Single Card', icon: Sparkles },
             { id: 'badge', label: 'Trust Badge', icon: Award },
           ].map((item) => {
@@ -123,10 +123,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
               <button
                 key={item.id}
                 onClick={() => setSettings(prev => ({ ...prev, type: item.id as WidgetType }))}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-sm'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                    ? 'bg-[#6701e6] text-white shadow-xs'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -144,28 +144,28 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
         <div className="space-y-6">
           
           {/* Customizer Controls */}
-          <div className="glass-panel p-5 rounded-2xl border border-white/10 space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-brand-400" />
+          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-[#6701e6]" />
               Customize Layout
             </h3>
 
             {/* Theme Toggle */}
             <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-300">Widget Theme</span>
-              <div className="flex items-center p-0.5 bg-zinc-900 rounded-lg border border-zinc-800">
+              <span className="text-xs font-semibold text-gray-700">Widget Theme</span>
+              <div className="flex items-center p-0.5 bg-gray-100 rounded-lg border border-gray-200">
                 <button
                   onClick={() => setSettings(prev => ({ ...prev, theme: 'dark' }))}
-                  className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
-                    settings.theme === 'dark' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-400 hover:text-zinc-200'
+                  className={`px-3 py-1 rounded text-xs font-semibold transition-all cursor-pointer ${
+                    settings.theme === 'dark' ? 'bg-gray-900 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
                   Dark
                 </button>
                 <button
                   onClick={() => setSettings(prev => ({ ...prev, theme: 'light' }))}
-                  className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
-                    settings.theme === 'light' ? 'bg-zinc-200 text-zinc-950 shadow' : 'text-zinc-400 hover:text-zinc-200'
+                  className={`px-3 py-1 rounded text-xs font-semibold transition-all cursor-pointer ${
+                    settings.theme === 'light' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
                   Light
@@ -177,8 +177,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
             {settings.type === 'wall' && (
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-zinc-300">Maximum Reviews</span>
-                  <span className="text-brand-400 font-semibold">{settings.maxCount}</span>
+                  <span className="font-semibold text-gray-700">Maximum Reviews</span>
+                  <span className="text-[#6701e6] font-bold">{settings.maxCount}</span>
                 </div>
                 <input
                   type="range"
@@ -186,49 +186,49 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                   max="12"
                   value={settings.maxCount}
                   onChange={(e) => setSettings(prev => ({ ...prev, maxCount: Number(e.target.value) }))}
-                  className="w-full accent-brand-500 cursor-pointer"
+                  className="w-full accent-[#6701e6] cursor-pointer"
                 />
               </div>
             )}
 
             {/* Checkbox Options */}
-            <div className="space-y-2 pt-2 border-t border-zinc-800">
-              <label className="flex items-center gap-2.5 text-xs text-zinc-300 cursor-pointer">
+            <div className="space-y-2.5 pt-3 border-t border-gray-100">
+              <label className="flex items-center gap-2.5 text-xs text-gray-700 font-medium cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.onlyFeatured}
                   onChange={(e) => setSettings(prev => ({ ...prev, onlyFeatured: e.target.checked }))}
-                  className="rounded border-zinc-700 bg-zinc-900 text-brand-600 focus:ring-brand-500"
+                  className="rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6]"
                 />
                 <span>Show only Featured reviews</span>
               </label>
 
-              <label className="flex items-center gap-2.5 text-xs text-zinc-300 cursor-pointer">
+              <label className="flex items-center gap-2.5 text-xs text-gray-700 font-medium cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.showRating}
                   onChange={(e) => setSettings(prev => ({ ...prev, showRating: e.target.checked }))}
-                  className="rounded border-zinc-700 bg-zinc-900 text-brand-600 focus:ring-brand-500"
+                  className="rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6]"
                 />
                 <span>Display Star Ratings</span>
               </label>
 
-              <label className="flex items-center gap-2.5 text-xs text-zinc-300 cursor-pointer">
+              <label className="flex items-center gap-2.5 text-xs text-gray-700 font-medium cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.showAvatar}
                   onChange={(e) => setSettings(prev => ({ ...prev, showAvatar: e.target.checked }))}
-                  className="rounded border-zinc-700 bg-zinc-900 text-brand-600 focus:ring-brand-500"
+                  className="rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6]"
                 />
                 <span>Display Reviewer Avatars</span>
               </label>
 
-              <label className="flex items-center gap-2.5 text-xs text-zinc-300 cursor-pointer">
+              <label className="flex items-center gap-2.5 text-xs text-gray-700 font-medium cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.showCompany}
                   onChange={(e) => setSettings(prev => ({ ...prev, showCompany: e.target.checked }))}
-                  className="rounded border-zinc-700 bg-zinc-900 text-brand-600 focus:ring-brand-500"
+                  className="rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6]"
                 />
                 <span>Display Company & Role</span>
               </label>
@@ -236,10 +236,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
           </div>
 
           {/* Copy Embed Code Panel */}
-          <div className="glass-panel p-5 rounded-2xl border border-white/10 space-y-3">
+          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                <Code2 className="w-4 h-4 text-brand-400" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
+                <Code2 className="w-4 h-4 text-[#6701e6]" />
                 Embed Code
               </h4>
 
@@ -247,13 +247,13 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
               <div className="flex items-center gap-1 text-[11px]">
                 <button
                   onClick={() => setCodeType('html')}
-                  className={`px-2 py-0.5 rounded ${codeType === 'html' ? 'bg-brand-500/20 text-brand-300 font-semibold' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  className={`px-2.5 py-0.5 rounded cursor-pointer ${codeType === 'html' ? 'bg-purple-100 text-[#6701e6] font-bold' : 'text-gray-500 hover:text-gray-900'}`}
                 >
                   HTML
                 </button>
                 <button
                   onClick={() => setCodeType('react')}
-                  className={`px-2 py-0.5 rounded ${codeType === 'react' ? 'bg-brand-500/20 text-brand-300 font-semibold' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  className={`px-2.5 py-0.5 rounded cursor-pointer ${codeType === 'react' ? 'bg-purple-100 text-[#6701e6] font-bold' : 'text-gray-500 hover:text-gray-900'}`}
                 >
                   React
                 </button>
@@ -261,30 +261,30 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
             </div>
 
             {/* Code Box */}
-            <div className="p-3 rounded-xl bg-zinc-950 font-mono text-[11px] text-zinc-400 border border-zinc-800/80 overflow-x-auto">
+            <div className="p-3 rounded-xl bg-gray-950 font-mono text-[11px] text-gray-300 border border-gray-800 overflow-x-auto">
               <code>{getEmbedSnippet()}</code>
             </div>
 
             <button
               onClick={handleCopyCode}
-              className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-white flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? 'Copied to Clipboard!' : 'Copy Snippet'}</span>
             </button>
           </div>
         </div>
 
         {/* Right: Live Interactive Widget Preview Canvas */}
-        <div className="lg:col-span-2 glass-panel p-6 rounded-2xl border border-white/10 flex flex-col min-h-[460px]">
-          <div className="flex items-center justify-between pb-4 border-b border-zinc-800 mb-6">
+        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-200 shadow-xs flex flex-col min-h-[460px]">
+          <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-6">
             <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4 text-brand-400" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <Eye className="w-4 h-4 text-[#6701e6]" />
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-600">
                 Interactive Preview Canvas
               </span>
             </div>
-            <span className="text-xs text-zinc-500">
+            <span className="text-xs text-gray-500 font-medium">
               Displaying {slicedReviews.length} approved testimonials
             </span>
           </div>
@@ -292,15 +292,15 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
           {/* Canvas Wrapper */}
           <div className={`flex-1 rounded-2xl p-6 transition-colors overflow-hidden ${
             settings.theme === 'dark' 
-              ? 'bg-zinc-950/80 border border-zinc-800/80 text-white' 
-              : 'bg-zinc-50 border border-zinc-200 text-zinc-900'
+              ? 'bg-gray-950 border border-gray-800 text-white' 
+              : 'bg-gray-50/80 border border-gray-200 text-gray-900'
           }`}>
             
             {slicedReviews.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8">
-                <Sparkles className="w-8 h-8 text-zinc-600 mb-2" />
-                <h4 className="text-sm font-semibold">No approved reviews match the filters</h4>
-                <p className="text-xs text-zinc-500 mt-1">
+                <Sparkles className="w-8 h-8 text-gray-400 mb-2" />
+                <h4 className="text-sm font-bold text-gray-800">No approved reviews match the filters</h4>
+                <p className="text-xs text-gray-500 mt-1">
                   Approve or feature testimonials in the Dashboard to display them in this widget.
                 </p>
               </div>
@@ -314,8 +314,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                     key={review.id}
                     className={`rounded-xl p-4 border transition-all ${
                       settings.theme === 'dark'
-                        ? 'bg-zinc-900/70 border-zinc-800 text-zinc-200'
-                        : 'bg-white border-zinc-200 text-zinc-800 shadow-sm'
+                        ? 'bg-zinc-900 border-zinc-800 text-zinc-200'
+                        : 'bg-white border-gray-200 text-gray-800 shadow-xs'
                     }`}
                   >
                     {settings.showRating && (
@@ -324,14 +324,14 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                           <Star
                             key={s}
                             className={`w-3.5 h-3.5 ${
-                              s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-zinc-600'
+                              s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300'
                             }`}
                           />
                         ))}
                       </div>
                     )}
                     <p className="text-xs leading-relaxed italic mb-3">"{review.content}"</p>
-                    <div className="flex items-center gap-2.5 pt-2 border-t border-zinc-800/40">
+                    <div className="flex items-center gap-2.5 pt-2 border-t border-gray-100">
                       {settings.showAvatar && review.avatarUrl && (
                         <img
                           src={review.avatarUrl}
@@ -340,9 +340,9 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                         />
                       )}
                       <div className="text-[11px]">
-                        <div className="font-semibold text-white">{review.name}</div>
+                        <div className={`font-semibold ${settings.theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{review.name}</div>
                         {settings.showCompany && (
-                          <div className="text-zinc-500">{review.role} {review.company ? `• ${review.company}` : ''}</div>
+                          <div className="text-gray-500">{review.role} {review.company ? `• ${review.company}` : ''}</div>
                         )}
                       </div>
                     </div>
@@ -359,23 +359,23 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                   return (
                     <div className={`p-6 rounded-2xl border ${
                       settings.theme === 'dark'
-                        ? 'bg-zinc-900/90 border-zinc-800 text-zinc-200'
-                        : 'bg-white border-zinc-200 text-zinc-900 shadow-md'
+                        ? 'bg-zinc-900 border-zinc-800 text-zinc-200'
+                        : 'bg-white border-gray-200 text-gray-900 shadow-xs'
                     }`}>
-                      <Quote className="w-8 h-8 text-brand-400/50 mb-3" />
+                      <Quote className="w-8 h-8 text-[#6701e6]/40 mb-3" />
                       {settings.showRating && (
                         <div className="flex items-center gap-1 mb-3">
                           {[1, 2, 3, 4, 5].map((s) => (
                             <Star
                               key={s}
                               className={`w-4 h-4 ${
-                                s <= currentReview.rating ? 'text-amber-400 fill-amber-400' : 'text-zinc-600'
+                                s <= currentReview.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300'
                               }`}
                             />
                           ))}
                         </div>
                       )}
-                      <p className="text-sm sm:text-base leading-relaxed mb-5 italic">
+                      <p className="text-sm leading-relaxed mb-5 italic">
                         "{currentReview.content}"
                       </p>
                       <div className="flex items-center gap-3">
@@ -383,13 +383,13 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                           <img
                             src={currentReview.avatarUrl}
                             alt={currentReview.name ? `${currentReview.name}'s profile photo` : 'Customer avatar'}
-                            className="w-10 h-10 rounded-full object-cover ring-2 ring-brand-500/40"
+                            className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-200"
                           />
                         )}
                         <div>
-                          <div className="font-bold text-sm">{currentReview.name}</div>
+                          <div className="font-bold text-sm text-gray-900">{currentReview.name}</div>
                           {settings.showCompany && (
-                            <div className="text-xs text-zinc-400">
+                            <div className="text-xs text-gray-500">
                               {currentReview.role} {currentReview.company ? `• ${currentReview.company}` : ''}
                             </div>
                           )}
@@ -403,16 +403,16 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                 <div className="flex items-center justify-center gap-4 mt-6">
                   <button
                     onClick={() => setCarouselIndex((prev) => (prev > 0 ? prev - 1 : slicedReviews.length - 1))}
-                    className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white transition-colors"
+                    className="p-2 rounded-full bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 transition-colors shadow-2xs cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-gray-500 font-medium">
                     {(carouselIndex % slicedReviews.length) + 1} of {slicedReviews.length}
                   </span>
                   <button
                     onClick={() => setCarouselIndex((prev) => (prev + 1) % slicedReviews.length)}
-                    className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white transition-colors"
+                    className="p-2 rounded-full bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 transition-colors shadow-2xs cursor-pointer"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -428,8 +428,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                   return (
                     <div className={`w-full max-w-md p-6 rounded-2xl border relative overflow-hidden ${
                       settings.theme === 'dark'
-                        ? 'bg-zinc-900/90 border-zinc-800 text-zinc-200'
-                        : 'bg-white border-zinc-200 text-zinc-900 shadow-lg'
+                        ? 'bg-zinc-900 border-zinc-800 text-zinc-200'
+                        : 'bg-white border-gray-200 text-gray-900 shadow-sm'
                     }`}>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-1">
@@ -437,12 +437,12 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                             <Star
                               key={s}
                               className={`w-4 h-4 ${
-                                s <= feat.rating ? 'text-amber-400 fill-amber-400' : 'text-zinc-600'
+                                s <= feat.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300'
                               }`}
                             />
                           ))}
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-400/20 text-amber-300">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
                           Spotlight
                         </span>
                       </div>
@@ -458,8 +458,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                           />
                         )}
                         <div>
-                          <div className="font-semibold text-sm">{feat.name}</div>
-                          <div className="text-xs text-zinc-400">{feat.role} • {feat.company}</div>
+                          <div className="font-bold text-sm text-gray-900">{feat.name}</div>
+                          <div className="text-xs text-gray-500">{feat.role} • {feat.company}</div>
                         </div>
                       </div>
                     </div>
@@ -471,20 +471,18 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
             {/* 4. Trust Rating Badge */}
             {settings.type === 'badge' && (
               <div className="h-full flex flex-col items-center justify-center gap-4 py-8">
-                {/* Horizontal Floating Trust Pill */}
-                <div className={`inline-flex items-center gap-3 px-4 py-2.5 rounded-full border shadow-lg ${
+                <div className={`inline-flex items-center gap-3 px-5 py-3 rounded-full border shadow-sm ${
                   settings.theme === 'dark'
                     ? 'bg-zinc-900 border-zinc-800 text-white'
-                    : 'bg-white border-zinc-200 text-zinc-900'
+                    : 'bg-white border-gray-200 text-gray-900'
                 }`}>
-                  {/* Overlapping mini avatars */}
                   <div className="flex -space-x-2">
                     {approvedReviews.slice(0, 4).map((r, i) => (
                       <img
                         key={i}
                         src={r.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'}
                         alt={r.name ? `${r.name}'s avatar` : 'Customer avatar'}
-                        className="w-6 h-6 rounded-full ring-2 ring-zinc-900 object-cover"
+                        className="w-6 h-6 rounded-full ring-2 ring-white object-cover"
                       />
                     ))}
                   </div>
@@ -498,8 +496,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
                     <span className="text-xs font-bold">{avgRating} / 5.0</span>
                   </div>
 
-                  <span className="text-xs text-zinc-400">
-                    Loved by <strong>{approvedReviews.length}+</strong> customers
+                  <span className="text-xs text-gray-500">
+                    Loved by <strong className="text-gray-900">{approvedReviews.length}+</strong> customers
                   </span>
                 </div>
               </div>
@@ -509,14 +507,14 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
             {settings.type === 'floating_tab' && (
               <div className="h-full flex flex-col items-center justify-center gap-4 py-8 relative min-h-[380px]">
                 <div className="text-center max-w-md space-y-2">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-xs font-semibold uppercase tracking-wider border border-purple-500/20">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-[#6701e6] text-xs font-bold uppercase tracking-wider border border-purple-200">
                     <Sparkles className="w-3.5 h-3.5" />
                     Senja-Class Interactive Floating Tab
                   </div>
-                  <h4 className="text-base font-bold text-white">
+                  <h4 className="text-base font-bold text-gray-900">
                     Click the floating button below to test the drawer!
                   </h4>
-                  <p className="text-xs text-zinc-400">
+                  <p className="text-xs text-gray-500">
                     Visitors see this anchored on your site. Clicking it pops open your wall of reviews & collection form without leaving your page.
                   </p>
                 </div>
@@ -536,14 +534,14 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews }) => {
             {settings.type === 'social_toast' && (
               <div className="h-full flex flex-col items-center justify-center gap-4 py-8 relative min-h-[380px]">
                 <div className="text-center max-w-md space-y-2 mb-8">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold uppercase tracking-wider border border-emerald-500/20">
-                    <Bell className="w-3.5 h-3.5" />
-                    Real-Time FOMO Popups
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold uppercase tracking-wider border border-emerald-200">
+                    <Bell className="w-3.5 h-3.5 text-emerald-600" />
+                    Real-Time Social Proof Popups
                   </div>
-                  <h4 className="text-base font-bold text-white">
+                  <h4 className="text-base font-bold text-gray-900">
                     Live Testimonial Notification Toast
                   </h4>
-                  <p className="text-xs text-zinc-400">
+                  <p className="text-xs text-gray-500">
                     Subtly pops up in the corner of your website every few seconds to show real verified buyer feedback.
                   </p>
                 </div>

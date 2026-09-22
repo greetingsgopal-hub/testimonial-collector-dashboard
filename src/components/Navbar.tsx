@@ -12,7 +12,6 @@ import {
   Crown,
   Download,
   Settings,
-  Sparkles,
 } from 'lucide-react';
 import { getActiveBackendInfo } from '../lib/storage';
 import { useAuth } from '../context/AuthContext';
@@ -34,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveView,
   pendingCount,
   onOpenDatabaseConfig,
-  onOpenWelcomeModal,
+  onOpenWelcomeModal: _onOpenWelcomeModal,
 }) => {
   const backend = getActiveBackendInfo();
   const { user, workspace, collectionForm, signOut, isDemoMode } = useAuth();
@@ -67,21 +66,21 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
         {/* Brand & Project Switcher */}
-        <div className="flex items-center gap-3">
-          <Link to="/dashboard" className="flex items-center gap-1.5 focus:outline-none">
-            <span className="font-display font-black text-xl text-[#6701e6] tracking-tight hover:opacity-95 transition-opacity">
+        <div className="flex items-center gap-3 shrink-0">
+          <Link to="/dashboard" className="flex items-center gap-1.5 focus:outline-none whitespace-nowrap">
+            <span className="font-display font-black text-xl text-[#6701e6] tracking-tight hover:opacity-95 transition-opacity whitespace-nowrap">
               Panda Praise
             </span>
           </Link>
 
           {isDemoMode && (
-            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
               Demo
             </span>
           )}
 
           <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400 pl-3 border-l border-gray-200">
-            <span className="flex items-center gap-1 text-gray-600 font-medium">
+            <span className="flex items-center gap-1 text-gray-600 font-medium whitespace-nowrap">
               <Building2 className="w-3.5 h-3.5 text-[#6701e6]" />
               {workspace?.name || 'Workspace'}
             </span>
@@ -101,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   key={tab.id}
                   id={`nav-${tab.id}-btn`}
                   onClick={() => setActiveView(tab.id)}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
                     isActive
                       ? 'bg-[#6701e6] text-white shadow-xs'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
@@ -120,14 +119,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Quick Share Collection Link Button */}
-          <div className="hidden md:flex items-center gap-1 bg-purple-50/70 border border-purple-200 p-1 rounded-xl">
+          <div className="hidden md:flex items-center gap-1 bg-purple-50/70 border border-purple-200 p-1 rounded-xl shrink-0">
             <button
               onClick={handleCopyLink}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-[#6701e6] hover:bg-purple-100/80 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-[#6701e6] hover:bg-purple-100/80 transition-colors cursor-pointer whitespace-nowrap"
               title="Copy public collection link to send to clients"
             >
               {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedLink ? 'Link Copied!' : 'Share Form Link'}</span>
+              <span>{copiedLink ? 'Link Copied!' : 'Share Form'}</span>
             </button>
             <a
               href={collectionUrl}
@@ -139,18 +138,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
-
-          {/* 5-Step Guide Button */}
-          {onOpenWelcomeModal && (
-            <button
-              onClick={onOpenWelcomeModal}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold transition-colors cursor-pointer shadow-xs"
-              title="Open the 5-step quickstart celebration guide"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>5-Step Guide</span>
-            </button>
-          )}
         </nav>
 
         {/* Right action controls */}
