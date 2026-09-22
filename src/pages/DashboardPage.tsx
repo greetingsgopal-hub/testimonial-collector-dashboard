@@ -15,6 +15,7 @@ import { PublishHistoryModal } from '../components/dashboard/PublishHistoryModal
 import { ImportPage } from './ImportPage';
 import { WorkspaceSettings } from '../components/dashboard/WorkspaceSettings';
 import { SentimentDashboard } from '../components/dashboard/SentimentDashboard';
+import { WelcomeCelebrationModal } from '../components/dashboard/WelcomeCelebrationModal';
 import { storage } from '../lib/storage';
 import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
@@ -38,12 +39,16 @@ import {
 
 export const DashboardPage = () => {
   usePageSeo({
-    title: 'Dashboard — Panda Praise',
+    title: 'Proof Dashboard — Panda Praise',
     description: 'Panda Praise customer review management and moderation dashboard.',
   });
 
   const { project, collectionForm } = useAuth();
   const [activeView, setActiveView] = useState<DashboardView>('dashboard');
+  const [showWelcomeModal, setShowWelcomeModal] = useState<boolean>(() => {
+    // Show automatically on first visit after onboarding
+    return localStorage.getItem('pp_welcome_celebrated') !== 'true';
+  });
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<ReviewStats>({
@@ -248,36 +253,71 @@ export const DashboardPage = () => {
   }, [reviews, filters]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 relative">
-      <div className="ambient-glow" />
-
+    <div className="min-h-screen flex flex-col bg-[#f9fafb] text-gray-900 relative font-sans">
+      
       {/* Navigation Header */}
       <Navbar
         activeView={activeView}
         setActiveView={setActiveView}
         pendingCount={stats.pendingCount}
         onOpenDatabaseConfig={() => setShowDatabaseModal(true)}
+        onOpenWelcomeModal={() => setShowWelcomeModal(true)}
+      />
+
+      {/* Welcoming Celebration Modal (Senja Exact) */}
+      <WelcomeCelebrationModal
+        isOpen={showWelcomeModal}
+        onClose={() => {
+          localStorage.setItem('pp_welcome_celebrated', 'true');
+          setShowWelcomeModal(false);
+        }}
+        onOpenWidgetStudio={() => setActiveView('widgets')}
+        onOpenImport={() => setActiveView('import')}
+        onOpenSocialStudio={() => setShowCarouselModal(true)}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 space-y-6">
         
+        {/* Welcoming Celebration Banner */}
+        <div className="bg-gradient-to-r from-[#6701e6] via-[#7c3aed] to-[#ec4899] rounded-2xl p-4 sm:p-5 text-white shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 text-xl shadow-xs">
+              🎉
+            </div>
+            <div>
+              <h3 className="font-extrabold text-sm sm:text-base leading-snug">
+                Welcome to Panda Praise!
+              </h3>
+              <p className="text-xs text-white/90 mt-0.5">
+                Your testimonial engine is ready. Follow the 5 quickstart steps to collect and share social proof.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowWelcomeModal(true)}
+            className="px-4 py-2 rounded-xl bg-white hover:bg-gray-100 text-[#6701e6] font-extrabold text-xs shadow-xs transition-colors shrink-0 cursor-pointer"
+          >
+            Open 5-Step Guide →
+          </button>
+        </div>
+
         {/* Tenant Project Action Banner */}
-        <div className="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold font-display text-white">
+              <h2 className="text-xl font-extrabold font-display text-gray-950">
                 {project?.name || 'Primary Project'}
               </h2>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-gray-100 border border-gray-200 text-gray-600">
                 slug: {project?.slug || 'pulse-ai'}
               </span>
               {currentCollectionForm && !currentCollectionForm.isActive && (
-                <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-red-500/15 border border-red-500/30 text-red-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-50 border border-red-200 text-red-600">
                   Form Closed
                 </span>
               )}
             </div>
-            <p className="text-xs text-zinc-400 mt-1">
+            <p className="text-xs text-gray-500 mt-1">
               Testimonials collected from your public form automatically route to this project moderation queue.
             </p>
           </div>
@@ -287,7 +327,7 @@ export const DashboardPage = () => {
             <button
               id="dashboard-carousel-studio-btn"
               onClick={() => setShowCarouselModal(true)}
-              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:via-indigo-500 hover:to-pink-500 text-xs font-semibold text-white flex items-center gap-1.5 transition-all shadow-glow-sm cursor-pointer hover:scale-[1.02]"
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:via-indigo-500 hover:to-pink-500 text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-xs cursor-pointer hover:scale-[1.02]"
               title="Create multi-review social carousel for LinkedIn & Instagram"
             >
               <Layers className="w-3.5 h-3.5 text-white" />
@@ -297,10 +337,10 @@ export const DashboardPage = () => {
             {/* Configure Collection Form */}
             <button
               onClick={() => setShowCollectionModal(true)}
-              className="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-200 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-700 hover:text-gray-950 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
               title="Configure collection form title, slug, and status"
             >
-              <Settings className="w-3.5 h-3.5 text-brand-400" />
+              <Settings className="w-3.5 h-3.5 text-[#6701e6]" />
               <span>Configure Form</span>
             </button>
 
@@ -308,10 +348,10 @@ export const DashboardPage = () => {
             <button
               id="dashboard-connected-accounts-btn"
               onClick={() => setShowAccountsModal(true)}
-              className="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-200 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-700 hover:text-gray-950 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
               title="Manage connected social accounts (LinkedIn, X, etc.)"
             >
-              <LinkIcon className="w-3.5 h-3.5 text-emerald-400" />
+              <LinkIcon className="w-3.5 h-3.5 text-emerald-600" />
               <span>Social Accounts</span>
             </button>
 
@@ -319,20 +359,20 @@ export const DashboardPage = () => {
             <button
               id="dashboard-publish-history-btn"
               onClick={() => setShowHistoryModal(true)}
-              className="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-200 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-700 hover:text-gray-950 flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
               title="View social publishing audit history"
             >
-              <History className="w-3.5 h-3.5 text-cyan-400" />
+              <History className="w-3.5 h-3.5 text-sky-600" />
               <span>History</span>
             </button>
 
-            <div className="flex items-center gap-2 p-1 bg-zinc-900/90 border border-zinc-800 rounded-xl flex-1 md:flex-initial">
-              <span className="text-xs font-mono text-zinc-400 px-2 truncate max-w-[200px]">
+            <div className="flex items-center gap-2 p-1 bg-gray-50 border border-gray-200 rounded-xl flex-1 md:flex-initial">
+              <span className="text-xs font-mono text-gray-600 px-2 truncate max-w-[200px]">
                 {collectionUrl}
               </span>
               <button
                 onClick={handleCopyLink}
-                className="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-xs font-semibold text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-lg bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                 title="Copy public link"
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -344,12 +384,45 @@ export const DashboardPage = () => {
               href={collectionUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors"
+              className="p-2.5 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 hover:text-gray-900 transition-colors shadow-xs"
               title="Open public form"
             >
               <ExternalLink className="w-4 h-4" />
             </a>
           </div>
+        </div>
+
+        {/* Quick Topic Chips (Screenshot media_1790044572034.png Exact) */}
+        <div className="flex flex-wrap items-center gap-2 py-0.5">
+          <span className="text-xs font-semibold text-gray-500 mr-1">Your customers talk about:</span>
+          <button
+            onClick={() => setFilters(prev => ({ ...prev, search: 'scheduling' }))}
+            className="px-3 py-1 rounded-full bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 text-xs font-medium text-gray-700 shadow-xs transition-colors cursor-pointer flex items-center gap-1"
+          >
+            <span>Ease of scheduling</span>
+            <span className="text-xs font-bold text-gray-900">42</span>
+          </button>
+          <button
+            onClick={() => setFilters(prev => ({ ...prev, search: 'time saved' }))}
+            className="px-3 py-1 rounded-full bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 text-xs font-medium text-gray-700 shadow-xs transition-colors cursor-pointer flex items-center gap-1"
+          >
+            <span>Time saved</span>
+            <span className="text-xs font-bold text-gray-900">38</span>
+          </button>
+          <button
+            onClick={() => setFilters(prev => ({ ...prev, search: 'support' }))}
+            className="px-3 py-1 rounded-full bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 text-xs font-medium text-gray-700 shadow-xs transition-colors cursor-pointer flex items-center gap-1"
+          >
+            <span>Customer support</span>
+            <span className="text-xs font-bold text-gray-900">29</span>
+          </button>
+          <button
+            onClick={() => setFilters(prev => ({ ...prev, search: 'onboarding' }))}
+            className="px-3 py-1 rounded-full bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 text-xs font-medium text-gray-700 shadow-xs transition-colors cursor-pointer flex items-center gap-1"
+          >
+            <span>Onboarding</span>
+            <span className="text-xs font-bold text-gray-900">21</span>
+          </button>
         </div>
 
         {/* Social Connection Feedback Notification */}
@@ -431,18 +504,18 @@ export const DashboardPage = () => {
                 <p className="text-xs">Loading project testimonials...</p>
               </div>
             ) : filteredReviews.length === 0 ? (
-              <div className="py-16 glass-panel rounded-2xl border border-white/10 text-center p-8 space-y-4 max-w-lg mx-auto">
-                <div className="w-12 h-12 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center mx-auto">
+              <div className="py-16 bg-white rounded-2xl border border-gray-200 shadow-xs text-center p-8 space-y-4 max-w-lg mx-auto">
+                <div className="w-12 h-12 rounded-xl bg-purple-50 text-[#6701e6] flex items-center justify-center mx-auto border border-purple-100">
                   <Send className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold font-display text-white">No Testimonials Yet</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <h3 className="text-lg font-extrabold font-display text-gray-950">No Testimonials Yet</h3>
+                <p className="text-xs text-gray-500 leading-relaxed">
                   Share your public collection form link with customers to collect feedback, or load sample reviews to test your widgets.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                   <button
                     onClick={handleCopyLink}
-                    className="w-full sm:w-auto px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-xs font-semibold text-white transition-all flex items-center justify-center gap-1.5"
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     <span>Copy Form Link</span>
@@ -452,9 +525,9 @@ export const DashboardPage = () => {
                   {storage.resetToSampleData && (
                     <button
                       onClick={handleSeedDemoData}
-                      className="w-full sm:w-auto px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-300 hover:text-white transition-colors flex items-center justify-center gap-1.5"
+                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-xs font-semibold text-gray-700 hover:text-gray-950 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                       <span>Load 6 Demo Reviews</span>
                     </button>
                   )}

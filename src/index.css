@@ -4,8 +4,8 @@
 
 @layer base {
   body {
-    background-color: #09090b;
-    color: #f4f4f5;
+    background-color: #f9fafb;
+    color: #111827;
     overflow-x: hidden;
   }
 
@@ -15,10 +15,10 @@
     height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: #09090b;
+    background: #f3f4f6;
   }
   ::-webkit-scrollbar-thumb {
-    background: #27272a;
+    background: #d1d5db;
     border-radius: 4px;
   }
   /* Focus visible accessibility outline for keyboard navigation */
@@ -237,5 +237,22 @@
 
 .marquee-track:hover {
   animation-play-state: paused;
+}
+
+/* Infinite vertical scrolling marquee for login/signup testimonials */
+@keyframes vertical-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
+.animate-vertical-scroll {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  animation: vertical-scroll 32s linear infinite;
 }
 

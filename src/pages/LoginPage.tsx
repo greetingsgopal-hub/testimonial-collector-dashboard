@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { AlertCircle, BookOpen } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { GoogleIcon } from '../components/auth/GoogleIcon';
+import { ScrollingTestimonials } from '../components/auth/ScrollingTestimonials';
 
 export const LoginPage: React.FC = () => {
   usePageSeo({
@@ -172,55 +173,8 @@ export const LoginPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Right Column: Testimonials Showcase ── */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#6701e6] p-10 xl:p-14 flex-col justify-center relative overflow-hidden text-white">
-        <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-purple-900/40 blur-3xl" />
-
-        <div className="relative z-10 max-w-lg mx-auto w-full space-y-6">
-          <div className="rounded-3xl bg-white/10 border border-white/15 p-6 xl:p-7 backdrop-blur-md shadow-2xl">
-            <div className="flex items-start gap-4">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
-                alt="Devin Lee"
-                className="w-16 h-16 rounded-2xl object-cover ring-2 ring-white/20 shrink-0"
-              />
-              <div>
-                <div className="flex text-amber-400 text-sm mb-1.5">★★★★★</div>
-                <p className="text-base sm:text-lg font-bold leading-snug">
-                  It took mere minutes to get set up and add GORGEOUS testimonials to my website
-                </p>
-                <p className="text-xs text-white/80 mt-2">
-                  Devin Lee <span className="text-emerald-400 font-medium">/ Systems Strategist</span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white/10 border border-white/15 p-6 xl:p-7 backdrop-blur-md shadow-2xl">
-            <div className="flex items-start gap-4">
-              <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80"
-                alt="Jamie Northrup"
-                className="w-16 h-16 rounded-2xl object-cover ring-2 ring-white/20 shrink-0"
-              />
-              <div>
-                <div className="flex text-amber-400 text-sm mb-1.5">★★★★★</div>
-                <p className="text-base sm:text-lg font-bold leading-snug">
-                  Took me less than 5 minutes to start collecting
-                </p>
-                <p className="text-xs text-white/80 mt-2">
-                  Jamie Northrup <span className="text-emerald-400 font-medium">/ Minimalist Hustler</span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-6 right-6 w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center shadow-lg">
-          <BookOpen className="w-4 h-4" />
-        </div>
-      </div>
+      {/* ── Right Column: Continuous Auto-scrolling Testimonials (Senja Exact) ── */}
+      <ScrollingTestimonials />
 
     </div>
   );

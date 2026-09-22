@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Code2, 
@@ -11,11 +12,11 @@ import {
   Crown,
   Download,
   Settings,
+  Sparkles,
 } from 'lucide-react';
 import { getActiveBackendInfo } from '../lib/storage';
 import { useAuth } from '../context/AuthContext';
 import { ProjectSwitcher } from './dashboard/ProjectSwitcher';
-import { PandaPraiseIcon } from './PandaPraiseLogo';
 import { PLAN_PRICING } from '../lib/planLimits';
 
 export type DashboardView = 'dashboard' | 'widgets' | 'import' | 'settings';
@@ -25,6 +26,7 @@ interface NavbarProps {
   setActiveView: (view: DashboardView) => void;
   pendingCount: number;
   onOpenDatabaseConfig: () => void;
+  onOpenWelcomeModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -32,6 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveView,
   pendingCount,
   onOpenDatabaseConfig,
+  onOpenWelcomeModal,
 }) => {
   const backend = getActiveBackendInfo();
   const { user, workspace, collectionForm, signOut, isDemoMode } = useAuth();
@@ -51,62 +54,63 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const navTabs: { id: DashboardView; label: string; icon: typeof LayoutDashboard; badge?: number }[] = [
-    { id: 'dashboard', label: 'Reviews', icon: LayoutDashboard, badge: pendingCount },
+    { id: 'dashboard', label: 'Proof', icon: LayoutDashboard, badge: pendingCount },
     { id: 'widgets', label: 'Widgets', icon: Code2 },
     { id: 'import', label: 'Import', icon: Download },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
+  const userInitial = (user?.displayName || user?.email || 'U').charAt(0).toUpperCase();
+
   return (
-    <header className="sticky top-0 z-40 w-full glass-panel border-b border-zinc-800/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-200 shadow-xs font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
         {/* Brand & Project Switcher */}
         <div className="flex items-center gap-3">
-          <PandaPraiseIcon size={36} colorMode="gradient" className="shrink-0" />
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-display font-extrabold text-base sm:text-lg text-white tracking-tight">
-                Panda <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Praise</span>
-              </span>
-              {isDemoMode && (
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
-                  Demo Mode
-                </span>
-              )}
-            </div>
-            {/* Workspace name + Project Switcher */}
-            <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 mt-0.5">
-              <span className="flex items-center gap-1 text-zinc-300 font-medium">
-                <Building2 className="w-3 h-3 text-brand-400" />
-                {workspace?.name || 'My Workspace'}
-              </span>
-              <span>/</span>
-              <ProjectSwitcher />
-            </div>
+          <Link to="/dashboard" className="flex items-center gap-1.5 focus:outline-none">
+            <span className="font-display font-black text-xl text-[#6701e6] tracking-tight hover:opacity-95 transition-opacity">
+              Panda Praise
+            </span>
+          </Link>
+
+          {isDemoMode && (
+            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+              Demo
+            </span>
+          )}
+
+          <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400 pl-3 border-l border-gray-200">
+            <span className="flex items-center gap-1 text-gray-600 font-medium">
+              <Building2 className="w-3.5 h-3.5 text-[#6701e6]" />
+              {workspace?.name || 'Workspace'}
+            </span>
+            <span>/</span>
+            <ProjectSwitcher />
           </div>
         </div>
 
-        {/* View Switcher Tabs */}
+        {/* View Switcher Tabs (Senja Exact) */}
         <nav className="flex items-center gap-2">
-          <div className="flex items-center p-1 bg-zinc-900/90 rounded-xl border border-zinc-800/80 shadow-inner">
+          <div className="flex items-center p-1 bg-gray-100 rounded-xl border border-gray-200">
             {navTabs.map(tab => {
               const Icon = tab.icon;
+              const isActive = activeView === tab.id;
               return (
                 <button
                   key={tab.id}
                   id={`nav-${tab.id}-btn`}
                   onClick={() => setActiveView(tab.id)}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                    activeView === tab.id
-                      ? 'bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-[#6701e6] text-white shadow-xs'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">{tab.label}</span>
                   {tab.badge && tab.badge > 0 && (
-                    <span className="ml-1 px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-amber-500 text-zinc-950 animate-pulse">
+                    <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-400 text-gray-950">
                       {tab.badge}
                     </span>
                   )}
@@ -116,49 +120,56 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Quick Share Collection Link Button */}
-          <div className="hidden md:flex items-center gap-1 bg-zinc-900/80 border border-zinc-800 p-1 rounded-xl">
+          <div className="hidden md:flex items-center gap-1 bg-purple-50/70 border border-purple-200 p-1 rounded-xl">
             <button
               onClick={handleCopyLink}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-brand-300 hover:text-brand-200 hover:bg-brand-500/10 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-[#6701e6] hover:bg-purple-100/80 transition-colors cursor-pointer"
               title="Copy public collection link to send to clients"
             >
-              {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copiedLink ? 'Link Copied!' : 'Share Form Link'}</span>
             </button>
             <a
               href={collectionUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              className="p-1.5 rounded-lg text-[#6701e6] hover:bg-purple-100/80 transition-colors"
               title="Open public form in new tab"
             >
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
+
+          {/* 5-Step Guide Button */}
+          {onOpenWelcomeModal && (
+            <button
+              onClick={onOpenWelcomeModal}
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold transition-colors cursor-pointer shadow-xs"
+              title="Open the 5-step quickstart celebration guide"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>5-Step Guide</span>
+            </button>
+          )}
         </nav>
 
         {/* Right action controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Plan Badge */}
-          <div className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
-            ${plan === 'pro' ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' :
-              plan === 'starter' ? 'bg-violet-500/15 text-violet-300 border border-violet-500/30' :
-              'bg-white/5 text-zinc-400 border border-white/10'}`}>
-            {plan !== 'free' && <Crown className="w-3 h-3" />}
+          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+            {plan !== 'free' && <Crown className="w-3 h-3 text-amber-500" />}
             {planName}
           </div>
 
           {/* Upgrade Button (free users only) */}
           {plan === 'free' && (
-            <a
-              href="/pricing"
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                       bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500
-                       text-white transition-all shadow-sm"
+            <Link
+              to="/onboarding/upgrade"
+              className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-black hover:bg-gray-800 text-white transition-all shadow-xs cursor-pointer"
             >
-              <Crown className="w-3 h-3" />
+              <Crown className="w-3 h-3 text-amber-400" />
               Upgrade
-            </a>
+            </Link>
           )}
 
           {/* Database indicator button */}
@@ -166,7 +177,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             id="database-config-btn"
             onClick={onOpenDatabaseConfig}
             title="Database Connection Status"
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 text-xs font-medium text-zinc-300 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-xs font-medium text-gray-700 transition-colors cursor-pointer"
           >
             <span className="relative flex h-2 w-2">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
@@ -176,27 +187,32 @@ export const Navbar: React.FC<NavbarProps> = ({
                 backend.type === 'firebase' ? 'bg-emerald-500' : 'bg-amber-500'
               }`}></span>
             </span>
-            <Database className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="hidden lg:inline">{backend.type === 'firebase' ? 'Firebase' : 'Demo DB'}</span>
+            <Database className="w-3.5 h-3.5 text-gray-500" />
+            <span className="hidden xl:inline text-xs">{backend.type === 'firebase' ? 'Firebase' : 'Demo DB'}</span>
           </button>
 
           {/* User profile & Sign out */}
-          <div className="flex items-center gap-2 pl-2 border-l border-zinc-800">
-            <div className="hidden xl:flex flex-col text-right">
-              <span className="text-xs font-semibold text-zinc-200 truncate max-w-[140px]">
-                {user?.email ? user.email.split('@')[0] : 'Demo User'}
-              </span>
-              <span className="text-[10px] text-zinc-500 truncate max-w-[140px]">
-                {user?.email || 'Offline'}
-              </span>
+          <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-purple-100 text-[#6701e6] font-bold text-xs flex items-center justify-center border border-purple-200">
+                {userInitial}
+              </div>
+              <div className="hidden xl:flex flex-col text-left">
+                <span className="text-xs font-bold text-gray-900 truncate max-w-[120px]">
+                  {user?.displayName || (user?.email ? user.email.split('@')[0] : 'Admin')}
+                </span>
+                <span className="text-[10px] text-gray-400 truncate max-w-[120px]">
+                  {user?.email || 'Logged in'}
+                </span>
+              </div>
             </div>
 
             <button
               onClick={() => signOut()}
               title="Sign Out"
-              className="p-2 rounded-lg bg-zinc-900/80 hover:bg-red-500/15 border border-zinc-800 text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-gray-50 hover:bg-red-50 border border-gray-200 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -204,3 +220,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+export default Navbar;

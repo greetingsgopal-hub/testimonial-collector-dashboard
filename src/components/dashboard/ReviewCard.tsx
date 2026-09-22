@@ -42,25 +42,25 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
     switch (status) {
       case 'approved':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <Check className="w-3 h-3" /> Approved
           </span>
         );
       case 'pending':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
             <Clock className="w-3 h-3" /> Pending
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-red-500/15 text-red-400 border border-red-500/30">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-50 text-red-700 border border-red-200">
             <X className="w-3 h-3" /> Rejected
           </span>
         );
       case 'archived':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-gray-100 text-gray-600 border border-gray-200">
             <Archive className="w-3 h-3" /> Archived
           </span>
         );
@@ -68,7 +68,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   };
 
   return (
-    <div className="glass-card rounded-2xl p-5 sm:p-6 border border-white/10 flex flex-col justify-between relative group hover:border-brand-500/40 transition-all">
+    <div className="bg-white rounded-2xl p-5 sm:p-6 border border-gray-200 shadow-xs flex flex-col justify-between relative group hover:border-[#6701e6]/40 hover:shadow-md transition-all font-sans text-gray-900">
       
       {/* Top row: Status, Featured Star, and More */}
       <div>
@@ -76,12 +76,12 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           <div className="flex items-center gap-2">
             {getStatusBadge(review.status)}
             {review.status === 'approved' && (
-              <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" title="Broadcasting to website widget">
+              <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100" title="Broadcasting to website widget">
                 <Globe className="w-2.5 h-2.5" /> Widget Live
               </span>
             )}
             {review.isFeatured && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                 <Sparkles className="w-3 h-3" /> Featured
               </span>
             )}
@@ -92,12 +92,12 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             <button
               disabled={review.status !== 'approved'}
               onClick={() => onToggleFeatured(review.id, review.isFeatured)}
-              className={`p-1.5 rounded-lg transition-colors ${
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                 review.status !== 'approved'
-                  ? 'opacity-30 cursor-not-allowed text-zinc-600'
+                  ? 'opacity-30 cursor-not-allowed text-gray-300'
                   : review.isFeatured
-                  ? 'text-amber-400 bg-amber-400/10 hover:bg-amber-400/20'
-                  : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'
+                  ? 'text-amber-500 bg-amber-50 hover:bg-amber-100'
+                  : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100'
               }`}
               title={
                 review.status !== 'approved'
@@ -107,14 +107,14 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
                   : 'Mark as Featured'
               }
             >
-              <Star className={`w-4 h-4 ${review.isFeatured ? 'fill-amber-400' : ''}`} />
+              <Star className={`w-4 h-4 ${review.isFeatured ? 'fill-amber-400 text-amber-400' : ''}`} />
             </button>
 
             {/* Create Social Post (Only for approved reviews) */}
             {review.status === 'approved' && onOpenSocialCard && (
               <button
                 onClick={() => onOpenSocialCard(review)}
-                className="p-1.5 rounded-lg text-brand-400 hover:text-white hover:bg-brand-600/25 transition-colors"
+                className="p-1.5 rounded-lg text-[#6701e6] hover:bg-purple-50 transition-colors cursor-pointer"
                 title="Create Social Post"
                 aria-label="Create Social Post"
               >
@@ -125,7 +125,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             {/* Open Detail Modal */}
             <button
               onClick={() => onOpenDetails(review)}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
               title="Inspect details"
             >
               <MoreHorizontal className="w-4 h-4" />
@@ -142,23 +142,23 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
                 className={`w-4 h-4 ${
                   s <= review.rating
                     ? 'text-amber-400 fill-amber-400'
-                    : 'text-zinc-700'
+                    : 'text-gray-200'
                 }`}
               />
             ))}
           </div>
-          <span className="text-[11px] text-zinc-500">{formattedDate}</span>
+          <span className="text-[11px] text-gray-400 font-medium">{formattedDate}</span>
         </div>
 
         {/* Headline */}
         {review.title && (
-          <h4 className="text-sm font-semibold text-white mb-1.5 line-clamp-1 font-display">
+          <h4 className="text-sm font-bold text-gray-950 mb-1.5 line-clamp-1 font-display">
             {review.title}
           </h4>
         )}
 
         {/* Content */}
-        <p className="text-zinc-300 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-4">
+        <p className="text-gray-700 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-4">
           "{review.content}"
         </p>
 
@@ -169,7 +169,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
               href={sanitizeUrl(review.videoUrl)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 text-xs font-medium border border-pink-500/20 transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-50 text-pink-700 hover:bg-pink-100 text-xs font-semibold border border-pink-200 transition-colors"
             >
               <Video className="w-3.5 h-3.5" />
               <span>Watch Video Testimonial</span>
@@ -184,7 +184,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             {review.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 rounded text-[10px] font-medium bg-zinc-800 text-zinc-400 border border-zinc-700/60"
+                className="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-600 border border-gray-200"
               >
                 #{tag}
               </span>
@@ -194,32 +194,32 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
       </div>
 
       {/* Bottom Footer: Reviewer Info & Moderation Action Bar */}
-      <div className="pt-4 border-t border-zinc-800/80 space-y-3">
+      <div className="pt-4 border-t border-gray-100 space-y-3">
         {/* Reviewer Details */}
         <div className="flex items-center gap-3">
           {review.avatarUrl ? (
             <img
               src={review.avatarUrl}
               alt={review.name}
-              className="w-9 h-9 rounded-full object-cover ring-1 ring-zinc-700"
+              className="w-9 h-9 rounded-full object-cover ring-1 ring-gray-200"
               onError={(e) => {
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center font-bold text-white text-xs shadow-sm">
+            <div className="w-9 h-9 rounded-full bg-purple-100 text-[#6701e6] border border-purple-200 flex items-center justify-center font-bold text-xs shadow-xs">
               {review.name.charAt(0).toUpperCase()}
             </div>
           )}
 
           <div className="min-w-0 flex-1">
-            <h5 className="text-xs font-semibold text-white truncate">{review.name}</h5>
-            <p className="text-[11px] text-zinc-400 truncate flex items-center gap-1">
+            <h5 className="text-xs font-bold text-gray-950 truncate">{review.name}</h5>
+            <p className="text-[11px] text-gray-500 truncate flex items-center gap-1">
               <span>{review.role}</span>
               {review.company && (
                 <>
-                  <span className="text-zinc-600">•</span>
-                  <span className="text-zinc-300 truncate">{review.company}</span>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-700 font-medium truncate">{review.company}</span>
                 </>
               )}
             </p>
@@ -231,10 +231,10 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           {/* Approve */}
           <button
             onClick={() => onUpdateStatus(review.id, 'approved')}
-            className={`py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
+            className={`py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer ${
               review.status === 'approved'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default'
-                : 'bg-zinc-900 hover:bg-emerald-500/20 text-zinc-400 hover:text-emerald-400 border border-zinc-800'
+                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                : 'bg-white hover:bg-emerald-50 text-gray-600 hover:text-emerald-700 border border-gray-200'
             }`}
             title="Approve Review"
           >
@@ -245,10 +245,10 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           {/* Reject */}
           <button
             onClick={() => onUpdateStatus(review.id, 'rejected')}
-            className={`py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
+            className={`py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer ${
               review.status === 'rejected'
-                ? 'bg-red-500/20 text-red-300 border border-red-500/40 cursor-default'
-                : 'bg-zinc-900 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 border border-zinc-800'
+                ? 'bg-red-100 text-red-800 border border-red-300'
+                : 'bg-white hover:bg-red-50 text-gray-600 hover:text-red-700 border border-gray-200'
             }`}
             title="Reject Review"
           >
@@ -259,10 +259,10 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           {/* Archive */}
           <button
             onClick={() => onUpdateStatus(review.id, 'archived')}
-            className={`py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
+            className={`py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer ${
               review.status === 'archived'
-                ? 'bg-zinc-700 text-zinc-200 border border-zinc-600 cursor-default'
-                : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-300 border border-zinc-800'
+                ? 'bg-gray-200 text-gray-800 border border-gray-300'
+                : 'bg-white hover:bg-gray-100 text-gray-600 hover:text-gray-900 border border-gray-200'
             }`}
             title="Archive Review"
           >
@@ -273,7 +273,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           {/* Delete */}
           <button
             onClick={() => onDelete(review.id)}
-            className="py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 border border-zinc-800 flex items-center justify-center gap-1 transition-colors"
+            className="py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-red-50 text-gray-400 hover:text-red-600 border border-gray-200 flex items-center justify-center gap-1 transition-colors cursor-pointer"
             title="Delete Permanently"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -284,3 +284,4 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
     </div>
   );
 };
+export default ReviewCard;
