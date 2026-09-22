@@ -13,6 +13,7 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import { OnboardingUpgradePage } from './pages/OnboardingUpgradePage';
 import { PricingPage } from './pages/PricingPage';
 import { WallOfLovePage } from './pages/WallOfLovePage';
 import { initAnalytics, trackPageView } from './lib/analytics';
@@ -59,6 +60,14 @@ export function App() {
             element={
               <ProtectedRoute>
                 <OnboardingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/onboarding/upgrade"
+            element={
+              <ProtectedRoute>
+                <OnboardingUpgradePage />
               </ProtectedRoute>
             }
           />

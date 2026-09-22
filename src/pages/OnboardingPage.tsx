@@ -106,7 +106,7 @@ export const OnboardingPage: React.FC = () => {
           console.error('Failed to update project during onboarding:', err);
         } finally {
           analytics.signupCompleted();
-          navigate('/dashboard');
+          navigate('/onboarding/upgrade');
         }
       }, 2400);
 
