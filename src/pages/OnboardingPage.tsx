@@ -132,10 +132,12 @@ export const OnboardingPage: React.FC = () => {
 
   const handleSelectCategory = (cat: string) => {
     setSellingCategory(cat);
-    // Smooth advance to Step 3
-    setTimeout(() => {
+  };
+
+  const handleStep2Proceed = () => {
+    if (sellingCategory) {
       setStep(3);
-    }, 150);
+    }
   };
 
   const handleStep3Submit = (e: React.FormEvent) => {
@@ -279,6 +281,17 @@ export const OnboardingPage: React.FC = () => {
                   </button>
                 );
               })}
+
+              {/* Proceed / Continue Button */}
+              <button
+                type="button"
+                id="onboarding-step2-proceed-btn"
+                onClick={handleStep2Proceed}
+                className="w-full mt-5 py-3.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white font-bold text-sm shadow-md transition-all hover:scale-[1.01] cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>Continue</span>
+                <span className="text-base">→</span>
+              </button>
             </div>
           </div>
         )}
