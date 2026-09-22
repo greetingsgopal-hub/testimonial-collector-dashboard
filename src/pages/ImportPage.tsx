@@ -12,11 +12,13 @@ import {
   ChevronRight,
   Search,
   ChevronDown,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { ImportPlatform, ReviewInput, CsvColumnMapping } from '../types';
 import { storage } from '../lib/storage';
+import { ConnectSourceModal } from '../components/dashboard/views/ConnectSourceModal';
 
 interface PlatformInfo {
   id: ImportPlatform;
@@ -60,6 +62,7 @@ export const ImportPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [importUrl, setImportUrl] = useState('');
   const [isImporting, setIsImporting] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
   const [importResult, setImportResult] = useState<{ success: boolean; count: number; errors?: string[] } | null>(null);
 
   // CSV state
@@ -261,10 +264,11 @@ export const ImportPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
+      {/* Header (Matches Senja 02:53) */}
       <div>
-        <h2 className="text-2xl font-bold font-display text-gray-900 tracking-tight">Import Testimonials</h2>
+        <h2 className="text-2xl font-bold font-display text-gray-900 tracking-tight">Add proof to your account</h2>
         <p className="text-sm text-gray-500 mt-1">
-          Import from 30+ platforms or upload a CSV file to bring in your existing reviews.
+          Import your proof from 30 sources.
         </p>
       </div>
 
@@ -304,7 +308,121 @@ export const ImportPage: React.FC = () => {
 
       {/* Platform Selection */}
       {!selectedPlatform && (
-        <div className="space-y-4">
+        <div className="space-y-6">
+          
+          {/* 5 Primary Import Methods (Matches Senja 02:53 in video) */}
+          <div className="space-y-3">
+            {/* 1. Auto-Import */}
+            <button
+              onClick={() => setShowConnectModal(true)}
+              className="w-full p-5 rounded-2xl bg-white border border-gray-200 hover:border-[#6701e6] hover:shadow-xs transition-all flex items-center justify-between text-left group cursor-pointer"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-purple-50 text-[#6701e6] flex items-center justify-center shrink-0 border border-purple-100">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-gray-900 group-hover:text-[#6701e6] transition-colors">Auto-Import</h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-[#6701e6]">21 Platforms</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">Connect to 21 platforms and Panda Praise will automatically import your new proof.</p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#6701e6] transition-colors" />
+            </button>
+
+            {/* 2. Import from web */}
+            <button
+              onClick={() => setSelectedPlatform('google_reviews')}
+              className="w-full p-5 rounded-2xl bg-white border border-gray-200 hover:border-[#6701e6] hover:shadow-xs transition-all flex items-center justify-between text-left group cursor-pointer"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                  <Globe className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 group-hover:text-[#6701e6] transition-colors">Import from web</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Paste a URL and Panda Praise will import your proof.</p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#6701e6] transition-colors" />
+            </button>
+
+            {/* 3. Upload spreadsheet */}
+            <button
+              onClick={() => setSelectedPlatform('csv')}
+              className="w-full p-5 rounded-2xl bg-white border border-gray-200 hover:border-[#6701e6] hover:shadow-xs transition-all flex items-center justify-between text-left group cursor-pointer"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 group-hover:text-[#6701e6] transition-colors">Upload spreadsheet</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Upload a CSV, XLS or XLSX file and Panda Praise will import your proof.</p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#6701e6] transition-colors" />
+            </button>
+
+            {/* 4. Manual Import */}
+            <button
+              onClick={() => setSelectedPlatform('manual')}
+              className="w-full p-5 rounded-2xl bg-white border border-gray-200 hover:border-[#6701e6] hover:shadow-xs transition-all flex items-center justify-between text-left group cursor-pointer"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-purple-50 text-[#6701e6] flex items-center justify-center shrink-0 border border-purple-100">
+                  <Upload className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 group-hover:text-[#6701e6] transition-colors">Manual Import</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Manually add video, text or screengrab proof to your account.</p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#6701e6] transition-colors" />
+            </button>
+
+            {/* 5. Migrate */}
+            <button
+              onClick={() => setSelectedPlatform('google_reviews')}
+              className="w-full p-5 rounded-2xl bg-white border border-gray-200 hover:border-[#6701e6] hover:shadow-xs transition-all flex items-center justify-between text-left group cursor-pointer"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
+                  <ArrowRight className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 group-hover:text-[#6701e6] transition-colors">Migrate</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Paste your Testimonial.to Wall of Love URL and Panda Praise will import your proof.</p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#6701e6] transition-colors" />
+            </button>
+          </div>
+
+          <div className="relative py-2 text-center">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
+            <span className="relative px-3 bg-[#f9fafb] text-[10px] uppercase font-bold text-gray-400 tracking-wider">Or Browse Platforms Directly</span>
+          </div>
+
+          {/* Connect Source Modal */}
+          <ConnectSourceModal
+            isOpen={showConnectModal}
+            onClose={() => setShowConnectModal(false)}
+            onSelectPlatform={(pid) => {
+              if (pid === 'google') setSelectedPlatform('google_reviews');
+              else if (pid === 'twitter') setSelectedPlatform('twitter');
+              else if (pid === 'g2') setSelectedPlatform('g2');
+              else if (pid === 'trustpilot') setSelectedPlatform('trustpilot');
+              else if (pid === 'producthunt') setSelectedPlatform('producthunt');
+              else if (pid === 'capterra') setSelectedPlatform('capterra');
+              else if (pid === 'yelp') setSelectedPlatform('yelp');
+              else if (pid === 'shopify') setSelectedPlatform('shopify');
+              else setSelectedPlatform('google_reviews');
+            }}
+          />
+
           {/* Search */}
           <div className="relative">
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
