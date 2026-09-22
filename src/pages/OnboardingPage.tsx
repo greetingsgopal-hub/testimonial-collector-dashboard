@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import confetti from 'canvas-confetti';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
@@ -63,6 +64,57 @@ export const OnboardingPage: React.FC = () => {
   const [sellingCategory, setSellingCategory] = useState('SaaS subscriptions');
   const [websiteUrl, setWebsiteUrl] = useState(project?.websiteUrl || 'https://senja.io');
 
+  // Multi-cannon celebration bomb with colorful paper cuttings
+  const fireCelebrationBomb = useCallback(() => {
+    // 1. Center burst
+    confetti({
+      particleCount: 110,
+      spread: 100,
+      startVelocity: 50,
+      origin: { x: 0.5, y: 0.4 },
+      colors: ['#6701e6', '#e11d48', '#a855f7', '#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#f97316'],
+      shapes: ['square', 'circle'],
+      scalar: 1.25,
+      ticks: 280,
+    });
+
+    // 2. Left side cannon
+    setTimeout(() => {
+      confetti({
+        particleCount: 65,
+        angle: 60,
+        spread: 75,
+        origin: { x: 0.05, y: 0.6 },
+        colors: ['#6701e6', '#a855f7', '#f59e0b', '#3b82f6', '#ec4899'],
+        scalar: 1.15,
+        ticks: 250,
+      });
+    }, 180);
+
+    // 3. Right side cannon
+    setTimeout(() => {
+      confetti({
+        particleCount: 65,
+        angle: 120,
+        spread: 75,
+        origin: { x: 0.95, y: 0.6 },
+        colors: ['#6701e6', '#e11d48', '#10b981', '#f59e0b', '#ec4899'],
+        scalar: 1.15,
+        ticks: 250,
+      });
+    }, 320);
+  }, []);
+
+  // Fire celebration bomb on Step 1 load
+  useEffect(() => {
+    if (step === 1) {
+      const timer = setTimeout(() => {
+        fireCelebrationBomb();
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [step, fireCelebrationBomb]);
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
@@ -71,7 +123,10 @@ export const OnboardingPage: React.FC = () => {
   const handleStep1Submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (firstName.trim()) {
-      setStep(2);
+      fireCelebrationBomb();
+      setTimeout(() => {
+        setStep(2);
+      }, 250);
     }
   };
 
@@ -132,16 +187,20 @@ export const OnboardingPage: React.FC = () => {
 
         {/* Center Intersecting Avatar Badge */}
         <div className="absolute left-1/2 -bottom-9 -translate-x-1/2 flex items-center justify-center">
-          <div className="relative">
+          <div
+            className="relative cursor-pointer group"
+            onClick={fireCelebrationBomb}
+            title="Click for celebration bomb!"
+          >
             {/* Gray avatar silhouette circle */}
-            <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gray-200 border-4 border-white shadow-md flex items-center justify-center text-gray-400">
+            <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gray-200 border-4 border-white shadow-md flex items-center justify-center text-gray-400 group-hover:scale-105 transition-transform">
               <svg className="w-9 h-9 sm:w-10 sm:h-10 fill-gray-400" viewBox="0 0 24 24">
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
               </svg>
             </div>
 
             {/* Overlapping white circle with purple heart */}
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white border-2 border-gray-100 shadow-lg absolute -bottom-1 -right-1 flex items-center justify-center text-[#6701e6]">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white border-2 border-gray-100 shadow-lg absolute -bottom-1 -right-1 flex items-center justify-center text-[#6701e6] group-hover:scale-115 transition-transform">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#6701e6">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
               </svg>
