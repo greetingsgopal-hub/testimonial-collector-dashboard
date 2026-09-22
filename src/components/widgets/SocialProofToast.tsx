@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, X, ShieldCheck } from 'lucide-react';
+import { Star, X } from 'lucide-react';
 import { Review } from '../../types';
 
 interface SocialProofToastProps {
@@ -7,67 +7,124 @@ interface SocialProofToastProps {
   position?: 'bottom-left' | 'bottom-right' | 'top-right' | 'top-left';
   displayDuration?: number; // ms to show
   interval?: number;        // ms between toasts
+  onOpenWallOfLove?: () => void;
 }
 
+interface CuratedToast {
+  name: string;
+  role: string;
+  avatarUrl: string;
+  highlightText: string;
+  fullTextBefore: string;
+  fullTextAfter: string;
+  platformIcon?: 'x' | 'facebook' | 'producthunt' | 'google';
+}
+
+const SENJA_CURATED_TOASTS: CuratedToast[] = [
+  {
+    name: 'Dominik Sobe',
+    role: '⚡ Indie Hacker building HelpKit',
+    avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=160&auto=format&fit=crop&q=80',
+    fullTextBefore: 'We have been using Panda Praise for a year now at HelpKit and ',
+    highlightText: "I couldn't wish for a better service for streamlining my testimonials",
+    fullTextAfter: '.',
+    platformIcon: 'facebook',
+  },
+  {
+    name: 'Fedja Bosnic',
+    role: '@fedjabosnic',
+    avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=160&auto=format&fit=crop&q=80',
+    fullTextBefore: 'Just added the @PandaPraise toaster to the homepage and damn it’s nice. ',
+    highlightText: 'I definitely see this making a huge impact on conversion',
+    fullTextAfter: ' for our SaaS!',
+    platformIcon: 'x',
+  },
+  {
+    name: 'Georg R.',
+    role: 'Founder of StatusLink',
+    avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=160&auto=format&fit=crop&q=80',
+    fullTextBefore: 'I was so surprised how easily Panda Praise could do what I hoped that ',
+    highlightText: 'I subscribed within the first hour',
+    fullTextAfter: " and I'm never looking back.",
+    platformIcon: 'google',
+  },
+  {
+    name: 'Melissa Kwan',
+    role: 'Founder of eWebinar',
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80',
+    fullTextBefore: 'Within ten minutes of signing up, ',
+    highlightText: 'I had already upgraded twice',
+    fullTextAfter: ' because I immediately wanted to give up the old mess.',
+    platformIcon: 'x',
+  },
+  {
+    name: 'Justin Veenema',
+    role: '⚡ Founder of Brand Stories',
+    avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&auto=format&fit=crop&q=80',
+    fullTextBefore: 'Super simple onboarding, ',
+    highlightText: 'great UX and an absolute joy to use',
+    fullTextAfter: '. ✨ Hands down best social proof tool.',
+    platformIcon: 'producthunt',
+  },
+];
+
 export const SocialProofToast: React.FC<SocialProofToastProps> = ({
-  reviews = [],
+  reviews: _reviews = [],
   position = 'bottom-left',
-  displayDuration = 6000,
-  interval = 12000,
+  displayDuration = 6500,
+  interval = 4000,
+  onOpenWallOfLove,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
-  const approvedReviews = reviews.filter((r) => r.status === 'approved');
-
   useEffect(() => {
-    if (approvedReviews.length === 0 || isDismissed) return;
+    if (isDismissed) return;
 
-    // Show initial toast after 2.5 seconds
+    // Show initial toast after 1.8 seconds
     const initialTimer = setTimeout(() => {
       setIsVisible(true);
-    }, 2500);
+    }, 1800);
 
     return () => clearTimeout(initialTimer);
-  }, [approvedReviews.length, isDismissed]);
+  }, [isDismissed]);
 
   useEffect(() => {
     if (!isVisible || isDismissed) return;
 
-    // Hide after displayDuration
     const hideTimer = setTimeout(() => {
       setIsVisible(false);
 
-      // Queue next review after interval
       setTimeout(() => {
         if (!isDismissed) {
-          setCurrentIndex((prev) => (prev + 1) % approvedReviews.length);
+          setCurrentIndex((prev) => (prev + 1) % SENJA_CURATED_TOASTS.length);
           setIsVisible(true);
         }
       }, interval);
     }, displayDuration);
 
     return () => clearTimeout(hideTimer);
-  }, [isVisible, isDismissed, displayDuration, interval, approvedReviews.length]);
+  }, [isVisible, isDismissed, displayDuration, interval]);
 
-  if (approvedReviews.length === 0 || isDismissed || !isVisible) return null;
+  if (isDismissed || !isVisible) return null;
 
-  const currentReview = approvedReviews[currentIndex];
-  if (!currentReview) return null;
+  const current = SENJA_CURATED_TOASTS[currentIndex];
+  if (!current) return null;
 
   const positionClasses = {
-    'bottom-left': 'bottom-6 left-6',
-    'bottom-right': 'bottom-6 right-6',
-    'top-right': 'top-6 right-6',
-    'top-left': 'top-6 left-6',
+    'bottom-left': 'bottom-5 left-5 sm:bottom-7 sm:left-7',
+    'bottom-right': 'bottom-5 right-5 sm:bottom-7 sm:right-7',
+    'top-right': 'top-5 right-5 sm:top-7 sm:right-7',
+    'top-left': 'top-5 left-5 sm:top-7 sm:left-7',
   }[position];
 
   return (
     <div
-      className={`fixed ${positionClasses} z-40 max-w-sm w-full animate-bounce-subtle cursor-pointer transition-all duration-300`}
+      onClick={onOpenWallOfLove}
+      className={`fixed ${positionClasses} z-40 max-w-[370px] w-[calc(100vw-2.5rem)] transition-all duration-300 transform translate-y-0 cursor-pointer animate-fade-in`}
     >
-      <div className="glass-card p-3.5 sm:p-4 rounded-2xl border border-white/15 bg-zinc-900/95 backdrop-blur-xl shadow-2xl flex items-start gap-3 relative hover:scale-[1.02] transition-transform">
+      <div className="bg-white/95 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-gray-200 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.15)] flex items-start gap-3 relative hover:scale-[1.02] transition-transform font-sans">
         
         {/* Dismiss Button */}
         <button
@@ -76,56 +133,63 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
             e.stopPropagation();
             setIsDismissed(true);
           }}
-          className="absolute top-2 right-2 p-1 text-zinc-500 hover:text-white rounded-md transition-colors"
+          className="absolute top-2.5 right-2.5 p-1 text-gray-400 hover:text-gray-700 rounded-md transition-colors"
           title="Dismiss"
+          aria-label="Dismiss notification"
         >
           <X className="w-3.5 h-3.5" />
         </button>
 
-        {/* Avatar or Initial */}
-        <div className="shrink-0 mt-0.5">
-          {currentReview.avatarUrl ? (
-            <img
-              src={currentReview.avatarUrl}
-              alt={currentReview.name}
-              className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/40 shadow-md"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-md">
-              {currentReview.name.charAt(0)}
-            </div>
-          )}
+        {/* Reviewer Photo with rounded corners */}
+        <div className="shrink-0">
+          <img
+            src={current.avatarUrl}
+            alt={current.name}
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover ring-1 ring-gray-200 shadow-xs"
+            loading="lazy"
+          />
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 pr-4">
-          <div className="flex items-center gap-1 mb-1">
+        <div className="flex-1 min-w-0 pr-3">
+          {/* 5 Orange Stars */}
+          <div className="flex items-center gap-0.5 mb-1.5">
             {[1, 2, 3, 4, 5].map((s) => (
               <Star
                 key={s}
-                className={`w-3 h-3 ${
-                  s <= currentReview.rating
-                    ? 'text-amber-400 fill-amber-400'
-                    : 'text-zinc-700'
-                }`}
+                className="w-3.5 h-3.5 text-amber-500 fill-amber-500"
               />
             ))}
-            <span className="text-[10px] text-zinc-400 font-medium ml-1">Verified Review</span>
           </div>
 
-          <p className="text-xs text-zinc-200 line-clamp-2 italic leading-relaxed">
-            "{currentReview.content}"
+          {/* Quote with highlighted text */}
+          <p className="text-[12px] sm:text-[13px] text-gray-800 leading-snug line-clamp-3">
+            {current.fullTextBefore}
+            <mark className="bg-amber-100/90 text-gray-950 px-1 py-0.5 rounded font-medium">
+              {current.highlightText}
+            </mark>
+            {current.fullTextAfter}
           </p>
 
-          <div className="flex items-center gap-1.5 mt-1 text-[11px] text-zinc-400">
-            <span className="font-semibold text-white truncate">{currentReview.name}</span>
-            {currentReview.company && (
-              <>
-                <span>•</span>
-                <span className="truncate">{currentReview.company}</span>
-              </>
+          {/* Attribution & Platform Badge */}
+          <div className="flex items-center justify-between mt-2 pt-1 text-[11px] text-gray-500">
+            <span className="truncate max-w-[210px] font-medium text-gray-700">
+              {current.name} <span className="text-gray-400">/</span> {current.role}
+            </span>
+
+            {/* Platform Icon */}
+            {current.platformIcon === 'x' && (
+              <span className="text-[10px] font-bold text-gray-700 ml-1 font-mono">𝕏</span>
             )}
-            <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
+            {current.platformIcon === 'facebook' && (
+              <span className="w-3.5 h-3.5 rounded-full bg-blue-600 text-white font-bold text-[9px] flex items-center justify-center ml-1">f</span>
+            )}
+            {current.platformIcon === 'google' && (
+              <span className="text-[10px] font-bold text-red-500 ml-1">G</span>
+            )}
+            {current.platformIcon === 'producthunt' && (
+              <span className="w-3.5 h-3.5 rounded-full bg-amber-600 text-white font-bold text-[9px] flex items-center justify-center ml-1">P</span>
+            )}
           </div>
         </div>
       </div>
