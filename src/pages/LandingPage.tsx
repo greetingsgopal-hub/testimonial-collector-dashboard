@@ -40,6 +40,21 @@ const FAQ_ITEMS = [
   },
 ];
 
+const CLIENT_LOGOS = [
+  { name: 'om', node: <span className="text-xl font-bold tracking-tight text-gray-500 font-sans">om</span> },
+  { name: 'pickupmusic', node: <span className="text-base font-semibold tracking-wide text-gray-500 font-mono">pickupmusic</span> },
+  { name: 'Marketing Examined', node: <span className="text-base font-bold text-gray-500 flex items-center gap-1.5"><span className="text-amber-500">★</span> Marketing Examined</span> },
+  { name: 'unplugged.', node: <span className="text-base font-serif italic text-gray-500">unplugged.</span> },
+  { name: 'Easlo', node: <span className="text-base font-bold text-gray-600 flex items-center gap-1.5"><span>👓</span> Easlo</span> },
+  { name: 'Breakcold', node: <span className="text-base font-bold text-gray-600 flex items-center gap-1.5"><span className="bg-gray-800 text-white text-[11px] px-1 py-0.5 rounded font-bold">Br</span> Breakcold</span> },
+  { name: 'immutable', node: <span className="text-base font-bold tracking-tight text-gray-500">immutable</span> },
+  { name: 'Substack', node: <span className="text-base font-semibold text-gray-500 flex items-center gap-1.5"><span className="w-3 h-3 bg-[#FF6719] rounded-xs inline-block" /> Substack</span> },
+  { name: 'Beehiiv', node: <span className="text-base font-extrabold text-gray-500">beehiiv</span> },
+  { name: 'ConvertKit', node: <span className="text-base font-bold text-gray-500 flex items-center gap-1.5"><span className="w-3 h-3 bg-rose-400 rounded-full inline-block" /> ConvertKit</span> },
+  { name: 'Kajabi', node: <span className="text-base font-semibold text-gray-500">kajabi</span> },
+  { name: 'Podia', node: <span className="text-base font-bold text-gray-500">podia</span> },
+];
+
 export const LandingPage: React.FC = () => {
   usePageSeo({
     title: 'Panda Praise — Collect, Manage and Share Testimonials',
@@ -182,20 +197,19 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Giant Quote Headline with Purple Highlight Box */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display text-gray-950 tracking-tight leading-[1.2] max-w-3xl mx-auto">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display text-gray-950 tracking-tight leading-snug sm:leading-tight lg:leading-[1.25] max-w-4xl mx-auto">
           “I've already seen a{' '}
-          <span className="senja-purple-mark">
+          <span className="senja-purple-mark my-1 sm:my-1.5">
             tangible impact
-          </span>
-          <br className="hidden sm:inline" />
-          <span className="senja-purple-mark mt-1 sm:mt-2">
+          </span>{' '}
+          <span className="senja-purple-mark my-1 sm:my-1.5">
             on revenue and conversion
-          </span>
-          {' '}by sharing more social proof.”
+          </span>{' '}
+          by sharing more social proof.”
         </h1>
 
         {/* Attribution: Jay Clouse */}
-        <div className="mt-5 flex items-center justify-center gap-3">
+        <div className="mt-6 flex items-center justify-center gap-3">
           <img
             src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
             alt="Jay Clouse"
@@ -213,16 +227,16 @@ export const LandingPage: React.FC = () => {
         </p>
 
         {/* 3 Green Checkmark Bullets */}
-        <div className="mt-6 flex flex-col sm:inline-flex text-left space-y-2 text-xs sm:text-sm text-gray-700">
-          <div className="flex items-start gap-2">
+        <div className="mt-6 flex flex-col sm:inline-flex text-left space-y-2.5 text-xs sm:text-sm text-gray-700 max-w-xl mx-auto">
+          <div className="flex items-start gap-2.5">
             <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <span>Collect text & video testimonials on autopilot, or import from 30+ platforms</span>
           </div>
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-2.5">
             <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <span>Find the perfect one in seconds — from Slack or any browser tab</span>
           </div>
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-2.5">
             <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <span>Turn it into a widget, video, image, popup, Wall of Love, or case study</span>
           </div>
@@ -271,16 +285,35 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 4. Client Logo Bar (Screenshot 2) ── */}
-      <section className="max-w-5xl mx-auto px-6 py-6 sm:py-8 border-t border-gray-200/80">
-        <div className="flex flex-wrap items-center justify-center gap-x-10 sm:gap-x-14 gap-y-4 opacity-75 grayscale hover:grayscale-0 transition-all">
-          <span className="text-xl font-bold tracking-tight text-gray-400 font-sans">om</span>
-          <span className="text-base font-semibold tracking-wide text-gray-500 font-mono">pickupmusic</span>
-          <span className="text-base font-bold text-gray-500">★ Marketing Examined</span>
-          <span className="text-base font-serif italic text-gray-500">unplugged.</span>
-          <span className="text-base font-bold text-gray-600">👓 Easlo</span>
-          <span className="text-base font-bold text-gray-600"><strong className="bg-gray-800 text-white px-1 rounded text-xs mr-1">Br</strong> Breakcold</span>
-          <span className="text-base font-bold text-gray-500">immutable</span>
+      {/* ── 4. Client Logo Moving Marquee (Senja Exact Parity) ── */}
+      <section className="w-full overflow-hidden relative py-8 sm:py-10 border-y border-gray-200/80 bg-white/50 my-6 sm:my-8">
+        {/* Left Fade Gradient Mask */}
+        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 sm:w-44 bg-gradient-to-r from-[#FAF9F6] via-[#FAF9F6]/90 to-transparent z-10" />
+
+        {/* Right Fade Gradient Mask */}
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 sm:w-44 bg-gradient-to-l from-[#FAF9F6] via-[#FAF9F6]/90 to-transparent z-10" />
+
+        {/* Infinite Moving Marquee Track */}
+        <div className="marquee-track flex items-center gap-12 sm:gap-16 whitespace-nowrap">
+          {/* First loop */}
+          {CLIENT_LOGOS.map((logo, idx) => (
+            <div
+              key={`logo-a-${idx}`}
+              className="shrink-0 flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity select-none cursor-default"
+            >
+              {logo.node}
+            </div>
+          ))}
+          {/* Duplicate loop for seamless infinite rotation */}
+          {CLIENT_LOGOS.map((logo, idx) => (
+            <div
+              key={`logo-b-${idx}`}
+              aria-hidden="true"
+              className="shrink-0 flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity select-none cursor-default"
+            >
+              {logo.node}
+            </div>
+          ))}
         </div>
       </section>
 
