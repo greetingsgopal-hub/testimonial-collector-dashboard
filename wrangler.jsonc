@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "testimonial-collector-dashboard2",
+  "account_id": "04b586d238bb60304c8fc2501beaecf3",
   "compatibility_date": "2026-09-15",
   "assets": {
     "directory": "./dist",
