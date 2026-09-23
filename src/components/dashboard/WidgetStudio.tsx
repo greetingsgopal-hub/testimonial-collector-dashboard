@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Code2, 
   Copy, 
@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Review, WidgetType, WidgetSettings } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { filterTestimonials, TestimonialFilterRules } from '../../lib/testimonialFilter';
 
 export type CmsPlatform = 'html' | 'webflow' | 'wordpress' | 'shopify' | 'framer' | 'react';
 
@@ -31,7 +32,7 @@ interface WidgetStudioProps {
 }
 
 export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) => {
-  const { project } = useAuth();
+  const { project, collectionForm } = useAuth();
   const projectWidgetId = project?.id || '';
 
   const [settings, setSettings] = useState<WidgetSettings>({
@@ -48,32 +49,67 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
     autoAddByTags: [],
   });
 
+  // Filter & Selection Engine
   const [selectionMode, setSelectionMode] = useState<'auto' | 'manual'>('auto');
-  const [selectedTag, setSelectedTag] = useState<string>('all');
   const [minRating, setMinRating] = useState<number>(0);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagMatchMode, setTagMatchMode] = useState<'any' | 'all'>('any');
+  const [featuredFilter, setFeaturedFilter] = useState<'all' | 'featured'>('all');
+  const [testimonialType, setTestimonialType] = useState<'all' | 'text' | 'image' | 'video'>('all');
+  const [selectedFormId, setSelectedFormId] = useState<string>('all');
+  const [requirePhoto, setRequirePhoto] = useState<boolean>(false);
+  const [requireImage, setRequireImage] = useState<boolean>(false);
+  const [requireVideo, setRequireVideo] = useState<boolean>(false);
+
   const [selectedReviewIds, setSelectedReviewIds] = useState<string[]>([]);
   const [cmsPlatform, setCmsPlatform] = useState<CmsPlatform>('html');
   const [copied, setCopied] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
 
   // All approved reviews from the project
-  const approvedReviews = reviews.filter((r) => r.status === 'approved');
-
-  // Extract all available tags
-  const allTags = Array.from(
-    new Set(approvedReviews.flatMap((r) => r.tags || []).filter(Boolean))
+  const approvedReviews = useMemo(
+    () => reviews.filter((r) => r.status === 'approved'),
+    [reviews]
   );
 
-  // Dynamic vs Manual filtered reviews
-  const filteredReviews = approvedReviews.filter((r) => {
-    if (selectionMode === 'manual') {
-      return selectedReviewIds.length === 0 || selectedReviewIds.includes(r.id);
-    }
-    if (settings.onlyFeatured && !r.isFeatured) return false;
-    if (minRating > 0 && r.rating < minRating) return false;
-    if (selectedTag !== 'all' && (!r.tags || !r.tags.includes(selectedTag))) return false;
-    return true;
-  });
+  // Extract all available tags
+  const allTags = useMemo(
+    () => Array.from(new Set(approvedReviews.flatMap((r) => r.tags || []).filter(Boolean))),
+    [approvedReviews]
+  );
+
+  // Filter rules definition
+  const filterRules: TestimonialFilterRules = useMemo(() => ({
+    mode: selectionMode,
+    manualReviewIds: selectedReviewIds,
+    minRating,
+    tags: selectedTags,
+    tagMatchMode,
+    onlyFeatured: featuredFilter === 'featured' || settings.onlyFeatured,
+    testimonialType,
+    collectionFormId: selectedFormId,
+    requireAvatar: requirePhoto,
+    requireImage,
+    requireVideo,
+  }), [
+    selectionMode,
+    selectedReviewIds,
+    minRating,
+    selectedTags,
+    tagMatchMode,
+    featuredFilter,
+    settings.onlyFeatured,
+    testimonialType,
+    selectedFormId,
+    requirePhoto,
+    requireImage,
+    requireVideo,
+  ]);
+
+  // Centralized dynamic filtered reviews
+  const filteredReviews = useMemo(() => {
+    return filterTestimonials(approvedReviews, filterRules);
+  }, [approvedReviews, filterRules]);
 
   const displayReviews = filteredReviews.slice(0, settings.maxCount);
 
@@ -98,12 +134,19 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
       date: settings.showDate ? '1' : '0',
       company: settings.showCompany ? '1' : '0',
       count: String(settings.maxCount),
-      featured: settings.onlyFeatured ? '1' : '0',
+      mode: selectionMode,
     });
 
     if (selectionMode === 'auto') {
       if (minRating > 0) params.set('minRating', String(minRating));
-      if (selectedTag && selectedTag !== 'all') params.set('tag', selectedTag);
+      if (selectedTags.length > 0) params.set('tags', selectedTags.join(','));
+      if (tagMatchMode === 'all') params.set('tagMatch', 'all');
+      if (featuredFilter === 'featured' || settings.onlyFeatured) params.set('featured', '1');
+      if (testimonialType !== 'all') params.set('type', testimonialType);
+      if (selectedFormId !== 'all') params.set('formId', selectedFormId);
+      if (requirePhoto) params.set('hasPhoto', '1');
+      if (requireImage) params.set('hasImage', '1');
+      if (requireVideo) params.set('hasVideo', '1');
     } else if (selectedReviewIds.length > 0) {
       params.set('ids', selectedReviewIds.join(','));
     }
@@ -275,77 +318,219 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
             </div>
 
             {selectionMode === 'auto' ? (
-              <div className="space-y-3 pt-2">
-                <p className="text-[11px] text-gray-500 leading-normal">
-                  Automatically populates with all qualifying testimonials. Updates automatically without editing your website.
-                </p>
+              <div className="space-y-3.5 pt-2">
+                <div className="p-2.5 rounded-xl bg-purple-50/70 border border-purple-200/80 text-[11px] text-purple-950 flex items-start gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-[#6701e6] shrink-0 mt-0.5" />
+                  <span className="leading-snug">
+                    <strong>Auto-Add Rules:</strong> Qualifying testimonials approved in the future will automatically appear on your website.
+                  </span>
+                </div>
 
-                {/* Min Rating Filter */}
+                {/* Rating Filter */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Minimum Rating
+                    Rating
                   </label>
                   <select
                     value={minRating}
                     onChange={(e) => setMinRating(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-xl text-xs bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6]"
                   >
-                    <option value={0}>All Ratings (1–5 Stars)</option>
-                    <option value={4}>4+ Stars Only</option>
-                    <option value={5}>5 Stars Only (Top Proof)</option>
+                    <option value={0}>All ratings (1–5 Stars)</option>
+                    <option value={4}>4+ stars</option>
+                    <option value={5}>5 stars (Top proof only)</option>
                   </select>
                 </div>
 
                 {/* Tag Filter */}
                 <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold text-gray-700">Tags</label>
+                    {selectedTags.length > 0 && (
+                      <button
+                        onClick={() => setSelectedTags([])}
+                        className="text-[10px] text-gray-500 hover:text-gray-900 cursor-pointer font-medium"
+                      >
+                        Clear tags ({selectedTags.length})
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-2 bg-gray-50 rounded-xl border border-gray-200">
+                    {allTags.length === 0 ? (
+                      <span className="text-[11px] text-gray-400 italic">No tags in library yet</span>
+                    ) : (
+                      allTags.map((tag) => {
+                        const isSelected = selectedTags.includes(tag);
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => {
+                              setSelectedTags((prev) =>
+                                isSelected ? prev.filter((t) => t !== tag) : [...prev, tag]
+                              );
+                            }}
+                            className={`px-2 py-0.5 rounded-lg text-xs font-medium transition-colors cursor-pointer border ${
+                              isSelected
+                                ? 'bg-[#6701e6] text-white border-[#6701e6]'
+                                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
+                            }`}
+                          >
+                            #{tag}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* Tag Matching Mode */}
+                {selectedTags.length > 1 && (
+                  <div className="space-y-1.5 p-2 rounded-xl bg-gray-50 border border-gray-200 text-xs">
+                    <span className="block font-semibold text-gray-700 text-[11px]">Tag matching</span>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-1.5 cursor-pointer text-xs text-gray-700">
+                        <input
+                          type="radio"
+                          name="tagMatchMode"
+                          value="any"
+                          checked={tagMatchMode === 'any'}
+                          onChange={() => setTagMatchMode('any')}
+                          className="text-[#6701e6] focus:ring-[#6701e6]"
+                        />
+                        <span>Any selected tag</span>
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer text-xs text-gray-700">
+                        <input
+                          type="radio"
+                          name="tagMatchMode"
+                          value="all"
+                          checked={tagMatchMode === 'all'}
+                          onChange={() => setTagMatchMode('all')}
+                          className="text-[#6701e6] focus:ring-[#6701e6]"
+                        />
+                        <span>All selected tags</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Featured Status */}
+                <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Filter by Tag
+                    Featured
                   </label>
                   <select
-                    value={selectedTag}
-                    onChange={(e) => setSelectedTag(e.target.value)}
+                    value={featuredFilter}
+                    onChange={(e) => setFeaturedFilter(e.target.value as any)}
                     className="w-full px-3 py-2 rounded-xl text-xs bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6]"
                   >
-                    <option value="all">All Tags (Entire Library)</option>
-                    {allTags.map((tag) => (
-                      <option key={tag} value={tag}>
-                        #{tag}
-                      </option>
-                    ))}
+                    <option value="all">All testimonials</option>
+                    <option value="featured">Featured only</option>
                   </select>
+                </div>
+
+                {/* Testimonial Type */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Type
+                  </label>
+                  <select
+                    value={testimonialType}
+                    onChange={(e) => setTestimonialType(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl text-xs bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6]"
+                  >
+                    <option value="all">All types</option>
+                    <option value="text">Text only</option>
+                    <option value="image">With customer photo</option>
+                    <option value="video">Video testimonials</option>
+                  </select>
+                </div>
+
+                {/* Collection Form */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Form
+                  </label>
+                  <select
+                    value={selectedFormId}
+                    onChange={(e) => setSelectedFormId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl text-xs bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6]"
+                  >
+                    <option value="all">All forms</option>
+                    {collectionForm && (
+                      <option value={collectionForm.id}>
+                        {collectionForm.title || 'Main Collection Form'}
+                      </option>
+                    )}
+                  </select>
+                </div>
+
+                {/* Media Availability */}
+                <div className="space-y-2 pt-1 border-t border-gray-100">
+                  <span className="block text-xs font-semibold text-gray-700">Media</span>
+                  <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={requirePhoto}
+                      onChange={(e) => setRequirePhoto(e.target.checked)}
+                      className="rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6]"
+                    />
+                    <span>Has customer photo</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={requireImage}
+                      onChange={(e) => setRequireImage(e.target.checked)}
+                      className="rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6]"
+                    />
+                    <span>Has image</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={requireVideo}
+                      onChange={(e) => setRequireVideo(e.target.checked)}
+                      className="rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6]"
+                    />
+                    <span>Has video</span>
+                  </label>
                 </div>
               </div>
             ) : (
-              <div className="space-y-2 pt-2 max-h-48 overflow-y-auto pr-1">
-                <p className="text-[11px] text-gray-500 mb-2">
-                  Pick specific testimonials to fix permanently in this widget:
-                </p>
-                {approvedReviews.map((r) => {
-                  const isChecked = selectedReviewIds.includes(r.id);
-                  return (
-                    <div
-                      key={r.id}
-                      onClick={() => toggleManualReview(r.id)}
-                      className={`p-2.5 rounded-xl border text-xs cursor-pointer flex items-center justify-between transition-colors ${
-                        isChecked
-                          ? 'bg-purple-50/70 border-[#6701e6]/40 text-gray-900 font-semibold'
-                          : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 truncate pr-2">
-                        {isChecked ? (
-                          <CheckSquare className="w-4 h-4 text-[#6701e6] shrink-0" />
-                        ) : (
-                          <Square className="w-4 h-4 text-gray-300 shrink-0" />
-                        )}
-                        <span className="truncate">{r.name}</span>
+              <div className="space-y-2 pt-2">
+                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900">
+                  <strong>Manual Mode:</strong> Only selected testimonials appear. Future approved testimonials will NOT be added automatically.
+                </div>
+                <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                  {approvedReviews.map((r) => {
+                    const isChecked = selectedReviewIds.includes(r.id);
+                    return (
+                      <div
+                        key={r.id}
+                        onClick={() => toggleManualReview(r.id)}
+                        className={`p-2.5 rounded-xl border text-xs cursor-pointer flex items-center justify-between transition-colors ${
+                          isChecked
+                            ? 'bg-purple-50/70 border-[#6701e6]/40 text-gray-900 font-semibold'
+                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 truncate pr-2">
+                          {isChecked ? (
+                            <CheckSquare className="w-4 h-4 text-[#6701e6] shrink-0" />
+                          ) : (
+                            <Square className="w-4 h-4 text-gray-300 shrink-0" />
+                          )}
+                          <span className="truncate">{r.name}</span>
+                        </div>
+                        <span className="text-[10px] text-amber-500 font-bold shrink-0">
+                          ★ {r.rating}
+                        </span>
                       </div>
-                      <span className="text-[10px] text-amber-500 font-bold shrink-0">
-                        ★ {r.rating}
-                      </span>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -463,7 +648,14 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
 
           {/* Embed Code & Platform Guidance */}
           <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-1.5">
+            <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-950 text-xs flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span className="font-semibold">
+                Embed once. New matching testimonials appear automatically.
+              </span>
+            </div>
+
+            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-1.5 pt-1">
               <Code2 className="w-4 h-4 text-[#6701e6]" />
               Publish on Your Website
             </h4>
@@ -544,16 +736,22 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
                 </div>
                 <h4 className="text-base font-bold text-gray-900 mb-1">No Matching Testimonials</h4>
                 <p className="text-xs text-gray-500 max-w-sm mb-4">
-                  No approved testimonials currently meet your filter criteria (Min Rating: {minRating || 'Any'}, Tag: {selectedTag}).
+                  No approved testimonials currently meet your filter criteria. Adjust your Auto-Add rules or switch to manual selection.
                 </p>
                 <button
                   onClick={() => {
                     setMinRating(0);
-                    setSelectedTag('all');
+                    setSelectedTags([]);
+                    setFeaturedFilter('all');
+                    setTestimonialType('all');
+                    setSelectedFormId('all');
+                    setRequirePhoto(false);
+                    setRequireImage(false);
+                    setRequireVideo(false);
                   }}
-                  className="px-4 py-2 rounded-xl bg-[#6701e6] text-white text-xs font-bold cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold cursor-pointer transition-colors shadow-xs"
                 >
-                  Reset Filter Rules
+                  Reset All Filter Rules
                 </button>
               </div>
             ) : settings.type === 'wall' ? (

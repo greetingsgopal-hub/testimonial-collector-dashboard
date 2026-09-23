@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Star, Quote, ExternalLink, Filter } from 'lucide-react';
+import { Star, Quote, ExternalLink, Filter, AlertCircle, RefreshCw } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { Review, WallOfLoveTheme } from '../types';
 import { usePageSeo } from '../lib/seo';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
+import { filterTestimonials, parseFilterRulesFromParams } from '../lib/testimonialFilter';
 
 // ── Theme Definitions ───────────────────────────────────────
 const THEME_STYLES: Record<WallOfLoveTheme, {
@@ -107,24 +108,31 @@ export const WallOfLovePage = () => {
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTheme, setActiveTheme] = useState<WallOfLoveTheme>(themeParam);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [showThemePicker, setShowThemePicker] = useState(false);
 
   const theme = THEME_STYLES[activeTheme];
 
+  const loadReviews = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const allReviews = await storage.getReviews(projectId || undefined);
+      const params = new URLSearchParams(window.location.search);
+      const rules = parseFilterRulesFromParams(params);
+      const qualifying = filterTestimonials(allReviews, rules);
+      setReviews(qualifying);
+    } catch (err: any) {
+      console.error('[WallOfLove] Failed to load reviews:', err);
+      setError(err?.message || 'Failed to load Wall of Love. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadReviews = async () => {
-      try {
-        const allReviews = await storage.getReviews(projectId || undefined);
-        const approved = allReviews.filter(r => r.status === 'approved');
-        setReviews(approved);
-      } catch (err) {
-        console.error('Failed to load reviews:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     loadReviews();
   }, [projectId]);
 
@@ -137,7 +145,7 @@ export const WallOfLovePage = () => {
 
   const filteredReviews = useMemo(() => {
     if (!activeTag) return reviews;
-    return reviews.filter(r => r.tags?.includes(activeTag));
+    return reviews.filter(r => r.tags?.some(t => t.toLowerCase() === activeTag.toLowerCase()));
   }, [reviews, activeTag]);
 
   // Masonry column distribution
@@ -153,6 +161,25 @@ export const WallOfLovePage = () => {
     return (
       <div className={`min-h-screen ${theme.bg} flex items-center justify-center`}>
         <div className="w-8 h-8 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`min-h-screen ${theme.bg} ${theme.text} flex flex-col items-center justify-center p-6 text-center`}>
+        <div className={`max-w-md p-8 rounded-3xl ${theme.cardBg} border ${theme.cardBorder} space-y-4 shadow-xl`}>
+          <AlertCircle className="w-10 h-10 text-rose-500 mx-auto" />
+          <h3 className="text-xl font-bold">Unable to load Wall of Love</h3>
+          <p className={`text-xs ${theme.textSecondary} leading-relaxed`}>{error}</p>
+          <button
+            onClick={loadReviews}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white cursor-pointer shadow-xs transition-colors"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Retry</span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -243,10 +270,24 @@ export const WallOfLovePage = () => {
 
         {/* Masonry Grid */}
         {filteredReviews.length === 0 ? (
-          <div className="py-20 text-center">
-            <Quote size={48} className={`mx-auto ${theme.textSecondary} opacity-30 mb-4`} />
-            <p className={`text-lg font-medium ${theme.textSecondary}`}>No testimonials yet</p>
-            <p className={`text-sm ${theme.textSecondary} opacity-60 mt-1`}>Check back soon!</p>
+          <div className={`py-20 text-center ${theme.cardBg} border ${theme.cardBorder} rounded-3xl p-8`}>
+            <Quote size={44} className={`mx-auto ${theme.textSecondary} opacity-30 mb-3`} />
+            <p className={`text-lg font-bold ${theme.text}`}>
+              {activeTag ? `No testimonials tagged #${activeTag}` : 'No testimonials published yet'}
+            </p>
+            <p className={`text-xs ${theme.textSecondary} opacity-80 mt-1 max-w-sm mx-auto`}>
+              {activeTag
+                ? 'Try selecting another tag or view all testimonials.'
+                : 'Approved testimonials matching your publishing rules will appear here automatically.'}
+            </p>
+            {activeTag && (
+              <button
+                onClick={() => setActiveTag(null)}
+                className="mt-4 px-4 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-current transition-colors cursor-pointer"
+              >
+                Clear tag filter
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

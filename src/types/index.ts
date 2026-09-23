@@ -231,7 +231,9 @@ export interface ReviewFilters {
   status: ReviewStatus | 'all';
   rating: number | 'all'; // 1-5 or 'all'
   tag: string | 'all';
+  type?: ReviewType | 'all';
   source?: ImportSource | 'all';
+  formId?: string | 'all';
   sentiment?: 'positive' | 'neutral' | 'negative' | 'all';
   sortBy: 'createdAt' | 'rating' | 'name';
   sortOrder: 'asc' | 'desc';

@@ -152,55 +152,18 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
         </div>
       </div>
 
-      {/* Second row: Search bar & Rating filter & Tag & Sort */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Second row: Search bar & Sort selector */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {/* Search Input */}
-        <div className="relative">
+        <div className="relative md:col-span-2">
           <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" />
           <input
             type="text"
-            placeholder="Search by name, company, or content..."
+            placeholder="Search testimonials by name, company, or keywords..."
             value={filters.search}
             onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
             className="w-full pl-9 pr-4 py-2 rounded-xl text-xs sm:text-sm bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6701e6] focus:border-[#6701e6] text-gray-900 placeholder-gray-400 shadow-xs transition-all"
           />
-        </div>
-
-        {/* Rating Filter */}
-        <div className="relative">
-          <select
-            value={filters.rating}
-            onChange={(e) => {
-              const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
-              setFilters((prev) => ({ ...prev, rating: val }));
-            }}
-            className="w-full px-3.5 py-2 rounded-xl text-xs sm:text-sm bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6701e6] focus:border-[#6701e6] text-gray-900 shadow-xs appearance-none cursor-pointer"
-          >
-            <option value="all">All Ratings</option>
-            <option value="5">5 Stars only</option>
-            <option value="4">4 Stars only</option>
-            <option value="3">3 Stars only</option>
-            <option value="2">2 Stars only</option>
-            <option value="1">1 Star only</option>
-          </select>
-          <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
-        </div>
-
-        {/* Tag Filter */}
-        <div className="relative">
-          <select
-            value={filters.tag}
-            onChange={(e) => setFilters((prev) => ({ ...prev, tag: e.target.value }))}
-            className="w-full px-3.5 py-2 rounded-xl text-xs sm:text-sm bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6701e6] focus:border-[#6701e6] text-gray-900 shadow-xs appearance-none cursor-pointer"
-          >
-            <option value="all">All Tags</option>
-            {availableTags.map((tag) => (
-              <option key={tag} value={tag}>
-                #{tag}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
         </div>
 
         {/* Sort selector */}
@@ -219,6 +182,75 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
             <option value="rating-asc">Lowest rated</option>
           </select>
           <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
+        </div>
+      </div>
+
+      {/* Third row: Detailed filters (Rating, Tag, Type, Source) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-0.5">
+        {/* Rating Filter */}
+        <div className="relative">
+          <select
+            value={filters.rating}
+            onChange={(e) => {
+              const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
+              setFilters((prev) => ({ ...prev, rating: val }));
+            }}
+            className="w-full px-3 py-1.5 rounded-xl text-xs bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6701e6] text-gray-900 shadow-xs appearance-none cursor-pointer"
+          >
+            <option value="all">All Ratings</option>
+            <option value="5">5 Stars only</option>
+            <option value="4">4 Stars only</option>
+            <option value="3">3 Stars only</option>
+            <option value="2">2 Stars only</option>
+            <option value="1">1 Star only</option>
+          </select>
+          <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-2.5 pointer-events-none" />
+        </div>
+
+        {/* Tag Filter */}
+        <div className="relative">
+          <select
+            value={filters.tag}
+            onChange={(e) => setFilters((prev) => ({ ...prev, tag: e.target.value }))}
+            className="w-full px-3 py-1.5 rounded-xl text-xs bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6701e6] text-gray-900 shadow-xs appearance-none cursor-pointer"
+          >
+            <option value="all">All Tags</option>
+            {availableTags.map((tag) => (
+              <option key={tag} value={tag}>
+                #{tag}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-2.5 pointer-events-none" />
+        </div>
+
+        {/* Type Filter */}
+        <div className="relative">
+          <select
+            value={filters.type || 'all'}
+            onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value as any }))}
+            className="w-full px-3 py-1.5 rounded-xl text-xs bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6701e6] text-gray-900 shadow-xs appearance-none cursor-pointer"
+          >
+            <option value="all">All Types</option>
+            <option value="text">Text only</option>
+            <option value="video">Video only</option>
+          </select>
+          <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-2.5 pointer-events-none" />
+        </div>
+
+        {/* Source Filter */}
+        <div className="relative">
+          <select
+            value={filters.source || 'all'}
+            onChange={(e) => setFilters((prev) => ({ ...prev, source: e.target.value as any }))}
+            className="w-full px-3 py-1.5 rounded-xl text-xs bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6701e6] text-gray-900 shadow-xs appearance-none cursor-pointer"
+          >
+            <option value="all">All Sources</option>
+            <option value="form">Direct Form</option>
+            <option value="manual">Manual Entry</option>
+            <option value="import">Imported</option>
+          </select>
+          <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-2.5 pointer-events-none" />
         </div>
       </div>
     </div>

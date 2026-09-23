@@ -149,11 +149,16 @@ export const PublicCollectorPage = () => {
   const handleSubmit = async (data: ReviewInput) => {
     setIsSubmitting(true);
     try {
-      const autoTag = formConfig?.settings?.autoTag;
-      const autoApprove = Boolean(formConfig?.settings?.autoApprove);
-      const combinedTags = autoTag
-        ? Array.from(new Set([...(data.tags || []), autoTag]))
-        : (data.tags || []);
+      const autoTagSetting = formConfig?.settings?.autoTag;
+      const autoTags = Array.isArray(autoTagSetting)
+        ? autoTagSetting
+        : (autoTagSetting || '')
+            .split(/[,;\s]+/)
+            .map(t => t.trim().replace(/^#/, ''))
+            .filter(Boolean);
+
+      const isAutoApprove = Boolean(formConfig?.settings?.autoApprove);
+      const combinedTags = Array.from(new Set([...(data.tags || []), ...autoTags]));
 
       const created = await storage.createReview(
         {
@@ -161,7 +166,7 @@ export const PublicCollectorPage = () => {
           tags: combinedTags,
           projectId: formConfig?.projectId,
           collectionFormId: formConfig?.id,
-          status: autoApprove ? 'approved' : 'pending',
+          status: isAutoApprove ? 'approved' : 'pending',
           consent: true,
         },
         formConfig?.projectId

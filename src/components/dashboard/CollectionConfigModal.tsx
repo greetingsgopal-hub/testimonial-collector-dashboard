@@ -314,12 +314,12 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
               <input
                 type="text"
                 value={autoTag}
-                onChange={(e) => setAutoTag(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                placeholder="e.g. enterprise, saas, onboarding"
+                onChange={(e) => setAutoTag(e.target.value.toLowerCase().replace(/[^a-z0-9-,\s]/g, ''))}
+                placeholder="e.g. enterprise, case-study, vip"
                 className="w-full px-3 py-2 rounded-lg text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
               />
               <p className="text-[10px] text-gray-500 mt-1">
-                Submissions via this form will automatically receive this tag for widget targeting.
+                Comma-separated tags (e.g. enterprise, case-study). Submissions will receive all specified tags automatically.
               </p>
             </div>
 

@@ -157,8 +157,9 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
                 </p>
                 {review.email && (
                   <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-1">
-                    <Mail className="w-3 h-3 text-gray-400" />
+                    <Mail className="w-3 h-3 text-gray-400 shrink-0" />
                     <span>{review.email}</span>
+                    <span className="text-[10px] text-gray-400 italic ml-1">(Private — never displayed publicly)</span>
                   </div>
                 )}
               </div>
@@ -446,6 +447,24 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
             </div>
           )}
 
+          {/* Submission Details */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-200">
+            <div>
+              <span className="block text-[10px] font-bold uppercase text-gray-600">Source</span>
+              <span className="font-semibold text-gray-900 capitalize">{review.source || 'Collection Form'}</span>
+            </div>
+            {review.collectionFormId && (
+              <div>
+                <span className="block text-[10px] font-bold uppercase text-gray-600">Form ID</span>
+                <span className="font-mono text-gray-900 text-[11px] truncate block" title={review.collectionFormId}>{review.collectionFormId}</span>
+              </div>
+            )}
+            <div>
+              <span className="block text-[10px] font-bold uppercase text-gray-600">Submitted</span>
+              <span className="font-semibold text-gray-900">{review.createdAt ? new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
+            </div>
+          </div>
+
           {/* Metadata & Consent */}
           <div className="flex items-center gap-2 text-xs text-emerald-800 bg-emerald-50 p-3 rounded-xl border border-emerald-200">
             <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600" />
@@ -456,27 +475,29 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
         {/* Footer Moderation Actions */}
         <div className="p-4 sm:p-5 border-t border-gray-100 bg-gray-50 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            {/* Approve */}
+            {/* Approve / Unapprove */}
             <button
-              onClick={() => onUpdateStatus(review.id, 'approved')}
+              onClick={() => onUpdateStatus(review.id, review.status === 'approved' ? 'pending' : 'approved')}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                 review.status === 'approved'
-                  ? 'bg-emerald-600 text-white shadow-xs'
+                  ? 'bg-emerald-600 text-white shadow-xs hover:bg-emerald-700'
                   : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'
               }`}
+              title={review.status === 'approved' ? 'Click to revert to pending' : 'Approve for public display'}
             >
               <Check className="w-4 h-4" />
-              <span>{review.status === 'approved' ? 'Approved' : 'Approve'}</span>
+              <span>{review.status === 'approved' ? 'Approved (Unapprove)' : 'Approve'}</span>
             </button>
 
             {/* Reject */}
             <button
-              onClick={() => onUpdateStatus(review.id, 'rejected')}
+              onClick={() => onUpdateStatus(review.id, review.status === 'rejected' ? 'pending' : 'rejected')}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                 review.status === 'rejected'
-                  ? 'bg-rose-600 text-white shadow-xs'
+                  ? 'bg-rose-600 text-white shadow-xs hover:bg-rose-700'
                   : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'
               }`}
+              title={review.status === 'rejected' ? 'Click to unreject' : 'Reject testimonial'}
             >
               <X className="w-4 h-4" />
               <span>{review.status === 'rejected' ? 'Rejected' : 'Reject'}</span>

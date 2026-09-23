@@ -7,6 +7,7 @@ import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
 import { FloatingReviewDrawer } from '../components/widgets/FloatingReviewDrawer';
 import { SocialProofToast } from '../components/widgets/SocialProofToast';
+import { filterTestimonials, parseFilterRulesFromParams } from '../lib/testimonialFilter';
 
 const DEFAULT_SETTINGS: WidgetSettings = {
   type: 'wall',
@@ -35,12 +36,12 @@ function parseSettings(): WidgetSettings {
     showAvatar: params.get('avatar') !== '0',
     showDate: params.get('date') !== '0',
     showCompany: params.get('company') !== '0',
-    maxCount: Math.min(12, Math.max(1, Number(params.get('count')) || 6)),
+    maxCount: Math.min(24, Math.max(1, Number(params.get('count')) || 6)),
     onlyFeatured: params.get('featured') === '1',
     tabPosition: (params.get('position') as any) || 'bottom-right',
     tabText: params.get('tabText') || undefined,
     autoAddByRating: Number(params.get('minRating')) || 0,
-    autoAddByTags: params.get('tag') && params.get('tag') !== 'all' ? [params.get('tag')!] : undefined,
+    autoAddByTags: params.get('tags') ? params.get('tags')!.split(',') : params.get('tag') && params.get('tag') !== 'all' ? [params.get('tag')!] : undefined,
   };
 }
 
@@ -74,29 +75,18 @@ export const PublicWidgetPage = () => {
       try {
         setIsLoading(true);
         const all = await storage.getReviews(publicWidgetId);
-        const approved = all.filter((r) => r.status === 'approved');
-        
-        let visible = approved;
-        if (settings.onlyFeatured) {
-          visible = visible.filter((r) => r.isFeatured);
-        }
-        if (settings.autoAddByRating && settings.autoAddByRating > 0) {
-          visible = visible.filter((r) => r.rating >= settings.autoAddByRating!);
-        }
-        if (settings.autoAddByTags && settings.autoAddByTags.length > 0) {
-          visible = visible.filter((r) => r.tags && r.tags.some(t => settings.autoAddByTags!.includes(t)));
-        }
         
         const params = new URLSearchParams(window.location.search);
-        const idsParam = params.get('ids');
-        if (idsParam) {
-          const allowedIds = idsParam.split(',').filter(Boolean);
-          if (allowedIds.length > 0) {
-            visible = visible.filter((r) => allowedIds.includes(r.id));
-          }
+        const rules = parseFilterRulesFromParams(params);
+
+        // Fallback to widget settings if not explicitly specified in URL params
+        if (settings.onlyFeatured) rules.onlyFeatured = true;
+        if (settings.autoAddByRating && (!rules.minRating || rules.minRating === 0)) {
+          rules.minRating = settings.autoAddByRating;
         }
 
-        setReviews(visible.slice(0, settings.maxCount));
+        const visible = filterTestimonials(all, rules, settings.maxCount);
+        setReviews(visible);
       } catch (error) {
         console.error('[PublicWidget] Failed to load approved reviews:', error);
       } finally {

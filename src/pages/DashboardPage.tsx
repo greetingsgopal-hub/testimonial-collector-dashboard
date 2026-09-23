@@ -228,6 +228,9 @@ export const DashboardPage = () => {
       if (filters.status !== 'all' && r.status !== filters.status) return false;
       if (filters.rating !== 'all' && r.rating !== filters.rating) return false;
       if (filters.tag !== 'all' && (!r.tags || !r.tags.includes(filters.tag))) return false;
+      if (filters.type && filters.type !== 'all' && r.type !== filters.type) return false;
+      if (filters.source && filters.source !== 'all' && r.source !== filters.source) return false;
+      if (filters.formId && filters.formId !== 'all' && r.collectionFormId !== filters.formId) return false;
 
       if (filters.search.trim()) {
         const q = filters.search.toLowerCase();
