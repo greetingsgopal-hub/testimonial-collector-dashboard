@@ -326,8 +326,9 @@ export const LandingPage: React.FC = () => {
             <div>
               <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-gray-100 border border-gray-200 shadow-inner">
                 <img
-                  src="/images/without_social_proof.jpg"
-                  alt="You Without Social Proof meme"
+                  src="/assets/senja/video-without.BT548AK4_Z15YjLo.webp"
+                  alt="You Without Social Proof"
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -364,8 +365,9 @@ export const LandingPage: React.FC = () => {
             <div>
               <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-purple-100 border border-purple-200 shadow-inner">
                 <img
-                  src="/images/with_social_proof.jpg"
-                  alt="You With Social Proof celebration meme"
+                  src="/assets/senja/video-with.Ctn8dyn5_1S8Qct.webp"
+                  alt="You With Social Proof celebration"
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -514,9 +516,10 @@ export const LandingPage: React.FC = () => {
           </blockquote>
           <figcaption className="mt-4 flex items-center gap-3">
             <img
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80"
+              src="/assets/senja/jamie-northrup.C6GwZu-2_s1skM.webp"
               alt="Jamie Northrup"
-              className="h-10 w-10 rounded-full object-cover"
+              loading="lazy"
+              className="h-10 w-10 rounded-full object-cover shadow-xs border border-gray-200"
             />
             <div>
               <p className="font-semibold text-gray-900 text-sm">Jamie Northrup</p>
@@ -987,9 +990,10 @@ export const LandingPage: React.FC = () => {
             </blockquote>
             <figcaption className="mt-4 flex items-center gap-3">
               <img
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80"
+                src="/assets/senja/michael-heap.BPuupf8X_67hTa.webp"
                 alt="Michael Heap"
-                className="h-10 w-10 rounded-full object-cover"
+                loading="lazy"
+                className="h-10 w-10 rounded-full object-cover shadow-xs border border-gray-200"
               />
               <div>
                 <p className="font-semibold text-gray-900 text-sm">Michael Heap</p>
@@ -1050,9 +1054,12 @@ export const LandingPage: React.FC = () => {
               </p>
             </blockquote>
             <figcaption className="mt-4 flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-sm">
-                NF
-              </div>
+              <img
+                src="/assets/senja/nathan-falceso.BOeFR7x3_24DNsr.webp"
+                alt="Nathan Falceso"
+                loading="lazy"
+                className="h-10 w-10 rounded-full object-cover shadow-xs border border-gray-200"
+              />
               <div>
                 <p className="font-semibold text-gray-900 text-sm">Nathan Falceso</p>
                 <p className="text-xs text-gray-500">Verified User</p>

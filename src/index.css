@@ -256,3 +256,53 @@
   animation: vertical-scroll 32s linear infinite;
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Senja Interactive Testimonial Cards & Hover System
+   ───────────────────────────────────────────────────────────── */
+.thl-link {
+  color: inherit;
+  text-decoration: underline dotted;
+  text-decoration-color: #6701e6;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  text-decoration-thickness: 2px;
+}
+.thl-link:hover, .thl-link:focus-visible {
+  color: #6701e6;
+  text-decoration-style: solid;
+}
+.thl-card {
+  z-index: 60;
+  text-align: left;
+  opacity: 0;
+  pointer-events: auto;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  width: min(22rem, 100vw - 2rem);
+  padding: 1rem 1.25rem;
+  transition: opacity 0.28s, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  position: fixed;
+  transform: translateY(10px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+.thl-card.thl-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.thl-mark {
+  color: inherit;
+  background-color: transparent;
+  background-image: linear-gradient(90deg, #e9dbff, #e9dbff);
+  background-position: 0;
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  border-radius: 2px;
+  padding: 0 2px;
+  transition: background-size 1.2s cubic-bezier(0.25, 0.8, 0.25, 1) 0.4s;
+}
+.thl-mark.thl-mark-on {
+  background-size: 100% 100%;
+}
+
+
