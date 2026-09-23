@@ -65,7 +65,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   };
 
   return (
-    <aside className="w-64 shrink-0 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 select-none z-30 font-sans text-sm">
+    <aside className="w-64 min-w-[16rem] shrink-0 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 select-none z-30 font-sans text-sm">
       
       {/* Brand Header */}
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -103,7 +103,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       </div>
 
       {/* Navigation Sections */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-6 scrollbar-thin">
+      <div className="flex-1 overflow-y-auto px-3.5 pt-3 pb-24 space-y-6 scrollbar-thin">
         
         {/* Top Welcome Quick Access */}
         <div>

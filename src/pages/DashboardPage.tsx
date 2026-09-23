@@ -42,7 +42,8 @@ import {
   Layers,
   Star,
   LayoutGrid,
-  Database
+  Database,
+  Check
 } from 'lucide-react';
 
 export const DashboardPage = () => {
@@ -281,24 +282,27 @@ export const DashboardPage = () => {
             <span className="text-xs text-gray-500 truncate max-w-[200px]">{project?.name || 'Main Product'}</span>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Quick Share Link */}
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-50/80 border border-purple-200 text-xs font-semibold text-[#6701e6]">
-              <span className="truncate max-w-[200px] font-mono text-[11px]">{collectionUrl}</span>
+          <div className="flex items-center gap-2.5">
+            {/* Quick Share Form Actions */}
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={handleCopyLink}
-                className="hover:underline font-bold cursor-pointer ml-1"
-                title="Copy public collection link"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#6701e6] border border-purple-200 text-xs font-semibold transition-all shadow-2xs hover:shadow-xs cursor-pointer whitespace-nowrap"
+                title="Copy public collector link"
               >
-                {copiedLink ? 'Copied!' : 'Share Form'}
+                {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedLink ? 'Copied Link!' : 'Copy Link'}</span>
               </button>
+
               <a
                 href={collectionUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:opacity-75 transition-opacity"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs hover:shadow-sm whitespace-nowrap cursor-pointer"
+                title="Open live collector form in new tab"
               >
-                <ExternalLink className="w-3 h-3" />
+                <span>Share Form</span>
+                <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
 
