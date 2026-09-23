@@ -21,6 +21,7 @@ import {
 } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../lib/firebase';
 import { Workspace, Project, CollectionForm, PlanTier } from '../types';
+import { cleanBrandOrProductName, deduplicateRepeatedString } from '../lib/security';
 
 /** Translate raw Firebase auth error codes into friendly, customer-readable messages. */
 function translateFirebaseError(error: any): string {
@@ -162,11 +163,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const formRef = doc(collection(db, 'collection_forms'));
         const now = new Date().toISOString();
 
+        const cleanProjName = cleanBrandOrProductName(currentProj.name);
+        const formTitle = cleanProjName
+          ? `Share your experience with ${cleanProjName}`
+          : 'Share your experience';
+
         const formData = {
           projectId: currentProj.id,
           ownerId: currentUser.uid,
           publicSlug: formSlug,
-          title: `Share your experience with ${currentProj.name}`,
+          title: formTitle,
           description: 'Your honest feedback helps us grow and serve you better.',
           isActive: true,
           allowVideo: true,
@@ -187,7 +193,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: row.id,
           projectId: data.projectId,
           publicSlug: data.publicSlug,
-          title: data.title,
+          title: deduplicateRepeatedString(data.title) || 'Share your experience',
           description: data.description,
           isActive: data.isActive,
           allowVideo: data.allowVideo,
@@ -367,11 +373,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Create a default collection form for the new project
       const formRef = doc(collection(db, 'collection_forms'));
+      const cleanProjName = cleanBrandOrProductName(name);
+      const formTitle = cleanProjName
+        ? `Share your experience with ${cleanProjName}`
+        : 'Share your experience';
+
       const formData = {
         projectId: newProject.id,
         ownerId: user.uid,
         publicSlug: `${projData.slug}-feedback`,
-        title: `Share your experience with ${name}`,
+        title: formTitle,
         description: 'Your honest feedback helps us grow and serve you better.',
         isActive: true,
         allowVideo: true,

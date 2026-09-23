@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { CollectionForm } from '../../types';
 import { storage } from '../../lib/storage';
+import { cleanBrandOrProductName, deduplicateRepeatedString } from '../../lib/security';
 
 interface CollectionConfigModalProps {
   collectionForm: CollectionForm | null;
@@ -26,7 +27,12 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
   onClose,
   onSaved,
 }) => {
-  const [title, setTitle] = useState(collectionForm?.title || 'Share Your Experience');
+  const [title, setTitle] = useState(
+    deduplicateRepeatedString(collectionForm?.title) || 'Share Your Experience'
+  );
+  const [brandName, setBrandName] = useState(
+    collectionForm?.settings?.brandName || (collectionForm as any)?.publicBrandName || ''
+  );
   const [description, setDescription] = useState(
     collectionForm?.description || 'Your honest feedback helps our team and community grow.'
   );
@@ -59,7 +65,10 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
     e.preventDefault();
     setError(null);
 
-    if (!title.trim()) {
+    const cleanTitle = deduplicateRepeatedString(title) || 'Share Your Experience';
+    const cleanBrand = cleanBrandOrProductName(brandName);
+
+    if (!cleanTitle.trim()) {
       setError('Collection title is required.');
       return;
     }
@@ -74,29 +83,32 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
       let saved: CollectionForm;
       const formSettings = {
         ...collectionForm?.settings,
+        brandName: cleanBrand || undefined,
         autoTag: autoTag.trim() || undefined,
         autoApprove,
       };
 
       if (collectionForm?.id) {
         saved = await storage.updateCollectionForm(collectionForm.id, {
-          title: title.trim(),
+          title: cleanTitle.trim(),
           description: description.trim(),
           publicSlug: publicSlug.trim(),
           isActive,
           allowVideo,
           projectId: collectionForm.projectId || projectId,
           settings: formSettings,
+          ...((cleanBrand ? { publicBrandName: cleanBrand } : {}) as any),
         });
       } else {
         saved = await storage.createCollectionForm({
           projectId,
-          title: title.trim(),
+          title: cleanTitle.trim(),
           description: description.trim(),
           publicSlug: publicSlug.trim(),
           isActive,
           allowVideo,
           settings: formSettings,
+          ...((cleanBrand ? { publicBrandName: cleanBrand } : {}) as any),
         });
       }
       onSaved(saved);
@@ -171,6 +183,23 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
+          </div>
+
+          {/* Brand / Product Name */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
+              Brand / Product Name
+            </label>
+            <input
+              type="text"
+              value={brandName}
+              onChange={(e) => setBrandName(e.target.value)}
+              placeholder="e.g. Acme Inc or Panda Praise"
+              className="w-full px-3.5 py-2 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6]"
+            />
+            <p className="text-[11px] text-gray-500 mt-1">
+              Used in the rating question: "Do you enjoy using {cleanBrandOrProductName(brandName) || 'our product'}?"
+            </p>
           </div>
 
           {/* Title */}

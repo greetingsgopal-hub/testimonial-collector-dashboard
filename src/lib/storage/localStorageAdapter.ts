@@ -1,6 +1,7 @@
 import { StorageAdapter } from './adapter';
 import { Review, ReviewInput, ReviewStats, CollectionForm, Project } from '../../types';
 import { INITIAL_REVIEWS } from '../seedData';
+import { cleanBrandOrProductName, deduplicateRepeatedString } from '../security';
 
 const STORAGE_KEY_PREFIX = 'pandapraise_testimonials_project_';
 export class LocalStorageAdapter implements StorageAdapter {
@@ -201,12 +202,17 @@ export class LocalStorageAdapter implements StorageAdapter {
           if (val) {
             const form = JSON.parse(val) as CollectionForm;
             if (form.publicSlug === publicSlug) {
+              const cleanTitle = deduplicateRepeatedString(form.title) || 'Share Your Experience';
+              const cleanBrand = cleanBrandOrProductName(form.settings?.brandName) || 'Panda Praise';
               return {
-                form,
+                form: {
+                  ...form,
+                  title: cleanTitle,
+                },
                 project: {
                   id: form.projectId,
                   workspaceId: 'ws-demo-1',
-                  name: 'Demo Product',
+                  name: cleanBrand,
                   slug: 'demo-product',
                   createdAt: form.createdAt,
                 }

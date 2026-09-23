@@ -1,6 +1,7 @@
 import { StorageAdapter } from './adapter';
 import { Review, ReviewInput, ReviewStats, CollectionForm, Project } from '../../types';
 import { getFirebaseDb, getFirebaseAuth } from '../firebase';
+import { cleanBrandOrProductName, deduplicateRepeatedString } from '../security';
 import {
   collection,
   doc,
@@ -293,11 +294,13 @@ export class FirebaseAdapter implements StorageAdapter {
     const formDoc = formSnapshot.docs[0];
     const formData = formDoc.data();
 
+    const cleanTitle = deduplicateRepeatedString(formData.title) || 'Share Your Experience';
+
     const form: CollectionForm = {
       id: formDoc.id,
       projectId: formData.projectId,
       publicSlug: formData.publicSlug,
-      title: formData.title,
+      title: cleanTitle,
       description: formData.description,
       isActive: formData.isActive,
       allowVideo: formData.allowVideo,
@@ -306,10 +309,29 @@ export class FirebaseAdapter implements StorageAdapter {
       updatedAt: formData.updatedAt,
     };
 
+    let projectName = formData.publicBrandName || formData.settings?.brandName;
+
+    // If no explicit brand name on the form, attempt to fetch the actual project document
+    if (!projectName && formData.projectId) {
+      try {
+        const projSnap = await getDoc(doc(db, 'projects', formData.projectId));
+        if (projSnap.exists()) {
+          const pData = projSnap.data();
+          if (pData?.name) {
+            projectName = pData.name;
+          }
+        }
+      } catch (err) {
+        console.warn('[firebaseAdapter] Could not fetch project doc:', err);
+      }
+    }
+
+    projectName = cleanBrandOrProductName(projectName) || 'Panda Praise';
+
     const project: Project = {
-      id: formData.projectId,
+      id: formData.projectId || 'proj-default',
       workspaceId: '',
-      name: formData.publicBrandName || formData.settings?.brandName || formData.title || 'Customer Testimonials',
+      name: projectName,
       slug: formData.publicSlug || 'testimonials',
       websiteUrl: formData.settings?.websiteUrl,
       createdAt: formData.createdAt,

@@ -93,3 +93,54 @@ export function validateReviewInput(data: ReviewInput): { valid: boolean; error?
 
   return { valid: true };
 }
+
+/**
+ * Deduplicates accidental doubled/repeated strings (e.g., "PhrasePhrase" or "Phrase Phrase").
+ */
+export function deduplicateRepeatedString(str?: string | null): string {
+  if (!str || typeof str !== 'string') return '';
+  let s = str.trim();
+
+  // 1. Check exact half repetition without spaces (e.g. "Share Your ExperienceShare Your Experience")
+  const len = s.length;
+  if (len >= 4 && len % 2 === 0) {
+    const half1 = s.substring(0, len / 2);
+    const half2 = s.substring(len / 2);
+    if (half1.toLowerCase() === half2.toLowerCase()) {
+      s = half1.trim();
+    }
+  }
+
+  // 2. Check repeated words/phrases with space or punctuation: "Word Word" -> "Word"
+  s = s.replace(/^(.{3,}?)\s+\1$/i, '$1').trim();
+  s = s.replace(/^(.{3,}?)\1$/i, '$1').trim();
+
+  return s;
+}
+
+/**
+ * Cleans brand or product names by deduplicating and filtering out generic form prompts
+ * like "Share Your Experience", "Rate your experience", or "Customer Testimonials".
+ */
+export function cleanBrandOrProductName(raw?: string | null): string {
+  const deduped = deduplicateRepeatedString(raw);
+  if (!deduped) return '';
+
+  const lower = deduped.toLowerCase();
+
+  // If it's a form instruction or generic fallback rather than a business/product name
+  if (
+    lower.startsWith('share your experience') ||
+    lower.startsWith('rate your experience') ||
+    lower.startsWith('submit your testimonial') ||
+    lower === 'customer testimonials' ||
+    lower === 'feedback' ||
+    lower === 'demo product' ||
+    lower === 'our product' ||
+    lower === 'our service'
+  ) {
+    return '';
+  }
+
+  return deduped;
+}

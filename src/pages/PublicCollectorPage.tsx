@@ -8,6 +8,7 @@ import { storage, getActiveBackendInfo } from '../lib/storage';
 import { AlertCircle, ArrowLeft, Building2, Clock, Star, CheckCircle2 } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
+import { cleanBrandOrProductName, deduplicateRepeatedString } from '../lib/security';
 
 const INITIAL_FORM_STATE: ReviewInput = {
   name: '',
@@ -45,11 +46,13 @@ export const PublicCollectorPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedReview, setSubmittedReview] = useState<Review | null>(null);
 
-  const pageTitle = formConfig?.title
-    ? `${formConfig.title} — Panda Praise`
-    : project?.name
-    ? `Submit Testimonial for ${project.name} — Panda Praise`
-    : 'Submit Your Testimonial — Panda Praise';
+  const displayBrand = cleanBrandOrProductName(project?.name || formConfig?.settings?.brandName);
+  const displayProductName = displayBrand || 'our product';
+  const cleanedTitle = deduplicateRepeatedString(formConfig?.title) || 'Share Your Experience';
+
+  const pageTitle = displayBrand && displayBrand.toLowerCase() !== 'panda praise'
+    ? `${cleanedTitle} — ${displayBrand} | Panda Praise`
+    : `${cleanedTitle} — Panda Praise`;
 
   usePageSeo({
     title: pageTitle,
@@ -216,23 +219,23 @@ export const PublicCollectorPage = () => {
       
       {/* Public Header */}
       <header className="w-full border-b border-gray-200/80 bg-white/90 backdrop-blur-md py-4 px-4 sm:px-8">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="font-extrabold text-sm text-[#6701e6] font-display">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="font-extrabold text-sm text-[#6701e6] font-display shrink-0">
               Panda Praise
             </span>
-            {project && (
+            {displayBrand && displayBrand.toLowerCase() !== 'panda praise' && (
               <>
-                <span className="text-gray-300">•</span>
-                <span className="font-medium text-xs text-gray-700 flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-gray-400" />
-                  {project.name}
+                <span className="text-gray-300 shrink-0">•</span>
+                <span className="font-medium text-xs text-gray-700 flex items-center gap-1.5 truncate">
+                  <Building2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                  <span className="truncate">{displayBrand}</span>
                 </span>
               </>
             )}
           </div>
 
-          <div className="text-[11px] text-gray-400">
+          <div className="text-[11px] text-gray-400 shrink-0">
             Powered by <span className="font-bold text-[#6701e6]">Panda Praise</span>
           </div>
         </div>
@@ -250,8 +253,8 @@ export const PublicCollectorPage = () => {
               <span className="font-black text-xl text-[#6701e6] font-display">
                 Panda Praise
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 font-display">
-                Do you enjoy using {project?.name || 'our product'}?
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 font-display break-words">
+                Do you enjoy using {displayProductName}?
               </h2>
               <p className="text-xs text-gray-500">
                 On a scale of 1 to 5, how would you rate us?
@@ -318,7 +321,7 @@ export const PublicCollectorPage = () => {
                   Thank you for your honesty!
                 </h3>
                 <p className="text-xs text-gray-600 max-w-xs mx-auto leading-relaxed">
-                  Your feedback has been delivered directly to the founders. We'll use your notes to improve {project?.name || 'our service'}.
+                  Your feedback has been delivered directly to the founders. We'll use your notes to improve {displayProductName}.
                 </p>
               </div>
             ) : (
