@@ -123,15 +123,14 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
 
         {/* Footer Actions */}
         <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
-          <a
-            href="https://docs.senja.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-600 transition-colors"
+          <button
+            type="button"
+            onClick={() => alert('Platform source sync imports reviews via CSV or direct webhook. You can upload a CSV export from any platform to import historical reviews instantly.')}
+            className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
           >
-            <span>Need help? Read the docs</span>
+            <span>Need help? Source guide</span>
             <ExternalLink className="w-3 h-3" />
-          </a>
+          </button>
 
           <button
             onClick={handleContinue}

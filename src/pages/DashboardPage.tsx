@@ -19,6 +19,7 @@ import { FormsView } from '../components/dashboard/views/FormsView';
 import { FeedbackView } from '../components/dashboard/views/FeedbackView';
 import { TagsView } from '../components/dashboard/views/TagsView';
 import { StudioView } from '../components/dashboard/views/StudioView';
+import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { ProofReelsView } from '../components/dashboard/views/ProofReelsView';
 import { ThankYousView } from '../components/dashboard/views/ThankYousView';
 import { BrandKitView } from '../components/dashboard/views/BrandKitView';
@@ -90,6 +91,7 @@ export const DashboardPage = () => {
   const [socialNotification, setSocialNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [currentCollectionForm, setCurrentCollectionForm] = useState<CollectionForm | null>(collectionForm);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [studioSubView, setStudioSubView] = useState<'overview' | 'widget'>('overview');
 
   const backend = getActiveBackendInfo();
   const activeProjectId = project?.id;
@@ -381,11 +383,21 @@ export const DashboardPage = () => {
 
           {/* Social Proof Studio */}
           {activeTab === 'studio' && (
-            <StudioView
-              onOpenWidgetCreator={() => setShowCollectionModal(true)}
-              onOpenSocialCard={() => setShowCarouselModal(true)}
-              onOpenWallOfLove={() => window.open('/wall-of-love', '_blank')}
-            />
+            studioSubView === 'widget' ? (
+              <WidgetStudio
+                reviews={reviews}
+                onBack={() => setStudioSubView('overview')}
+              />
+            ) : (
+              <StudioView
+                onOpenWidgetCreator={() => setStudioSubView('widget')}
+                onOpenSocialCard={() => setShowCarouselModal(true)}
+                onOpenWallOfLove={() => {
+                  const slug = project?.slug || project?.id;
+                  window.open(slug ? `/love/${slug}` : '/wall-of-love', '_blank');
+                }}
+              />
+            )
           )}
 
           {/* Proof Reels */}
@@ -478,7 +490,10 @@ export const DashboardPage = () => {
 
                   {/* Widget Preset 3: Wall of Love */}
                   <div
-                    onClick={() => window.open('/wall-of-love', '_blank')}
+                    onClick={() => {
+                      const slug = project?.slug || project?.id;
+                      window.open(slug ? `/love/${slug}` : '/wall-of-love', '_blank');
+                    }}
                     className="p-3 rounded-2xl bg-gray-50 hover:bg-purple-50/50 border border-gray-200/80 hover:border-purple-300 transition-all cursor-pointer group shadow-2xs"
                   >
                     <div className="flex items-center justify-between mb-2">

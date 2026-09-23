@@ -53,6 +53,7 @@ export function App() {
           <Route path="/c/:collectionSlug" element={<PublicCollectorPage />} />
           <Route path="/w/:publicWidgetId" element={<PublicWidgetPage />} />
           <Route path="/love/:slug" element={<WallOfLovePage />} />
+          <Route path="/wall-of-love" element={<WallOfLovePage />} />
 
           {/* Protected Routes */}
           <Route

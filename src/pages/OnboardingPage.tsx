@@ -62,7 +62,7 @@ export const OnboardingPage: React.FC = () => {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [firstName, setFirstName] = useState(user?.displayName?.split(' ')[0] || '');
   const [sellingCategory, setSellingCategory] = useState('SaaS subscriptions');
-  const [websiteUrl, setWebsiteUrl] = useState(project?.websiteUrl || 'https://senja.io');
+  const [websiteUrl, setWebsiteUrl] = useState(project?.websiteUrl || '');
 
   // Multi-cannon celebration bomb with colorful paper cuttings
   const fireCelebrationBomb = useCallback(() => {
@@ -316,7 +316,7 @@ export const OnboardingPage: React.FC = () => {
                 required
                 value={websiteUrl}
                 onChange={(e) => setWebsiteUrl(e.target.value)}
-                placeholder="https://senja.io"
+                placeholder="https://yourcompany.com"
                 className="w-full px-4 py-3 rounded-xl border-2 border-[#6701e6] focus:outline-none focus:ring-4 focus:ring-[#6701e6]/15 text-sm text-gray-900 font-medium placeholder-gray-400 shadow-xs transition-all"
               />
               <button

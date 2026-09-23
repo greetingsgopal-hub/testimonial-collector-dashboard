@@ -16,7 +16,10 @@ import {
   Video,
   Gift,
   MessageSquare,
-  HelpCircle
+  HelpCircle,
+  Upload,
+  Camera,
+  Trash2
 } from 'lucide-react';
 import { ReviewInput } from '../../types';
 import { validateReviewInput, sanitizeText } from '../../lib/security';
@@ -92,6 +95,59 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
   const [originalContent, setOriginalContent] = useState<string | null>(null);
   const [isPolishing, setIsPolishing] = useState(false);
   const [aiSuccessBadge, setAiSuccessBadge] = useState<string | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setErrorMsg('Please select an image file (JPEG, PNG, or WebP).');
+      return;
+    }
+
+    setIsUploadingPhoto(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 256;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/webp', 0.85);
+          setFormData((prev) => ({ ...prev, avatarUrl: dataUrl }));
+        }
+        setIsUploadingPhoto(false);
+      };
+      img.onerror = () => {
+        setIsUploadingPhoto(false);
+        setErrorMsg('Failed to process image file.');
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.onerror = () => {
+      setIsUploadingPhoto(false);
+      setErrorMsg('Failed to read image.');
+    };
+    reader.readAsDataURL(file);
+  };
 
   const impact = calculateImpactScore(formData.content);
 
@@ -551,35 +607,67 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         </div>
       </div>
 
-      {/* Avatar Selection */}
-      <div>
-        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-          Avatar Photo (Image URL or Pick Preset)
+      {/* Avatar / Photo Selection */}
+      <div className="p-4 rounded-2xl bg-gray-50/70 border border-gray-200 space-y-3">
+        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700">
+          Your Photo / Avatar
         </label>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <input
-            type="url"
-            placeholder="https://example.com/avatar.jpg"
-            value={formData.avatarUrl || ''}
-            onChange={(e) => setFormData((prev) => ({ ...prev, avatarUrl: e.target.value }))}
-            className="flex-1 w-full px-4 py-2 rounded-xl text-xs sm:text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
-          />
 
-          {/* Quick preset choices */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 font-medium">Presets:</span>
-            {PRESET_AVATARS.map((url, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setFormData((prev) => ({ ...prev, avatarUrl: url }))}
-                className={`w-7 h-7 rounded-full overflow-hidden border-2 transition-transform hover:scale-110 cursor-pointer ${
-                  formData.avatarUrl === url ? 'border-[#6701e6] ring-2 ring-[#6701e6]/30' : 'border-gray-300'
-                }`}
-              >
-                <img src={url} alt={`Preset ${idx + 1}`} className="w-full h-full object-cover" />
-              </button>
-            ))}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          {/* Avatar Preview */}
+          <div className="w-14 h-14 rounded-full overflow-hidden bg-purple-100 border-2 border-purple-200 shrink-0 flex items-center justify-center shadow-xs">
+            {formData.avatarUrl ? (
+              <img src={formData.avatarUrl} alt="Avatar Preview" className="w-full h-full object-cover" />
+            ) : (
+              <Camera className="w-6 h-6 text-purple-400" />
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex-1 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="px-3.5 py-1.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer transition-colors">
+                <Upload className="w-3.5 h-3.5" />
+                <span>{isUploadingPhoto ? 'Processing...' : 'Upload Photo'}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                  disabled={isUploadingPhoto}
+                />
+              </label>
+
+              {formData.avatarUrl && (
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, avatarUrl: '' }))}
+                  className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  <Trash2 className="w-3 h-3 text-red-500" />
+                  <span>Remove</span>
+                </button>
+              )}
+            </div>
+
+            {/* Presets & URL Fallback */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-gray-500">
+              <span className="font-medium">Or pick preset:</span>
+              <div className="flex items-center gap-1.5">
+                {PRESET_AVATARS.map((url, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, avatarUrl: url }))}
+                    className={`w-6 h-6 rounded-full overflow-hidden border transition-transform hover:scale-110 cursor-pointer ${
+                      formData.avatarUrl === url ? 'border-[#6701e6] ring-2 ring-[#6701e6]/40' : 'border-gray-300'
+                    }`}
+                  >
+                    <img src={url} alt={`Preset ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -39,6 +39,8 @@ function parseSettings(): WidgetSettings {
     onlyFeatured: params.get('featured') === '1',
     tabPosition: (params.get('position') as any) || 'bottom-right',
     tabText: params.get('tabText') || undefined,
+    autoAddByRating: Number(params.get('minRating')) || 0,
+    autoAddByTags: params.get('tag') && params.get('tag') !== 'all' ? [params.get('tag')!] : undefined,
   };
 }
 
@@ -73,7 +75,27 @@ export const PublicWidgetPage = () => {
         setIsLoading(true);
         const all = await storage.getReviews(publicWidgetId);
         const approved = all.filter((r) => r.status === 'approved');
-        const visible = settings.onlyFeatured ? approved.filter((r) => r.isFeatured) : approved;
+        
+        let visible = approved;
+        if (settings.onlyFeatured) {
+          visible = visible.filter((r) => r.isFeatured);
+        }
+        if (settings.autoAddByRating && settings.autoAddByRating > 0) {
+          visible = visible.filter((r) => r.rating >= settings.autoAddByRating!);
+        }
+        if (settings.autoAddByTags && settings.autoAddByTags.length > 0) {
+          visible = visible.filter((r) => r.tags && r.tags.some(t => settings.autoAddByTags!.includes(t)));
+        }
+        
+        const params = new URLSearchParams(window.location.search);
+        const idsParam = params.get('ids');
+        if (idsParam) {
+          const allowedIds = idsParam.split(',').filter(Boolean);
+          if (allowedIds.length > 0) {
+            visible = visible.filter((r) => allowedIds.includes(r.id));
+          }
+        }
+
         setReviews(visible.slice(0, settings.maxCount));
       } catch (error) {
         console.error('[PublicWidget] Failed to load approved reviews:', error);

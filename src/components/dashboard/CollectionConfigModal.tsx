@@ -33,6 +33,8 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
   const [publicSlug, setPublicSlug] = useState(collectionForm?.publicSlug || 'feedback');
   const [isActive, setIsActive] = useState(collectionForm?.isActive ?? true);
   const [allowVideo, setAllowVideo] = useState(collectionForm?.allowVideo ?? true);
+  const [autoTag, setAutoTag] = useState(collectionForm?.settings?.autoTag || '');
+  const [autoApprove, setAutoApprove] = useState(collectionForm?.settings?.autoApprove ?? false);
 
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -70,6 +72,12 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
     setIsSaving(true);
     try {
       let saved: CollectionForm;
+      const formSettings = {
+        ...collectionForm?.settings,
+        autoTag: autoTag.trim() || undefined,
+        autoApprove,
+      };
+
       if (collectionForm?.id) {
         saved = await storage.updateCollectionForm(collectionForm.id, {
           title: title.trim(),
@@ -78,6 +86,7 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
           isActive,
           allowVideo,
           projectId: collectionForm.projectId || projectId,
+          settings: formSettings,
         });
       } else {
         saved = await storage.createCollectionForm({
@@ -87,6 +96,7 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
           publicSlug: publicSlug.trim(),
           isActive,
           allowVideo,
+          settings: formSettings,
         });
       }
       onSaved(saved);
@@ -251,7 +261,7 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
               <div>
                 <div className="text-xs font-bold">Accept Video Links</div>
                 <div className="text-[10px] text-gray-500">
-                  {allowVideo ? 'Loom / YouTube / Vimeo enabled' : 'Text-only form'}
+                  {allowVideo ? 'Loom / YouTube enabled' : 'Text-only form'}
                 </div>
               </div>
               {allowVideo ? (
@@ -260,6 +270,39 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
                 <ToggleLeft className="w-6 h-6 text-gray-400" />
               )}
             </div>
+          </div>
+
+          {/* Automatic Tagging & Auto-Approval Settings */}
+          <div className="p-4 rounded-xl bg-purple-50/50 border border-purple-200 space-y-3">
+            <div className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+              Automatic Processing Rules
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                Auto-Tag Incoming Testimonials
+              </label>
+              <input
+                type="text"
+                value={autoTag}
+                onChange={(e) => setAutoTag(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                placeholder="e.g. enterprise, saas, onboarding"
+                className="w-full px-3 py-2 rounded-lg text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+              />
+              <p className="text-[10px] text-gray-500 mt-1">
+                Submissions via this form will automatically receive this tag for widget targeting.
+              </p>
+            </div>
+
+            <label className="flex items-center gap-2.5 pt-1 text-xs text-gray-700 font-medium cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autoApprove}
+                onChange={(e) => setAutoApprove(e.target.checked)}
+                className="rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6]"
+              />
+              <span>Automatically approve testimonials from this form (skip pending queue)</span>
+            </label>
           </div>
 
           {/* Action Buttons */}

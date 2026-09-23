@@ -127,6 +127,9 @@ export interface CollectionFormSettings {
   // Video settings
   maxVideoDurationSeconds?: number;
   allowWebcamRecording?: boolean;
+  // Automation
+  autoTag?: string;
+  autoApprove?: boolean;
 }
 
 export interface CollectionFormStep {

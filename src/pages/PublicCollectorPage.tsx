@@ -146,12 +146,19 @@ export const PublicCollectorPage = () => {
   const handleSubmit = async (data: ReviewInput) => {
     setIsSubmitting(true);
     try {
+      const autoTag = formConfig?.settings?.autoTag;
+      const autoApprove = Boolean(formConfig?.settings?.autoApprove);
+      const combinedTags = autoTag
+        ? Array.from(new Set([...(data.tags || []), autoTag]))
+        : (data.tags || []);
+
       const created = await storage.createReview(
         {
           ...data,
+          tags: combinedTags,
           projectId: formConfig?.projectId,
           collectionFormId: formConfig?.id,
-          status: 'pending',
+          status: autoApprove ? 'approved' : 'pending',
           consent: true,
         },
         formConfig?.projectId
