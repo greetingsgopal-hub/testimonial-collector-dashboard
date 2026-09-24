@@ -245,7 +245,7 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
                 required
                 value={publicSlug}
                 onChange={handleSlugChange}
-                placeholder="e.g. pulse-feedback"
+                placeholder="e.g. your-feedback"
                 className="flex-1 px-3 py-2 rounded-r-xl text-xs font-mono bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6]"
               />
             </div>

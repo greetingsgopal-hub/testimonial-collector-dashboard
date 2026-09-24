@@ -484,7 +484,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <Link
-              to="/c/pulse-feedback"
+              to="/c/feedback"
               className="w-full py-3 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-md transition-all"
             >
               <span>Test Live Collector Form</span>

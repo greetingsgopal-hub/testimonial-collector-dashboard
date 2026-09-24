@@ -214,7 +214,7 @@ export const DashboardPage = () => {
 
   const collectionUrl = currentCollectionForm
     ? `${window.location.origin}/c/${currentCollectionForm.publicSlug}`
-    : `${window.location.origin}/c/pulse-feedback`;
+    : `${window.location.origin}/c/feedback`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(collectionUrl);

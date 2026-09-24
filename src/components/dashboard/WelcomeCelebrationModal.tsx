@@ -31,7 +31,7 @@ export const WelcomeCelebrationModal: React.FC<WelcomeCelebrationModalProps> = (
   const firstName = user?.displayName?.split(' ')[0] || 'there';
   const collectionUrl = collectionForm
     ? `${window.location.origin}/c/${collectionForm.publicSlug}`
-    : `${window.location.origin}/c/pulse-feedback`;
+    : `${window.location.origin}/c/feedback`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(collectionUrl);

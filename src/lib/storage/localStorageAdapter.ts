@@ -152,8 +152,8 @@ export class LocalStorageAdapter implements StorageAdapter {
       const defaultForm: CollectionForm = {
         id: 'form-' + target,
         projectId: target,
-        publicSlug: target === 'proj-demo-1' ? 'pulse-feedback' : target + '-feedback',
-        title: 'Share Your Experience',
+        publicSlug: target === 'proj-demo-1' ? 'feedback' : target + '-feedback',
+        title: 'Share Your Experience with Panda Praise',
         description: 'Your honest feedback helps our team and community grow.',
         isActive: true,
         allowVideo: true,
@@ -164,7 +164,13 @@ export class LocalStorageAdapter implements StorageAdapter {
       return defaultForm;
     }
     try {
-      return JSON.parse(data) as CollectionForm;
+      const parsed = JSON.parse(data) as CollectionForm;
+      if (parsed.title?.includes('Pulse') || parsed.publicSlug === 'pulse-feedback') {
+        parsed.title = 'Share Your Experience with Panda Praise';
+        if (parsed.publicSlug === 'pulse-feedback') parsed.publicSlug = 'feedback';
+        localStorage.setItem(key, JSON.stringify(parsed));
+      }
+      return parsed;
     } catch {
       return null;
     }
@@ -225,21 +231,20 @@ export class LocalStorageAdapter implements StorageAdapter {
       }
     }
     const demoForm = await this.getCollectionForm('proj-demo-1');
-    if (demoForm && (demoForm.publicSlug === publicSlug || publicSlug === 'pulse-feedback' || publicSlug === 'pandapraise-feedback' || publicSlug === 'pandapraise')) {
-      const isPandaPraise = publicSlug === 'pandapraise-feedback' || publicSlug === 'pandapraise';
+    if (demoForm && (demoForm.publicSlug === publicSlug || publicSlug === 'feedback' || publicSlug === 'pulse-feedback' || publicSlug === 'pandapraise-feedback' || publicSlug === 'pandapraise')) {
       return {
         form: {
           ...demoForm,
-          title: isPandaPraise ? 'Share Your Experience with Panda Praise' : demoForm.title,
-          description: isPandaPraise
-            ? 'Help other founders and creators discover how Panda Praise automates testimonial collection and social publishing.'
-            : demoForm.description,
+          publicSlug: publicSlug === 'pulse-feedback' ? 'feedback' : publicSlug,
+          title: 'Share Your Experience with Panda Praise',
+          description: 'Help other founders and creators discover how Panda Praise automates testimonial collection and social publishing.',
         },
         project: {
           id: 'proj-demo-1',
           workspaceId: 'ws-demo-1',
-          name: isPandaPraise ? 'Panda Praise' : 'Pulse AI Product',
-          slug: isPandaPraise ? 'pandapraise' : 'pulse-ai',
+          name: 'Panda Praise',
+          slug: 'pandapraise',
+          websiteUrl: 'https://pandapraise.com',
           createdAt: demoForm.createdAt,
         }
       };

@@ -4,9 +4,9 @@ export const INITIAL_REVIEWS: Review[] = [
   {
     id: 'rev-001',
     name: 'Sarah Lin',
-    email: 'sarah.lin@pulseai.dev',
+    email: 'sarah.lin@finscale.io',
     role: 'Head of Product',
-    company: 'Pulse AI',
+    company: 'FinScale',
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     rating: 5,
     title: 'Cut our sales cycle in half with social proof',

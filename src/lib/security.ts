@@ -127,6 +127,9 @@ export function cleanBrandOrProductName(raw?: string | null): string {
   if (!deduped) return '';
 
   const lower = deduped.toLowerCase();
+  if (lower.includes('pulse ai')) {
+    return 'Panda Praise';
+  }
 
   // If it's a form instruction or generic fallback rather than a business/product name
   if (
