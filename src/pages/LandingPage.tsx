@@ -400,7 +400,7 @@ export const LandingPage: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <XIcon className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                  <span>Second-guessing yourself</span>
+                  <span>Losing leads to buyer hesitation</span>
                 </li>
               </ul>
             </div>
@@ -569,7 +569,7 @@ export const LandingPage: React.FC = () => {
                     to="/c/feedback"
                     className="w-full py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
                   >
-                    <span>Test Live Collector Form</span>
+                    <span>Test live collector form</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
@@ -845,7 +845,7 @@ export const LandingPage: React.FC = () => {
               {activeShareTab === 'widgets' && (
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
-                    Add Testimonial Widgets to Your Website
+                    Showcase Your Proof Anywhere
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
                     More attention-grabbing widgets than anywhere else. Install once with copy-paste code, and watch approved testimonials update live.
@@ -869,12 +869,12 @@ export const LandingPage: React.FC = () => {
                       'Avatars Pro',
                       'Avatars Grid',
                       'Testimonial Highlights',
-                      'Lindoy List',
-                      'Loppa Carousel',
+                      'Minimalist List',
+                      'Compact Testimonials',
                       'Candy Carousel',
-                      'Mayen Carousel',
+                      'Classic Cards',
                       'Quote Grid',
-                      'Andoya Carousel',
+                      'Modern Slider',
                       'Testimonial Bubble List'
                     ].map((w) => {
                       const isSelected = selectedWidgetTag === w;
@@ -1323,7 +1323,7 @@ export const LandingPage: React.FC = () => {
               className="px-6 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/20 transition-colors flex items-center gap-2 cursor-pointer"
             >
               <Play className="w-4 h-4 text-white" />
-              <span>Try Demo Dashboard</span>
+              <span>Try Interactive Demo</span>
             </button>
           </div>
         </div>
