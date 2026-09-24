@@ -217,9 +217,9 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Primary H1: Balanced 2-line structure without awkward wrap */}
-        <h1 className="text-4xl sm:text-6xl lg:text-[72px] font-extrabold font-display text-gray-950 tracking-tight leading-[1.1] max-w-5xl mx-auto">
-          Turn Customer Praise into <br className="hidden sm:inline" />
-          <span className="senja-purple-mark mt-2">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-display text-gray-950 tracking-tight leading-[1.12] max-w-4xl mx-auto">
+          <span className="sm:whitespace-nowrap">Turn Customer Praise into</span> <br className="hidden sm:inline" />
+          <span className="senja-purple-mark mt-2 whitespace-nowrap">
             Your #1 Sales Engine
           </span>
         </h1>
