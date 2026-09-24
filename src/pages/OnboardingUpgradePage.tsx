@@ -72,10 +72,11 @@ export const OnboardingUpgradePage: React.FC = () => {
       {/* ── 2. Headline & Subheadline (Screenshot Exact) ── */}
       <div className="pt-12 sm:pt-14 px-4 sm:px-6 max-w-4xl mx-auto text-center">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-display text-gray-950 tracking-tight leading-snug">
-          With Panda Praise you can share your testimonials in more ways than anywhere else!
+          <span className="block">With Panda Praise, share your testimonials</span>
+          <span className="block">in more ways than anywhere else!</span>
         </h1>
-        <p className="text-sm sm:text-base text-gray-500 mt-3 max-w-2xl mx-auto leading-relaxed">
-          This is just a few of the hundreds of images, widgets, Walls of Love and social videos you can create with Panda Praise.
+        <p className="text-sm sm:text-base text-gray-500 mt-3 max-w-3xl mx-auto leading-relaxed sm:whitespace-nowrap">
+          Here are just a few of the widgets, social images, and Walls of Love you can create.
         </p>
 
         {/* View Switcher Pill (Showcase vs Commercial Plans) */}
