@@ -196,8 +196,8 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* ── 3. Hero Section (Screenshot 1 Exact) ── */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-16 text-center relative z-10">
+      {/* ── 3. Hero Section (Senja Benchmark Parity) ── */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-16 text-center relative z-10">
         
         {/* Floating purple 4-point sparkle doodle on left */}
         <div className="absolute left-2 sm:-left-12 top-16 hidden sm:block text-[#6701e6] opacity-80 animate-pulse">
@@ -206,39 +206,22 @@ export const LandingPage: React.FC = () => {
           </svg>
         </div>
 
+        {/* Top Eyebrow Badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 border border-purple-200/60 mb-6 shadow-xs">
+          <span className="flex h-2 w-2 rounded-full bg-[#6701e6] animate-pulse" />
+          <span className="text-xs font-semibold text-[#6701e6]">The #1 Social Proof Platform for Growing Businesses</span>
+        </div>
+
         {/* Primary Product Value Proposition H1 */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display text-gray-950 tracking-tight leading-snug sm:leading-tight lg:leading-[1.15] max-w-4xl mx-auto">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-display text-gray-950 tracking-tight leading-[1.12] max-w-4xl mx-auto">
           Turn Customer Praise into{' '}
           <span className="senja-purple-mark my-1 sm:my-1.5">
             Your #1 Sales Engine
           </span>
         </h1>
 
-        {/* Featured Social Proof Quote with Integrated 5-Star Trust Signal */}
-        <div className="mt-6 max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-purple-50/70 border border-purple-100/90 shadow-xs">
-          <div className="flex items-center justify-center gap-1 text-amber-500 mb-2" aria-label="Rated 5 out of 5 stars">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <span key={s} className="text-sm">★</span>
-            ))}
-          </div>
-          <blockquote className="text-sm sm:text-base font-medium text-gray-800 italic leading-relaxed">
-            “I've seen a tangible impact on revenue and conversion by sharing customer proof.”
-          </blockquote>
-          <div className="mt-3 flex items-center justify-center gap-2.5">
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
-              alt="Jay Clouse"
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-purple-200"
-            />
-            <div className="text-left leading-tight">
-              <span className="text-xs font-bold text-gray-900 block">Jay Clouse</span>
-              <span className="text-xs text-gray-500">Founder, Creator Science</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Subheadline with dotted underline */}
-        <p className="mt-6 text-base sm:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+        {/* Subheadline directly below H1 */}
+        <p className="mt-6 text-base sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed font-normal">
           <span className="senja-dotted font-medium text-gray-900">Meet Panda Praise</span> — the easiest way to collect, organize, and showcase verified customer proof.
         </p>
 
@@ -258,8 +241,8 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Giant Glowing CTA Button with directional icon */}
-        <div className="mt-8 flex justify-center">
+        {/* Hero CTA Button Cluster */}
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <div className="senja-hero-cta">
             <div className="senja-cta-ring">
               <Link
@@ -268,17 +251,29 @@ export const LandingPage: React.FC = () => {
                   analytics.ctaClicked('hero_primary', '/signup');
                   analytics.signupStarted('hero_primary');
                 }}
-                className="senja-btn-primary px-8 py-3.5 sm:py-4 text-lg sm:text-xl shadow-xl hover:scale-105 transition-all inline-flex items-center gap-2"
+                className="senja-btn-primary px-8 py-3.5 sm:py-4 text-base sm:text-lg shadow-xl hover:scale-105 transition-all inline-flex items-center gap-2 font-bold"
               >
                 <span>Start for free today</span>
                 <ArrowRight className="w-5 h-5 text-white" aria-hidden="true" />
               </Link>
             </div>
           </div>
+          <button
+            onClick={handleLaunchDemo}
+            className="px-6 py-3.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-sm transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+          >
+            <Play className="w-4 h-4 text-[#6701e6]" />
+            <span>Try Interactive Demo</span>
+          </button>
         </div>
 
+        {/* Microcopy reassurance */}
+        <p className="mt-2.5 text-xs text-gray-500 font-medium">
+          Free forever • No credit card required • 2-minute setup
+        </p>
+
         {/* Avatar Stack + "loved by 20,000+ customers" */}
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+        <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-2.5">
           <div className="flex items-center -space-x-2">
             {[
               'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
@@ -298,6 +293,29 @@ export const LandingPage: React.FC = () => {
           <div className="flex items-center gap-1.5 text-xs text-gray-700">
             <span className="text-amber-500 font-bold">★★★★★</span>
             <span className="font-medium text-gray-600">loved by 20,000+ customers</span>
+          </div>
+        </div>
+
+        {/* Featured Social Proof Quote Card (Anchored right above marquee) */}
+        <div className="mt-10 max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-white/80 backdrop-blur-sm border border-purple-100 shadow-md">
+          <div className="flex items-center justify-center gap-1 text-amber-500 mb-2" aria-label="Rated 5 out of 5 stars">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <span key={s} className="text-sm">★</span>
+            ))}
+          </div>
+          <blockquote className="text-sm sm:text-base font-medium text-gray-800 italic leading-relaxed">
+            “I've seen a tangible impact on revenue and conversion by sharing customer proof.”
+          </blockquote>
+          <div className="mt-3 flex items-center justify-center gap-2.5">
+            <img
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
+              alt="Jay Clouse"
+              className="w-8 h-8 rounded-full object-cover ring-2 ring-purple-200"
+            />
+            <div className="text-left leading-tight">
+              <span className="text-xs font-bold text-gray-900 block">Jay Clouse</span>
+              <span className="text-xs text-gray-500">Founder, Creator Science</span>
+            </div>
           </div>
         </div>
       </section>
