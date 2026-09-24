@@ -205,36 +205,36 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* ── 3. Hero Section (Reconstructed SaaS Architecture) ── */}
-      <section className="max-w-5xl mx-auto px-6 pt-16 sm:pt-20 pb-16 text-center relative z-10">
+      <section className="max-w-4xl mx-auto px-6 pt-14 sm:pt-18 pb-14 text-center relative z-10">
         
         {/* Floating purple sparkle doodle */}
-        <div className="absolute left-2 sm:-left-8 top-20 hidden sm:block text-[#6701e6] opacity-75 animate-pulse">
+        <div className="absolute left-2 sm:-left-6 top-20 hidden sm:block text-[#6701e6] opacity-75 animate-pulse" aria-hidden="true">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0 L14.6 9.4 L24 12 L14.6 14.6 L12 24 L9.4 14.6 L0 12 L9.4 9.4 Z" />
           </svg>
         </div>
 
         {/* Top Eyebrow Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50/80 border border-purple-200/60 mb-6 shadow-xs">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50/80 border border-purple-200/60 mb-5 shadow-xs">
           <span className="flex h-2 w-2 rounded-full bg-[#6701e6] animate-pulse" />
           <span className="text-xs font-semibold text-[#6701e6]">The #1 Social Proof Platform for Growing Businesses</span>
         </div>
 
         {/* Primary H1: Balanced 2-line structure without awkward wrap */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-display text-gray-950 tracking-tight leading-[1.12] max-w-4xl mx-auto">
-          <span className="sm:whitespace-nowrap">Turn Customer Praise into</span> <br className="hidden sm:inline" />
-          <span className="senja-purple-mark mt-2 whitespace-nowrap">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-display text-gray-950 tracking-tight leading-[1.12] max-w-3xl mx-auto">
+          <span>Turn Customer Praise into</span>{' '}
+          <span className="senja-purple-mark mt-2 inline-block whitespace-nowrap">
             Your #1 Sales Engine
           </span>
         </h1>
 
         {/* Subheadline directly below H1 */}
-        <p className="mt-6 text-base sm:text-xl text-gray-600 max-w-xl text-balance mx-auto leading-relaxed font-normal">
-          <span className="senja-dotted font-medium text-gray-900">Meet Panda Praise</span> — the easiest way to collect, organize, and showcase verified customer proof.
+        <p className="mt-5 text-base sm:text-lg text-gray-600 max-w-xl mx-auto leading-relaxed font-normal">
+          <span className="font-semibold text-gray-900">Meet Panda Praise</span> — the easiest way to collect, organize, and showcase verified customer proof.
         </p>
 
         {/* 3 Green Checkmark Reassurance Bullets */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-gray-600 font-medium">
+        <div className="mt-5 max-w-2xl mx-auto flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-gray-600 font-medium">
           <div className="flex items-center gap-1.5">
             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>Automate video & text collection</span>
@@ -276,12 +276,12 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Microcopy reassurance */}
-        <p className="mt-2.5 text-xs text-gray-600 font-medium">
+        <p className="mt-3 text-xs text-gray-600 font-medium">
           Free forever • No credit card required • 2-minute setup
         </p>
 
         {/* Avatar Stack + "loved by 20,000+ customers" */}
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+        <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2.5">
           <div className="flex items-center -space-x-2">
             {[
               'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
@@ -307,7 +307,7 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Featured Social Proof Quote Card (Anchored above marquee) */}
-        <div className="mt-10 max-w-3xl mx-auto p-5 rounded-2xl bg-white/90 backdrop-blur-sm border border-purple-100/90 shadow-md">
+        <div className="mt-8 max-w-xl mx-auto p-5 sm:p-6 rounded-2xl bg-white/95 backdrop-blur-sm border border-purple-100/90 shadow-md">
           <div role="img" aria-label="Rated 5 out of 5 stars" className="flex items-center justify-center gap-1 text-amber-500 mb-2">
             {[1, 2, 3, 4, 5].map((s) => (
               <span key={s} className="text-sm" aria-hidden="true">★</span>
@@ -316,7 +316,7 @@ export const LandingPage: React.FC = () => {
           <blockquote className="text-sm sm:text-base font-medium text-gray-800 italic leading-relaxed">
             “I've seen a tangible impact on revenue and conversion by sharing customer proof.”
           </blockquote>
-          <div className="mt-3 flex items-center justify-center gap-2.5">
+          <div className="mt-3.5 flex items-center justify-center gap-2.5">
             <img
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
               alt="Jay Clouse"
@@ -324,7 +324,7 @@ export const LandingPage: React.FC = () => {
             />
             <div className="text-left leading-tight">
               <span className="text-xs font-bold text-gray-900 block">Jay Clouse</span>
-              <span className="text-xs text-gray-500">Founder, Creator Science</span>
+              <span className="text-xs text-gray-600">Founder, Creator Science</span>
             </div>
           </div>
         </div>
