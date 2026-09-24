@@ -215,14 +215,14 @@ export const LandingPage: React.FC = () => {
         </h1>
 
         {/* Featured Social Proof Quote with Integrated 5-Star Trust Signal */}
-        <div className="mt-6 max-w-2xl mx-auto p-4 sm:p-5 rounded-2xl bg-purple-50/70 border border-purple-100/90 shadow-xs">
+        <div className="mt-6 max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-purple-50/70 border border-purple-100/90 shadow-xs">
           <div className="flex items-center justify-center gap-1 text-amber-500 mb-2" aria-label="Rated 5 out of 5 stars">
             {[1, 2, 3, 4, 5].map((s) => (
               <span key={s} className="text-sm">★</span>
             ))}
           </div>
           <blockquote className="text-sm sm:text-base font-medium text-gray-800 italic leading-relaxed">
-            “I've already seen a tangible impact on revenue and conversion by sharing more social proof.”
+            “I've seen a tangible impact on revenue and conversion by sharing customer proof.”
           </blockquote>
           <div className="mt-3 flex items-center justify-center gap-2.5">
             <img
@@ -238,8 +238,8 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Subheadline with dotted underline */}
-        <p className="mt-6 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          <span className="senja-dotted font-medium text-gray-900">Meet Panda Praise</span> — the all-in-one platform to collect, organize, and showcase verified testimonials that turn visitors into paying customers.
+        <p className="mt-6 text-base sm:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <span className="senja-dotted font-medium text-gray-900">Meet Panda Praise</span> — the easiest way to collect, organize, and showcase verified customer proof.
         </p>
 
         {/* 3 Green Checkmark Bullets */}
@@ -336,15 +336,15 @@ export const LandingPage: React.FC = () => {
 
       {/* ── 5. Before / After Comparison Meme Cards (Screenshot 2 Exact) ── */}
       <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <p className="font-caveat text-3xl text-[#6701e6] -rotate-1 mb-1">
+        <div className="text-center max-w-4xl mx-auto mb-10">
+          <p className="font-caveat text-2xl sm:text-3xl text-[#6701e6] -rotate-1 mb-2">
             The proof advantage
           </p>
-          <h2 id="comparison-heading" className="text-2xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight">
-            Why Top Brands Win with Social Proof
+          <h2 id="comparison-heading" className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-display text-gray-950 tracking-tight sm:whitespace-nowrap">
+            Why Winning Brands Rely on Social Proof
           </h2>
-          <p className="text-xs sm:text-sm text-gray-600 mt-2">
-            See the undeniable difference verified customer praise makes on your conversion rate.
+          <p className="text-xs sm:text-sm text-gray-600 mt-2 max-w-2xl mx-auto sm:whitespace-nowrap">
+            See the undeniable impact verified customer praise has on your conversion rates.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
@@ -443,12 +443,12 @@ export const LandingPage: React.FC = () => {
           Collect
         </p>
 
-        <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight">
-          Collect Authentic Video & Text Reviews on Autopilot
+        <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight max-w-4xl mx-auto sm:whitespace-nowrap">
+          Collect Video & Text Reviews on Autopilot
         </h2>
 
-        <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Create branded forms with custom video prompts in under 30 seconds. No apps, downloads, or customer logins required.
+        <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-3xl mx-auto leading-relaxed sm:whitespace-nowrap">
+          Launch branded collection forms in 30 seconds — no apps or customer logins required.
         </p>
 
         {/* 6 Two-Column Green Checkmarks */}
@@ -575,12 +575,12 @@ export const LandingPage: React.FC = () => {
           Organize
         </p>
 
-        <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight">
-          Every Piece of Customer Proof, Instantly at Hand
+        <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight max-w-4xl mx-auto sm:whitespace-nowrap">
+          Every Testimonial, Instantly at Your Fingertips
         </h2>
 
-        <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Never hunt through screenshots, Slack threads, or emails again. Search, filter, and tag every review in one unified, searchable vault.
+        <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-3xl mx-auto leading-relaxed sm:whitespace-nowrap">
+          Search, filter, and tag every customer review in one unified, searchable vault.
         </p>
 
         {/* Checklist */}
@@ -780,12 +780,12 @@ export const LandingPage: React.FC = () => {
             Publish
           </p>
 
-          <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight">
-            Turn One Great Review into 12 High-Converting Assets
+          <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight max-w-4xl mx-auto sm:whitespace-nowrap">
+            Turn One Review into 12 High-Converting Assets
           </h2>
 
-          <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Put your social proof to work across your entire funnel — from dynamic website widgets and viral social reels to Wall of Love galleries and sales pitch assets.
+          <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-3xl mx-auto leading-relaxed sm:whitespace-nowrap">
+            Publish reviews as interactive website widgets, viral social reels, Wall of Love pages, and pitch assets.
           </p>
 
           {/* Checklist */}
@@ -1105,12 +1105,12 @@ export const LandingPage: React.FC = () => {
             Reward
           </p>
 
-          <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight">
-            Turn Happy Reviewers into Lifelong Advocates
+          <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight max-w-4xl mx-auto sm:whitespace-nowrap">
+            Turn Happy Reviewers into Brand Advocates
           </h2>
 
-          <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Delight your biggest fans with automated thank-you notes, personalized video messages, and exclusive reward perks.
+          <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-3xl mx-auto leading-relaxed sm:whitespace-nowrap">
+            Delight customers with automated thank-you notes, personalized videos, and reward perks.
           </p>
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
@@ -1167,11 +1167,11 @@ export const LandingPage: React.FC = () => {
         <p className="font-caveat text-3xl text-[#6701e6] -rotate-1">
           Built for you
         </p>
-        <h2 className="mt-2 font-display text-3xl font-extrabold sm:text-4xl text-gray-950">
+        <h2 className="mt-2 font-display text-3xl font-extrabold sm:text-4xl text-gray-950 max-w-4xl mx-auto sm:whitespace-nowrap">
           Built for Every Business That Grows on Trust
         </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-600">
-          Whether you're a solo creator, an ambitious SaaS team, or a high-growth agency — Panda Praise powers customer proof that converts.
+        <p className="mx-auto mt-3 max-w-3xl text-sm sm:text-base text-gray-600 leading-relaxed sm:whitespace-nowrap">
+          Whether you're a creator, SaaS founder, or agency — Panda Praise powers proof that converts.
         </p>
         <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-4xl mx-auto text-left">
           {[
@@ -1270,11 +1270,11 @@ export const LandingPage: React.FC = () => {
 
         <div className="relative mx-auto max-w-3xl px-6">
           <p className="font-caveat text-3xl text-purple-200">Start in 2 minutes</p>
-          <h2 className="mt-2 font-display text-3xl sm:text-5xl font-extrabold tracking-tight">
+          <h2 className="mt-2 font-display text-3xl sm:text-5xl font-extrabold tracking-tight max-w-3xl mx-auto sm:whitespace-nowrap">
             Turn Customer Praise into Pure Revenue
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm sm:text-base text-white/90 leading-relaxed">
-            Set up your free collection workspace today. Collect video & text proof, build automated widgets, and watch your conversions climb.
+          <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-white/90 leading-relaxed sm:whitespace-nowrap">
+            Set up your free collection workspace in 2 minutes and turn testimonials into sales.
           </p>
 
           <ul className="mx-auto mt-6 inline-flex flex-col gap-2 text-left text-xs sm:text-sm text-white/90">
