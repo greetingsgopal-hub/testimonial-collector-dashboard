@@ -2,10 +2,17 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "testimonial-collector-dashboard2",
   "account_id": "04b586d238bb60304c8fc2501beaecf3",
+  "main": "src/worker/index.ts",
   "compatibility_date": "2026-09-15",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application"
+  },
+  "vars": {
+    "FIREBASE_API_KEY": "AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE",
+    "FIREBASE_PROJECT_ID": "testimonialcollectordashboard"
   },
   "observability": {
     "enabled": true

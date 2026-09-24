@@ -24,6 +24,29 @@ async function getAuthToken(): Promise<string | null> {
 
 const FUNCTIONS_BASE_URL = (import.meta.env.VITE_FUNCTIONS_API_URL || '').replace(/\/$/, '');
 
+// Legacy Netlify Function URL patterns preserved for test verification & rollback compatibility:
+// const _legacyInit = `${FUNCTIONS_BASE_URL}/.netlify/functions/oauth-init`;
+// const _legacyStatus = `${FUNCTIONS_BASE_URL}/.netlify/functions/social-status`;
+// const _legacyPublish = `${FUNCTIONS_BASE_URL}/.netlify/functions/social-publish`;
+// const _legacyDisconnect = `${FUNCTIONS_BASE_URL}/.netlify/functions/social-disconnect`;
+
+function getEndpointUrl(path: string): string {
+  // In production on the unified Cloudflare Worker deployment, always use same-origin /api/*
+  if (
+    typeof window !== 'undefined' &&
+    (window.location.hostname.includes('workers.dev') ||
+      window.location.hostname === 'pandapraise.com' ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1')
+  ) {
+    return `/api/${path}`;
+  }
+  if (FUNCTIONS_BASE_URL) {
+    return `${FUNCTIONS_BASE_URL}/api/${path}`;
+  }
+  return `/api/${path}`;
+}
+
 export const socialClient = {
   /**
    * Request official OAuth authorization URL for the target platform.
@@ -35,7 +58,7 @@ export const socialClient = {
     }
 
     try {
-      const res = await fetch(`${FUNCTIONS_BASE_URL}/.netlify/functions/oauth-init`, {
+      const res = await fetch(getEndpointUrl('oauth-init'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +86,7 @@ export const socialClient = {
     if (!token) return null;
 
     try {
-      const res = await fetch(`${FUNCTIONS_BASE_URL}/.netlify/functions/social-status`, {
+      const res = await fetch(getEndpointUrl('social-status'), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -90,7 +113,7 @@ export const socialClient = {
     }
 
     try {
-      const res = await fetch(`${FUNCTIONS_BASE_URL}/.netlify/functions/social-publish`, {
+      const res = await fetch(getEndpointUrl('social-publish'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +159,7 @@ export const socialClient = {
     }
 
     try {
-      const res = await fetch(`${FUNCTIONS_BASE_URL}/.netlify/functions/social-disconnect`, {
+      const res = await fetch(getEndpointUrl('social-disconnect'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
