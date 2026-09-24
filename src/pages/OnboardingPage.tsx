@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
+import { Check, ArrowRight } from 'lucide-react';
 
 const SELLING_OPTIONS = [
   'Courses',
@@ -140,6 +141,12 @@ export const OnboardingPage: React.FC = () => {
     }
   };
 
+  // Step 4 progressive setup states
+  const [setupProgress, setSetupProgress] = useState(25);
+  const [setupStatusText, setSetupStatusText] = useState('Initializing project workspace...');
+  const [isSetupComplete, setIsSetupComplete] = useState(false);
+  const [countdown, setCountdown] = useState(8);
+
   const handleStep3Submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (websiteUrl.trim()) {
@@ -147,11 +154,28 @@ export const OnboardingPage: React.FC = () => {
     }
   };
 
-  // Step 4: Countdown / Setup animation then redirect to Dashboard
+  const setupRanRef = useRef(false);
+
+  // Step 4: Multi-stage setup pipeline with tangible feedback
   useEffect(() => {
-    if (step === 4) {
-      const timer = setTimeout(async () => {
+    if (step === 4 && !setupRanRef.current) {
+      setupRanRef.current = true;
+      let isMounted = true;
+
+      const runSetup = async () => {
         try {
+          // Stage 1: Workspace Initialization
+          if (isMounted) {
+            setSetupProgress(35);
+            setSetupStatusText('Configuring workspace & permissions...');
+          }
+          await new Promise((r) => setTimeout(r, 600));
+
+          // Stage 2: Project persistence
+          if (isMounted) {
+            setSetupProgress(70);
+            setSetupStatusText('Generating testimonial collection form & Wall of Love...');
+          }
           if (project?.id) {
             const domainName = websiteUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
             await updateProjectDetails(project.id, {
@@ -159,17 +183,49 @@ export const OnboardingPage: React.FC = () => {
               websiteUrl: websiteUrl.trim(),
             });
           }
+          await new Promise((r) => setTimeout(r, 600));
+
+          // Stage 3: Ready
+          if (isMounted) {
+            setSetupProgress(100);
+            setSetupStatusText('Workspace ready!');
+            setIsSetupComplete(true);
+            fireCelebrationBomb();
+            analytics.signupCompleted();
+          }
         } catch (err) {
           console.error('Failed to update project during onboarding:', err);
-        } finally {
-          analytics.signupCompleted();
-          navigate('/onboarding/upgrade');
+          if (isMounted) {
+            setIsSetupComplete(true);
+          }
         }
-      }, 2400);
+      };
 
-      return () => clearTimeout(timer);
+      runSetup();
+
+      return () => {
+        isMounted = false;
+      };
     }
-  }, [step, project?.id, websiteUrl, firstName, updateProjectDetails, navigate]);
+  }, [step, project?.id, websiteUrl, firstName, updateProjectDetails, fireCelebrationBomb]);
+
+  // Step 4: Transparent, user-controlled countdown once setup completes
+  useEffect(() => {
+    if (step === 4 && isSetupComplete) {
+      const interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            navigate('/dashboard');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [step, isSetupComplete, navigate]);
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col font-sans selection:bg-purple-500/20 selection:text-purple-900 pb-16">
@@ -329,27 +385,110 @@ export const OnboardingPage: React.FC = () => {
           </div>
         )}
 
-        {/* ── STEP 4: Setting up your account Animation (Screenshot 5 Exact) ── */}
+        {/* ── STEP 4: Setting up your account Animation & Ready State ── */}
         {step === 4 && (
           <div className="text-center animate-fade-in w-full">
             <h1 className="text-2xl sm:text-3xl font-extrabold font-display text-gray-900 tracking-tight max-w-xl mx-auto leading-snug">
-              Hi {firstName || 'there'}! What website, product or service do you want to collect testimonials for?
+              {isSetupComplete ? (
+                <span>Your workspace is ready, {firstName || 'there'}! 🎉</span>
+              ) : (
+                <span>Setting up your workspace for {websiteUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '') || 'your business'}...</span>
+              )}
             </h1>
             <p className="text-sm text-gray-500 mt-2">
-              We'll create a project for you.
+              {isSetupComplete ? (
+                <span>Your project, collection form, and Wall of Love have been successfully generated.</span>
+              ) : (
+                <span>We're preparing your collection form, embed widgets, and Wall of Love.</span>
+              )}
             </p>
 
-            {/* Pulsing Setup Card (Screenshot 5 Exact) */}
-            <div className="max-w-md mx-auto mt-8 p-4 sm:p-5 rounded-full bg-gray-50/90 border border-gray-200/80 flex items-center gap-4 shadow-sm">
-              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-[#6701e6] flex items-center justify-center text-white shadow-md animate-pulse shrink-0">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
+            {/* Setup Progress & Action Card */}
+            <div className="max-w-md mx-auto mt-8 p-5 sm:p-6 rounded-2xl bg-gray-50/95 border border-gray-200/90 text-left shadow-sm">
+              <div className="flex items-center gap-4">
+                <div
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md shrink-0 transition-all ${
+                    isSetupComplete ? 'bg-emerald-600' : 'bg-[#6701e6] animate-pulse'
+                  }`}
+                >
+                  {isSetupComplete ? (
+                    <Check className="w-6 h-6 text-white stroke-[2.5]" />
+                  ) : (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold text-gray-900 text-sm">
+                      {isSetupComplete ? 'Account & Project Ready' : 'Setting up your account'}
+                    </p>
+                    <span className="text-xs font-semibold text-gray-500 font-mono">
+                      {setupProgress}%
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 truncate mt-0.5">
+                    {setupStatusText}
+                  </p>
+                </div>
               </div>
-              <div className="text-left">
-                <p className="font-bold text-gray-900 text-sm">Setting up your account</p>
-                <p className="text-xs text-gray-500">This should take less than a minute.</p>
+
+              {/* Progress bar */}
+              <div className="w-full bg-gray-200 h-1.5 rounded-full mt-4 overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-500 rounded-full ${
+                    isSetupComplete ? 'bg-emerald-500' : 'bg-[#6701e6]'
+                  }`}
+                  style={{ width: `${setupProgress}%` }}
+                />
               </div>
+
+              {/* Ready Checklist */}
+              {isSetupComplete && (
+                <div className="mt-4 pt-3 border-t border-gray-200/80 space-y-1.5 text-xs text-gray-600 animate-fade-in">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Workspace initialized for {websiteUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '') || 'your brand'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Public testimonial collection form created</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Wall of Love publishing live</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Direct Action Button */}
+              {isSetupComplete && (
+                <div className="mt-5 space-y-2.5 animate-fade-in">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      analytics.signupCompleted();
+                      navigate('/dashboard');
+                    }}
+                    className="w-full py-3.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white font-bold text-sm shadow-md transition-all hover:scale-[1.01] cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <span>Go to My Dashboard</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+
+                  <div className="flex items-center justify-between text-[11px] text-gray-500 px-1 pt-0.5">
+                    <span>Continuing automatically in {countdown}s...</span>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/onboarding/upgrade')}
+                      className="text-[#6701e6] hover:underline font-semibold cursor-pointer"
+                    >
+                      See Formats & Plans →
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Join 1000s of happy users Testimonial Carousel */}
