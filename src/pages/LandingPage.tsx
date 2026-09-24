@@ -48,18 +48,18 @@ const FAQ_ITEMS = [
 ];
 
 const CLIENT_LOGOS = [
-  { name: 'om', node: <span className="text-xl font-bold tracking-tight text-gray-500 font-sans">om</span> },
-  { name: 'pickupmusic', node: <span className="text-base font-semibold tracking-wide text-gray-500 font-sans">pickupmusic</span> },
-  { name: 'Marketing Examined', node: <span className="text-base font-bold text-gray-500 flex items-center gap-1.5"><span className="text-amber-500">★</span> Marketing Examined</span> },
-  { name: 'unplugged.', node: <span className="text-base italic text-gray-500 font-sans">unplugged.</span> },
-  { name: 'Easlo', node: <span className="text-base font-bold text-gray-600 flex items-center gap-1.5"><span>👓</span> Easlo</span> },
-  { name: 'Breakcold', node: <span className="text-base font-bold text-gray-600 flex items-center gap-1.5"><span className="bg-gray-800 text-white text-xs px-1 py-0.5 rounded font-bold">Br</span> Breakcold</span> },
-  { name: 'immutable', node: <span className="text-base font-bold tracking-tight text-gray-500">immutable</span> },
-  { name: 'Substack', node: <span className="text-base font-semibold text-gray-500 flex items-center gap-1.5"><span className="w-3 h-3 bg-[#FF6719] rounded-sm inline-block" /> Substack</span> },
-  { name: 'Beehiiv', node: <span className="text-base font-extrabold text-gray-500">beehiiv</span> },
-  { name: 'ConvertKit', node: <span className="text-base font-bold text-gray-500 flex items-center gap-1.5"><span className="w-3 h-3 bg-rose-400 rounded-full inline-block" /> ConvertKit</span> },
-  { name: 'Kajabi', node: <span className="text-base font-semibold text-gray-500">kajabi</span> },
-  { name: 'Podia', node: <span className="text-base font-bold text-gray-500">podia</span> },
+  { name: 'om', node: <span className="text-xl font-bold tracking-tight text-gray-700 font-sans">om</span> },
+  { name: 'pickupmusic', node: <span className="text-base font-semibold tracking-wide text-gray-700 font-sans">pickupmusic</span> },
+  { name: 'Marketing Examined', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span className="text-amber-500" aria-hidden="true">★</span> Marketing Examined</span> },
+  { name: 'unplugged.', node: <span className="text-base italic text-gray-700 font-sans">unplugged.</span> },
+  { name: 'Easlo', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span aria-hidden="true">👓</span> Easlo</span> },
+  { name: 'Breakcold', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span className="bg-gray-900 text-white text-xs px-1 py-0.5 rounded font-bold">Br</span> Breakcold</span> },
+  { name: 'immutable', node: <span className="text-base font-bold tracking-tight text-gray-700">immutable</span> },
+  { name: 'Substack', node: <span className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><span className="w-3 h-3 bg-[#FF6719] rounded-sm inline-block" aria-hidden="true" /> Substack</span> },
+  { name: 'Beehiiv', node: <span className="text-base font-extrabold text-gray-700">beehiiv</span> },
+  { name: 'ConvertKit', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span className="w-3 h-3 bg-rose-400 rounded-full inline-block" aria-hidden="true" /> ConvertKit</span> },
+  { name: 'Kajabi', node: <span className="text-base font-semibold text-gray-700">kajabi</span> },
+  { name: 'Podia', node: <span className="text-base font-bold text-gray-700">podia</span> },
 ];
 
 export const LandingPage: React.FC = () => {
@@ -276,7 +276,7 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Microcopy reassurance */}
-        <p className="mt-2.5 text-xs text-gray-500 font-medium">
+        <p className="mt-2.5 text-xs text-gray-600 font-medium">
           Free forever • No credit card required • 2-minute setup
         </p>
 
@@ -299,16 +299,18 @@ export const LandingPage: React.FC = () => {
             ))}
           </div>
           <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-amber-500 font-bold tracking-tight">★★★★★</span>
+            <span role="img" aria-label="5 stars" className="text-amber-500 font-bold tracking-tight">
+              <span aria-hidden="true">★★★★★</span>
+            </span>
             <span className="font-semibold text-gray-700">loved by 20,000+ customers</span>
           </div>
         </div>
 
         {/* Featured Social Proof Quote Card (Anchored above marquee) */}
         <div className="mt-10 max-w-3xl mx-auto p-5 rounded-2xl bg-white/90 backdrop-blur-sm border border-purple-100/90 shadow-md">
-          <div className="flex items-center justify-center gap-1 text-amber-500 mb-2" aria-label="Rated 5 out of 5 stars">
+          <div role="img" aria-label="Rated 5 out of 5 stars" className="flex items-center justify-center gap-1 text-amber-500 mb-2">
             {[1, 2, 3, 4, 5].map((s) => (
-              <span key={s} className="text-sm">★</span>
+              <span key={s} className="text-sm" aria-hidden="true">★</span>
             ))}
           </div>
           <blockquote className="text-sm sm:text-base font-medium text-gray-800 italic leading-relaxed">
@@ -334,7 +336,7 @@ export const LandingPage: React.FC = () => {
           {CLIENT_LOGOS.map((logo, idx) => (
             <div
               key={`logo-a-${idx}`}
-              className="shrink-0 flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity select-none cursor-default"
+              className="shrink-0 flex items-center justify-center text-gray-700 hover:text-gray-950 transition-colors select-none cursor-default"
             >
               {logo.node}
             </div>
@@ -344,7 +346,7 @@ export const LandingPage: React.FC = () => {
             <div
               key={`logo-b-${idx}`}
               aria-hidden="true"
-              className="shrink-0 flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity select-none cursor-default"
+              className="shrink-0 flex items-center justify-center text-gray-700 hover:text-gray-950 transition-colors select-none cursor-default"
             >
               {logo.node}
             </div>
@@ -527,7 +529,7 @@ export const LandingPage: React.FC = () => {
                   />
                   <div>
                     <p className="font-bold text-gray-900 text-xs">Jamie Northrup</p>
-                    <p className="text-[11px] text-gray-500">Minimalist Hustler</p>
+                    <p className="text-[11px] text-gray-600">Minimalist Hustler</p>
                   </div>
                 </figcaption>
               </figure>
@@ -547,7 +549,7 @@ export const LandingPage: React.FC = () => {
                       <h3 className="font-bold text-gray-900 text-sm sm:text-base">
                         Share a testimonial for my course 🫶
                       </h3>
-                      <p className="text-xs text-gray-500">Takes less than 60 seconds</p>
+                      <p className="text-xs text-gray-600">Takes less than 60 seconds</p>
                     </div>
                   </div>
 
@@ -608,24 +610,24 @@ export const LandingPage: React.FC = () => {
                       </span>
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-gray-800">Erin Doyle</p>
-                        <p className="text-xs text-gray-500">Admin</p>
+                        <p className="text-xs text-gray-600">Admin</p>
                       </div>
                     </div>
 
                     <div>
-                      <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">COLLECT</p>
+                      <p className="text-[10px] font-bold tracking-wider text-gray-600 uppercase">COLLECT</p>
                       <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Forms</p>
                       <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Import</p>
                     </div>
 
                     <div>
-                      <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">MANAGE</p>
+                      <p className="text-[10px] font-bold tracking-wider text-gray-600 uppercase">MANAGE</p>
                       <p className="mt-1 rounded bg-[#6701e6]/10 px-2 py-1 font-bold text-[#6701e6]">Proof</p>
                       <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Tags</p>
                     </div>
 
                     <div>
-                      <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">SHARE</p>
+                      <p className="text-[10px] font-bold tracking-wider text-gray-600 uppercase">SHARE</p>
                       <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Studio</p>
                       <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Thank Yous</p>
                     </div>
@@ -635,7 +637,7 @@ export const LandingPage: React.FC = () => {
                   <div className="col-span-12 sm:col-span-8 p-4 sm:p-5">
                     <div className="flex items-center justify-between">
                       <p className="text-sm sm:text-base font-bold text-gray-900">
-                        Your Proof <span className="ml-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">118</span>
+                        Your Proof <span className="ml-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700">118</span>
                       </p>
                       <Link
                         to="/signup"
@@ -647,7 +649,7 @@ export const LandingPage: React.FC = () => {
 
                     {/* Tag filters */}
                     <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
-                      <span className="text-gray-500 text-[11px]">Customers praise:</span>
+                      <span className="text-gray-600 text-[11px]">Customers praise:</span>
                       <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600 text-[11px]">Ease of use <b>42</b></span>
                       <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600 text-[11px]">Time saved <b>38</b></span>
                       <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600 text-[11px]">Support <b>29</b></span>
@@ -659,6 +661,7 @@ export const LandingPage: React.FC = () => {
                         <Search className="w-3.5 h-3.5 text-gray-400" />
                         <input
                           type="text"
+                          aria-label="Search testimonials with natural language"
                           value={searchQueryMock}
                           onChange={(e) => setSearchQueryMock(e.target.value)}
                           className="bg-transparent focus:outline-none w-full text-xs text-gray-800"
@@ -681,9 +684,9 @@ export const LandingPage: React.FC = () => {
                       <div className="rounded-xl border border-gray-200 p-2.5 bg-white shadow-xs text-left">
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-xs text-gray-900">Sam Marsh · Marsh & Sons</span>
-                          <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">Approved</span>
+                          <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">Approved</span>
                         </div>
-                        <div className="text-xs text-amber-500 my-0.5">★★★★★</div>
+                        <div role="img" aria-label="5 out of 5 stars" className="text-xs text-amber-500 my-0.5"><span aria-hidden="true">★★★★★</span></div>
                         <p className="text-xs text-gray-700">"I was sure the techs would never use it. They picked it up in a day."</p>
                       </div>
 
@@ -691,9 +694,9 @@ export const LandingPage: React.FC = () => {
                       <div className="rounded-xl border border-gray-200 p-2.5 bg-white shadow-xs text-left">
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-xs text-gray-900">Dave Hartley · Owner, Hartley Plumbing</span>
-                          <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">Approved</span>
+                          <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">Approved</span>
                         </div>
-                        <div className="text-xs text-amber-500 my-0.5">★★★★★</div>
+                        <div role="img" aria-label="5 out of 5 stars" className="text-xs text-amber-500 my-0.5"><span aria-hidden="true">★★★★★</span></div>
                         <p className="text-xs text-gray-700">"Scheduling used to eat my Sundays. Now it runs itself."</p>
                       </div>
                     </div>
@@ -900,13 +903,13 @@ export const LandingPage: React.FC = () => {
                   <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left max-w-4xl mx-auto">
                     {INITIAL_REVIEWS.slice(0, 3).map((r, i) => (
                       <div key={i} className="p-4 rounded-xl border border-gray-200 bg-white shadow-xs hover:border-purple-200 transition-colors">
-                        <div className="flex text-amber-500 text-xs mb-2">★★★★★</div>
+                        <div role="img" aria-label="5 out of 5 stars" className="flex text-amber-500 text-xs mb-2"><span aria-hidden="true">★★★★★</span></div>
                         <p className="text-xs text-gray-800 italic line-clamp-3 mb-3">"{r.content}"</p>
                         <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
                           <img src={r.avatarUrl} alt={r.name} className="w-6 h-6 rounded-full object-cover" />
                           <div className="text-[11px] truncate">
                             <span className="font-bold text-gray-900 block">{r.name}</span>
-                            <span className="text-gray-400 truncate">{r.company}</span>
+                            <span className="text-gray-600 truncate">{r.company}</span>
                           </div>
                         </div>
                       </div>
@@ -985,9 +988,9 @@ export const LandingPage: React.FC = () => {
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
-                      <div className="flex text-amber-500 text-xs mb-1">★★★★★</div>
+                      <div role="img" aria-label="5 out of 5 stars" className="flex text-amber-500 text-xs mb-1"><span aria-hidden="true">★★★★★</span></div>
                       <p className="text-xs text-gray-800">"Panda Praise made our checkout conversion jump 28% in 2 weeks."</p>
-                      <p className="text-[11px] text-gray-500 mt-1 font-semibold">David K. · Just now</p>
+                      <p className="text-[11px] text-gray-600 mt-1 font-semibold">David K. · Just now</p>
                     </div>
                   </div>
                 </div>
@@ -1002,7 +1005,7 @@ export const LandingPage: React.FC = () => {
                     Get more visits to your site with stunning images that you can share on your socials. Drive visits, sales and signups.
                   </p>
                   <div className="mt-6 max-w-md mx-auto p-6 rounded-2xl bg-gradient-to-r from-[#6701e6] to-indigo-600 text-white shadow-xl text-left">
-                    <div className="flex text-amber-300 text-xs mb-2">★★★★★</div>
+                    <div role="img" aria-label="5 out of 5 stars" className="flex text-amber-300 text-xs mb-2"><span aria-hidden="true">★★★★★</span></div>
                     <p className="text-sm font-semibold mb-3">"Panda Praise is the single most valuable growth tool we adopted this year."</p>
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-white text-[#6701e6] font-bold text-xs flex items-center justify-center">E</div>
@@ -1270,7 +1273,7 @@ export const LandingPage: React.FC = () => {
         </svg>
 
         {/* Rotating Circular Stamp */}
-        <div className="pointer-events-none absolute right-10 top-1/2 hidden -translate-y-1/2 text-white/80 lg:block">
+        <div className="pointer-events-none absolute right-10 top-1/2 hidden -translate-y-1/2 text-white/80 lg:block" aria-hidden="true">
           <svg className="stamp-spin" width="140" height="140" viewBox="0 0 170 170" fill="none">
             <defs>
               <path id="stamp-circle-closing" d="M85,85 m-62,0 a62,62 0 1,1 124,0 a62,62 0 1,1 -124,0" />
@@ -1349,7 +1352,7 @@ export const LandingPage: React.FC = () => {
                   Panda <span className="text-[#6701e6]">Praise</span>
                 </span>
               </Link>
-              <p className="mt-4 max-w-[14rem] text-sm leading-relaxed text-gray-500">
+              <p className="mt-4 max-w-[14rem] text-sm leading-relaxed text-gray-600">
                 Collect, manage and share testimonials in minutes.
               </p>
             </div>
@@ -1359,7 +1362,7 @@ export const LandingPage: React.FC = () => {
               
               {/* Product */}
               <div>
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Product</h3>
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Product</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Collect Testimonials</button></li>
                   <li><button onClick={() => scrollToSection('find-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Import Testimonials</button></li>
@@ -1374,7 +1377,7 @@ export const LandingPage: React.FC = () => {
 
               {/* Resources */}
               <div>
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Resources</h3>
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Resources</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Blog</Link></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Free Tools</Link></li>
@@ -1388,7 +1391,7 @@ export const LandingPage: React.FC = () => {
 
               {/* Compare */}
               <div>
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Compare</h3>
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Compare</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">All alternatives</button></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Boast.io alternative</Link></li>
@@ -1403,7 +1406,7 @@ export const LandingPage: React.FC = () => {
 
               {/* Company */}
               <div>
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Company</h3>
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Company</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><Link to="/" className="hover:text-gray-900 transition-colors">About us</Link></li>
                   <li><Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link></li>
@@ -1422,20 +1425,20 @@ export const LandingPage: React.FC = () => {
           {/* Personas Cross-Linking Row */}
           <div className="mt-12 border-t border-gray-200/80 pt-6 text-left">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-[13px]">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Panda Praise for</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Panda Praise for</span>
               {['Agencies', 'Coaches', 'Communities', 'Course Creators', 'Creators', 'Ecommerce', 'Employees', 'Events', 'Freelancers', 'Newsletters', 'Real estate agents', 'SaaS', 'Sales teams'].map((p, idx, arr) => (
                 <React.Fragment key={p}>
-                  <Link to="/signup" className="text-gray-500 transition-colors hover:text-gray-900">
+                  <Link to="/signup" className="text-gray-600 transition-colors hover:text-gray-900">
                     {p}
                   </Link>
-                  {idx < arr.length - 1 && <span className="select-none text-gray-300">·</span>}
+                  {idx < arr.length - 1 && <span aria-hidden="true" className="select-none text-gray-300">·</span>}
                 </React.Fragment>
               ))}
             </div>
           </div>
 
           {/* Copyright and Legal Row */}
-          <div className="mt-6 border-t border-gray-200/80 pt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-500 text-left">
+          <div className="mt-6 border-t border-gray-200/80 pt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-600 text-left">
             <span>© 2026 Panda Praise Ltd. All rights reserved.</span>
             <div className="flex items-center gap-5">
               <Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link>
