@@ -316,9 +316,17 @@ export const PublicCollectorPage = () => {
               Continue
             </button>
 
-            {/* Footer link */}
-            <div className="pt-2 text-[11px] text-gray-400">
-              Collect testimonials with <span className="text-[#6701e6] font-semibold">Panda Praise ↗</span>
+            {/* Viral Growth Referral Link */}
+            <div className="pt-2 text-center">
+              <a
+                href="/?ref=collector_badge"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-700 transition-colors group cursor-pointer"
+              >
+                <span>Collect testimonials with</span>
+                <span className="text-[#6701e6] font-semibold group-hover:underline">Panda Praise ↗</span>
+              </a>
             </div>
           </div>
         )}
@@ -381,9 +389,17 @@ export const PublicCollectorPage = () => {
               </form>
             )}
 
-            {/* Footer link */}
-            <div className="pt-2 text-[11px] text-gray-400">
-              Collect testimonials with <span className="text-[#6701e6] font-semibold">Panda Praise ↗</span>
+            {/* Viral Growth Referral Link */}
+            <div className="pt-2 text-center">
+              <a
+                href="/?ref=collector_badge"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-700 transition-colors group cursor-pointer"
+              >
+                <span>Collect testimonials with</span>
+                <span className="text-[#6701e6] font-semibold group-hover:underline">Panda Praise ↗</span>
+              </a>
             </div>
           </div>
         )}
@@ -413,6 +429,19 @@ export const PublicCollectorPage = () => {
               <div className="lg:col-span-5 sticky top-8 space-y-4">
                 <LivePreviewCard data={formData} />
               </div>
+            </div>
+
+            {/* Viral Growth Referral Link */}
+            <div className="text-center pt-4">
+              <a
+                href="/?ref=collector_badge"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-700 transition-colors group cursor-pointer"
+              >
+                <span>Collect testimonials with</span>
+                <span className="text-[#6701e6] font-semibold group-hover:underline">Panda Praise ↗</span>
+              </a>
             </div>
           </div>
         )}

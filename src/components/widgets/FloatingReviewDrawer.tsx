@@ -413,9 +413,14 @@ export const FloatingReviewDrawer: React.FC<FloatingReviewDrawerProps> = ({
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                 Verified Customer Feedback
               </span>
-              <span className="font-semibold text-zinc-400">
-                Powered by Panda Praise
-              </span>
+              <a
+                href="/?ref=widget_badge"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                Powered by Panda Praise ↗
+              </a>
             </div>
           </div>
         </div>
