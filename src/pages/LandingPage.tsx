@@ -8,7 +8,10 @@ import {
   Play, 
   Search, 
   Video, 
-  MessageSquare
+  MessageSquare,
+  Gift,
+  Sparkles,
+  ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
@@ -105,8 +108,8 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-gray-900 selection:bg-purple-500/20 selection:text-purple-900 relative overflow-hidden pb-20 sm:pb-0 font-sans">
       
-      {/* ── 1. Top Announcement Quiz Bar (Senja Exact Parity) ── */}
-      <div className="bg-[#6701e6] hover:bg-[#5400bd] transition-colors text-white py-2.5 px-4 text-center relative z-50 flex items-center justify-center gap-2 shadow-xs text-xs sm:text-sm font-medium cursor-pointer">
+      {/* ── 1. Top Announcement Quiz Bar ── */}
+      <div className="bg-[#6701e6] hover:bg-[#5400bd] transition-colors text-white py-2 px-4 text-center relative z-50 flex items-center justify-center gap-2 shadow-xs text-xs sm:text-sm font-medium cursor-pointer">
         <Link to="/signup" className="flex items-center gap-1.5 hover:underline">
           <span className="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
             Free quiz
@@ -117,9 +120,9 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* Ambient background glow — Senja signature purple radial wash */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[38rem]" style={{ background: 'radial-gradient(70rem 26rem at 50% -4rem, rgb(103 1 230 / 0.08), transparent)' }} />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem]" style={{ background: 'radial-gradient(75rem 28rem at 50% -4rem, rgb(103 1 230 / 0.08), transparent)' }} />
 
-      {/* ── 2. Header / Navigation (Senja Architectural Parity) ── */}
+      {/* ── 2. Header / Navigation ── */}
       <header className="sticky top-0 z-40 w-full bg-white/95 border-b border-gray-200/80 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-6 h-18 flex items-center justify-between">
           
@@ -200,10 +203,10 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* ── 3. Hero Section (Senja Structural Benchmark) ── */}
+      {/* ── 3. Hero Section (Reconstructed SaaS Architecture) ── */}
       <section className="max-w-5xl mx-auto px-6 pt-16 sm:pt-20 pb-16 text-center relative z-10">
         
-        {/* Floating sparkle doodle */}
+        {/* Floating purple sparkle doodle */}
         <div className="absolute left-2 sm:-left-8 top-20 hidden sm:block text-[#6701e6] opacity-75 animate-pulse">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0 L14.6 9.4 L24 12 L14.6 14.6 L12 24 L9.4 14.6 L0 12 L9.4 9.4 Z" />
@@ -224,7 +227,7 @@ export const LandingPage: React.FC = () => {
           </span>
         </h1>
 
-        {/* Subheadline immediately below H1 */}
+        {/* Subheadline directly below H1 */}
         <p className="mt-6 text-base sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed font-normal">
           <span className="senja-dotted font-medium text-gray-900">Meet Panda Praise</span> — the easiest way to collect, organize, and showcase verified customer proof.
         </p>
@@ -349,7 +352,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── 5. Before / After Comparison Cards ("The proof advantage") ── */}
-      <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-5xl mx-auto px-6 py-20">
+      <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center max-w-3xl mx-auto mb-12">
           <p className="font-caveat text-3xl text-[#6701e6] -rotate-1 mb-1">
             The proof advantage
@@ -445,385 +448,357 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 6. "Collect" Section (Feature 1) ── */}
-      <section id="collect-section" className="max-w-5xl mx-auto px-6 py-20 text-center relative border-t border-gray-200">
-        
-        {/* Floating speech bubble doodle */}
-        <div className="absolute left-6 sm:left-12 top-10 hidden sm:block text-[#6701e6] opacity-75">
-          <MessageSquare className="w-8 h-8" />
-        </div>
-
-        {/* Cursive kicker */}
-        <p className="font-caveat text-3xl text-[#6701e6] -rotate-2">
-          Collect
-        </p>
-
-        <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto">
-          Collect Video & Text Reviews on Autopilot
-        </h2>
-
-        <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Launch branded collection forms in 30 seconds — no apps or customer logins required.
-        </p>
-
-        {/* 6 Two-Column Green Checkmarks */}
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2.5 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Automate <span className="senja-dotted">video and text collection</span></span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Share or embed your form anywhere</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Offer rewards to collect even more</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Import from 30+ platforms or CSV</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Trigger 24/7 testimonial invites</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Automate with Zapier, API & webhooks</span>
-          </div>
-        </div>
-
-        {/* Embedded Interactive Collection Form Mockup */}
-        <div className="mt-10 rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 p-6 sm:p-12 shadow-xl max-w-3xl mx-auto text-left">
-          <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-2xl max-w-lg mx-auto">
-            <div className="flex items-center gap-3 mb-4">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                alt="Creator"
-                className="w-11 h-11 rounded-full object-cover ring-2 ring-amber-200"
-              />
-              <div>
-                <h3 className="font-bold text-gray-900 text-sm sm:text-base">
-                  Share a testimonial for my course 🫶
-                </h3>
-                <p className="text-xs text-gray-500">Takes less than 60 seconds</p>
-              </div>
-            </div>
-
-            {/* Mock video container */}
-            <div className="rounded-xl bg-gray-900 text-white p-6 mb-4 flex flex-col items-center justify-center text-center aspect-video relative overflow-hidden group">
-              <div className="w-12 h-12 rounded-full bg-[#6701e6] flex items-center justify-center text-white shadow-lg mb-2 group-hover:scale-110 transition-transform">
-                <Video className="w-5 h-5" />
-              </div>
-              <p className="text-xs font-semibold">Record a video testimonial</p>
-              <p className="text-xs text-gray-400 mt-1.5">or submit a written review below</p>
-            </div>
-
-            {/* Prompt helpers */}
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              <span className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full font-medium">✨ What was your biggest win?</span>
-              <span className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full font-medium">🚀 Would you recommend us?</span>
-            </div>
-
-            <Link
-              to="/c/feedback"
-              className="w-full py-3 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-md transition-all"
-            >
-              <span>Test Live Collector Form</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-
-        {/* CTA Button */}
-        <div className="mt-8 flex justify-center">
-          <Link
-            to="/signup"
-            className="px-8 py-3.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white font-bold text-base shadow-md transition-all hover:scale-105"
-          >
-            Sign up for free
-          </Link>
-        </div>
-
-        {/* Quote Block with thick black left border */}
-        <figure className="relative border-l-2 border-black py-2 pl-5 text-left mx-auto mt-10 max-w-xl">
-          <blockquote className="text-sm sm:text-base text-gray-700 leading-relaxed">
-            <p>
-              Panda Praise made it so easy and quick to collect testimonials.{' '}
-              <mark className="senja-yellow-mark">
-                Took me less than 5 minutes to start collecting
-              </mark>{' '}
-              them, and adding them to my website was even quicker! Thanks for this awesome tool.
-            </p>
-          </blockquote>
-          <figcaption className="mt-4 flex items-center gap-3">
-            <img
-              src="/assets/senja/jamie-northrup.C6GwZu-2_s1skM.webp"
-              alt="Jamie Northrup"
-              loading="lazy"
-              className="h-10 w-10 rounded-full object-cover shadow-xs border border-gray-200"
-            />
-            <div>
-              <p className="font-semibold text-gray-900 text-sm">Jamie Northrup</p>
-              <p className="text-xs text-gray-500">Minimalist Hustler</p>
-            </div>
-          </figcaption>
-        </figure>
-      </section>
-
-      {/* ── 7. "Organize" Section (Feature 2) ── */}
-      <section id="find-section" className="max-w-5xl mx-auto px-6 py-20 text-center relative border-t border-gray-200">
-        
-        {/* Floating 5 stars doodle on top right */}
-        <div className="absolute right-6 sm:right-12 top-10 hidden sm:block text-[#6701e6] opacity-75">
-          <div className="flex items-center gap-0.5">
-            {[1, 2, 3, 4].map((s) => (
-              <span key={s} className="text-lg text-[#6701e6]">★</span>
-            ))}
-            <span className="text-lg text-[#6701e6]">☆</span>
-          </div>
-        </div>
-
-        {/* Cursive kicker */}
-        <p className="font-caveat text-3xl text-[#6701e6] rotate-1">
-          Organize
-        </p>
-
-        <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto">
-          Every Testimonial, Instantly at Your Fingertips
-        </h2>
-
-        <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Search, filter, and tag every customer review in one unified, searchable vault.
-        </p>
-
-        {/* Checklist */}
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2.5 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Search with natural language</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Filter by offer, buyer, industry, product, plan</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Share everywhere from the Chrome Extension</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Ask the Slack bot for recommendations</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Always-on access via AI assistants (MCP)</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Generate 1-click case studies from top reviews</span>
-          </div>
-        </div>
-
-        {/* Rich Browser Mockup (app.pandapraise.com/proof) */}
-        <div className="mt-10 rounded-2xl border border-gray-200 bg-white shadow-xl overflow-hidden text-left max-w-4xl mx-auto">
-          {/* Browser Bar */}
-          <div className="flex items-center gap-1.5 border-b border-gray-200 bg-gray-50 px-4 py-3">
-            <span className="h-2.5 w-2.5 rounded-full bg-rose-400"></span>
-            <span className="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
-            <span className="ml-3 rounded bg-white px-2 py-0.5 text-xs text-gray-500 border border-gray-200">
-              app.pandapraise.com/proof
-            </span>
-          </div>
-
-          <div className="grid grid-cols-12">
-            {/* Sidebar */}
-            <div className="col-span-12 sm:col-span-3 border-b sm:border-b-0 sm:border-r border-gray-100 p-4 space-y-4 text-xs">
-              <div className="flex items-center gap-2 pb-3 border-b border-gray-100">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#6701e6]/10 text-xs font-bold text-[#6701e6]">
-                  E
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate font-semibold text-gray-800">Erin Doyle</p>
-                  <p className="text-xs text-gray-500">Admin</p>
-                </div>
+      {/* ── 6. FEATURE 1: "COLLECT" (Two-Column Alternating: Text LEFT, Visual RIGHT) ── */}
+      <section id="collect-section" className="border-t border-gray-200/80 bg-white py-20 sm:py-24">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            
+            {/* Column A: Text Content */}
+            <div className="lg:col-span-6 text-left">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/70 text-amber-800 text-xs font-bold tracking-wide uppercase mb-4">
+                <MessageSquare className="w-3.5 h-3.5 text-amber-600" />
+                <span>01 / Collect Testimonials</span>
               </div>
 
-              <div>
-                <p className="text-[11px] font-bold tracking-wide text-gray-400 uppercase">COLLECT</p>
-                <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Forms</p>
-                <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Import</p>
-              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold font-display text-gray-950 tracking-tight leading-[1.15]">
+                Collect Video & Text Reviews on Autopilot
+              </h2>
 
-              <div>
-                <p className="text-[11px] font-bold tracking-wide text-gray-400 uppercase">MANAGE</p>
-                <p className="mt-1 rounded bg-[#6701e6]/10 px-2 py-1 font-bold text-[#6701e6]">Proof</p>
-                <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Tags</p>
-              </div>
+              <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed">
+                Launch branded collection forms in 30 seconds. No apps, downloads, or customer logins required. Capture authentic video stories and 5-star praise effortlessly.
+              </p>
 
-              <div>
-                <p className="text-[11px] font-bold tracking-wide text-gray-400 uppercase">SHARE</p>
-                <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Studio</p>
-                <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Thank Yous</p>
-              </div>
-            </div>
+              {/* Feature Checklist Bullets */}
+              <ul className="mt-6 space-y-3 text-sm text-gray-700 font-medium">
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Automate video and text collection with guided prompts</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Share via direct link, embed anywhere, or trigger via QR code</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Import from 30+ platforms including Google, Trustpilot & CSV</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Automate triggers with Zapier, webhooks & collection APIs</span>
+                </li>
+              </ul>
 
-            {/* Main Proof Area */}
-            <div className="col-span-12 sm:col-span-6 p-5">
-              <div className="flex items-center justify-between">
-                <p className="text-base font-bold text-gray-900">
-                  Your Proof <span className="ml-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">118</span>
-                </p>
+              {/* Action Link & CTA */}
+              <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link
                   to="/signup"
-                  className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                  className="px-6 py-3 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white font-bold text-sm shadow-md transition-all hover:scale-105 inline-flex items-center gap-2"
                 >
-                  + Invite a customer
+                  <span>Start collecting for free</span>
+                  <ArrowRight className="w-4 h-4 text-white" />
+                </Link>
+                <Link
+                  to="/c/feedback"
+                  className="px-5 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-sm transition-colors flex items-center gap-1.5"
+                >
+                  <span>Test live collector form</span>
+                  <ExternalLink className="w-4 h-4 text-gray-400" />
                 </Link>
               </div>
 
-              {/* Tag filters */}
-              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
-                <span className="text-gray-500">Your customers talk about:</span>
-                <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600">Ease of scheduling <b>42</b></span>
-                <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600">Time saved <b>38</b></span>
-                <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600">Customer support <b>29</b></span>
-                <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600">Onboarding <b>21</b></span>
-              </div>
-
-              {/* Natural language search bar */}
-              <div className="mt-4 flex items-center gap-2">
-                <div className="min-w-0 flex-1 rounded-lg border border-[#6701e6]/40 px-3 py-1.5 text-xs text-gray-800 flex items-center gap-2 bg-purple-50/20">
-                  <Search className="w-3.5 h-3.5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={searchQueryMock}
-                    onChange={(e) => setSearchQueryMock(e.target.value)}
-                    className="bg-transparent focus:outline-none w-full text-xs text-gray-800"
+              {/* In-Section Testimonial Quote */}
+              <figure className="relative border-l-2 border-black py-2 pl-4 text-left mt-8 max-w-lg">
+                <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  <p>
+                    Panda Praise made it so easy and quick to collect testimonials.{' '}
+                    <mark className="senja-yellow-mark">
+                      Took me less than 5 minutes to start collecting
+                    </mark>
+                    , and adding them to my website was even quicker!
+                  </p>
+                </blockquote>
+                <figcaption className="mt-2.5 flex items-center gap-2.5">
+                  <img
+                    src="/assets/senja/jamie-northrup.C6GwZu-2_s1skM.webp"
+                    alt="Jamie Northrup"
+                    loading="lazy"
+                    className="h-8 w-8 rounded-full object-cover border border-gray-200"
                   />
-                </div>
-                <span className="hidden lg:block rounded-lg border border-gray-200 px-2 py-1.5 text-xs text-gray-600">All ⌄</span>
-                <span className="hidden lg:block rounded-lg border border-gray-200 px-2 py-1.5 text-xs text-gray-600">Tags ⌄</span>
-              </div>
-
-              {/* Matched Case Study Card */}
-              <div className="mt-4 space-y-2.5">
-                <div className="rounded-xl border border-purple-200 bg-purple-50/30 p-3">
-                  <p className="text-xs font-bold text-gray-900">
-                    How Hartley Plumbing cut missed jobs to zero in one month
-                  </p>
-                  <p className="mt-1 text-xs text-[#6701e6]">
-                    ✨ Case study generated with Panda Praise AI · 1 metric
-                  </p>
-                </div>
-
-                {/* Proof row 1 */}
-                <div className="rounded-xl border border-gray-200 p-3 bg-white shadow-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-gray-900">Sam Marsh</span>
-                      <span className="text-xs text-gray-500">· Marsh & Sons Electrical</span>
-                    </div>
-                    <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-xs font-bold text-emerald-600">
-                      Approved
-                    </span>
+                  <div>
+                    <p className="font-bold text-gray-900 text-xs">Jamie Northrup</p>
+                    <p className="text-[11px] text-gray-500">Minimalist Hustler</p>
                   </div>
-                  <div className="text-xs text-amber-500 my-0.5">★★★★★</div>
-                  <p className="text-xs text-gray-700">"I was sure the techs would never use it. They picked it up in a day."</p>
-                </div>
+                </figcaption>
+              </figure>
+            </div>
 
-                {/* Proof row 2 */}
-                <div className="rounded-xl border border-gray-200 p-3 bg-white shadow-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-gray-900">Dave Hartley</span>
-                      <span className="text-xs text-gray-500">· Owner, Hartley Plumbing</span>
+            {/* Column B: Product Demonstration Mockup */}
+            <div className="lg:col-span-6">
+              <div className="rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 p-6 sm:p-10 shadow-xl">
+                <div className="bg-white rounded-2xl p-6 sm:p-7 shadow-2xl max-w-md mx-auto text-left">
+                  <div className="flex items-center gap-3 mb-4">
+                    <img
+                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+                      alt="Creator"
+                      className="w-11 h-11 rounded-full object-cover ring-2 ring-amber-200"
+                    />
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-sm sm:text-base">
+                        Share a testimonial for my course 🫶
+                      </h3>
+                      <p className="text-xs text-gray-500">Takes less than 60 seconds</p>
                     </div>
-                    <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-xs font-bold text-emerald-600">
-                      Approved
-                    </span>
                   </div>
-                  <div className="text-xs text-amber-500 my-0.5">★★★★★</div>
-                  <p className="text-xs text-gray-700">"Scheduling used to eat my Sundays. Now it runs itself and the lads just check their phones."</p>
+
+                  {/* Mock video container */}
+                  <div className="rounded-xl bg-gray-900 text-white p-5 mb-4 flex flex-col items-center justify-center text-center aspect-video relative overflow-hidden group">
+                    <div className="w-11 h-11 rounded-full bg-[#6701e6] flex items-center justify-center text-white shadow-lg mb-2 group-hover:scale-110 transition-transform">
+                      <Video className="w-5 h-5" />
+                    </div>
+                    <p className="text-xs font-semibold">Record a video testimonial</p>
+                    <p className="text-[11px] text-gray-400 mt-1">or submit a written review below</p>
+                  </div>
+
+                  {/* Prompt helpers */}
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    <span className="text-[11px] bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full font-medium">✨ What was your biggest win?</span>
+                    <span className="text-[11px] bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full font-medium">🚀 Would you recommend us?</span>
+                  </div>
+
+                  <Link
+                    to="/c/feedback"
+                    className="w-full py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
+                  >
+                    <span>Test Live Collector Form</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </div>
               </div>
             </div>
 
-            {/* Right Search & Filter Panel */}
-            <div className="hidden sm:block sm:col-span-3 border-l border-gray-100 p-4 text-xs">
-              <p className="font-bold text-gray-800 mb-3">Search and Filter</p>
-              <div className="space-y-2 text-[11px] text-gray-500">
-                <p className="flex items-center justify-between border-b border-gray-100 pb-1.5">Status <span>⌄</span></p>
-                <p className="flex items-center justify-between border-b border-gray-100 pb-1.5">Source <span>⌄</span></p>
-                <p className="flex items-center justify-between border-b border-gray-100 pb-1.5">Rating <span>⌄</span></p>
-                <p className="flex items-center justify-between border-b border-gray-100 pb-1.5">Tags <span>⌄</span></p>
-                <p className="flex items-center justify-between">Type <span>⌄</span></p>
-              </div>
-            </div>
           </div>
         </div>
-
-        {/* Quote Block with thick black left border */}
-        <figure className="relative border-l-2 border-black py-2 pl-5 text-left mx-auto mt-10 max-w-xl">
-          <blockquote className="text-sm sm:text-base text-gray-700 leading-relaxed">
-            <p>
-              Within ten minutes of signing up,{' '}
-              <mark className="senja-yellow-mark">
-                I had already upgraded twice
-              </mark>{' '}
-              because I immediately wanted to give up the old mess and have all our client stories in Panda Praise.
-            </p>
-          </blockquote>
-          <figcaption className="mt-4 flex items-center gap-3">
-            <img
-              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80"
-              alt="Melissa Kwan"
-              className="h-10 w-10 rounded-full object-cover"
-            />
-            <div>
-              <p className="font-semibold text-gray-900 text-sm">Melissa Kwan</p>
-              <p className="text-xs text-gray-500">Founder of eWebinar</p>
-            </div>
-          </figcaption>
-        </figure>
       </section>
 
-      {/* ── 8. "Share" Section (Feature 3) ── */}
-      <section id="share-section" className="bg-gray-50/80 py-20 border-t border-gray-200">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          
-          {/* Cursive kicker */}
-          <p className="font-caveat text-3xl text-[#6701e6] -rotate-1">
-            Share everywhere
-          </p>
+      {/* ── 7. FEATURE 2: "ORGANIZE" (Two-Column Alternating: Visual LEFT, Text RIGHT) ── */}
+      <section id="find-section" className="border-t border-gray-200/80 bg-gray-50/70 py-20 sm:py-24">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            
+            {/* Column A: Product Mockup (Proof Vault Window) */}
+            <div className="lg:col-span-7 order-2 lg:order-1">
+              <div className="rounded-2xl border border-gray-200 bg-white shadow-xl overflow-hidden text-left">
+                {/* Browser Bar */}
+                <div className="flex items-center gap-1.5 border-b border-gray-200 bg-gray-50 px-4 py-3">
+                  <span className="h-2.5 w-2.5 rounded-full bg-rose-400"></span>
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+                  <span className="ml-3 rounded bg-white px-2 py-0.5 text-xs text-gray-500 border border-gray-200">
+                    app.pandapraise.com/proof
+                  </span>
+                </div>
 
-          <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto">
+                <div className="grid grid-cols-12">
+                  {/* Sidebar */}
+                  <div className="col-span-12 sm:col-span-4 border-b sm:border-b-0 sm:border-r border-gray-100 p-4 space-y-4 text-xs">
+                    <div className="flex items-center gap-2 pb-3 border-b border-gray-100">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#6701e6]/10 text-xs font-bold text-[#6701e6]">
+                        E
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-gray-800">Erin Doyle</p>
+                        <p className="text-xs text-gray-500">Admin</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">COLLECT</p>
+                      <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Forms</p>
+                      <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Import</p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">MANAGE</p>
+                      <p className="mt-1 rounded bg-[#6701e6]/10 px-2 py-1 font-bold text-[#6701e6]">Proof</p>
+                      <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Tags</p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">SHARE</p>
+                      <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Studio</p>
+                      <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Thank Yous</p>
+                    </div>
+                  </div>
+
+                  {/* Main Proof Area */}
+                  <div className="col-span-12 sm:col-span-8 p-4 sm:p-5">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm sm:text-base font-bold text-gray-900">
+                        Your Proof <span className="ml-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">118</span>
+                      </p>
+                      <Link
+                        to="/signup"
+                        className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                      >
+                        + Invite customer
+                      </Link>
+                    </div>
+
+                    {/* Tag filters */}
+                    <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
+                      <span className="text-gray-500 text-[11px]">Customers praise:</span>
+                      <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600 text-[11px]">Ease of use <b>42</b></span>
+                      <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600 text-[11px]">Time saved <b>38</b></span>
+                      <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600 text-[11px]">Support <b>29</b></span>
+                    </div>
+
+                    {/* Natural language search bar */}
+                    <div className="mt-3.5 flex items-center gap-2">
+                      <div className="min-w-0 flex-1 rounded-lg border border-[#6701e6]/40 px-3 py-1.5 text-xs text-gray-800 flex items-center gap-2 bg-purple-50/20">
+                        <Search className="w-3.5 h-3.5 text-gray-400" />
+                        <input
+                          type="text"
+                          value={searchQueryMock}
+                          onChange={(e) => setSearchQueryMock(e.target.value)}
+                          className="bg-transparent focus:outline-none w-full text-xs text-gray-800"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Matched Case Study Card */}
+                    <div className="mt-3 space-y-2">
+                      <div className="rounded-xl border border-purple-200 bg-purple-50/40 p-2.5 text-left">
+                        <p className="text-xs font-bold text-gray-900">
+                          How Hartley Plumbing cut missed jobs to zero in one month
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-[#6701e6]">
+                          ✨ Case study generated with Panda Praise AI · 1 metric
+                        </p>
+                      </div>
+
+                      {/* Proof row 1 */}
+                      <div className="rounded-xl border border-gray-200 p-2.5 bg-white shadow-xs text-left">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-gray-900">Sam Marsh · Marsh & Sons</span>
+                          <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">Approved</span>
+                        </div>
+                        <div className="text-xs text-amber-500 my-0.5">★★★★★</div>
+                        <p className="text-xs text-gray-700">"I was sure the techs would never use it. They picked it up in a day."</p>
+                      </div>
+
+                      {/* Proof row 2 */}
+                      <div className="rounded-xl border border-gray-200 p-2.5 bg-white shadow-xs text-left">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-gray-900">Dave Hartley · Owner, Hartley Plumbing</span>
+                          <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">Approved</span>
+                        </div>
+                        <div className="text-xs text-amber-500 my-0.5">★★★★★</div>
+                        <p className="text-xs text-gray-700">"Scheduling used to eat my Sundays. Now it runs itself."</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Column B: Text Content */}
+            <div className="lg:col-span-5 order-1 lg:order-2 text-left">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-200/70 text-[#6701e6] text-xs font-bold tracking-wide uppercase mb-4">
+                <Search className="w-3.5 h-3.5 text-[#6701e6]" />
+                <span>02 / Organize & Search</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold font-display text-gray-950 tracking-tight leading-[1.15]">
+                Every Testimonial, Instantly at Your Fingertips
+              </h2>
+
+              <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed">
+                Search, filter, and tag every customer review in one unified, searchable vault. Stop losing rave reviews in Slack, email threads, and screenshots.
+              </p>
+
+              {/* Checklist */}
+              <ul className="mt-6 space-y-3 text-sm text-gray-700 font-medium">
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Search with natural language queries</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Filter by offer, buyer persona, industry, or product tier</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Instant access via Chrome extension & Slack integration</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Generate instant case studies with 1 click</span>
+                </li>
+              </ul>
+
+              {/* In-Section Testimonial Quote */}
+              <figure className="relative border-l-2 border-black py-2 pl-4 text-left mt-8 max-w-lg">
+                <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  <p>
+                    Within ten minutes of signing up,{' '}
+                    <mark className="senja-yellow-mark">
+                      I had already upgraded twice
+                    </mark>{' '}
+                    because I immediately wanted all our client stories organized in Panda Praise.
+                  </p>
+                </blockquote>
+                <figcaption className="mt-2.5 flex items-center gap-2.5">
+                  <img
+                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80"
+                    alt="Melissa Kwan"
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="font-bold text-gray-900 text-xs">Melissa Kwan</p>
+                    <p className="text-[11px] text-gray-500">Founder of eWebinar</p>
+                  </div>
+                </figcaption>
+              </figure>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── 8. FEATURE 3: "PUBLISH & SHARE" (Full Showcase Transformation Architecture) ── */}
+      <section id="share-section" className="border-t border-gray-200/80 bg-white py-20 sm:py-24 text-center">
+        <div className="max-w-6xl mx-auto px-6">
+          
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/70 text-blue-700 text-xs font-bold tracking-wide uppercase mb-4">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <span>03 / Publish Everywhere</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto leading-[1.15]">
             One Testimonial, 12 Ways to Share It
           </h2>
 
-          <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Don't let your best reviews collect digital dust. Panda Praise turns every testimonial into widgets, videos, Reels, popups, and case studies.
           </p>
 
-          {/* Checklist */}
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2.5 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
+          {/* 6 Checklist Bullets in Balanced Grid */}
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3 text-left max-w-4xl mx-auto text-xs sm:text-sm text-gray-700 font-medium">
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <span>Widgets, popups and Walls of Love</span>
             </div>
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Social videos, Reels and images for your feeds</span>
+              <span>Social videos, Reels & feed graphics</span>
             </div>
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Case studies that close deals for you</span>
+              <span>Case studies that close deals</span>
             </div>
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Get stars in Google with Rich Snippets</span>
+              <span>Google stars with Rich Snippets</span>
             </div>
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -831,12 +806,13 @@ export const LandingPage: React.FC = () => {
             </div>
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Unlimited ad-free video hosting built in</span>
+              <span>Ad-free video hosting built in</span>
             </div>
           </div>
 
           {/* Interactive Tabbed Sharing Showcase Card */}
-          <div className="mt-10 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
+          <div className="mt-12 rounded-3xl border border-gray-200 bg-white p-6 sm:p-10 shadow-lg max-w-5xl mx-auto">
+            
             {/* Pill Tab Switcher */}
             <div className="flex justify-center-safe gap-2 overflow-x-auto pb-2">
               {[
@@ -852,10 +828,10 @@ export const LandingPage: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveShareTab(tab.id as any)}
-                    className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                    className={`shrink-0 whitespace-nowrap rounded-full px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                       isActive
                         ? 'bg-[#6701e6] text-white shadow-md'
-                        : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-100'
+                        : 'border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'
                     }`}
                   >
                     {tab.label}
@@ -875,8 +851,8 @@ export const LandingPage: React.FC = () => {
                     More attention-grabbing widgets than anywhere else. Install once with copy-paste code, and watch approved testimonials update live.
                   </p>
 
-                  {/* 23 Widget Tags Grid */}
-                  <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-3xl mx-auto">
+                  {/* 22 Widget Tags Grid */}
+                  <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
                     {[
                       'Testimonial Image Gallery',
                       'Testimonial Masonry',
@@ -920,7 +896,7 @@ export const LandingPage: React.FC = () => {
                   </div>
 
                   {/* Live Widget Cards Preview */}
-                  <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left max-w-3xl mx-auto">
+                  <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left max-w-4xl mx-auto">
                     {INITIAL_REVIEWS.slice(0, 3).map((r, i) => (
                       <div key={i} className="p-4 rounded-xl border border-gray-200 bg-white shadow-xs hover:border-purple-200 transition-colors">
                         <div className="flex text-amber-500 text-xs mb-2">★★★★★</div>
@@ -985,7 +961,7 @@ export const LandingPage: React.FC = () => {
                   <div className="mt-6">
                     <button
                       onClick={() => setIsWallModalOpen(true)}
-                      className="px-6 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-bold shadow-md transition-transform hover:scale-105"
+                      className="px-6 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-bold shadow-md transition-transform hover:scale-105 cursor-pointer"
                     >
                       Open Wall of Love Preview
                     </button>
@@ -1065,9 +1041,9 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Quote Block with thick black left border */}
-          <figure className="relative border-l-2 border-black py-2 pl-5 text-left mx-auto mt-10 max-w-xl">
-            <blockquote className="text-sm sm:text-base text-gray-700 leading-relaxed">
+          {/* Testimonial Quote under Showcase */}
+          <figure className="relative border-l-2 border-black py-2 pl-4 text-left mx-auto mt-10 max-w-xl">
+            <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
               <p>
                 We have collected tons of testimonials and previously it was a bit fiddly...{' '}
                 <mark className="senja-yellow-mark">
@@ -1076,89 +1052,123 @@ export const LandingPage: React.FC = () => {
                 , love it. They're like our very own social proof emojis now!
               </p>
             </blockquote>
-            <figcaption className="mt-4 flex items-center gap-3">
+            <figcaption className="mt-2.5 flex items-center gap-2.5">
               <img
                 src="/assets/senja/michael-heap.BPuupf8X_67hTa.webp"
                 alt="Michael Heap"
                 loading="lazy"
-                className="h-10 w-10 rounded-full object-cover shadow-xs border border-gray-200"
+                className="h-8 w-8 rounded-full object-cover border border-gray-200"
               />
               <div>
-                <p className="font-semibold text-gray-900 text-sm">Michael Heap</p>
-                <p className="text-xs text-gray-500">Chrome Web Store review</p>
+                <p className="font-bold text-gray-900 text-xs">Michael Heap</p>
+                <p className="text-[11px] text-gray-500">Chrome Web Store review</p>
               </div>
             </figcaption>
           </figure>
         </div>
       </section>
 
-      {/* ── 9. "Thank" Section (Feature 4 - Senja Core Pillar) ── */}
-      <section className="bg-white py-20 border-t border-gray-200 text-center relative">
-        <div className="max-w-5xl mx-auto px-6">
-          
-          <p className="font-caveat text-3xl text-[#6701e6] rotate-1">
-            Thank
-          </p>
+      {/* ── 9. FEATURE 4: "THANK & DELIGHT" (Two-Column Alternating: Visual LEFT, Text RIGHT) ── */}
+      <section className="border-t border-gray-200/80 bg-gray-50/70 py-20 sm:py-24">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            
+            {/* Column A: Visual Demonstration (Delight & Rewards Card) */}
+            <div className="lg:col-span-6 order-2 lg:order-1">
+              <div className="rounded-3xl border border-gray-200 bg-white p-6 sm:p-8 shadow-xl max-w-md mx-auto text-left relative overflow-hidden">
+                <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <span className="p-2 rounded-xl bg-purple-100 text-[#6701e6]">
+                      <Gift className="w-5 h-5" />
+                    </span>
+                    <div>
+                      <p className="font-bold text-sm text-gray-900">Thank You Gift Dispatched</p>
+                      <p className="text-[11px] text-gray-500">Delivered to client via email & Slack</p>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-emerald-50 text-emerald-700 px-2 py-0.5 text-xs font-bold">Sent ✨</span>
+                </div>
 
-          <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto">
-            Thank Every Customer Like It's Still Day One
-          </h2>
+                <div className="mt-4 p-4 rounded-2xl bg-purple-50/60 border border-purple-100">
+                  <p className="text-xs text-purple-950 font-medium leading-relaxed">
+                    "Hey Nathan! Loved your review about our support speed. Here is a $25 Amazon perk and early access to our V2 dashboard!"
+                  </p>
+                  <div className="mt-3 flex items-center justify-between text-xs font-bold text-[#6701e6]">
+                    <span>Coupon: PRAISE-VIP-25</span>
+                    <span className="bg-white px-2 py-0.5 rounded border border-purple-200 text-[10px]">Claimed</span>
+                  </div>
+                </div>
 
-          <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            You didn't grow by treating people like numbers. Send personal thank-you videos, gifts, and reward notes at any scale.
-          </p>
+                <div className="mt-4 flex items-center gap-3 text-xs text-gray-500">
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
+                  <span>Client reaction synced to #testimonials in Slack</span>
+                </div>
+              </div>
+            </div>
 
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2.5 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
-            <div className="flex items-start gap-2">
-              <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Find the customers you should thank</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Send e-gifts, coupons and discounts</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Unlock features as a thank you</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Record personal notes and videos</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>See who redeems every gift</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Get reactions delivered to Slack</span>
-            </div>
-          </div>
+            {/* Column B: Text Content */}
+            <div className="lg:col-span-6 order-1 lg:order-2 text-left">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-50 border border-pink-200/70 text-pink-700 text-xs font-bold tracking-wide uppercase mb-4">
+                <Gift className="w-3.5 h-3.5 text-pink-600" />
+                <span>04 / Delight & Reward</span>
+              </div>
 
-          <figure className="relative border-l-2 border-black py-2 pl-5 text-left mx-auto mt-10 max-w-xl">
-            <blockquote className="text-sm sm:text-base text-gray-700 leading-relaxed">
-              <p>
-                <mark className="senja-yellow-mark">Panda Praise is simply awesome</mark>. They work hard providing a wide list of review integrations, showing how the company is built in public, and their constant presence with their customers.
+              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold font-display text-gray-950 tracking-tight leading-[1.15]">
+                Thank Every Customer Like It's Still Day One
+              </h2>
+
+              <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed">
+                You didn't grow by treating people like numbers. Send personal thank-you videos, gifts, and reward notes at any scale.
               </p>
-            </blockquote>
-            <figcaption className="mt-4 flex items-center gap-3">
-              <img
-                src="/assets/senja/nathan-falceso.BOeFR7x3_24DNsr.webp"
-                alt="Nathan Falceso"
-                loading="lazy"
-                className="h-10 w-10 rounded-full object-cover shadow-xs border border-gray-200"
-              />
-              <div>
-                <p className="font-semibold text-gray-900 text-sm">Nathan Falceso</p>
-                <p className="text-xs text-gray-500">Verified User</p>
-              </div>
-            </figcaption>
-          </figure>
+
+              {/* Checklist */}
+              <ul className="mt-6 space-y-3 text-sm text-gray-700 font-medium">
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Find the customers who deserve an immediate thank you</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Send automated e-gifts, discount codes, and feature unlocks</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Record short personal thank-you videos with 1 click</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Stream customer reactions straight to Slack</span>
+                </li>
+              </ul>
+
+              {/* Quote Block */}
+              <figure className="relative border-l-2 border-black py-2 pl-4 text-left mt-8 max-w-lg">
+                <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  <p>
+                    <mark className="senja-yellow-mark">Panda Praise is simply awesome</mark>. They work hard providing a wide list of review integrations, and their constant presence with their customers makes all the difference.
+                  </p>
+                </blockquote>
+                <figcaption className="mt-2.5 flex items-center gap-2.5">
+                  <img
+                    src="/assets/senja/nathan-falceso.BOeFR7x3_24DNsr.webp"
+                    alt="Nathan Falceso"
+                    loading="lazy"
+                    className="h-8 w-8 rounded-full object-cover border border-gray-200"
+                  />
+                  <div>
+                    <p className="font-bold text-gray-900 text-xs">Nathan Falceso</p>
+                    <p className="text-[11px] text-gray-500">Verified User</p>
+                  </div>
+                </figcaption>
+              </figure>
+            </div>
+
+          </div>
         </div>
       </section>
 
-      {/* ── 10. "Built for you" Personas Section (Senja Exact Pill Grid) ── */}
-      <section className="max-w-5xl mx-auto px-6 py-20 text-center border-t border-gray-200">
+      {/* ── 10. "Built for you" Personas Section ── */}
+      <section className="max-w-5xl mx-auto px-6 py-20 text-center border-t border-gray-200/80">
         <p className="font-caveat text-3xl text-[#6701e6] -rotate-1">
           Built for you
         </p>
@@ -1219,7 +1229,7 @@ export const LandingPage: React.FC = () => {
               >
                 <button
                   onClick={() => toggleFaq(idx)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-gray-50/80 transition-colors"
+                  className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-gray-50/80 transition-colors cursor-pointer"
                   aria-expanded={isOpen}
                 >
                   <span className="text-sm sm:text-base font-semibold text-gray-900">
@@ -1310,7 +1320,7 @@ export const LandingPage: React.FC = () => {
             </Link>
             <button
               onClick={handleLaunchDemo}
-              className="px-6 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/20 transition-colors flex items-center gap-2"
+              className="px-6 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/20 transition-colors flex items-center gap-2 cursor-pointer"
             >
               <Play className="w-4 h-4 text-white" />
               <span>Try Demo Dashboard</span>
@@ -1332,7 +1342,7 @@ export const LandingPage: React.FC = () => {
           <div className="grid gap-12 lg:grid-cols-[16rem_1fr] lg:gap-16">
             
             {/* Column 0: Brand Info */}
-            <div>
+            <div className="text-left">
               <Link to="/" className="inline-flex items-center">
                 <span className="font-display font-extrabold text-2xl tracking-tight text-gray-950">
                   Panda <span className="text-[#6701e6]">Praise</span>
@@ -1344,17 +1354,17 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* 4 Multi-Columns */}
-            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 text-left">
               
               {/* Product */}
               <div>
                 <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Product</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
-                  <li><button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors text-left">Collect Testimonials</button></li>
-                  <li><button onClick={() => scrollToSection('find-section')} className="hover:text-gray-900 transition-colors text-left">Import Testimonials</button></li>
+                  <li><button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Collect Testimonials</button></li>
+                  <li><button onClick={() => scrollToSection('find-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Import Testimonials</button></li>
                   <li><Link to="/c/feedback" className="hover:text-gray-900 transition-colors">Video Testimonials</Link></li>
-                  <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left">Testimonial Widgets</button></li>
-                  <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left">Wall of Love</button></li>
+                  <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Testimonial Widgets</button></li>
+                  <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Wall of Love</button></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Case Study Generator</Link></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Thank Yous</Link></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Free Migration</Link></li>
@@ -1371,7 +1381,7 @@ export const LandingPage: React.FC = () => {
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Testimonial Questions</Link></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Testimonial Templates</Link></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Use Cases</Link></li>
-                  <li><button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors text-left">Help Center</button></li>
+                  <li><button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Help Center</button></li>
                 </ul>
               </div>
 
@@ -1379,7 +1389,7 @@ export const LandingPage: React.FC = () => {
               <div>
                 <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Compare</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
-                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left">All alternatives</button></li>
+                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">All alternatives</button></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Boast.io alternative</Link></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Bonjoro alternative</Link></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Elfsight alternative</Link></li>
@@ -1396,8 +1406,8 @@ export const LandingPage: React.FC = () => {
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><Link to="/" className="hover:text-gray-900 transition-colors">About us</Link></li>
                   <li><Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link></li>
-                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left">Customer Stories</button></li>
-                  <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left">Our Wall of Love 💖</button></li>
+                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Customer Stories</button></li>
+                  <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Our Wall of Love 💖</button></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Affiliate program</Link></li>
                   <li><Link to="/c/feedback" className="hover:text-gray-900 transition-colors">Leave a Review</Link></li>
                   <li><Link to="/login" className="hover:text-gray-900 transition-colors">Login</Link></li>
@@ -1409,7 +1419,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Personas Cross-Linking Row */}
-          <div className="mt-12 border-t border-gray-200/80 pt-6">
+          <div className="mt-12 border-t border-gray-200/80 pt-6 text-left">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-[13px]">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Panda Praise for</span>
               {['Agencies', 'Coaches', 'Communities', 'Course Creators', 'Creators', 'Ecommerce', 'Employees', 'Events', 'Freelancers', 'Newsletters', 'Real estate agents', 'SaaS', 'Sales teams'].map((p, idx, arr) => (
@@ -1424,7 +1434,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Copyright and Legal Row */}
-          <div className="mt-6 border-t border-gray-200/80 pt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-500">
+          <div className="mt-6 border-t border-gray-200/80 pt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-500 text-left">
             <span>© 2026 Panda Praise Ltd. All rights reserved.</span>
             <div className="flex items-center gap-5">
               <Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link>
