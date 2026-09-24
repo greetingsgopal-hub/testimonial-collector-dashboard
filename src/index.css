@@ -68,7 +68,8 @@
 
   /* Senja-style button ring and beam */
   .senja-hero-cta {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     position: relative;
   }
 

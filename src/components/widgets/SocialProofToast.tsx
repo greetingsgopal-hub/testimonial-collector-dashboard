@@ -113,16 +113,16 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
   if (!current) return null;
 
   const positionClasses = {
-    'bottom-left': 'bottom-5 left-5 sm:bottom-7 sm:left-7',
-    'bottom-right': 'bottom-5 right-5 sm:bottom-7 sm:right-7',
-    'top-right': 'top-5 right-5 sm:top-7 sm:right-7',
-    'top-left': 'top-5 left-5 sm:top-7 sm:left-7',
+    'bottom-left': 'bottom-4 left-4 sm:bottom-6 sm:left-6 2xl:left-8',
+    'bottom-right': 'bottom-4 right-4 sm:bottom-6 sm:right-6 2xl:right-8',
+    'top-right': 'top-4 right-4 sm:top-6 sm:right-6',
+    'top-left': 'top-4 left-4 sm:top-6 sm:left-6',
   }[position];
 
   return (
     <div
       onClick={onOpenWallOfLove}
-      className={`fixed ${positionClasses} z-40 max-w-[370px] w-[calc(100vw-2.5rem)] transition-all duration-300 transform translate-y-0 cursor-pointer animate-fade-in`}
+      className={`fixed ${positionClasses} z-40 hidden md:block max-w-[310px] w-full transition-all duration-300 transform translate-y-0 cursor-pointer animate-fade-in`}
     >
       <div className="bg-white/95 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-gray-200 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.15)] flex items-start gap-3 relative hover:scale-[1.02] transition-transform font-sans">
         

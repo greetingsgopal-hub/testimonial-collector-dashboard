@@ -74,15 +74,16 @@ export const LandingPage: React.FC = () => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [activeShareTab, setActiveShareTab] = useState<'widgets' | 'videos' | 'walls' | 'popups' | 'images' | 'hosting'>('widgets');
   const [selectedWidgetTag, setSelectedWidgetTag] = useState('Testimonial Image Gallery');
-  const [showFloatingElements, setShowFloatingElements] = useState(false);
+  const [showHeartTab, setShowHeartTab] = useState(false);
+  const [showSocialToast, setShowSocialToast] = useState(false);
   const [searchQueryMock, setSearchQueryMock] = useState('do the techs actually use it');
   const [isWallModalOpen, setIsWallModalOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 800) {
-        setShowFloatingElements(true);
-      }
+      const y = window.scrollY;
+      setShowHeartTab(y > 500);
+      setShowSocialToast(y > 1650);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -228,7 +229,7 @@ export const LandingPage: React.FC = () => {
         </h1>
 
         {/* Subheadline directly below H1 */}
-        <p className="mt-6 text-base sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed font-normal">
+        <p className="mt-6 text-base sm:text-xl text-gray-600 max-w-xl text-balance mx-auto leading-relaxed font-normal">
           <span className="senja-dotted font-medium text-gray-900">Meet Panda Praise</span> — the easiest way to collect, organize, and showcase verified customer proof.
         </p>
 
@@ -250,7 +251,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Hero CTA Cluster */}
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <div className="senja-hero-cta">
+          <div className="senja-hero-cta flex items-center">
             <div className="senja-cta-ring">
               <Link
                 to="/signup"
@@ -267,7 +268,7 @@ export const LandingPage: React.FC = () => {
           </div>
           <button
             onClick={handleLaunchDemo}
-            className="px-6 py-3.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-sm transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+            className="px-6 py-3.5 sm:py-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-sm transition-all shadow-xs flex items-center gap-2 cursor-pointer self-center"
           >
             <Play className="w-4 h-4 text-[#6701e6]" />
             <span>Try Interactive Demo</span>
@@ -357,7 +358,7 @@ export const LandingPage: React.FC = () => {
           <p className="font-caveat text-3xl text-[#6701e6] -rotate-1 mb-1">
             The proof advantage
           </p>
-          <h2 id="comparison-heading" className="text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight">
+          <h2 id="comparison-heading" className="text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-md mx-auto text-balance">
             Why Winning Brands Rely on Social Proof
           </h2>
           <p className="text-sm sm:text-base text-gray-600 mt-3 max-w-xl mx-auto">
@@ -1445,23 +1446,21 @@ export const LandingPage: React.FC = () => {
         </div>
       </footer>
 
-      {/* ── 14. Floating Elements (Delayed on scroll to prevent hero distraction) ── */}
-      {showFloatingElements && (
-        <>
-          {/* Senja-Class Vertical Floating Wall of Love Heart Tab on Right Edge */}
-          <FloatingReviewDrawer
-            reviews={INITIAL_REVIEWS}
-            variant="wall-heart"
-            defaultOpen={isWallModalOpen}
-          />
+      {/* ── 14. Floating Elements (Controlled to prevent hero and card obstruction) ── */}
+      {showHeartTab && (
+        <FloatingReviewDrawer
+          reviews={INITIAL_REVIEWS}
+          variant="wall-heart"
+          defaultOpen={isWallModalOpen}
+        />
+      )}
 
-          {/* Senja-Class Social Proof Popup Toast on Bottom Left */}
-          <SocialProofToast
-            reviews={INITIAL_REVIEWS}
-            position="bottom-left"
-            onOpenWallOfLove={() => setIsWallModalOpen(true)}
-          />
-        </>
+      {showSocialToast && (
+        <SocialProofToast
+          reviews={INITIAL_REVIEWS}
+          position="bottom-left"
+          onOpenWallOfLove={() => setIsWallModalOpen(true)}
+        />
       )}
     </div>
   );
