@@ -179,8 +179,8 @@ export const TermsPage = () => {
             </p>
             <p>
               For questions regarding these Terms of Service, please contact the platform administrator at{' '}
-              <a href="mailto:myprojectpotato@gmail.com" className="text-brand-400 hover:text-brand-300 font-medium underline">
-                myprojectpotato@gmail.com
+              <a href="mailto:support@pandapraise.dev" className="text-brand-400 hover:text-brand-300 font-medium underline">
+                support@pandapraise.dev
               </a>.
             </p>
           </section>

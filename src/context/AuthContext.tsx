@@ -143,14 +143,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
-    const isDemo = localStorage.getItem('pandapraise_demo_mode') === 'true';
-    return isDemo && !isFirebaseConfigured;
+    return localStorage.getItem('pandapraise_demo_mode') === 'true';
   });
   const [authError, setAuthError] = useState<string | null>(null);
 
   // Load the collection form for a given project
   const loadCollectionForm = useCallback(async (currentUser: AuthUser, currentProj: Project) => {
-    if (!db) return;
+    if (isDemoMode || !db) return;
     try {
       const formQuery = query(
         collection(db, 'collection_forms'),
@@ -206,11 +205,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err) {
       console.error('[AuthContext] Failed to load collection form:', err);
     }
-  }, []);
+  }, [isDemoMode]);
 
   // Initialize workspace, project, and collection form for the user in Firestore
   const initUserTenancy = async (currentUser: AuthUser) => {
-    if (!db) return;
+    if (isDemoMode || !db) return;
 
     try {
       // Extract viral referral attribution context if present (Priority 3 & 5)
@@ -390,14 +389,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ── Switch active project ─────────────────────────────────
   const setActiveProject = useCallback(async (newProject: Project) => {
     setProject(newProject);
-    if (user) {
+    if (user && !isDemoMode) {
       localStorage.setItem(`pandapraise_active_project_${user.uid}`, newProject.id);
       await loadCollectionForm(user, newProject);
     }
-  }, [user, loadCollectionForm]);
+  }, [user, isDemoMode, loadCollectionForm]);
 
   // ── Create new project ────────────────────────────────────
   const createNewProject = useCallback(async (name: string, websiteUrl?: string): Promise<Project | null> => {
+    if (isDemoMode) {
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const newProjId = `proj-demo-${Date.now()}`;
+      const newProject: Project = {
+        id: newProjId,
+        workspaceId: workspace?.id || 'ws-demo-1',
+        ownerId: user?.uid || 'demo-user-001',
+        name,
+        slug: `${slug}-${Math.floor(Math.random() * 1000)}`,
+        websiteUrl: websiteUrl || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      setAllProjects(prev => [...prev, newProject]);
+      setWorkspace(prev => prev ? { ...prev, projectCount: (prev.projectCount || 0) + 1 } : prev);
+      return newProject;
+    }
+
     if (!db || !user || !workspace) return null;
     try {
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -453,10 +470,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAuthError(err.message || 'Failed to create project');
       return null;
     }
-  }, [user, workspace, allProjects]);
+  }, [user, workspace, allProjects, isDemoMode]);
 
   // ── Update project details ────────────────────────────────
   const updateProjectDetails = useCallback(async (id: string, updates: Partial<Project>): Promise<Project | null> => {
+    if (isDemoMode) {
+      const now = new Date().toISOString();
+      setAllProjects(prev => prev.map(p => p.id === id ? { ...p, ...updates, updatedAt: now } : p));
+      if (project?.id === id) {
+        setProject(prev => prev ? { ...prev, ...updates, updatedAt: now } : prev);
+      }
+      return { ...allProjects.find(p => p.id === id)!, ...updates, updatedAt: now };
+    }
+
     if (!db) return null;
     try {
       const now = new Date().toISOString();
@@ -473,10 +499,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('[AuthContext] Failed to update project:', err);
       return null;
     }
-  }, [project, allProjects]);
+  }, [project, allProjects, isDemoMode]);
 
   // ── Update collection form details ─────────────────────────
   const updateCollectionFormDetails = useCallback(async (id: string, updates: Partial<CollectionForm>): Promise<CollectionForm | null> => {
+    if (isDemoMode) {
+      const now = new Date().toISOString();
+      setCollectionForm(prev => prev && prev.id === id ? { ...prev, ...updates, updatedAt: now } : prev);
+      return collectionForm ? { ...collectionForm, ...updates, updatedAt: now } : null;
+    }
+
     if (!db) return null;
     try {
       const now = new Date().toISOString();
@@ -489,10 +521,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('[AuthContext] Failed to update collection form:', err);
       return null;
     }
-  }, [collectionForm]);
+  }, [collectionForm, isDemoMode]);
 
   // ── Delete project ────────────────────────────────────────
   const deleteProjectById = useCallback(async (id: string): Promise<boolean> => {
+    if (isDemoMode) {
+      if (allProjects.length <= 1) return false;
+      const remaining = allProjects.filter(p => p.id !== id);
+      setAllProjects(remaining);
+      if (project?.id === id && remaining.length > 0) {
+        await setActiveProject(remaining[0]);
+      }
+      setWorkspace(prev => prev ? { ...prev, projectCount: remaining.length } : prev);
+      return true;
+    }
+
     if (!db || !workspace || allProjects.length <= 1) return false;
     try {
       await deleteDoc(doc(db, 'projects', id));
@@ -517,7 +560,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('[AuthContext] Failed to delete project:', err);
       return false;
     }
-  }, [workspace, allProjects, project, setActiveProject]);
+  }, [workspace, allProjects, project, setActiveProject, isDemoMode]);
 
   useEffect(() => {
     if (!isFirebaseConfigured || !auth) {
@@ -534,6 +577,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
+        localStorage.removeItem('pandapraise_demo_mode');
+        setIsDemoMode(false);
         const authUser: AuthUser = {
           id: firebaseUser.uid,
           uid: firebaseUser.uid,
@@ -543,11 +588,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(authUser);
         await initUserTenancy(authUser);
       } else {
-        setUser(null);
-        setWorkspace(null);
-        setProject(null);
-        setAllProjects([]);
-        setCollectionForm(null);
+        if (localStorage.getItem('pandapraise_demo_mode') === 'true') {
+          setIsDemoMode(true);
+          setUser(DEMO_USER);
+          setWorkspace(DEMO_WORKSPACE);
+          setProject(DEMO_PROJECTS[0]);
+          setAllProjects(DEMO_PROJECTS);
+          setCollectionForm(DEMO_FORM);
+        } else {
+          setUser(null);
+          setWorkspace(null);
+          setProject(null);
+          setAllProjects([]);
+          setCollectionForm(null);
+        }
       }
       setIsLoading(false);
     });
@@ -670,10 +724,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const enableDemoMode = () => {
-    if (isFirebaseConfigured) {
-      console.warn('[Security] Demo mode is disabled in production when Firebase is configured.');
-      return;
-    }
     localStorage.setItem('pandapraise_demo_mode', 'true');
     setIsDemoMode(true);
     setUser(DEMO_USER);

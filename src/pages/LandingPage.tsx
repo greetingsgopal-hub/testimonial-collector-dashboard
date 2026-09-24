@@ -11,7 +11,8 @@ import {
   MessageSquare,
   Gift,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Menu
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
@@ -78,6 +79,7 @@ export const LandingPage: React.FC = () => {
   const [showSocialToast, setShowSocialToast] = useState(false);
   const [searchQueryMock, setSearchQueryMock] = useState('do the techs actually use it');
   const [isWallModalOpen, setIsWallModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -200,8 +202,72 @@ export const LandingPage: React.FC = () => {
                 </Link>
               </>
             )}
+
+            {/* Mobile Hamburger Button */}
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-950 hover:bg-gray-100 transition-colors cursor-pointer"
+              aria-label="Toggle navigation menu"
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? <XIcon className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Dropdown */}
+        {isMobileMenuOpen && (
+          <nav className="md:hidden border-t border-gray-200/80 bg-white px-6 py-4 space-y-3 shadow-lg animate-fade-in">
+            <Link
+              to="/pricing"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block py-2 text-sm font-medium text-gray-700 hover:text-[#6701e6] transition-colors"
+            >
+              Pricing
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                scrollToSection('collect-section');
+                setIsMobileMenuOpen(false);
+              }}
+              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-[#6701e6] transition-colors cursor-pointer"
+            >
+              Product
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                scrollToSection('share-section');
+                setIsMobileMenuOpen(false);
+              }}
+              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-[#6701e6] transition-colors cursor-pointer"
+            >
+              Customers
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                scrollToSection('comparison-section');
+                setIsMobileMenuOpen(false);
+              }}
+              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-[#6701e6] transition-colors cursor-pointer"
+            >
+              Why Panda Praise
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                scrollToSection('faq');
+                setIsMobileMenuOpen(false);
+              }}
+              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-[#6701e6] transition-colors cursor-pointer"
+            >
+              Resources
+            </button>
+          </nav>
+        )}
       </header>
 
       {/* ── 3. Hero Section (Reconstructed SaaS Architecture) ── */}
@@ -541,6 +607,9 @@ export const LandingPage: React.FC = () => {
                     <img
                       src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
                       alt="Creator"
+                      loading="lazy"
+                      width="44"
+                      height="44"
                       className="w-11 h-11 rounded-full object-cover ring-2 ring-amber-200"
                     />
                     <div>
@@ -753,6 +822,9 @@ export const LandingPage: React.FC = () => {
                   <img
                     src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80"
                     alt="Melissa Kwan"
+                    loading="lazy"
+                    width="32"
+                    height="32"
                     className="h-8 w-8 rounded-full object-cover"
                   />
                   <div>
@@ -983,6 +1055,9 @@ export const LandingPage: React.FC = () => {
                     <img
                       src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80"
                       alt="Reviewer"
+                      loading="lazy"
+                      width="40"
+                      height="40"
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
@@ -1367,9 +1442,6 @@ export const LandingPage: React.FC = () => {
                   <li><Link to="/c/feedback" className="hover:text-gray-900 transition-colors">Video Testimonials</Link></li>
                   <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Testimonial Widgets</button></li>
                   <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Wall of Love</button></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Case Study Generator</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Thank Yous</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Free Migration</Link></li>
                 </ul>
               </div>
 
@@ -1377,71 +1449,41 @@ export const LandingPage: React.FC = () => {
               <div>
                 <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Resources</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Blog</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Free Tools</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Testimonial Examples</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Testimonial Questions</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Testimonial Templates</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Use Cases</Link></li>
-                  <li><button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Help Center</button></li>
+                  <li><Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing & Plans</Link></li>
+                  <li><button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Frequently Asked Questions</button></li>
                 </ul>
               </div>
 
-              {/* Compare */}
+              {/* Overview */}
               <div>
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Compare</h3>
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Overview</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
-                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">All alternatives</button></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Boast.io alternative</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Bonjoro alternative</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Elfsight alternative</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Famewall alternative</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Testimonial.to alternative</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Trustmary alternative</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">VideoAsk alternative</Link></li>
+                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Why Panda Praise</button></li>
+                  <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Customer Proof Studio</button></li>
                 </ul>
               </div>
 
-              {/* Company */}
+              {/* Platform */}
               <div>
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Company</h3>
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Platform</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
-                  <li><Link to="/" className="hover:text-gray-900 transition-colors">About us</Link></li>
                   <li><Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link></li>
-                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Customer Stories</button></li>
                   <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Our Wall of Love 💖</button></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Affiliate program</Link></li>
                   <li><Link to="/c/feedback" className="hover:text-gray-900 transition-colors">Leave a Review</Link></li>
                   <li><Link to="/login" className="hover:text-gray-900 transition-colors">Login</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">What's new ✨</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors font-semibold text-[#6701e6]">Start Free</Link></li>
                 </ul>
               </div>
 
-            </div>
-          </div>
-
-          {/* Personas Cross-Linking Row */}
-          <div className="mt-12 border-t border-gray-200/80 pt-6 text-left">
-            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-[13px]">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Panda Praise for</span>
-              {['Agencies', 'Coaches', 'Communities', 'Course Creators', 'Creators', 'Ecommerce', 'Employees', 'Events', 'Freelancers', 'Newsletters', 'Real estate agents', 'SaaS', 'Sales teams'].map((p, idx, arr) => (
-                <React.Fragment key={p}>
-                  <Link to="/signup" className="text-gray-600 transition-colors hover:text-gray-900">
-                    {p}
-                  </Link>
-                  {idx < arr.length - 1 && <span aria-hidden="true" className="select-none text-gray-300">·</span>}
-                </React.Fragment>
-              ))}
             </div>
           </div>
 
           {/* Copyright and Legal Row */}
-          <div className="mt-6 border-t border-gray-200/80 pt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-600 text-left">
+          <div className="mt-8 border-t border-gray-200/80 pt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-600 text-left">
             <span>© 2026 Panda Praise Ltd. All rights reserved.</span>
             <div className="flex items-center gap-5">
               <Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link>
               <Link to="/privacy-policy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
-              <Link to="/pricing" className="hover:text-gray-900 transition-colors">Discount code policy</Link>
             </div>
           </div>
         </div>

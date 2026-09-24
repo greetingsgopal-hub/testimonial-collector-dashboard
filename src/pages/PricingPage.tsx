@@ -352,6 +352,21 @@ export const PricingPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 py-8 text-xs text-zinc-500">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="flex items-center justify-center sm:justify-start gap-2">
+            <PandaPraiseIcon size={20} />
+            <span>© 2026 Panda Praise Ltd. All rights reserved.</span>
+          </div>
+          <div className="flex items-center justify-center gap-6">
+            <Link to="/" className="hover:text-zinc-300 transition-colors">Home</Link>
+            <Link to="/terms" className="hover:text-zinc-300 transition-colors">Terms of Service</Link>
+            <Link to="/privacy-policy" className="hover:text-zinc-300 transition-colors">Privacy Policy</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

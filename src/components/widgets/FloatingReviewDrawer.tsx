@@ -114,22 +114,21 @@ export const FloatingReviewDrawer: React.FC<FloatingReviewDrawerProps> = ({
     <>
       {/* ── 1. Floating Action Button / Tab ── */}
       {!isOpen && variant === 'wall-heart' && (
-        <div className="fixed right-3 sm:right-4 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3">
+        <div className="fixed right-1 sm:right-4 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2">
           <button
             type="button"
             onClick={() => setIsOpen(true)}
             aria-label="See our Wall of Love"
-            className="flex flex-col items-center gap-1 transition-transform hover:scale-110 group cursor-pointer focus:outline-none"
+            className="flex flex-col items-center gap-0.5 sm:gap-1 transition-transform hover:scale-110 group cursor-pointer focus:outline-none"
           >
             <svg
-              width="50"
               viewBox="0 0 124 116"
               fill="none"
               stroke="#6701e6"
               strokeWidth="5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-[#6701e6] drop-shadow-md wall-heart-animated"
+              className="w-8 sm:w-[50px] h-auto text-[#6701e6] drop-shadow-md wall-heart-animated"
             >
               <clipPath id="drawer-wall-heart-clip">
                 <path d="M62 36 C62 22 50 12 36 12 C18 12 8 26 8 40 C8 68 38 86 62 104 C86 86 116 68 116 40 C116 26 106 12 88 12 C74 12 62 22 62 36 Z" />
@@ -145,17 +144,17 @@ export const FloatingReviewDrawer: React.FC<FloatingReviewDrawerProps> = ({
               />
               <path d="M62 36 C62 22 50 12 36 12 C18 12 8 26 8 40 C8 68 38 86 62 104 C86 86 116 68 116 40 C116 26 106 12 88 12 C74 12 62 22 62 36 Z" />
             </svg>
-            <span className="text-[11px] font-bold text-[#6701e6] tracking-tight">Wall of Love</span>
+            <span className="hidden sm:inline text-[11px] font-bold text-[#6701e6] tracking-tight">Wall of Love</span>
           </button>
 
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="w-8 h-8 rounded-full bg-white border border-pink-200 text-pink-500 shadow-md flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+            className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white border border-pink-200 text-pink-500 shadow-md flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
             title="Customer Social Proof"
             aria-label="Open testimonials summary"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
               <line x1="16" y1="13" x2="8" y2="13"/>

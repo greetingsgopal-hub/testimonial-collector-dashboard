@@ -202,8 +202,8 @@ export const PrivacyPolicyPage = () => {
             </p>
             <p>
               For any questions regarding this Privacy Policy or your data, you can reach out via the project repository or contact the platform administrator at{' '}
-              <a href="mailto:myprojectpotato@gmail.com" className="text-brand-400 hover:text-brand-300 font-medium underline">
-                myprojectpotato@gmail.com
+              <a href="mailto:support@pandapraise.dev" className="text-brand-400 hover:text-brand-300 font-medium underline">
+                support@pandapraise.dev
               </a>.
             </p>
           </section>
