@@ -22,6 +22,8 @@ async function getAuthToken(): Promise<string | null> {
   return currentUser.getIdToken();
 }
 
+const FUNCTIONS_BASE_URL = (import.meta.env.VITE_FUNCTIONS_API_URL || '').replace(/\/$/, '');
+
 export const socialClient = {
   /**
    * Request official OAuth authorization URL for the target platform.
@@ -33,7 +35,7 @@ export const socialClient = {
     }
 
     try {
-      const res = await fetch('/.netlify/functions/oauth-init', {
+      const res = await fetch(`${FUNCTIONS_BASE_URL}/.netlify/functions/oauth-init`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,7 +63,7 @@ export const socialClient = {
     if (!token) return null;
 
     try {
-      const res = await fetch('/.netlify/functions/social-status', {
+      const res = await fetch(`${FUNCTIONS_BASE_URL}/.netlify/functions/social-status`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -88,7 +90,7 @@ export const socialClient = {
     }
 
     try {
-      const res = await fetch('/.netlify/functions/social-publish', {
+      const res = await fetch(`${FUNCTIONS_BASE_URL}/.netlify/functions/social-publish`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +136,7 @@ export const socialClient = {
     }
 
     try {
-      const res = await fetch('/.netlify/functions/social-disconnect', {
+      const res = await fetch(`${FUNCTIONS_BASE_URL}/.netlify/functions/social-disconnect`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -31,6 +31,7 @@ import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, Collect
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
+import { EmailVerificationBanner } from '../components/auth/EmailVerificationBanner';
 import { 
   Sparkles, 
   Send, 
@@ -331,6 +332,9 @@ export const DashboardPage = () => {
             </button>
           </div>
         </header>
+
+        {/* Firebase Email Verification Notification Gate */}
+        <EmailVerificationBanner />
 
         {socialNotification && (
           <div className={`mx-6 mt-4 p-3 rounded-xl flex items-center justify-between text-xs font-semibold ${

@@ -30,14 +30,19 @@ export const ForgotPasswordPage = () => {
 
     setIsSubmitting(true);
     try {
-      const res = await resetPassword(email);
+      const res = await resetPassword(email.trim());
       if (res.success) {
-        setSuccessMessage('Password recovery email sent! Please check your inbox.');
+        setSuccessMessage('If an account exists with this email address, a password recovery link has been sent. Please check your inbox and spam folder.');
       } else {
-        setLocalError(res.error || 'Failed to send recovery email.');
+        // If an unexpected system error occurred (e.g. network failure), display friendly error; otherwise neutral
+        if (res.error?.toLowerCase().includes('network')) {
+          setLocalError(res.error);
+        } else {
+          setSuccessMessage('If an account exists with this email address, a password recovery link has been sent. Please check your inbox and spam folder.');
+        }
       }
     } catch (err: any) {
-      setLocalError(err.message || 'An error occurred.');
+      setSuccessMessage('If an account exists with this email address, a password recovery link has been sent. Please check your inbox and spam folder.');
     } finally {
       setIsSubmitting(false);
     }

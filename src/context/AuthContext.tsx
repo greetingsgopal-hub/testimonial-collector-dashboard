@@ -6,6 +6,7 @@ import {
   GoogleAuthProvider,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
+  sendEmailVerification,
   onAuthStateChanged,
   User as FirebaseUser,
 } from 'firebase/auth';
@@ -52,6 +53,7 @@ export interface AuthUser {
   uid: string;
   email: string | null;
   displayName?: string | null;
+  emailVerified: boolean;
 }
 
 interface AuthContextType {
@@ -61,6 +63,7 @@ interface AuthContextType {
   collectionForm: CollectionForm | null;
   isLoading: boolean;
   isDemoMode: boolean;
+  isEmailVerified: boolean;
   authError: string | null;
   setAuthError: (err: string | null) => void;
   signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
@@ -68,6 +71,8 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
+  sendVerificationEmail: () => Promise<{ success: boolean; error?: string }>;
+  checkVerificationStatus: () => Promise<boolean>;
   enableDemoMode: () => void;
   disableDemoMode: () => void;
   refreshWorkspaceContext: () => Promise<void>;
@@ -88,6 +93,7 @@ const DEMO_USER: AuthUser = {
   uid: 'demo-user-001',
   email: 'founder@demo.pandapraise.dev',
   displayName: 'Demo Founder',
+  emailVerified: true,
 };
 
 const DEMO_WORKSPACE: Workspace = {
@@ -584,6 +590,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: firebaseUser.displayName,
+          emailVerified: firebaseUser.emailVerified,
         };
         setUser(authUser);
         await initUserTenancy(authUser);
@@ -620,11 +627,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Automatically send verification email on new account creation
+      try {
+        await sendEmailVerification(userCredential.user);
+      } catch (verifErr) {
+        console.warn('[AuthContext] Initial verification email trigger failed:', verifErr);
+      }
+
       const authUser: AuthUser = {
         id: userCredential.user.uid,
         uid: userCredential.user.uid,
         email: userCredential.user.email,
         displayName: userCredential.user.displayName,
+        emailVerified: userCredential.user.emailVerified,
       };
       setUser(authUser);
       await initUserTenancy(authUser);
@@ -652,6 +667,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         uid: userCredential.user.uid,
         email: userCredential.user.email,
         displayName: userCredential.user.displayName,
+        emailVerified: userCredential.user.emailVerified,
       };
       setUser(authUser);
       await initUserTenancy(authUser);
@@ -681,6 +697,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         uid: userCredential.user.uid,
         email: userCredential.user.email,
         displayName: userCredential.user.displayName,
+        emailVerified: userCredential.user.emailVerified,
       };
       setUser(authUser);
       await initUserTenancy(authUser);
@@ -717,9 +734,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await sendPasswordResetEmail(auth, email);
       return { success: true };
     } catch (error: any) {
+      const code = error?.code || '';
+      // Neutral response to avoid user enumeration
+      if (
+        code === 'auth/user-not-found' ||
+        code === 'auth/invalid-email' ||
+        code === 'auth/missing-email'
+      ) {
+        return { success: true };
+      }
       const friendlyMessage = translateFirebaseError(error);
       setAuthError(friendlyMessage);
       return { success: false, error: friendlyMessage };
+    }
+  };
+
+  const sendVerificationEmail = async (): Promise<{ success: boolean; error?: string }> => {
+    if (isDemoMode) return { success: true };
+    if (!auth || !auth.currentUser) {
+      return { success: false, error: 'No active user found. Please sign in.' };
+    }
+    try {
+      await sendEmailVerification(auth.currentUser);
+      return { success: true };
+    } catch (error: any) {
+      const friendlyMessage = translateFirebaseError(error);
+      return { success: false, error: friendlyMessage };
+    }
+  };
+
+  const checkVerificationStatus = async (): Promise<boolean> => {
+    if (isDemoMode) return true;
+    if (!auth || !auth.currentUser) return false;
+    try {
+      await auth.currentUser.reload();
+      const verified = auth.currentUser.emailVerified;
+      if (user) {
+        setUser(prev => prev ? { ...prev, emailVerified: verified } : null);
+      }
+      return verified;
+    } catch (err) {
+      console.error('[AuthContext] Error reloading verification status:', err);
+      return false;
     }
   };
 
@@ -732,7 +788,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAllProjects(DEMO_PROJECTS);
     setCollectionForm(DEMO_FORM);
   };
-
 
   const disableDemoMode = () => {
     localStorage.removeItem('pandapraise_demo_mode');
@@ -750,6 +805,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const isEmailVerified = isDemoMode || Boolean(user?.emailVerified);
+
   return (
     <AuthContext.Provider
       value={{
@@ -759,6 +816,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         collectionForm,
         isLoading,
         isDemoMode,
+        isEmailVerified,
         authError,
         setAuthError,
         signUp,
@@ -766,6 +824,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signInWithGoogle,
         signOut,
         resetPassword,
+        sendVerificationEmail,
+        checkVerificationStatus,
         enableDemoMode,
         disableDemoMode,
         refreshWorkspaceContext,

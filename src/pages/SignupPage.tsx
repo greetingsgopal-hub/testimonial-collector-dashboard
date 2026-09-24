@@ -277,11 +277,24 @@ export const SignupPage: React.FC = () => {
               />
             </div>
 
+            {/* Terms & Privacy Acknowledgement */}
+            <p className="text-[11px] text-gray-500 text-center leading-normal pt-1">
+              By creating an account, you agree to our{' '}
+              <Link to="/terms" className="text-[#6701e6] hover:underline font-medium">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link to="/privacy-policy" className="text-[#6701e6] hover:underline font-medium">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+
             {/* Solid Black Sign up Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 rounded-lg bg-black hover:bg-gray-800 text-white font-bold text-sm transition-colors shadow-xs cursor-pointer disabled:opacity-50 mt-5"
+              className="w-full py-3 rounded-lg bg-black hover:bg-gray-800 text-white font-bold text-sm transition-colors shadow-xs cursor-pointer disabled:opacity-50 mt-2"
             >
               {isSubmitting ? 'Creating account...' : 'Sign up'}
             </button>

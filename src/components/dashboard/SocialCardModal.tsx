@@ -22,6 +22,7 @@ import { Review, SocialPlatform } from '../../types';
 import { analytics } from '../../lib/analytics';
 import { socialClient, SocialStatusResponse } from '../../lib/socialClient';
 import { ConnectedAccountsModal } from './ConnectedAccountsModal';
+import { useAuth } from '../../context/AuthContext';
 
 const LinkedinIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -182,6 +183,8 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
   onClose,
 }) => {
   if (!review) return null;
+
+  const { isEmailVerified } = useAuth();
 
   // Selected Platform
   const [selectedPlatform, setSelectedPlatform] = useState<SocialPlatform>('linkedin');
@@ -464,6 +467,11 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
     setPublishError(null);
     setPublishSuccess(null);
 
+    if (!isEmailVerified) {
+      setPublishError('Email verification required. Please verify your email address to enable 1-click social broadcasting.');
+      return;
+    }
+
     if (review.status !== 'approved') {
       setPublishError('Moderation Gate: Only approved testimonials can be published to social media.');
       return;
@@ -509,6 +517,11 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
   // Publish to All Connected Platforms
   const handlePublishAll = async () => {
     if (isPublishingAll || !statusData) return;
+
+    if (!isEmailVerified) {
+      setPublishError('Email verification required. Please verify your email address to enable 1-click social broadcasting.');
+      return;
+    }
     const connectedPlatforms = (['linkedin', 'twitter', 'facebook', 'instagram'] as SocialPlatform[]).filter(
       (p) => statusData.connections[p]?.connected
     );
@@ -559,6 +572,10 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
 
   // Connect Account Trigger
   const handleConnectPlatform = async (platform: SocialPlatform) => {
+    if (!isEmailVerified) {
+      setPublishError('Email verification required. Please verify your email address before connecting external social accounts.');
+      return;
+    }
     analytics.socialConnectStarted(platform);
     const res = await socialClient.initOAuth(platform);
     if (res.authUrl) {

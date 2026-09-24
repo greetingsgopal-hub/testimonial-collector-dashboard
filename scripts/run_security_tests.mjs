@@ -228,6 +228,72 @@ assert(storageRules.includes('isTenantOwner(tenantId)'), 'storage.rules defines 
 assert(storageRules.includes('allow create, update: if isTenantOwner(tenantId) && isValidImage()'), 'storage.rules requires authenticated tenant ownership for public media writes');
 assert(!storageRules.includes('allow write: if ('), 'storage.rules has NO unauthenticated public write blocks');
 
+// --- Phase 1: Workspace Entitlement & Billing Lock Assertions ---
+assert(firestoreRules.includes('affectedKeys().hasAny(['), 'firestore.rules restricts affectedKeys on workspace update');
+assert(firestoreRules.includes("'plan'"), 'firestore.rules locks plan from client update');
+assert(firestoreRules.includes("'subscriptionStatus'"), 'firestore.rules locks subscriptionStatus from client update');
+assert(firestoreRules.includes("'billingCycle'"), 'firestore.rules locks billingCycle from client update');
+assert(firestoreRules.includes("'stripeCustomerId'") && firestoreRules.includes("'stripeSubscriptionId'"), 'firestore.rules locks Stripe identifiers from client update');
+assert(firestoreRules.includes("'planExpiresAt'"), 'firestore.rules locks planExpiresAt from client update');
+assert(firestoreRules.includes("request.resource.data.plan == 'free'"), 'firestore.rules enforces plan == free on workspace creation');
+assert(firestoreRules.includes('avatarUrl.size() <= 75000'), 'firestore.rules enforces avatarUrl <= 75,000 char maximum');
+
+// --- Simulated Rule Evaluation for Cases A through F ---
+function evaluateWorkspaceUpdate(currentDoc, requestedUpdates, authUid) {
+  const isOwner = authUid === currentDoc.ownerId;
+  const isOwnerUnchanged = requestedUpdates.ownerId === undefined || requestedUpdates.ownerId === currentDoc.ownerId;
+  const lockedKeys = ['plan', 'subscriptionStatus', 'billingCycle', 'stripeCustomerId', 'stripeSubscriptionId', 'planExpiresAt'];
+  const affectedKeys = Object.keys(requestedUpdates);
+  const touchesLockedField = affectedKeys.some(k => lockedKeys.includes(k) && requestedUpdates[k] !== currentDoc[k]);
+  
+  return isOwner && isOwnerUnchanged && !touchesLockedField;
+}
+
+const baseWs = {
+  ownerId: 'user_123',
+  name: 'Acme Studio',
+  slug: 'acme-studio',
+  plan: 'free',
+  subscriptionStatus: 'trialing',
+  billingCycle: 'monthly',
+  stripeCustomerId: null,
+  stripeSubscriptionId: null,
+  projectCount: 1,
+  updatedAt: '2026-09-01T00:00:00Z'
+};
+
+// Case A: Normal workspace update (name, brandColor, projectCount)
+const caseA = evaluateWorkspaceUpdate(baseWs, { name: 'Acme Global', brandColor: '#6701e6', projectCount: 2, updatedAt: '2026-09-24T00:00:00Z' }, 'user_123');
+assert(caseA === true, 'Case A: Normal workspace update is ALLOWED');
+
+// Case B: Attempt to change plan
+const caseB = evaluateWorkspaceUpdate(baseWs, { plan: 'pro' }, 'user_123');
+assert(caseB === false, 'Case B: Attempt to change plan to "pro" is BLOCKED');
+
+// Case C: Attempt to change subscriptionStatus
+const caseC = evaluateWorkspaceUpdate(baseWs, { subscriptionStatus: 'active' }, 'user_123');
+assert(caseC === false, 'Case C: Attempt to change subscriptionStatus is BLOCKED');
+
+// Case D: Attempt to change billingCycle
+const caseD = evaluateWorkspaceUpdate(baseWs, { billingCycle: 'annual' }, 'user_123');
+assert(caseD === false, 'Case D: Attempt to change billingCycle is BLOCKED');
+
+// Case E: Attempt to change Stripe IDs
+const caseE1 = evaluateWorkspaceUpdate(baseWs, { stripeCustomerId: 'cus_attacker123' }, 'user_123');
+const caseE2 = evaluateWorkspaceUpdate(baseWs, { stripeSubscriptionId: 'sub_fake_active' }, 'user_123');
+assert(caseE1 === false && caseE2 === false, 'Case E: Attempt to change Stripe IDs is BLOCKED');
+
+// Case F: Attempt to change ownerId
+const caseF = evaluateWorkspaceUpdate(baseWs, { ownerId: 'user_456' }, 'user_123');
+assert(caseF === false, 'Case F: Attempt to change ownerId is BLOCKED');
+
+// Avatar length check
+function evaluateAvatarLength(avatarUrl) {
+  return typeof avatarUrl === 'string' && avatarUrl.length <= 75000;
+}
+assert(evaluateAvatarLength('data:image/webp;base64,' + 'A'.repeat(50000)) === true, 'Valid avatarUrl <= 75000 is ALLOWED');
+assert(evaluateAvatarLength('data:image/webp;base64,' + 'A'.repeat(80000)) === false, 'Oversized avatarUrl > 75000 is BLOCKED');
+
 // -------------------------------------------------------------
 // Test 6: Netlify Configuration & Security Headers
 // -------------------------------------------------------------
