@@ -220,11 +220,11 @@ export const LandingPage: React.FC = () => {
           <span className="text-xs font-semibold text-[#6701e6]">The #1 Social Proof Platform for Growing Businesses</span>
         </div>
 
-        {/* Primary H1: Balanced 2-line structure without awkward wrap */}
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-display text-gray-950 tracking-tight leading-[1.12] max-w-3xl mx-auto">
-          <span>Turn Customer Praise into</span>{' '}
-          <span className="senja-purple-mark mt-2 inline-block whitespace-nowrap">
-            Your #1 Sales Engine
+        {/* Primary H1: Balanced, centrally aligned 2-line headline */}
+        <h1 className="text-3xl sm:text-4xl lg:text-[48px] font-extrabold font-display text-gray-950 tracking-tight leading-[1.16] max-w-3xl mx-auto text-center">
+          <span className="block">Turn Customer Praise</span>
+          <span className="block mt-1 sm:mt-2 text-[#6701e6]">
+            Into Your #1 Sales Engine
           </span>
         </h1>
 
