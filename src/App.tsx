@@ -16,6 +16,7 @@ import { OnboardingPage } from './pages/OnboardingPage';
 import { OnboardingUpgradePage } from './pages/OnboardingUpgradePage';
 import { PricingPage } from './pages/PricingPage';
 import { WallOfLovePage } from './pages/WallOfLovePage';
+import { ViralActivationPage } from './pages/ViralActivationPage';
 import { initAnalytics, trackPageView } from './lib/analytics';
 
 /**
@@ -69,6 +70,22 @@ export function App() {
             element={
               <ProtectedRoute>
                 <OnboardingUpgradePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ready"
+            element={
+              <ProtectedRoute>
+                <ViralActivationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/activate"
+            element={
+              <ProtectedRoute>
+                <ViralActivationPage />
               </ProtectedRoute>
             }
           />

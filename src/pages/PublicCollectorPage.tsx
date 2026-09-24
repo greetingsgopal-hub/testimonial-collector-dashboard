@@ -172,6 +172,11 @@ export const PublicCollectorPage = () => {
         formConfig?.projectId
       );
       analytics.publicCollectionSubmitted();
+      analytics.testimonialSubmissionCompleted({
+        projectId: formConfig?.projectId || 'unknown',
+        formId: formConfig?.id || 'unknown',
+        hasAvatar: Boolean(data.avatarUrl),
+      });
       setSubmittedReview(created);
     } finally {
       setIsSubmitting(false);
@@ -405,6 +410,8 @@ export const PublicCollectorPage = () => {
         <SuccessModal
           review={submittedReview}
           isPublicView={true}
+          businessName={displayBrand || formConfig?.settings?.brandName || formConfig?.title}
+          projectId={formConfig?.projectId}
           onClose={() => setSubmittedReview(null)}
           onResetForm={() => {
             setFormData(INITIAL_FORM_STATE);

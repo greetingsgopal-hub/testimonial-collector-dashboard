@@ -281,6 +281,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let currentProj: Project;
 
       if (projSnapshot.empty) {
+        let initialProjName = 'Main Product';
+        try {
+          const stored = sessionStorage.getItem('pandapraise_viral_origin');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed.customerName) {
+              const firstName = parsed.customerName.trim().split(' ')[0];
+              initialProjName = `${firstName}'s Testimonials`;
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+        if (initialProjName === 'Main Product' && currentUser.displayName) {
+          const firstName = currentUser.displayName.trim().split(' ')[0];
+          initialProjName = `${firstName}'s Testimonials`;
+        }
+
         const projSlug = `${currentWs.slug}-project`;
         const projRef = doc(collection(db, 'projects'));
         const now = new Date().toISOString();
@@ -288,7 +306,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const projData = {
           workspaceId: currentWs.id,
           ownerId: currentUser.uid,
-          name: 'Main Product',
+          name: initialProjName,
           slug: projSlug,
           websiteUrl: '',
           createdAt: now,

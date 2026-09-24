@@ -118,5 +118,25 @@ export const analytics = {
     trackEvent('social_publish_all_started', { platform_count: count }),
   socialPublishAllCompleted: () =>
     trackEvent('social_publish_all_completed'),
+
+  // ── Viral Growth Loop Tracking (Requirement 13) ───────────────
+  testimonialSubmissionCompleted: (params?: Record<string, string | number | boolean>) =>
+    trackEvent('testimonial_submission_completed', params),
+  viralCtaViewed: (params?: Record<string, string | number | boolean>) =>
+    trackEvent('viral_cta_viewed', params),
+  viralCtaClicked: (params?: Record<string, string | number | boolean>) =>
+    trackEvent('viral_cta_clicked', params),
+  viralSignupStarted: (params?: Record<string, string | number | boolean>) =>
+    trackEvent('viral_signup_started', params),
+  viralSignupCompleted: (params?: Record<string, string | number | boolean>) =>
+    trackEvent('viral_signup_completed', params),
+  viralWorkspaceCreated: (params?: Record<string, string | number | boolean>) =>
+    trackEvent('viral_workspace_created', params),
+  viralCollectionLinkGenerated: (params?: Record<string, string | number | boolean>) =>
+    trackEvent('viral_collection_link_generated', params),
+  viralCollectionLinkCopied: (params?: Record<string, string | number | boolean>) =>
+    trackEvent('viral_collection_link_copied', params),
+  viralShareStarted: (params?: Record<string, string | number | boolean>) =>
+    trackEvent('viral_share_started', params),
 };
 

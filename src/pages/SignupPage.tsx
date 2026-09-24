@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { AlertCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
@@ -8,8 +8,13 @@ import { GoogleIcon } from '../components/auth/GoogleIcon';
 import { ScrollingTestimonials } from '../components/auth/ScrollingTestimonials';
 
 export const SignupPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const isViral = searchParams.get('source') === 'testimonial';
+
   usePageSeo({
-    title: 'Welcome to Panda Praise — Sign up',
+    title: isViral
+      ? 'Get Your Free Panda Praise Link — Sign Up'
+      : 'Welcome to Panda Praise — Sign up',
     description: 'Panda Praise helps you start collecting, managing and sharing your testimonials in minutes, not days.',
   });
 
@@ -19,8 +24,63 @@ export const SignupPage: React.FC = () => {
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const { signUp, signInWithGoogle, enableDemoMode } = useAuth();
+  const { user, signUp, signInWithGoogle, enableDemoMode, updateProjectDetails, project } = useAuth();
   const navigate = useNavigate();
+
+  // Read viral context from sessionStorage if available
+  const [viralContext, setViralContext] = useState<{
+    customerName?: string;
+    customerEmail?: string;
+    customerCompany?: string;
+    referredByProjectId?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('pandapraise_viral_origin');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setViralContext(parsed);
+        if (parsed.customerEmail) {
+          setEmail(parsed.customerEmail);
+        }
+      }
+    } catch (e) {
+      // Ignore
+    }
+
+    if (isViral) {
+      analytics.viralSignupStarted({ source: 'testimonial' });
+    }
+  }, [isViral]);
+
+  const handlePostSignupRedirect = async (userEmail: string) => {
+    if (isViral || viralContext) {
+      analytics.viralSignupCompleted();
+      analytics.viralWorkspaceCreated();
+      analytics.viralCollectionLinkGenerated();
+
+      // Ensure project name is neutral or based on the new user (Requirement 10: NEVER name Customer B after Business A!)
+      const rawName = viralContext?.customerName || userEmail.split('@')[0] || 'My';
+      const cleanFirstName = rawName.trim().split(' ')[0];
+      const newBusinessName = `${cleanFirstName}'s Testimonials`;
+
+      if (project?.id && updateProjectDetails) {
+        try {
+          await updateProjectDetails(project.id, {
+            name: newBusinessName,
+          });
+        } catch (e) {
+          // Non-blocking
+        }
+      }
+
+      navigate('/ready');
+    } else {
+      analytics.signupCompleted();
+      navigate('/onboarding');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,8 +100,7 @@ export const SignupPage: React.FC = () => {
     try {
       const res = await signUp(email, password);
       if (res.success) {
-        analytics.signupCompleted();
-        navigate('/onboarding');
+        await handlePostSignupRedirect(email);
       } else {
         setLocalError(res.error || 'Failed to create account.');
       }
@@ -52,9 +111,9 @@ export const SignupPage: React.FC = () => {
     }
   };
 
-  const handleDemoSignup = () => {
+  const handleDemoSignup = async () => {
     enableDemoMode();
-    navigate('/onboarding');
+    await handlePostSignupRedirect('demo@pandapraise.dev');
   };
 
   const handleGoogleSignup = async () => {
@@ -63,8 +122,7 @@ export const SignupPage: React.FC = () => {
     try {
       const res = await signInWithGoogle();
       if (res.success) {
-        analytics.signupCompleted();
-        navigate('/onboarding');
+        await handlePostSignupRedirect(email || 'user@pandapraise.dev');
       } else {
         setLocalError(res.error || 'Failed to sign up with Google.');
       }
@@ -78,7 +136,7 @@ export const SignupPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white text-gray-900 flex font-sans selection:bg-purple-500/20 selection:text-purple-900">
       
-      {/* ── Left Column: Sign up Form (Senja Exact Theme) ── */}
+      {/* ── Left Column: Sign up Form ── */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 md:px-16 xl:px-24 py-12">
         <div className="w-full max-w-md mx-auto">
           
@@ -91,12 +149,43 @@ export const SignupPage: React.FC = () => {
             </Link>
           </div>
 
+          {/* Existing Logged-in Account Banner (Requirement 6 & 15) */}
+          {user && (
+            <div className="mb-6 p-4 rounded-2xl bg-purple-50 border border-purple-200 text-xs text-purple-900 space-y-2 animate-fade-in">
+              <div className="flex items-center gap-1.5 font-bold">
+                <Sparkles className="w-4 h-4 text-[#6701e6]" />
+                <span>You are already signed in as {user.email}</span>
+              </div>
+              <p className="text-gray-600">
+                You already have a Panda Praise account. Skip signup and proceed to your dashboard.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard')}
+                className="mt-1 px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+              >
+                <span>Continue to Your Dashboard</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Viral Signup Badge */}
+          {(isViral || viralContext) && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-200 text-[#6701e6] text-xs font-bold mb-3 shadow-2xs">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>⚡ Your Testimonial Link is 30 Seconds Away</span>
+            </div>
+          )}
+
           {/* Heading & Subtitle */}
           <h1 className="text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight">
-            Welcome to Panda Praise
+            {isViral || viralContext ? 'Start Collecting Testimonials' : 'Welcome to Panda Praise'}
           </h1>
           <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-            Panda Praise helps you start collecting, managing and sharing your testimonials in minutes, not days.
+            {isViral || viralContext
+              ? 'Create your free account. Your personalized testimonial collection link will be ready immediately.'
+              : 'Panda Praise helps you start collecting, managing and sharing your testimonials in minutes, not days.'}
           </p>
 
           {/* Error Message Alert */}
