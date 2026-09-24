@@ -60,7 +60,7 @@ export class LocalStorageAdapter implements StorageAdapter {
       id: 'rev-' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36),
       projectId: targetProject,
       source: input.source || 'form',
-      status: input.status || 'pending',
+      status: 'pending', // Public customer submissions ALWAYS start as pending
       isFeatured: false,
       helpfulCount: 0,
       createdAt: new Date().toISOString(),
@@ -70,6 +70,24 @@ export class LocalStorageAdapter implements StorageAdapter {
     reviews.unshift(newReview);
     this.saveReviews(reviews, targetProject);
     return newReview;
+  }
+
+  async evaluateAutoApproval(reviewId: string, projectId?: string): Promise<Review | null> {
+    const targetProject = projectId || 'proj-demo-1';
+    const reviews = this.loadReviews(targetProject);
+    const rev = reviews.find(r => r.id === reviewId);
+    if (!rev) return null;
+
+    // SECURITY: Never auto-approve negative feedback or low ratings
+    if (rev.tags?.includes('private-feedback') || rev.rating <= 3) {
+      return rev;
+    }
+
+    const form = await this.getCollectionForm(targetProject);
+    if (form?.settings?.autoApprove && rev.rating >= 4) {
+      return this.updateReview(reviewId, { status: 'approved', projectId: targetProject });
+    }
+    return rev;
   }
 
   async updateReview(id: string, updates: Partial<Review>): Promise<Review> {

@@ -23,16 +23,27 @@ export const SignupPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [isExistingAccount, setIsExistingAccount] = useState(false);
 
-  const { user, signUp, signInWithGoogle, enableDemoMode, updateProjectDetails, project } = useAuth();
+  const { 
+    user, 
+    signUp, 
+    signInWithGoogle, 
+    enableDemoMode, 
+    updateProjectDetails, 
+    updateCollectionFormDetails, 
+    project, 
+    collectionForm 
+  } = useAuth();
   const navigate = useNavigate();
 
   // Read viral context from sessionStorage if available
   const [viralContext, setViralContext] = useState<{
+    customerFirstName?: string;
     customerName?: string;
     customerEmail?: string;
-    customerCompany?: string;
-    referredByProjectId?: string;
+    referredFromProjectId?: string;
+    referredFromFormId?: string;
   } | null>(null);
 
   useEffect(() => {
@@ -61,15 +72,21 @@ export const SignupPage: React.FC = () => {
       analytics.viralCollectionLinkGenerated();
 
       // Ensure project name is neutral or based on the new user (Requirement 10: NEVER name Customer B after Business A!)
-      const rawName = viralContext?.customerName || userEmail.split('@')[0] || 'My';
+      const rawName = viralContext?.customerFirstName || viralContext?.customerName || userEmail.split('@')[0] || 'My';
       const cleanFirstName = rawName.trim().split(' ')[0];
       const newBusinessName = `${cleanFirstName}'s Testimonials`;
+      const formTitle = `Share your experience with ${newBusinessName}`;
 
       if (project?.id && updateProjectDetails) {
         try {
           await updateProjectDetails(project.id, {
             name: newBusinessName,
           });
+          if (collectionForm?.id && updateCollectionFormDetails) {
+            await updateCollectionFormDetails(collectionForm.id, {
+              title: formTitle,
+            });
+          }
         } catch (e) {
           // Non-blocking
         }
@@ -85,6 +102,7 @@ export const SignupPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
+    setIsExistingAccount(false);
 
     if (!email.trim() || !password) {
       setLocalError('Please fill in all required fields.');
@@ -102,10 +120,22 @@ export const SignupPage: React.FC = () => {
       if (res.success) {
         await handlePostSignupRedirect(email);
       } else {
-        setLocalError(res.error || 'Failed to create account.');
+        const errMsg = res.error || 'Failed to create account.';
+        if (errMsg.includes('auth/email-already-in-use') || errMsg.toLowerCase().includes('already in use') || errMsg.toLowerCase().includes('already exists')) {
+          setIsExistingAccount(true);
+          setLocalError('An account with this email already exists.');
+        } else {
+          setLocalError(errMsg);
+        }
       }
     } catch (err: any) {
-      setLocalError(err.message || 'An error occurred during registration.');
+      const errMsg = err.message || 'An error occurred during registration.';
+      if (errMsg.includes('auth/email-already-in-use') || errMsg.toLowerCase().includes('already in use')) {
+        setIsExistingAccount(true);
+        setLocalError('An account with this email already exists.');
+      } else {
+        setLocalError(errMsg);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -148,6 +178,26 @@ export const SignupPage: React.FC = () => {
               </svg>
             </Link>
           </div>
+
+          {/* Account already exists recovery prompt (Priority 8) */}
+          {isExistingAccount && (
+            <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-2 animate-fade-in">
+              <div className="flex items-center gap-1.5 font-bold">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>An account with this email already exists!</span>
+              </div>
+              <p className="text-amber-800">
+                You already have a Panda Praise account. Log in with your password to access your existing collection link and dashboard without creating duplicate workspaces.
+              </p>
+              <Link
+                to={`/login?redirect=/ready&email=${encodeURIComponent(email)}`}
+                className="mt-1 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs transition-all shadow-xs"
+              >
+                <span>Log in to your account</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          )}
 
           {/* Existing Logged-in Account Banner (Requirement 6 & 15) */}
           {user && (

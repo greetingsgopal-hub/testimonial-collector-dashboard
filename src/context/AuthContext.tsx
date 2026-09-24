@@ -76,6 +76,7 @@ interface AuthContextType {
   setActiveProject: (project: Project) => Promise<void>;
   createNewProject: (name: string, websiteUrl?: string) => Promise<Project | null>;
   updateProjectDetails: (id: string, updates: Partial<Project>) => Promise<Project | null>;
+  updateCollectionFormDetails: (id: string, updates: Partial<CollectionForm>) => Promise<CollectionForm | null>;
   deleteProjectById: (id: string) => Promise<boolean>;
   isNewUser: boolean;
 }
@@ -212,6 +213,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!db) return;
 
     try {
+      // Extract viral referral attribution context if present (Priority 3 & 5)
+      let referralSource = 'direct';
+      let referredFromProjectId: string | undefined = undefined;
+      let referredFromFormId: string | undefined = undefined;
+      let customerFirstName = '';
+
+      try {
+        const stored = sessionStorage.getItem('pandapraise_viral_origin');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.source === 'testimonial') {
+            referralSource = 'testimonial';
+            referredFromProjectId = parsed.referredFromProjectId || parsed.referredByProjectId || undefined;
+            referredFromFormId = parsed.referredFromFormId || undefined;
+          }
+          if (parsed.customerFirstName) {
+            customerFirstName = parsed.customerFirstName.trim();
+          } else if (parsed.customerName) {
+            customerFirstName = parsed.customerName.trim().split(' ')[0];
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+
       // 1. Fetch or create workspace
       const wsQuery = query(collection(db, 'workspaces'), where('ownerId', '==', currentUser.uid));
       const wsSnapshot = await getDocs(wsQuery);
@@ -226,7 +252,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const wsRef = doc(collection(db, 'workspaces'));
         const now = new Date().toISOString();
 
-        const wsData = {
+        const wsData: any = {
           ownerId: currentUser.uid,
           name: `${userPrefix.toUpperCase()}'s Workspace`,
           slug: defaultSlug,
@@ -234,6 +260,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           testimonialCount: 0,
           projectCount: 0,
           seatCount: 1,
+          referralSource,
+          ...(referredFromProjectId ? { referredFromProjectId } : {}),
+          ...(referredFromFormId ? { referredFromFormId } : {}),
           createdAt: now,
           updatedAt: now,
         };
@@ -262,6 +291,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           logoUrl: data.logoUrl,
           brandColor: data.brandColor,
           customDomain: data.customDomain,
+          referralSource: data.referralSource,
+          referredFromProjectId: data.referredFromProjectId,
+          referredFromFormId: data.referredFromFormId,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
         };
@@ -281,34 +313,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let currentProj: Project;
 
       if (projSnapshot.empty) {
-        let initialProjName = 'Main Product';
-        try {
-          const stored = sessionStorage.getItem('pandapraise_viral_origin');
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (parsed.customerName) {
-              const firstName = parsed.customerName.trim().split(' ')[0];
-              initialProjName = `${firstName}'s Testimonials`;
-            }
-          }
-        } catch (e) {
-          // ignore
-        }
-        if (initialProjName === 'Main Product' && currentUser.displayName) {
+        let initialProjName = 'My Testimonials';
+        if (customerFirstName) {
+          initialProjName = `${customerFirstName}'s Testimonials`;
+        } else if (currentUser.displayName) {
           const firstName = currentUser.displayName.trim().split(' ')[0];
           initialProjName = `${firstName}'s Testimonials`;
+        } else if (currentUser.email) {
+          const prefix = currentUser.email.split('@')[0];
+          initialProjName = `${prefix}'s Testimonials`;
         }
 
         const projSlug = `${currentWs.slug}-project`;
         const projRef = doc(collection(db, 'projects'));
         const now = new Date().toISOString();
 
-        const projData = {
+        const projData: any = {
           workspaceId: currentWs.id,
           ownerId: currentUser.uid,
           name: initialProjName,
           slug: projSlug,
           websiteUrl: '',
+          referralSource,
+          ...(referredFromProjectId ? { referredFromProjectId } : {}),
+          ...(referredFromFormId ? { referredFromFormId } : {}),
           createdAt: now,
           updatedAt: now,
         };
@@ -446,6 +474,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return null;
     }
   }, [project, allProjects]);
+
+  // ── Update collection form details ─────────────────────────
+  const updateCollectionFormDetails = useCallback(async (id: string, updates: Partial<CollectionForm>): Promise<CollectionForm | null> => {
+    if (!db) return null;
+    try {
+      const now = new Date().toISOString();
+      const formRef = doc(db, 'collection_forms', id);
+      await updateDoc(formRef, { ...updates, updatedAt: now });
+
+      setCollectionForm(prev => prev && prev.id === id ? { ...prev, ...updates, updatedAt: now } : prev);
+      return collectionForm ? { ...collectionForm, ...updates, updatedAt: now } : null;
+    } catch (err: any) {
+      console.error('[AuthContext] Failed to update collection form:', err);
+      return null;
+    }
+  }, [collectionForm]);
 
   // ── Delete project ────────────────────────────────────────
   const deleteProjectById = useCallback(async (id: string): Promise<boolean> => {
@@ -680,6 +724,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setActiveProject,
         createNewProject,
         updateProjectDetails,
+        updateCollectionFormDetails,
         deleteProjectById,
         isNewUser,
       }}

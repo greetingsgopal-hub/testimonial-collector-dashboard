@@ -40,6 +40,10 @@ export interface Workspace {
   testimonialCount?: number;
   projectCount?: number;
   seatCount?: number;
+  // Referral attribution (viral growth loop)
+  referralSource?: string;
+  referredFromProjectId?: string;
+  referredFromFormId?: string;
   // Metadata
   createdAt: string;
   updatedAt?: string;
@@ -84,6 +88,10 @@ export interface Project {
   customDomain?: string;      // e.g. love.mybrand.com
   description?: string;
   industry?: string;
+  // Referral attribution (viral growth loop)
+  referralSource?: string;
+  referredFromProjectId?: string;
+  referredFromFormId?: string;
   createdAt: string;
   updatedAt?: string;
 }

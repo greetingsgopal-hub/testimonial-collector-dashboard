@@ -14,6 +14,7 @@ interface SuccessModalProps {
   isPublicView?: boolean;
   businessName?: string;
   projectId?: string;
+  formId?: string;
 }
 
 export const SuccessModal: React.FC<SuccessModalProps> = ({
@@ -24,6 +25,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
   isPublicView = false,
   businessName,
   projectId,
+  formId,
 }) => {
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
@@ -60,16 +62,17 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
       has_customer_company: Boolean(review.company),
     });
 
-    // Store non-sensitive attribution and customer pre-fill context in browser session
+    // Priority 3 & 5: Store non-sensitive attribution and minimal first-name context in browser session
     try {
+      const cleanFirstName = review.name ? review.name.trim().split(' ')[0] : '';
       sessionStorage.setItem(
         'pandapraise_viral_origin',
         JSON.stringify({
           source: 'testimonial',
-          customerName: review.name || '',
+          customerFirstName: cleanFirstName,
           customerEmail: review.email || '',
-          customerCompany: review.company || '',
-          referredByProjectId: projectId || review.projectId || '',
+          referredFromProjectId: projectId || review.projectId || '',
+          referredFromFormId: formId || review.collectionFormId || '',
           timestamp: Date.now(),
         })
       );

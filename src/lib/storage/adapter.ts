@@ -16,6 +16,7 @@ export interface StorageAdapter {
   updateReview(id: string, updates: Partial<Review>): Promise<Review>;
   deleteReview(id: string): Promise<boolean>;
   getStats(projectId?: string): Promise<ReviewStats>;
+  evaluateAutoApproval?(reviewId: string, projectId?: string): Promise<Review | null>;
   resetToSampleData?(projectId?: string): Promise<void>;
   bulkCreateReviews?(reviews: ReviewInput[], projectId: string): Promise<Review[]>;
 

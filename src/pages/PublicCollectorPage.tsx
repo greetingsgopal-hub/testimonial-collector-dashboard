@@ -118,7 +118,12 @@ export const PublicCollectorPage = () => {
 
   const handleNegativeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!negativeFeedback.trim()) return;
+    const feedbackText = negativeFeedback.trim();
+    if (!feedbackText) return;
+    if (feedbackText.length < 10) {
+      alert('Please provide at least 10 characters so the business can understand your feedback.');
+      return;
+    }
     setIsSubmitting(true);
 
     try {
@@ -128,13 +133,14 @@ export const PublicCollectorPage = () => {
           email: '',
           role: 'Customer',
           rating: selectedRating,
-          content: negativeFeedback.trim(),
+          content: feedbackText,
           type: 'text',
           tags: ['private-feedback'],
           projectId: formConfig?.projectId,
           collectionFormId: formConfig?.id,
-          status: 'rejected', // routes to private feedback inbox
-          consent: false,
+          status: 'pending', // Valid pending status for submission (never public)
+          consent: true, // User consents to share private feedback directly with business owner
+          source: 'form',
         },
         formConfig?.projectId
       );
@@ -157,20 +163,28 @@ export const PublicCollectorPage = () => {
             .map(t => t.trim().replace(/^#/, ''))
             .filter(Boolean);
 
-      const isAutoApprove = Boolean(formConfig?.settings?.autoApprove);
       const combinedTags = Array.from(new Set([...(data.tags || []), ...autoTags]));
 
+      // PRIORITY 1: Anonymous submissions are ALWAYS pending initially.
+      // The anonymous client must NEVER directly create an approved public testimonial.
       const created = await storage.createReview(
         {
           ...data,
           tags: combinedTags,
           projectId: formConfig?.projectId,
           collectionFormId: formConfig?.id,
-          status: isAutoApprove ? 'approved' : 'pending',
+          status: 'pending',
           consent: true,
+          source: 'form',
         },
         formConfig?.projectId
       );
+
+      // Trusted auto-approval evaluation
+      if (storage.evaluateAutoApproval) {
+        await storage.evaluateAutoApproval(created.id, formConfig?.projectId);
+      }
+
       analytics.publicCollectionSubmitted();
       analytics.testimonialSubmissionCompleted({
         projectId: formConfig?.projectId || 'unknown',
@@ -412,6 +426,7 @@ export const PublicCollectorPage = () => {
           isPublicView={true}
           businessName={displayBrand || formConfig?.settings?.brandName || formConfig?.title}
           projectId={formConfig?.projectId}
+          formId={formConfig?.id}
           onClose={() => setSubmittedReview(null)}
           onResetForm={() => {
             setFormData(INITIAL_FORM_STATE);

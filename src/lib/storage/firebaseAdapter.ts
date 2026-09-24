@@ -52,6 +52,7 @@ export class FirebaseAdapter implements StorageAdapter {
     const currentUser = auth.currentUser;
 
     if (currentUser) {
+      await this.promoteQualifyingPendingReviews(currentUser.uid, projectId);
       let q = query(collection(db, 'reviews'), where('ownerId', '==', currentUser.uid));
       if (projectId) {
         q = query(collection(db, 'reviews'), where('ownerId', '==', currentUser.uid), where('projectId', '==', projectId));
@@ -114,6 +115,12 @@ export class FirebaseAdapter implements StorageAdapter {
       }
     }
 
+    const isAnonymous = !currentUser;
+    // Anonymous public submissions MUST ALWAYS be pending, consent: true, isFeatured: false
+    const initialStatus = isAnonymous ? 'pending' : (review.status || 'pending');
+    const initialFeatured = isAnonymous ? false : Boolean(review.isFeatured);
+    const initialConsent = isAnonymous ? true : Boolean(review.consent);
+
     const reviewRef = doc(collection(db, 'reviews'));
     const now = new Date().toISOString();
 
@@ -122,8 +129,8 @@ export class FirebaseAdapter implements StorageAdapter {
       collectionFormId: review.collectionFormId || null,
       ownerId: targetOwnerId,
       name: review.name,
-      email: review.email,
-      role: review.role,
+      email: review.email || '',
+      role: review.role || 'Customer',
       company: review.company || null,
       avatarUrl: review.avatarUrl || null,
       rating: Number(review.rating),
@@ -133,9 +140,9 @@ export class FirebaseAdapter implements StorageAdapter {
       videoUrl: review.videoUrl || null,
       tags: review.tags || [],
       source: review.source || 'form',
-      status: review.status || 'pending',
-      isFeatured: Boolean(review.isFeatured),
-      consent: Boolean(review.consent),
+      status: initialStatus,
+      isFeatured: initialFeatured,
+      consent: initialConsent,
       helpfulCount: 0,
       createdAt: now,
       updatedAt: now,
@@ -145,11 +152,71 @@ export class FirebaseAdapter implements StorageAdapter {
 
     const created = this.mapDocToReview(reviewRef.id, reviewData);
 
-    if (created.status === 'approved') {
+    // Only authenticated owners are permitted by Firestore rules to sync to public_reviews
+    if (created.status === 'approved' && !isAnonymous && targetOwnerId === currentUser.uid) {
       await this.syncPublicReview(reviewRef.id, created, targetOwnerId);
     }
 
     return created;
+  }
+
+  async evaluateAutoApproval(reviewId: string, projectId?: string): Promise<Review | null> {
+    const auth = getFirebaseAuth();
+    const currentUser = auth.currentUser;
+    if (!currentUser) return null;
+
+    const db = getFirebaseDb();
+    const reviewRef = doc(db, 'reviews', reviewId);
+    const reviewSnap = await getDoc(reviewRef);
+    if (!reviewSnap.exists()) return null;
+
+    const data = reviewSnap.data();
+    if (data.ownerId !== currentUser.uid) return null;
+
+    // SECURITY: Never auto-approve negative feedback or low ratings
+    if (data.tags?.includes('private-feedback') || Number(data.rating) <= 3) {
+      return this.mapDocToReview(reviewId, data);
+    }
+
+    const form = await this.getCollectionForm(projectId || data.projectId);
+    if (form?.settings?.autoApprove && Number(data.rating) >= 4) {
+      return this.updateReview(reviewId, { status: 'approved' });
+    }
+
+    return this.mapDocToReview(reviewId, data);
+  }
+
+  private async promoteQualifyingPendingReviews(ownerId: string, projectId?: string): Promise<void> {
+    try {
+      const db = getFirebaseDb();
+      let q = query(
+        collection(db, 'reviews'),
+        where('ownerId', '==', ownerId),
+        where('status', '==', 'pending')
+      );
+      if (projectId) {
+        q = query(
+          collection(db, 'reviews'),
+          where('ownerId', '==', ownerId),
+          where('projectId', '==', projectId),
+          where('status', '==', 'pending')
+        );
+      }
+      const snap = await getDocs(q);
+      if (snap.empty) return;
+
+      const form = await this.getCollectionForm(projectId);
+      if (!form?.settings?.autoApprove) return;
+
+      for (const docSnap of snap.docs) {
+        const data = docSnap.data();
+        if (Number(data.rating) >= 4 && !data.tags?.includes('private-feedback')) {
+          await this.updateReview(docSnap.id, { status: 'approved' });
+        }
+      }
+    } catch (err) {
+      console.warn('[FirebaseAdapter] Pending auto-approval evaluation notice:', err);
+    }
   }
 
   async updateReview(id: string, updates: Partial<Review>): Promise<Review> {
@@ -198,6 +265,11 @@ export class FirebaseAdapter implements StorageAdapter {
   }
 
   private async syncPublicReview(id: string, review: Review, ownerId: string): Promise<void> {
+    // SECURITY: Never sync private feedback or low ratings (<= 3 stars) to public_reviews
+    if (review.tags?.includes('private-feedback') || review.rating <= 3) {
+      return;
+    }
+
     const db = getFirebaseDb();
     const publicRef = doc(db, 'public_reviews', id);
 

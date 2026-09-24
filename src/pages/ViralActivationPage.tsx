@@ -43,6 +43,13 @@ export const ViralActivationPage: React.FC = () => {
     analytics.viralCollectionLinkGenerated({
       slug: publicSlug,
     });
+
+    // Priority 4: Clean up viral session context now that activation has successfully consumed it
+    try {
+      sessionStorage.removeItem('pandapraise_viral_origin');
+    } catch {
+      // ignore
+    }
   }, [publicSlug]);
 
   const handleCopyLink = () => {

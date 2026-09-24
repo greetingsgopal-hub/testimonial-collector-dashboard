@@ -22,7 +22,16 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const redirectPath = (location.state as any)?.from?.pathname || '/dashboard';
+  const queryParams = new URLSearchParams(location.search);
+  const redirectQuery = queryParams.get('redirect');
+  const emailQuery = queryParams.get('email');
+  const redirectPath = (location.state as any)?.from?.pathname || redirectQuery || '/dashboard';
+
+  React.useEffect(() => {
+    if (emailQuery && !email) {
+      setEmail(emailQuery);
+    }
+  }, [emailQuery]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
