@@ -20,23 +20,27 @@ import { SocialProofToast } from '../components/widgets/SocialProofToast';
 const FAQ_ITEMS = [
   {
     q: 'Do I need a developer every time I receive a new testimonial?',
-    a: 'No. The website widget is installed once. After installation, newly approved testimonials appear automatically.',
+    a: 'No. The website widget is installed once with a simple one-line embed code. After installation, newly approved testimonials appear on your site automatically.',
   },
   {
-    q: 'Do my customers need to create an account?',
-    a: 'No. Customers can submit testimonials through your public collection link without creating an account.',
+    q: 'Do my customers need to create an account to leave a review?',
+    a: 'No. Customers submit testimonials through your branded public link in under 60 seconds without creating any account or downloading an app.',
   },
   {
     q: 'Can I approve testimonials before they appear on my website?',
-    a: 'Yes. Testimonials enter your moderation workflow first. You decide which ones are approved and published.',
+    a: 'Yes. Every incoming testimonial lands in your private moderation inbox first. You maintain 100% control over which reviews get published.',
   },
   {
     q: 'Can customer email addresses appear publicly?',
-    a: 'No. Customer contact information is kept out of the public testimonial view.',
+    a: 'Never. Customer emails, phone numbers, and private contact details are kept strictly private and never exposed to website visitors.',
   },
   {
-    q: 'How does Panda Praise appear on my website?',
-    a: 'You install the Panda Praise widget on your website once using the provided embed code. After that, approved testimonials are loaded through the existing widget automatically.',
+    q: 'How does Panda Praise integrate with my website?',
+    a: 'Panda Praise works with any website builder including WordPress, Webflow, Framer, Shopify, Squarespace, Wix, React, Next.js, and custom HTML.',
+  },
+  {
+    q: 'Can I import my existing reviews from other platforms?',
+    a: 'Yes! You can import existing reviews from Google, Trustpilot, Twitter/X, LinkedIn, G2, Capterra, Product Hunt, or upload via CSV in one click.',
   },
 ];
 
@@ -65,7 +69,7 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, enableDemoMode } = useAuth();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-  const [activeShareTab, setActiveShareTab] = useState<'videos' | 'widgets' | 'walls' | 'popups' | 'images' | 'hosting'>('widgets');
+  const [activeShareTab, setActiveShareTab] = useState<'widgets' | 'videos' | 'walls' | 'popups' | 'images' | 'hosting'>('widgets');
   const [selectedWidgetTag, setSelectedWidgetTag] = useState('Testimonial Image Gallery');
   const [showFloatingElements, setShowFloatingElements] = useState(false);
   const [searchQueryMock, setSearchQueryMock] = useState('do the techs actually use it');
@@ -73,7 +77,7 @@ export const LandingPage: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 300) {
+      if (window.scrollY > 400) {
         setShowFloatingElements(true);
       }
     };
@@ -101,10 +105,10 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-gray-900 selection:bg-purple-500/20 selection:text-purple-900 relative overflow-hidden pb-20 sm:pb-0 font-sans">
       
-      {/* ── 1. Top Announcement Quiz Bar (Senja Exact) ── */}
-      <div className="bg-[#6701e6] hover:bg-[#5400bd] transition-colors text-white py-2 px-4 text-center relative z-50 flex items-center justify-center gap-2 shadow-sm text-xs sm:text-sm font-medium cursor-pointer">
+      {/* ── 1. Top Announcement Quiz Bar (Senja Exact Parity) ── */}
+      <div className="bg-[#6701e6] hover:bg-[#5400bd] transition-colors text-white py-2.5 px-4 text-center relative z-50 flex items-center justify-center gap-2 shadow-xs text-xs sm:text-sm font-medium cursor-pointer">
         <Link to="/signup" className="flex items-center gap-1.5 hover:underline">
-          <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">
+          <span className="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
             Free quiz
           </span>
           <span>What's your Social Proof Score?</span>
@@ -113,13 +117,13 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* Ambient background glow — Senja signature purple radial wash */}
-      <div className="ambient-glow-light" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[38rem]" style={{ background: 'radial-gradient(70rem 26rem at 50% -4rem, rgb(103 1 230 / 0.08), transparent)' }} />
 
-      {/* ── 2. Header / Navigation ── */}
-      <header className="sticky top-0 z-40 w-full bg-white/90 border-b border-gray-200 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      {/* ── 2. Header / Navigation (Senja Architectural Parity) ── */}
+      <header className="sticky top-0 z-40 w-full bg-white/95 border-b border-gray-200/80 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-6 h-18 flex items-center justify-between">
           
-          {/* Logo strictly clean text "Panda Praise" — NO panda icon/logo */}
+          {/* Logo strictly clean text "Panda Praise" */}
           <Link to="/" className="flex items-center gap-2 group">
             <span className="font-display font-extrabold text-2xl tracking-tight text-gray-950 group-hover:text-purple-950 transition-colors">
               Panda <span className="text-[#6701e6]">Praise</span>
@@ -127,7 +131,7 @@ export const LandingPage: React.FC = () => {
           </Link>
 
           {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-600">
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
             <Link to="/pricing" className="hover:text-[#6701e6] transition-colors">
               Pricing
             </Link>
@@ -196,52 +200,52 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* ── 3. Hero Section (Senja Benchmark Parity) ── */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-16 text-center relative z-10">
+      {/* ── 3. Hero Section (Senja Structural Benchmark) ── */}
+      <section className="max-w-5xl mx-auto px-6 pt-16 sm:pt-20 pb-16 text-center relative z-10">
         
-        {/* Floating purple 4-point sparkle doodle on left */}
-        <div className="absolute left-2 sm:-left-12 top-16 hidden sm:block text-[#6701e6] opacity-80 animate-pulse">
-          <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor">
+        {/* Floating sparkle doodle */}
+        <div className="absolute left-2 sm:-left-8 top-20 hidden sm:block text-[#6701e6] opacity-75 animate-pulse">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0 L14.6 9.4 L24 12 L14.6 14.6 L12 24 L9.4 14.6 L0 12 L9.4 9.4 Z" />
           </svg>
         </div>
 
         {/* Top Eyebrow Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 border border-purple-200/60 mb-6 shadow-xs">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50/80 border border-purple-200/60 mb-6 shadow-xs">
           <span className="flex h-2 w-2 rounded-full bg-[#6701e6] animate-pulse" />
           <span className="text-xs font-semibold text-[#6701e6]">The #1 Social Proof Platform for Growing Businesses</span>
         </div>
 
-        {/* Primary Product Value Proposition H1 */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-display text-gray-950 tracking-tight leading-[1.12] max-w-4xl mx-auto">
-          Turn Customer Praise into{' '}
-          <span className="senja-purple-mark my-1 sm:my-1.5">
+        {/* Primary H1: Balanced 2-line structure without awkward wrap */}
+        <h1 className="text-4xl sm:text-6xl lg:text-[72px] font-extrabold font-display text-gray-950 tracking-tight leading-[1.1] max-w-5xl mx-auto">
+          Turn Customer Praise into <br className="hidden sm:inline" />
+          <span className="senja-purple-mark mt-2">
             Your #1 Sales Engine
           </span>
         </h1>
 
-        {/* Subheadline directly below H1 */}
+        {/* Subheadline immediately below H1 */}
         <p className="mt-6 text-base sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed font-normal">
           <span className="senja-dotted font-medium text-gray-900">Meet Panda Praise</span> — the easiest way to collect, organize, and showcase verified customer proof.
         </p>
 
-        {/* 3 Green Checkmark Bullets */}
-        <div className="mt-6 flex flex-col sm:inline-flex text-left space-y-2.5 text-xs sm:text-sm text-gray-700 max-w-xl mx-auto">
-          <div className="flex items-start gap-2.5">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Collect text & video testimonials on autopilot, or import from 30+ platforms</span>
+        {/* 3 Green Checkmark Reassurance Bullets */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-gray-600 font-medium">
+          <div className="flex items-center gap-1.5">
+            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Automate video & text collection</span>
           </div>
-          <div className="flex items-start gap-2.5">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Find the perfect one in seconds — from Slack or any browser tab</span>
+          <div className="flex items-center gap-1.5">
+            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Import from 30+ platforms in 1 click</span>
           </div>
-          <div className="flex items-start gap-2.5">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Turn it into a widget, video, image, popup, Wall of Love, or case study</span>
+          <div className="flex items-center gap-1.5">
+            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Embed widgets, popups & Walls of Love</span>
           </div>
         </div>
 
-        {/* Hero CTA Button Cluster */}
+        {/* Hero CTA Cluster */}
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <div className="senja-hero-cta">
             <div className="senja-cta-ring">
@@ -273,31 +277,31 @@ export const LandingPage: React.FC = () => {
         </p>
 
         {/* Avatar Stack + "loved by 20,000+ customers" */}
-        <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-2.5">
           <div className="flex items-center -space-x-2">
             {[
               'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
               'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80',
-              'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&auto=format&fit=crop&q=80',
+              'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80',
               'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80',
-              'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=80&auto=format&fit=crop&q=80',
+              'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&auto=format&fit=crop&q=80',
             ].map((img, i) => (
               <img
                 key={i}
                 src={img}
-                alt="customer"
-                className="w-7 h-7 rounded-full border-2 border-white object-cover shadow-xs"
+                alt="Happy customer"
+                className="w-7 h-7 rounded-full object-cover ring-2 ring-white"
               />
             ))}
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-gray-700">
-            <span className="text-amber-500 font-bold">★★★★★</span>
-            <span className="font-medium text-gray-600">loved by 20,000+ customers</span>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-amber-500 font-bold tracking-tight">★★★★★</span>
+            <span className="font-semibold text-gray-700">loved by 20,000+ customers</span>
           </div>
         </div>
 
-        {/* Featured Social Proof Quote Card (Anchored right above marquee) */}
-        <div className="mt-10 max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-white/80 backdrop-blur-sm border border-purple-100 shadow-md">
+        {/* Featured Social Proof Quote Card (Anchored above marquee) */}
+        <div className="mt-10 max-w-3xl mx-auto p-5 rounded-2xl bg-white/90 backdrop-blur-sm border border-purple-100/90 shadow-md">
           <div className="flex items-center justify-center gap-1 text-amber-500 mb-2" aria-label="Rated 5 out of 5 stars">
             {[1, 2, 3, 4, 5].map((s) => (
               <span key={s} className="text-sm">★</span>
@@ -321,16 +325,8 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── 4. Client Logo Moving Marquee (Senja Exact Parity) ── */}
-      <section className="w-full overflow-hidden relative py-8 sm:py-10 border-y border-gray-200/80 bg-white/50 my-6 sm:my-8">
-        {/* Left Fade Gradient Mask */}
-        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 sm:w-44 bg-gradient-to-r from-[#FAF9F6] via-[#FAF9F6]/90 to-transparent z-10" />
-
-        {/* Right Fade Gradient Mask */}
-        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 sm:w-44 bg-gradient-to-l from-[#FAF9F6] via-[#FAF9F6]/90 to-transparent z-10" />
-
-        {/* Infinite Moving Marquee Track */}
-        <div className="marquee-track flex items-center gap-12 sm:gap-16 whitespace-nowrap">
-          {/* First loop */}
+      <section className="relative w-full overflow-hidden py-8 border-y border-gray-200/70 bg-white/60">
+        <div className="marquee-track flex items-center gap-12 sm:gap-16">
           {CLIENT_LOGOS.map((logo, idx) => (
             <div
               key={`logo-a-${idx}`}
@@ -352,20 +348,21 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 5. Before / After Comparison Meme Cards (Screenshot 2 Exact) ── */}
-      <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="text-center max-w-4xl mx-auto mb-10">
-          <p className="font-caveat text-2xl sm:text-3xl text-[#6701e6] -rotate-1 mb-2">
+      {/* ── 5. Before / After Comparison Cards ("The proof advantage") ── */}
+      <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-5xl mx-auto px-6 py-20">
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <p className="font-caveat text-3xl text-[#6701e6] -rotate-1 mb-1">
             The proof advantage
           </p>
-          <h2 id="comparison-heading" className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-display text-gray-950 tracking-tight sm:whitespace-nowrap">
+          <h2 id="comparison-heading" className="text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight">
             Why Winning Brands Rely on Social Proof
           </h2>
-          <p className="text-xs sm:text-sm text-gray-600 mt-2 max-w-2xl mx-auto sm:whitespace-nowrap">
+          <p className="text-sm sm:text-base text-gray-600 mt-3 max-w-xl mx-auto">
             See the undeniable impact verified customer praise has on your conversion rates.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Card 1: You Without Social Proof */}
           <div className="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col justify-between">
@@ -448,11 +445,11 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 6. "Collect" Section (Screenshot 3 Exact) ── */}
-      <section id="collect-section" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center relative">
+      {/* ── 6. "Collect" Section (Feature 1) ── */}
+      <section id="collect-section" className="max-w-5xl mx-auto px-6 py-20 text-center relative border-t border-gray-200">
         
-        {/* Floating speech bubble doodle on left */}
-        <div className="absolute left-4 sm:left-12 top-8 hidden sm:block text-[#6701e6] opacity-80">
+        {/* Floating speech bubble doodle */}
+        <div className="absolute left-6 sm:left-12 top-10 hidden sm:block text-[#6701e6] opacity-75">
           <MessageSquare className="w-8 h-8" />
         </div>
 
@@ -461,16 +458,16 @@ export const LandingPage: React.FC = () => {
           Collect
         </p>
 
-        <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight max-w-4xl mx-auto sm:whitespace-nowrap">
+        <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto">
           Collect Video & Text Reviews on Autopilot
         </h2>
 
-        <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-3xl mx-auto leading-relaxed sm:whitespace-nowrap">
+        <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
           Launch branded collection forms in 30 seconds — no apps or customer logins required.
         </p>
 
         {/* 6 Two-Column Green Checkmarks */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2.5 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
           <div className="flex items-start gap-2">
             <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <span>Automate <span className="senja-dotted">video and text collection</span></span>
@@ -497,7 +494,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Embedded Interactive Collection Form Mockup (Orange/Amber Container) */}
+        {/* Embedded Interactive Collection Form Mockup */}
         <div className="mt-10 rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 p-6 sm:p-12 shadow-xl max-w-3xl mx-auto text-left">
           <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-2xl max-w-lg mx-auto">
             <div className="flex items-center gap-3 mb-4">
@@ -575,11 +572,11 @@ export const LandingPage: React.FC = () => {
         </figure>
       </section>
 
-      {/* ── 7. "Find" Section (Screenshot 4 Exact) ── */}
-      <section id="find-section" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center relative border-t border-gray-200">
+      {/* ── 7. "Organize" Section (Feature 2) ── */}
+      <section id="find-section" className="max-w-5xl mx-auto px-6 py-20 text-center relative border-t border-gray-200">
         
         {/* Floating 5 stars doodle on top right */}
-        <div className="absolute right-4 sm:right-12 top-10 hidden sm:block text-[#6701e6] opacity-80">
+        <div className="absolute right-6 sm:right-12 top-10 hidden sm:block text-[#6701e6] opacity-75">
           <div className="flex items-center gap-0.5">
             {[1, 2, 3, 4].map((s) => (
               <span key={s} className="text-lg text-[#6701e6]">★</span>
@@ -593,16 +590,16 @@ export const LandingPage: React.FC = () => {
           Organize
         </p>
 
-        <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight max-w-4xl mx-auto sm:whitespace-nowrap">
+        <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto">
           Every Testimonial, Instantly at Your Fingertips
         </h2>
 
-        <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-3xl mx-auto leading-relaxed sm:whitespace-nowrap">
+        <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
           Search, filter, and tag every customer review in one unified, searchable vault.
         </p>
 
         {/* Checklist */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2.5 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
           <div className="flex items-start gap-2">
             <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <span>Search with natural language</span>
@@ -622,6 +619,10 @@ export const LandingPage: React.FC = () => {
           <div className="flex items-start gap-2">
             <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <span>Always-on access via AI assistants (MCP)</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <span>Generate 1-click case studies from top reviews</span>
           </div>
         </div>
 
@@ -651,19 +652,19 @@ export const LandingPage: React.FC = () => {
               </div>
 
               <div>
-                <p className="text-xs font-bold tracking-wide text-gray-400">COLLECT</p>
+                <p className="text-[11px] font-bold tracking-wide text-gray-400 uppercase">COLLECT</p>
                 <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Forms</p>
                 <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Import</p>
               </div>
 
               <div>
-                <p className="text-xs font-bold tracking-wide text-gray-400">MANAGE</p>
+                <p className="text-[11px] font-bold tracking-wide text-gray-400 uppercase">MANAGE</p>
                 <p className="mt-1 rounded bg-[#6701e6]/10 px-2 py-1 font-bold text-[#6701e6]">Proof</p>
                 <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Tags</p>
               </div>
 
               <div>
-                <p className="text-xs font-bold tracking-wide text-gray-400">SHARE</p>
+                <p className="text-[11px] font-bold tracking-wide text-gray-400 uppercase">SHARE</p>
                 <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Studio</p>
                 <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Thank Yous</p>
               </div>
@@ -789,25 +790,25 @@ export const LandingPage: React.FC = () => {
         </figure>
       </section>
 
-      {/* ── 8. "Share Everywhere" & Studio Section (Screenshot 5 Exact) ── */}
-      <section id="share-section" className="bg-gray-50 py-16 sm:py-20 border-t border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* ── 8. "Share" Section (Feature 3) ── */}
+      <section id="share-section" className="bg-gray-50/80 py-20 border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-6 text-center">
           
           {/* Cursive kicker */}
           <p className="font-caveat text-3xl text-[#6701e6] -rotate-1">
-            Publish
+            Share everywhere
           </p>
 
-          <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight max-w-4xl mx-auto sm:whitespace-nowrap">
-            Turn One Review into 12 High-Converting Assets
+          <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto">
+            One Testimonial, 12 Ways to Share It
           </h2>
 
-          <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-3xl mx-auto leading-relaxed sm:whitespace-nowrap">
-            Publish reviews as interactive website widgets, viral social reels, Wall of Love pages, and pitch assets.
+          <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Don't let your best reviews collect digital dust. Panda Praise turns every testimonial into widgets, videos, Reels, popups, and case studies.
           </p>
 
           {/* Checklist */}
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2.5 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <span>Widgets, popups and Walls of Love</span>
@@ -868,104 +869,60 @@ export const LandingPage: React.FC = () => {
               {activeShareTab === 'widgets' && (
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
-                    Embed Pixel-Perfect Review Widgets on Any Website
+                    Add Testimonial Widgets to Your Website
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Match your brand in seconds. Install once with copy-paste code, and watch approved testimonials update live.
+                    More attention-grabbing widgets than anywhere else. Install once with copy-paste code, and watch approved testimonials update live.
                   </p>
 
-                  {/* Categorized and structured widget tabs */}
-                  <div className="mt-6 flex flex-col items-center gap-3 max-w-3xl mx-auto" role="tablist" aria-label="Widget formats">
-                    <div className="flex flex-wrap items-center justify-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1">Grids:</span>
-                      {[
-                        'Testimonial Image Gallery',
-                        'Testimonial Masonry',
-                        'Hero Quotes',
-                        'Avatars Grid',
-                      ].map((w) => {
-                        const isSelected = selectedWidgetTag === w;
-                        return (
-                          <button
-                            key={w}
-                            type="button"
-                            role="tab"
-                            aria-selected={isSelected}
-                            onClick={() => setSelectedWidgetTag(w)}
-                            className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
-                              isSelected
-                                ? 'bg-[#6701e6] text-white shadow-xs'
-                                : 'border border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
-                            }`}
-                          >
-                            {w}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="flex flex-wrap items-center justify-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1">Sliders:</span>
-                      {[
-                        'Modern Carousel',
-                        'Testimonial Carousel',
-                        'Bold Carousel',
-                        'Testimonial Marquee',
-                      ].map((w) => {
-                        const isSelected = selectedWidgetTag === w;
-                        return (
-                          <button
-                            key={w}
-                            type="button"
-                            role="tab"
-                            aria-selected={isSelected}
-                            onClick={() => setSelectedWidgetTag(w)}
-                            className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
-                              isSelected
-                                ? 'bg-[#6701e6] text-white shadow-xs'
-                                : 'border border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
-                            }`}
-                          >
-                            {w}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="flex flex-wrap items-center justify-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1">Badges:</span>
-                      {[
-                        'Rating Badge',
-                        'Bold Highlights',
-                        'Company Logos',
-                        'Star Rating Badge',
-                        'Single Video',
-                      ].map((w) => {
-                        const isSelected = selectedWidgetTag === w;
-                        return (
-                          <button
-                            key={w}
-                            type="button"
-                            role="tab"
-                            aria-selected={isSelected}
-                            onClick={() => setSelectedWidgetTag(w)}
-                            className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
-                              isSelected
-                                ? 'bg-[#6701e6] text-white shadow-xs'
-                                : 'border border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
-                            }`}
-                          >
-                            {w}
-                          </button>
-                        );
-                      })}
-                    </div>
+                  {/* 23 Widget Tags Grid */}
+                  <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-3xl mx-auto">
+                    {[
+                      'Testimonial Image Gallery',
+                      'Testimonial Masonry',
+                      'Testimonial Marquee',
+                      'Testimonial Carousel',
+                      'Slab Carousel',
+                      'Rating Badge',
+                      'Bold Highlights',
+                      'Company Logos',
+                      'Single Video',
+                      'Social Star',
+                      'Hero Quotes',
+                      'Bricks',
+                      'Avatars Pro',
+                      'Avatars Grid',
+                      'Testimonial Highlights',
+                      'Lindoy List',
+                      'Loppa Carousel',
+                      'Candy Carousel',
+                      'Mayen Carousel',
+                      'Quote Grid',
+                      'Andoya Carousel',
+                      'Testimonial Bubble List'
+                    ].map((w) => {
+                      const isSelected = selectedWidgetTag === w;
+                      return (
+                        <button
+                          key={w}
+                          type="button"
+                          onClick={() => setSelectedWidgetTag(w)}
+                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                            isSelected
+                              ? 'bg-[#6701e6] text-white shadow-xs'
+                              : 'border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {w}
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {/* Live Widget Cards Preview */}
-                  <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+                  <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left max-w-3xl mx-auto">
                     {INITIAL_REVIEWS.slice(0, 3).map((r, i) => (
-                      <div key={i} className="p-4 rounded-xl border border-gray-200 bg-white shadow-xs">
+                      <div key={i} className="p-4 rounded-xl border border-gray-200 bg-white shadow-xs hover:border-purple-200 transition-colors">
                         <div className="flex text-amber-500 text-xs mb-2">★★★★★</div>
                         <p className="text-xs text-gray-800 italic line-clamp-3 mb-3">"{r.content}"</p>
                         <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
@@ -984,21 +941,23 @@ export const LandingPage: React.FC = () => {
               {activeShareTab === 'videos' && (
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
-                    Turn Video Reviews into High-Impact Social Reels
+                    Share Video Testimonials on Your Social Media
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Export high-retention 9:16 vertical videos with auto-subtitles, animated waveforms, and custom branding.
+                    Get more visits to your site with stunning videos and Reels that you can share directly to your feeds.
                   </p>
                   <div className="mt-6 mx-auto max-w-xs aspect-[9/16] rounded-2xl bg-zinc-950 text-white p-5 flex flex-col justify-between shadow-2xl relative">
                     <div className="flex items-center justify-between text-xs text-zinc-400">
-                      <span>Panda Praise Reel Studio</span>
-                      <span className="text-pink-500 font-bold">● LIVE</span>
+                      <span>Panda Praise Studio</span>
+                      <span className="text-rose-500 font-bold flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" /> LIVE
+                      </span>
                     </div>
                     <div className="text-center my-auto">
-                      <div className="w-14 h-14 rounded-full bg-[#6701e6] flex items-center justify-center mx-auto text-white shadow-glow mb-3">
+                      <div className="w-14 h-14 rounded-full bg-[#6701e6] flex items-center justify-center mx-auto text-white shadow-lg mb-3">
                         <Play className="w-6 h-6 fill-white ml-0.5" />
                       </div>
-                      <p className="text-xs font-semibold">"This tool 3x'd our customer conversions!"</p>
+                      <p className="text-sm font-semibold">"This tool 3x'd our customer conversions in 30 days!"</p>
                     </div>
                     <div className="text-left text-xs text-zinc-300">
                       <p className="font-bold text-white">@founder_growth</p>
@@ -1011,14 +970,14 @@ export const LandingPage: React.FC = () => {
               {activeShareTab === 'walls' && (
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
-                    Launch a Dedicated Wall of Love in Seconds
+                    Link to Walls of Love in Emails, Navigations and Bios
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Give potential buyers an irresistible stream of authentic customer praise that obliterates sales hesitation.
+                    Show off your best testimonials with our beautiful Walls of Love. More customization options, CTAs, and filters.
                   </p>
-                  <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  <div className="mt-6 flex flex-wrap justify-center gap-2">
                     {['Whimsical Theme', 'Noire Theme', 'Pastel Theme', 'Hong Kong Theme'].map((th) => (
-                      <span key={th} className="rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                      <span key={th} className="rounded-full border border-gray-200 bg-gray-50 px-3.5 py-1.5 text-xs font-medium text-gray-700">
                         {th}
                       </span>
                     ))}
@@ -1026,7 +985,7 @@ export const LandingPage: React.FC = () => {
                   <div className="mt-6">
                     <button
                       onClick={() => setIsWallModalOpen(true)}
-                      className="px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs font-bold shadow-md transition-transform hover:scale-105"
+                      className="px-6 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-bold shadow-md transition-transform hover:scale-105"
                     >
                       Open Wall of Love Preview
                     </button>
@@ -1037,33 +996,42 @@ export const LandingPage: React.FC = () => {
               {activeShareTab === 'popups' && (
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
-                    Drive Urgency with Real-Time Review Popups
+                    Add Testimonial Popups to Your Website
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Display live customer proof and authentic ratings at the exact moment visitors are deciding to purchase.
+                    Add social proof in seconds and generate FOMO with stylish popups shown to high-intent buyers.
                   </p>
-                  <p className="mt-4 text-xs text-purple-700 font-semibold">
-                    Look at the bottom-left corner of this screen to see the live toaster in action!
-                  </p>
+                  <div className="mt-6 max-w-md mx-auto p-4 rounded-2xl bg-white border border-gray-200 shadow-lg text-left flex items-start gap-3">
+                    <img
+                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80"
+                      alt="Reviewer"
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div>
+                      <div className="flex text-amber-500 text-xs mb-1">★★★★★</div>
+                      <p className="text-xs text-gray-800">"Panda Praise made our checkout conversion jump 28% in 2 weeks."</p>
+                      <p className="text-[11px] text-gray-500 mt-1 font-semibold">David K. · Just now</p>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {activeShareTab === 'images' && (
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
-                    Generate High-Converting Quote Graphics in One Click
+                    Share Image Testimonials on Your Socials
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Design polished social cards ready to drive engagement on Twitter, LinkedIn, Instagram, and slide decks.
+                    Get more visits to your site with stunning images that you can share on your socials. Drive visits, sales and signups.
                   </p>
-                  <div className="mt-6 max-w-md mx-auto p-5 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-xl text-left">
+                  <div className="mt-6 max-w-md mx-auto p-6 rounded-2xl bg-gradient-to-r from-[#6701e6] to-indigo-600 text-white shadow-xl text-left">
                     <div className="flex text-amber-300 text-xs mb-2">★★★★★</div>
                     <p className="text-sm font-semibold mb-3">"Panda Praise is the single most valuable growth tool we adopted this year."</p>
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-white text-purple-700 font-bold text-xs flex items-center justify-center">E</div>
+                      <div className="w-8 h-8 rounded-full bg-white text-[#6701e6] font-bold text-xs flex items-center justify-center">E</div>
                       <div className="text-xs">
-                        <span className="font-bold">Elena Rostova</span>
-                        <span className="text-purple-200 block text-xs">VP Growth</span>
+                        <span className="font-bold block">Elena Rostova</span>
+                        <span className="text-purple-200 text-[11px]">VP Growth @ SaaSify</span>
                       </div>
                     </div>
                   </div>
@@ -1073,16 +1041,25 @@ export const LandingPage: React.FC = () => {
               {activeShareTab === 'hosting' && (
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
-                    Lightning-Fast, Ad-Free Video Hosting Built In
+                    Unlimited, Ad-Free Hosting for Your Video Testimonials
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Ditch expensive third-party video hosts. Stream your video testimonials flawlessly with zero ads or tracking.
+                    Ditch Wistia, YouTube and Vimeo. Add your video testimonials to your website with dedicated, ad-free video hosting.
                   </p>
-                  <div className="mt-6 inline-flex flex-col gap-2 text-xs text-gray-700 text-left">
-                    <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> All your video testimonials in one place</div>
-                    <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Share with a link or embed with widgets</div>
-                    <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> 100% ad-free video hosting</div>
-                  </div>
+                  <ul className="mt-6 mx-auto w-fit space-y-2 text-left text-xs sm:text-sm text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>All your video testimonials in one place</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>Share with a link or embed with widgets</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>100% ad-free, fast CDN video delivery</span>
+                    </li>
+                  </ul>
                 </div>
               )}
             </div>
@@ -1115,23 +1092,23 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 9. "Thank" Section (Senja Feature) ── */}
-      <section className="bg-white py-16 sm:py-20 border-t border-gray-200 text-center">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* ── 9. "Thank" Section (Feature 4 - Senja Core Pillar) ── */}
+      <section className="bg-white py-20 border-t border-gray-200 text-center relative">
+        <div className="max-w-5xl mx-auto px-6">
           
           <p className="font-caveat text-3xl text-[#6701e6] rotate-1">
-            Reward
+            Thank
           </p>
 
-          <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight max-w-4xl mx-auto sm:whitespace-nowrap">
-            Turn Happy Reviewers into Brand Advocates
+          <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto">
+            Thank Every Customer Like It's Still Day One
           </h2>
 
-          <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-3xl mx-auto leading-relaxed sm:whitespace-nowrap">
-            Delight customers with automated thank-you notes, personalized videos, and reward perks.
+          <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            You didn't grow by treating people like numbers. Send personal thank-you videos, gifts, and reward notes at any scale.
           </p>
 
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2.5 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <span>Find the customers you should thank</span>
@@ -1180,50 +1157,54 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 10. "Built for you" Personas Section ── */}
-      <section className="max-w-5xl mx-auto px-6 py-16 text-center border-t border-gray-200">
+      {/* ── 10. "Built for you" Personas Section (Senja Exact Pill Grid) ── */}
+      <section className="max-w-5xl mx-auto px-6 py-20 text-center border-t border-gray-200">
         <p className="font-caveat text-3xl text-[#6701e6] -rotate-1">
           Built for you
         </p>
-        <h2 className="mt-2 font-display text-3xl font-extrabold sm:text-4xl text-gray-950 max-w-4xl mx-auto sm:whitespace-nowrap">
-          Built for Every Business That Grows on Trust
+        <h2 className="mt-2 font-display text-3xl sm:text-4xl font-extrabold text-gray-950 max-w-3xl mx-auto">
+          Whatever You Make, Panda Praise Fits How You Work
         </h2>
-        <p className="mx-auto mt-3 max-w-3xl text-sm sm:text-base text-gray-600 leading-relaxed sm:whitespace-nowrap">
-          Whether you're a creator, SaaS founder, or agency — Panda Praise powers proof that converts.
+        <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-gray-600 leading-relaxed">
+          Whether you're a creator, run a SaaS, or sell your own kind of niche thing — Panda Praise is the go-to tool for collecting, managing, and showing off your social proof.
         </p>
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-4xl mx-auto text-left">
+        
+        {/* Senja Rounded-Full Persona Tags Grid */}
+        <div className="mt-8 flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
           {[
-            { persona: 'Creators', desc: 'Courses, ebooks & digital products', icon: '🎨' },
-            { persona: 'SaaS Companies', desc: 'Software, apps & web platforms', icon: '⚡' },
-            { persona: 'Agencies', desc: 'Design, marketing & client work', icon: '💼' },
-            { persona: 'Communities', desc: 'Memberships, forums & cohorts', icon: '👥' },
-            { persona: 'Newsletters', desc: 'Substack, Beehiiv & publications', icon: '📬' },
-            { persona: 'Freelancers', desc: 'Consultants, copywriters & pros', icon: '✍️' },
-            { persona: 'Ecommerce', desc: 'Direct-to-consumer & online shops', icon: '🛍️' },
-            { persona: 'Coaches & Mentors', desc: 'Executive, career & life coaching', icon: '🎯' },
-          ].map((item) => (
-            <div
-              key={item.persona}
-              className="rounded-xl border border-gray-200 bg-white p-3.5 shadow-xs"
+            'Creators',
+            'Communities',
+            'SaaS companies',
+            'Agencies',
+            'Course creators',
+            'Newsletters',
+            'Freelancers',
+            'Employees',
+            'Ecommerce',
+            'Sales teams',
+            'Real estate agents',
+            'Events',
+            'Coaches',
+          ].map((persona) => (
+            <Link
+              key={persona}
+              to="/signup"
+              className="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-purple-300 hover:bg-purple-50 hover:text-[#6701e6]"
             >
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-base" aria-hidden="true">{item.icon}</span>
-                <span className="text-xs sm:text-sm font-bold text-gray-900">{item.persona}</span>
-              </div>
-              <p className="text-xs text-gray-500 leading-snug">{item.desc}</p>
-            </div>
+              {persona}
+            </Link>
           ))}
         </div>
       </section>
 
       {/* ── 11. Frequently Asked Questions Section ── */}
-      <section id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10 border-t border-gray-200">
+      <section id="faq" className="max-w-4xl mx-auto px-6 py-20 relative z-10 border-t border-gray-200">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <p className="font-caveat text-3xl text-[#6701e6]">Got questions?</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-gray-950 tracking-tight mt-1">
+          <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight mt-1">
             Frequently Asked Questions
           </h2>
-          <p className="text-sm text-gray-600 mt-2">
+          <p className="text-sm sm:text-base text-gray-600 mt-2">
             Everything you need to know about collecting, organizing, and publishing verified proof.
           </p>
         </div>
@@ -1241,7 +1222,7 @@ export const LandingPage: React.FC = () => {
                   className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-gray-50/80 transition-colors"
                   aria-expanded={isOpen}
                 >
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm sm:text-base font-semibold text-gray-900">
                     {item.q}
                   </span>
                   <ChevronDown
@@ -1251,7 +1232,7 @@ export const LandingPage: React.FC = () => {
                   />
                 </button>
                 {isOpen && (
-                  <div className="px-6 pb-4 pt-1 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-gray-100 bg-gray-50/50 animate-fade-in">
+                  <div className="px-6 pb-4 pt-1 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-gray-100 bg-gray-50/50">
                     {item.a}
                   </div>
                 )}
@@ -1272,6 +1253,11 @@ export const LandingPage: React.FC = () => {
           aria-hidden="true"
         />
 
+        {/* Tone-on-tone motifs */}
+        <svg className="pointer-events-none absolute -bottom-28 -right-24 w-[420px] -rotate-6 opacity-[0.14]" viewBox="0 0 120 112" fill="none" stroke="#fff" strokeWidth="4" aria-hidden="true">
+          <path d="M60 34 C60 20 48 10 34 10 C16 10 6 24 6 38 C6 66 36 84 60 102 C84 84 114 66 114 38 C114 24 104 10 86 10 C72 10 60 20 60 34 Z" />
+        </svg>
+
         {/* Rotating Circular Stamp */}
         <div className="pointer-events-none absolute right-10 top-1/2 hidden -translate-y-1/2 text-white/80 lg:block">
           <svg className="stamp-spin" width="140" height="140" viewBox="0 0 170 170" fill="none">
@@ -1288,11 +1274,11 @@ export const LandingPage: React.FC = () => {
 
         <div className="relative mx-auto max-w-3xl px-6">
           <p className="font-caveat text-3xl text-purple-200">Start in 2 minutes</p>
-          <h2 className="mt-2 font-display text-3xl sm:text-5xl font-extrabold tracking-tight max-w-3xl mx-auto sm:whitespace-nowrap">
-            Turn Customer Praise into Pure Revenue
+          <h2 className="mt-2 font-display text-3xl sm:text-5xl font-extrabold tracking-tight max-w-3xl mx-auto">
+            Ready to boost your business with social proof?
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-white/90 leading-relaxed sm:whitespace-nowrap">
-            Set up your free collection workspace in 2 minutes and turn testimonials into sales.
+          <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-white/90 leading-relaxed">
+            Set up in minutes and discover how easy it is to collect, manage, and share the social proof that drives your business forward.
           </p>
 
           <ul className="mx-auto mt-6 inline-flex flex-col gap-2 text-left text-xs sm:text-sm text-white/90">
@@ -1333,22 +1319,118 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 13. Footer ── */}
-      <footer className="border-t border-gray-200 py-10 text-xs text-gray-500 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-display font-extrabold text-base text-gray-900">Panda Praise</span>
-            <span className="text-gray-300">•</span>
-            <span>Collect, Manage and Share Testimonials</span>
+      {/* ── 13. Comprehensive SaaS Footer (Senja Exact Multi-Column Structure) ── */}
+      <footer className="bg-gray-50 border-t border-gray-200">
+        {/* Wavy Senja divider SVG line */}
+        <div className="flex justify-center pt-10 text-[#6701e6]">
+          <svg width="220" height="22" viewBox="0 0 220 22" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" aria-hidden="true">
+            <path d="M4 14 Q17 2 30 14 T56 14 T82 14 T108 14 T134 14 T160 14 T186 14 T212 14" />
+          </svg>
+        </div>
+
+        <div className="mx-auto max-w-6xl px-6 pt-10 pb-16">
+          <div className="grid gap-12 lg:grid-cols-[16rem_1fr] lg:gap-16">
+            
+            {/* Column 0: Brand Info */}
+            <div>
+              <Link to="/" className="inline-flex items-center">
+                <span className="font-display font-extrabold text-2xl tracking-tight text-gray-950">
+                  Panda <span className="text-[#6701e6]">Praise</span>
+                </span>
+              </Link>
+              <p className="mt-4 max-w-[14rem] text-sm leading-relaxed text-gray-500">
+                Collect, manage and share testimonials in minutes.
+              </p>
+            </div>
+
+            {/* 4 Multi-Columns */}
+            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+              
+              {/* Product */}
+              <div>
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Product</h3>
+                <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
+                  <li><button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors text-left">Collect Testimonials</button></li>
+                  <li><button onClick={() => scrollToSection('find-section')} className="hover:text-gray-900 transition-colors text-left">Import Testimonials</button></li>
+                  <li><Link to="/c/feedback" className="hover:text-gray-900 transition-colors">Video Testimonials</Link></li>
+                  <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left">Testimonial Widgets</button></li>
+                  <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left">Wall of Love</button></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Case Study Generator</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Thank Yous</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Free Migration</Link></li>
+                </ul>
+              </div>
+
+              {/* Resources */}
+              <div>
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Resources</h3>
+                <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Blog</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Free Tools</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Testimonial Examples</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Testimonial Questions</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Testimonial Templates</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Use Cases</Link></li>
+                  <li><button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors text-left">Help Center</button></li>
+                </ul>
+              </div>
+
+              {/* Compare */}
+              <div>
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Compare</h3>
+                <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
+                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left">All alternatives</button></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Boast.io alternative</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Bonjoro alternative</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Elfsight alternative</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Famewall alternative</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Testimonial.to alternative</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Trustmary alternative</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">VideoAsk alternative</Link></li>
+                </ul>
+              </div>
+
+              {/* Company */}
+              <div>
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Company</h3>
+                <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
+                  <li><Link to="/" className="hover:text-gray-900 transition-colors">About us</Link></li>
+                  <li><Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link></li>
+                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left">Customer Stories</button></li>
+                  <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left">Our Wall of Love 💖</button></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Affiliate program</Link></li>
+                  <li><Link to="/c/feedback" className="hover:text-gray-900 transition-colors">Leave a Review</Link></li>
+                  <li><Link to="/login" className="hover:text-gray-900 transition-colors">Login</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">What's new ✨</Link></li>
+                </ul>
+              </div>
+
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link>
-            <Link to="/c/pandapraise-feedback" className="hover:text-gray-900 transition-colors">Leave a Review</Link>
-            <Link to="/privacy-policy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-gray-900 transition-colors">Terms</Link>
-            <Link to="/login" className="hover:text-gray-900 transition-colors">Login</Link>
-            <Link to="/signup" className="hover:text-gray-900 transition-colors">Sign up for free</Link>
+          {/* Personas Cross-Linking Row */}
+          <div className="mt-12 border-t border-gray-200/80 pt-6">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-[13px]">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Panda Praise for</span>
+              {['Agencies', 'Coaches', 'Communities', 'Course Creators', 'Creators', 'Ecommerce', 'Employees', 'Events', 'Freelancers', 'Newsletters', 'Real estate agents', 'SaaS', 'Sales teams'].map((p, idx, arr) => (
+                <React.Fragment key={p}>
+                  <Link to="/signup" className="text-gray-500 transition-colors hover:text-gray-900">
+                    {p}
+                  </Link>
+                  {idx < arr.length - 1 && <span className="select-none text-gray-300">·</span>}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+
+          {/* Copyright and Legal Row */}
+          <div className="mt-6 border-t border-gray-200/80 pt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-500">
+            <span>© 2026 Panda Praise Ltd. All rights reserved.</span>
+            <div className="flex items-center gap-5">
+              <Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link>
+              <Link to="/privacy-policy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
+              <Link to="/pricing" className="hover:text-gray-900 transition-colors">Discount code policy</Link>
+            </div>
           </div>
         </div>
       </footer>
