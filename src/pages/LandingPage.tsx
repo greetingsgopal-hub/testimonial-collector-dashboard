@@ -220,11 +220,11 @@ export const LandingPage: React.FC = () => {
           <span className="text-xs font-semibold text-[#6701e6]">The #1 Social Proof Platform for Growing Businesses</span>
         </div>
 
-        {/* Primary H1: Balanced, centrally aligned 2-line headline */}
-        <h1 className="text-3xl sm:text-4xl lg:text-[48px] font-extrabold font-display text-gray-950 tracking-tight leading-[1.16] max-w-3xl mx-auto text-center">
-          <span className="block">Turn Customer Praise</span>
-          <span className="block mt-1 sm:mt-2 text-[#6701e6]">
-            Into Your #1 Sales Engine
+        {/* Primary H1: Exactly two centered lines with highlighted treatment */}
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight leading-[1.18] max-w-3xl mx-auto text-center">
+          <span className="block">Turn Customer Praise Into</span>
+          <span className="senja-purple-mark mt-1 sm:mt-2 inline-block whitespace-nowrap">
+            Your #1 Growth Engine
           </span>
         </h1>
 
@@ -307,21 +307,19 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Compact Featured Customer Proof Strip */}
-        <div className="mt-7 w-fit max-w-2xl mx-auto py-3.5 px-6 sm:py-4 sm:px-8 rounded-2xl bg-white/90 backdrop-blur-sm border border-purple-100/80 shadow-xs flex flex-col items-center text-center">
+        <div className="mt-7 max-w-lg mx-auto py-3.5 px-5 sm:py-4 sm:px-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-purple-100/80 shadow-xs flex flex-col items-center text-center">
           <div role="img" aria-label="Rated 5 out of 5 stars" className="flex items-center justify-center gap-1 text-amber-500 mb-1.5">
             {[1, 2, 3, 4, 5].map((s) => (
               <span key={s} className="text-xs" aria-hidden="true">★</span>
             ))}
           </div>
-          <blockquote className="text-xs sm:text-[13px] md:text-sm font-medium text-gray-800 italic leading-snug sm:whitespace-nowrap">
-            “I've seen a <span className="font-semibold text-gray-950 not-italic">tangible impact on revenue and conversion</span> by sharing customer proof.”
+          <blockquote className="text-xs sm:text-sm font-medium text-gray-800 italic leading-snug max-w-md mx-auto">
+            “I've seen a tangible impact on revenue and conversion by sharing customer proof.”
           </blockquote>
-          <div className="mt-2.5 flex items-center justify-center gap-2.5">
-            <img
-              src="/images/gopal-thakur.jpg"
-              alt="Gopal Thakur"
-              className="w-7 h-7 rounded-full object-cover ring-2 ring-purple-100 shrink-0 shadow-xs"
-            />
+          <div className="mt-2.5 flex items-center justify-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-[#6701e6] text-white flex items-center justify-center font-bold text-[10px] ring-2 ring-purple-100 shrink-0 select-none" aria-hidden="true">
+              GT
+            </div>
             <div className="text-left leading-tight">
               <span className="text-xs font-bold text-gray-900 block">Gopal Thakur</span>
               <span className="text-[11px] text-gray-600">Papasystem</span>
