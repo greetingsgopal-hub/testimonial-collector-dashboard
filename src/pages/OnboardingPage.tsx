@@ -145,7 +145,7 @@ export const OnboardingPage: React.FC = () => {
   const [setupProgress, setSetupProgress] = useState(25);
   const [setupStatusText, setSetupStatusText] = useState('Initializing project workspace...');
   const [isSetupComplete, setIsSetupComplete] = useState(false);
-  const [countdown, setCountdown] = useState(8);
+  const [countdown, setCountdown] = useState(4);
 
   const handleStep3Submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,7 +169,7 @@ export const OnboardingPage: React.FC = () => {
             setSetupProgress(35);
             setSetupStatusText('Configuring workspace & permissions...');
           }
-          await new Promise((r) => setTimeout(r, 600));
+          await new Promise((r) => setTimeout(r, 450));
 
           // Stage 2: Project persistence
           if (isMounted) {
@@ -178,12 +178,19 @@ export const OnboardingPage: React.FC = () => {
           }
           if (project?.id) {
             const domainName = websiteUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-            await updateProjectDetails(project.id, {
-              name: domainName ? domainName.split('.')[0] : (firstName ? `${firstName}'s Project` : project.name),
-              websiteUrl: websiteUrl.trim(),
-            });
+            try {
+              await Promise.race([
+                updateProjectDetails(project.id, {
+                  name: domainName ? domainName.split('.')[0] : (firstName ? `${firstName}'s Project` : project.name),
+                  websiteUrl: websiteUrl.trim(),
+                }),
+                new Promise((resolve) => setTimeout(resolve, 800)),
+              ]);
+            } catch (err) {
+              console.warn('[Onboarding] Non-blocking project update error:', err);
+            }
           }
-          await new Promise((r) => setTimeout(r, 600));
+          await new Promise((r) => setTimeout(r, 450));
 
           // Stage 3: Ready
           if (isMounted) {
@@ -196,6 +203,8 @@ export const OnboardingPage: React.FC = () => {
         } catch (err) {
           console.error('Failed to update project during onboarding:', err);
           if (isMounted) {
+            setSetupProgress(100);
+            setSetupStatusText('Workspace ready!');
             setIsSetupComplete(true);
           }
         }
@@ -462,33 +471,35 @@ export const OnboardingPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Direct Action Button */}
-              {isSetupComplete && (
-                <div className="mt-5 space-y-2.5 animate-fade-in">
+              {/* Direct Action Button: Always available so user can proceed without waiting or getting stuck */}
+              <div className="mt-5 space-y-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    analytics.signupCompleted();
+                    navigate('/dashboard');
+                  }}
+                  className="w-full py-3.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white font-bold text-sm shadow-md transition-all hover:scale-[1.01] cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>{isSetupComplete ? 'Go to My Dashboard' : 'Proceed to Dashboard'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-center justify-between text-[11px] text-gray-500 px-1 pt-0.5">
+                  <span>
+                    {isSetupComplete
+                      ? `Continuing automatically in ${countdown}s...`
+                      : 'Setting up your workspace...'}
+                  </span>
                   <button
                     type="button"
-                    onClick={() => {
-                      analytics.signupCompleted();
-                      navigate('/dashboard');
-                    }}
-                    className="w-full py-3.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white font-bold text-sm shadow-md transition-all hover:scale-[1.01] cursor-pointer flex items-center justify-center gap-2"
+                    onClick={() => navigate('/onboarding/upgrade')}
+                    className="text-[#6701e6] hover:underline font-semibold cursor-pointer"
                   >
-                    <span>Go to My Dashboard</span>
-                    <ArrowRight className="w-4 h-4" />
+                    See Formats & Plans →
                   </button>
-
-                  <div className="flex items-center justify-between text-[11px] text-gray-500 px-1 pt-0.5">
-                    <span>Continuing automatically in {countdown}s...</span>
-                    <button
-                      type="button"
-                      onClick={() => navigate('/onboarding/upgrade')}
-                      className="text-[#6701e6] hover:underline font-semibold cursor-pointer"
-                    >
-                      See Formats & Plans →
-                    </button>
-                  </div>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Join 1000s of happy users Testimonial Carousel */}
