@@ -600,7 +600,7 @@ export const LandingPage: React.FC = () => {
           </div>
           <div className="flex items-start gap-2">
             <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>Always-on access with the MCP</span>
+            <span>Always-on access via AI assistants (MCP)</span>
           </div>
         </div>
 
@@ -886,9 +886,9 @@ export const LandingPage: React.FC = () => {
                     <div className="flex flex-wrap items-center justify-center gap-2">
                       <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1">Sliders:</span>
                       {[
-                        'Candy Carousel',
+                        'Modern Carousel',
                         'Testimonial Carousel',
-                        'Slab Carousel',
+                        'Bold Carousel',
                         'Testimonial Marquee',
                       ].map((w) => {
                         const isSelected = selectedWidgetTag === w;
@@ -917,7 +917,7 @@ export const LandingPage: React.FC = () => {
                         'Rating Badge',
                         'Bold Highlights',
                         'Company Logos',
-                        'Social Star',
+                        'Star Rating Badge',
                         'Single Video',
                       ].map((w) => {
                         const isSelected = selectedWidgetTag === w;
@@ -1168,7 +1168,7 @@ export const LandingPage: React.FC = () => {
           Whatever you make, Panda Praise fits how you work
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-600">
-          Whether you're a creator, run a SaaS, or sell your own kind of niche thing — Panda Praise is the go-to tool for collecting, managing, and showing off your social proof.
+          Whether you're a creator, run a SaaS, or offer a specialized product or service — Panda Praise is the go-to tool for collecting, managing, and sharing your social proof.
         </p>
         <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-4xl mx-auto text-left">
           {[
