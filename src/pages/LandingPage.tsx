@@ -306,25 +306,23 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Featured Social Proof Quote Card (Anchored above marquee) */}
-        <div className="mt-8 max-w-xl mx-auto p-5 sm:p-6 rounded-2xl bg-white/95 backdrop-blur-sm border border-purple-100/90 shadow-md">
-          <div role="img" aria-label="Rated 5 out of 5 stars" className="flex items-center justify-center gap-1 text-amber-500 mb-2">
+        {/* Compact Featured Customer Proof Strip */}
+        <div className="mt-7 max-w-lg mx-auto py-3.5 px-5 sm:py-4 sm:px-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-purple-100/80 shadow-xs flex flex-col items-center text-center">
+          <div role="img" aria-label="Rated 5 out of 5 stars" className="flex items-center justify-center gap-1 text-amber-500 mb-1.5">
             {[1, 2, 3, 4, 5].map((s) => (
-              <span key={s} className="text-sm" aria-hidden="true">★</span>
+              <span key={s} className="text-xs" aria-hidden="true">★</span>
             ))}
           </div>
-          <blockquote className="text-sm sm:text-base font-medium text-gray-800 italic leading-relaxed">
+          <blockquote className="text-xs sm:text-sm font-medium text-gray-800 italic leading-snug max-w-md mx-auto">
             “I've seen a tangible impact on revenue and conversion by sharing customer proof.”
           </blockquote>
-          <div className="mt-3.5 flex items-center justify-center gap-2.5">
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
-              alt="Jay Clouse"
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-purple-200"
-            />
+          <div className="mt-2.5 flex items-center justify-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-[#6701e6] text-white flex items-center justify-center font-bold text-[10px] ring-2 ring-purple-100 shrink-0 select-none">
+              GT
+            </div>
             <div className="text-left leading-tight">
-              <span className="text-xs font-bold text-gray-900 block">Jay Clouse</span>
-              <span className="text-xs text-gray-600">Founder, Creator Science</span>
+              <span className="text-xs font-bold text-gray-900 block">Gopal Thakur</span>
+              <span className="text-[11px] text-gray-600">Papasystem</span>
             </div>
           </div>
         </div>
