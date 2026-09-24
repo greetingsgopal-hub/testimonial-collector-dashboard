@@ -80,7 +80,7 @@ export const LandingPage: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 400) {
+      if (window.scrollY > 800) {
         setShowFloatingElements(true);
       }
     };
