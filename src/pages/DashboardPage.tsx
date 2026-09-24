@@ -103,6 +103,11 @@ export const DashboardPage = () => {
     const socialConnected = params.get('social_connected');
     const accountName = params.get('account_name');
     const socialError = params.get('social_error');
+    const requestedTab = params.get('tab');
+
+    if (socialConnected || requestedTab === 'integrate') {
+      setActiveTab('integrate');
+    }
 
     if (socialConnected) {
       setSocialNotification({
@@ -111,6 +116,9 @@ export const DashboardPage = () => {
       });
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (socialError) {
+      if (requestedTab === 'integrate') {
+        setActiveTab('integrate');
+      }
       setSocialNotification({
         type: 'error',
         message: `Social Connection Notice: ${socialError}`
