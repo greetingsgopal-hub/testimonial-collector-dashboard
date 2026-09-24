@@ -163,7 +163,7 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
           </div>
 
           {/* Quote with highlighted text */}
-          <p className="text-[12px] sm:text-[13px] text-gray-800 leading-snug line-clamp-3">
+          <p className="text-xs sm:text-sm text-gray-800 leading-snug line-clamp-3">
             {current.fullTextBefore}
             <mark className="bg-amber-100/90 text-gray-950 px-1 py-0.5 rounded font-medium">
               {current.highlightText}
@@ -172,23 +172,23 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
           </p>
 
           {/* Attribution & Platform Badge */}
-          <div className="flex items-center justify-between mt-2 pt-1 text-[11px] text-gray-500">
-            <span className="truncate max-w-[210px] font-medium text-gray-700">
+          <div className="flex items-center justify-between mt-2 pt-1 text-xs text-gray-500">
+            <span className="font-medium text-gray-700">
               {current.name} <span className="text-gray-400">/</span> {current.role}
             </span>
 
             {/* Platform Icon */}
             {current.platformIcon === 'x' && (
-              <span className="text-[10px] font-bold text-gray-700 ml-1 font-mono">𝕏</span>
+              <span className="text-xs font-bold text-gray-700 ml-1">𝕏</span>
             )}
             {current.platformIcon === 'facebook' && (
-              <span className="w-3.5 h-3.5 rounded-full bg-blue-600 text-white font-bold text-[9px] flex items-center justify-center ml-1">f</span>
+              <span className="w-3.5 h-3.5 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center ml-1">f</span>
             )}
             {current.platformIcon === 'google' && (
-              <span className="text-[10px] font-bold text-red-500 ml-1">G</span>
+              <span className="text-xs font-bold text-red-500 ml-1">G</span>
             )}
             {current.platformIcon === 'producthunt' && (
-              <span className="w-3.5 h-3.5 rounded-full bg-amber-600 text-white font-bold text-[9px] flex items-center justify-center ml-1">P</span>
+              <span className="w-3.5 h-3.5 rounded-full bg-amber-600 text-white font-bold text-[10px] flex items-center justify-center ml-1">P</span>
             )}
           </div>
         </div>

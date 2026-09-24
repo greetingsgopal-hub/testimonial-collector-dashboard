@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
@@ -42,13 +42,13 @@ const FAQ_ITEMS = [
 
 const CLIENT_LOGOS = [
   { name: 'om', node: <span className="text-xl font-bold tracking-tight text-gray-500 font-sans">om</span> },
-  { name: 'pickupmusic', node: <span className="text-base font-semibold tracking-wide text-gray-500 font-mono">pickupmusic</span> },
+  { name: 'pickupmusic', node: <span className="text-base font-semibold tracking-wide text-gray-500 font-sans">pickupmusic</span> },
   { name: 'Marketing Examined', node: <span className="text-base font-bold text-gray-500 flex items-center gap-1.5"><span className="text-amber-500">★</span> Marketing Examined</span> },
-  { name: 'unplugged.', node: <span className="text-base font-serif italic text-gray-500">unplugged.</span> },
+  { name: 'unplugged.', node: <span className="text-base italic text-gray-500 font-sans">unplugged.</span> },
   { name: 'Easlo', node: <span className="text-base font-bold text-gray-600 flex items-center gap-1.5"><span>👓</span> Easlo</span> },
-  { name: 'Breakcold', node: <span className="text-base font-bold text-gray-600 flex items-center gap-1.5"><span className="bg-gray-800 text-white text-[11px] px-1 py-0.5 rounded font-bold">Br</span> Breakcold</span> },
+  { name: 'Breakcold', node: <span className="text-base font-bold text-gray-600 flex items-center gap-1.5"><span className="bg-gray-800 text-white text-xs px-1 py-0.5 rounded font-bold">Br</span> Breakcold</span> },
   { name: 'immutable', node: <span className="text-base font-bold tracking-tight text-gray-500">immutable</span> },
-  { name: 'Substack', node: <span className="text-base font-semibold text-gray-500 flex items-center gap-1.5"><span className="w-3 h-3 bg-[#FF6719] rounded-xs inline-block" /> Substack</span> },
+  { name: 'Substack', node: <span className="text-base font-semibold text-gray-500 flex items-center gap-1.5"><span className="w-3 h-3 bg-[#FF6719] rounded-sm inline-block" /> Substack</span> },
   { name: 'Beehiiv', node: <span className="text-base font-extrabold text-gray-500">beehiiv</span> },
   { name: 'ConvertKit', node: <span className="text-base font-bold text-gray-500 flex items-center gap-1.5"><span className="w-3 h-3 bg-rose-400 rounded-full inline-block" /> ConvertKit</span> },
   { name: 'Kajabi', node: <span className="text-base font-semibold text-gray-500">kajabi</span> },
@@ -66,8 +66,20 @@ export const LandingPage: React.FC = () => {
   const { user, enableDemoMode } = useAuth();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [activeShareTab, setActiveShareTab] = useState<'videos' | 'widgets' | 'walls' | 'popups' | 'images' | 'hosting'>('widgets');
+  const [selectedWidgetTag, setSelectedWidgetTag] = useState('Testimonial Image Gallery');
+  const [showFloatingElements, setShowFloatingElements] = useState(false);
   const [searchQueryMock, setSearchQueryMock] = useState('do the techs actually use it');
   const [isWallModalOpen, setIsWallModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowFloatingElements(true);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLaunchDemo = () => {
     analytics.ctaClicked('demo_mode', '/dashboard');
@@ -92,7 +104,7 @@ export const LandingPage: React.FC = () => {
       {/* ── 1. Top Announcement Quiz Bar (Senja Exact) ── */}
       <div className="bg-[#6701e6] hover:bg-[#5400bd] transition-colors text-white py-2 px-4 text-center relative z-50 flex items-center justify-center gap-2 shadow-sm text-xs sm:text-sm font-medium cursor-pointer">
         <Link to="/signup" className="flex items-center gap-1.5 hover:underline">
-          <span className="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">
+          <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">
             Free quiz
           </span>
           <span>What's your Social Proof Score?</span>
@@ -148,13 +160,21 @@ export const LandingPage: React.FC = () => {
           {/* Right Action Buttons */}
           <div className="flex items-center gap-3">
             {user ? (
-              <Link
-                to="/dashboard"
-                className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-semibold shadow-md flex items-center gap-1.5 transition-all hover:scale-[1.02]"
-              >
-                <span>Dashboard</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              <>
+                <Link
+                  to="/dashboard"
+                  className="px-3.5 py-1.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5"
+                >
+                  <span>Dashboard</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-gray-500" />
+                </Link>
+                <Link
+                  to="/dashboard?new=true"
+                  className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-semibold shadow-sm transition-all hover:scale-[1.02]"
+                >
+                  Start for free
+                </Link>
+              </>
             ) : (
               <>
                 <Link
@@ -168,7 +188,7 @@ export const LandingPage: React.FC = () => {
                   onClick={() => analytics.signupStarted('header_nav')}
                   className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-semibold shadow-sm transition-all hover:scale-[1.02]"
                 >
-                  Sign up for free
+                  Start for free
                 </Link>
               </>
             )}
@@ -186,43 +206,39 @@ export const LandingPage: React.FC = () => {
           </svg>
         </div>
 
-        {/* Floating 5 purple stars doodle on right */}
-        <div className="absolute right-2 sm:-right-8 top-28 hidden sm:block text-[#6701e6] opacity-80">
-          <div className="flex items-center gap-1">
-            {[1, 2, 3, 4].map((s) => (
-              <span key={s} className="text-base text-[#6701e6]">★</span>
-            ))}
-            <span className="text-base text-[#6701e6]">☆</span>
-          </div>
-        </div>
-
-        {/* Giant Quote Headline with Purple Highlight Box */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display text-gray-950 tracking-tight leading-snug sm:leading-tight lg:leading-[1.25] max-w-4xl mx-auto">
-          “I've already seen a{' '}
+        {/* Primary Product Value Proposition H1 */}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display text-gray-950 tracking-tight leading-snug sm:leading-tight lg:leading-[1.2] max-w-4xl mx-auto">
+          Collect, Manage and Share Testimonials{' '}
           <span className="senja-purple-mark my-1 sm:my-1.5">
-            tangible impact
-          </span>{' '}
-          <span className="senja-purple-mark my-1 sm:my-1.5">
-            on revenue and conversion
-          </span>{' '}
-          by sharing more social proof.”
+            Without the Hassle
+          </span>
         </h1>
 
-        {/* Attribution: Jay Clouse */}
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <img
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
-            alt="Jay Clouse"
-            className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-200"
-          />
-          <div className="text-left leading-tight">
-            <div className="text-sm font-bold text-gray-900">Jay Clouse</div>
-            <div className="text-xs text-gray-500">Founder, Creator Science</div>
+        {/* Featured Social Proof Quote with Integrated 5-Star Trust Signal */}
+        <div className="mt-6 max-w-2xl mx-auto p-4 sm:p-5 rounded-2xl bg-purple-50/70 border border-purple-100/90 shadow-xs">
+          <div className="flex items-center justify-center gap-1 text-amber-500 mb-2" aria-label="Rated 5 out of 5 stars">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <span key={s} className="text-sm">★</span>
+            ))}
+          </div>
+          <blockquote className="text-sm sm:text-base font-medium text-gray-800 italic leading-relaxed">
+            “I've already seen a tangible impact on revenue and conversion by sharing more social proof.”
+          </blockquote>
+          <div className="mt-3 flex items-center justify-center gap-2.5">
+            <img
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
+              alt="Jay Clouse"
+              className="w-8 h-8 rounded-full object-cover ring-2 ring-purple-200"
+            />
+            <div className="text-left leading-tight">
+              <span className="text-xs font-bold text-gray-900 block">Jay Clouse</span>
+              <span className="text-xs text-gray-500">Founder, Creator Science</span>
+            </div>
           </div>
         </div>
 
         {/* Subheadline with dotted underline */}
-        <p className="mt-8 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+        <p className="mt-6 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
           <span className="senja-dotted font-medium text-gray-900">Meet Panda Praise</span>. The easiest way to gather customer testimonials and case studies, then share them everywhere to increase trust and sales.
         </p>
 
@@ -242,7 +258,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Giant Glowing CTA Button */}
+        {/* Giant Glowing CTA Button with directional icon */}
         <div className="mt-8 flex justify-center">
           <div className="senja-hero-cta">
             <div className="senja-cta-ring">
@@ -252,9 +268,10 @@ export const LandingPage: React.FC = () => {
                   analytics.ctaClicked('hero_primary', '/signup');
                   analytics.signupStarted('hero_primary');
                 }}
-                className="senja-btn-primary px-8 py-3.5 sm:py-4 text-lg sm:text-xl shadow-xl hover:scale-105 transition-all"
+                className="senja-btn-primary px-8 py-3.5 sm:py-4 text-lg sm:text-xl shadow-xl hover:scale-105 transition-all inline-flex items-center gap-2"
               >
                 <span>Start for free today</span>
+                <ArrowRight className="w-5 h-5 text-white" aria-hidden="true" />
               </Link>
             </div>
           </div>
@@ -318,7 +335,15 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── 5. Before / After Comparison Meme Cards (Screenshot 2 Exact) ── */}
-      <section id="comparison-section" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <h2 id="comparison-heading" className="text-2xl sm:text-3xl font-extrabold font-display text-gray-950 tracking-tight">
+            The Difference Social Proof Makes
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-600 mt-2">
+            See how Panda Praise transforms customer praise into your #1 conversion driver.
+          </p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           
           {/* Card 1: You Without Social Proof */}
@@ -461,9 +486,9 @@ export const LandingPage: React.FC = () => {
                 className="w-11 h-11 rounded-full object-cover ring-2 ring-amber-200"
               />
               <div>
-                <h4 className="font-bold text-gray-900 text-sm sm:text-base">
+                <h3 className="font-bold text-gray-900 text-sm sm:text-base">
                   Share a testimonial for my course 🫶
-                </h4>
+                </h3>
                 <p className="text-xs text-gray-500">Takes less than 60 seconds</p>
               </div>
             </div>
@@ -474,13 +499,13 @@ export const LandingPage: React.FC = () => {
                 <Video className="w-5 h-5" />
               </div>
               <p className="text-xs font-semibold">Record a video testimonial</p>
-              <p className="text-[11px] text-gray-400 mt-1">or submit a written review below</p>
+              <p className="text-xs text-gray-400 mt-1.5">or submit a written review below</p>
             </div>
 
             {/* Prompt helpers */}
             <div className="flex flex-wrap gap-1.5 mb-4">
-              <span className="text-[11px] bg-gray-100 text-gray-600 px-2 py-1 rounded-full">✨ What was your biggest win?</span>
-              <span className="text-[11px] bg-gray-100 text-gray-600 px-2 py-1 rounded-full">🚀 Would you recommend us?</span>
+              <span className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full font-medium">✨ What was your biggest win?</span>
+              <span className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full font-medium">🚀 Would you recommend us?</span>
             </div>
 
             <Link
@@ -586,7 +611,7 @@ export const LandingPage: React.FC = () => {
             <span className="h-2.5 w-2.5 rounded-full bg-rose-400"></span>
             <span className="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
-            <span className="ml-3 rounded bg-white px-2 py-0.5 text-xs text-gray-500 font-mono border border-gray-200">
+            <span className="ml-3 rounded bg-white px-2 py-0.5 text-xs text-gray-500 border border-gray-200">
               app.pandapraise.com/proof
             </span>
           </div>
@@ -600,24 +625,24 @@ export const LandingPage: React.FC = () => {
                 </span>
                 <div className="min-w-0">
                   <p className="truncate font-semibold text-gray-800">Erin Doyle</p>
-                  <p className="text-[11px] text-gray-400">Admin</p>
+                  <p className="text-xs text-gray-500">Admin</p>
                 </div>
               </div>
 
               <div>
-                <p className="text-[11px] font-bold tracking-wide text-gray-400">COLLECT</p>
+                <p className="text-xs font-bold tracking-wide text-gray-400">COLLECT</p>
                 <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Forms</p>
                 <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Import</p>
               </div>
 
               <div>
-                <p className="text-[11px] font-bold tracking-wide text-gray-400">MANAGE</p>
+                <p className="text-xs font-bold tracking-wide text-gray-400">MANAGE</p>
                 <p className="mt-1 rounded bg-[#6701e6]/10 px-2 py-1 font-bold text-[#6701e6]">Proof</p>
                 <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Tags</p>
               </div>
 
               <div>
-                <p className="text-[11px] font-bold tracking-wide text-gray-400">SHARE</p>
+                <p className="text-xs font-bold tracking-wide text-gray-400">SHARE</p>
                 <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Studio</p>
                 <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Thank Yous</p>
               </div>
@@ -631,15 +656,15 @@ export const LandingPage: React.FC = () => {
                 </p>
                 <Link
                   to="/signup"
-                  className="rounded-lg border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-700 hover:bg-gray-50"
+                  className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50"
                 >
                   + Invite a customer
                 </Link>
               </div>
 
               {/* Tag filters */}
-              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px]">
-                <span className="text-gray-400">Your customers talk about:</span>
+              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
+                <span className="text-gray-500">Your customers talk about:</span>
                 <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600">Ease of scheduling <b>42</b></span>
                 <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600">Time saved <b>38</b></span>
                 <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600">Customer support <b>29</b></span>
@@ -657,8 +682,8 @@ export const LandingPage: React.FC = () => {
                     className="bg-transparent focus:outline-none w-full text-xs text-gray-800"
                   />
                 </div>
-                <span className="hidden lg:block rounded-lg border border-gray-200 px-2 py-1.5 text-[11px] text-gray-600">All ⌄</span>
-                <span className="hidden lg:block rounded-lg border border-gray-200 px-2 py-1.5 text-[11px] text-gray-600">Tags ⌄</span>
+                <span className="hidden lg:block rounded-lg border border-gray-200 px-2 py-1.5 text-xs text-gray-600">All ⌄</span>
+                <span className="hidden lg:block rounded-lg border border-gray-200 px-2 py-1.5 text-xs text-gray-600">Tags ⌄</span>
               </div>
 
               {/* Matched Case Study Card */}
@@ -667,7 +692,7 @@ export const LandingPage: React.FC = () => {
                   <p className="text-xs font-bold text-gray-900">
                     How Hartley Plumbing cut missed jobs to zero in one month
                   </p>
-                  <p className="mt-1 text-[11px] text-[#6701e6]">
+                  <p className="mt-1 text-xs text-[#6701e6]">
                     ✨ Case study generated with Panda Praise AI · 1 metric
                   </p>
                 </div>
@@ -677,13 +702,13 @@ export const LandingPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-xs text-gray-900">Sam Marsh</span>
-                      <span className="text-[11px] text-gray-400">· Marsh & Sons Electrical</span>
+                      <span className="text-xs text-gray-500">· Marsh & Sons Electrical</span>
                     </div>
-                    <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">
+                    <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-xs font-bold text-emerald-600">
                       Approved
                     </span>
                   </div>
-                  <div className="text-[11px] text-amber-500 my-0.5">★★★★★</div>
+                  <div className="text-xs text-amber-500 my-0.5">★★★★★</div>
                   <p className="text-xs text-gray-700">"I was sure the techs would never use it. They picked it up in a day."</p>
                 </div>
 
@@ -692,13 +717,13 @@ export const LandingPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-xs text-gray-900">Dave Hartley</span>
-                      <span className="text-[11px] text-gray-400">· Owner, Hartley Plumbing</span>
+                      <span className="text-xs text-gray-500">· Owner, Hartley Plumbing</span>
                     </div>
-                    <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">
+                    <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-xs font-bold text-emerald-600">
                       Approved
                     </span>
                   </div>
-                  <div className="text-[11px] text-amber-500 my-0.5">★★★★★</div>
+                  <div className="text-xs text-amber-500 my-0.5">★★★★★</div>
                   <p className="text-xs text-gray-700">"Scheduling used to eat my Sundays. Now it runs itself and the lads just check their phones."</p>
                 </div>
               </div>
@@ -828,27 +853,92 @@ export const LandingPage: React.FC = () => {
                     More attention-grabbing widgets than anywhere else. Install once, updates automatically.
                   </p>
 
-                  {/* Widget tags list */}
-                  <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-3xl mx-auto">
-                    {[
-                      'Testimonial Image Gallery',
-                      'Testimonial Masonry',
-                      'Testimonial Marquee',
-                      'Testimonial Carousel',
-                      'Slab Carousel',
-                      'Rating Badge',
-                      'Bold Highlights',
-                      'Company Logos',
-                      'Single Video',
-                      'Social Star',
-                      'Hero Quotes',
-                      'Avatars Grid',
-                      'Candy Carousel',
-                    ].map((w) => (
-                      <span key={w} className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700">
-                        {w}
-                      </span>
-                    ))}
+                  {/* Categorized and structured widget tabs */}
+                  <div className="mt-6 flex flex-col items-center gap-3 max-w-3xl mx-auto" role="tablist" aria-label="Widget formats">
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1">Grids:</span>
+                      {[
+                        'Testimonial Image Gallery',
+                        'Testimonial Masonry',
+                        'Hero Quotes',
+                        'Avatars Grid',
+                      ].map((w) => {
+                        const isSelected = selectedWidgetTag === w;
+                        return (
+                          <button
+                            key={w}
+                            type="button"
+                            role="tab"
+                            aria-selected={isSelected}
+                            onClick={() => setSelectedWidgetTag(w)}
+                            className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+                              isSelected
+                                ? 'bg-[#6701e6] text-white shadow-xs'
+                                : 'border border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
+                            }`}
+                          >
+                            {w}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1">Sliders:</span>
+                      {[
+                        'Candy Carousel',
+                        'Testimonial Carousel',
+                        'Slab Carousel',
+                        'Testimonial Marquee',
+                      ].map((w) => {
+                        const isSelected = selectedWidgetTag === w;
+                        return (
+                          <button
+                            key={w}
+                            type="button"
+                            role="tab"
+                            aria-selected={isSelected}
+                            onClick={() => setSelectedWidgetTag(w)}
+                            className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+                              isSelected
+                                ? 'bg-[#6701e6] text-white shadow-xs'
+                                : 'border border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
+                            }`}
+                          >
+                            {w}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1">Badges:</span>
+                      {[
+                        'Rating Badge',
+                        'Bold Highlights',
+                        'Company Logos',
+                        'Social Star',
+                        'Single Video',
+                      ].map((w) => {
+                        const isSelected = selectedWidgetTag === w;
+                        return (
+                          <button
+                            key={w}
+                            type="button"
+                            role="tab"
+                            aria-selected={isSelected}
+                            onClick={() => setSelectedWidgetTag(w)}
+                            className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+                              isSelected
+                                ? 'bg-[#6701e6] text-white shadow-xs'
+                                : 'border border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
+                            }`}
+                          >
+                            {w}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Live Widget Cards Preview */}
@@ -1080,28 +1170,27 @@ export const LandingPage: React.FC = () => {
         <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-600">
           Whether you're a creator, run a SaaS, or sell your own kind of niche thing — Panda Praise is the go-to tool for collecting, managing, and showing off your social proof.
         </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-2.5 max-w-3xl mx-auto">
+        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-4xl mx-auto text-left">
           {[
-            'Creators',
-            'Communities',
-            'SaaS companies',
-            'Agencies',
-            'Course creators',
-            'Newsletters',
-            'Freelancers',
-            'Employees',
-            'Ecommerce',
-            'Sales teams',
-            'Real estate agents',
-            'Events',
-            'Coaches',
-          ].map((persona) => (
-            <span
-              key={persona}
-              className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-xs sm:text-sm font-medium text-gray-700 shadow-xs hover:border-[#6701e6]/40 hover:bg-[#6701e6]/5 hover:text-[#6701e6] transition-colors"
+            { persona: 'Creators', desc: 'Courses, ebooks & digital products', icon: '🎨' },
+            { persona: 'SaaS Companies', desc: 'Software, apps & web platforms', icon: '⚡' },
+            { persona: 'Agencies', desc: 'Design, marketing & client work', icon: '💼' },
+            { persona: 'Communities', desc: 'Memberships, forums & cohorts', icon: '👥' },
+            { persona: 'Newsletters', desc: 'Substack, Beehiiv & publications', icon: '📬' },
+            { persona: 'Freelancers', desc: 'Consultants, copywriters & pros', icon: '✍️' },
+            { persona: 'Ecommerce', desc: 'Direct-to-consumer & online shops', icon: '🛍️' },
+            { persona: 'Coaches & Mentors', desc: 'Executive, career & life coaching', icon: '🎯' },
+          ].map((item) => (
+            <div
+              key={item.persona}
+              className="rounded-xl border border-gray-200 bg-white p-3.5 shadow-xs"
             >
-              {persona}
-            </span>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-base" aria-hidden="true">{item.icon}</span>
+                <span className="text-xs sm:text-sm font-bold text-gray-900">{item.persona}</span>
+              </div>
+              <p className="text-xs text-gray-500 leading-snug">{item.desc}</p>
+            </div>
           ))}
         </div>
       </section>
@@ -1207,9 +1296,10 @@ export const LandingPage: React.FC = () => {
                 analytics.ctaClicked('closing_cta', '/signup');
                 analytics.signupStarted('closing_cta');
               }}
-              className="px-8 py-4 rounded-xl bg-white text-gray-950 font-bold text-base shadow-xl hover:bg-gray-100 hover:scale-105 transition-all"
+              className="px-8 py-4 rounded-xl bg-white text-gray-950 font-bold text-base shadow-xl hover:bg-gray-100 hover:scale-105 transition-all inline-flex items-center gap-2"
             >
-              Start for free today
+              <span>Start for free today</span>
+              <ArrowRight className="w-5 h-5 text-gray-950" aria-hidden="true" />
             </Link>
             <button
               onClick={handleLaunchDemo}
@@ -1233,7 +1323,7 @@ export const LandingPage: React.FC = () => {
 
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
             <Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link>
-            <Link to="/c/pandapraise-feedback" className="text-[#6701e6] hover:underline font-semibold">Leave a Review</Link>
+            <Link to="/c/pandapraise-feedback" className="hover:text-gray-900 transition-colors">Leave a Review</Link>
             <Link to="/privacy-policy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-gray-900 transition-colors">Terms</Link>
             <Link to="/login" className="hover:text-gray-900 transition-colors">Login</Link>
@@ -1242,20 +1332,24 @@ export const LandingPage: React.FC = () => {
         </div>
       </footer>
 
-      {/* ── 14. Floating Elements ── */}
-      {/* Senja-Class Vertical Floating Wall of Love Heart Tab on Right Edge */}
-      <FloatingReviewDrawer
-        reviews={INITIAL_REVIEWS}
-        variant="wall-heart"
-        defaultOpen={isWallModalOpen}
-      />
+      {/* ── 14. Floating Elements (Delayed on scroll to prevent hero distraction) ── */}
+      {showFloatingElements && (
+        <>
+          {/* Senja-Class Vertical Floating Wall of Love Heart Tab on Right Edge */}
+          <FloatingReviewDrawer
+            reviews={INITIAL_REVIEWS}
+            variant="wall-heart"
+            defaultOpen={isWallModalOpen}
+          />
 
-      {/* Senja-Class Social Proof Popup Toast on Bottom Left */}
-      <SocialProofToast
-        reviews={INITIAL_REVIEWS}
-        position="bottom-left"
-        onOpenWallOfLove={() => setIsWallModalOpen(true)}
-      />
+          {/* Senja-Class Social Proof Popup Toast on Bottom Left */}
+          <SocialProofToast
+            reviews={INITIAL_REVIEWS}
+            position="bottom-left"
+            onOpenWallOfLove={() => setIsWallModalOpen(true)}
+          />
+        </>
+      )}
     </div>
   );
 };
