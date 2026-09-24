@@ -207,10 +207,10 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Primary Product Value Proposition H1 */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display text-gray-950 tracking-tight leading-snug sm:leading-tight lg:leading-[1.2] max-w-4xl mx-auto">
-          Collect, Manage and Share Testimonials{' '}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display text-gray-950 tracking-tight leading-snug sm:leading-tight lg:leading-[1.15] max-w-4xl mx-auto">
+          Turn Customer Praise into{' '}
           <span className="senja-purple-mark my-1 sm:my-1.5">
-            Without the Hassle
+            Your #1 Sales Engine
           </span>
         </h1>
 
@@ -239,7 +239,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Subheadline with dotted underline */}
         <p className="mt-6 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          <span className="senja-dotted font-medium text-gray-900">Meet Panda Praise</span>. The easiest way to gather customer testimonials and case studies, then share them everywhere to increase trust and sales.
+          <span className="senja-dotted font-medium text-gray-900">Meet Panda Praise</span> — the all-in-one platform to collect, organize, and showcase verified testimonials that turn visitors into paying customers.
         </p>
 
         {/* 3 Green Checkmark Bullets */}
@@ -337,11 +337,14 @@ export const LandingPage: React.FC = () => {
       {/* ── 5. Before / After Comparison Meme Cards (Screenshot 2 Exact) ── */}
       <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <h2 id="comparison-heading" className="text-2xl sm:text-3xl font-extrabold font-display text-gray-950 tracking-tight">
-            The Difference Social Proof Makes
+          <p className="font-caveat text-3xl text-[#6701e6] -rotate-1 mb-1">
+            The proof advantage
+          </p>
+          <h2 id="comparison-heading" className="text-2xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight">
+            Why Top Brands Win with Social Proof
           </h2>
           <p className="text-xs sm:text-sm text-gray-600 mt-2">
-            See how Panda Praise transforms customer praise into your #1 conversion driver.
+            See the undeniable difference verified customer praise makes on your conversion rate.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
@@ -441,11 +444,11 @@ export const LandingPage: React.FC = () => {
         </p>
 
         <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight">
-          Create a simple collection form in 30 seconds
+          Collect Authentic Video & Text Reviews on Autopilot
         </h2>
 
         <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Create your form, customize it and add your personalized intro video. With Panda Praise you'll collect twice as many testimonials.
+          Create branded forms with custom video prompts in under 30 seconds. No apps, downloads, or customer logins required.
         </p>
 
         {/* 6 Two-Column Green Checkmarks */}
@@ -569,15 +572,15 @@ export const LandingPage: React.FC = () => {
 
         {/* Cursive kicker */}
         <p className="font-caveat text-3xl text-[#6701e6] rotate-1">
-          Find
+          Organize
         </p>
 
         <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight">
-          Where the f*ck is that screenshot?
+          Every Piece of Customer Proof, Instantly at Hand
         </h2>
 
         <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          The perfect testimonial for every pitch, page and post. With Panda Praise you'll have one place for all your proof, ready for you and your team to share.
+          Never hunt through screenshots, Slack threads, or emails again. Search, filter, and tag every review in one unified, searchable vault.
         </p>
 
         {/* Checklist */}
@@ -774,15 +777,15 @@ export const LandingPage: React.FC = () => {
           
           {/* Cursive kicker */}
           <p className="font-caveat text-3xl text-[#6701e6] -rotate-1">
-            Share everywhere
+            Publish
           </p>
 
           <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight">
-            One testimonial, 12 ways to share it
+            Turn One Great Review into 12 High-Converting Assets
           </h2>
 
           <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Don't let your best proof collect digital dust. Panda Praise turns every testimonial into widgets, videos, Reels, images, popups and case studies. Proof at every step of your funnel.
+            Put your social proof to work across your entire funnel — from dynamic website widgets and viral social reels to Wall of Love galleries and sales pitch assets.
           </p>
 
           {/* Checklist */}
@@ -846,11 +849,11 @@ export const LandingPage: React.FC = () => {
             <div className="mt-8">
               {activeShareTab === 'widgets' && (
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-900">
-                    Add testimonial widgets to your website
+                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
+                    Embed Pixel-Perfect Review Widgets on Any Website
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    More attention-grabbing widgets than anywhere else. Install once, updates automatically.
+                    Match your brand in seconds. Install once with copy-paste code, and watch approved testimonials update live.
                   </p>
 
                   {/* Categorized and structured widget tabs */}
@@ -962,11 +965,11 @@ export const LandingPage: React.FC = () => {
 
               {activeShareTab === 'videos' && (
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-900">
-                    Share video testimonials on your social media
+                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
+                    Turn Video Reviews into High-Impact Social Reels
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Get more visits to your site with stunning 9:16 vertical videos and Reels.
+                    Export high-retention 9:16 vertical videos with auto-subtitles, animated waveforms, and custom branding.
                   </p>
                   <div className="mt-6 mx-auto max-w-xs aspect-[9/16] rounded-2xl bg-zinc-950 text-white p-5 flex flex-col justify-between shadow-2xl relative">
                     <div className="flex items-center justify-between text-xs text-zinc-400">
@@ -979,7 +982,7 @@ export const LandingPage: React.FC = () => {
                       </div>
                       <p className="text-xs font-semibold">"This tool 3x'd our customer conversions!"</p>
                     </div>
-                    <div className="text-left text-[11px] text-zinc-300">
+                    <div className="text-left text-xs text-zinc-300">
                       <p className="font-bold text-white">@founder_growth</p>
                       <p className="text-zinc-400">Auto-captioned with waveform 🎵</p>
                     </div>
@@ -989,11 +992,11 @@ export const LandingPage: React.FC = () => {
 
               {activeShareTab === 'walls' && (
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-900">
-                    Link to Walls of Love in emails, navigations and bios
+                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
+                    Launch a Dedicated Wall of Love in Seconds
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Show off your best testimonials with our beautiful Walls of Love.
+                    Give potential buyers an irresistible stream of authentic customer praise that obliterates sales hesitation.
                   </p>
                   <div className="mt-4 flex flex-wrap justify-center gap-2">
                     {['Whimsical Theme', 'Noire Theme', 'Pastel Theme', 'Hong Kong Theme'].map((th) => (
@@ -1015,11 +1018,11 @@ export const LandingPage: React.FC = () => {
 
               {activeShareTab === 'popups' && (
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-900">
-                    Add testimonial popups to your website
+                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
+                    Drive Urgency with Real-Time Review Popups
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Add social proof in seconds and generate FOMO with stylish corner popups.
+                    Display live customer proof and authentic ratings at the exact moment visitors are deciding to purchase.
                   </p>
                   <p className="mt-4 text-xs text-purple-700 font-semibold">
                     Look at the bottom-left corner of this screen to see the live toaster in action!
@@ -1029,11 +1032,11 @@ export const LandingPage: React.FC = () => {
 
               {activeShareTab === 'images' && (
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-900">
-                    Share image testimonials on your socials
+                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
+                    Generate High-Converting Quote Graphics in One Click
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Drive visits, sales and signups with beautiful social cards.
+                    Design polished social cards ready to drive engagement on Twitter, LinkedIn, Instagram, and slide decks.
                   </p>
                   <div className="mt-6 max-w-md mx-auto p-5 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-xl text-left">
                     <div className="flex text-amber-300 text-xs mb-2">★★★★★</div>
@@ -1042,7 +1045,7 @@ export const LandingPage: React.FC = () => {
                       <div className="w-7 h-7 rounded-full bg-white text-purple-700 font-bold text-xs flex items-center justify-center">E</div>
                       <div className="text-xs">
                         <span className="font-bold">Elena Rostova</span>
-                        <span className="text-purple-200 block text-[10px]">VP Growth</span>
+                        <span className="text-purple-200 block text-xs">VP Growth</span>
                       </div>
                     </div>
                   </div>
@@ -1051,11 +1054,11 @@ export const LandingPage: React.FC = () => {
 
               {activeShareTab === 'hosting' && (
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-900">
-                    Unlimited, ad-free hosting for your video testimonials
+                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
+                    Lightning-Fast, Ad-Free Video Hosting Built In
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Ditch Wistia, YouTube and Vimeo. Add your video testimonials with dedicated, lightning-fast hosting.
+                    Ditch expensive third-party video hosts. Stream your video testimonials flawlessly with zero ads or tracking.
                   </p>
                   <div className="mt-6 inline-flex flex-col gap-2 text-xs text-gray-700 text-left">
                     <div className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> All your video testimonials in one place</div>
@@ -1099,15 +1102,15 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <p className="font-caveat text-3xl text-[#6701e6] rotate-1">
-            Thank
+            Reward
           </p>
 
           <h2 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight">
-            Thank every customer like it's still day one
+            Turn Happy Reviewers into Lifelong Advocates
           </h2>
 
           <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            You didn't grow by treating people like numbers. Send personal thank-you videos, gifts and notes, at any size.
+            Delight your biggest fans with automated thank-you notes, personalized video messages, and exclusive reward perks.
           </p>
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2 text-left max-w-2xl mx-auto text-xs sm:text-sm text-gray-700">
@@ -1165,10 +1168,10 @@ export const LandingPage: React.FC = () => {
           Built for you
         </p>
         <h2 className="mt-2 font-display text-3xl font-extrabold sm:text-4xl text-gray-950">
-          Whatever you make, Panda Praise fits how you work
+          Built for Every Business That Grows on Trust
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-600">
-          Whether you're a creator, run a SaaS, or offer a specialized product or service — Panda Praise is the go-to tool for collecting, managing, and sharing your social proof.
+          Whether you're a solo creator, an ambitious SaaS team, or a high-growth agency — Panda Praise powers customer proof that converts.
         </p>
         <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-4xl mx-auto text-left">
           {[
@@ -1198,12 +1201,12 @@ export const LandingPage: React.FC = () => {
       {/* ── 11. Frequently Asked Questions Section ── */}
       <section id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10 border-t border-gray-200">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <p className="font-caveat text-3xl text-[#6701e6]">Got Questions?</p>
+          <p className="font-caveat text-3xl text-[#6701e6]">Got questions?</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-gray-950 tracking-tight mt-1">
             Frequently Asked Questions
           </h2>
           <p className="text-sm text-gray-600 mt-2">
-            Everything you need to know about collecting and displaying testimonials with Panda Praise.
+            Everything you need to know about collecting, organizing, and publishing verified proof.
           </p>
         </div>
 
@@ -1266,12 +1269,12 @@ export const LandingPage: React.FC = () => {
         </div>
 
         <div className="relative mx-auto max-w-3xl px-6">
-          <p className="font-caveat text-3xl text-white/80">Testimonials made easy</p>
+          <p className="font-caveat text-3xl text-purple-200">Start in 2 minutes</p>
           <h2 className="mt-2 font-display text-3xl sm:text-5xl font-extrabold tracking-tight">
-            Ready to boost your business with social proof?
+            Turn Customer Praise into Pure Revenue
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm sm:text-base text-white/80 leading-relaxed">
-            Set up in minutes and discover how easy it is to collect, manage, and share the social proof that drives your business forward.
+          <p className="mx-auto mt-4 max-w-2xl text-sm sm:text-base text-white/90 leading-relaxed">
+            Set up your free collection workspace today. Collect video & text proof, build automated widgets, and watch your conversions climb.
           </p>
 
           <ul className="mx-auto mt-6 inline-flex flex-col gap-2 text-left text-xs sm:text-sm text-white/90">
