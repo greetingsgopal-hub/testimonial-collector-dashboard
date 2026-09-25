@@ -107,10 +107,10 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-gray-900 selection:bg-purple-500/20 selection:text-purple-900 relative overflow-hidden pb-20 sm:pb-0 font-sans">
+    <div className="min-h-screen bg-[#FFFFFF] text-[#0F172A] selection:bg-brand-500/20 selection:text-brand-900 relative pb-20 sm:pb-0 font-sans">
       
       {/* ── 1. Top Announcement Quiz Bar ── */}
-      <div className="bg-[#6701e6] hover:bg-[#5400bd] transition-colors text-white py-2 px-4 text-center relative z-50 flex items-center justify-center gap-2 shadow-xs text-xs sm:text-sm font-medium cursor-pointer">
+      <div className="bg-brand-600 hover:bg-brand-700 transition-colors text-white py-2 px-4 text-center relative z-40 flex items-center justify-center gap-2 shadow-xs text-xs sm:text-sm font-medium cursor-pointer">
         <Link to="/signup" className="flex items-center gap-1.5 hover:underline">
           <span className="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
             Free quiz
@@ -120,46 +120,46 @@ export const LandingPage: React.FC = () => {
         </Link>
       </div>
 
-      {/* Ambient background glow — Senja signature purple radial wash */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem]" style={{ background: 'radial-gradient(75rem 28rem at 50% -4rem, rgb(103 1 230 / 0.08), transparent)' }} />
+      {/* Ambient background glow */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem]" style={{ background: 'radial-gradient(75rem 28rem at 50% -4rem, rgb(79 70 229 / 0.08), transparent)' }} />
 
-      {/* ── 2. Header / Navigation ── */}
-      <header className="sticky top-0 z-40 w-full bg-white/95 border-b border-gray-200/80 backdrop-blur-md">
+      {/* ── 2. Header / Navigation (Sticky Frozen Navbar) ── */}
+      <header className="sticky top-0 z-50 w-full bg-white/95 border-b border-gray-200/80 backdrop-blur-md shadow-xs transition-shadow">
         <div className="max-w-6xl mx-auto px-6 h-18 flex items-center justify-between">
           
           {/* Logo strictly clean text "Panda Praise" */}
           <Link to="/" className="flex items-center gap-2 group">
-            <span className="font-display font-extrabold text-2xl tracking-tight text-gray-950 group-hover:text-purple-950 transition-colors">
-              Panda <span className="text-[#6701e6]">Praise</span>
+            <span className="font-display font-extrabold text-2xl tracking-tight text-gray-950 group-hover:text-brand-700 transition-colors">
+              Panda <span className="text-brand-600">Praise</span>
             </span>
           </Link>
 
           {/* Nav Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-            <Link to="/pricing" className="hover:text-[#6701e6] transition-colors">
+            <Link to="/pricing" className="hover:text-brand-600 transition-colors">
               Pricing
             </Link>
             <button
               onClick={() => scrollToSection('collect-section')}
-              className="hover:text-[#6701e6] transition-colors cursor-pointer"
+              className="hover:text-brand-600 transition-colors cursor-pointer"
             >
               Product
             </button>
             <button
               onClick={() => scrollToSection('share-section')}
-              className="hover:text-[#6701e6] transition-colors cursor-pointer"
+              className="hover:text-brand-600 transition-colors cursor-pointer"
             >
               Customers
             </button>
             <button
               onClick={() => scrollToSection('comparison-section')}
-              className="hover:text-[#6701e6] transition-colors cursor-pointer"
+              className="hover:text-brand-600 transition-colors cursor-pointer"
             >
               Why Panda Praise
             </button>
             <button
               onClick={() => scrollToSection('faq')}
-              className="hover:text-[#6701e6] transition-colors cursor-pointer"
+              className="hover:text-brand-600 transition-colors cursor-pointer"
             >
               Resources
             </button>
@@ -178,7 +178,7 @@ export const LandingPage: React.FC = () => {
                 </Link>
                 <Link
                   to="/dashboard?new=true"
-                  className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-semibold shadow-sm transition-all hover:scale-[1.02]"
+                  className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all hover:scale-[1.02]"
                 >
                   Start for free
                 </Link>
@@ -194,7 +194,7 @@ export const LandingPage: React.FC = () => {
                 <Link
                   to="/signup"
                   onClick={() => analytics.signupStarted('header_nav')}
-                  className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-semibold shadow-sm transition-all hover:scale-[1.02]"
+                  className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all hover:scale-[1.02]"
                 >
                   Start for free
                 </Link>
