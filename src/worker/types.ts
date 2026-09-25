@@ -13,6 +13,9 @@ export interface WorkerEnv {
   LINKEDIN_REDIRECT_URI?: string;
   APP_ENCRYPTION_KEY?: string;
   APP_ENCRYPTION_KEY_PREVIOUS?: string;
+  FIREBASE_SERVICE_ACCOUNT_KEY?: string;
+  FIREBASE_CLIENT_EMAIL?: string;
+  FIREBASE_PRIVATE_KEY?: string;
   NODE_ENV?: string;
 }
 

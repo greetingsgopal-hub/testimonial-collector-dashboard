@@ -1,4 +1,20 @@
 import { WorkerEnv } from '../types';
+import { getServiceAccountAccessToken } from './googleAuth';
+
+async function getAuthHeader(idToken?: string | null, env?: WorkerEnv): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (idToken) {
+    headers['Authorization'] = `Bearer ${idToken}`;
+    return headers;
+  }
+  if (env) {
+    const saToken = await getServiceAccountAccessToken(env);
+    if (saToken) {
+      headers['Authorization'] = `Bearer ${saToken}`;
+    }
+  }
+  return headers;
+}
 
 function getFirestoreBase(env: WorkerEnv): string {
   const projectId = env.FIREBASE_PROJECT_ID || env.VITE_FIREBASE_PROJECT_ID || 'testimonialcollectordashboard';
@@ -45,8 +61,7 @@ function fromFirestoreFields(fields: Record<string, any>): any {
 
 export async function getDocument(collectionName: string, docId: string, idToken?: string | null, env?: WorkerEnv): Promise<any | null> {
   const base = getFirestoreBase(env || ({} as any));
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
+  const headers = await getAuthHeader(idToken, env);
 
   const res = await fetch(`${base}/${collectionName}/${docId}`, { headers });
   if (res.status === 404) return null;
@@ -63,8 +78,7 @@ export async function getDocument(collectionName: string, docId: string, idToken
 
 export async function saveDocument(collectionName: string, docId: string, data: Record<string, any>, idToken?: string | null, env?: WorkerEnv): Promise<void> {
   const base = getFirestoreBase(env || ({} as any));
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
+  const headers = await getAuthHeader(idToken, env);
 
   const fields: Record<string, any> = {};
   for (const [k, v] of Object.entries(data)) {
@@ -87,8 +101,7 @@ export async function saveDocument(collectionName: string, docId: string, data: 
 
 export async function deleteDocument(collectionName: string, docId: string, idToken?: string | null, env?: WorkerEnv): Promise<void> {
   const base = getFirestoreBase(env || ({} as any));
-  const headers: Record<string, string> = {};
-  if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
+  const headers = await getAuthHeader(idToken, env);
 
   const res = await fetch(`${base}/${collectionName}/${docId}`, {
     method: 'DELETE',
@@ -104,8 +117,7 @@ export async function deleteDocument(collectionName: string, docId: string, idTo
 export async function queryUserDocuments(collectionName: string, ownerId: string, idToken?: string | null, env?: WorkerEnv): Promise<any[]> {
   const projectId = env?.FIREBASE_PROJECT_ID || env?.VITE_FIREBASE_PROJECT_ID || 'testimonialcollectordashboard';
   const queryUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`;
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
+  const headers = await getAuthHeader(idToken, env);
 
   const body = {
     structuredQuery: {
