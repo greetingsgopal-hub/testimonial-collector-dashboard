@@ -25,6 +25,12 @@ const LinkedInIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   </svg>
 );
 
+const FacebookBrandIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+  </svg>
+);
+
 const InstagramBrandIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none">
     <rect width="24" height="24" rx="6" fill="url(#ig-grad-view)" />
@@ -109,6 +115,19 @@ export const IntegrateView: React.FC = () => {
   const [disconnecting, setDisconnecting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Facebook Integration State
+  const [isFacebookConnected, setIsFacebookConnected] = useState<boolean>(() => {
+    return Boolean(localStorage.getItem('pandapraise_facebook_connected') === 'true');
+  });
+  const [facebookPageName, setFacebookPageName] = useState(() => {
+    return localStorage.getItem('pandapraise_facebook_name') || 'Panda Praise Official';
+  });
+  const [facebookAutoSync, setFacebookAutoSync] = useState<boolean>(() => {
+    return localStorage.getItem('pandapraise_facebook_auto_sync') !== 'false';
+  });
+  const [connectingFacebook, setConnectingFacebook] = useState(false);
+  const [disconnectingFacebook, setDisconnectingFacebook] = useState(false);
+
   // Instagram Integration State
   const [isInstagramConnected, setIsInstagramConnected] = useState<boolean>(() => {
     return Boolean(localStorage.getItem('pandapraise_instagram_connected') === 'true');
@@ -165,7 +184,7 @@ export const IntegrateView: React.FC = () => {
       setStripeWebhookSecret(storedSecret);
     }
 
-    // Check for LinkedIn or Instagram OAuth callback redirect
+    // Check for LinkedIn, Instagram, or Facebook OAuth callback redirect
     const params = new URLSearchParams(window.location.search);
     const socialConnected = params.get('social_connected');
     const accountName = params.get('account_name');
@@ -175,6 +194,13 @@ export const IntegrateView: React.FC = () => {
         localStorage.setItem('pandapraise_linkedin_name', accountName);
       }
       showToast(`✓ Connected to LinkedIn${accountName ? ` as ${accountName}` : ''}! 1-Click Social Publishing is now enabled.`);
+    } else if (socialConnected === 'facebook') {
+      localStorage.setItem('pandapraise_facebook_connected', 'true');
+      const formattedPage = accountName || 'Panda Praise Official';
+      localStorage.setItem('pandapraise_facebook_name', formattedPage);
+      setFacebookPageName(formattedPage);
+      setIsFacebookConnected(true);
+      showToast(`✓ Connected to Facebook Page (${formattedPage})! Automated comments and page ratings are syncing.`);
     } else if (socialConnected === 'instagram') {
       localStorage.setItem('pandapraise_instagram_connected', 'true');
       const formattedName = accountName ? `@${accountName.replace(/^@/, '')}` : '@pandapraise_official';
@@ -188,6 +214,34 @@ export const IntegrateView: React.FC = () => {
   const showToast = (msg: string) => {
     setFeedbackToast(msg);
     setTimeout(() => setFeedbackToast(null), 3500);
+  };
+
+  // Facebook Handlers
+  const handleConnectFacebook = () => {
+    setConnectingFacebook(true);
+    localStorage.setItem('pandapraise_facebook_auto_sync', facebookAutoSync ? 'true' : 'false');
+    window.location.href = '/api/auth/facebook';
+  };
+
+  const handleDisconnectFacebook = () => {
+    if (!confirm('Are you sure you want to disconnect Facebook Page review and comment sync?')) {
+      return;
+    }
+    setDisconnectingFacebook(true);
+    setTimeout(() => {
+      localStorage.removeItem('pandapraise_facebook_connected');
+      localStorage.removeItem('pandapraise_facebook_name');
+      setIsFacebookConnected(false);
+      setDisconnectingFacebook(false);
+      showToast('Facebook Page successfully disconnected.');
+    }, 400);
+  };
+
+  const handleToggleFacebookAutoSync = () => {
+    const nextVal = !facebookAutoSync;
+    setFacebookAutoSync(nextVal);
+    localStorage.setItem('pandapraise_facebook_auto_sync', nextVal ? 'true' : 'false');
+    showToast(nextVal ? 'Automated background sync enabled.' : 'Automated background sync paused.');
   };
 
   // Instagram Handlers
@@ -344,6 +398,15 @@ export const IntegrateView: React.FC = () => {
           description: 'Connect your personal profile or company page to publish approved testimonials directly to your feed with 1 click.',
           badgeType: isLinkedInConnected ? 'connected' : 'active',
           badgeLabel: isLinkedInConnected ? 'Connected' : 'Active',
+          isLiveOAuth: true,
+        },
+        {
+          id: 'facebook',
+          name: 'Facebook Page',
+          icon: <FacebookBrandIcon className="w-6 h-6 text-[#1877F2]" />,
+          description: 'Stream 5-star page ratings, verified recommendations, and post comments directly from your connected Facebook Page in the background.',
+          badgeType: isFacebookConnected ? 'connected' : 'active',
+          badgeLabel: isFacebookConnected ? 'Connected' : 'Active',
           isLiveOAuth: true,
         },
         {
@@ -885,6 +948,44 @@ export const IntegrateView: React.FC = () => {
                         </div>
                       )}
 
+                      {/* Special Facebook Connected Info */}
+                      {item.id === 'facebook' && isFacebookConnected && (
+                        <div className="mt-3 p-2.5 rounded-xl bg-blue-50/70 border border-blue-100 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 rounded-full bg-[#1877F2] flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                              fb
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <span className="text-[11px] font-bold text-blue-950 block truncate">
+                                {facebookPageName}
+                              </span>
+                              <span className="text-[10px] text-blue-700">Page reviews & comment stream active</span>
+                            </div>
+                          </div>
+
+                          {/* Background sync preference toggle */}
+                          <div className="flex items-center justify-between pt-1 border-t border-blue-200/50">
+                            <span className="text-[10.5px] font-medium text-blue-900">
+                              Background Auto Sync
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleToggleFacebookAutoSync}
+                              className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
+                                facebookAutoSync ? 'bg-[#1877F2]' : 'bg-gray-300'
+                              }`}
+                              title={facebookAutoSync ? 'Automated background polling enabled' : 'Automated background polling paused'}
+                            >
+                              <span
+                                className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow-2xs ring-0 transition duration-200 ease-in-out ${
+                                  facebookAutoSync ? 'translate-x-3' : 'translate-x-0'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Special Instagram Connected Info */}
                       {item.id === 'instagram' && isInstagramConnected && (
                         <div className="mt-3 p-2.5 rounded-xl bg-purple-50/70 border border-purple-100 flex items-center gap-2">
@@ -978,6 +1079,47 @@ export const IntegrateView: React.FC = () => {
                             ) : (
                               <>
                                 <span>Connect LinkedIn</span>
+                                <ArrowUpRight className="w-3.5 h-3.5" />
+                              </>
+                            )}
+                          </button>
+                        )
+                      )}
+
+                      {/* Facebook Card Actions */}
+                      {item.id === 'facebook' && (
+                        isFacebookConnected ? (
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 py-2 px-3 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold text-center flex items-center justify-center gap-1.5 shadow-2xs">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                              <span className="truncate">Connected to Facebook</span>
+                            </div>
+                            <button
+                              id="disconnect-facebook-btn"
+                              type="button"
+                              onClick={handleDisconnectFacebook}
+                              disabled={disconnectingFacebook}
+                              className="py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50 text-center shrink-0"
+                            >
+                              {disconnectingFacebook ? '...' : 'Disconnect'}
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            id="connect-facebook-btn"
+                            type="button"
+                            onClick={handleConnectFacebook}
+                            disabled={connectingFacebook}
+                            className="w-full py-2 px-3 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                          >
+                            {connectingFacebook ? (
+                              <>
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                <span>Redirecting to Meta...</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>Connect Facebook Page</span>
                                 <ArrowUpRight className="w-3.5 h-3.5" />
                               </>
                             )}

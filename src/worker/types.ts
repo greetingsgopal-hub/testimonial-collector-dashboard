@@ -18,12 +18,20 @@ export interface WorkerEnv {
   META_APP_ID?: string;
   META_APP_SECRET?: string;
   INSTAGRAM_REDIRECT_URI?: string;
+  FACEBOOK_REDIRECT_URI?: string;
+  META_WEBHOOK_VERIFY_TOKEN?: string;
   APP_ENCRYPTION_KEY?: string;
   APP_ENCRYPTION_KEY_PREVIOUS?: string;
   FIREBASE_SERVICE_ACCOUNT_KEY?: string;
   FIREBASE_CLIENT_EMAIL?: string;
   FIREBASE_PRIVATE_KEY?: string;
   NODE_ENV?: string;
+}
+
+export interface ScheduledEvent {
+  cron: string;
+  type: string;
+  scheduledTime: number;
 }
 
 export interface ExecutionContext {

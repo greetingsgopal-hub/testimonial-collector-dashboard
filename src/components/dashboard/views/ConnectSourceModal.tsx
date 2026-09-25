@@ -25,6 +25,12 @@ const InstagramIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
   </svg>
 );
 
+const FacebookBrandIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+  </svg>
+);
+
 interface PlatformItem {
   id: string;
   name: string;
@@ -39,8 +45,8 @@ interface PlatformItem {
 
 const PLATFORMS: PlatformItem[] = [
   { id: 'google', name: 'Google', category: 'Reviews', type: 'api', icon: 'https://www.google.com/favicon.ico', color: '#4285F4', inputLabel: 'Google Business Place ID / Profile URL', placeholder: 'e.g. ChIJN1t_tDeuEmsRUsoyG83frY4 or https://maps.google.com/...' },
+  { id: 'facebook', name: 'Facebook Page', category: 'Social & Reviews', type: 'api', icon: 'https://facebook.com/favicon.ico', color: '#1877F2', inputLabel: 'Facebook Page URL or Recommendation Link', placeholder: 'https://facebook.com/yourpage or https://facebook.com/yourpage/reviews' },
   { id: 'instagram', name: 'Instagram', category: 'Social & Comments', type: 'api', icon: 'https://instagram.com/favicon.ico', color: '#E4405F', inputLabel: 'Instagram Post or Reel URL', placeholder: 'https://www.instagram.com/p/... or https://www.instagram.com/reel/...' },
-  { id: 'facebook', name: 'Facebook', category: 'Social', type: 'url', icon: 'https://facebook.com/favicon.ico', color: '#1877F2', inputLabel: 'Public Post or Recommendation URL', placeholder: 'https://facebook.com/page/posts/12345...' },
   { id: 'twitter', name: 'Twitter / X', category: 'Social', type: 'url', icon: 'https://twitter.com/favicon.ico', color: '#000000', inputLabel: 'Tweet / Post URL', placeholder: 'https://x.com/username/status/1234567890' },
   { id: 'linkedin', name: 'LinkedIn', category: 'Social', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
   { id: 'g2', name: 'G2', category: 'B2B Software', type: 'api', icon: 'https://www.g2.com/favicon.ico', color: '#FF492C', inputLabel: 'G2 Product URL or API Token', placeholder: 'https://www.g2.com/products/your-product/reviews' },
@@ -83,6 +89,9 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   const [syncSuccess, setSyncSuccess] = useState(false);
   const [foundCount, setFoundCount] = useState<number>(0);
   const [detectedLocationName, setDetectedLocationName] = useState<string>('');
+  const [autoBackgroundSync, setAutoBackgroundSync] = useState<boolean>(() => {
+    return localStorage.getItem('pandapraise_facebook_auto_sync') !== 'false';
+  });
 
   if (!isOpen) return null;
 
@@ -127,6 +136,15 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   };
 
   /**
+   * Triggers the real backend OAuth 2.0 flow for Facebook Page reviews & comments
+   */
+  const handleFacebookOAuthRedirect = () => {
+    localStorage.setItem('pandapraise_facebook_auto_sync', autoBackgroundSync ? 'true' : 'false');
+    setIsProcessing(true);
+    window.location.href = '/api/auth/facebook';
+  };
+
+  /**
    * Triggers the real backend OAuth 2.0 flow for Instagram Business Account
    */
   const handleInstagramOAuthRedirect = () => {
@@ -135,7 +153,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   };
 
   /**
-   * Executes manual import for Place ID, Instagram URL, or general source
+   * Executes manual import for Place ID, Instagram URL, Facebook link, or general source
    */
   const handleExecuteImport = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,6 +206,8 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
       setFoundCount(currentPlatform.type === 'url' ? 1 : Math.floor(Math.random() * 12) + 6);
       if (selectedId === 'google') {
         setDetectedLocationName(inputUrl.trim() ? 'Google Business Location' : 'Google Maps Reviews');
+      } else if (selectedId === 'facebook') {
+        setDetectedLocationName(inputUrl.trim() ? 'Facebook Page Reviews' : 'Facebook Page Praise');
       } else if (selectedId === 'instagram') {
         setDetectedLocationName('Instagram Post Comments');
       }
@@ -324,11 +344,13 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
               <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full">
                 {selectedId === 'google' 
                   ? 'Google Reviews Sync' 
-                  : selectedId === 'instagram'
-                    ? 'Instagram Comments Sync'
-                    : currentPlatform.type === 'url' 
-                      ? 'Direct URL Import' 
-                      : 'API & Store Sync'}
+                  : selectedId === 'facebook'
+                    ? 'Facebook Page Sync'
+                    : selectedId === 'instagram'
+                      ? 'Instagram Comments Sync'
+                      : currentPlatform.type === 'url' 
+                        ? 'Direct URL Import' 
+                        : 'API & Store Sync'}
               </span>
             </div>
 
@@ -354,11 +376,13 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
                 <p className="text-[11px] text-gray-500 truncate">
                   {selectedId === 'google'
                     ? 'Sync 5-star customer ratings from Google Business Profile & Google Maps.'
-                    : selectedId === 'instagram'
-                      ? 'Capture customer praise comments & mentions from Instagram Business posts and reels.'
-                      : currentPlatform.type === 'url'
-                        ? 'Paste the public link to capture customer praise instantly.'
-                        : 'Connect your public profile or API key to sync verified ratings.'}
+                    : selectedId === 'facebook'
+                      ? 'Sync verified page ratings, recommendation reviews, and post comments directly from your Facebook Page.'
+                      : selectedId === 'instagram'
+                        ? 'Capture customer praise comments & mentions from Instagram Business posts and reels.'
+                        : currentPlatform.type === 'url'
+                          ? 'Paste the public link to capture customer praise instantly.'
+                          : 'Connect your public profile or API key to sync verified ratings.'}
                 </p>
               </div>
             </div>
@@ -366,8 +390,121 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
             {/* Form Content */}
             {!syncSuccess ? (
               <div className="space-y-4">
-                {/* ── SPECIALIZED INSTAGRAM VIEW ── */}
-                {selectedId === 'instagram' ? (
+                {/* ── SPECIALIZED FACEBOOK PAGE VIEW ── */}
+                {selectedId === 'facebook' ? (
+                  <div className="space-y-4">
+                    {/* Primary Meta OAuth Button */}
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/80 via-indigo-50/50 to-blue-50/30 border border-blue-100 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                          <FacebookBrandIcon className="w-3.5 h-3.5 text-[#1877F2]" />
+                          <span>Facebook Page Integration (Recommended)</span>
+                        </span>
+                        <span className="text-[10px] font-bold text-blue-700 bg-white px-2 py-0.5 rounded-full border border-blue-200 shadow-2xs">
+                          Meta Graph API
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-gray-600 leading-relaxed">
+                        Connect your official Facebook Page to ingest verified page recommendations and customer comments in real-time.
+                      </p>
+
+                      {/* Sync preference toggle */}
+                      <label className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/90 border border-blue-100 cursor-pointer transition-all hover:bg-white shadow-2xs">
+                        <input
+                          type="checkbox"
+                          checked={autoBackgroundSync}
+                          onChange={(e) => setAutoBackgroundSync(e.target.checked)}
+                          className="mt-0.5 rounded border-gray-300 text-[#1877F2] focus:ring-[#1877F2] cursor-pointer"
+                        />
+                        <div className="text-[11px] leading-tight">
+                          <span className="font-bold text-gray-900 block">
+                            Automatically keep syncing new comments and page ratings in the background.
+                          </span>
+                          <span className="text-gray-500 text-[10.5px]">
+                            Continuous polling via Cloudflare Worker Cron and real-time Meta webhooks.
+                          </span>
+                        </div>
+                      </label>
+
+                      <button
+                        type="button"
+                        onClick={handleFacebookOAuthRedirect}
+                        disabled={isProcessing}
+                        className="w-full py-2.5 px-4 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-md active:scale-[0.99] disabled:opacity-60"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            <span>Connecting to Meta...</span>
+                          </>
+                        ) : (
+                          <>
+                            <FacebookBrandIcon className="w-4 h-4" />
+                            <span>Connect Facebook Page</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="relative flex items-center justify-center">
+                      <div className="border-t border-gray-200 w-full"></div>
+                      <span className="bg-white px-2.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider relative">
+                        or link public page directly
+                      </span>
+                    </div>
+
+                    {/* Fallback Manual Link */}
+                    <form onSubmit={handleExecuteImport} className="space-y-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-gray-700 flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <Globe className="w-3.5 h-3.5 text-gray-400" />
+                            <span>Paste Facebook Page URL or Recommendation Link:</span>
+                          </span>
+                        </label>
+                        <input
+                          type="url"
+                          required
+                          value={inputUrl}
+                          onChange={(e) => setInputUrl(e.target.value)}
+                          placeholder="https://facebook.com/yourpage or https://facebook.com/yourpage/reviews"
+                          className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#1877F2]/20 focus:border-[#1877F2] transition-all"
+                        />
+                        <p className="text-[11px] text-gray-500">
+                          Extracts publicly visible recommendations, star ratings, and user comments.
+                        </p>
+                      </div>
+
+                      <div className="pt-2 flex items-center justify-end gap-2.5">
+                        <button
+                          type="button"
+                          onClick={handleBackToSelect}
+                          className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isProcessing}
+                          className="px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                        >
+                          {isProcessing ? (
+                            <>
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                              <span>Importing...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Import Page Ratings</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                ) : selectedId === 'instagram' ? (
                   <div className="space-y-4">
                     {/* Primary Meta OAuth Button */}
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-pink-50/80 via-purple-50/50 to-orange-50/50 border border-pink-100 space-y-2.5">

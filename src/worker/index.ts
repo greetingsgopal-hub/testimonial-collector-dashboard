@@ -1,4 +1,4 @@
-import { WorkerEnv, ExecutionContext } from './types';
+import { WorkerEnv, ExecutionContext, ScheduledEvent } from './types';
 import { handleOptionsPreflight } from './lib/cors';
 import { handleOAuthInit } from './handlers/oauthInit';
 import { handleOAuthCallback } from './handlers/oauthCallback';
@@ -10,17 +10,24 @@ import { handleLinkedInAuthCallback } from './handlers/linkedinAuthCallback';
 import { handleInstagramAuthInit } from './handlers/instagramAuthInit';
 import { handleInstagramAuthCallback } from './handlers/instagramAuthCallback';
 import { handleInstagramFetchMentions } from './handlers/instagramFetchMentions';
+import { handleFacebookAuthInit } from './handlers/facebookAuthInit';
+import { handleFacebookAuthCallback } from './handlers/facebookAuthCallback';
+import { handleFacebookWebhook } from './handlers/facebookWebhook';
 import { handleSocialPublish } from './handlers/socialPublish';
 import { handleSocialStatus } from './handlers/socialStatus';
 import { handleSocialDisconnect } from './handlers/socialDisconnect';
+import { executeAutomatedBackgroundSync } from './lib/backgroundSync';
 
 export default {
   async fetch(request: Request, env: WorkerEnv, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const pathname = url.pathname;
 
-    // Check if the request is destined for an API endpoint
-    const isApiRoute = pathname.startsWith('/api/') || pathname.startsWith('/.netlify/functions/');
+    // Check if the request is destined for an API endpoint or webhook
+    const isApiRoute =
+      pathname.startsWith('/api/') ||
+      pathname.startsWith('/.netlify/functions/') ||
+      pathname.startsWith('/api/webhook/');
 
     if (isApiRoute) {
       // 1. Handle CORS Preflight for API routes
@@ -31,6 +38,18 @@ export default {
       const endpoint = pathname.replace(/^\/(?:api|\.netlify\/functions)\//, '').split('?')[0].replace(/\/$/, '');
 
       switch (endpoint) {
+        case 'auth/facebook':
+        case 'facebook-auth':
+          return await handleFacebookAuthInit(request, env);
+
+        case 'auth/facebook/callback':
+        case 'facebook-callback':
+          return await handleFacebookAuthCallback(request, env);
+
+        case 'webhook/facebook':
+        case 'facebook-webhook':
+          return await handleFacebookWebhook(request, env);
+
         case 'auth/instagram':
         case 'instagram-auth':
           return await handleInstagramAuthInit(request, env);
@@ -94,5 +113,12 @@ export default {
     }
 
     return new Response('Asset binding not configured.', { status: 500 });
+  },
+
+  /**
+   * Automated cron trigger for background polling of Facebook and Instagram praise
+   */
+  async scheduled(event: ScheduledEvent, env: WorkerEnv, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(executeAutomatedBackgroundSync(event, env, ctx));
   },
 };
