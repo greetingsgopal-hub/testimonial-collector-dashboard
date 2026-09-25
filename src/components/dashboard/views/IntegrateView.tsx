@@ -25,6 +25,22 @@ const LinkedInIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   </svg>
 );
 
+const InstagramBrandIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none">
+    <rect width="24" height="24" rx="6" fill="url(#ig-grad-view)" />
+    <path d="M12 7.2A4.8 4.8 0 1 0 16.8 12 4.8 4.8 0 0 0 12 7.2zm0 7.9A3.1 3.1 0 1 1 15.1 12 3.1 3.1 0 0 1 12 15.1zm4.9-8.1a1.1 1.1 0 1 1-1.1-1.1 1.1 1.1 0 0 1 1.1 1.1zm3.1 3.1a5.8 5.8 0 0 0-.4-1.9 3.9 3.9 0 0 0-2.2-2.2 5.8 5.8 0 0 0-1.9-.4C14.3 3.5 13.9 3.5 12 3.5s-2.3 0-3.5.1a5.8 5.8 0 0 0-1.9.4 3.9 3.9 0 0 0-2.2 2.2 5.8 5.8 0 0 0-.4 1.9C3.9 9.3 3.9 9.7 3.9 12s0 2.7.1 3.5a5.8 5.8 0 0 0 .4 1.9 3.9 3.9 0 0 0 2.2 2.2 5.8 5.8 0 0 0 1.9.4c1.2.1 1.6.1 3.5.1s2.3 0 3.5-.1a5.8 5.8 0 0 0 1.9-.4 3.9 3.9 0 0 0 2.2-2.2 5.8 5.8 0 0 0 .4-1.9c.1-1.2.1-1.6.1-3.5s0-2.7-.1-3.5z" fill="#FFFFFF"/>
+    <defs>
+      <linearGradient id="ig-grad-view" x1="0" y1="24" x2="24" y2="0" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#FFDC80" />
+        <stop offset="0.25" stopColor="#F77737" />
+        <stop offset="0.5" stopColor="#F56040" />
+        <stop offset="0.75" stopColor="#FD1D1D" />
+        <stop offset="1" stopColor="#C13584" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 const StripeIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
     <path fill="#635BFF" d="M0 4a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v16a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V4z" />
@@ -93,6 +109,16 @@ export const IntegrateView: React.FC = () => {
   const [disconnecting, setDisconnecting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Instagram Integration State
+  const [isInstagramConnected, setIsInstagramConnected] = useState<boolean>(() => {
+    return Boolean(localStorage.getItem('pandapraise_instagram_connected') === 'true');
+  });
+  const [instagramAccountName, setInstagramAccountName] = useState(() => {
+    return localStorage.getItem('pandapraise_instagram_name') || '@pandapraise_official';
+  });
+  const [connectingInstagram, setConnectingInstagram] = useState(false);
+  const [disconnectingInstagram, setDisconnectingInstagram] = useState(false);
+
   // Stripe Integration State
   const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
   const [stripeSecretKey, setStripeSecretKey] = useState('');
@@ -139,7 +165,7 @@ export const IntegrateView: React.FC = () => {
       setStripeWebhookSecret(storedSecret);
     }
 
-    // Check for LinkedIn OAuth callback redirect
+    // Check for LinkedIn or Instagram OAuth callback redirect
     const params = new URLSearchParams(window.location.search);
     const socialConnected = params.get('social_connected');
     const accountName = params.get('account_name');
@@ -149,12 +175,39 @@ export const IntegrateView: React.FC = () => {
         localStorage.setItem('pandapraise_linkedin_name', accountName);
       }
       showToast(`✓ Connected to LinkedIn${accountName ? ` as ${accountName}` : ''}! 1-Click Social Publishing is now enabled.`);
+    } else if (socialConnected === 'instagram') {
+      localStorage.setItem('pandapraise_instagram_connected', 'true');
+      const formattedName = accountName ? `@${accountName.replace(/^@/, '')}` : '@pandapraise_official';
+      localStorage.setItem('pandapraise_instagram_name', formattedName);
+      setInstagramAccountName(formattedName);
+      setIsInstagramConnected(true);
+      showToast(`✓ Connected to Instagram Business Account (${formattedName})! Comment mentions are now syncing.`);
     }
   }, []);
 
   const showToast = (msg: string) => {
     setFeedbackToast(msg);
     setTimeout(() => setFeedbackToast(null), 3500);
+  };
+
+  // Instagram Handlers
+  const handleConnectInstagram = () => {
+    setConnectingInstagram(true);
+    window.location.href = '/api/auth/instagram';
+  };
+
+  const handleDisconnectInstagram = () => {
+    if (!confirm('Are you sure you want to disconnect Instagram comment sync?')) {
+      return;
+    }
+    setDisconnectingInstagram(true);
+    setTimeout(() => {
+      localStorage.removeItem('pandapraise_instagram_connected');
+      localStorage.removeItem('pandapraise_instagram_name');
+      setIsInstagramConnected(false);
+      setDisconnectingInstagram(false);
+      showToast('Instagram account successfully disconnected.');
+    }, 400);
   };
 
   // LinkedIn Handlers
@@ -291,6 +344,15 @@ export const IntegrateView: React.FC = () => {
           description: 'Connect your personal profile or company page to publish approved testimonials directly to your feed with 1 click.',
           badgeType: isLinkedInConnected ? 'connected' : 'active',
           badgeLabel: isLinkedInConnected ? 'Connected' : 'Active',
+          isLiveOAuth: true,
+        },
+        {
+          id: 'instagram',
+          name: 'Instagram',
+          icon: <InstagramBrandIcon className="w-6 h-6" />,
+          description: 'Sync praise comments, reel feedback, and customer shoutouts directly from your connected Instagram Business account.',
+          badgeType: isInstagramConnected ? 'connected' : 'active',
+          badgeLabel: isInstagramConnected ? 'Connected' : 'Active',
           isLiveOAuth: true,
         },
         {
@@ -823,6 +885,21 @@ export const IntegrateView: React.FC = () => {
                         </div>
                       )}
 
+                      {/* Special Instagram Connected Info */}
+                      {item.id === 'instagram' && isInstagramConnected && (
+                        <div className="mt-3 p-2.5 rounded-xl bg-purple-50/70 border border-purple-100 flex items-center gap-2">
+                          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#FFDC80] via-[#FD1D1D] to-[#C13584] flex items-center justify-center text-white text-[10px] font-bold">
+                            ig
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[11px] font-bold text-purple-950 block truncate">
+                              {instagramAccountName}
+                            </span>
+                            <span className="text-[10px] text-purple-700">Comment & Mention sync active</span>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Special Stripe Connected Info */}
                       {item.id === 'stripe' && isStripeConnected && (
                         <div className="mt-3 p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 flex items-center justify-between gap-2">
@@ -901,6 +978,47 @@ export const IntegrateView: React.FC = () => {
                             ) : (
                               <>
                                 <span>Connect LinkedIn</span>
+                                <ArrowUpRight className="w-3.5 h-3.5" />
+                              </>
+                            )}
+                          </button>
+                        )
+                      )}
+
+                      {/* Instagram Card Actions */}
+                      {item.id === 'instagram' && (
+                        isInstagramConnected ? (
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 py-2 px-3 rounded-xl bg-purple-50 text-purple-800 border border-purple-200 text-xs font-bold text-center flex items-center justify-center gap-1.5 shadow-2xs">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                              <span className="truncate">Connected to Instagram</span>
+                            </div>
+                            <button
+                              id="disconnect-instagram-btn"
+                              type="button"
+                              onClick={handleDisconnectInstagram}
+                              disabled={disconnectingInstagram}
+                              className="py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50 text-center shrink-0"
+                            >
+                              {disconnectingInstagram ? '...' : 'Disconnect'}
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            id="connect-instagram-btn"
+                            type="button"
+                            onClick={handleConnectInstagram}
+                            disabled={connectingInstagram}
+                            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-90 text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                          >
+                            {connectingInstagram ? (
+                              <>
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                <span>Redirecting to Meta...</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>Connect Instagram</span>
                                 <ArrowUpRight className="w-3.5 h-3.5" />
                               </>
                             )}

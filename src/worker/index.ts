@@ -7,6 +7,9 @@ import { handleGoogleAuthCallback } from './handlers/googleAuthCallback';
 import { handleGooglePlaceImport } from './handlers/googlePlaceImport';
 import { handleLinkedInAuthInit } from './handlers/linkedinAuthInit';
 import { handleLinkedInAuthCallback } from './handlers/linkedinAuthCallback';
+import { handleInstagramAuthInit } from './handlers/instagramAuthInit';
+import { handleInstagramAuthCallback } from './handlers/instagramAuthCallback';
+import { handleInstagramFetchMentions } from './handlers/instagramFetchMentions';
 import { handleSocialPublish } from './handlers/socialPublish';
 import { handleSocialStatus } from './handlers/socialStatus';
 import { handleSocialDisconnect } from './handlers/socialDisconnect';
@@ -28,6 +31,19 @@ export default {
       const endpoint = pathname.replace(/^\/(?:api|\.netlify\/functions)\//, '').split('?')[0].replace(/\/$/, '');
 
       switch (endpoint) {
+        case 'auth/instagram':
+        case 'instagram-auth':
+          return await handleInstagramAuthInit(request, env);
+
+        case 'auth/instagram/callback':
+        case 'instagram-callback':
+          return await handleInstagramAuthCallback(request, env);
+
+        case 'instagram/fetch-mentions':
+        case 'instagram-fetch-mentions':
+        case 'instagram/import-post':
+          return await handleInstagramFetchMentions(request, env);
+
         case 'auth/linkedin':
         case 'linkedin-auth':
           return await handleLinkedInAuthInit(request, env);

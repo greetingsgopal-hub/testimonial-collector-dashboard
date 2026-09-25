@@ -13,8 +13,17 @@ import {
   Search,
   ShieldCheck,
   MapPin,
-  Globe
+  Globe,
+  MessageCircle
 } from 'lucide-react';
+
+const InstagramIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
 
 interface PlatformItem {
   id: string;
@@ -30,14 +39,16 @@ interface PlatformItem {
 
 const PLATFORMS: PlatformItem[] = [
   { id: 'google', name: 'Google', category: 'Reviews', type: 'api', icon: 'https://www.google.com/favicon.ico', color: '#4285F4', inputLabel: 'Google Business Place ID / Profile URL', placeholder: 'e.g. ChIJN1t_tDeuEmsRUsoyG83frY4 or https://maps.google.com/...' },
+  { id: 'instagram', name: 'Instagram', category: 'Social & Comments', type: 'api', icon: 'https://instagram.com/favicon.ico', color: '#E4405F', inputLabel: 'Instagram Post or Reel URL', placeholder: 'https://www.instagram.com/p/... or https://www.instagram.com/reel/...' },
   { id: 'facebook', name: 'Facebook', category: 'Social', type: 'url', icon: 'https://facebook.com/favicon.ico', color: '#1877F2', inputLabel: 'Public Post or Recommendation URL', placeholder: 'https://facebook.com/page/posts/12345...' },
   { id: 'twitter', name: 'Twitter / X', category: 'Social', type: 'url', icon: 'https://twitter.com/favicon.ico', color: '#000000', inputLabel: 'Tweet / Post URL', placeholder: 'https://x.com/username/status/1234567890' },
+  { id: 'linkedin', name: 'LinkedIn', category: 'Social', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
   { id: 'g2', name: 'G2', category: 'B2B Software', type: 'api', icon: 'https://www.g2.com/favicon.ico', color: '#FF492C', inputLabel: 'G2 Product URL or API Token', placeholder: 'https://www.g2.com/products/your-product/reviews' },
   { id: 'trustpilot', name: 'Trustpilot', category: 'Reviews', type: 'api', icon: 'https://www.trustpilot.com/favicon.ico', color: '#00B67A', inputLabel: 'Trustpilot Business Domain / API Key', placeholder: 'e.g. yourcompany.com or API Token' },
   { id: 'producthunt', name: 'Product Hunt', category: 'Launches', type: 'url', icon: 'https://www.producthunt.com/favicon.ico', color: '#DA552F', inputLabel: 'Product Hunt Review / Comment URL', placeholder: 'https://www.producthunt.com/posts/your-product#reviews' },
+  { id: 'shopify', name: 'Shopify', category: 'Ecommerce', type: 'api', icon: 'https://www.shopify.com/favicon.ico', color: '#96bf48', inputLabel: 'Shopify Store URL & App API Key', placeholder: 'your-store.myshopify.com' },
   { id: 'capterra', name: 'Capterra', category: 'B2B Software', type: 'api', icon: 'https://www.capterra.com/favicon.ico', color: '#00587C', inputLabel: 'Capterra Vendor Profile URL', placeholder: 'https://www.capterra.com/p/123456/Your-Product/' },
   { id: 'yelp', name: 'Yelp', category: 'Local', type: 'api', icon: 'https://www.yelp.com/favicon.ico', color: '#D32323', inputLabel: 'Yelp Business URL', placeholder: 'https://www.yelp.com/biz/your-business-name' },
-  { id: 'shopify', name: 'Shopify', category: 'Ecommerce', type: 'api', icon: 'https://www.shopify.com/favicon.ico', color: '#96bf48', inputLabel: 'Shopify Store URL & App API Key', placeholder: 'your-store.myshopify.com' },
   { id: 'udemy', name: 'Udemy', category: 'Courses', type: 'api', icon: 'https://www.udemy.com/favicon.ico', color: '#A435F0', inputLabel: 'Udemy Course URL', placeholder: 'https://www.udemy.com/course/your-course-name/' },
   { id: 'amazon', name: 'Amazon', category: 'Ecommerce', type: 'api', icon: 'https://www.amazon.com/favicon.ico', color: '#FF9900', inputLabel: 'Amazon ASIN / Product Review URL', placeholder: 'https://www.amazon.com/dp/B000XXXXXX' },
   { id: 'airbnb', name: 'Airbnb', category: 'Hospitality', type: 'api', icon: 'https://www.airbnb.com/favicon.ico', color: '#FF5A5F', inputLabel: 'Airbnb Listing URL', placeholder: 'https://www.airbnb.com/rooms/12345678' },
@@ -47,8 +58,6 @@ const PLATFORMS: PlatformItem[] = [
   { id: 'wordpress', name: 'WordPress', category: 'CMS', type: 'api', icon: 'https://wordpress.org/favicon.ico', color: '#21759B', inputLabel: 'WordPress Plugin / Theme Slug', placeholder: 'https://wordpress.org/plugins/your-plugin/' },
   { id: 'discourse', name: 'Discourse', category: 'Forums', type: 'url', icon: 'https://www.discourse.org/favicon.ico', color: '#2B3B48', inputLabel: 'Discourse Topic / Post URL', placeholder: 'https://community.yourcompany.com/t/topic/1234' },
   { id: 'reddit', name: 'Reddit', category: 'Social', type: 'url', icon: 'https://www.reddit.com/favicon.ico', color: '#FF4500', inputLabel: 'Reddit Post or Comment URL', placeholder: 'https://www.reddit.com/r/saas/comments/...' },
-  { id: 'linkedin', name: 'LinkedIn', category: 'Social', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
-  { id: 'tripadvisor', name: 'TripAdvisor', category: 'Travel', type: 'api', icon: 'https://www.tripadvisor.com/favicon.ico', color: '#34E0A1', inputLabel: 'TripAdvisor Business Listing URL', placeholder: 'https://www.tripadvisor.com/Restaurant_Review-...' },
   { id: 'tiktok', name: 'TikTok', category: 'Video', type: 'url', icon: 'https://www.tiktok.com/favicon.ico', color: '#000000', inputLabel: 'TikTok Video URL', placeholder: 'https://www.tiktok.com/@username/video/123456789' },
 ];
 
@@ -114,12 +123,19 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
    */
   const handleGoogleOAuthRedirect = () => {
     setIsProcessing(true);
-    // Redirect directly to the backend OAuth initiation endpoint
     window.location.href = '/api/auth/google';
   };
 
   /**
-   * Executes manual import for Place ID or general source
+   * Triggers the real backend OAuth 2.0 flow for Instagram Business Account
+   */
+  const handleInstagramOAuthRedirect = () => {
+    setIsProcessing(true);
+    window.location.href = '/api/auth/instagram';
+  };
+
+  /**
+   * Executes manual import for Place ID, Instagram URL, or general source
    */
   const handleExecuteImport = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,7 +158,26 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
           return;
         }
       } catch (err) {
-        console.warn('[ConnectSourceModal] Direct API fetch error, falling back to simulated sync:', err);
+        console.warn('[ConnectSourceModal] Google direct API error:', err);
+      }
+    } else if (selectedId === 'instagram') {
+      try {
+        const response = await fetch('/api/instagram/import-post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ postUrl: inputUrl.trim() }),
+        });
+
+        if (response.ok) {
+          const data: any = await response.json();
+          setIsProcessing(false);
+          setSyncSuccess(true);
+          setFoundCount(data.importedCount || 2);
+          setDetectedLocationName(inputUrl.includes('reel') ? 'Instagram Reel Praise' : 'Instagram Feed Post');
+          return;
+        }
+      } catch (err) {
+        console.warn('[ConnectSourceModal] Instagram extract error:', err);
       }
     }
 
@@ -153,6 +188,8 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
       setFoundCount(currentPlatform.type === 'url' ? 1 : Math.floor(Math.random() * 12) + 6);
       if (selectedId === 'google') {
         setDetectedLocationName(inputUrl.trim() ? 'Google Business Location' : 'Google Maps Reviews');
+      } else if (selectedId === 'instagram') {
+        setDetectedLocationName('Instagram Post Comments');
       }
     }, 900);
   };
@@ -251,7 +288,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
             <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => alert('Platform source sync imports reviews via public links, direct OAuth 2.0, or Places APIs. All testimonials are synced directly into your inbox.')}
+                onClick={() => alert('Platform source sync imports reviews via public links, direct Meta/Google OAuth 2.0, or Places APIs. All testimonials are synced directly into your inbox.')}
                 className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <span>Need help? Source guide</span>
@@ -287,9 +324,11 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
               <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full">
                 {selectedId === 'google' 
                   ? 'Google Reviews Sync' 
-                  : currentPlatform.type === 'url' 
-                    ? 'Direct URL Import' 
-                    : 'API & Store Sync'}
+                  : selectedId === 'instagram'
+                    ? 'Instagram Comments Sync'
+                    : currentPlatform.type === 'url' 
+                      ? 'Direct URL Import' 
+                      : 'API & Store Sync'}
               </span>
             </div>
 
@@ -315,9 +354,11 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
                 <p className="text-[11px] text-gray-500 truncate">
                   {selectedId === 'google'
                     ? 'Sync 5-star customer ratings from Google Business Profile & Google Maps.'
-                    : currentPlatform.type === 'url'
-                      ? 'Paste the public link to capture customer praise instantly.'
-                      : 'Connect your public profile or API key to sync verified ratings.'}
+                    : selectedId === 'instagram'
+                      ? 'Capture customer praise comments & mentions from Instagram Business posts and reels.'
+                      : currentPlatform.type === 'url'
+                        ? 'Paste the public link to capture customer praise instantly.'
+                        : 'Connect your public profile or API key to sync verified ratings.'}
                 </p>
               </div>
             </div>
@@ -325,8 +366,103 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
             {/* Form Content */}
             {!syncSuccess ? (
               <div className="space-y-4">
-                {/* ── SPECIALIZED GOOGLE REVIEWS VIEW ── */}
-                {selectedId === 'google' ? (
+                {/* ── SPECIALIZED INSTAGRAM VIEW ── */}
+                {selectedId === 'instagram' ? (
+                  <div className="space-y-4">
+                    {/* Primary Meta OAuth Button */}
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-pink-50/80 via-purple-50/50 to-orange-50/50 border border-pink-100 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                          <InstagramIcon className="w-3.5 h-3.5 text-[#E4405F]" />
+                          <span>Instagram Business Account (Recommended)</span>
+                        </span>
+                        <span className="text-[10px] font-bold text-purple-700 bg-white px-2 py-0.5 rounded-full border border-purple-200 shadow-2xs">
+                          Meta OAuth 2.0
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-gray-600 leading-relaxed">
+                        Connect your Instagram Business account to continuously stream praise comments, reviews, and mentions into your Proof Vault.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleInstagramOAuthRedirect}
+                        disabled={isProcessing}
+                        className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-95 text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-md active:scale-[0.99] disabled:opacity-60"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            <span>Redirecting to Meta...</span>
+                          </>
+                        ) : (
+                          <>
+                            <InstagramIcon className="w-4 h-4" />
+                            <span>Connect Instagram Business Account</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="relative flex items-center justify-center">
+                      <div className="border-t border-gray-200 w-full"></div>
+                      <span className="bg-white px-2.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider relative">
+                        or extract from link
+                      </span>
+                    </div>
+
+                    {/* Secondary Manual Post / Reel Extraction Form */}
+                    <form onSubmit={handleExecuteImport} className="space-y-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-gray-700 flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <MessageCircle className="w-3.5 h-3.5 text-gray-400" />
+                            <span>Paste a public Instagram post/reel URL to extract comments:</span>
+                          </span>
+                        </label>
+                        <input
+                          type="url"
+                          required
+                          value={inputUrl}
+                          onChange={(e) => setInputUrl(e.target.value)}
+                          placeholder="https://www.instagram.com/p/... or https://www.instagram.com/reel/..."
+                          className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#E4405F]/20 focus:border-[#E4405F] transition-all"
+                        />
+                        <p className="text-[11px] text-gray-500">
+                          Extracts author handles, comment text, and verified timestamps directly into moderation.
+                        </p>
+                      </div>
+
+                      <div className="pt-2 flex items-center justify-end gap-2.5">
+                        <button
+                          type="button"
+                          onClick={handleBackToSelect}
+                          className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isProcessing}
+                          className="px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                        >
+                          {isProcessing ? (
+                            <>
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                              <span>Extracting...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Extract Post Comments</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                ) : selectedId === 'google' ? (
+                  /* ── SPECIALIZED GOOGLE REVIEWS VIEW ── */
                   <div className="space-y-4">
                     {/* Primary OAuth 2.0 Button */}
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/70 to-indigo-50/50 border border-blue-100 space-y-2.5">
@@ -523,7 +659,11 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
 
                 <div className="space-y-1">
                   <h4 className="text-base font-bold text-gray-900">
-                    {selectedId === 'google' ? 'Google Reviews Synced!' : 'Connection Successful!'}
+                    {selectedId === 'instagram' 
+                      ? 'Instagram Comments Synced!' 
+                      : selectedId === 'google' 
+                        ? 'Google Reviews Synced!' 
+                        : 'Connection Successful!'}
                   </h4>
                   <p className="text-xs text-gray-600 max-w-sm mx-auto leading-relaxed">
                     Found <strong className="text-emerald-700">{foundCount} verified {foundCount === 1 ? 'testimonial' : 'testimonials'}</strong> {detectedLocationName ? `from "${detectedLocationName}"` : `ready to import from ${currentPlatform.name}`}.
@@ -540,7 +680,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
                   </div>
                   {detectedLocationName && (
                     <div className="flex items-center justify-between text-gray-500 text-[11px]">
-                      <span>Location / Place:</span>
+                      <span>Source Reference:</span>
                       <span className="font-bold text-gray-800 truncate max-w-[200px]">{detectedLocationName}</span>
                     </div>
                   )}

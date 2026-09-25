@@ -15,6 +15,9 @@ export interface WorkerEnv {
   GOOGLE_CLIENT_SECRET?: string;
   GOOGLE_REDIRECT_URI?: string;
   GOOGLE_PLACES_API_KEY?: string;
+  META_APP_ID?: string;
+  META_APP_SECRET?: string;
+  INSTAGRAM_REDIRECT_URI?: string;
   APP_ENCRYPTION_KEY?: string;
   APP_ENCRYPTION_KEY_PREVIOUS?: string;
   FIREBASE_SERVICE_ACCOUNT_KEY?: string;
