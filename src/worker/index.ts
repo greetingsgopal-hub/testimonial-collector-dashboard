@@ -5,6 +5,8 @@ import { handleOAuthCallback } from './handlers/oauthCallback';
 import { handleGoogleAuthInit } from './handlers/googleAuthInit';
 import { handleGoogleAuthCallback } from './handlers/googleAuthCallback';
 import { handleGooglePlaceImport } from './handlers/googlePlaceImport';
+import { handleLinkedInAuthInit } from './handlers/linkedinAuthInit';
+import { handleLinkedInAuthCallback } from './handlers/linkedinAuthCallback';
 import { handleSocialPublish } from './handlers/socialPublish';
 import { handleSocialStatus } from './handlers/socialStatus';
 import { handleSocialDisconnect } from './handlers/socialDisconnect';
@@ -26,6 +28,14 @@ export default {
       const endpoint = pathname.replace(/^\/(?:api|\.netlify\/functions)\//, '').split('?')[0].replace(/\/$/, '');
 
       switch (endpoint) {
+        case 'auth/linkedin':
+        case 'linkedin-auth':
+          return await handleLinkedInAuthInit(request, env);
+
+        case 'auth/linkedin/callback':
+        case 'linkedin-callback':
+          return await handleLinkedInAuthCallback(request, env);
+
         case 'auth/google':
         case 'google-auth':
           return await handleGoogleAuthInit(request, env);

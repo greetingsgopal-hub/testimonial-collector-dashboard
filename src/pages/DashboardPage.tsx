@@ -104,8 +104,8 @@ export const DashboardPage = () => {
     const accountName = params.get('account_name');
     const socialError = params.get('social_error');
     const requestedTab = params.get('tab');
-
-    if (socialConnected || requestedTab === 'integrate') {
+    const pathname = window.location.pathname;
+    if (socialConnected || requestedTab === 'integrate' || pathname.includes('/integrate')) {
       setActiveTab('integrate');
     }
 
