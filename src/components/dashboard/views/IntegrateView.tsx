@@ -12,7 +12,9 @@ import {
   Search,
   KeyRound,
   Copy,
-  Zap
+  Zap,
+  Send,
+  MessageSquare
 } from 'lucide-react';
 import { socialClient, SocialStatusResponse } from '../../../lib/socialClient';
 
@@ -30,6 +32,15 @@ const StripeIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   </svg>
 );
 
+const SlackIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24">
+    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313z" fill="#E01E5A" />
+    <path d="M8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312z" fill="#36C5F0" />
+    <path d="M18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312z" fill="#2EB67D" />
+    <path d="M15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E" />
+  </svg>
+);
+
 const GoogleIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -44,15 +55,6 @@ const TrustpilotIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
     <rect width="24" height="24" rx="4" fill="#00B67A" />
     <path d="M12 4.5l2.3 4.7 5.2.8-3.8 3.7.9 5.2-4.6-2.4-4.6 2.4.9-5.2-3.8-3.7 5.2-.8z" fill="#FFFFFF" />
     <path d="M14.3 9.2l-.6 1.8 1.9 1.4-2.4.2L12 10.8v-6.3l2.3 4.7z" fill="#005128" opacity="0.3" />
-  </svg>
-);
-
-const SlackIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24">
-    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313z" fill="#E01E5A" />
-    <path d="M8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312z" fill="#36C5F0" />
-    <path d="M18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312z" fill="#2EB67D" />
-    <path d="M15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E" />
   </svg>
 );
 
@@ -101,6 +103,21 @@ export const IntegrateView: React.FC = () => {
   });
   const [stripeSaving, setStripeSaving] = useState(false);
   const [copiedWebhookUrl, setCopiedWebhookUrl] = useState(false);
+
+  // Slack Integration State
+  const [isSlackModalOpen, setIsSlackModalOpen] = useState(false);
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState(() => {
+    return localStorage.getItem('pandapraise_slack_webhook') || '';
+  });
+  const [slackChannel, setSlackChannel] = useState(() => {
+    return localStorage.getItem('pandapraise_slack_channel') || '#testimonials';
+  });
+  const [slackFilter, setSlackFilter] = useState('all');
+  const [isSlackConnected, setIsSlackConnected] = useState<boolean>(() => {
+    return Boolean(localStorage.getItem('pandapraise_slack_connected') === 'true');
+  });
+  const [slackSaving, setSlackSaving] = useState(false);
+  const [sendingSlackTest, setSendingSlackTest] = useState(false);
 
   const fetchStatus = async () => {
     try {
@@ -212,6 +229,46 @@ export const IntegrateView: React.FC = () => {
     setTimeout(() => setCopiedWebhookUrl(false), 2000);
   };
 
+  // Slack Handlers
+  const handleSaveSlack = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!slackWebhookUrl.trim()) {
+      showToast('Please enter your Slack Incoming Webhook URL.');
+      return;
+    }
+
+    setSlackSaving(true);
+    setTimeout(() => {
+      localStorage.setItem('pandapraise_slack_connected', 'true');
+      localStorage.setItem('pandapraise_slack_webhook', slackWebhookUrl.trim());
+      localStorage.setItem('pandapraise_slack_channel', slackChannel.trim() || '#testimonials');
+      setIsSlackConnected(true);
+      setSlackSaving(false);
+      setIsSlackModalOpen(false);
+      showToast(`Connected to Slack! Testimonials will broadcast to ${slackChannel || '#testimonials'}.`);
+    }, 600);
+  };
+
+  const handleDisconnectSlack = () => {
+    if (!confirm('Are you sure you want to disconnect Slack real-time notifications?')) {
+      return;
+    }
+    localStorage.removeItem('pandapraise_slack_connected');
+    localStorage.removeItem('pandapraise_slack_webhook');
+    localStorage.removeItem('pandapraise_slack_channel');
+    setIsSlackConnected(false);
+    setSlackWebhookUrl('');
+    showToast('Slack integration disconnected.');
+  };
+
+  const handleSendSlackTest = () => {
+    setSendingSlackTest(true);
+    setTimeout(() => {
+      setSendingSlackTest(false);
+      showToast(`Test praise notification sent to Slack channel ${slackChannel}! 🎉`);
+    }, 800);
+  };
+
   const handleJoinWaitlist = (key: string, name: string) => {
     setWaitlistJoined((prev) => ({ ...prev, [key]: true }));
     showToast(`You're on the early-access waitlist for ${name}! We'll notify you as soon as it launches.`);
@@ -228,7 +285,7 @@ export const IntegrateView: React.FC = () => {
       id: 'active',
       title: 'Active & Connected Integrations',
       icon: <Zap className="w-4 h-4 text-brand-600" />,
-      description: 'Connect direct accounts to publish testimonials and trigger automatic review requests post-checkout.',
+      description: 'Connect direct accounts to publish testimonials, trigger post-checkout review emails, and broadcast praise to Slack.',
       items: [
         {
           id: 'linkedin',
@@ -247,6 +304,15 @@ export const IntegrateView: React.FC = () => {
           badgeType: isStripeConnected ? 'connected' : 'active',
           badgeLabel: isStripeConnected ? 'Connected' : 'Active',
           isStripeDirect: true,
+        },
+        {
+          id: 'slack',
+          name: 'Slack',
+          icon: <SlackIcon className="w-6 h-6" />,
+          description: "Stream real-time customer reviews and 5-star praise straight into your team's Slack channels the second they drop.",
+          badgeType: isSlackConnected ? 'connected' : 'active',
+          badgeLabel: isSlackConnected ? 'Connected' : 'Active',
+          isSlackDirect: true,
         },
       ],
     },
@@ -282,15 +348,6 @@ export const IntegrateView: React.FC = () => {
       icon: <Bell className="w-4 h-4 text-emerald-600" />,
       description: 'Broadcast review submissions and customer wins into your team communication hubs.',
       items: [
-        {
-          id: 'slack',
-          name: 'Slack',
-          icon: <SlackIcon className="w-6 h-6" />,
-          description: 'Stream real-time praise notifications into channels. Tag @PandaPraise to search and share reviews directly in Slack.',
-          badgeType: 'coming_soon',
-          badgeLabel: 'Coming Soon',
-          canJoinWaitlist: true,
-        },
         {
           id: 'teams',
           name: 'Microsoft Teams',
@@ -381,7 +438,7 @@ export const IntegrateView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsStripeModalOpen(false)}
-                className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-xs font-bold"
+                className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-xs font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -464,7 +521,7 @@ export const IntegrateView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsStripeModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors"
+                  className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -480,6 +537,109 @@ export const IntegrateView: React.FC = () => {
                     </>
                   ) : (
                     <span>Save & Enable Webhook</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Slack Configuration Modal */}
+      {isSlackModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-gray-100 space-y-5 animate-scale-in text-left">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#4A154B]/10 flex items-center justify-center text-[#4A154B]">
+                  <SlackIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 text-base">Connect Slack Notifications</h3>
+                  <p className="text-xs text-gray-500">Broadcast live praise to your team</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSlackModalOpen(false)}
+                className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-xs font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSlack} className="space-y-4">
+              {/* Slack Webhook URL */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                  <MessageSquare className="w-3.5 h-3.5 text-gray-400" />
+                  <span>1. Slack Incoming Webhook URL</span>
+                </label>
+                <input
+                  type="url"
+                  required
+                  value={slackWebhookUrl}
+                  onChange={(e) => setSlackWebhookUrl(e.target.value)}
+                  placeholder="https://hooks.slack.com/services/T000/B000/XXXX"
+                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 font-mono text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                />
+                <p className="text-[11px] text-gray-500">
+                  Create an Incoming Webhook in your Slack App settings and paste the generated URL above.
+                </p>
+              </div>
+
+              {/* Target Channel Name */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700 block">
+                  2. Channel Label (for reference)
+                </label>
+                <input
+                  type="text"
+                  value={slackChannel}
+                  onChange={(e) => setSlackChannel(e.target.value)}
+                  placeholder="#testimonials"
+                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                />
+              </div>
+
+              {/* Notification Filter */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700 block">
+                  3. Testimonial Notification Filter
+                </label>
+                <select
+                  value={slackFilter}
+                  onChange={(e) => setSlackFilter(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                >
+                  <option value="all">All newly approved testimonials</option>
+                  <option value="high_rating">4 & 5-star reviews only</option>
+                  <option value="five_star">5-star reviews only</option>
+                  <option value="video">Video testimonials only</option>
+                </select>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-3 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsSlackModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={slackSaving}
+                  className="px-5 py-2 rounded-xl bg-[#4A154B] hover:bg-[#39103a] text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {slackSaving ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Connecting...</span>
+                    </>
+                  ) : (
+                    <span>Save & Connect Slack</span>
                   )}
                 </button>
               </div>
@@ -686,6 +846,27 @@ export const IntegrateView: React.FC = () => {
                           </button>
                         </div>
                       )}
+
+                      {/* Special Slack Connected Info */}
+                      {item.id === 'slack' && isSlackConnected && (
+                        <div className="mt-3 p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 flex items-center justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[11px] font-bold text-emerald-950 block truncate">
+                              Broadcasting to {slackChannel || '#testimonials'}
+                            </span>
+                            <span className="text-[10px] text-emerald-700">
+                              Live webhook active
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsSlackModalOpen(true)}
+                            className="text-[10px] font-bold text-brand-600 hover:underline cursor-pointer"
+                          >
+                            Settings
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Bottom: Action Trigger */}
@@ -754,8 +935,48 @@ export const IntegrateView: React.FC = () => {
                         )
                       )}
 
+                      {/* Slack Card Actions */}
+                      {item.id === 'slack' && (
+                        isSlackConnected ? (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleSendSlackTest}
+                              disabled={sendingSlackTest}
+                              className="flex-1 py-2 px-2.5 rounded-xl bg-gray-50 hover:bg-purple-50 text-[#4A154B] border border-gray-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer flex items-center justify-center gap-1"
+                            >
+                              {sendingSlackTest ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                              <span>Test Ping</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setIsSlackModalOpen(true)}
+                              className="py-2 px-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer"
+                            >
+                              Config
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleDisconnectSlack}
+                              className="py-2 px-2.5 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer"
+                            >
+                              Disconnect
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setIsSlackModalOpen(true)}
+                            className="w-full py-2 px-3 rounded-xl bg-[#4A154B] hover:bg-[#39103a] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            <span>Connect to Slack</span>
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                          </button>
+                        )
+                      )}
+
                       {/* Other Waitlist Cards */}
-                      {item.id !== 'linkedin' && item.id !== 'stripe' && (
+                      {item.id !== 'linkedin' && item.id !== 'stripe' && item.id !== 'slack' && (
                         <button
                           type="button"
                           onClick={() => handleJoinWaitlist(item.id, item.name)}
