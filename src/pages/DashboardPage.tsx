@@ -407,10 +407,7 @@ export const DashboardPage = () => {
               <StudioView
                 onOpenWidgetCreator={() => setStudioSubView('widget')}
                 onOpenSocialCard={() => setShowCarouselModal(true)}
-                onOpenWallOfLove={() => {
-                  const slug = project?.slug || project?.id;
-                  window.open(slug ? `/love/${slug}` : '/wall-of-love', '_blank');
-                }}
+                onOpenWallOfLove={() => setStudioSubView('widget')}
               />
             )
           )}
@@ -506,19 +503,19 @@ export const DashboardPage = () => {
                   {/* Widget Preset 3: Wall of Love */}
                   <div
                     onClick={() => {
-                      const slug = project?.slug || project?.id;
-                      window.open(slug ? `/love/${slug}` : '/wall-of-love', '_blank');
+                      setActiveTab('studio');
+                      setStudioSubView('widget');
                     }}
                     className="p-3 rounded-2xl bg-gray-50 hover:bg-purple-50/50 border border-gray-200/80 hover:border-purple-300 transition-all cursor-pointer group shadow-2xs"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded">Full Page</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#6701e6]" />
+                      <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded">Wall of Love</span>
+                      <Sparkles className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#6701e6]" />
                     </div>
                     <div className="bg-white p-2.5 rounded-xl border border-gray-200 text-[10px] text-gray-600 line-clamp-2">
                       Interactive grid of masonry testimonial cards
                     </div>
-                    <span className="block mt-2 text-xs font-bold text-gray-900 group-hover:text-[#6701e6]">Wall of Love</span>
+                    <span className="block mt-2 text-xs font-bold text-gray-900 group-hover:text-[#6701e6]">Wall of Love Builder</span>
                   </div>
 
                   {/* Widget Preset 4: Carousel */}

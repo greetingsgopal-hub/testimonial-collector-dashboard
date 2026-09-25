@@ -16,12 +16,19 @@ import { handleFacebookWebhook } from './handlers/facebookWebhook';
 import { handleSocialPublish } from './handlers/socialPublish';
 import { handleSocialStatus } from './handlers/socialStatus';
 import { handleSocialDisconnect } from './handlers/socialDisconnect';
+import { handleEmbedScript } from './handlers/embedScript';
+import { handleEmbedTestimonials } from './handlers/embedTestimonials';
 import { executeAutomatedBackgroundSync } from './lib/backgroundSync';
 
 export default {
   async fetch(request: Request, env: WorkerEnv, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const pathname = url.pathname;
+
+    // Public Static Client-Side JavaScript Runtime for Wall of Love Embed
+    if (pathname === '/embed.js' || pathname === '/embed.min.js') {
+      return handleEmbedScript(request, env);
+    }
 
     // Check if the request is destined for an API endpoint or webhook
     const isApiRoute =
@@ -98,6 +105,11 @@ export default {
 
         case 'social-disconnect':
           return await handleSocialDisconnect(request, env);
+
+        case 'embed/testimonials':
+        case 'embed-testimonials':
+        case 'testimonials/embed':
+          return await handleEmbedTestimonials(request, env);
 
         default:
           return new Response(JSON.stringify({ error: `API route '${pathname}' not found.` }), {
