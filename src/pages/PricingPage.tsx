@@ -134,9 +134,20 @@ export const PricingPage = () => {
             <Shield size={12} />
             Simple, transparent pricing
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-4 leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 leading-tight">
             Start free. Upgrade when<br className="hidden sm:block" /> you're ready to grow.
           </h1>
+
+          {/* Trust Micro-Copy Social Proof Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs text-zinc-300 mb-6 shadow-2xs">
+            <span className="text-amber-400 font-bold flex items-center gap-0.5">
+              <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+            </span>
+            <span className="font-semibold text-white">Rated 4.9/5 by SaaS Founders</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-zinc-400">Loved by 20,000+ businesses</span>
+          </div>
+
           <p className="text-lg text-zinc-400 max-w-xl mx-auto mb-8">
             No credit card required. No hidden fees. Cancel anytime.
           </p>
@@ -145,14 +156,14 @@ export const PricingPage = () => {
           <div className="inline-flex items-center gap-3 bg-white/5 rounded-full p-1 border border-white/10">
             <button
               onClick={() => setIsAnnual(false)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer
                 ${!isAnnual ? 'bg-violet-600 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200'}`}
             >
               Monthly
             </button>
             <button
               onClick={() => setIsAnnual(true)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5 cursor-pointer
                 ${isAnnual ? 'bg-violet-600 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200'}`}
             >
               Annual
@@ -249,27 +260,37 @@ export const PricingPage = () => {
         </div>
 
         {/* Feature Comparison Table */}
-        <div className="mb-20">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">Feature Comparison</h2>
-          <div className="overflow-x-auto">
+        <div className="mb-20 max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-white">Feature Comparison</h2>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+              Compare all features across Free, Starter, and Pro plans side by side.
+            </p>
+          </div>
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-zinc-900/40 shadow-xl">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 text-zinc-400 font-medium">Feature</th>
-                  <th className="text-center py-3 px-4 text-zinc-400 font-medium w-28">Free</th>
-                  <th className="text-center py-3 px-4 text-violet-300 font-medium w-28">Starter</th>
-                  <th className="text-center py-3 px-4 text-amber-300 font-medium w-28">Pro</th>
+                <tr className="border-b border-white/10 bg-white/[0.04]">
+                  <th className="text-left py-2.5 px-4 text-zinc-300 font-semibold text-xs sm:text-sm">Feature</th>
+                  <th className="text-center py-2.5 px-4 text-zinc-300 font-semibold text-xs sm:text-sm w-28">Free</th>
+                  <th className="text-center py-2.5 px-4 text-violet-300 font-semibold text-xs sm:text-sm w-28">Starter</th>
+                  <th className="text-center py-2.5 px-4 text-amber-300 font-semibold text-xs sm:text-sm w-28">Pro</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-white/[0.04]">
                 {FEATURES.map((f, idx) => (
-                  <tr key={f.name} className={`border-b border-white/5 ${idx % 2 === 0 ? 'bg-white/[0.01]' : ''}`}>
-                    <td className="py-3 px-4 text-zinc-300 flex items-center gap-1.5">
+                  <tr
+                    key={f.name}
+                    className={`transition-colors hover:bg-white/[0.04] ${
+                      idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'
+                    }`}
+                  >
+                    <td className="py-2 px-4 text-zinc-300 flex items-center gap-1.5 font-medium text-xs sm:text-sm">
                       {f.name}
                       {f.tooltip && (
-                        <span className="group relative">
-                          <HelpCircle size={13} className="text-zinc-600 cursor-help" />
-                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-lg bg-zinc-800 text-xs text-zinc-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10">
+                        <span className="group relative inline-flex items-center">
+                          <HelpCircle size={13} className="text-zinc-500 cursor-help hover:text-zinc-300 transition-colors" />
+                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-lg bg-zinc-800 text-xs text-zinc-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10 shadow-lg z-20">
                             {f.tooltip}
                           </span>
                         </span>
@@ -278,13 +299,13 @@ export const PricingPage = () => {
                     {(['free', 'starter', 'pro'] as PlanTier[]).map(tier => {
                       const val = f[tier];
                       return (
-                        <td key={tier} className="text-center py-3 px-4">
+                        <td key={tier} className="text-center py-2 px-4 text-xs sm:text-sm">
                           {val === true ? (
-                            <Check size={16} className="text-emerald-400 mx-auto" />
+                            <Check size={15} className="text-emerald-400 mx-auto" />
                           ) : val === false ? (
-                            <X size={16} className="text-zinc-700 mx-auto" />
+                            <X size={15} className="text-zinc-700 mx-auto" />
                           ) : (
-                            <span className="text-zinc-300">{val}</span>
+                            <span className="text-zinc-300 font-medium">{val}</span>
                           )}
                         </td>
                       );
