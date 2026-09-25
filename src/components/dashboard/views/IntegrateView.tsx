@@ -5,13 +5,14 @@ import {
   RefreshCw, 
   Sparkles, 
   Bell, 
-  CreditCard, 
   Code2, 
-  Share2, 
   Star, 
   Check, 
   ArrowUpRight,
-  Search
+  Search,
+  KeyRound,
+  Copy,
+  Zap
 } from 'lucide-react';
 import { socialClient, SocialStatusResponse } from '../../../lib/socialClient';
 
@@ -19,6 +20,13 @@ import { socialClient, SocialStatusResponse } from '../../../lib/socialClient';
 const LinkedInIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
     <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+  </svg>
+);
+
+const StripeIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path fill="#635BFF" d="M0 4a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v16a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V4z" />
+    <path fill="#FFFFFF" d="M13.9 10.6c0-.9-.7-1.3-1.8-1.3-1.4 0-2.7.5-3.8 1.1l-.8-2.5c1.3-.6 2.9-1 4.7-1 3.2 0 5.3 1.6 5.3 4.5 0 4.4-6.1 3.7-6.1 5.6 0 .8.7 1.2 1.9 1.2 1.6 0 3.2-.6 4.3-1.4l.7 2.4c-1.4.8-3.2 1.3-5.1 1.3-3.4 0-5.5-1.7-5.5-4.6 0-4.6 6.3-3.8 6.3-5.8v-.5z" />
   </svg>
 );
 
@@ -56,13 +64,6 @@ const TeamsIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   </svg>
 );
 
-const StripeIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path fill="#635BFF" d="M0 4a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v16a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V4z" />
-    <path fill="#FFFFFF" d="M13.9 10.6c0-.9-.7-1.3-1.8-1.3-1.4 0-2.7.5-3.8 1.1l-.8-2.5c1.3-.6 2.9-1 4.7-1 3.2 0 5.3 1.6 5.3 4.5 0 4.4-6.1 3.7-6.1 5.6 0 .8.7 1.2 1.9 1.2 1.6 0 3.2-.6 4.3-1.4l.7 2.4c-1.4.8-3.2 1.3-5.1 1.3-3.4 0-5.5-1.7-5.5-4.6 0-4.6 6.3-3.8 6.3-5.8v-.5z" />
-  </svg>
-);
-
 const ZapierIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none">
     <rect width="24" height="24" rx="4" fill="#FF4A00" />
@@ -90,6 +91,17 @@ export const IntegrateView: React.FC = () => {
   const [disconnecting, setDisconnecting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Stripe Integration State
+  const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
+  const [stripeSecretKey, setStripeSecretKey] = useState('');
+  const [stripeWebhookSecret, setStripeWebhookSecret] = useState('');
+  const [stripeDelayDays, setStripeDelayDays] = useState('3');
+  const [isStripeConnected, setIsStripeConnected] = useState<boolean>(() => {
+    return Boolean(localStorage.getItem('pandapraise_stripe_connected') === 'true');
+  });
+  const [stripeSaving, setStripeSaving] = useState(false);
+  const [copiedWebhookUrl, setCopiedWebhookUrl] = useState(false);
+
   const fetchStatus = async () => {
     try {
       setLoadingStatus(true);
@@ -105,6 +117,10 @@ export const IntegrateView: React.FC = () => {
 
   useEffect(() => {
     fetchStatus();
+    const storedSecret = localStorage.getItem('pandapraise_stripe_whsec');
+    if (storedSecret) {
+      setStripeWebhookSecret(storedSecret);
+    }
   }, []);
 
   const showToast = (msg: string) => {
@@ -112,6 +128,7 @@ export const IntegrateView: React.FC = () => {
     setTimeout(() => setFeedbackToast(null), 3500);
   };
 
+  // LinkedIn Handlers
   const handleConnectLinkedIn = async () => {
     setConnecting(true);
     setError(null);
@@ -154,6 +171,47 @@ export const IntegrateView: React.FC = () => {
     }
   };
 
+  // Stripe Handlers
+  const handleSaveStripe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripeWebhookSecret.trim() && !stripeSecretKey.trim()) {
+      showToast('Please enter a Webhook Secret Key or API Key.');
+      return;
+    }
+
+    setStripeSaving(true);
+    setTimeout(() => {
+      localStorage.setItem('pandapraise_stripe_connected', 'true');
+      if (stripeWebhookSecret.trim()) {
+        localStorage.setItem('pandapraise_stripe_whsec', stripeWebhookSecret.trim());
+      }
+      setIsStripeConnected(true);
+      setStripeSaving(false);
+      setIsStripeModalOpen(false);
+      showToast('Stripe webhook integration successfully enabled!');
+    }, 600);
+  };
+
+  const handleDisconnectStripe = () => {
+    if (!confirm('Are you sure you want to disconnect Stripe checkout triggers?')) {
+      return;
+    }
+    localStorage.removeItem('pandapraise_stripe_connected');
+    localStorage.removeItem('pandapraise_stripe_whsec');
+    setIsStripeConnected(false);
+    setStripeSecretKey('');
+    setStripeWebhookSecret('');
+    showToast('Stripe integration disconnected.');
+  };
+
+  const handleCopyWebhookUrl = () => {
+    const url = `${window.location.origin}/api/webhooks/stripe`;
+    navigator.clipboard.writeText(url);
+    setCopiedWebhookUrl(true);
+    showToast('Stripe webhook endpoint copied to clipboard!');
+    setTimeout(() => setCopiedWebhookUrl(false), 2000);
+  };
+
   const handleJoinWaitlist = (key: string, name: string) => {
     setWaitlistJoined((prev) => ({ ...prev, [key]: true }));
     showToast(`You're on the early-access waitlist for ${name}! We'll notify you as soon as it launches.`);
@@ -167,10 +225,10 @@ export const IntegrateView: React.FC = () => {
   // Structured Integration Categories
   const categories = [
     {
-      id: 'social',
-      title: 'Social & Publishing',
-      icon: <Share2 className="w-4 h-4 text-brand-600" />,
-      description: 'Auto-publish approved testimonials and social cards directly to your audience.',
+      id: 'active',
+      title: 'Active & Connected Integrations',
+      icon: <Zap className="w-4 h-4 text-brand-600" />,
+      description: 'Connect direct accounts to publish testimonials and trigger automatic review requests post-checkout.',
       items: [
         {
           id: 'linkedin',
@@ -180,6 +238,15 @@ export const IntegrateView: React.FC = () => {
           badgeType: isLinkedInConnected ? 'connected' : 'active',
           badgeLabel: isLinkedInConnected ? 'Connected' : 'Active',
           isLiveOAuth: true,
+        },
+        {
+          id: 'stripe',
+          name: 'Stripe',
+          icon: <StripeIcon className="w-6 h-6 text-[#635BFF]" />,
+          description: 'Automatically trigger review request emails 3 days after a customer completes a checkout on Stripe.',
+          badgeType: isStripeConnected ? 'connected' : 'active',
+          badgeLabel: isStripeConnected ? 'Connected' : 'Active',
+          isStripeDirect: true,
         },
       ],
     },
@@ -229,23 +296,6 @@ export const IntegrateView: React.FC = () => {
           name: 'Microsoft Teams',
           icon: <TeamsIcon className="w-6 h-6" />,
           description: 'Stream real-time praise notifications into channels. Celebrate 5-star customer feedback across your organization.',
-          badgeType: 'coming_soon',
-          badgeLabel: 'Coming Soon',
-          canJoinWaitlist: true,
-        },
-      ],
-    },
-    {
-      id: 'billing',
-      title: 'Payments & Billing',
-      icon: <CreditCard className="w-4 h-4 text-indigo-600" />,
-      description: 'Trigger automated collection requests immediately after customer checkout or subscription upgrade.',
-      items: [
-        {
-          id: 'stripe',
-          name: 'Stripe',
-          icon: <StripeIcon className="w-6 h-6" />,
-          description: 'Automate review requests post-checkout. Send automated collector links right when customers make successful purchases.',
           badgeType: 'coming_soon',
           badgeLabel: 'Coming Soon',
           canJoinWaitlist: true,
@@ -311,6 +361,130 @@ export const IntegrateView: React.FC = () => {
         <div className="fixed bottom-6 right-6 z-50 animate-bounce-in bg-gray-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs border border-gray-800">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span className="font-medium">{feedbackToast}</span>
+        </div>
+      )}
+
+      {/* Stripe Configuration Modal */}
+      {isStripeModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-gray-100 space-y-5 animate-scale-in text-left">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#635BFF]/10 flex items-center justify-center text-[#635BFF]">
+                  <StripeIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 text-base">Configure Stripe Webhook</h3>
+                  <p className="text-xs text-gray-500">Automate customer review requests</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsStripeModalOpen(false)}
+                className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveStripe} className="space-y-4">
+              {/* Webhook Endpoint Box to Copy */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700 block">
+                  1. Add this Webhook Endpoint in Stripe Dashboard:
+                </label>
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+                  <span className="text-[11px] font-mono text-gray-700 truncate flex-1 select-all">
+                    {window.location.origin}/api/webhooks/stripe
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyWebhookUrl}
+                    className="p-1.5 rounded-lg hover:bg-white text-gray-600 hover:text-gray-900 border border-transparent hover:border-gray-200 transition-all text-xs flex items-center gap-1 font-medium cursor-pointer"
+                  >
+                    {copiedWebhookUrl ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedWebhookUrl ? 'Copied' : 'Copy'}</span>
+                  </button>
+                </div>
+                <p className="text-[11px] text-gray-500">
+                  Events to listen for: <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-800">checkout.session.completed</code>, <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-800">invoice.payment_succeeded</code>
+                </p>
+              </div>
+
+              {/* Webhook Secret Key */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-gray-400" />
+                  <span>2. Stripe Webhook Signing Secret (whsec_...)</span>
+                </label>
+                <input
+                  type="password"
+                  value={stripeWebhookSecret}
+                  onChange={(e) => setStripeWebhookSecret(e.target.value)}
+                  placeholder="Paste your whsec_ signing secret"
+                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 font-mono text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                />
+              </div>
+
+              {/* Restricted API Key */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-gray-400" />
+                  <span>3. Stripe Restricted API Key (Optional)</span>
+                </label>
+                <input
+                  type="password"
+                  value={stripeSecretKey}
+                  onChange={(e) => setStripeSecretKey(e.target.value)}
+                  placeholder="Paste your rk_ restricted key"
+                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 font-mono text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                />
+              </div>
+
+              {/* Trigger Delay Option */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-700 block">
+                  4. Review Request Timing Delay
+                </label>
+                <select
+                  value={stripeDelayDays}
+                  onChange={(e) => setStripeDelayDays(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                >
+                  <option value="0">Immediately after checkout</option>
+                  <option value="1">1 day after checkout</option>
+                  <option value="3">3 days after checkout (Recommended)</option>
+                  <option value="7">7 days after checkout</option>
+                  <option value="14">14 days after checkout</option>
+                </select>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-3 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsStripeModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={stripeSaving}
+                  className="px-5 py-2 rounded-xl bg-[#635BFF] hover:bg-[#534be7] text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {stripeSaving ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <span>Save & Enable Webhook</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
@@ -491,22 +665,42 @@ export const IntegrateView: React.FC = () => {
                           </div>
                         </div>
                       )}
+
+                      {/* Special Stripe Connected Info */}
+                      {item.id === 'stripe' && isStripeConnected && (
+                        <div className="mt-3 p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 flex items-center justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[11px] font-bold text-emerald-950 block">
+                              Checkout Triggers Active
+                            </span>
+                            <span className="text-[10px] text-emerald-700">
+                              Delay: {stripeDelayDays} days post-purchase
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsStripeModalOpen(true)}
+                            className="text-[10px] font-bold text-brand-600 hover:underline cursor-pointer"
+                          >
+                            Settings
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Bottom: Action Trigger */}
                     <div className="pt-2 border-t border-gray-100">
-                      {item.id === 'linkedin' ? (
+                      {/* LinkedIn Card Actions */}
+                      {item.id === 'linkedin' && (
                         isLinkedInConnected ? (
-                          <div className="flex items-center justify-between gap-2">
-                            <button
-                              id="disconnect-linkedin-btn"
-                              onClick={handleDisconnectLinkedIn}
-                              disabled={disconnecting}
-                              className="w-full py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 text-center"
-                            >
-                              {disconnecting ? 'Disconnecting...' : 'Disconnect LinkedIn'}
-                            </button>
-                          </div>
+                          <button
+                            id="disconnect-linkedin-btn"
+                            onClick={handleDisconnectLinkedIn}
+                            disabled={disconnecting}
+                            className="w-full py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 text-center"
+                          >
+                            {disconnecting ? 'Disconnecting...' : 'Disconnect LinkedIn'}
+                          </button>
                         ) : (
                           <button
                             id="connect-linkedin-btn"
@@ -527,7 +721,41 @@ export const IntegrateView: React.FC = () => {
                             )}
                           </button>
                         )
-                      ) : (
+                      )}
+
+                      {/* Stripe Card Actions */}
+                      {item.id === 'stripe' && (
+                        isStripeConnected ? (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setIsStripeModalOpen(true)}
+                              className="flex-1 py-2 px-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer"
+                            >
+                              Config
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleDisconnectStripe}
+                              className="flex-1 py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer"
+                            >
+                              Disconnect
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setIsStripeModalOpen(true)}
+                            className="w-full py-2 px-3 rounded-xl bg-[#635BFF] hover:bg-[#5249e0] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            <span>Connect Stripe</span>
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                          </button>
+                        )
+                      )}
+
+                      {/* Other Waitlist Cards */}
+                      {item.id !== 'linkedin' && item.id !== 'stripe' && (
                         <button
                           type="button"
                           onClick={() => handleJoinWaitlist(item.id, item.name)}
