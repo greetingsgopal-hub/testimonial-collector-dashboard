@@ -20,50 +20,50 @@ interface CuratedToast {
   platformIcon?: 'x' | 'facebook' | 'producthunt' | 'google';
 }
 
-const SENJA_CURATED_TOASTS: CuratedToast[] = [
+const CURATED_TOASTS: CuratedToast[] = [
   {
-    name: 'Dominik Sobe',
-    role: '⚡ Indie Hacker building HelpKit',
+    name: 'David S.',
+    role: 'Product Lead',
     avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=160&auto=format&fit=crop&q=80',
-    fullTextBefore: 'We have been using Panda Praise for a year now at HelpKit and ',
-    highlightText: "I couldn't wish for a better service for streamlining my testimonials",
-    fullTextAfter: '.',
-    platformIcon: 'facebook',
-  },
-  {
-    name: 'Fedja Bosnic',
-    role: '@fedjabosnic',
-    avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=160&auto=format&fit=crop&q=80',
-    fullTextBefore: 'Just added the @PandaPraise toaster to the homepage and damn it’s nice. ',
-    highlightText: 'I definitely see this making a huge impact on conversion',
-    fullTextAfter: ' for our SaaS!',
-    platformIcon: 'x',
-  },
-  {
-    name: 'Georg R.',
-    role: 'Founder of StatusLink',
-    avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=160&auto=format&fit=crop&q=80',
-    fullTextBefore: 'I was so surprised how easily Panda Praise could do what I hoped that ',
-    highlightText: 'I subscribed within the first hour',
-    fullTextAfter: " and I'm never looking back.",
+    fullTextBefore: 'We have been using Panda Praise for over a year and ',
+    highlightText: "it completely streamlined how we collect and publish testimonials",
+    fullTextAfter: ' across our entire site.',
     platformIcon: 'google',
   },
   {
-    name: 'Melissa Kwan',
-    role: 'Founder of eWebinar',
-    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80',
-    fullTextBefore: 'Within ten minutes of signing up, ',
-    highlightText: 'I had already upgraded twice',
-    fullTextAfter: ' because I immediately wanted to give up the old mess.',
+    name: 'Felix B.',
+    role: 'SaaS Founder',
+    avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=160&auto=format&fit=crop&q=80',
+    fullTextBefore: 'Just added the Panda Praise widgets to our landing page. ',
+    highlightText: 'It made an immediate positive impact on conversions',
+    fullTextAfter: ' for our software.',
     platformIcon: 'x',
   },
   {
-    name: 'Justin Veenema',
-    role: '⚡ Founder of Brand Stories',
+    name: 'Marcus V.',
+    role: 'Growth Lead',
+    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=160&auto=format&fit=crop&q=80',
+    fullTextBefore: 'Panda Praise made collecting and showcasing social proof effortless. ',
+    highlightText: 'Our conversion rate jumped significantly in week one',
+    fullTextAfter: ', and our customers love the submission flow.',
+    platformIcon: 'google',
+  },
+  {
+    name: 'Elena K.',
+    role: 'Founder & CEO',
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80',
+    fullTextBefore: 'Within ten minutes of setting up Panda Praise, ',
+    highlightText: 'we collected our first 5 verified video reviews',
+    fullTextAfter: ' with zero friction.',
+    platformIcon: 'x',
+  },
+  {
+    name: 'Jason V.',
+    role: 'Marketing Director',
     avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&auto=format&fit=crop&q=80',
     fullTextBefore: 'Super simple onboarding, ',
     highlightText: 'great UX and an absolute joy to use',
-    fullTextAfter: '. ✨ Hands down best social proof tool.',
+    fullTextAfter: '. Hands down the best social proof platform.',
     platformIcon: 'producthunt',
   },
 ];
@@ -98,7 +98,7 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
 
       setTimeout(() => {
         if (!isDismissed) {
-          setCurrentIndex((prev) => (prev + 1) % SENJA_CURATED_TOASTS.length);
+          setCurrentIndex((prev) => (prev + 1) % CURATED_TOASTS.length);
           setIsVisible(true);
         }
       }, interval);
@@ -109,7 +109,7 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
 
   if (isDismissed || !isVisible) return null;
 
-  const current = SENJA_CURATED_TOASTS[currentIndex];
+  const current = CURATED_TOASTS[currentIndex];
   if (!current) return null;
 
   const positionClasses = {
