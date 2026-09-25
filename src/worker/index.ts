@@ -2,6 +2,9 @@ import { WorkerEnv, ExecutionContext } from './types';
 import { handleOptionsPreflight } from './lib/cors';
 import { handleOAuthInit } from './handlers/oauthInit';
 import { handleOAuthCallback } from './handlers/oauthCallback';
+import { handleGoogleAuthInit } from './handlers/googleAuthInit';
+import { handleGoogleAuthCallback } from './handlers/googleAuthCallback';
+import { handleGooglePlaceImport } from './handlers/googlePlaceImport';
 import { handleSocialPublish } from './handlers/socialPublish';
 import { handleSocialStatus } from './handlers/socialStatus';
 import { handleSocialDisconnect } from './handlers/socialDisconnect';
@@ -23,6 +26,19 @@ export default {
       const endpoint = pathname.replace(/^\/(?:api|\.netlify\/functions)\//, '').split('?')[0].replace(/\/$/, '');
 
       switch (endpoint) {
+        case 'auth/google':
+        case 'google-auth':
+          return await handleGoogleAuthInit(request, env);
+
+        case 'auth/google/callback':
+        case 'google-callback':
+          return await handleGoogleAuthCallback(request, env);
+
+        case 'google/import-place':
+        case 'google-place-import':
+        case 'places/import':
+          return await handleGooglePlaceImport(request, env);
+
         case 'oauth-init':
           return await handleOAuthInit(request, env);
 

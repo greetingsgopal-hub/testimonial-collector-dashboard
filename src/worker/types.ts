@@ -11,6 +11,10 @@ export interface WorkerEnv {
   LINKEDIN_CLIENT_ID?: string;
   LINKEDIN_CLIENT_SECRET?: string;
   LINKEDIN_REDIRECT_URI?: string;
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+  GOOGLE_REDIRECT_URI?: string;
+  GOOGLE_PLACES_API_KEY?: string;
   APP_ENCRYPTION_KEY?: string;
   APP_ENCRYPTION_KEY_PREVIOUS?: string;
   FIREBASE_SERVICE_ACCOUNT_KEY?: string;

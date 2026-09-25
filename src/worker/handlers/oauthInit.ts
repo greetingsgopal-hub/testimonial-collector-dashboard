@@ -88,6 +88,47 @@ export async function handleOAuthInit(request: Request, env: WorkerEnv): Promise
       );
     }
 
+    if (platform === 'google') {
+      const clientId = env.GOOGLE_CLIENT_ID;
+      const redirectUri =
+        env.GOOGLE_REDIRECT_URI ||
+        `${new URL(request.url).origin}/api/auth/google/callback`;
+
+      const state = generateOAuthState(user.uid, 'google', env);
+
+      if (!clientId) {
+        return new Response(
+          JSON.stringify({
+            authUrl: `${new URL(request.url).origin}/dashboard?connected=google`,
+            state,
+            platform: 'google',
+            configured: false,
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      const scopes = encodeURIComponent('openid profile email https://www.googleapis.com/auth/business.manage');
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${encodeURIComponent(
+        clientId
+      )}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${scopes}&access_type=offline&prompt=consent`;
+
+      return new Response(
+        JSON.stringify({
+          authUrl,
+          state,
+          platform: 'google',
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     return new Response(
       JSON.stringify({ error: `Direct OAuth for platform '${platform}' is not supported.` }),
       {

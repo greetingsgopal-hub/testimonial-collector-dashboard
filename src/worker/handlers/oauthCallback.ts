@@ -102,6 +102,50 @@ export async function handleOAuthCallback(request: Request, env: WorkerEnv): Pro
       );
     }
 
+    if (platform === 'google') {
+      const clientId = env.GOOGLE_CLIENT_ID || '';
+      const clientSecret = env.GOOGLE_CLIENT_SECRET || '';
+      const redirectUri = env.GOOGLE_REDIRECT_URI || `${baseUrl}/api/auth/google/callback`;
+
+      if (!clientId || !clientSecret) {
+        return Response.redirect(
+          `${baseUrl}/dashboard?social_connected=google&account_name=${encodeURIComponent('Google Business Profile')}&notice=${encodeURIComponent('Sandbox mode')}`,
+          302
+        );
+      }
+
+      const { exchangeGoogleCode, getGoogleUserProfile, fetchGoogleBusinessReviews } = await import('../lib/googleOAuth');
+      const tokenData = await exchangeGoogleCode(code, redirectUri, clientId, clientSecret);
+      const profile = await getGoogleUserProfile(tokenData.access_token);
+      const reviews = await fetchGoogleBusinessReviews(tokenData.access_token, env);
+
+      const now = new Date().toISOString();
+      const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000).toISOString();
+
+      const connectionDoc = {
+        ownerId: userId,
+        platform: 'google',
+        platformUserId: profile.sub,
+        platformAccountName: profile.name || profile.email || 'Google Business Account',
+        accountType: 'business',
+        accessTokenEncrypted: encryptToken(tokenData.access_token, env),
+        refreshTokenEncrypted: tokenData.refresh_token ? encryptToken(tokenData.refresh_token, env) : null,
+        tokenExpiresAt: expiresAt,
+        status: 'connected',
+        reviewsSyncedCount: reviews.length,
+        connectedAt: now,
+        updatedAt: now,
+      };
+
+      const docId = `${userId}_google`;
+      await saveDocument('social_connections', docId, connectionDoc, undefined, env);
+
+      return Response.redirect(
+        `${baseUrl}/dashboard?social_connected=google&account_name=${encodeURIComponent(profile.name)}&imported_count=${reviews.length}`,
+        302
+      );
+    }
+
     return Response.redirect(
       `${baseUrl}/dashboard?social_error=${encodeURIComponent('Unsupported platform.')}`,
       302
