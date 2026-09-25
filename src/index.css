@@ -4,8 +4,8 @@
 
 @layer base {
   body {
-    background-color: #f9fafb;
-    color: #111827;
+    background-color: #ffffff;
+    color: #0f172a;
     overflow-x: hidden;
   }
 
@@ -15,10 +15,10 @@
     height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: #f3f4f6;
+    background: #f8fafc;
   }
   ::-webkit-scrollbar-thumb {
-    background: #d1d5db;
+    background: #cbd5e1;
     border-radius: 4px;
   }
   /* Focus visible accessibility outline for keyboard navigation */
@@ -27,43 +27,43 @@
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
-    outline: 2px solid #8b5cf6;
+    outline: 2px solid #4f46e5;
     outline-offset: 2px;
   }
 }
 
 @layer components {
   .glass-panel {
-    background: rgba(18, 18, 23, 0.7);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(226, 232, 240, 0.8);
   }
 
   .glass-card {
-    background: rgba(24, 24, 27, 0.65);
+    background: #ffffff;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid #e2e8f0;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .glass-card:hover {
-    border-color: rgba(167, 139, 250, 0.3);
-    box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.15);
+    border-color: rgba(79, 70, 229, 0.3);
+    box-shadow: 0 10px 30px -10px rgba(79, 70, 229, 0.12);
   }
 
   .glass-input {
-    background: rgba(15, 15, 20, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #f4f4f5;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #0f172a;
     transition: all 0.2s ease;
   }
 
   .glass-input:focus {
     outline: none;
-    border-color: rgba(103, 1, 230, 0.8);
-    box-shadow: 0 0 0 3px rgba(103, 1, 230, 0.25);
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
   }
 
   /* Senja-style button ring and beam */
@@ -74,24 +74,24 @@
   }
 
   .senja-cta-ring {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(79, 70, 229, 0.08);
+    border: 1px solid rgba(79, 70, 229, 0.2);
     border-radius: 20px;
     padding: 5px;
     display: inline-flex;
     position: relative;
-    box-shadow: 0 10px 30px -5px rgba(103, 1, 230, 0.4);
+    box-shadow: 0 10px 30px -5px rgba(79, 70, 229, 0.25);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   .senja-cta-ring:hover {
-    box-shadow: 0 14px 40px -5px rgba(103, 1, 230, 0.55);
+    box-shadow: 0 14px 40px -5px rgba(79, 70, 229, 0.35);
   }
 
   .senja-btn-primary {
     font-family: 'Bricolage Grotesque', 'Outfit', sans-serif;
     color: #ffffff;
-    background: linear-gradient(180deg, #9954f2 0%, #6701e6 100%);
+    background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
     border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 16px;
     font-weight: 700;
@@ -105,7 +105,7 @@
 
   .senja-btn-primary:hover {
     transform: scale(1.02);
-    background: linear-gradient(180deg, #a465f7 0%, #7306fb 100%);
+    background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
   }
 
   .senja-btn-primary:active {
@@ -113,47 +113,47 @@
   }
 
   .senja-card-clean {
-    background: #111118;
-    border: 1px solid #232334;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 24px;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .senja-card-clean:hover {
-    border-color: rgba(153, 84, 242, 0.4);
-    box-shadow: 0 12px 36px -10px rgba(103, 1, 230, 0.2);
+    border-color: rgba(79, 70, 229, 0.4);
+    box-shadow: 0 12px 36px -10px rgba(79, 70, 229, 0.15);
   }
 
   /* Senja Light Mode Cards & Inputs */
   .senja-light-card {
     background-color: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #e2e8f0;
     border-radius: 24px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.02);
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .senja-light-card:hover {
-    border-color: #c4b5fd;
-    box-shadow: 0 12px 28px -6px rgba(103, 1, 230, 0.1);
+    border-color: #c7d2fe;
+    box-shadow: 0 12px 28px -6px rgba(79, 70, 229, 0.1);
   }
 
   .senja-light-input {
     background-color: #ffffff;
-    border: 1.5px solid #e5e7eb;
-    color: #111827;
+    border: 1.5px solid #e2e8f0;
+    color: #0f172a;
     border-radius: 12px;
     transition: all 0.15s ease;
   }
 
   .senja-light-input:focus {
     outline: none;
-    border-color: #6701e6;
-    box-shadow: 0 0 0 3px rgba(103, 1, 230, 0.12);
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
   }
 }
 
-/* Background ambient light gradients - Senja signature purple radial wash */
+/* Background ambient light gradients - Classic SaaS Indigo radial wash */
 .ambient-glow {
   position: fixed;
   top: 0;
@@ -161,7 +161,7 @@
   transform: translateX(-50%);
   width: 100vw;
   height: 600px;
-  background: radial-gradient(70rem 26rem at 50% -4rem, rgb(103 1 230 / 0.16), transparent);
+  background: radial-gradient(70rem 26rem at 50% -4rem, rgb(79 70 229 / 0.12), transparent);
   pointer-events: none;
   z-index: 0;
 }
@@ -173,15 +173,15 @@
   transform: translateX(-50%);
   width: 100vw;
   height: 600px;
-  background: radial-gradient(70rem 26rem at 50% -4rem, rgb(103 1 230 / 0.08), transparent);
+  background: radial-gradient(70rem 26rem at 50% -4rem, rgb(79 70 229 / 0.06), transparent);
   pointer-events: none;
   z-index: 0;
 }
 
 /* Senja signature highlights and decorative underlines */
 .senja-purple-mark {
-  background-color: #ebdffc;
-  color: #09090b;
+  background-color: #e0e7ff;
+  color: #0f172a;
   padding: 2px 10px;
   border-radius: 12px;
   display: inline-block;
@@ -189,15 +189,15 @@
 }
 
 .senja-yellow-mark {
-  background-color: rgba(255, 205, 54, 0.35);
-  color: #111827;
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #0f172a;
   padding: 1px 6px;
   border-radius: 6px;
   font-weight: 500;
 }
 
 .senja-dotted {
-  border-bottom: 2px dotted #7c3aed;
+  border-bottom: 2px dotted #4f46e5;
   padding-bottom: 2px;
 }
 
@@ -263,13 +263,13 @@
 .thl-link {
   color: inherit;
   text-decoration: underline dotted;
-  text-decoration-color: #6701e6;
+  text-decoration-color: #4f46e5;
   text-underline-offset: 3px;
   cursor: pointer;
   text-decoration-thickness: 2px;
 }
 .thl-link:hover, .thl-link:focus-visible {
-  color: #6701e6;
+  color: #4f46e5;
   text-decoration-style: solid;
 }
 .thl-card {
@@ -278,14 +278,14 @@
   opacity: 0;
   pointer-events: auto;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e2e8f0;
   border-radius: 1rem;
   width: min(22rem, 100vw - 2rem);
   padding: 1rem 1.25rem;
   transition: opacity 0.28s, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   position: fixed;
   transform: translateY(10px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
 }
 .thl-card.thl-visible {
   opacity: 1;
@@ -294,7 +294,7 @@
 .thl-mark {
   color: inherit;
   background-color: transparent;
-  background-image: linear-gradient(90deg, #e9dbff, #e9dbff);
+  background-image: linear-gradient(90deg, #e0e7ff, #e0e7ff);
   background-position: 0;
   background-repeat: no-repeat;
   background-size: 0% 100%;
