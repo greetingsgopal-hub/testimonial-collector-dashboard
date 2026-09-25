@@ -910,17 +910,12 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </blockquote>
                 <figcaption className="mt-2.5 flex items-center gap-2.5">
-                  <img
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80"
-                    alt="Melissa Kwan"
-                    loading="lazy"
-                    width="32"
-                    height="32"
-                    className="h-8 w-8 rounded-full object-cover"
-                  />
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-400 text-white font-bold text-xs flex items-center justify-center border border-indigo-100 shadow-xs select-none">
+                    MK
+                  </div>
                   <div>
-                    <p className="font-bold text-gray-900 text-xs">Melissa Kwan</p>
-                    <p className="text-[11px] text-gray-500">Founder of eWebinar</p>
+                    <p className="font-bold text-gray-900 text-xs">Melissa K.</p>
+                    <p className="text-[11px] text-gray-500">Tech Founder</p>
                   </div>
                 </figcaption>
               </figure>
@@ -1197,26 +1192,23 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Testimonial Quote under Showcase */}
-          <figure className="relative border-l-2 border-black py-2 pl-4 text-left mx-auto mt-10 max-w-xl">
+          <figure className="relative border-l-2 border-brand-600 py-2 pl-4 text-left mx-auto mt-10 max-w-xl">
             <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
               <p>
                 We have collected tons of testimonials and previously it was a bit fiddly...{' '}
                 <mark className="senja-yellow-mark">
                   if we need a quick social media post, want to add proof to an email or use as ads, we can just pick right from Panda Praise
                 </mark>
-                , love it. They're like our very own social proof emojis now!
+                , love it. It makes showcasing social proof completely effortless!
               </p>
             </blockquote>
             <figcaption className="mt-2.5 flex items-center gap-2.5">
-              <img
-                src="/assets/senja/michael-heap.BPuupf8X_67hTa.webp"
-                alt="Michael Heap"
-                loading="lazy"
-                className="h-8 w-8 rounded-full object-cover border border-gray-200"
-              />
+              <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-400 text-white font-bold text-xs flex items-center justify-center border border-indigo-100 shadow-xs select-none">
+                MH
+              </div>
               <div>
-                <p className="font-bold text-gray-900 text-xs">Michael Heap</p>
-                <p className="text-[11px] text-gray-500">Chrome Web Store review</p>
+                <p className="font-bold text-gray-900 text-xs">Michael H.</p>
+                <p className="text-[11px] text-gray-500">Verified Customer</p>
               </div>
             </figcaption>
           </figure>
@@ -1233,7 +1225,7 @@ export const LandingPage: React.FC = () => {
               <div className="rounded-3xl border border-gray-200 bg-white p-6 sm:p-8 shadow-xl max-w-md mx-auto text-left relative overflow-hidden">
                 <div className="flex items-center justify-between pb-4 border-b border-gray-100">
                   <div className="flex items-center gap-2">
-                    <span className="p-2 rounded-xl bg-purple-100 text-[#6701e6]">
+                    <span className="p-2 rounded-xl bg-indigo-50 text-brand-600">
                       <Gift className="w-5 h-5" />
                     </span>
                     <div>
@@ -1244,13 +1236,13 @@ export const LandingPage: React.FC = () => {
                   <span className="rounded-full bg-emerald-50 text-emerald-700 px-2 py-0.5 text-xs font-bold">Sent ✨</span>
                 </div>
 
-                <div className="mt-4 p-4 rounded-2xl bg-purple-50/60 border border-purple-100">
-                  <p className="text-xs text-purple-950 font-medium leading-relaxed">
-                    "Hey Nathan! Loved your review about our support speed. Here is a $25 Amazon perk and early access to our V2 dashboard!"
+                <div className="mt-4 p-4 rounded-2xl bg-indigo-50/60 border border-indigo-100">
+                  <p className="text-xs text-indigo-950 font-medium leading-relaxed">
+                    "Hey Taylor! Loved your review about our onboarding speed. Here is a $25 gift perk and early access to our new widget templates!"
                   </p>
-                  <div className="mt-3 flex items-center justify-between text-xs font-bold text-[#6701e6]">
+                  <div className="mt-3 flex items-center justify-between text-xs font-bold text-brand-600">
                     <span>Coupon: PRAISE-VIP-25</span>
-                    <span className="bg-white px-2 py-0.5 rounded border border-purple-200 text-[10px]">Claimed</span>
+                    <span className="bg-white px-2 py-0.5 rounded border border-indigo-200 text-[10px]">Claimed</span>
                   </div>
                 </div>
 
@@ -1263,7 +1255,7 @@ export const LandingPage: React.FC = () => {
 
             {/* Column B: Text Content */}
             <div className="lg:col-span-6 order-1 lg:order-2 text-left">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-50 border border-pink-200/70 text-pink-700 text-xs font-bold tracking-wide uppercase mb-4">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-pink-50 border border-pink-200/70 text-pink-700 text-xs font-bold tracking-wide uppercase mb-4">
                 <Gift className="w-3.5 h-3.5 text-pink-600" />
                 <span>04 / Delight & Reward</span>
               </div>
@@ -1297,22 +1289,19 @@ export const LandingPage: React.FC = () => {
               </ul>
 
               {/* Quote Block */}
-              <figure className="relative border-l-2 border-black py-2 pl-4 text-left mt-8 max-w-lg">
+              <figure className="relative border-l-2 border-brand-600 py-2 pl-4 text-left mt-8 max-w-lg">
                 <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                   <p>
-                    <mark className="senja-yellow-mark">Panda Praise is simply awesome</mark>. They work hard providing a wide list of review integrations, and their constant presence with their customers makes all the difference.
+                    <mark className="senja-yellow-mark">Panda Praise is simply awesome</mark>. Collecting verified testimonials and turning them into high-converting website widgets has never been this seamless and fast.
                   </p>
                 </blockquote>
                 <figcaption className="mt-2.5 flex items-center gap-2.5">
-                  <img
-                    src="/assets/senja/nathan-falceso.BOeFR7x3_24DNsr.webp"
-                    alt="Nathan Falceso"
-                    loading="lazy"
-                    className="h-8 w-8 rounded-full object-cover border border-gray-200"
-                  />
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-400 text-white font-bold text-xs flex items-center justify-center border border-indigo-100 shadow-xs select-none">
+                    NF
+                  </div>
                   <div>
-                    <p className="font-bold text-gray-900 text-xs">Nathan Falceso</p>
-                    <p className="text-[11px] text-gray-500">Verified User</p>
+                    <p className="font-bold text-gray-900 text-xs">Nathan F.</p>
+                    <p className="text-[11px] text-gray-500">Verified Customer</p>
                   </div>
                 </figcaption>
               </figure>
