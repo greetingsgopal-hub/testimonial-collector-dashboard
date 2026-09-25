@@ -54,18 +54,16 @@ const FAQ_ITEMS = [
 ];
 
 const CLIENT_LOGOS = [
-  { name: 'om', node: <span className="text-xl font-bold tracking-tight text-gray-700 font-sans">om</span> },
-  { name: 'pickupmusic', node: <span className="text-base font-semibold tracking-wide text-gray-700 font-sans">pickupmusic</span> },
-  { name: 'Marketing Examined', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span className="text-amber-500" aria-hidden="true">★</span> Marketing Examined</span> },
-  { name: 'unplugged.', node: <span className="text-base italic text-gray-700 font-sans">unplugged.</span> },
-  { name: 'Easlo', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span aria-hidden="true">👓</span> Easlo</span> },
-  { name: 'Breakcold', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span className="bg-gray-900 text-white text-xs px-1 py-0.5 rounded font-bold">Br</span> Breakcold</span> },
-  { name: 'immutable', node: <span className="text-base font-bold tracking-tight text-gray-700">immutable</span> },
-  { name: 'Substack', node: <span className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><span className="w-3 h-3 bg-[#FF6719] rounded-sm inline-block" aria-hidden="true" /> Substack</span> },
-  { name: 'Beehiiv', node: <span className="text-base font-extrabold text-gray-700">beehiiv</span> },
-  { name: 'ConvertKit', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span className="w-3 h-3 bg-rose-400 rounded-full inline-block" aria-hidden="true" /> ConvertKit</span> },
-  { name: 'Kajabi', node: <span className="text-base font-semibold text-gray-700">kajabi</span> },
-  { name: 'Podia', node: <span className="text-base font-bold text-gray-700">podia</span> },
+  { name: 'Acme Corp', node: <span className="text-base font-bold text-gray-700 flex items-center gap-2"><span className="w-5 h-5 rounded-md bg-slate-900 text-white flex items-center justify-center text-[10px] font-black" aria-hidden="true">A</span> Acme Corp</span> },
+  { name: 'SaaSify', node: <span className="text-base font-bold text-gray-700 flex items-center gap-2"><span className="w-3.5 h-3.5 rounded-full bg-brand-600 inline-block" aria-hidden="true" /> SaaSify</span> },
+  { name: 'GlobalTech', node: <span className="text-base font-semibold tracking-wide text-gray-700 flex items-center gap-1.5 font-mono"><span className="text-brand-600 font-bold" aria-hidden="true">///</span> GlobalTech</span> },
+  { name: 'Venture Labs', node: <span className="text-base font-bold text-gray-700 flex items-center gap-2"><span className="w-5 h-5 rounded-md bg-brand-100 text-brand-700 flex items-center justify-center text-[10px] font-extrabold" aria-hidden="true">VL</span> Venture Labs</span> },
+  { name: 'Apex Digital', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span className="text-amber-500 text-xs" aria-hidden="true">▲</span> Apex Digital</span> },
+  { name: 'CloudScale', node: <span className="text-base font-semibold text-gray-700 flex items-center gap-2"><span className="w-4 h-4 rounded-md bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold" aria-hidden="true">◆</span> CloudScale</span> },
+  { name: 'Novastream', node: <span className="text-base font-bold text-gray-700 flex items-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-brand-600 inline-block" aria-hidden="true" /> Novastream</span> },
+  { name: 'SyncPulse', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span className="text-brand-600 font-bold text-sm" aria-hidden="true">⚡</span> SyncPulse</span> },
+  { name: 'HyperGrowth', node: <span className="text-base font-extrabold tracking-tight text-gray-700 font-display">HyperGrowth</span> },
+  { name: 'OmniFlow', node: <span className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-slate-200 text-slate-800 flex items-center justify-center text-[10px] font-bold" aria-hidden="true">◎</span> OmniFlow</span> },
 ];
 
 export const LandingPage: React.FC = () => {
