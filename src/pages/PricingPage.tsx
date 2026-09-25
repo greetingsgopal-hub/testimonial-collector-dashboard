@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Check,
@@ -25,29 +25,57 @@ interface PlanFeature {
   tooltip?: string;
 }
 
-const FEATURES: PlanFeature[] = [
-  { name: 'Testimonials', free: 'Up to 15', starter: 'Unlimited', pro: 'Unlimited' },
-  { name: 'Projects', free: '1', starter: '1', pro: '5 (add-ons available)' },
-  { name: 'Team seats', free: '1', starter: '2', pro: '5 (add-ons available)' },
-  { name: 'Collection forms', free: true, starter: true, pro: true },
-  { name: 'Text & video testimonials', free: true, starter: true, pro: true },
-  { name: 'Widget views', free: 'Unlimited', starter: 'Unlimited', pro: 'Unlimited' },
-  { name: 'Wall of Love', free: true, starter: true, pro: true },
-  { name: 'Social card creator', free: true, starter: true, pro: true },
-  { name: 'CSV & JSON export', free: true, starter: true, pro: true },
-  { name: 'Remove Panda Praise branding', free: false, starter: true, pro: true },
-  { name: 'HD video quality', free: false, starter: true, pro: true },
-  { name: 'Custom domain', free: false, starter: true, pro: true, tooltip: 'Point your own domain to your Wall of Love' },
-  { name: 'Import from 30+ platforms', free: false, starter: true, pro: true },
-  { name: 'API access', free: false, starter: true, pro: true },
-  { name: 'Webhooks', free: false, starter: true, pro: true },
-  { name: 'Zapier integration', free: false, starter: true, pro: true },
-  { name: 'Sentiment analysis', free: false, starter: true, pro: true },
-  { name: 'Rich Snippets (SEO)', free: false, starter: false, pro: true, tooltip: 'Show star ratings in Google search results' },
-  { name: 'Testimonial translation', free: false, starter: false, pro: true },
-  { name: 'AI case study generator', free: false, starter: false, pro: true },
-  { name: 'Priority support', free: false, starter: false, pro: true },
+interface FeatureCategory {
+  title: string;
+  icon?: string;
+  features: PlanFeature[];
+}
+
+const FEATURE_CATEGORIES: FeatureCategory[] = [
+  {
+    title: 'Core Features & Limits',
+    features: [
+      { name: 'Testimonials', free: 'Up to 15', starter: 'Unlimited', pro: 'Unlimited' },
+      { name: 'Projects', free: '1', starter: '1', pro: '5 (add-ons available)' },
+      { name: 'Team seats', free: '1', starter: '2', pro: '5 (add-ons available)' },
+      { name: 'Collection forms', free: true, starter: true, pro: true },
+      { name: 'Text & video testimonials', free: true, starter: true, pro: true },
+      { name: 'Widget views', free: 'Unlimited', starter: 'Unlimited', pro: 'Unlimited' },
+      { name: 'CSV & JSON export', free: true, starter: true, pro: true },
+    ],
+  },
+  {
+    title: 'Widgets & Customization',
+    features: [
+      { name: 'Wall of Love', free: true, starter: true, pro: true },
+      { name: 'Social card creator', free: true, starter: true, pro: true },
+      { name: 'Remove Panda Praise branding', free: false, starter: true, pro: true },
+      { name: 'HD video quality', free: false, starter: true, pro: true },
+      { name: 'Custom domain', free: false, starter: true, pro: true, tooltip: 'Point your own domain to your Wall of Love' },
+      { name: 'Rich Snippets (SEO Schema)', free: false, starter: false, pro: true, tooltip: 'Show star ratings directly in Google search results' },
+    ],
+  },
+  {
+    title: 'Integrations & Automation',
+    features: [
+      { name: 'Import from 30+ platforms', free: false, starter: true, pro: true },
+      { name: 'API access', free: false, starter: true, pro: true },
+      { name: 'Webhooks', free: false, starter: true, pro: true },
+      { name: 'Zapier & Slack integrations', free: false, starter: true, pro: true },
+      { name: 'AI case study generator', free: false, starter: false, pro: true },
+    ],
+  },
+  {
+    title: 'Analytics, AI & Security',
+    features: [
+      { name: 'Sentiment analysis', free: false, starter: true, pro: true },
+      { name: 'Testimonial translation', free: false, starter: false, pro: true },
+      { name: 'Priority support', free: false, starter: false, pro: true },
+    ],
+  },
 ];
+
+const FEATURES: PlanFeature[] = FEATURE_CATEGORIES.flatMap((cat) => cat.features);
 
 const FAQ_ITEMS = [
   {
@@ -259,7 +287,7 @@ export const PricingPage = () => {
           })}
         </div>
 
-        {/* Feature Comparison Table */}
+        {/* Feature Comparison Table with Clean Categorization */}
         <div className="mb-20 max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-white">Feature Comparison</h2>
@@ -267,50 +295,66 @@ export const PricingPage = () => {
               Compare all features across Free, Starter, and Pro plans side by side.
             </p>
           </div>
+
           <div className="overflow-x-auto rounded-2xl border border-white/10 bg-zinc-900/40 shadow-xl">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10 bg-white/[0.04]">
-                  <th className="text-left py-2.5 px-4 text-zinc-300 font-semibold text-xs sm:text-sm">Feature</th>
-                  <th className="text-center py-2.5 px-4 text-zinc-300 font-semibold text-xs sm:text-sm w-28">Free</th>
-                  <th className="text-center py-2.5 px-4 text-violet-300 font-semibold text-xs sm:text-sm w-28">Starter</th>
-                  <th className="text-center py-2.5 px-4 text-amber-300 font-semibold text-xs sm:text-sm w-28">Pro</th>
+                  <th className="text-left py-3 px-4 text-zinc-200 font-semibold text-xs sm:text-sm">Feature</th>
+                  <th className="text-center py-3 px-4 text-zinc-300 font-semibold text-xs sm:text-sm w-28 sm:w-32">Free</th>
+                  <th className="text-center py-3 px-4 text-violet-300 font-semibold text-xs sm:text-sm w-28 sm:w-32">Starter</th>
+                  <th className="text-center py-3 px-4 text-amber-300 font-semibold text-xs sm:text-sm w-28 sm:w-32">Pro</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
-                {FEATURES.map((f, idx) => (
-                  <tr
-                    key={f.name}
-                    className={`transition-colors hover:bg-white/[0.04] ${
-                      idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'
-                    }`}
-                  >
-                    <td className="py-2 px-4 text-zinc-300 flex items-center gap-1.5 font-medium text-xs sm:text-sm">
-                      {f.name}
-                      {f.tooltip && (
-                        <span className="group relative inline-flex items-center">
-                          <HelpCircle size={13} className="text-zinc-500 cursor-help hover:text-zinc-300 transition-colors" />
-                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-lg bg-zinc-800 text-xs text-zinc-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10 shadow-lg z-20">
-                            {f.tooltip}
-                          </span>
-                        </span>
-                      )}
-                    </td>
-                    {(['free', 'starter', 'pro'] as PlanTier[]).map(tier => {
-                      const val = f[tier];
-                      return (
-                        <td key={tier} className="text-center py-2 px-4 text-xs sm:text-sm">
-                          {val === true ? (
-                            <Check size={15} className="text-emerald-400 mx-auto" />
-                          ) : val === false ? (
-                            <X size={15} className="text-zinc-700 mx-auto" />
-                          ) : (
-                            <span className="text-zinc-300 font-medium">{val}</span>
+              <tbody>
+                {FEATURE_CATEGORIES.map((category) => (
+                  <React.Fragment key={category.title}>
+                    {/* Category Subheading Row */}
+                    <tr className="border-y border-white/10 bg-gradient-to-r from-violet-950/40 via-purple-950/30 to-transparent">
+                      <td
+                        colSpan={4}
+                        className="py-2.5 px-4 text-left text-xs font-bold uppercase tracking-wider text-violet-300"
+                      >
+                        {category.title}
+                      </td>
+                    </tr>
+
+                    {/* Category Feature Rows */}
+                    {category.features.map((f, idx) => (
+                      <tr
+                        key={f.name}
+                        className={`transition-colors hover:bg-white/[0.04] border-b border-white/[0.04] ${
+                          idx % 2 === 0 ? 'bg-white/[0.015]' : 'bg-transparent'
+                        }`}
+                      >
+                        <td className="py-2.5 px-4 text-zinc-300 flex items-center gap-1.5 font-medium text-xs sm:text-sm">
+                          {f.name}
+                          {f.tooltip && (
+                            <span className="group relative inline-flex items-center">
+                              <HelpCircle size={13} className="text-zinc-500 cursor-help hover:text-zinc-300 transition-colors" />
+                              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-lg bg-zinc-800 text-xs text-zinc-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10 shadow-lg z-20">
+                                {f.tooltip}
+                              </span>
+                            </span>
                           )}
                         </td>
-                      );
-                    })}
-                  </tr>
+                        {(['free', 'starter', 'pro'] as PlanTier[]).map((tier) => {
+                          const val = f[tier];
+                          return (
+                            <td key={tier} className="text-center py-2.5 px-4 text-xs sm:text-sm">
+                              {val === true ? (
+                                <Check size={16} className="text-emerald-400 mx-auto" />
+                              ) : val === false ? (
+                                <X size={16} className="text-zinc-700 mx-auto" />
+                              ) : (
+                                <span className="text-zinc-300 font-medium">{val}</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
