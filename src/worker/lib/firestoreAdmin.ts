@@ -3,15 +3,16 @@ import { getServiceAccountAccessToken } from './googleAuth';
 
 async function getAuthHeader(idToken?: string | null, env?: WorkerEnv): Promise<Record<string, string>> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (idToken) {
-    headers['Authorization'] = `Bearer ${idToken}`;
-    return headers;
-  }
   if (env) {
     const saToken = await getServiceAccountAccessToken(env);
     if (saToken) {
       headers['Authorization'] = `Bearer ${saToken}`;
+      return headers;
     }
+  }
+  if (idToken) {
+    headers['Authorization'] = `Bearer ${idToken}`;
+    return headers;
   }
   return headers;
 }
