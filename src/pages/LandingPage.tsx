@@ -423,16 +423,16 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 5. Before / After Comparison Cards ("The proof advantage") ── */}
-      <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <p className="font-caveat text-3xl text-brand-600 -rotate-1 mb-1">
-            The proof advantage
+      {/* ── 5. Before / After Comparison Cards ("The Proof Advantage") ── */}
+      <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 px-2">
+          <p className="font-caveat text-2xl sm:text-3xl text-brand-600 -rotate-1 mb-2 font-medium">
+            The Proof Advantage
           </p>
-          <h2 id="comparison-heading" className="text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-md mx-auto text-balance">
+          <h2 id="comparison-heading" className="text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-xl mx-auto text-balance leading-tight">
             Why Winning Brands Rely on Social Proof
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 mt-3 max-w-xl mx-auto">
+          <p className="text-sm sm:text-base text-gray-600 mt-3 sm:mt-4 max-w-xl mx-auto text-balance leading-relaxed">
             See the undeniable impact verified customer praise has on your conversion rates.
           </p>
         </div>
