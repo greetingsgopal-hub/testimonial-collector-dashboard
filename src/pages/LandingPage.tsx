@@ -931,24 +931,24 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── 8. FEATURE 3: "PUBLISH & SHARE" (Full Showcase Transformation Architecture) ── */}
-      <section id="share-section" className="border-t border-gray-200/80 bg-white py-20 sm:py-24 text-center">
-        <div className="max-w-6xl mx-auto px-6">
+      <section id="share-section" className="border-t border-gray-200/80 bg-white py-20 sm:py-28 lg:py-32 text-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/70 text-blue-700 text-xs font-bold tracking-wide uppercase mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-indigo-50 border border-indigo-200/70 text-brand-600 text-xs font-bold tracking-wide uppercase mb-5">
+            <Sparkles className="w-3.5 h-3.5 text-brand-600" />
             <span>03 / Publish Everywhere</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto leading-[1.15]">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto leading-tight text-balance">
             One Testimonial, 12 Ways to Share It
           </h2>
 
-          <p className="mt-4 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 sm:mt-5 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed text-balance">
             Don't let your best reviews collect digital dust. Panda Praise turns every testimonial into widgets, videos, Reels, popups, and case studies.
           </p>
 
           {/* 6 Checklist Bullets in Balanced Grid */}
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3 text-left max-w-4xl mx-auto text-xs sm:text-sm text-gray-700 font-medium">
+          <div className="mt-10 mb-12 sm:mb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3.5 text-left max-w-4xl mx-auto text-xs sm:text-sm text-gray-700 font-medium">
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <span>Widgets, popups and Walls of Love</span>
@@ -976,7 +976,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Interactive Tabbed Sharing Showcase Card */}
-          <div className="mt-12 rounded-3xl border border-gray-200 bg-white p-6 sm:p-10 shadow-lg max-w-5xl mx-auto">
+          <div className="rounded-3xl border border-gray-200 bg-white p-6 sm:p-10 shadow-lg max-w-5xl mx-auto">
             
             {/* Pill Tab Switcher */}
             <div className="flex justify-center-safe gap-2 overflow-x-auto pb-2">
@@ -995,8 +995,8 @@ export const LandingPage: React.FC = () => {
                     onClick={() => setActiveShareTab(tab.id as any)}
                     className={`shrink-0 whitespace-nowrap rounded-full px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                       isActive
-                        ? 'bg-[#6701e6] text-white shadow-md'
-                        : 'border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'
+                        ? 'bg-brand-600 text-white shadow-md'
+                        : 'border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                     }`}
                   >
                     {tab.label}
@@ -1016,42 +1016,29 @@ export const LandingPage: React.FC = () => {
                     More attention-grabbing widgets than anywhere else. Install once with copy-paste code, and watch approved testimonials update live.
                   </p>
 
-                  {/* 22 Widget Tags Grid */}
-                  <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
+                  {/* Streamlined Curated Primary Widget Categories */}
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-2 max-w-3xl mx-auto">
                     {[
-                      'Testimonial Image Gallery',
-                      'Testimonial Masonry',
-                      'Testimonial Marquee',
-                      'Testimonial Carousel',
-                      'Slab Carousel',
+                      'Image Gallery',
+                      'Masonry Grid',
+                      'Marquee Ticker',
+                      'Carousel Slider',
                       'Rating Badge',
-                      'Bold Highlights',
-                      'Company Logos',
-                      'Single Video',
-                      'Social Star',
-                      'Hero Quotes',
-                      'Bricks',
+                      'Social Cards',
                       'Avatars Pro',
-                      'Avatars Grid',
-                      'Testimonial Highlights',
                       'Minimalist List',
-                      'Compact Testimonials',
-                      'Candy Carousel',
-                      'Classic Cards',
                       'Quote Grid',
-                      'Modern Slider',
-                      'Testimonial Bubble List'
                     ].map((w) => {
-                      const isSelected = selectedWidgetTag === w;
+                      const isSelected = selectedWidgetTag === w || (selectedWidgetTag === 'Testimonial Image Gallery' && w === 'Image Gallery');
                       return (
                         <button
                           key={w}
                           type="button"
                           onClick={() => setSelectedWidgetTag(w)}
-                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                          className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer ${
                             isSelected
-                              ? 'bg-[#6701e6] text-white shadow-xs'
-                              : 'border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700'
+                              ? 'bg-brand-600 text-white shadow-xs'
+                              : 'border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-950'
                           }`}
                         >
                           {w}
@@ -1063,7 +1050,7 @@ export const LandingPage: React.FC = () => {
                   {/* Live Widget Cards Preview */}
                   <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left max-w-4xl mx-auto">
                     {INITIAL_REVIEWS.slice(0, 3).map((r, i) => (
-                      <div key={i} className="p-4 rounded-xl border border-gray-200 bg-white shadow-xs hover:border-purple-200 transition-colors">
+                      <div key={i} className="p-4 rounded-xl border border-gray-200 bg-white shadow-xs hover:border-indigo-200 transition-colors">
                         <div role="img" aria-label="5 out of 5 stars" className="flex text-amber-500 text-xs mb-2"><span aria-hidden="true">★★★★★</span></div>
                         <p className="text-xs text-gray-800 italic line-clamp-3 mb-3">"{r.content}"</p>
                         <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
@@ -1095,7 +1082,7 @@ export const LandingPage: React.FC = () => {
                       </span>
                     </div>
                     <div className="text-center my-auto">
-                      <div className="w-14 h-14 rounded-full bg-[#6701e6] flex items-center justify-center mx-auto text-white shadow-lg mb-3">
+                      <div className="w-14 h-14 rounded-full bg-brand-600 flex items-center justify-center mx-auto text-white shadow-lg mb-3">
                         <Play className="w-6 h-6 fill-white ml-0.5" />
                       </div>
                       <p className="text-sm font-semibold">"This tool 3x'd our customer conversions in 30 days!"</p>
@@ -1126,7 +1113,7 @@ export const LandingPage: React.FC = () => {
                   <div className="mt-6">
                     <button
                       onClick={() => setIsWallModalOpen(true)}
-                      className="px-6 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs sm:text-sm font-bold shadow-md transition-transform hover:scale-105 cursor-pointer"
+                      className="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-bold shadow-md transition-transform hover:scale-105 cursor-pointer"
                     >
                       Open Wall of Love Preview
                     </button>
