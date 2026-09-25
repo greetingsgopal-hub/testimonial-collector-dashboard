@@ -125,7 +125,7 @@ export const LandingPage: React.FC = () => {
 
       {/* ── 2. Header / Navigation (Sticky Frozen Navbar) ── */}
       <header className="sticky top-0 z-50 w-full bg-white/95 border-b border-gray-200/80 backdrop-blur-md shadow-xs transition-shadow">
-        <div className="max-w-6xl mx-auto px-6 h-18 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
           
           {/* Logo strictly clean text "Panda Praise" */}
           <Link to="/" className="flex items-center gap-2 group">
@@ -166,40 +166,20 @@ export const LandingPage: React.FC = () => {
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-3">
-            {user ? (
-              <>
-                <Link
-                  to="/dashboard"
-                  className="px-3.5 py-1.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5"
-                >
-                  <span>Dashboard</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-gray-500" />
-                </Link>
-                <Link
-                  to="/dashboard?new=true"
-                  className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all hover:scale-[1.02]"
-                >
-                  Start for free
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-950 transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  onClick={() => analytics.signupStarted('header_nav')}
-                  className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all hover:scale-[1.02]"
-                >
-                  Start for free
-                </Link>
-              </>
-            )}
+          <div className="flex items-center gap-4 sm:gap-6">
+            <Link
+              to={user ? "/dashboard" : "/login"}
+              className="text-sm font-medium text-gray-600 hover:text-gray-950 transition-colors"
+            >
+              Login
+            </Link>
+            <Link
+              to={user ? "/dashboard?new=true" : "/signup"}
+              onClick={() => analytics.signupStarted('header_nav')}
+              className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all hover:scale-[1.02]"
+            >
+              Start for free
+            </Link>
 
             {/* Mobile Hamburger Button */}
             <button
