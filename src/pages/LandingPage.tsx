@@ -69,7 +69,7 @@ export const LandingPage: React.FC = () => {
   });
 
   const navigate = useNavigate();
-  const { user, enableDemoMode } = useAuth();
+  const { user } = useAuth();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [activeShareTab, setActiveShareTab] = useState<'widgets' | 'videos' | 'walls' | 'popups' | 'images' | 'hosting'>('widgets');
   const [selectedWidgetTag, setSelectedWidgetTag] = useState('Testimonial Image Gallery');
@@ -90,9 +90,12 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   const handleLaunchDemo = () => {
-    analytics.ctaClicked('demo_mode', '/dashboard');
-    enableDemoMode();
-    navigate('/dashboard');
+    analytics.ctaClicked('demo_mode', user ? '/dashboard' : '/signup');
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/signup');
+    }
   };
 
   const toggleFaq = (idx: number) => {
