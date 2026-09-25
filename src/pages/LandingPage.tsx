@@ -485,7 +485,7 @@ export const LandingPage: React.FC = () => {
                   <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
                     <XIcon className="w-3 h-3 text-rose-500" />
                   </div>
-                  <span>Struggling to <span className="senja-dotted">build trust</span> with new visitors</span>
+                  <span>Struggling to build trust with new visitors</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
@@ -552,7 +552,7 @@ export const LandingPage: React.FC = () => {
                     </div>
                   </div>
                   <p className="text-[11px] text-slate-700 font-medium leading-relaxed">
-                    &ldquo;Adding Panda Praise testimonials boosted our checkout conversions by +42% in week one!&rdquo;
+                    "Adding Panda Praise testimonials boosted our checkout conversions by +42% in week one!"
                   </p>
                 </div>
 
@@ -560,12 +560,12 @@ export const LandingPage: React.FC = () => {
                   <div className="bg-emerald-50/90 border border-emerald-200/80 rounded-lg px-2.5 py-1.5 flex items-center justify-between">
                     <span className="text-[10px] text-emerald-800 font-medium">Conversion Lift</span>
                     <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-0.5">
-                      <TrendingUp className="w-2.5 h-2.5 text-emerald-600" /> +34.8%
+                      <TrendingUp className="w-2.5 h-2.5 text-emerald-600" /> +42.5%
                     </span>
                   </div>
-                  <div className="bg-amber-50/90 border border-amber-200/80 rounded-lg px-2.5 py-1.5 flex items-center justify-between">
-                    <span className="text-[10px] text-amber-800 font-medium">Average Rating</span>
-                    <span className="text-[10px] font-bold text-amber-700">4.9 / 5.0 ★</span>
+                  <div className="bg-emerald-50/90 border border-emerald-200/80 rounded-lg px-2.5 py-1.5 flex items-center justify-between">
+                    <span className="text-[10px] text-emerald-800 font-medium">Visitor Retention</span>
+                    <span className="text-[10px] font-bold text-emerald-700">92%</span>
                   </div>
                 </div>
               </div>
