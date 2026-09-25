@@ -144,46 +144,45 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                 Create your free Panda Praise account and get your own testimonial link.
               </p>
 
-              {user ? (
-                // Already authenticated (Requirement 6 & 15)
-                <div className="mt-3.5 pt-3 border-t border-purple-100/80 flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-gray-500 truncate">
-                    Signed in as <strong className="text-gray-900 font-medium">{user.email}</strong>
-                  </span>
+              <div className="mt-3.5 space-y-2.5">
+                <button
+                  onClick={handleViralSignup}
+                  className="w-full py-3 px-4 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-95 shadow-md cursor-pointer"
+                >
+                  <span>Create My Free Panda Praise</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <div className="flex items-center justify-between text-[11px] text-gray-500 pt-0.5">
+                  <span>No credit card required.</span>
                   <button
                     onClick={() => {
                       onClose();
-                      navigate('/dashboard');
+                      navigate('/login');
                     }}
-                    className="px-3.5 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-xs"
+                    className="text-[#6701e6] font-semibold hover:underline cursor-pointer"
                   >
-                    <span>Go to Dashboard</span>
-                    <ArrowRight className="w-3 h-3" />
+                    Already have an account? Sign in →
                   </button>
                 </div>
-              ) : (
-                <div className="mt-3.5 space-y-2">
-                  <button
-                    onClick={handleViralSignup}
-                    className="w-full py-3 px-4 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-95 shadow-md cursor-pointer"
-                  >
-                    <span>Create My Free Panda Praise</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                  <div className="flex items-center justify-between text-[11px] text-gray-500 pt-0.5">
-                    <span>No credit card required.</span>
+
+                {user && (
+                  <div className="mt-2 pt-2.5 border-t border-purple-100/80 flex items-center justify-between gap-2 text-[11px] text-gray-500">
+                    <span className="truncate max-w-[200px]">
+                      Signed in as <strong className="text-gray-900 font-medium">{user.email}</strong>
+                    </span>
                     <button
                       onClick={() => {
                         onClose();
-                        navigate('/login');
+                        navigate('/dashboard');
                       }}
-                      className="text-[#6701e6] font-semibold hover:underline cursor-pointer"
+                      className="text-[#6701e6] font-bold hover:underline shrink-0 flex items-center gap-0.5 cursor-pointer"
                     >
-                      Already have an account? Log in →
+                      <span>Go to Dashboard</span>
+                      <ArrowRight className="w-3 h-3" />
                     </button>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         )}

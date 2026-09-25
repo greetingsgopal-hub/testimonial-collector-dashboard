@@ -29,6 +29,7 @@ export const SignupPage: React.FC = () => {
     user, 
     signUp, 
     signInWithGoogle, 
+    signOut,
     enableDemoMode, 
     updateProjectDetails, 
     updateCollectionFormDetails, 
@@ -207,16 +208,27 @@ export const SignupPage: React.FC = () => {
                 <span>You are already signed in as {user.email}</span>
               </div>
               <p className="text-gray-600">
-                You already have a Panda Praise account. Skip signup and proceed to your dashboard.
+                You already have an active session. Skip signup and proceed to your dashboard, or sign out to create a fresh new account.
               </p>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard')}
-                className="mt-1 px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
-              >
-                <span>Continue to Your Dashboard</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => navigate('/dashboard')}
+                  className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                >
+                  <span>Continue to Your Dashboard</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await signOut();
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 font-semibold text-xs transition-colors cursor-pointer"
+                >
+                  <span>Sign out to create new account</span>
+                </button>
+              </div>
             </div>
           )}
 
