@@ -20,8 +20,8 @@ const TESTIMONIALS_LIST: TestimonialItem[] = [
     text: 'It took mere minutes to get set up and add GORGEOUS testimonials to my website',
   },
   {
-    name: 'Jamie Northrup',
-    role: 'Minimalist Hustler',
+    name: 'Alex M.',
+    role: 'SaaS Founder',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80',
     stars: 5,
     text: 'Took me less than 5 minutes to start collecting',

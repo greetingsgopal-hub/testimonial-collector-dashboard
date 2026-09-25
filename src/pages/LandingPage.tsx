@@ -668,7 +668,7 @@ export const LandingPage: React.FC = () => {
               </div>
 
               {/* In-Section Testimonial Quote */}
-              <figure className="relative border-l-2 border-black py-2 pl-4 text-left mt-8 max-w-lg">
+              <figure className="relative border-l-2 border-brand-600 py-2 pl-4 text-left mt-8 max-w-lg">
                 <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                   <p>
                     Panda Praise made it so easy and quick to collect testimonials.{' '}
@@ -679,15 +679,12 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </blockquote>
                 <figcaption className="mt-2.5 flex items-center gap-2.5">
-                  <img
-                    src="/assets/senja/jamie-northrup.C6GwZu-2_s1skM.webp"
-                    alt="Jamie Northrup"
-                    loading="lazy"
-                    className="h-8 w-8 rounded-full object-cover border border-gray-200"
-                  />
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-400 text-white font-bold text-xs flex items-center justify-center border border-indigo-100 shadow-xs select-none">
+                    AM
+                  </div>
                   <div>
-                    <p className="font-bold text-gray-900 text-xs">Jamie Northrup</p>
-                    <p className="text-[11px] text-gray-600">Minimalist Hustler</p>
+                    <p className="font-bold text-gray-900 text-xs">Alex M.</p>
+                    <p className="text-[11px] text-gray-600">SaaS Founder</p>
                   </div>
                 </figcaption>
               </figure>
