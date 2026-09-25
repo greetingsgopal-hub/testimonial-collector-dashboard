@@ -12,7 +12,12 @@ import {
   Gift,
   Sparkles,
   ExternalLink,
-  Menu
+  Menu,
+  ShieldCheck,
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
+  Star
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
@@ -421,7 +426,7 @@ export const LandingPage: React.FC = () => {
       {/* ── 5. Before / After Comparison Cards ("The proof advantage") ── */}
       <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <p className="font-caveat text-3xl text-[#6701e6] -rotate-1 mb-1">
+          <p className="font-caveat text-3xl text-brand-600 -rotate-1 mb-1">
             The proof advantage
           </p>
           <h2 id="comparison-heading" className="text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-md mx-auto text-balance">
@@ -437,76 +442,167 @@ export const LandingPage: React.FC = () => {
           {/* Card 1: You Without Social Proof */}
           <div className="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col justify-between">
             <div>
-              <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-gray-100 border border-gray-200 shadow-inner">
-                <img
-                  src="/assets/senja/video-without.BT548AK4_Z15YjLo.webp"
-                  alt="You Without Social Proof"
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                />
+              {/* Minimalist UI Mockup Container (Without Social Proof) */}
+              <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-gradient-to-b from-slate-50 to-slate-100/80 border border-slate-200 p-4 flex flex-col justify-between shadow-inner select-none">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-600 border border-rose-200/70">
+                    <AlertCircle className="w-3 h-3 text-rose-500" /> No Verified Reviews
+                  </span>
+                </div>
+
+                <div className="bg-white/90 border border-dashed border-slate-300 rounded-xl p-3 text-center my-auto shadow-xs">
+                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-1 text-slate-400">
+                    <MessageSquare className="w-4 h-4 text-slate-400" />
+                  </div>
+                  <p className="text-xs font-semibold text-slate-600">0 Testimonials Collected</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Visitors leave due to lack of social proof</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-white/80 border border-slate-200/80 rounded-lg px-2.5 py-1.5 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500 font-medium">Conversion Rate</span>
+                    <span className="text-[10px] font-bold text-rose-600 flex items-center gap-0.5">
+                      <TrendingDown className="w-2.5 h-2.5" /> 0.8%
+                    </span>
+                  </div>
+                  <div className="bg-white/80 border border-slate-200/80 rounded-lg px-2.5 py-1.5 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500 font-medium">Bounce Rate</span>
+                    <span className="text-[10px] font-bold text-rose-600">74%</span>
+                  </div>
+                </div>
               </div>
+
               <h3 className="text-xl font-bold font-display text-gray-900 text-center mb-6">
                 You Without Social Proof
               </h3>
               <ul className="space-y-3.5 text-xs sm:text-sm text-gray-600 max-w-sm mx-auto">
                 <li className="flex items-start gap-3">
-                  <XIcon className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                  <span>Struggling to <span className="senja-dotted">build trust</span></span>
+                  <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <XIcon className="w-3 h-3 text-rose-500" />
+                  </div>
+                  <span>Struggling to <span className="senja-dotted">build trust</span> with new visitors</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <XIcon className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                  <span>Watching sales trickle in</span>
+                  <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <XIcon className="w-3 h-3 text-rose-500" />
+                  </div>
+                  <span>Watching sales trickle in slowly</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <XIcon className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                  <span>Working overtime to prove yourself</span>
+                  <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <XIcon className="w-3 h-3 text-rose-500" />
+                  </div>
+                  <span>Working overtime to prove product value</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <XIcon className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                  <span>Blending in with competitors</span>
+                  <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <XIcon className="w-3 h-3 text-rose-500" />
+                  </div>
+                  <span>Blending in with generic competitors</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <XIcon className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                  <span>Losing leads to buyer hesitation</span>
+                  <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <XIcon className="w-3 h-3 text-rose-500" />
+                  </div>
+                  <span>Losing high-intent leads to buyer hesitation</span>
                 </li>
               </ul>
             </div>
           </div>
 
           {/* Card 2: You With Social Proof */}
-          <div className="bg-purple-50/20 border-2 border-purple-300/80 rounded-3xl p-6 sm:p-8 shadow-lg shadow-purple-500/5 flex flex-col justify-between relative">
+          <div className="bg-white border-2 border-indigo-100 rounded-3xl p-6 sm:p-8 shadow-lg shadow-indigo-500/5 flex flex-col justify-between relative ring-1 ring-indigo-500/10">
             <div>
-              <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-purple-100 border border-purple-200 shadow-inner">
-                <img
-                  src="/assets/senja/video-with.Ctn8dyn5_1S8Qct.webp"
-                  alt="You With Social Proof celebration"
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                />
+              {/* Modern UI Mockup Container (With Social Proof) */}
+              <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-gradient-to-b from-indigo-50/60 via-white to-amber-50/30 border border-indigo-100 p-4 flex flex-col justify-between shadow-inner select-none">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-300" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-300" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-300" />
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                    <ShieldCheck className="w-3 h-3 text-emerald-600" /> Verified Customer Reviews
+                  </span>
+                </div>
+
+                <div className="bg-white border border-slate-200/80 rounded-xl p-3 my-auto shadow-sm space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-brand-600 to-brand-400 text-white font-bold text-[10px] flex items-center justify-center shadow-xs">
+                        SJ
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-bold text-slate-900 leading-tight flex items-center gap-1">
+                          Sarah Jenkins
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" title="Verified" />
+                        </div>
+                        <div className="text-[9px] text-slate-500">Founder, Velocity Labs</div>
+                      </div>
+                    </div>
+                    <div className="flex text-amber-500 text-[10px] gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-700 font-medium leading-relaxed">
+                    &ldquo;Adding Panda Praise testimonials boosted our checkout conversions by +42% in week one!&rdquo;
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-emerald-50/90 border border-emerald-200/80 rounded-lg px-2.5 py-1.5 flex items-center justify-between">
+                    <span className="text-[10px] text-emerald-800 font-medium">Conversion Lift</span>
+                    <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-0.5">
+                      <TrendingUp className="w-2.5 h-2.5 text-emerald-600" /> +34.8%
+                    </span>
+                  </div>
+                  <div className="bg-amber-50/90 border border-amber-200/80 rounded-lg px-2.5 py-1.5 flex items-center justify-between">
+                    <span className="text-[10px] text-amber-800 font-medium">Average Rating</span>
+                    <span className="text-[10px] font-bold text-amber-700">4.9 / 5.0 ★</span>
+                  </div>
+                </div>
               </div>
+
               <h3 className="text-xl font-bold font-display text-gray-900 text-center mb-6">
                 You With Social Proof
               </h3>
-              <ul className="space-y-3.5 text-xs sm:text-sm text-gray-700 max-w-sm mx-auto font-medium">
+              <ul className="space-y-3.5 text-xs sm:text-sm text-gray-800 max-w-sm mx-auto font-medium">
                 <li className="flex items-start gap-3">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Win customer trust instantly</span>
+                  <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 text-emerald-600" />
+                  </div>
+                  <span>Win customer trust instantly with authentic praise</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Sell like hotcakes</span>
+                  <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 text-emerald-600" />
+                  </div>
+                  <span>Skyrocket website conversion rates and sales</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Turn your audience into advocates</span>
+                  <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 text-emerald-600" />
+                  </div>
+                  <span>Turn your happiest customers into active advocates</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Stand out from competitors</span>
+                  <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 text-emerald-600" />
+                  </div>
+                  <span>Stand out effortlessly against competitors</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Market with confidence</span>
+                  <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 text-emerald-600" />
+                  </div>
+                  <span>Market with unshakeable confidence & social proof</span>
                 </li>
               </ul>
             </div>
