@@ -1,6 +1,55 @@
 import { Buffer } from 'node:buffer';
 
-const LINKEDIN_API_VERSION = '202401';
+const CANDIDATE_VERSIONS = [
+  '202502',
+  '202501',
+  '202412',
+  '202411',
+  '202410',
+  '202409',
+  '202408',
+  '202407',
+  '202406',
+  '202405',
+  '202404',
+  '202403',
+  '202402',
+  '202609',
+  '202608',
+  '202607',
+  '202606',
+  '202605',
+  '202604',
+  '202603',
+  '202602',
+  '202601',
+];
+
+let cachedActiveVersion: string | null = null;
+
+async function executeWithVersionRetry(
+  requestFn: (version: string) => Promise<Response>
+): Promise<Response> {
+  if (cachedActiveVersion) {
+    const res = await requestFn(cachedActiveVersion);
+    if (res.status !== 426) {
+      return res;
+    }
+    cachedActiveVersion = null;
+  }
+
+  let lastRes: Response | null = null;
+  for (const v of CANDIDATE_VERSIONS) {
+    const res = await requestFn(v);
+    if (res.status !== 426) {
+      cachedActiveVersion = v;
+      return res;
+    }
+    lastRes = res;
+  }
+
+  return lastRes!;
+}
 
 export interface LinkedInTokenResponse {
   access_token: string;
@@ -71,20 +120,22 @@ export async function publishLinkedInImagePost(
   imageBase64: string
 ): Promise<{ postId: string; postUrl: string }> {
   // Step 1: Initialize Image Upload
-  const initRes = await fetch('https://api.linkedin.com/rest/images?action=initializeUpload', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'LinkedIn-Version': LINKEDIN_API_VERSION,
-      'X-Restli-Protocol-Version': '2.0.0',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      initializeUploadRequest: {
-        owner: personUrn,
+  const initRes = await executeWithVersionRetry((version) =>
+    fetch('https://api.linkedin.com/rest/images?action=initializeUpload', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'LinkedIn-Version': version,
+        'X-Restli-Protocol-Version': '2.0.0',
+        'Content-Type': 'application/json',
       },
-    }),
-  });
+      body: JSON.stringify({
+        initializeUploadRequest: {
+          owner: personUrn,
+        },
+      }),
+    })
+  );
 
   if (!initRes.ok) {
     const errBody = await initRes.text();
@@ -139,16 +190,18 @@ export async function publishLinkedInImagePost(
     isReshareDisabledByAuthor: false,
   };
 
-  const postRes = await fetch('https://api.linkedin.com/rest/posts', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'LinkedIn-Version': LINKEDIN_API_VERSION,
-      'X-Restli-Protocol-Version': '2.0.0',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(postPayload),
-  });
+  const postRes = await executeWithVersionRetry((version) =>
+    fetch('https://api.linkedin.com/rest/posts', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'LinkedIn-Version': version,
+        'X-Restli-Protocol-Version': '2.0.0',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(postPayload),
+    })
+  );
 
   if (!postRes.ok) {
     const errBody = await postRes.text();
@@ -180,16 +233,18 @@ export async function publishLinkedInTextPost(
     isReshareDisabledByAuthor: false,
   };
 
-  const postRes = await fetch('https://api.linkedin.com/rest/posts', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'LinkedIn-Version': LINKEDIN_API_VERSION,
-      'X-Restli-Protocol-Version': '2.0.0',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(postPayload),
-  });
+  const postRes = await executeWithVersionRetry((version) =>
+    fetch('https://api.linkedin.com/rest/posts', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'LinkedIn-Version': version,
+        'X-Restli-Protocol-Version': '2.0.0',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(postPayload),
+    })
+  );
 
   if (!postRes.ok) {
     const errBody = await postRes.text();

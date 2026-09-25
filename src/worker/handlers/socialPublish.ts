@@ -244,12 +244,13 @@ export async function handleSocialPublish(request: Request, env: WorkerEnv): Pro
     );
   } catch (err: any) {
     console.error('[SocialPublish] Publishing failed:', err?.message || err);
-    const isAuthErr = err?.message?.includes('expired') || err?.message?.includes('revoked') || err?.message?.includes('401');
+    const isAuthErr = err?.message?.includes('(401)') || err?.message?.includes('REVOKED') || err?.message?.includes('EXPIRED_TOKEN');
     return new Response(
       JSON.stringify({
         error: isAuthErr
           ? 'Social platform authentication expired or was revoked. Please reconnect your account.'
           : 'Failed to publish post to social platform. Please try again.',
+        details: err?.message,
         reauthRequired: isAuthErr,
       }),
       {
