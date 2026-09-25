@@ -438,8 +438,8 @@ export const LandingPage: React.FC = () => {
               {/* Meme GIF Container (Without Social Proof - This Is Fine) */}
               <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-slate-100 border border-slate-200 shadow-inner relative">
                 <img
-                  src="https://media.giphy.com/media/QMHoU66sBXqqLqYvGO/giphy.gif"
-                  alt="You Without Social Proof - Chaos and panic"
+                  src="/assets/this-is-fine.gif"
+                  alt="You Without Social Proof - This is fine fire dog meme"
                   loading="lazy"
                   className="w-full h-full object-cover"
                 />
@@ -489,7 +489,7 @@ export const LandingPage: React.FC = () => {
               {/* Meme GIF Container (With Social Proof - Leonardo DiCaprio Gatsby Toast) */}
               <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-indigo-50 border border-indigo-100 shadow-inner relative">
                 <img
-                  src="https://media.giphy.com/media/BPJmthQ3YRwD6/giphy.gif"
+                  src="/assets/gatsby-toast.gif"
                   alt="You With Social Proof - Leonardo DiCaprio raising a celebratory glass"
                   loading="lazy"
                   className="w-full h-full object-cover"
