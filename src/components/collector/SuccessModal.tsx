@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
-import { CheckCircle2, ArrowRight, PlusCircle, Sparkles, Copy, Check } from 'lucide-react';
+import { CheckCircle2, ArrowRight, PlusCircle, Sparkles, Copy, Check, X } from 'lucide-react';
 import { Review } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { analytics } from '../../lib/analytics';
@@ -90,6 +90,16 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div className="bg-white w-full max-w-md rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-2xl relative overflow-hidden animate-slide-up text-center text-gray-900 my-auto">
         
+        {/* Dismiss / Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+          title="Close modal"
+          aria-label="Close modal"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
         {/* Glow effect */}
         <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-purple-100/60 rounded-full blur-3xl pointer-events-none" />
 
@@ -187,32 +197,34 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
           </div>
         )}
 
-        {/* Existing Secondary Action Buttons */}
-        <div className={`grid ${isPublicView ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-2.5 font-display`}>
-          <button
-            onClick={() => {
-              onResetForm();
-              onClose();
-            }}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs sm:text-sm font-semibold text-gray-700 transition-colors cursor-pointer"
-          >
-            <PlusCircle className="w-4 h-4 text-gray-500" />
-            <span>Submit Another Testimonial</span>
-          </button>
-
-          {!isPublicView && onGoToDashboard && (
+        {/* Secondary Action Buttons (Dashboard testing view only - hidden for public end users) */}
+        {!isPublicView && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-display">
             <button
               onClick={() => {
+                onResetForm();
                 onClose();
-                onGoToDashboard();
               }}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-xs sm:text-sm font-bold text-white shadow-md transition-all cursor-pointer"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs sm:text-sm font-semibold text-gray-700 transition-colors cursor-pointer"
             >
-              <span>View in Dashboard</span>
-              <ArrowRight className="w-4 h-4" />
+              <PlusCircle className="w-4 h-4 text-gray-500" />
+              <span>Submit Another Testimonial</span>
             </button>
-          )}
-        </div>
+
+            {onGoToDashboard && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onGoToDashboard();
+                }}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-xs sm:text-sm font-bold text-white shadow-md transition-all cursor-pointer"
+              >
+                <span>View in Dashboard</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
