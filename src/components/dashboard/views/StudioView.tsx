@@ -43,7 +43,7 @@ export const StudioView: React.FC<StudioViewProps> = ({
             Social Proof Studio
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            What would you like to create?
+            Turn approved testimonials into website and marketing assets.
           </p>
         </div>
 
@@ -80,7 +80,7 @@ export const StudioView: React.FC<StudioViewProps> = ({
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <h2 className="text-base font-bold text-gray-900 font-display">Your Saved</h2>
-            <p className="text-xs text-gray-400">Everything you create and save in Studio will show up here.</p>
+            <p className="text-xs text-gray-400">Create a widget, Wall of Love, social asset or other proof asset. Your saved creations will appear here.</p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -99,9 +99,9 @@ export const StudioView: React.FC<StudioViewProps> = ({
           <div className="w-12 h-12 rounded-full bg-purple-50 text-[#6701e6] flex items-center justify-center mx-auto">
             <Sparkles className="w-6 h-6" />
           </div>
-          <p className="text-sm font-bold text-gray-800">Nothing here, yet.</p>
+          <p className="text-sm font-bold text-gray-800">Put your proof to work.</p>
           <p className="text-xs text-gray-400 max-w-sm mx-auto leading-relaxed">
-            To start, select what you would like to create using the menu above.
+            Choose an asset above, then select the approved testimonials you want customers to see.
           </p>
         </div>
       </div>
