@@ -122,7 +122,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
         {/* Section: COLLECT */}
         <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Collect</p>
+          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Get Proof</p>
           <button
             onClick={() => setActiveTab('forms')}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
@@ -154,7 +154,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
         {/* Section: MANAGE */}
         <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Manage</p>
+          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Manage Proof</p>
           <button
             onClick={() => setActiveTab('proof')}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
@@ -214,7 +214,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
         {/* Section: SHARE */}
         <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Share</p>
+          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Use Proof</p>
           <button
             onClick={() => setActiveTab('studio')}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
@@ -293,7 +293,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
         {/* Section: ANALYZE */}
         <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Analyze</p>
+          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Understand</p>
           <button
             onClick={() => setActiveTab('analyze')}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
