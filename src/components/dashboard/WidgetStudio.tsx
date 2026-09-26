@@ -65,111 +65,6 @@ const FacebookIcon = ({ className = 'w-3.5 h-3.5' }: { className?: string }) => 
   </svg>
 );
 
-const FALLBACK_DEMO_REVIEWS: Review[] = [
-  {
-    id: 'demo-1',
-    projectId: 'demo-project',
-    name: 'Sarah Jenkins',
-    role: 'VP of Growth',
-    company: 'ScaleFlow AI',
-    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    content: 'Panda Praise completely transformed our landing page conversion rate. We saw an immediate 34% lift within 48 hours of embedding the Wall of Love widget!',
-    status: 'approved',
-    type: 'text',
-    createdAt: new Date().toISOString(),
-    isFeatured: true,
-    tags: ['conversion', 'saas'],
-    source: 'linkedin',
-    verified: true,
-  } as any,
-  {
-    id: 'demo-2',
-    projectId: 'demo-project',
-    name: 'Marcus Vance',
-    role: 'Founder & CEO',
-    company: 'DevPulse',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    content: 'The automatic sync from Google Reviews and Facebook Page is magical. Customer comments land in our proof vault without any manual copying and pasting.',
-    status: 'approved',
-    type: 'text',
-    createdAt: new Date().toISOString(),
-    isFeatured: true,
-    tags: ['integration', 'automation'],
-    source: 'google',
-    verified: true,
-  } as any,
-  {
-    id: 'demo-3',
-    projectId: 'demo-project',
-    name: 'Elena Rostova',
-    role: 'Head of Product',
-    company: 'NovaSphere',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    content: 'Setting up the Wall of Love took less than 2 minutes. The dark theme looks unbelievable on our Next.js SaaS landing page.',
-    status: 'approved',
-    type: 'text',
-    createdAt: new Date().toISOString(),
-    isFeatured: false,
-    tags: ['design', 'widgets'],
-    source: 'instagram',
-    verified: true,
-  } as any,
-  {
-    id: 'demo-4',
-    projectId: 'demo-project',
-    name: 'David Chen',
-    role: 'Lead Architect',
-    company: 'CloudStack Media',
-    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    content: 'High-speed script, zero layout shifts, and real-time webhook updates. This is the gold standard for social proof collection.',
-    status: 'approved',
-    type: 'text',
-    createdAt: new Date().toISOString(),
-    isFeatured: true,
-    tags: ['speed', 'engineering'],
-    source: 'facebook',
-    verified: true,
-  } as any,
-  {
-    id: 'demo-5',
-    projectId: 'demo-project',
-    name: 'Jessica Morales',
-    role: 'E-commerce Director',
-    company: 'LuxeGlow Beauty',
-    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    content: 'Our checkout conversion skyrocketed after we placed the 5-star customer reviews right beside our pricing table. Absolutely essential tool.',
-    status: 'approved',
-    type: 'text',
-    createdAt: new Date().toISOString(),
-    isFeatured: false,
-    tags: ['ecommerce', 'sales'],
-    source: 'direct',
-    verified: true,
-  } as any,
-  {
-    id: 'demo-6',
-    projectId: 'demo-project',
-    name: 'Alexander Hayes',
-    role: 'Co-founder',
-    company: 'HyperGrowth Labs',
-    avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    content: 'The automatic social cards and responsive masonry grid make our customers feel like celebrities. 10/10 recommendation.',
-    status: 'approved',
-    type: 'text',
-    createdAt: new Date().toISOString(),
-    isFeatured: true,
-    tags: ['growth', 'marketing'],
-    source: 'linkedin',
-    verified: true,
-  } as any,
-];
-
 interface WidgetStudioProps {
   reviews: Review[];
   onBack?: () => void;
@@ -208,10 +103,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
   const [copied, setCopied] = useState(false);
 
   // All approved reviews from project or fallback demo reviews
-  const approvedReviews = useMemo(() => {
-    const list = reviews.filter((r) => r.status === 'approved');
-    return list.length > 0 ? list : FALLBACK_DEMO_REVIEWS;
-  }, [reviews]);
+  const approvedReviews = useMemo(
+    () => reviews.filter((r) => r.status === 'approved'),
+    [reviews]
+  );
 
   // Dynamic filtered reviews with source platform support & rating filter
   const filteredReviews = useMemo(() => {
@@ -635,7 +530,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
                 </div>
                 <h4 className="text-base font-bold text-gray-900 mb-1">No Matching Testimonials</h4>
                 <p className="text-xs text-gray-500 max-w-sm mb-4">
-                  No testimonials currently meet your filter criteria. Try resetting minimum rating or enabling all sources.
+                  Approve at least one testimonial to preview and publish your proof here.
                 </p>
                 <button
                   onClick={() => {
@@ -644,7 +539,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
                   }}
                   className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold cursor-pointer transition-colors shadow-xs"
                 >
-                  Reset Filter Rules
+                  Go to Proof
                 </button>
               </div>
             ) : settings.type === 'wall' ? (
