@@ -9,6 +9,7 @@ interface WelcomeViewProps {
   onProof: () => void;
   onStudio: () => void;
   reviews: Array<{ status: string }>;
+  publishComplete: boolean;
 }
 
 export const WelcomeView: React.FC<WelcomeViewProps> = ({
@@ -18,10 +19,11 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
   onProof,
   onStudio,
   reviews,
+  publishComplete,
 }) => {
   const hasProof = reviews.length > 0;
   const hasApprovedProof = reviews.some(review => review.status === 'approved');
-  const completedSteps = Number(hasProof) + Number(hasApprovedProof);
+  const completedSteps = Number(hasProof) + Number(hasApprovedProof) + Number(publishComplete);
   const { user } = useAuth();
   const displayName = user?.displayName || (user?.email ? user.email.split('@')[0] : 'there');
 
@@ -70,12 +72,12 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
           </button>
           <button onClick={onStudio} className="w-full text-left rounded-2xl border border-gray-200 bg-gray-50/60 hover:border-purple-300 hover:bg-purple-50/40 p-5 transition-all cursor-pointer">
             <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center mb-4">
-              <Star className={`w-4 h-4 ${hasApprovedProof ? 'text-[#6701e6]' : 'text-gray-400'}`} />
+              {publishComplete ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Star className={`w-4 h-4 ${hasApprovedProof ? 'text-[#6701e6]' : 'text-gray-400'}`} />}
             </div>
-            <p className={`text-[11px] font-bold uppercase tracking-wider ${hasApprovedProof ? 'text-[#6701e6]' : 'text-gray-400'}`}>Step 3</p>
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${publishComplete ? 'text-emerald-700' : hasApprovedProof ? 'text-[#6701e6]' : 'text-gray-400'}`}>Step 3 {publishComplete ? '· Complete' : ''}</p>
             <h3 className="text-sm font-bold text-gray-950 mt-1">Put your proof to work</h3>
-            <p className="text-xs text-gray-500 leading-relaxed mt-2">Turn approved testimonials into website and marketing assets with Studio.</p>
-            {hasApprovedProof && <span className="inline-flex items-center gap-1 mt-3 text-[11px] font-bold text-[#6701e6]">Ready for Studio <ArrowRight className="w-3 h-3" /></span>}
+            <p className="text-xs text-gray-500 leading-relaxed mt-2">Turn approved testimonials into a website or marketing asset with Studio.</p>
+            {publishComplete ? <span className="inline-flex items-center gap-1 mt-3 text-[11px] font-bold text-emerald-700">Publish setup complete</span> : hasApprovedProof && <span className="inline-flex items-center gap-1 mt-3 text-[11px] font-bold text-[#6701e6]">Ready for Studio <ArrowRight className="w-3 h-3" /></span>}
           </button>
         </div>
       </section>
