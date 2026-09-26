@@ -27,7 +27,7 @@ export async function handleLinkedInAuthInit(request: Request, env: WorkerEnv): 
   }
 
   // Resolve user identity from Authorization header or query param
-  let userId = 'user_demo_gopal';
+  let userId: string | null = null;
   const authHeader = request.headers.get('Authorization');
   if (authHeader) {
     const token = extractBearerToken(authHeader);
@@ -35,8 +35,19 @@ export async function handleLinkedInAuthInit(request: Request, env: WorkerEnv): 
     if (user) {
       userId = user.uid;
     }
-  } else if (url.searchParams.get('uid')) {
-    userId = url.searchParams.get('uid') || userId;
+  }
+
+  if (!userId) {
+    if (request.method === 'GET') {
+      return Response.redirect(
+        `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent('Please sign in before connecting LinkedIn.')}`,
+        302
+      );
+    }
+    return new Response(JSON.stringify({ error: 'Authentication required.' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   const clientId = env.LINKEDIN_CLIENT_ID;
@@ -49,7 +60,7 @@ export async function handleLinkedInAuthInit(request: Request, env: WorkerEnv): 
     console.warn('[LinkedInAuthInit] LINKEDIN_CLIENT_ID not configured in Worker environment.');
     if (request.method === 'GET') {
       return Response.redirect(
-        `${baseUrl}/dashboard/integrate?social_connected=linkedin&account_name=${encodeURIComponent('Gopal Thakur')}&notice=${encodeURIComponent('LinkedIn Client ID placeholder mode active')}`,
+        `${baseUrl}/dashboard/integrate?social_connected=linkedin&notice=${encodeURIComponent('LinkedIn is not configured yet. Please contact support.')}`,
         302
       );
     }
