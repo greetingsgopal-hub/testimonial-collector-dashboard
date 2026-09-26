@@ -15,7 +15,7 @@ export interface PublicEmbedReview {
 
 export async function handleEmbedTestimonials(request: Request, env: WorkerEnv): Promise<Response> {
   const url = new URL(request.url);
-  const projectId = url.searchParams.get('projectId') || url.searchParams.get('project') || 'default';
+  const projectId = url.searchParams.get('projectId') || url.searchParams.get('project') || '';
   const minRating = parseInt(url.searchParams.get('minRating') || '0', 10);
   const sourcesParam = url.searchParams.get('sources');
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '30', 10), 100);
@@ -33,6 +33,13 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
   };
 
   try {
+    if (!projectId) {
+      return new Response(JSON.stringify({ error: 'projectId is required.', testimonials: [] }), {
+        status: 400,
+        headers: corsHeaders,
+      });
+    }
+
     let reviews: PublicEmbedReview[] = [];
 
     // Attempt to query Firestore testimonials if project ID is provided
@@ -41,7 +48,7 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
 
     const firestoreQuery = {
       structuredQuery: {
-        from: [{ collectionId: 'testimonials' }],
+        from: [{ collectionId: 'public_reviews' }],
         where: {
           compositeFilter: {
             op: 'AND',
@@ -72,8 +79,8 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
         if (item.document?.fields) {
           const f = item.document.fields;
           const reviewProjId = f.projectId?.stringValue || '';
-          // Match project if specified or include all approved if global/demo
-          if (!projectId || projectId === 'default' || projectId === 'demo-project' || reviewProjId === projectId) {
+          // Strict tenant isolation: only return approved reviews for this project.
+          if (reviewProjId === projectId) {
             const rawSource = (f.source?.stringValue || f.platform?.stringValue || 'direct').toLowerCase();
             const source: 'google' | 'linkedin' | 'instagram' | 'facebook' | 'direct' =
               rawSource.includes('google') ? 'google' :
