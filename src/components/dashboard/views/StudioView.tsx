@@ -15,12 +15,18 @@ interface StudioViewProps {
   onOpenWidgetCreator?: () => void;
   onOpenSocialCard?: () => void;
   onOpenWallOfLove?: () => void;
+  approvedCount?: number;
+  onOpenProof?: () => void;
+  onCollect?: () => void;
 }
 
 export const StudioView: React.FC<StudioViewProps> = ({
   onOpenWidgetCreator,
   onOpenSocialCard,
   onOpenWallOfLove,
+  approvedCount = 0,
+  onOpenProof,
+  onCollect,
 }) => {
 
   const studioOptions = [
@@ -56,15 +62,28 @@ export const StudioView: React.FC<StudioViewProps> = ({
         </button>
       </div>
 
-      {/* Creation Quick Options Grid (Matches Senja 03:32) */}
+      {approvedCount === 0 && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-bold text-gray-900">Approve a testimonial before creating an asset</p>
+            <p className="text-xs text-gray-600 mt-1">Studio uses approved proof. Go to your proof library, approve one, then come back here.</p>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <button onClick={onOpenProof} className="px-3.5 py-2 rounded-xl bg-[#6701e6] text-white text-xs font-bold hover:bg-[#5200bd] cursor-pointer">Review proof</button>
+            <button onClick={onCollect} className="px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 cursor-pointer">Collect proof</button>
+          </div>
+        </div>
+      )}
+
+      {/* Creation Quick Options Grid (Matches Senja 03:32) */
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         {studioOptions.map((opt) => {
           const Icon = opt.icon;
           return (
             <button
               key={opt.id}
-              onClick={opt.action}
-              className="p-3.5 rounded-2xl bg-white border border-gray-200 hover:border-[#6701e6] hover:bg-purple-50/30 transition-all flex items-center gap-2 text-xs font-bold text-gray-800 shadow-2xs hover:shadow-xs cursor-pointer group"
+              onClick={approvedCount > 0 ? opt.action : undefined}
+              className={`p-3.5 rounded-2xl bg-white border transition-all flex items-center gap-2 text-xs font-bold shadow-2xs group ${approvedCount > 0 ? 'border-gray-200 hover:border-[#6701e6] hover:bg-purple-50/30 text-gray-800 hover:shadow-xs cursor-pointer' : 'border-gray-200 text-gray-400 opacity-60 cursor-not-allowed'}`}
             >
               <div className="w-7 h-7 rounded-xl bg-purple-50 text-[#6701e6] flex items-center justify-center shrink-0 group-hover:bg-[#6701e6] group-hover:text-white transition-colors">
                 <Icon className="w-3.5 h-3.5" />
