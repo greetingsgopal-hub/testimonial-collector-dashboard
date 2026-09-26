@@ -412,6 +412,9 @@ export const DashboardPage = () => {
                 onOpenWidgetCreator={() => setStudioSubView('widget')}
                 onOpenSocialCard={() => setShowCarouselModal(true)}
                 onOpenWallOfLove={() => setStudioSubView('widget')}
+                approvedCount={reviews.filter(r => r.status === 'approved').length}
+                onOpenProof={() => setActiveTab('proof')}
+                onCollect={() => setActiveTab('forms')}
               />
             )
           )}
@@ -602,6 +605,21 @@ export const DashboardPage = () => {
               </div>
 
               {/* Customer topics are derived elsewhere; do not show fabricated counts here. */}
+              {reviews.length > 0 && stats.approvedCount === 0 && (
+                <div className="mb-5 rounded-2xl border border-purple-200 bg-purple-50 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">Your proof is waiting for approval</p>
+                    <p className="text-xs text-gray-600 mt-1">Approve at least one testimonial before sending it to Studio or publishing it publicly.</p>
+                  </div>
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, status: 'pending' }))}
+                    className="shrink-0 px-4 py-2 rounded-xl bg-[#6701e6] text-white text-xs font-bold hover:bg-[#5200bd] cursor-pointer"
+                  >
+                    Review testimonials
+                  </button>
+                </div>
+              )}
+
               {/* Priority Pending Moderation Alert */}
               {stats.pendingCount > 0 && (
                 <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs text-amber-800 animate-fade-in">
