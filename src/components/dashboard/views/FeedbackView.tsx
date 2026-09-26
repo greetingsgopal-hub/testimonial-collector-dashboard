@@ -24,9 +24,9 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({
       
       {/* Header */}
       <div className="space-y-1 pb-2 border-b border-gray-100">
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight font-display">Feedback</h1>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight font-display">Private Feedback</h1>
         <p className="text-xs text-gray-500">
-          See private feedback collected from your customers. This feedback is never shown publicly.
+          Low ratings stay private. Use this feedback to respond to unhappy customers and improve the experience before publishing anything publicly.
         </p>
       </div>
 
@@ -48,7 +48,7 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({
           <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center mx-auto text-gray-400">
             <Search className="w-6 h-6 text-gray-300" />
           </div>
-          <p className="text-sm font-semibold text-gray-800">No feedback found.</p>
+          <p className="text-sm font-semibold text-gray-800">No private feedback yet.</p>
           <p className="text-xs text-gray-400 max-w-sm mx-auto">
             When customers submit 1-3 star ratings with notes on how to improve, their private constructive feedback will appear here.
           </p>
