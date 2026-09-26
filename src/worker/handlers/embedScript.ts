@@ -9,6 +9,37 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
   'use strict';
 
   var API_BASE = 'https://testimonial-collector-dashboard2.greetings-gopal.workers.dev';
+  // Security: HTML escaping to prevent XSS
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
+  }
+
+  // Security: Whitelist of allowed themes
+  var ALLOWED_THEMES = {
+    'light_gradient': true,
+    'light': true,
+    'dark': true,
+    'minimalist': true
+  };
+
+  function sanitizeTheme(theme) {
+    return ALLOWED_THEMES[theme] ? theme : 'light_gradient';
+  }
+
+  // Security: Validate avatar URL (must be https)
+  function sanitizeAvatarUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    var trimmed = url.trim();
+    if (trimmed.indexOf('https://') !== 0) return '';
+    return trimmed;
+  }
+
 
   // Platform Icons SVG Helpers
   var ICONS = {
@@ -325,31 +356,32 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
       return;
     }
 
-    var html = '<div class="pp-wall-container pp-theme-' + theme + '">';
+    var html = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '">';
     html += '<div class="pp-wall-masonry">';
 
     for (var i = 0; i < reviews.length; i++) {
       var r = reviews[i];
+      var safeAvatar = sanitizeAvatarUrl(r.authorAvatar);
       var avatarHtml = '';
-      if (r.authorAvatar) {
-        avatarHtml = '<img src="' + r.authorAvatar + '" alt="' + (r.authorName || 'Avatar') + '" class="pp-avatar" onerror="this.outerHTML=\\'<div class=\\\\\\"pp-avatar-fallback\\\\\\">' + getInitials(r.authorName) + '</div>\\'" />';
+      if (safeAvatar) {
+        avatarHtml = '<img src="' + safeAvatar + '" alt="' + escapeHtml(r.authorName || 'Avatar') + '" class="pp-avatar" onerror="this.remove()" />';
       } else {
-        avatarHtml = '<div class="pp-avatar-fallback">' + getInitials(r.authorName) + '</div>';
+        avatarHtml = '<div class="pp-avatar-fallback">' + escapeHtml(getInitials(r.authorName)) + '</div>';
       }
 
-      var subtext = [r.authorTitle, r.authorCompany].filter(Boolean).join(' • ');
+      var subtext = [r.authorTitle, r.authorCompany].filter(Boolean).map(escapeHtml).join(' • ');
 
       html += '<div class="pp-card">';
       html += '  <div class="pp-top-row">';
       html += '    <div class="pp-stars">' + renderStars(r.rating) + '</div>';
       html += '    ' + renderSourceBadge(r.source);
       html += '  </div>';
-      html += '  <p class="pp-text">"' + (r.text || '') + '"</p>';
+      html += '  <p class="pp-text">"' + escapeHtml(r.text || '') + '"</p>';
       html += '  <div class="pp-author-row">';
       html += '    ' + avatarHtml;
       html += '    <div class="pp-author-meta">';
       html += '      <div class="pp-author-name-line">';
-      html += '        <span class="pp-author-name">' + (r.authorName || 'Anonymous') + '</span>';
+      html += '        <span class="pp-author-name">' + escapeHtml(r.authorName || 'Anonymous') + '</span>';
       if (r.verified) {
         html += ICONS.verified;
       }
@@ -388,7 +420,7 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
         var limit = container.getAttribute('data-max-count') || '18';
 
         // Skeleton loading state
-        container.innerHTML = '<div class="pp-wall-container pp-theme-' + theme + '"><div class="pp-wall-masonry"><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div></div></div>';
+        container.innerHTML = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '"><div class="pp-wall-masonry"><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div></div></div>';
 
         var query = '?projectId=' + encodeURIComponent(projectId) +
           '&minRating=' + encodeURIComponent(minRating) +
