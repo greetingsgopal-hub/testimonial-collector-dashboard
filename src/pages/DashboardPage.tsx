@@ -55,7 +55,7 @@ export const DashboardPage = () => {
   });
 
   const { project, collectionForm } = useAuth();
-  const [activeTab, setActiveTab] = useState<DashboardTab>('proof');
+  const [activeTab, setActiveTab] = useState<DashboardTab>('welcome');
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<ReviewStats>({
