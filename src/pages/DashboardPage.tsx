@@ -93,9 +93,19 @@ export const DashboardPage = () => {
   const [currentCollectionForm, setCurrentCollectionForm] = useState<CollectionForm | null>(collectionForm);
   const [copiedLink, setCopiedLink] = useState(false);
   const [studioSubView, setStudioSubView] = useState<'overview' | 'widget'>('overview');
+  const [publishComplete, setPublishComplete] = useState(false);
 
   const backend = getActiveBackendInfo();
   const activeProjectId = project?.id;
+
+  useEffect(() => {
+    if (!activeProjectId) return;
+    const key = `panda-praise:publish-complete:${activeProjectId}`;
+    setPublishComplete(Boolean(localStorage.getItem(key)));
+    const handlePublishComplete = () => setPublishComplete(true);
+    window.addEventListener('panda-praise:publish-complete', handlePublishComplete);
+    return () => window.removeEventListener('panda-praise:publish-complete', handlePublishComplete);
+  }, [activeProjectId]);
 
   // Handle OAuth callback redirects in query params
   useEffect(() => {
@@ -365,6 +375,7 @@ export const DashboardPage = () => {
               onProof={() => setActiveTab('proof')}
               onStudio={() => setActiveTab('studio')}
               reviews={reviews}
+              publishComplete={publishComplete}
             />
           )}
 
