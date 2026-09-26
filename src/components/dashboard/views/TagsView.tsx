@@ -41,9 +41,9 @@ export const TagsView: React.FC<TagsViewProps> = ({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-100">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight font-display">Your Tags</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight font-display">Organize your proof</h1>
           <p className="text-xs text-gray-500 mt-1">
-            Tags help you organize and filter your customer testimonials.
+            Use tags to quickly find the right testimonial for a page, feature, customer type or campaign.
           </p>
         </div>
 
@@ -52,7 +52,7 @@ export const TagsView: React.FC<TagsViewProps> = ({
           className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>Create new tag</span>
+          <span>Create tag</span>
         </button>
       </div>
 
@@ -90,7 +90,7 @@ export const TagsView: React.FC<TagsViewProps> = ({
           <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center mx-auto text-gray-400">
             <TagIcon className="w-6 h-6 text-gray-300" />
           </div>
-          <p className="text-sm font-semibold text-gray-800">No tags, yet.</p>
+          <p className="text-sm font-semibold text-gray-800">No tags yet</p>
           <p className="text-xs text-gray-400 max-w-sm mx-auto">
             Tags help you organize your testimonials. Create your first tag to get started.
           </p>
