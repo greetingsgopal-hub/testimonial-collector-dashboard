@@ -319,10 +319,17 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
     }
   };
 
+  const handlePublishSetup = () => {
+    const projectId = project?.id || 'demo-project';
+    localStorage.setItem(`panda-praise:publish-complete:${projectId}`, new Date().toISOString());
+    window.dispatchEvent(new CustomEvent('panda-praise:publish-complete'));
+  };
+
   const handleCopyCode = async () => {
     try {
       await navigator.clipboard.writeText(getEmbedSnippet());
       setCopied(true);
+      handlePublishSetup();
       setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopied(false);
