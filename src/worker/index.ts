@@ -33,7 +33,6 @@ export default {
     // Check if the request is destined for an API endpoint or webhook
     const isApiRoute =
       pathname.startsWith('/api/') ||
-      pathname.startsWith('/.netlify/functions/') ||
       pathname.startsWith('/api/webhook/');
 
     if (isApiRoute) {
@@ -42,7 +41,7 @@ export default {
       if (preflight) return preflight;
 
       // 2. Normalize endpoint name
-      const endpoint = pathname.replace(/^\/(?:api|\.netlify\/functions)\//, '').split('?')[0].replace(/\/$/, '');
+      const endpoint = pathname.replace(/^\/api\//, '').split('?')[0].replace(/\/$/, '');
 
       switch (endpoint) {
         case 'auth/facebook':
