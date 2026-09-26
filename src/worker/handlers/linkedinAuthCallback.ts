@@ -57,7 +57,7 @@ export async function handleLinkedInAuthCallback(request: Request, env: WorkerEn
     if (!clientId || !clientSecret) {
       console.warn('[LinkedInOAuthCallback] LINKEDIN credentials missing in environment.');
       return Response.redirect(
-        `${baseUrl}/dashboard/integrate?social_connected=linkedin&account_name=${encodeURIComponent('Gopal Thakur')}&notice=${encodeURIComponent('Sandbox mode active')}`,
+        `${baseUrl}/dashboard/integrate?social_connected=linkedin&notice=${encodeURIComponent('LinkedIn is not configured yet. Please contact support.')}`,
         302
       );
     }
