@@ -59,7 +59,6 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
             <p className={`text-[11px] font-bold uppercase tracking-wider ${hasProof ? 'text-emerald-700' : 'text-[#6701e6]'}`}>Step 1</p>
             <h3 className="text-sm font-bold text-gray-950 mt-1">Get your first proof</h3>
             <p className="text-xs text-gray-500 leading-relaxed mt-2">Collect a new testimonial from a customer or bring in testimonials you already have.</p>
-          </div>
           </button>
           <button onClick={onProof} className={`w-full text-left rounded-2xl border p-5 transition-all cursor-pointer ${hasApprovedProof ? 'border-emerald-200 bg-emerald-50/40' : hasProof ? 'border-purple-200 bg-purple-50/50 hover:border-purple-300' : 'border-gray-200 bg-gray-50/60'}`}>
             <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center mb-4">
@@ -68,7 +67,6 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
             <p className={`text-[11px] font-bold uppercase tracking-wider ${hasApprovedProof ? 'text-emerald-700' : hasProof ? 'text-[#6701e6]' : 'text-gray-400'}`}>Step 2</p>
             <h3 className="text-sm font-bold text-gray-950 mt-1">Approve your best proof</h3>
             <p className="text-xs text-gray-500 leading-relaxed mt-2">Review what customers said and choose the testimonials you want to use publicly.</p>
-          </div>
           </button>
           <button onClick={onStudio} className="w-full text-left rounded-2xl border border-gray-200 bg-gray-50/60 hover:border-purple-300 hover:bg-purple-50/40 p-5 transition-all cursor-pointer">
             <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center mb-4">
