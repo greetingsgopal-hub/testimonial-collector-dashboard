@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Copy, Check, ExternalLink, Settings, Send, MessageSquare, Star } from 'lucide-react';
+import { Plus, Copy, Check, ExternalLink, Settings, Share, MessageSquare, Star } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
 interface FormsViewProps {
@@ -32,9 +32,9 @@ export const FormsView: React.FC<FormsViewProps> = ({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-100">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight font-display">Your Forms</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight font-display">Collect testimonials</h1>
           <p className="text-xs text-gray-500 mt-1">
-            Use forms to collect testimonials and feedback from your customers.
+            Create a simple customer form and share it to collect new testimonials.
           </p>
         </div>
 
@@ -43,7 +43,7 @@ export const FormsView: React.FC<FormsViewProps> = ({
           className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 self-start sm:self-auto cursor-pointer whitespace-nowrap shrink-0"
         >
           <Plus className="w-3.5 h-3.5 shrink-0" />
-          <span>Create new</span>
+          <span>Configure collection form</span>
         </button>
       </div>
 
@@ -103,14 +103,14 @@ export const FormsView: React.FC<FormsViewProps> = ({
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-[#6701e6] border border-purple-200 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <Send className="w-3 h-3" />
-                  <span>Invites</span>
+                  <span>Share link</span>
                 </button>
                 <button
                   onClick={onViewProof}
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <MessageSquare className="w-3 h-3 text-gray-500" />
-                  <span>Testimonials</span>
+                  <span>View proof</span>
                 </button>
                 <button
                   onClick={onConfigureForm}
@@ -126,19 +126,19 @@ export const FormsView: React.FC<FormsViewProps> = ({
           {/* Right: Metrics Grid (Matches Senja 02:47) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 border-t xl:border-t-0 xl:border-l border-gray-100 pt-4 xl:pt-0 xl:pl-6 shrink-0">
             <div className="text-center px-2">
-              <span className="block text-lg font-bold text-gray-900">0</span>
+              <span className="block text-lg font-bold text-gray-900">—</span>
               <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap">invites</span>
             </div>
             <div className="text-center px-2">
-              <span className="block text-lg font-bold text-gray-900">1</span>
+              <span className="block text-lg font-bold text-gray-900">—</span>
               <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap">unique visits</span>
             </div>
             <div className="text-center px-2">
-              <span className="block text-lg font-bold text-gray-900">0</span>
+              <span className="block text-lg font-bold text-gray-900">—</span>
               <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap">testimonials</span>
             </div>
             <div className="text-center px-2">
-              <span className="block text-lg font-bold text-emerald-600">0.0%</span>
+              <span className="block text-lg font-bold text-emerald-600">—</span>
               <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap">response rate</span>
             </div>
           </div>
