@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Copy, Check, ExternalLink, Settings, Share, MessageSquare, Star } from 'lucide-react';
+import { Plus, Copy, Check, ExternalLink, Settings, Send, MessageSquare, Star } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
 interface FormsViewProps {
