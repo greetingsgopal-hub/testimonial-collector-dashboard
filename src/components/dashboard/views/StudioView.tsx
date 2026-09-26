@@ -29,6 +29,12 @@ export const StudioView: React.FC<StudioViewProps> = ({
   onCollect,
 }) => {
 
+  const handlePublishSetup = () => {
+    const projectId = window.location.pathname + window.location.host;
+    localStorage.setItem(`panda-praise:publish-complete:${projectId}`, new Date().toISOString());
+    window.dispatchEvent(new CustomEvent('panda-praise:publish-complete'));
+  };
+
   const studioOptions = [
     { id: 'widget', label: 'Widget', icon: LayoutGrid, action: onOpenWidgetCreator },
     { id: 'social-video', label: 'Social Video', icon: Video, action: onOpenSocialCard },
