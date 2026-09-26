@@ -417,6 +417,10 @@ export const DashboardPage = () => {
               <WidgetStudio
                 reviews={reviews}
                 onBack={() => setStudioSubView('overview')}
+                onOpenProof={() => {
+                  setStudioSubView('overview');
+                  setActiveTab('proof');
+                }}
               />
             ) : (
               <StudioView
