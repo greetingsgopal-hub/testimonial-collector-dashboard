@@ -27,8 +27,8 @@ export async function handleGoogleAuthInit(request: Request, env: WorkerEnv): Pr
     );
   }
 
-  // Resolve user identity either from Authorization header or state query
-  let userId = 'user_demo_gopal';
+  // Resolve user identity from Authorization header only (C4: no uid query param trust)
+  let userId: string | null = null;
   const authHeader = request.headers.get('Authorization');
   if (authHeader) {
     const token = extractBearerToken(authHeader);
@@ -36,8 +36,19 @@ export async function handleGoogleAuthInit(request: Request, env: WorkerEnv): Pr
     if (user) {
       userId = user.uid;
     }
-  } else if (url.searchParams.get('uid')) {
-    userId = url.searchParams.get('uid') || userId;
+  }
+
+  if (!userId) {
+    if (request.method === 'GET') {
+      return Response.redirect(
+        `${baseUrl}/dashboard?social_error=${encodeURIComponent('Please sign in before connecting Google.')}`,
+        302
+      );
+    }
+    return new Response(JSON.stringify({ error: 'Authentication required.' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   const clientId = env.GOOGLE_CLIENT_ID;

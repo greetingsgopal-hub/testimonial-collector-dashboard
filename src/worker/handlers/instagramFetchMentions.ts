@@ -29,7 +29,8 @@ export async function handleInstagramFetchMentions(request: Request, env: Worker
     );
   }
 
-  let userId = 'user_demo_gopal';
+  // Require verified auth (C4: no demo user fallback, no uid query param trust)
+  let userId: string | null = null;
   const authHeader = request.headers.get('Authorization');
   if (authHeader) {
     const token = extractBearerToken(authHeader);
@@ -37,6 +38,13 @@ export async function handleInstagramFetchMentions(request: Request, env: Worker
     if (user) {
       userId = user.uid;
     }
+  }
+
+  if (!userId) {
+    return new Response(JSON.stringify({ error: 'Authentication required.' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   try {
