@@ -434,7 +434,7 @@ export const DashboardPage = () => {
 
           {/* AI Sentiment Analysis */}
           {activeTab === 'analyze' && (
-            <AnalyzeView />
+            <AnalyzeView reviews={reviews} />
           )}
 
           {/* Integrations */}
