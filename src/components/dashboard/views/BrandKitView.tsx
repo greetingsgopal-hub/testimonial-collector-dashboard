@@ -1,8 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Palette, Crown, Plus } from 'lucide-react';
+import { Palette, Crown, Plus, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 
 export const BrandKitView: React.FC = () => {
+  const { project, workspace } = useAuth();
+  const brandName = project?.name || workspace?.name || 'Your brand';
+  const brandColor = project?.brandColor || workspace?.brandColor || '#6701E6';
+  const logoUrl = project?.logoUrl || workspace?.logoUrl;
+
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 space-y-6 font-sans">
       
@@ -36,7 +42,7 @@ export const BrandKitView: React.FC = () => {
           <span className="text-xs font-bold text-gray-700">Logos</span>
           <div className="flex items-center gap-3">
             <div className="w-20 h-16 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
-              <span className="font-extrabold text-xs text-[#6701e6]">LOGO</span>
+              {logoUrl ? <img src={logoUrl} alt={`${brandName} logo`} className="max-w-full max-h-full object-contain" /> : <span className="font-extrabold text-xs" style={{ color: brandColor }}>{brandName.slice(0, 10)}</span>}
             </div>
             <div className="w-20 h-16 rounded-xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 text-[10px]">
               <Plus className="w-4 h-4 mb-0.5" />
@@ -50,8 +56,8 @@ export const BrandKitView: React.FC = () => {
           <span className="text-xs font-bold text-gray-700">Colors</span>
           <div className="grid grid-cols-4 gap-3">
             <div className="p-2 rounded-xl border border-gray-200 bg-white space-y-1">
-              <div className="h-10 rounded-lg bg-[#6701E6]"></div>
-              <span className="block text-[10px] font-mono font-bold text-gray-700">#6701E6</span>
+              <div className="h-10 rounded-lg" style={{ backgroundColor: brandColor }}></div>
+              <span className="block text-[10px] font-mono font-bold text-gray-700">{brandColor}</span>
             </div>
             <div className="p-2 rounded-xl border border-gray-200 bg-white space-y-1">
               <div className="h-10 rounded-lg bg-[#27272A]"></div>
@@ -63,7 +69,7 @@ export const BrandKitView: React.FC = () => {
             </div>
             <div className="p-2 rounded-xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 text-[10px]">
               <Plus className="w-4 h-4 mb-0.5" />
-              <span>Add color</span>
+              <span>Choose in settings</span>
             </div>
           </div>
         </div>
@@ -72,8 +78,8 @@ export const BrandKitView: React.FC = () => {
         <div className="space-y-2">
           <span className="text-xs font-bold text-gray-700">Typography</span>
           <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-900">Inter & Plus Jakarta Sans</span>
-            <span className="text-[10px] text-gray-400">Primary Font</span>
+            <span className="text-xs font-semibold text-gray-900">Your product identity</span>
+            <span className="text-[10px] text-gray-400">{brandName}</span>
           </div>
         </div>
 
