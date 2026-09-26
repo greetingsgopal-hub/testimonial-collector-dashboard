@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { HeartHandshake, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
+type ThankYousViewProps = { reviews?: Array<{ id: string; status: string; createdAt?: string }> };
+
 export const ThankYousView: React.FC<ThankYousViewProps> = ({ reviews = [] }) => {
   const { user } = useAuth();
   const displayName = user?.displayName || (user?.email ? user.email.split('@')[0] : 'Founder');
