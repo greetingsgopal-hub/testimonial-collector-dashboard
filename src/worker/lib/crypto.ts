@@ -12,15 +12,6 @@ const TAG_LENGTH = 16; // 128-bit auth tag
 function getSecretKey(env: WorkerEnv, usePrevious = false): Buffer {
   let secret = usePrevious ? env.APP_ENCRYPTION_KEY_PREVIOUS : env.APP_ENCRYPTION_KEY;
 
-  if (!secret && !usePrevious) {
-    secret = env.LINKEDIN_CLIENT_SECRET;
-  }
-
-  if (!secret && !usePrevious) {
-    // Local / development fallback key
-    secret = 'pandapraise-dev-local-only-key-32chars!!';
-  }
-
   if (!secret) {
     throw new Error(`[Security] No encryption key configured.`);
   }
