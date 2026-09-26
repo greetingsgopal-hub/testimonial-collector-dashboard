@@ -429,7 +429,7 @@ export const DashboardPage = () => {
 
           {/* Rich Snippet (SEO Schema) */}
           {activeTab === 'rich-snippet' && (
-            <RichSnippetView />
+            <RichSnippetView reviews={reviews} />
           )}
 
           {/* AI Sentiment Analysis */}
