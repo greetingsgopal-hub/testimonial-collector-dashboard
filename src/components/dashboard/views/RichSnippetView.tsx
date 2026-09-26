@@ -15,7 +15,9 @@ import {
 import { useAuth } from '../../../context/AuthContext';
 import { Review } from '../../../types';
 
-interface RichSnippetViewProps { reviews?: Review[]; }\n\nexport const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }) => {
+interface RichSnippetViewProps { reviews?: Review[]; }
+
+export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }) => {
   const { project, workspace } = useAuth();
   const [copied, setCopied] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
