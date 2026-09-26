@@ -360,7 +360,11 @@ export const DashboardPage = () => {
           {activeTab === 'welcome' && (
             <WelcomeView
               onOpenForm={() => window.open(collectionUrl, '_blank')}
-              onSendInvites={handleCopyLink}
+              onCollect={() => setActiveTab('forms')}
+              onImport={() => setActiveTab('import')}
+              onProof={() => setActiveTab('proof')}
+              onStudio={() => setActiveTab('studio')}
+              reviews={reviews}
             />
           )}
 
@@ -597,39 +601,7 @@ export const DashboardPage = () => {
                 </div>
               </div>
 
-              {/* Quick Topic Chips */}
-              <div className="flex flex-wrap items-center gap-2 py-0.5">
-                <span className="text-xs font-semibold text-gray-500 mr-1">Your customers talk about:</span>
-                <button
-                  onClick={() => setFilters(prev => ({ ...prev, search: 'scheduling' }))}
-                  className="px-3 py-1 rounded-full bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 text-xs font-medium text-gray-700 shadow-xs transition-colors cursor-pointer flex items-center gap-1"
-                >
-                  <span>Ease of scheduling</span>
-                  <span className="text-xs font-bold text-gray-900">42</span>
-                </button>
-                <button
-                  onClick={() => setFilters(prev => ({ ...prev, search: 'time saved' }))}
-                  className="px-3 py-1 rounded-full bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 text-xs font-medium text-gray-700 shadow-xs transition-colors cursor-pointer flex items-center gap-1"
-                >
-                  <span>Time saved</span>
-                  <span className="text-xs font-bold text-gray-900">38</span>
-                </button>
-                <button
-                  onClick={() => setFilters(prev => ({ ...prev, search: 'support' }))}
-                  className="px-3 py-1 rounded-full bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 text-xs font-medium text-gray-700 shadow-xs transition-colors cursor-pointer flex items-center gap-1"
-                >
-                  <span>Customer support</span>
-                  <span className="text-xs font-bold text-gray-900">29</span>
-                </button>
-                <button
-                  onClick={() => setFilters(prev => ({ ...prev, search: 'onboarding' }))}
-                  className="px-3 py-1 rounded-full bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 text-xs font-medium text-gray-700 shadow-xs transition-colors cursor-pointer flex items-center gap-1"
-                >
-                  <span>Onboarding</span>
-                  <span className="text-xs font-bold text-gray-900">21</span>
-                </button>
-              </div>
-
+              {/* Customer topics are derived elsewhere; do not show fabricated counts here. */}
               {/* Priority Pending Moderation Alert */}
               {stats.pendingCount > 0 && (
                 <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs text-amber-800 animate-fade-in">
