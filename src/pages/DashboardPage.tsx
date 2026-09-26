@@ -437,7 +437,7 @@ export const DashboardPage = () => {
 
           {/* Thank Yous Center */}
           {activeTab === 'thank-yous' && (
-            <ThankYousView />
+            <ThankYousView reviews={reviews} />
           )}
 
           {/* Brand Kit */}
