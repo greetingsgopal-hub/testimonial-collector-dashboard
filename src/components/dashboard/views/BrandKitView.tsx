@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Palette, Crown, Plus, CheckCircle2 } from 'lucide-react';
+import { Palette, Crown, Plus } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
 export const BrandKitView: React.FC = () => {
