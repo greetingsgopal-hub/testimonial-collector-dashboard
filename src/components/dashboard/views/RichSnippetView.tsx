@@ -13,8 +13,9 @@ import {
   Search
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
+import { Review } from '../../../types';
 
-export const RichSnippetView: React.FC = () => {
+interface RichSnippetViewProps { reviews?: Review[]; }\n\nexport const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }) => {
   const { project, workspace } = useAuth();
   const [copied, setCopied] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -23,12 +24,17 @@ export const RichSnippetView: React.FC = () => {
   const [schemaType, setSchemaType] = useState<'Product' | 'SoftwareApplication' | 'LocalBusiness' | 'Organization' | 'Service'>('SoftwareApplication');
   const [businessName, setBusinessName] = useState(project?.name || workspace?.name || 'Panda Praise');
   const [websiteUrl, setWebsiteUrl] = useState(project?.websiteUrl || 'https://pandapraise.com');
-  const [ratingValue, setRatingValue] = useState('4.9');
-  const [reviewCount, setReviewCount] = useState('128');
+  const approvedReviews = reviews.filter(r => r.status === 'approved');
+  const calculatedRating = approvedReviews.length ? (approvedReviews.reduce((sum, r) => sum + r.rating, 0) / approvedReviews.length).toFixed(1) : '';
+  const calculatedCount = approvedReviews.length;
+  const [ratingValue, setRatingValue] = useState('');
+  const [reviewCount, setReviewCount] = useState('');
   const [description, setDescription] = useState(
     'Collect, manage, and showcase verified customer testimonials and video reviews with Panda Praise.'
   );
 
+  const effectiveRating = ratingValue || calculatedRating;
+  const effectiveCount = reviewCount || String(calculatedCount);
   const jsonLdCode = `<script type="application/ld+json">
 {
   "@context": "https://schema.org/",
@@ -38,10 +44,10 @@ export const RichSnippetView: React.FC = () => {
   "description": "${description}",
   "aggregateRating": {
     "@type": "AggregateRating",
-    "ratingValue": "${ratingValue}",
+    "ratingValue": "${effectiveRating}",
     "bestRating": "5",
     "worstRating": "1",
-    "ratingCount": "${reviewCount}"
+    "ratingCount": "${effectiveCount}"
   }
 }
 </script>`;
@@ -81,7 +87,7 @@ export const RichSnippetView: React.FC = () => {
           </span>
         </div>
         <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-3xl">
-          Automatically generate Google-compliant JSON-LD markup so your customer reviews qualify for star ratings directly in Google search results.
+          Generate structured data from your approved testimonials so search engines can understand your review information. Only use ratings and counts that match your real customer proof.
         </p>
       </div>
 
@@ -168,7 +174,7 @@ export const RichSnippetView: React.FC = () => {
                     type="text"
                     value={ratingValue}
                     onChange={(e) => setRatingValue(e.target.value)}
-                    placeholder="4.9"
+                    placeholder={calculatedRating || 'Collect approved reviews first'}
                     className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 font-mono text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
@@ -179,7 +185,7 @@ export const RichSnippetView: React.FC = () => {
                     type="number"
                     value={reviewCount}
                     onChange={(e) => setReviewCount(e.target.value)}
-                    placeholder="128"
+                    placeholder={calculatedCount ? String(calculatedCount) : '0'}
                     className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 font-mono text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
@@ -280,8 +286,8 @@ export const RichSnippetView: React.FC = () => {
                     <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <span className="font-bold text-gray-800 text-xs">Rating: {ratingValue}</span>
-                <span className="text-gray-500 text-xs">• ‎{reviewCount} reviews</span>
+                <span className="font-bold text-gray-800 text-xs">Rating: {effectiveRating || '—'}</span>
+                <span className="text-gray-500 text-xs">• ‎{effectiveCount || '0'} reviews</span>
               </div>
 
               {/* Snippet Description */}
