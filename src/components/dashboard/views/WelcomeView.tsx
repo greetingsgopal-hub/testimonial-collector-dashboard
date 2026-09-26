@@ -1,14 +1,27 @@
 import React from 'react';
-import { ArrowRight, CheckCircle2, Download, FileText, Sparkles, Star } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Circle, Download, FileText, Sparkles, Star } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
 interface WelcomeViewProps {
   onOpenForm: () => void;
   onCollect: () => void;
   onImport: () => void;
+  onProof: () => void;
+  onStudio: () => void;
+  reviews: Array<{ status: string }>;
 }
 
-export const WelcomeView: React.FC<WelcomeViewProps> = ({ onOpenForm, onCollect, onImport }) => {
+export const WelcomeView: React.FC<WelcomeViewProps> = ({
+  onOpenForm,
+  onCollect,
+  onImport,
+  onProof,
+  onStudio,
+  reviews,
+}) => {
+  const hasProof = reviews.length > 0;
+  const hasApprovedProof = reviews.some(review => review.status === 'approved');
+  const completedSteps = Number(hasProof) + Number(hasApprovedProof);
   const { user } = useAuth();
   const displayName = user?.displayName || (user?.email ? user.email.split('@')[0] : 'there');
 
@@ -35,34 +48,37 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({ onOpenForm, onCollect,
             <h2 className="text-lg font-bold text-gray-950 mt-1">Your first three steps</h2>
           </div>
           <span className="text-xs font-bold text-[#6701e6] bg-purple-50 px-3 py-1.5 rounded-full border border-purple-100">
-            0 / 3 complete
+            {completedSteps} / 3 complete
           </span>
         </div>
         <div className="grid md:grid-cols-3 gap-3">
-          <div className="rounded-2xl border border-purple-200 bg-purple-50/50 p-5">
+          <button onClick={onCollect} className={`w-full text-left rounded-2xl border p-5 transition-all cursor-pointer ${hasProof ? 'border-emerald-200 bg-emerald-50/40' : 'border-purple-200 bg-purple-50/50 hover:border-purple-300'}`}>
             <div className="w-9 h-9 rounded-xl bg-white border border-purple-100 flex items-center justify-center mb-4">
-              <FileText className="w-4 h-4 text-[#6701e6]" />
+              {hasProof ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <FileText className="w-4 h-4 text-[#6701e6]" />}
             </div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#6701e6]">Step 1</p>
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${hasProof ? 'text-emerald-700' : 'text-[#6701e6]'}`}>Step 1</p>
             <h3 className="text-sm font-bold text-gray-950 mt-1">Get your first proof</h3>
             <p className="text-xs text-gray-500 leading-relaxed mt-2">Collect a new testimonial from a customer or bring in testimonials you already have.</p>
           </div>
-          <div className="rounded-2xl border border-gray-200 bg-gray-50/60 p-5">
+          </button>
+          <button onClick={onProof} className={`w-full text-left rounded-2xl border p-5 transition-all cursor-pointer ${hasApprovedProof ? 'border-emerald-200 bg-emerald-50/40' : hasProof ? 'border-purple-200 bg-purple-50/50 hover:border-purple-300' : 'border-gray-200 bg-gray-50/60'}`}>
             <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center mb-4">
-              <CheckCircle2 className="w-4 h-4 text-gray-400" />
+              {hasApprovedProof ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Circle className="w-4 h-4 text-gray-400" />}
             </div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Step 2</p>
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${hasApprovedProof ? 'text-emerald-700' : hasProof ? 'text-[#6701e6]' : 'text-gray-400'}`}>Step 2</p>
             <h3 className="text-sm font-bold text-gray-950 mt-1">Approve your best proof</h3>
             <p className="text-xs text-gray-500 leading-relaxed mt-2">Review what customers said and choose the testimonials you want to use publicly.</p>
           </div>
-          <div className="rounded-2xl border border-gray-200 bg-gray-50/60 p-5">
+          </button>
+          <button onClick={onStudio} className="w-full text-left rounded-2xl border border-gray-200 bg-gray-50/60 hover:border-purple-300 hover:bg-purple-50/40 p-5 transition-all cursor-pointer">
             <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center mb-4">
-              <Star className="w-4 h-4 text-gray-400" />
+              <Star className={`w-4 h-4 ${hasApprovedProof ? 'text-[#6701e6]' : 'text-gray-400'}`} />
             </div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Step 3</p>
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${hasApprovedProof ? 'text-[#6701e6]' : 'text-gray-400'}`}>Step 3</p>
             <h3 className="text-sm font-bold text-gray-950 mt-1">Put your proof to work</h3>
             <p className="text-xs text-gray-500 leading-relaxed mt-2">Turn approved testimonials into website and marketing assets with Studio.</p>
-          </div>
+            {hasApprovedProof && <span className="inline-flex items-center gap-1 mt-3 text-[11px] font-bold text-[#6701e6]">Ready for Studio <ArrowRight className="w-3 h-3" /></span>}
+          </button>
         </div>
       </section>
 
