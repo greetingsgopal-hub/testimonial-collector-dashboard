@@ -1,6 +1,5 @@
 import React from 'react';
 import { ArrowRight, CheckCircle2, Circle, Download, FileText, Sparkles, Star } from 'lucide-react';
-import { useAuth } from '../../../context/AuthContext';
 
 interface WelcomeViewProps {
   onOpenForm: () => void;
@@ -24,8 +23,6 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
   const hasProof = reviews.length > 0;
   const hasApprovedProof = reviews.some(review => review.status === 'approved');
   const completedSteps = Number(hasProof) + Number(hasApprovedProof) + Number(publishComplete);
-  const { user } = useAuth();
-  const displayName = user?.displayName || (user?.email ? user.email.split('@')[0] : 'there');
 
   return (
     <div className="max-w-5xl mx-auto py-6 px-2 sm:px-4 space-y-7 animate-fade-in font-sans">
