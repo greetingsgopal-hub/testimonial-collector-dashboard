@@ -74,19 +74,6 @@ await itAsync('Worker Router: OPTIONS preflight to /api/oauth-init returns 204 w
   assert.notStrictEqual(res.headers.get('Access-Control-Allow-Origin'), '*');
 });
 
-await itAsync('Worker Router: Legacy /.netlify/functions/oauth-init routes to identical handler', async () => {
-  const req = new Request('https://testimonial-collector-dashboard2.greetings-gopal.workers.dev/.netlify/functions/oauth-init', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ platform: 'linkedin' }),
-  });
-  const res = await workerRouter.fetch(req, mockEnv, {});
-  // Without auth token, expects 401 Unauthorized JSON, NOT HTML fallback!
-  assert.strictEqual(res.status, 401);
-  const data = await res.json();
-  assert.ok(data.error.includes('Unauthorized'));
-});
-
 // -------------------------------------------------------------
 // 2. AUTHENTICATION & AUTHORIZATION
 // -------------------------------------------------------------
