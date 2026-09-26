@@ -13,81 +13,6 @@ export interface PublicEmbedReview {
   createdAt: string;
 }
 
-const SAMPLE_REVIEWS: PublicEmbedReview[] = [
-  {
-    id: 'sample-1',
-    authorName: 'Sarah Jenkins',
-    authorTitle: 'VP of Growth',
-    authorCompany: 'ScaleFlow AI',
-    authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    text: 'Panda Praise completely transformed our landing page conversion rate. We saw an immediate 34% lift within 48 hours of embedding the Wall of Love widget!',
-    source: 'linkedin',
-    verified: true,
-    createdAt: '2026-09-20T10:00:00Z',
-  },
-  {
-    id: 'sample-2',
-    authorName: 'Marcus Vance',
-    authorTitle: 'Founder & CEO',
-    authorCompany: 'DevPulse',
-    authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    text: 'The automatic sync from Google Reviews and Facebook Page is magical. Customer comments land in our proof vault without any manual copying and pasting.',
-    source: 'google',
-    verified: true,
-    createdAt: '2026-09-18T14:30:00Z',
-  },
-  {
-    id: 'sample-3',
-    authorName: 'Elena Rostova',
-    authorTitle: 'Head of Product',
-    authorCompany: 'NovaSphere',
-    authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    text: 'Setting up the Wall of Love took less than 2 minutes. The dark theme looks unbelievable on our Next.js SaaS landing page.',
-    source: 'instagram',
-    verified: true,
-    createdAt: '2026-09-16T09:15:00Z',
-  },
-  {
-    id: 'sample-4',
-    authorName: 'David Chen',
-    authorTitle: 'Lead Architect',
-    authorCompany: 'CloudStack Media',
-    authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    text: 'High-speed script, zero layout shifts, and real-time webhook updates. This is the gold standard for social proof collection.',
-    source: 'facebook',
-    verified: true,
-    createdAt: '2026-09-14T16:45:00Z',
-  },
-  {
-    id: 'sample-5',
-    authorName: 'Jessica Morales',
-    authorTitle: 'E-commerce Director',
-    authorCompany: 'LuxeGlow Beauty',
-    authorAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    text: 'Our checkout conversion skyrocketed after we placed the 5-star customer reviews right beside our pricing table. Absolutely essential tool.',
-    source: 'direct',
-    verified: true,
-    createdAt: '2026-09-12T11:20:00Z',
-  },
-  {
-    id: 'sample-6',
-    authorName: 'Alexander Hayes',
-    authorTitle: 'Co-founder',
-    authorCompany: 'HyperGrowth Labs',
-    authorAvatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80',
-    rating: 5,
-    text: 'The automatic social cards and responsive masonry grid make our customers feel like celebrities. 10/10 recommendation.',
-    source: 'linkedin',
-    verified: true,
-    createdAt: '2026-09-10T18:00:00Z',
-  },
-];
-
 export async function handleEmbedTestimonials(request: Request, env: WorkerEnv): Promise<Response> {
   const url = new URL(request.url);
   const projectId = url.searchParams.get('projectId') || url.searchParams.get('project') || 'default';
@@ -173,11 +98,7 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
       }
     }
 
-    // Fallback to rich curated samples if no Firestore records exist for the project
-    if (reviews.length === 0) {
-      reviews = [...SAMPLE_REVIEWS];
-    }
-
+    // No demo/testimonials in production. An empty project returns an empty widget.
     // Apply filtering
     let filtered = reviews.filter((r) => {
       if (minRating > 0 && r.rating < minRating) return false;
@@ -194,7 +115,7 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
       totalCount: filtered.length,
       averageRating: filtered.length > 0
         ? (filtered.reduce((acc, r) => acc + r.rating, 0) / filtered.length).toFixed(1)
-        : '5.0',
+        : '0.0',
       testimonials: filtered.slice(0, limit),
     };
 
@@ -204,15 +125,15 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
     });
   } catch (err: any) {
     console.error('[handleEmbedTestimonials] Error:', err);
-    // Fallback gracefully to sample reviews
     return new Response(
       JSON.stringify({
         projectId,
-        totalCount: SAMPLE_REVIEWS.length,
-        averageRating: '5.0',
-        testimonials: SAMPLE_REVIEWS.slice(0, limit),
+        totalCount: 0,
+        averageRating: '0.0',
+        testimonials: [],
+        error: 'Unable to load testimonials right now.',
       }),
-      { status: 200, headers: corsHeaders }
+      { status: 503, headers: corsHeaders }
     );
   }
 }
