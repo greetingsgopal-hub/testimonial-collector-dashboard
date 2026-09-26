@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { HeartHandshake, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
-export const ThankYousView: React.FC = () => {
+export const ThankYousView: React.FC<ThankYousViewProps> = ({ reviews = [] }) => {
   const { user } = useAuth();
   const displayName = user?.displayName || (user?.email ? user.email.split('@')[0] : 'Founder');
+  const pendingThanks = reviews.filter((review) => review.status === 'approved');
   const [activeTab, setActiveTab] = useState<'not-thanked' | 'thanked' | 'notifications'>('not-thanked');
 
   return (
@@ -68,7 +69,7 @@ export const ThankYousView: React.FC = () => {
               : 'text-gray-500 hover:text-gray-900'
           }`}
         >
-          Not thanked 0
+          Not thanked {pendingThanks.length}
         </button>
         <button
           onClick={() => setActiveTab('thanked')}
@@ -105,10 +106,10 @@ export const ThankYousView: React.FC = () => {
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <p className="text-sm font-semibold text-gray-800">
-            You're all caught up — no one is waiting on a thank you.
+            {pendingThanks.length > 0 ? `${pendingThanks.length} customer${pendingThanks.length === 1 ? '' : 's'} can be thanked.` : "You're all caught up — no approved testimonial is waiting on a thank you."}
           </p>
           <p className="text-xs text-gray-400">
-            When you collect new reviews, send personal video or note thank-yous here.
+            Approved testimonials will appear here when thank-you sending is connected.
           </p>
         </div>
       </div>
