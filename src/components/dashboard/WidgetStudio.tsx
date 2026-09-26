@@ -68,11 +68,12 @@ const FacebookIcon = ({ className = 'w-3.5 h-3.5' }: { className?: string }) => 
 interface WidgetStudioProps {
   reviews: Review[];
   onBack?: () => void;
+  onOpenProof?: () => void;
 }
 
-export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) => {
+export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onOpenProof }) => {
   const { project } = useAuth();
-  const projectWidgetId = project?.id || 'demo-project';
+  const projectWidgetId = project?.id;
 
   const [settings, setSettings] = useState<WidgetSettings>({
     type: 'wall',
@@ -138,7 +139,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
   const runtimeScriptUrl = 'https://testimonial-collector-dashboard2.greetings-gopal.workers.dev/embed.js';
 
   const getEmbedSnippet = () => {
-    const projId = projectWidgetId || 'demo-project';
+    const projId = projectWidgetId || '';
     const sourcesStr = selectedSources.join(',');
 
     switch (cmsPlatform) {
@@ -215,7 +216,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
   };
 
   const handlePublishSetup = () => {
-    const projectId = project?.id || 'demo-project';
+    const projectId = project?.id;
+    if (!projectId) return;
     localStorage.setItem(`panda-praise:publish-complete:${projectId}`, new Date().toISOString());
     window.dispatchEvent(new CustomEvent('panda-praise:publish-complete'));
   };
@@ -534,8 +536,11 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack }) =
                 </p>
                 <button
                   onClick={() => {
-                    setMinRating(0);
-                    setSelectedSources(['google', 'linkedin', 'instagram', 'facebook', 'direct']);
+                    if (onOpenProof) onOpenProof();
+                    else {
+                      setMinRating(0);
+                      setSelectedSources(['google', 'linkedin', 'instagram', 'facebook', 'direct']);
+                    }
                   }}
                   className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold cursor-pointer transition-colors shadow-xs"
                 >
