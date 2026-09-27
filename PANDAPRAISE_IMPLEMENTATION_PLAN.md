@@ -37,7 +37,7 @@ Through empirical testing, code tracing, and live HTTP requests against the prod
 * **Storage Finding**: Anonymous file uploads to Firebase Storage are completely blocked by rules (PASS); avatars are converted client-side to base64 DataURLs stored in Firestore. However, `avatarUrl` string length is unbound in `firestore.rules`.
 
 ### 1.5 Account Deletion Completely Missing (Confirmed Compliance Risk)
-* **Location**: `PrivacyPolicyPage.tsx` Section 7 mentions manual contact at `support@pandapraise.dev`.
+* **Location**: `PrivacyPolicyPage.tsx` Section 7 mentions manual contact at `support@pandapraise.com`.
 * **Mechanism**: There is no self-service account deletion in `WorkspaceSettings.tsx` and no backend cascade deletion function.
 * **Impact**: Non-compliance with GDPR Article 17 ("Right to Erasure") and CCPA.
 

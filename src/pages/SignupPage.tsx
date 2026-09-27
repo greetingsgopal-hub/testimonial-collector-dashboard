@@ -144,7 +144,7 @@ export const SignupPage: React.FC = () => {
 
   const handleDemoSignup = async () => {
     enableDemoMode();
-    await handlePostSignupRedirect('demo@pandapraise.dev');
+      await handlePostSignupRedirect('demo@pandapraise.com');
   };
 
   const handleGoogleSignup = async () => {
@@ -153,7 +153,7 @@ export const SignupPage: React.FC = () => {
     try {
       const res = await signInWithGoogle();
       if (res.success) {
-        await handlePostSignupRedirect(email || 'user@pandapraise.dev');
+    await handlePostSignupRedirect(email || 'user@pandapraise.com');
       } else {
         setLocalError(res.error || 'Failed to sign up with Google.');
       }

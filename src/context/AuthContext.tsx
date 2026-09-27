@@ -91,7 +91,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const DEMO_USER: AuthUser = {
   id: 'demo-user-001',
   uid: 'demo-user-001',
-  email: 'founder@demo.pandapraise.dev',
+  email: 'founder@demo.pandapraise.com',
   displayName: 'Demo Founder',
   emailVerified: true,
 };

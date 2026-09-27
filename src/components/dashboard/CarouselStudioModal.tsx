@@ -104,7 +104,7 @@ const THEMES: Record<
 export const CarouselStudioModal: React.FC<CarouselStudioModalProps> = ({
   approvedReviews,
   projectName = 'Panda Praise',
-  websiteUrl = 'pandapraise.dev',
+    websiteUrl = 'pandapraise.com',
   initialSelectedReviewIds,
   onClose,
 }) => {

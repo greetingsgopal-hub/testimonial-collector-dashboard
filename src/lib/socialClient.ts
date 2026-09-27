@@ -35,8 +35,8 @@ function getEndpointUrl(path: string): string {
   if (
     typeof window !== 'undefined' &&
     (window.location.hostname.includes('workers.dev') ||
-      window.location.hostname === 'pandapraise.dev' ||
-      window.location.hostname === 'www.pandapraise.dev' ||
+      window.location.hostname === 'pandapraise.com' ||
+      window.location.hostname === 'www.pandapraise.com' ||
       window.location.hostname === 'localhost' ||
       window.location.hostname === '127.0.0.1')
   ) {

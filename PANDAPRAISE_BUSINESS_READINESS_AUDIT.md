@@ -64,7 +64,7 @@ The evaluation traced all authentication flows, data paths, tenant boundaries, p
 ### Current Implementation
 * **Privacy Policy**: [`src/pages/PrivacyPolicyPage.tsx`](file:///C:/Users/User/.gemini/antigravity-ide/scratch/testimonial-collector-dashboard/src/pages/PrivacyPolicyPage.tsx)
 * **Terms of Service**: [`src/pages/TermsPage.tsx`](file:///C:/Users/User/.gemini/antigravity-ide/scratch/testimonial-collector-dashboard/src/pages/TermsPage.tsx)
-* **Official Contact**: `support@pandapraise.dev`
+* **Official Contact**: `support@pandapraise.com`
 
 ### Findings
 

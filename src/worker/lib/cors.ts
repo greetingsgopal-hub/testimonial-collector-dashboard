@@ -5,8 +5,8 @@
 const ALLOWED_ORIGINS = [
   'https://testimonial-collector-dashboard2.greetings-gopal.workers.dev',
   'https://cheery-hummingbird-7ecc95.netlify.app',
-  'https://pandapraise.dev',
-  'https://www.pandapraise.dev',
+  'https://pandapraise.com',
+  'https://www.pandapraise.com',
   'http://localhost:5173',
   'http://localhost:8787',
   'http://127.0.0.1:8787',
