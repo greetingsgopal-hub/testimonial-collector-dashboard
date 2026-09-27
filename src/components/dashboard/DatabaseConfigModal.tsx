@@ -25,12 +25,8 @@ VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
 VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef123456`;
 
-const NETLIFY_DEPLOY_SNIPPET = `# Netlify CLI deployment
-npm run build
-npx netlify deploy --prod --dir=dist`;
-
 export const DatabaseConfigModal: React.FC<DatabaseConfigModalProps> = ({ onClose }) => {
-  const [activeTab, setActiveTab] = useState<'firebase' | 'rest' | 'netlify'>('firebase');
+  const [activeTab, setActiveTab] = useState<'firebase' | 'rest'>('firebase');
   const [copiedEnv, setCopiedEnv] = useState(false);
   const [copiedRules, setCopiedRules] = useState(false);
   const backend = getActiveBackendInfo();
@@ -113,17 +109,6 @@ export const DatabaseConfigModal: React.FC<DatabaseConfigModalProps> = ({ onClos
             <span>Custom REST API</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('netlify')}
-            className={`flex items-center gap-1.5 pb-3 text-xs font-semibold border-b-2 transition-colors ${
-              activeTab === 'netlify'
-                ? 'border-brand-500 text-brand-400'
-                : 'border-transparent text-zinc-400 hover:text-zinc-200'
-            }`}
-          >
-            <Terminal className="w-3.5 h-3.5" />
-            <span>Deploy to Netlify</span>
-          </button>
         </div>
 
         {/* Tab Body */}
@@ -178,7 +163,7 @@ export const DatabaseConfigModal: React.FC<DatabaseConfigModalProps> = ({ onClos
                   {FIREBASE_ENV_SNIPPET}
                 </pre>
                 <p className="text-[11px] text-zinc-500">
-                  Add these to your <code className="text-zinc-300">.env</code> locally or in Netlify site environment variables. Panda Praise will automatically connect to Firebase!
+                  Add these to your <code className="text-zinc-300">.env</code> locally or in your deployment environment variables. Panda Praise will automatically connect to Firebase!
                 </p>
               </div>
             </div>
@@ -206,30 +191,6 @@ VITE_API_KEY=your_optional_api_key`}
             </div>
           )}
 
-          {activeTab === 'netlify' && (
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-zinc-900/70 border border-zinc-800 space-y-3">
-                <div className="font-semibold text-white text-xs">
-                  Zero-Config Netlify Deployment
-                </div>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  The project is already pre-configured with <code className="text-brand-300">netlify.toml</code> and <code className="text-brand-300">public/_redirects</code> for single-page routing and production caching headers.
-                </p>
-
-                <div className="space-y-2">
-                  <div className="text-xs font-semibold text-zinc-300">Deploy Options:</div>
-                  <div className="text-xs text-zinc-400 space-y-1.5 pl-2">
-                    <p><strong>Option A (Git):</strong> Push this repo to GitHub/GitLab and link it in Netlify. Build command is <code className="text-brand-300">npm run build</code> and publish directory is <code className="text-brand-300">dist</code>.</p>
-                    <p><strong>Option B (Netlify Drop):</strong> Run <code className="text-brand-300">npm run build</code>, then drag the generated <code className="text-brand-300">dist</code> folder straight to <a href="https://app.netlify.com/drop" target="_blank" className="text-brand-400 underline">app.netlify.com/drop</a>.</p>
-                  </div>
-                </div>
-
-                <pre className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 font-mono text-xs text-zinc-300 overflow-x-auto">
-                  {NETLIFY_DEPLOY_SNIPPET}
-                </pre>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Footer */}

@@ -22,29 +22,10 @@ async function getAuthToken(): Promise<string | null> {
   return currentUser.getIdToken();
 }
 
-const FUNCTIONS_BASE_URL = (import.meta.env.VITE_FUNCTIONS_API_URL || '').replace(/\/$/, '');
-
-// Legacy Netlify Function URL patterns preserved for test verification & rollback compatibility:
-// const _legacyInit = `${FUNCTIONS_BASE_URL}/.netlify/functions/oauth-init`;
-// const _legacyStatus = `${FUNCTIONS_BASE_URL}/.netlify/functions/social-status`;
-// const _legacyPublish = `${FUNCTIONS_BASE_URL}/.netlify/functions/social-publish`;
-// const _legacyDisconnect = `${FUNCTIONS_BASE_URL}/.netlify/functions/social-disconnect`;
-
 function getEndpointUrl(path: string): string {
-  // In production on the unified Cloudflare Worker deployment, always use same-origin /api/*
-  if (
-    typeof window !== 'undefined' &&
-    (window.location.hostname.includes('workers.dev') ||
-      window.location.hostname === 'pandapraise.com' ||
-      window.location.hostname === 'www.pandapraise.com' ||
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1')
-  ) {
-    return `/api/${path}`;
-  }
-  if (FUNCTIONS_BASE_URL) {
-    return `${FUNCTIONS_BASE_URL}/api/${path}`;
-  }
+  // The frontend and API share the same origin on the unified Cloudflare
+  // Worker deployment (workers.dev today, pandapraise.com once bound), and
+  // on the local Vite dev server. Always use same-origin /api/*.
   return `/api/${path}`;
 }
 
