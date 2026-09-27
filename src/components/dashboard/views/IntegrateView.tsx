@@ -11,8 +11,6 @@ import {
   ArrowUpRight,
   Search,
   Zap,
-  Send,
-  MessageSquare
 } from 'lucide-react';
 import { socialClient, SocialStatusResponse } from '../../../lib/socialClient';
 
@@ -100,7 +98,6 @@ const WebhookIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
 );
 
 export const IntegrateView: React.FC = () => {
-  const [autoCaseStudies, setAutoCaseStudies] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchFilter, setSearchFilter] = useState('');
   const [waitlistJoined, setWaitlistJoined] = useState<Record<string, boolean>>({});
@@ -144,20 +141,9 @@ export const IntegrateView: React.FC = () => {
   const [, setLoadingSubscription] = useState(false);
   const [billingPortalLoading, setBillingPortalLoading] = useState(false);
 
-  // Slack Integration State
-  const [isSlackModalOpen, setIsSlackModalOpen] = useState(false);
-  const [slackWebhookUrl, setSlackWebhookUrl] = useState(() => {
-    return localStorage.getItem('pandapraise_slack_webhook') || '';
-  });
-  const [slackChannel, setSlackChannel] = useState(() => {
-    return localStorage.getItem('pandapraise_slack_channel') || '#testimonials';
-  });
-  const [slackFilter, setSlackFilter] = useState('all');
-  const [isSlackConnected, setIsSlackConnected] = useState<boolean>(() => {
-    return Boolean(localStorage.getItem('pandapraise_slack_connected') === 'true');
-  });
-  const [slackSaving, setSlackSaving] = useState(false);
-  const [sendingSlackTest, setSendingSlackTest] = useState(false);
+  // Slack integration is not implemented yet — card is presented as "Coming soon"
+  // with a waitlist. No simulated connection state is kept (HIGH finding: the
+  // previous flow faked a successful connect + test ping via setTimeout).
 
   const fetchStatus = async () => {
     try {
@@ -336,46 +322,6 @@ export const IntegrateView: React.FC = () => {
     }
   };
 
-  // Slack Handlers
-  const handleSaveSlack = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!slackWebhookUrl.trim()) {
-      showToast('Please enter your Slack Incoming Webhook URL.');
-      return;
-    }
-
-    setSlackSaving(true);
-    setTimeout(() => {
-      localStorage.setItem('pandapraise_slack_connected', 'true');
-      localStorage.setItem('pandapraise_slack_webhook', slackWebhookUrl.trim());
-      localStorage.setItem('pandapraise_slack_channel', slackChannel.trim() || '#testimonials');
-      setIsSlackConnected(true);
-      setSlackSaving(false);
-      setIsSlackModalOpen(false);
-      showToast(`Connected to Slack! Testimonials will broadcast to ${slackChannel || '#testimonials'}.`);
-    }, 600);
-  };
-
-  const handleDisconnectSlack = () => {
-    if (!confirm('Are you sure you want to disconnect Slack real-time notifications?')) {
-      return;
-    }
-    localStorage.removeItem('pandapraise_slack_connected');
-    localStorage.removeItem('pandapraise_slack_webhook');
-    localStorage.removeItem('pandapraise_slack_channel');
-    setIsSlackConnected(false);
-    setSlackWebhookUrl('');
-    showToast('Slack integration disconnected.');
-  };
-
-  const handleSendSlackTest = () => {
-    setSendingSlackTest(true);
-    setTimeout(() => {
-      setSendingSlackTest(false);
-      showToast(`Test praise notification sent to Slack channel ${slackChannel}! 🎉`);
-    }, 800);
-  };
-
   const handleJoinWaitlist = (key: string, name: string) => {
     setWaitlistJoined((prev) => ({ ...prev, [key]: true }));
     showToast(`You're on the early-access waitlist for ${name}! We'll notify you as soon as it launches.`);
@@ -392,7 +338,7 @@ export const IntegrateView: React.FC = () => {
       id: 'active',
       title: 'Active & Connected Integrations',
       icon: <Zap className="w-4 h-4 text-brand-600" />,
-      description: 'Connect direct accounts to publish testimonials, trigger post-checkout review emails, and broadcast praise to Slack.',
+      description: 'Connect direct social accounts to publish testimonials and trigger post-checkout review emails.',
       items: [
         {
           id: 'linkedin',
@@ -430,15 +376,6 @@ export const IntegrateView: React.FC = () => {
           badgeLabel: stripeSubscription?.plan && stripeSubscription.plan !== 'free' ? 'Subscribed' : 'Free Plan',
           isStripeDirect: true,
         },
-        {
-          id: 'slack',
-          name: 'Slack',
-          icon: <SlackIcon className="w-6 h-6" />,
-          description: "Stream real-time customer reviews and 5-star praise straight into your team's Slack channels the second they drop.",
-          badgeType: isSlackConnected ? 'connected' : 'active',
-          badgeLabel: isSlackConnected ? 'Connected' : 'Active',
-          isSlackDirect: true,
-        },
       ],
     },
     {
@@ -473,6 +410,15 @@ export const IntegrateView: React.FC = () => {
       icon: <Bell className="w-4 h-4 text-emerald-600" />,
       description: 'Broadcast review submissions and customer wins into your team communication hubs.',
       items: [
+        {
+          id: 'slack',
+          name: 'Slack',
+          icon: <SlackIcon className="w-6 h-6" />,
+          description: "Stream real-time customer reviews and 5-star praise straight into your team's Slack channels the second they drop.",
+          badgeType: 'coming_soon',
+          badgeLabel: 'Coming Soon',
+          canJoinWaitlist: true,
+        },
         {
           id: 'teams',
           name: 'Microsoft Teams',
@@ -546,109 +492,6 @@ export const IntegrateView: React.FC = () => {
         </div>
       )}
 
-{/* Slack Configuration Modal */}
-      {isSlackModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-gray-100 space-y-5 animate-scale-in text-left">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#4A154B]/10 flex items-center justify-center text-[#4A154B]">
-                  <SlackIcon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 text-base">Connect Slack Notifications</h3>
-                  <p className="text-xs text-gray-500">Broadcast live praise to your team</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsSlackModalOpen(false)}
-                className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-xs font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveSlack} className="space-y-4">
-              {/* Slack Webhook URL */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-                  <MessageSquare className="w-3.5 h-3.5 text-gray-400" />
-                  <span>1. Slack Incoming Webhook URL</span>
-                </label>
-                <input
-                  type="url"
-                  required
-                  value={slackWebhookUrl}
-                  onChange={(e) => setSlackWebhookUrl(e.target.value)}
-                  placeholder="https://hooks.slack.com/services/T000/B000/XXXX"
-                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 font-mono text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
-                />
-                <p className="text-[11px] text-gray-500">
-                  Create an Incoming Webhook in your Slack App settings and paste the generated URL above.
-                </p>
-              </div>
-
-              {/* Target Channel Name */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-700 block">
-                  2. Channel Label (for reference)
-                </label>
-                <input
-                  type="text"
-                  value={slackChannel}
-                  onChange={(e) => setSlackChannel(e.target.value)}
-                  placeholder="#testimonials"
-                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
-                />
-              </div>
-
-              {/* Notification Filter */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-700 block">
-                  3. Testimonial Notification Filter
-                </label>
-                <select
-                  value={slackFilter}
-                  onChange={(e) => setSlackFilter(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
-                >
-                  <option value="all">All newly approved testimonials</option>
-                  <option value="high_rating">4 & 5-star reviews only</option>
-                  <option value="five_star">5-star reviews only</option>
-                  <option value="video">Video testimonials only</option>
-                </select>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-3 flex items-center justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setIsSlackModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={slackSaving}
-                  className="px-5 py-2 rounded-xl bg-[#4A154B] hover:bg-[#39103a] text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  {slackSaving ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      <span>Connecting...</span>
-                    </>
-                  ) : (
-                    <span>Save & Connect Slack</span>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
         <div className="space-y-1">
@@ -676,7 +519,7 @@ export const IntegrateView: React.FC = () => {
         </div>
       </div>
 
-      {/* Auto Case Studies Toggle Banner */}
+      {/* AI Case Study Generator — Coming Soon Banner (no simulated toggle) */}
       <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-50/60 to-indigo-50/60 border border-purple-100 shadow-xs flex items-center justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
@@ -684,28 +527,17 @@ export const IntegrateView: React.FC = () => {
           </div>
           <div className="space-y-0.5 text-left">
             <p className="text-xs sm:text-sm font-bold text-gray-900">
-              Panda Praise AI Case Study Generator
+              Panda Praise AI Case Study Generator — Coming Soon
             </p>
             <p className="text-xs text-gray-600 max-w-xl">
-              Automatically transform multi-step customer praise into ready-to-publish case studies and social graphics.
+              Automatically transform multi-step customer praise into ready-to-publish case studies and social graphics. This feature is not available yet.
             </p>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setAutoCaseStudies(!autoCaseStudies)}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-            autoCaseStudies ? 'bg-brand-600' : 'bg-gray-200'
-          }`}
-          aria-label="Toggle auto case studies"
-        >
-          <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
-              autoCaseStudies ? 'translate-x-5' : 'translate-x-0'
-            }`}
-          />
-        </button>
+        <span className="px-2.5 py-1 rounded-full bg-white text-gray-500 border border-gray-200 text-[10px] font-bold uppercase tracking-wide shrink-0">
+          Coming Soon
+        </span>
       </div>
 
       {/* Category Filter Pills */}
@@ -901,26 +733,6 @@ export const IntegrateView: React.FC = () => {
                         </div>
                       )}
 
-                      {/* Special Slack Connected Info */}
-                      {item.id === 'slack' && isSlackConnected && (
-                        <div className="mt-3 p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 flex items-center justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <span className="text-[11px] font-bold text-emerald-950 block truncate">
-                              Broadcasting to {slackChannel || '#testimonials'}
-                            </span>
-                            <span className="text-[10px] text-emerald-700">
-                              Live webhook active
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setIsSlackModalOpen(true)}
-                            className="text-[10px] font-bold text-brand-600 hover:underline cursor-pointer"
-                          >
-                            Settings
-                          </button>
-                        </div>
-                      )}
                     </div>
 
                     {/* Bottom: Action Trigger */}
@@ -1076,48 +888,8 @@ export const IntegrateView: React.FC = () => {
                         )
                       )}
 
-                      {/* Slack Card Actions */}
-                      {item.id === 'slack' && (
-                        isSlackConnected ? (
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={handleSendSlackTest}
-                              disabled={sendingSlackTest}
-                              className="flex-1 py-2 px-2.5 rounded-xl bg-gray-50 hover:bg-purple-50 text-[#4A154B] border border-gray-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer flex items-center justify-center gap-1"
-                            >
-                              {sendingSlackTest ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                              <span>Test Ping</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setIsSlackModalOpen(true)}
-                              className="py-2 px-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer"
-                            >
-                              Config
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleDisconnectSlack}
-                              className="py-2 px-2.5 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer"
-                            >
-                              Disconnect
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => setIsSlackModalOpen(true)}
-                            className="w-full py-2 px-3 rounded-xl bg-[#4A154B] hover:bg-[#39103a] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
-                          >
-                            <span>Connect to Slack</span>
-                            <ArrowUpRight className="w-3.5 h-3.5" />
-                          </button>
-                        )
-                      )}
-
                       {/* Other Waitlist Cards */}
-                      {item.id !== 'linkedin' && item.id !== 'stripe' && item.id !== 'slack' && (
+                      {item.id !== 'linkedin' && item.id !== 'stripe' && (
                         <button
                           type="button"
                           onClick={() => handleJoinWaitlist(item.id, item.name)}

@@ -22,6 +22,8 @@ interface FloatingReviewDrawerProps {
   allowSubmit?: boolean;
   defaultOpen?: boolean;
   variant?: 'pill' | 'wall-heart';
+  /** When set, reviews are sample data and this label is shown (e.g. marketing previews). */
+  sampleLabel?: string;
 }
 
 export const FloatingReviewDrawer: React.FC<FloatingReviewDrawerProps> = ({
@@ -34,6 +36,7 @@ export const FloatingReviewDrawer: React.FC<FloatingReviewDrawerProps> = ({
   allowSubmit = true,
   defaultOpen = false,
   variant = 'wall-heart',
+  sampleLabel,
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [activeTab, setActiveTab] = useState<'reviews' | 'write'>('reviews');
@@ -220,15 +223,18 @@ export const FloatingReviewDrawer: React.FC<FloatingReviewDrawerProps> = ({
                 <div>
                   <h3 className="font-display font-bold text-base text-white tracking-tight flex items-center gap-1.5">
                     {project?.name || 'Customer Reviews'}
-                    <span title="Verified Testimonials" className="inline-flex">
+                    <span title={sampleLabel || 'Verified Testimonials'} className="inline-flex">
                       <ShieldCheck className="w-4 h-4 text-emerald-400" />
                     </span>
                   </h3>
                   <p className="text-xs text-zinc-400 flex items-center gap-1">
                     <span className="text-amber-400 font-semibold">{avgRating} / 5.0</span>
                     <span>•</span>
-                    <span>{approvedReviews.length} verified reviews</span>
+                    <span>{approvedReviews.length} {sampleLabel ? 'sample reviews' : 'verified reviews'}</span>
                   </p>
+                  {sampleLabel && (
+                    <p className="text-[10px] text-zinc-500 mt-0.5">{sampleLabel}</p>
+                  )}
                 </div>
               </div>
 
@@ -410,7 +416,7 @@ export const FloatingReviewDrawer: React.FC<FloatingReviewDrawerProps> = ({
             <div className="p-4 border-t border-zinc-800/80 bg-zinc-900/50 flex items-center justify-between text-[11px] text-zinc-500">
               <span className="flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                Verified Customer Feedback
+                {sampleLabel || 'Verified Customer Feedback'}
               </span>
               <a
                 href="/?ref=widget_badge"

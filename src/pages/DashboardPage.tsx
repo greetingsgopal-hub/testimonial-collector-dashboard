@@ -665,7 +665,7 @@ export const DashboardPage = () => {
                 <SentimentDashboard reviews={reviews} />
               )}
 
-              {/* Natural Language Filters, View Switcher & Export */}
+      {/* Filters, View Switcher & Export */}
               <ReviewFilters
                 filters={filters}
                 setFilters={setFilters}

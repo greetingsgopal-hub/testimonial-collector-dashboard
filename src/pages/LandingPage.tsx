@@ -4,6 +4,7 @@ import {
   ArrowRight, 
   ChevronDown, 
   Check, 
+  Clock,
   X as XIcon, 
   Play, 
   Search, 
@@ -670,13 +671,13 @@ export const LandingPage: React.FC = () => {
                       <span className="rounded-full border border-gray-200 px-2 py-0.5 text-gray-600 text-[11px]">Support <b>29</b></span>
                     </div>
 
-                    {/* Natural language search bar */}
+                    {/* Keyword search bar */}
                     <div className="mt-3.5 flex items-center gap-2">
                       <div className="min-w-0 flex-1 rounded-lg border border-[#6701e6]/40 px-3 py-1.5 text-xs text-gray-800 flex items-center gap-2 bg-purple-50/20">
                         <Search className="w-3.5 h-3.5 text-gray-400" />
                         <input
                           type="text"
-                          aria-label="Search testimonials with natural language"
+                          aria-label="Search testimonials by keyword"
                           value={searchQueryMock}
                           onChange={(e) => setSearchQueryMock(e.target.value)}
                           className="bg-transparent focus:outline-none w-full text-xs text-gray-800"
@@ -739,19 +740,19 @@ export const LandingPage: React.FC = () => {
               <ul className="mt-6 space-y-3 text-sm text-gray-700 font-medium">
                 <li className="flex items-start gap-2.5">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Search with natural language queries</span>
+                  <span>Search every testimonial by keyword, name, company, or role</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Filter by offer, buyer persona, industry, or product tier</span>
+                  <span>Filter by rating, status, source, form, and custom tags</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Instant access via Chrome extension & Slack integration</span>
+                  <span>Import reviews from CSV, LinkedIn, Facebook, and Instagram</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Generate instant case studies with 1 click</span>
+                  <Clock className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                  <span>Chrome extension, Slack integration & 1-click case studies — coming soon</span>
                 </li>
               </ul>
 
@@ -1004,9 +1005,9 @@ export const LandingPage: React.FC = () => {
                   </p>
                   <div className="mt-6 max-w-md mx-auto p-6 rounded-2xl bg-gradient-to-r from-[#6701e6] to-indigo-600 text-white shadow-xl text-left">
                     <div role="img" aria-label="5 out of 5 stars" className="flex text-amber-300 text-xs mb-2"><span aria-hidden="true">★★★★★</span></div>
-                    <p className="text-sm font-semibold mb-3">"Panda Praise is the single most valuable growth tool we adopted this year."</p>
+                    <p className="text-sm font-semibold mb-3">"Your customer's testimonial appears here as a branded image."</p>
                     <div className="text-xs text-purple-100">
-                      Your customer's photo, name, company & role — on a branded image ready to share.
+                      Sample preview — their photo, name, company & role, ready to share on your socials.
                     </div>
                   </div>
                 </div>
@@ -1039,25 +1040,19 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Testimonial Quote under Showcase */}
+          {/* Product-truth quote under Showcase — no fabricated customer attribution */}
           <figure className="relative border-l-2 border-brand-600 py-2 pl-4 text-left mx-auto mt-10 max-w-xl">
             <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
               <p>
-                We have collected tons of testimonials and previously it was a bit fiddly...{' '}
+                Every testimonial you collect can be turned into a branded image, video, or widget —{' '}
                 <mark className="senja-yellow-mark">
-                  if we need a quick social media post, want to add proof to an email or use as ads, we can just pick right from Panda Praise
+                  ready to share on your socials, in emails, or on your website
                 </mark>
-                , love it. It makes showcasing social proof completely effortless!
+                , without any design work.
               </p>
             </blockquote>
-            <figcaption className="mt-2.5 flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-400 text-white font-bold text-xs flex items-center justify-center border border-indigo-100 shadow-xs select-none">
-                MH
-              </div>
-              <div>
-                <p className="font-bold text-gray-900 text-xs">Michael H.</p>
-                <p className="text-[11px] text-gray-500">Verified Customer</p>
-              </div>
+            <figcaption className="mt-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+              Built into every plan
             </figcaption>
           </figure>
         </div>
@@ -1071,6 +1066,7 @@ export const LandingPage: React.FC = () => {
             {/* Column A: Visual Demonstration (Delight & Rewards Card) */}
             <div className="lg:col-span-6 order-2 lg:order-1">
               <div className="rounded-3xl border border-gray-200 bg-white p-6 sm:p-8 shadow-xl max-w-md mx-auto text-left relative overflow-hidden">
+                <span className="absolute top-4 right-4 rounded-full bg-gray-100 text-gray-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">Coming soon — preview</span>
                 <div className="flex items-center justify-between pb-4 border-b border-gray-100">
                   <div className="flex items-center gap-2">
                     <span className="p-2 rounded-xl bg-indigo-50 text-brand-600">
@@ -1095,8 +1091,8 @@ export const LandingPage: React.FC = () => {
                 </div>
 
                 <div className="mt-4 flex items-center gap-3 text-xs text-gray-500">
-                  <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-                  <span>Client reaction synced to #testimonials in Slack</span>
+                  <span className="flex h-2 w-2 rounded-full bg-gray-300" />
+                  <span>Client reaction notifications (Slack sync planned)</span>
                 </div>
               </div>
             </div>
@@ -1113,7 +1109,7 @@ export const LandingPage: React.FC = () => {
               </h2>
 
               <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed">
-                You didn't grow by treating people like numbers. Send personal thank-you videos, gifts, and reward notes at any scale.
+                You didn't grow by treating people like numbers. Track which customers deserve a thank-you and keep the moment alive.
               </p>
 
               {/* Checklist */}
@@ -1124,33 +1120,27 @@ export const LandingPage: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Send automated e-gifts, discount codes, and feature unlocks</span>
+                  <span>Track and celebrate the customers who leave 5-star praise</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Record short personal thank-you videos with 1 click</span>
+                  <Clock className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                  <span>Thank-you videos, e-gifts & reward automation — coming soon</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Stream customer reactions straight to Slack</span>
+                  <Clock className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                  <span>Slack reaction streaming — coming soon</span>
                 </li>
               </ul>
 
-              {/* Quote Block */}
+              {/* Product-truth quote — no fabricated customer attribution */}
               <figure className="relative border-l-2 border-brand-600 py-2 pl-4 text-left mt-8 max-w-lg">
                 <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                   <p>
-                    <mark className="senja-yellow-mark">Panda Praise is simply awesome</mark>. Collecting verified testimonials and turning them into high-converting website widgets has never been this seamless and fast.
+                    <mark className="senja-yellow-mark">Your happiest customers are your best marketing</mark> — Panda Praise keeps every piece of their praise organized and ready to publish.
                   </p>
                 </blockquote>
-                <figcaption className="mt-2.5 flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-400 text-white font-bold text-xs flex items-center justify-center border border-indigo-100 shadow-xs select-none">
-                    NF
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900 text-xs">Nathan F.</p>
-                    <p className="text-[11px] text-gray-500">Verified Customer</p>
-                  </div>
+                <figcaption className="mt-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+                  Built into every plan
                 </figcaption>
               </figure>
             </div>
@@ -1410,6 +1400,7 @@ export const LandingPage: React.FC = () => {
           reviews={INITIAL_REVIEWS}
           variant="wall-heart"
           defaultOpen={isWallModalOpen}
+          sampleLabel="Sample preview — not real Panda Praise customers"
         />
       )}
 
@@ -1418,6 +1409,7 @@ export const LandingPage: React.FC = () => {
           reviews={INITIAL_REVIEWS}
           position="bottom-left"
           onOpenWallOfLove={() => setIsWallModalOpen(true)}
+          sampleLabel="Sample"
         />
       )}
     </div>

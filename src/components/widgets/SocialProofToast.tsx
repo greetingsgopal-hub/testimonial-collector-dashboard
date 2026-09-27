@@ -8,6 +8,8 @@ interface SocialProofToastProps {
   displayDuration?: number; // ms to show
   interval?: number;        // ms between toasts
   onOpenWallOfLove?: () => void;
+  /** When set, reviews are sample data and this label is shown on each toast. */
+  sampleLabel?: string;
 }
 
 interface CuratedToast {
@@ -29,6 +31,7 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
   displayDuration = 6500,
   interval = 4000,
   onOpenWallOfLove,
+  sampleLabel,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -150,6 +153,11 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
             <span className="font-medium text-gray-700">
               {current.name} <span className="text-gray-400">/</span> {current.role}
             </span>
+            {sampleLabel && (
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-1 shrink-0">
+                {sampleLabel}
+              </span>
+            )}
 
             {/* Platform Icon */}
             {current.platformIcon === 'x' && (
