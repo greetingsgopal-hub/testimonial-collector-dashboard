@@ -2,7 +2,7 @@ import { WorkerEnv, ScheduledEvent, ExecutionContext } from '../types';
 import { decryptToken } from './crypto';
 import { fetchFacebookPageReviews } from './facebookOAuth';
 import { fetchInstagramCommentsAndMentions } from './instagramOAuth';
-import { saveDocument, getDocument } from './firestoreAdmin';
+import { saveDocument, getDocument, queryDocumentsByField } from './firestoreAdmin';
 
 /**
  * Executes automated background polling for connected Facebook Pages and Instagram accounts.
@@ -15,7 +15,19 @@ export async function executeAutomatedBackgroundSync(
 ): Promise<void> {
   console.log(`[BackgroundSync] Starting cron trigger at ${new Date(event.scheduledTime).toISOString()} (Cron: ${event.cron})`);
 
-  const activeUsers = ['user_demo_gopal'];
+  // Discover connected users dynamically — never a hardcoded demo list.
+  const connections = await queryDocumentsByField('social_connections', 'status', 'connected', undefined, env).catch(
+    (e) => {
+      console.warn('[BackgroundSync] Failed to query connected accounts:', e);
+      return [] as any[];
+    }
+  );
+  const activeUsers = [...new Set(connections.map((c: any) => c.ownerId).filter(Boolean))];
+
+  if (activeUsers.length === 0) {
+    console.log('[BackgroundSync] No connected accounts to sync.');
+    return;
+  }
 
   for (const userId of activeUsers) {
     // 1. Check Facebook Page Sync

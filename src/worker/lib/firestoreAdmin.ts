@@ -1,7 +1,7 @@
 import { WorkerEnv } from '../types';
 import { getServiceAccountAccessToken } from './googleAuth';
 
-async function getAuthHeader(idToken?: string | null, env?: WorkerEnv): Promise<Record<string, string>> {
+export async function getAuthHeader(idToken?: string | null, env?: WorkerEnv): Promise<Record<string, string>> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (env) {
     const saToken = await getServiceAccountAccessToken(env);
@@ -141,6 +141,60 @@ export async function queryUserDocuments(collectionName: string, ownerId: string
 
   if (!res.ok) {
     console.warn(`[Firestore] Query ${collectionName} failed:`, res.status);
+    return [];
+  }
+
+  const rawList: any = await res.json();
+  const results: any[] = [];
+  for (const item of rawList) {
+    if (item.document) {
+      const parts = item.document.name.split('/');
+      const id = parts[parts.length - 1];
+      results.push({
+        id,
+        ...fromFirestoreFields(item.document.fields || {}),
+      });
+    }
+  }
+  return results;
+}
+
+/**
+ * Queries documents in a collection by an arbitrary field equality filter.
+ * Uses the service-account token when available (server-side trust context).
+ */
+export async function queryDocumentsByField(
+  collectionName: string,
+  field: string,
+  value: string,
+  idToken?: string | null,
+  env?: WorkerEnv
+): Promise<any[]> {
+  const projectId = env?.FIREBASE_PROJECT_ID || env?.VITE_FIREBASE_PROJECT_ID || 'testimonialcollectordashboard';
+  const queryUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`;
+  const headers = await getAuthHeader(idToken, env);
+
+  const body = {
+    structuredQuery: {
+      from: [{ collectionId: collectionName }],
+      where: {
+        fieldFilter: {
+          field: { fieldPath: field },
+          op: 'EQUAL',
+          value: { stringValue: value },
+        },
+      },
+    },
+  };
+
+  const res = await fetch(queryUrl, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    console.warn(`[Firestore] Field query ${collectionName}.${field} failed:`, res.status);
     return [];
   }
 

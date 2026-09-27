@@ -36,6 +36,20 @@ export function sanitizeText(input: string | undefined | null, maxLength = 1000)
 }
 
 /**
+ * Escapes HTML special characters for safe interpolation into HTML strings
+ * (e.g. email signature HTML built from user-submitted testimonial content).
+ */
+export function escapeHtml(input: string | undefined | null): string {
+  if (!input) return '';
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
  * Validates customer testimonial form input before submission.
  */
 export function validateReviewInput(data: ReviewInput): { valid: boolean; error?: string } {

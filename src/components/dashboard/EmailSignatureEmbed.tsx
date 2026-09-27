@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Review, ReviewStats } from '../../types';
+import { escapeHtml } from '../../lib/security';
 
 interface EmailSignatureEmbedProps {
   reviews: Review[];
@@ -47,13 +48,20 @@ export const EmailSignatureEmbed: React.FC<EmailSignatureEmbedProps> = ({ review
   const generateHtml = (): string => {
     const avgRating = stats.averageRating.toFixed(1);
     const totalReviews = stats.total;
+    // brandColor comes from a color picker + free-text input; only allow hex
+    // colors so it cannot break out of the style attribute in the HTML string.
+    const safeColor = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(brandColor) ? brandColor : '#8B5CF6';
+    const safeWallUrl = /^https?:\/\//i.test(wallUrl) ? wallUrl : '#';
+    const quoteText = topReview ? escapeHtml(truncateQuote(topReview.content, 120)) : '';
+    const quoteAuthor = topReview ? escapeHtml(topReview.name) : '';
+    const quoteCompany = topReview && topReview.company ? escapeHtml(topReview.company) : '';
 
     switch (activeStyle) {
       case 'minimal':
         return `<table cellpadding="0" cellspacing="0" style="font-family:Arial,sans-serif;">
   <tr>
     <td style="padding:8px 0;">
-      <a href="${wallUrl}" style="text-decoration:none;color:${brandColor};font-size:13px;font-weight:600;">
+      <a href="${safeWallUrl}" style="text-decoration:none;color:${safeColor};font-size:13px;font-weight:600;">
         ⭐ ${avgRating}/5 from ${totalReviews} reviews
       </a>
     </td>
@@ -64,8 +72,8 @@ export const EmailSignatureEmbed: React.FC<EmailSignatureEmbedProps> = ({ review
         return `<table cellpadding="0" cellspacing="0" style="font-family:Arial,sans-serif;">
   <tr>
     <td style="padding:12px 0;">
-      <a href="${wallUrl}" style="text-decoration:none;display:inline-block;">
-        <table cellpadding="0" cellspacing="0" style="background:${brandColor};border-radius:8px;overflow:hidden;">
+      <a href="${safeWallUrl}" style="text-decoration:none;display:inline-block;">
+        <table cellpadding="0" cellspacing="0" style="background:${safeColor};border-radius:8px;overflow:hidden;">
           <tr>
             <td style="padding:8px 16px;color:#fff;font-size:12px;font-weight:700;letter-spacing:0.5px;">
               ⭐ RATED ${avgRating}/5
@@ -86,7 +94,7 @@ export const EmailSignatureEmbed: React.FC<EmailSignatureEmbedProps> = ({ review
         return `<table cellpadding="0" cellspacing="0" style="font-family:Arial,sans-serif;">
   <tr>
     <td style="padding:8px 0;">
-      <a href="${wallUrl}" style="text-decoration:none;display:inline-block;">
+      <a href="${safeWallUrl}" style="text-decoration:none;display:inline-block;">
         <span style="color:#F59E0B;font-size:16px;letter-spacing:2px;">${starsHtml}</span>
         <br/>
         <span style="color:#71717A;font-size:11px;">${avgRating} out of 5 · ${totalReviews} reviews</span>
@@ -102,16 +110,16 @@ export const EmailSignatureEmbed: React.FC<EmailSignatureEmbedProps> = ({ review
         return `<table cellpadding="0" cellspacing="0" style="font-family:Arial,sans-serif;max-width:300px;">
   <tr>
     <td style="padding:12px 0;">
-      <table cellpadding="0" cellspacing="0" style="border-left:3px solid ${brandColor};padding-left:12px;">
+      <table cellpadding="0" cellspacing="0" style="border-left:3px solid ${safeColor};padding-left:12px;">
         <tr>
           <td>
             <p style="color:#3F3F46;font-size:12px;font-style:italic;margin:0 0 6px 0;line-height:1.4;">
-              "${truncateQuote(topReview.content, 120)}"
+              "${quoteText}"
             </p>
             <p style="color:#71717A;font-size:11px;margin:0;">
-              — ${topReview.name}${topReview.company ? `, ${topReview.company}` : ''}
+              — ${quoteAuthor}${quoteCompany ? `, ${quoteCompany}` : ''}
             </p>
-            <a href="${wallUrl}" style="color:${brandColor};font-size:10px;text-decoration:none;display:inline-block;margin-top:4px;">
+            <a href="${safeWallUrl}" style="color:${safeColor};font-size:10px;text-decoration:none;display:inline-block;margin-top:4px;">
               See all ${totalReviews} reviews →
             </a>
           </td>

@@ -55,9 +55,9 @@ export async function handleGoogleAuthCallback(request: Request, env: WorkerEnv)
     const redirectUri = env.GOOGLE_REDIRECT_URI || `${baseUrl}/api/auth/google/callback`;
 
     if (!clientId || !clientSecret) {
-      console.warn('[GoogleOAuthCallback] GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET missing in environment.');
+      console.error('[GoogleOAuthCallback] GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET missing in environment.');
       return Response.redirect(
-        `${baseUrl}/dashboard?social_connected=google&account_name=${encodeURIComponent('Google Business Profile')}&notice=${encodeURIComponent('Simulated connection active')}`,
+        `${baseUrl}/dashboard?social_error=${encodeURIComponent('Server configuration error. Contact administrator.')}`,
         302
       );
     }

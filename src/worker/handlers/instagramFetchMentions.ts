@@ -55,8 +55,21 @@ export async function handleInstagramFetchMentions(request: Request, env: Worker
     const now = new Date().toISOString();
 
     if (postUrl && typeof postUrl === 'string' && postUrl.trim()) {
-      // Direct post or reel extraction
+      // Direct post/reel extraction requires the authenticated Graph API.
+      // A bare URL alone cannot yield real comment data — never fabricate.
       importedReviews = extractInstagramPostReview(postUrl.trim());
+      if (importedReviews.length === 0) {
+        return new Response(
+          JSON.stringify({
+            error:
+              'Direct link import is not available. Connect your Instagram Business account, then sync comments from your connected account instead.',
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
     } else {
       // Sync from connected Instagram Business Account
       const docId = `${userId}_instagram`;
@@ -68,10 +81,16 @@ export async function handleInstagramFetchMentions(request: Request, env: Worker
           importedReviews = await fetchInstagramCommentsAndMentions(accessToken, connDoc.platformUserId || '', env);
         } catch (e) {
           console.warn('[InstagramFetchMentions] Decryption fallback:', e);
-          importedReviews = extractInstagramPostReview('https://instagram.com/p/demo_post');
+          importedReviews = [];
         }
       } else {
-        importedReviews = extractInstagramPostReview('https://instagram.com/p/demo_post');
+        return new Response(
+          JSON.stringify({ error: 'No connected Instagram account found. Connect Instagram first.' }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
       }
     }
 

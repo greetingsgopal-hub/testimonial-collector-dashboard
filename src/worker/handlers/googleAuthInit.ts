@@ -59,11 +59,9 @@ export async function handleGoogleAuthInit(request: Request, env: WorkerEnv): Pr
 
   if (!clientId) {
     console.warn('[GoogleAuthInit] GOOGLE_CLIENT_ID not set in worker environment.');
-    // If not configured, gracefully redirect to simulated successful connection or helpful dashboard prompt
     if (request.method === 'GET') {
-      // In dev/demo environment without Google credentials, simulate seamless connection
       return Response.redirect(
-        `${baseUrl}/dashboard?connected=google&account_name=${encodeURIComponent('Google Business Profile')}&notice=${encodeURIComponent('Google Client ID placeholder mode active')}`,
+        `${baseUrl}/dashboard?social_error=${encodeURIComponent('Google is not configured on the server. Please contact support.')}`,
         302
       );
     }
@@ -72,10 +70,9 @@ export async function handleGoogleAuthInit(request: Request, env: WorkerEnv): Pr
       JSON.stringify({
         error: 'GOOGLE_CLIENT_ID is not configured in Worker environment variables.',
         configured: false,
-        fallbackAuthUrl: `${baseUrl}/dashboard?connected=google`,
       }),
       {
-        status: 200,
+        status: 503,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

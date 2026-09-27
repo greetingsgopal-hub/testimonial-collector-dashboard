@@ -14,10 +14,21 @@ const ALLOWED_ORIGINS = [
 
 export function getCorsHeaders(requestOrigin?: string | null): Record<string, string> {
   const origin = requestOrigin || '';
-  const isAllowed = ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.workers.dev') || origin.endsWith('.netlify.app');
+  // Exact-match allowlist only. Suffix wildcards (*.workers.dev / *.netlify.app)
+  // would let any attacker register a preview subdomain and make credentialed
+  // cross-origin requests. Unknown origins get NO Access-Control-Allow-Origin.
+  const isAllowed = ALLOWED_ORIGINS.includes(origin);
+
+  if (!isAllowed) {
+    return {
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Vary': 'Origin',
+    };
+  }
 
   return {
-    'Access-Control-Allow-Origin': isAllowed ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
     'Access-Control-Allow-Credentials': 'true',

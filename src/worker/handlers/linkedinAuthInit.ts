@@ -60,7 +60,7 @@ export async function handleLinkedInAuthInit(request: Request, env: WorkerEnv): 
     console.warn('[LinkedInAuthInit] LINKEDIN_CLIENT_ID not configured in Worker environment.');
     if (request.method === 'GET') {
       return Response.redirect(
-        `${baseUrl}/dashboard/integrate?social_connected=linkedin&notice=${encodeURIComponent('LinkedIn is not configured yet. Please contact support.')}`,
+        `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent('LinkedIn is not configured on the server. Please contact support.')}`,
         302
       );
     }
@@ -69,12 +69,10 @@ export async function handleLinkedInAuthInit(request: Request, env: WorkerEnv): 
       JSON.stringify({
         error: 'LINKEDIN_CLIENT_ID is not configured in Worker environment variables.',
         configured: false,
-        authUrl: `${baseUrl}/dashboard/integrate?social_connected=linkedin`,
-        state,
         platform: 'linkedin',
       }),
       {
-        status: 200,
+        status: 503,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

@@ -1,4 +1,5 @@
 import { WorkerEnv } from '../types';
+import { getAuthHeader } from '../lib/firestoreAdmin';
 
 export interface PublicEmbedReview {
   id: string;
@@ -60,6 +61,13 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
                   value: { stringValue: 'approved' },
                 },
               },
+              {
+                fieldFilter: {
+                  field: { fieldPath: 'projectId' },
+                  op: 'EQUAL',
+                  value: { stringValue: projectId },
+                },
+              },
             ],
           },
         },
@@ -67,9 +75,12 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
       },
     };
 
+    // Server-side trust: authenticate with the service account and enforce
+    // the projectId filter inside the query itself (not client-side after).
+    const headers = await getAuthHeader(undefined, env);
     const firestoreRes = await fetch(queryUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(firestoreQuery),
     });
 
@@ -97,7 +108,7 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
               rating: parseInt(f.rating?.integerValue || f.rating?.doubleValue || '5', 10),
               text: f.text?.stringValue || f.content?.stringValue || '',
               source,
-              verified: Boolean(f.verified?.booleanValue ?? true),
+              verified: Boolean(f.verified?.booleanValue ?? false),
               createdAt: f.createdAt?.timestampValue || f.createdAt?.stringValue || new Date().toISOString(),
             });
           }

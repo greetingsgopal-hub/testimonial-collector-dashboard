@@ -109,7 +109,7 @@ export async function handleOAuthCallback(request: Request, env: WorkerEnv): Pro
 
       if (!clientId || !clientSecret) {
         return Response.redirect(
-          `${baseUrl}/dashboard?social_connected=google&account_name=${encodeURIComponent('Google Business Profile')}&notice=${encodeURIComponent('Sandbox mode')}`,
+          `${baseUrl}/dashboard?social_error=${encodeURIComponent('Server configuration error. Contact administrator.')}`,
           302
         );
       }

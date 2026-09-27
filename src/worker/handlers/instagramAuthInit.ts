@@ -64,7 +64,7 @@ export async function handleInstagramAuthInit(request: Request, env: WorkerEnv):
     console.warn('[InstagramAuthInit] META_APP_ID not configured in Worker environment.');
     if (request.method === 'GET') {
       return Response.redirect(
-        `${baseUrl}/dashboard/integrate?social_connected=instagram&account_name=${encodeURIComponent('@pandapraise_official')}&notice=${encodeURIComponent('Meta App ID placeholder mode active')}`,
+        `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent('Instagram is not configured on the server. Please contact support.')}`,
         302
       );
     }
@@ -73,12 +73,10 @@ export async function handleInstagramAuthInit(request: Request, env: WorkerEnv):
       JSON.stringify({
         error: 'META_APP_ID is not configured in Worker environment variables.',
         configured: false,
-        authUrl: `${baseUrl}/dashboard/integrate?social_connected=instagram`,
-        state,
         platform: 'instagram',
       }),
       {
-        status: 200,
+        status: 503,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

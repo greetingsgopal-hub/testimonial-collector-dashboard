@@ -132,12 +132,10 @@ export async function getInstagramBusinessAccount(
     console.warn('[InstagramOAuth] Failed to fetch account from Graph API:', err);
   }
 
-  return {
-    id: `ig_${Date.now()}`,
-    username: 'pandapraise_official',
-    name: 'Panda Praise Instagram',
-    profilePicture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-  };
+  // No fabricated fallback account: fail honestly.
+  throw new Error(
+    'No Instagram Business account found. Convert your Instagram account to a Business account linked to a Facebook Page and try again.'
+  );
 }
 
 /**
@@ -185,78 +183,20 @@ export async function fetchInstagramCommentsAndMentions(
       }
     }
   } catch (err) {
-    console.warn('[InstagramOAuth] Live Graph API comment query warning, returning sample dataset:', err);
+    console.warn('[InstagramOAuth] Live Graph API comment query failed, returning empty list:', err);
   }
 
-  // High-converting verified praise comments from Instagram
-  return [
-    {
-      id: `ig_sample_${Date.now()}_1`,
-      authorName: '@maya.designs',
-      authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-      rating: 5,
-      text: 'Obsessed with how clean the testimonial widgets look on our Shopify store! Boosted our launch day conversions by 32% 🙌✨',
-      date: new Date(Date.now() - 1 * 86400000).toISOString(),
-      source: 'instagram',
-      verified: true,
-      postUrl: 'https://instagram.com/p/C3x9L8mPq1',
-    },
-    {
-      id: `ig_sample_${Date.now()}_2`,
-      authorName: '@lucas_growthlab',
-      authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      rating: 5,
-      text: 'The best review capture tool out there. Love how simple it is to import comments directly from our Instagram feed posts into our wall of fame 🚀',
-      date: new Date(Date.now() - 3 * 86400000).toISOString(),
-      source: 'instagram',
-      verified: true,
-      postUrl: 'https://instagram.com/p/C3x9L8mPq2',
-    },
-    {
-      id: `ig_sample_${Date.now()}_3`,
-      authorName: '@elena_saas',
-      authorAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
-      rating: 5,
-      text: 'Game changer for social proof! Clients love the 1-click video recording and sharing experience.',
-      date: new Date(Date.now() - 6 * 86400000).toISOString(),
-      source: 'instagram',
-      verified: true,
-      postUrl: 'https://instagram.com/reel/C3x9L8mPq3',
-    },
-  ];
+  // No fabricated fallback comments: empty list when nothing real is available.
+  return [];
 }
 
 /**
  * Extracts public Instagram praise comment/mention from a post or reel link.
  */
 export function extractInstagramPostReview(postUrl: string): InstagramCommentReview[] {
-  const cleanUrl = postUrl.trim();
-  const isReel = cleanUrl.includes('/reel/') || cleanUrl.includes('/reels/');
-  
-  return [
-    {
-      id: `ig_post_extracted_${Date.now()}_1`,
-      authorName: isReel ? '@creative_studio_hq' : '@alexandra.design',
-      authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      rating: 5,
-      text: isReel 
-        ? 'Hands down the easiest way to collect video reviews from our community. Love the branded embeds!' 
-        : 'Huge shoutout to Panda Praise for making customer testimonial management so effortless and beautiful!',
-      date: new Date().toISOString(),
-      source: 'instagram',
-      verified: true,
-      postUrl: cleanUrl,
-    },
-    {
-      id: `ig_post_extracted_${Date.now()}_2`,
-      authorName: '@noah.builds',
-      authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-      rating: 5,
-      text: 'Our landing page conversion rate jumped significantly after showcasing these verified Instagram mentions.',
-      date: new Date(Date.now() - 2 * 86400000).toISOString(),
-      source: 'instagram',
-      verified: true,
-      postUrl: cleanUrl,
-    }
-  ];
+  // Comment extraction requires the Graph API (authenticated, server-side).
+  // A bare URL alone cannot yield real comment data — return nothing rather
+  // than fabricate reviews. Kept as an exported stub so call sites fail safe.
+  void postUrl;
+  return [];
 }

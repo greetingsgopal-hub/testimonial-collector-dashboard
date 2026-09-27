@@ -99,13 +99,11 @@ export async function handleOAuthInit(request: Request, env: WorkerEnv): Promise
       if (!clientId) {
         return new Response(
           JSON.stringify({
-            authUrl: `${new URL(request.url).origin}/dashboard?connected=google`,
-            state,
-            platform: 'google',
+            error: 'Google OAuth is not configured on the server. GOOGLE_CLIENT_ID must be set in Worker environment variables.',
             configured: false,
           }),
           {
-            status: 200,
+            status: 503,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           }
         );

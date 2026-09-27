@@ -17,6 +17,12 @@ interface QrCodeGeneratorProps {
 // Simple QR code generator using SVG (no external library needed)
 // Uses a basic encoding algorithm for alphanumeric URLs
 function generateQrSvg(data: string, size: number, fg: string, bg: string): string {
+  // Only allow hex colors into the SVG markup — anything else could break out
+  // of the fill attribute and inject markup via dangerouslySetInnerHTML.
+  const safeFg = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fg) ? fg : '#000000';
+  const safeBg = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(bg) ? bg : '#FFFFFF';
+  const safeSize = Number.isFinite(size) && size > 0 && size <= 1000 ? size : 200;
+  const safeData = data.replace(/[<>&"']/g, '');
   // Create a deterministic grid pattern based on the data
   // In production, use a proper QR library like 'qrcode'
   const modules = 25; // Standard QR size
@@ -25,8 +31,8 @@ function generateQrSvg(data: string, size: number, fg: string, bg: string): stri
 
   // Seed from data string
   let hash = 0;
-  for (let i = 0; i < data.length; i++) {
-    const char = data.charCodeAt(i);
+  for (let i = 0; i < safeData.length; i++) {
+    const char = safeData.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
@@ -69,13 +75,13 @@ function generateQrSvg(data: string, size: number, fg: string, bg: string): stri
   for (let row = 0; row < modules; row++) {
     for (let col = 0; col < modules; col++) {
       if (grid[row][col]) {
-        rects += `<rect x="${col * cellSize}" y="${row * cellSize}" width="${cellSize}" height="${cellSize}" fill="${fg}" rx="${cellSize * 0.15}"/>`;
+        rects += `<rect x="${col * cellSize}" y="${row * cellSize}" width="${cellSize}" height="${cellSize}" fill="${safeFg}" rx="${cellSize * 0.15}"/>`;
       }
     }
   }
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
-    <rect width="${size}" height="${size}" fill="${bg}" rx="12"/>
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${safeSize} ${safeSize}" width="${safeSize}" height="${safeSize}">
+    <rect width="${safeSize}" height="${safeSize}" fill="${safeBg}" rx="12"/>
     ${rects}
   </svg>`;
 }

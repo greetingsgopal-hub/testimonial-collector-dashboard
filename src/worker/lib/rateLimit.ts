@@ -1,5 +1,12 @@
 /**
  * Lightweight in-memory sliding-window rate limiter for Cloudflare Worker.
+ *
+ * KNOWN LIMITATION: this store is per-isolate. Cloudflare Workers run many
+ * isolates per deployment, so limits are enforced per isolate, not globally.
+ * A determined attacker rotating across isolates can exceed the configured
+ * rate. For global enforcement, back this with Cloudflare KV or Durable
+ * Objects. Acceptable for OAuth-init brute-force slowing, not for hard
+ * abuse guarantees on public submission endpoints.
  */
 
 interface RateLimitRecord {

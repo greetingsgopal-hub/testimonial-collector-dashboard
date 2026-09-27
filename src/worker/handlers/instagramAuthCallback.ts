@@ -55,9 +55,9 @@ export async function handleInstagramAuthCallback(request: Request, env: WorkerE
     const redirectUri = env.INSTAGRAM_REDIRECT_URI || `${baseUrl}/api/auth/instagram/callback`;
 
     if (!appId || !appSecret) {
-      console.warn('[InstagramOAuthCallback] Meta credentials missing in environment.');
+      console.error('[InstagramOAuthCallback] Meta credentials missing in environment.');
       return Response.redirect(
-        `${baseUrl}/dashboard/integrate?social_connected=instagram&account_name=${encodeURIComponent('@pandapraise_official')}&notice=${encodeURIComponent('Sandbox mode active')}`,
+        `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent('Server configuration error. Contact administrator.')}`,
         302
       );
     }

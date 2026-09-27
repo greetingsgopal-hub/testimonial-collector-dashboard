@@ -108,7 +108,7 @@ export async function getGoogleUserProfile(accessToken: string): Promise<GoogleU
 
 /**
  * Fetches Google Business Profile accounts and locations, then pulls real verified customer reviews.
- * Falls back to simulated high-converting reviews if the account is in sandbox/demo mode.
+ * Never fabricates data: on any failure or empty result, returns an empty list.
  */
 export async function fetchGoogleBusinessReviews(
   accessToken: string,
@@ -146,15 +146,19 @@ export async function fetchGoogleBusinessReviews(
 
             if (reviewsRes.ok) {
               const reviewsData: any = await reviewsRes.json();
-              const googleReviews = reviewsData.reviews || [];
+              const ratingMap: Record<string, number> = { FIVE: 5, FOUR: 4, THREE: 3, TWO: 2, ONE: 1 };
+              // Only import reviews with real comment text and a real star rating.
+              const googleReviews = (reviewsData.reviews || []).filter(
+                (rev: any) => rev.comment && ratingMap[rev.starRating]
+              );
 
               if (googleReviews.length > 0) {
                 return googleReviews.map((rev: any, idx: number) => ({
                   id: rev.reviewId || `google_rev_${Date.now()}_${idx}`,
-                  authorName: rev.reviewer?.displayName || 'Verified Google Reviewer',
-                  authorAvatar: rev.reviewer?.profilePhotoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-                  rating: rev.starRating === 'FIVE' ? 5 : rev.starRating === 'FOUR' ? 4 : rev.starRating === 'THREE' ? 3 : 5,
-                  text: rev.comment || 'Outstanding experience! The team went above and beyond our expectations.',
+                  authorName: rev.reviewer?.displayName || 'Google Reviewer',
+                  authorAvatar: rev.reviewer?.profilePhotoUrl,
+                  rating: ratingMap[rev.starRating],
+                  text: rev.comment,
                   date: rev.createTime || new Date().toISOString(),
                   source: 'google',
                   verified: true,
@@ -167,45 +171,11 @@ export async function fetchGoogleBusinessReviews(
       }
     }
   } catch (err) {
-    console.warn('[GoogleOAuth] Business API fetch exception, returning verified sync dataset:', err);
+    console.warn('[GoogleOAuth] Business API fetch failed, returning empty list:', err);
   }
 
-  // Robust default verified batch if Google Business Account has no public API reviews enabled yet
-  return [
-    {
-      id: `google_sync_${Date.now()}_1`,
-      authorName: 'Sarah Jenkins',
-      authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-      rating: 5,
-      text: 'Panda Praise completely transformed how we capture and showcase client feedback. Super clean integration and authentic 5-star Google review sync!',
-      date: new Date(Date.now() - 2 * 86400000).toISOString(),
-      source: 'google',
-      verified: true,
-      platformUrl: 'https://maps.google.com',
-    },
-    {
-      id: `google_sync_${Date.now()}_2`,
-      authorName: 'Marcus Vance',
-      authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      rating: 5,
-      text: 'Effortless setup. We connected our Google Business profile in under 30 seconds and our conversion rate jumped by 24% after embedding the Wall of Fame.',
-      date: new Date(Date.now() - 5 * 86400000).toISOString(),
-      source: 'google',
-      verified: true,
-      platformUrl: 'https://maps.google.com',
-    },
-    {
-      id: `google_sync_${Date.now()}_3`,
-      authorName: 'Elena Rostova',
-      authorAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
-      rating: 5,
-      text: 'Best testimonial management tool by far. The Google Maps Rich Snippets schema alone drove dozens of high-intent organic leads directly from Google Search.',
-      date: new Date(Date.now() - 9 * 86400000).toISOString(),
-      source: 'google',
-      verified: true,
-      platformUrl: 'https://maps.google.com',
-    },
-  ];
+  // No fabricated fallback: empty list when nothing real is available.
+  return [];
 }
 
 /**
@@ -231,72 +201,48 @@ export async function fetchGooglePlaceReviews(
   }
 
   const apiKey = env.GOOGLE_PLACES_API_KEY;
-
-  if (apiKey && placeId && !placeId.startsWith('http')) {
-    try {
-      const placesUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(
-        placeId
-      )}&fields=name,rating,user_ratings_total,reviews&key=${encodeURIComponent(apiKey)}`;
-
-      const res = await fetch(placesUrl);
-      if (res.ok) {
-        const data: any = await res.json();
-        if (data.result) {
-          const result = data.result;
-          const reviews: ImportedReview[] = (result.reviews || []).map((r: any, idx: number) => ({
-            id: `google_place_${Date.now()}_${idx}`,
-            authorName: r.author_name || 'Verified Google User',
-            authorAvatar: r.profile_photo_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-            rating: r.rating || 5,
-            text: r.text || 'Great service and reliable team!',
-            date: r.time ? new Date(r.time * 1000).toISOString() : new Date().toISOString(),
-            source: 'google',
-            verified: true,
-            platformUrl: r.author_url || 'https://maps.google.com',
-          }));
-
-          return {
-            placeName: result.name || 'Google Business Location',
-            rating: result.rating || 5.0,
-            totalReviews: result.user_ratings_total || reviews.length,
-            reviews,
-          };
-        }
-      }
-    } catch (e) {
-      console.warn('[GooglePlaces] Failed to fetch Place Details from API:', e);
-    }
+  if (!apiKey) {
+    throw new Error('GOOGLE_PLACES_API_KEY is not configured in Worker environment variables.');
+  }
+  if (!placeId || placeId.startsWith('http')) {
+    throw new Error('Please provide a valid Google Place ID (not a raw URL).');
   }
 
-  // Clean fallback place response
-  const derivedName = placeId.includes('http') ? 'Your Google Business Profile' : placeId || 'Google Business Location';
-  return {
-    placeName: derivedName,
-    rating: 4.9,
-    totalReviews: 48,
-    reviews: [
-      {
-        id: `google_manual_${Date.now()}_1`,
-        authorName: 'David K. Miller',
-        authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-        rating: 5,
-        text: 'The Google review integration is remarkably fast and seamless. Synced all our 5-star customer feedback in seconds.',
-        date: new Date().toISOString(),
-        source: 'google',
-        verified: true,
-        platformUrl: 'https://maps.google.com',
-      },
-      {
-        id: `google_manual_${Date.now()}_2`,
-        authorName: 'Amara Patel',
-        authorAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
-        rating: 5,
-        text: 'Top tier experience! Having verified Google badges on our customer testimonials has doubled our conversion credibility.',
-        date: new Date(Date.now() - 3 * 86400000).toISOString(),
-        source: 'google',
-        verified: true,
-        platformUrl: 'https://maps.google.com',
-      }
-    ],
-  };
+  try {
+    const placesUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(
+      placeId
+    )}&fields=name,rating,user_ratings_total,reviews&key=${encodeURIComponent(apiKey)}`;
+
+    const res = await fetch(placesUrl);
+    if (!res.ok) {
+      throw new Error(`Google Places API request failed (${res.status}).`);
+    }
+    const data: any = await res.json();
+    if (!data.result) {
+      throw new Error('Google Place not found for the provided ID.');
+    }
+    const result = data.result;
+    const reviews: ImportedReview[] = (result.reviews || []).map((r: any, idx: number) => ({
+      id: `google_place_${Date.now()}_${idx}`,
+      authorName: r.author_name || 'Google User',
+      authorAvatar: r.profile_photo_url,
+      rating: r.rating || 0,
+      text: r.text,
+      date: r.time ? new Date(r.time * 1000).toISOString() : new Date().toISOString(),
+      source: 'google',
+      verified: true,
+      platformUrl: r.author_url || 'https://maps.google.com',
+    }));
+
+    return {
+      placeName: result.name || 'Google Business Location',
+      rating: result.rating || 0,
+      totalReviews: result.user_ratings_total || reviews.length,
+      reviews,
+    };
+  } catch (e: any) {
+    if (e instanceof Error && e.message.startsWith('GOOGLE_PLACES_API_KEY')) throw e;
+    console.warn('[GooglePlaces] Failed to fetch Place Details from API:', e);
+    throw new Error('Failed to fetch Google Place details. Please verify the Place ID.');
+  }
 }

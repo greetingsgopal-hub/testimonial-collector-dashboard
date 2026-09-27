@@ -55,9 +55,9 @@ export async function handleLinkedInAuthCallback(request: Request, env: WorkerEn
     const redirectUri = env.LINKEDIN_REDIRECT_URI || `${baseUrl}/api/auth/linkedin/callback`;
 
     if (!clientId || !clientSecret) {
-      console.warn('[LinkedInOAuthCallback] LINKEDIN credentials missing in environment.');
+      console.error('[LinkedInOAuthCallback] LINKEDIN credentials missing in environment.');
       return Response.redirect(
-        `${baseUrl}/dashboard/integrate?social_connected=linkedin&notice=${encodeURIComponent('LinkedIn is not configured yet. Please contact support.')}`,
+        `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent('Server configuration error. Contact administrator.')}`,
         302
       );
     }

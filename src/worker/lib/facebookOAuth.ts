@@ -120,16 +120,8 @@ export async function getFacebookPages(userAccessToken: string): Promise<Faceboo
     console.warn('[FacebookOAuth] Failed to get accounts from Graph API:', err);
   }
 
-  // Fallback demo page
-  return [
-    {
-      id: `fb_page_${Date.now()}`,
-      name: 'Panda Praise Official Page',
-      category: 'Software',
-      pageAccessToken: userAccessToken,
-      profilePicture: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150',
-    },
-  ];
+  // No fabricated fallback page: return what the Graph API actually gave us.
+  return [];
 }
 
 /**
@@ -173,48 +165,11 @@ export async function fetchFacebookPageReviews(
       }
     }
   } catch (err) {
-    console.warn('[FacebookOAuth] Graph API rating fetch warning, returning curated dataset:', err);
+    console.warn('[FacebookOAuth] Graph API rating fetch failed, returning empty list:', err);
   }
 
-  // Curated verified 5-star customer reviews from Facebook Page
-  return [
-    {
-      id: `fb_review_${Date.now()}_1`,
-      authorName: 'Danielle Cooper',
-      authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      rating: 5,
-      text: 'Panda Praise has been a phenomenal addition to our marketing stack. Our Facebook recommendations automatically display on our checkout page with zero maintenance!',
-      date: new Date(Date.now() - 1 * 86400000).toISOString(),
-      source: 'facebook',
-      verified: true,
-      pageId,
-      postUrl: `https://facebook.com/${pageId}`,
-    },
-    {
-      id: `fb_review_${Date.now()}_2`,
-      authorName: 'Jeremy Scott',
-      authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      rating: 5,
-      text: 'Super straightforward setup. Love that customer reviews from our Facebook page sync straight into our inbox and widgets in real-time.',
-      date: new Date(Date.now() - 4 * 86400000).toISOString(),
-      source: 'facebook',
-      verified: true,
-      pageId,
-      postUrl: `https://facebook.com/${pageId}`,
-    },
-    {
-      id: `fb_review_${Date.now()}_3`,
-      authorName: 'Clara Zhao',
-      authorAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
-      rating: 5,
-      text: 'The best social proof collector we have used. The live rating badges and trust widgets give our potential buyers immense confidence.',
-      date: new Date(Date.now() - 7 * 86400000).toISOString(),
-      source: 'facebook',
-      verified: true,
-      pageId,
-      postUrl: `https://facebook.com/${pageId}`,
-    },
-  ];
+  // No fabricated fallback reviews: empty list when nothing real is available.
+  return [];
 }
 
 /**
@@ -233,18 +188,20 @@ export function transformFacebookWebhookPayload(payload: any): FacebookReviewIte
       const value = change.value;
 
       if (field === 'ratings' || field === 'recommendations') {
-        reviews.push({
-          id: `fb_webhook_${value.review_id || Date.now()}`,
-          authorName: value.reviewer_name || 'Facebook User',
-          authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-          rating: value.rating || (value.recommendation_type === 'positive' ? 5 : 4),
-          text: value.review_text || value.message || 'Highly recommended! Excellent service.',
-          date: value.created_time ? new Date(value.created_time * 1000).toISOString() : new Date().toISOString(),
-          source: 'facebook',
-          verified: true,
-          pageId,
-          postUrl: `https://facebook.com/${pageId}`,
-        });
+        const text = value.review_text || value.message;
+        if (text) {
+          reviews.push({
+            id: `fb_webhook_${value.review_id || Date.now()}`,
+            authorName: value.reviewer_name || 'Facebook User',
+            rating: value.rating || (value.recommendation_type === 'positive' ? 5 : 4),
+            text,
+            date: value.created_time ? new Date(value.created_time * 1000).toISOString() : new Date().toISOString(),
+            source: 'facebook',
+            verified: true,
+            pageId,
+            postUrl: `https://facebook.com/${pageId}`,
+          });
+        }
       } else if (field === 'feed' && value.item === 'comment' && value.verb === 'add') {
         if (value.message && value.message.length > 10) {
           reviews.push({

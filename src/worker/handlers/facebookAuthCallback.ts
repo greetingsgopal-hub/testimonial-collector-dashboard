@@ -55,9 +55,9 @@ export async function handleFacebookAuthCallback(request: Request, env: WorkerEn
     const redirectUri = env.FACEBOOK_REDIRECT_URI || `${baseUrl}/api/auth/facebook/callback`;
 
     if (!appId || !appSecret) {
-      console.warn('[FacebookOAuthCallback] Meta credentials missing in environment.');
+      console.error('[FacebookOAuthCallback] Meta credentials missing in environment.');
       return Response.redirect(
-        `${baseUrl}/dashboard/integrate?social_connected=facebook&account_name=${encodeURIComponent('Panda Praise Official Page')}&notice=${encodeURIComponent('Sandbox mode active')}`,
+        `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent('Server configuration error. Contact administrator.')}`,
         302
       );
     }
@@ -67,11 +67,12 @@ export async function handleFacebookAuthCallback(request: Request, env: WorkerEn
 
     // 2. Fetch managed Facebook Pages
     const pages = await getFacebookPages(tokenData.accessToken);
-    const primaryPage = pages[0] || {
-      id: `fb_page_${Date.now()}`,
-      name: 'Panda Praise Official Page',
-      pageAccessToken: tokenData.accessToken,
-    };
+    const primaryPage = pages[0];
+    if (!primaryPage) {
+      throw new Error(
+        'No Facebook Pages found for this account. Create a Facebook Page and grant the app access, then try again.'
+      );
+    }
 
     // 3. Fetch initial ratings and recommendations
     const pageToken = primaryPage.pageAccessToken || tokenData.accessToken;

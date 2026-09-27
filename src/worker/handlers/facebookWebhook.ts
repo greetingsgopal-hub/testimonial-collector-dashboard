@@ -1,7 +1,7 @@
 import { WorkerEnv } from '../types';
 import { getCorsHeaders } from '../lib/cors';
 import { transformFacebookWebhookPayload } from '../lib/facebookOAuth';
-import { saveDocument } from '../lib/firestoreAdmin';
+import { saveDocument, queryDocumentsByField } from '../lib/firestoreAdmin';
 import crypto from 'node:crypto';
 
 /**
@@ -95,8 +95,21 @@ export async function handleFacebookWebhook(request: Request, env: WorkerEnv): P
       const now = new Date().toISOString();
 
       for (const rev of reviews) {
+        if (!rev.pageId) {
+          console.warn(`[FacebookWebhook] Review ${rev.id} has no pageId. Skipping.`);
+          continue;
+        }
+        // Resolve the tenant owner by looking up which connected account owns
+        // this page. Unbound pages are skipped — never attributed to a demo user.
+        const connections = await queryDocumentsByField('social_connections', 'pageId', rev.pageId, undefined, env);
+        const owner = connections.find((c: any) => c.ownerId && c.status === 'connected');
+        if (!owner) {
+          console.warn(`[FacebookWebhook] No connected account found for page ${rev.pageId}. Skipping review ${rev.id}.`);
+          continue;
+        }
+
         const testimonialDoc = {
-          ownerId: 'user_demo_gopal', // In production resolved from pageId binding
+          ownerId: owner.ownerId,
           author: rev.authorName,
           avatar: rev.authorAvatar,
           rating: rev.rating,
@@ -115,7 +128,7 @@ export async function handleFacebookWebhook(request: Request, env: WorkerEnv): P
         );
       }
 
-      console.log(`[FacebookWebhook] Processed ${reviews.length} new testimonials via real-time Meta push.`);
+      console.log(`[FacebookWebhook] Processed webhook entries for ${reviews.length} reviews (bound pages only).`);
 
       return new Response(JSON.stringify({ status: 'EVENT_RECEIVED', processed: reviews.length }), {
         status: 200,

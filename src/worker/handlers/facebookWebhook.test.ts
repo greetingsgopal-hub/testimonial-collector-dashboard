@@ -61,9 +61,12 @@ function webhookPost(body: string, headers: Record<string, string> = {}) {
 // Mock Firestore so tests assert on calls without touching real infrastructure
 vi.mock('../lib/firestoreAdmin', () => ({
   saveDocument: vi.fn().mockResolvedValue(undefined),
+  queryDocumentsByField: vi.fn().mockResolvedValue([
+    { id: 'user_1_facebook', ownerId: 'user_1', pageId: 'page_123', status: 'connected' },
+  ]),
 }));
 
-import { saveDocument } from '../lib/firestoreAdmin';
+import { saveDocument, queryDocumentsByField } from '../lib/firestoreAdmin';
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -137,6 +140,17 @@ describe('C2: Meta webhook signature verification (POST)', () => {
     expect(doc.text).toBe('Great service, highly recommended!');
     expect(doc.verified).toBe(true);
     expect(doc.status).toBe('approved');
+    expect(doc.ownerId).toBe('user_1'); // resolved from pageId binding, not a demo user
+  });
+
+  it('skips reviews for pages with no connected owner (no demo-user attribution)', async () => {
+    (queryDocumentsByField as any).mockResolvedValueOnce([]);
+    const res = await handleFacebookWebhook(
+      webhookPost(VALID_PAYLOAD, { 'X-Hub-Signature-256': sign(VALID_PAYLOAD) }),
+      ENV
+    );
+    expect(res.status).toBe(200);
+    expect(saveDocument).not.toHaveBeenCalled();
   });
 
   it('uses timingSafeEqual for comparison (not string equality)', async () => {
