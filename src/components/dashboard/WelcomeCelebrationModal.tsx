@@ -227,10 +227,10 @@ export const WelcomeCelebrationModal: React.FC<WelcomeCelebrationModalProps> = (
                 </div>
                 <div>
                   <h4 className="font-bold text-sm text-gray-900">
-                    Import existing reviews from 30+ platforms
+                    Import existing reviews
                   </h4>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Import existing feedback from Google, Twitter/X, Trustpilot, ProductHunt, or CSV.
+                    Upload a CSV of existing feedback, or connect Google, LinkedIn, Instagram or Facebook.
                   </p>
                 </div>
               </div>

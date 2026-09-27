@@ -1,80 +1,56 @@
 import React from 'react';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Star, Video, Globe, ShieldCheck, Sparkles, Share2, QrCode } from 'lucide-react';
 
-export interface TestimonialItem {
-  name: string;
-  role: string;
-  avatar: string;
-  stars: number;
+export interface FeatureCardItem {
+  icon: React.ReactNode;
+  title: string;
   text: string;
-  tag?: string;
-  highlight?: string;
 }
 
-const TESTIMONIALS_LIST: TestimonialItem[] = [
+// Honest feature cards replace the fabricated customer testimonials that were
+// here before (fake names/roles attributed to Panda Praise customers). When
+// real customer testimonials exist, they can be swapped back in here.
+const FEATURES_LIST: FeatureCardItem[] = [
   {
-    name: 'Devin Lee',
-    role: 'Systems Strategist',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: 'It took mere minutes to get set up and add GORGEOUS testimonials to my website',
+    icon: <Star className="w-6 h-6 text-amber-400" />,
+    title: 'Collect text & video testimonials',
+    text: 'A public link, QR code or embeddable widget your customers can use in under a minute.',
   },
   {
-    name: 'Alex M.',
-    role: 'SaaS Founder',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: 'Took me less than 5 minutes to start collecting',
+    icon: <ShieldCheck className="w-6 h-6 text-emerald-400" />,
+    title: 'Approve before anything goes live',
+    text: 'Every submission lands in your moderation inbox first. Nothing is published without your sign-off.',
   },
   {
-    name: 'Elliot Thomas',
-    role: 'Founder',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: 'an absolute game changer',
+    icon: <Globe className="w-6 h-6 text-sky-400" />,
+    title: 'Import your existing reviews',
+    text: 'Upload a CSV, or connect Google, LinkedIn, Instagram or Facebook to pull reviews in.',
   },
   {
-    name: 'LaShonda Brown',
-    role: 'Tech Educator & YouTuber',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: 'Effective tech tools are great. Effective tools run by incredibly supportive humans, even better.',
+    icon: <Share2 className="w-6 h-6 text-rose-400" />,
+    title: 'Publish anywhere',
+    text: 'Walls of Love, embeddable widgets, popups and shareable images for your socials.',
   },
   {
-    name: 'femke',
-    role: '@femkesvs',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: "I switched to Panda Praise to collect testimonials and it's my fav tool of the year! A+ all around from design to support.",
-    highlight: "it's my fav tool of the year",
+    icon: <Video className="w-6 h-6 text-indigo-400" />,
+    title: 'Ad-free video hosting',
+    text: 'Your video testimonials hosted on dedicated, ad-free hosting — no Wistia or YouTube branding.',
   },
   {
-    name: 'Michel Bardelmeijer',
-    role: 'Founder of redirect.pizza',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: 'Loving Panda Praise! We needed an easy-to-use testimonial solution with great design which Panda Praise fully delivers.',
+    icon: <QrCode className="w-6 h-6 text-teal-400" />,
+    title: 'QR codes for in-person collection',
+    text: 'Print a QR code on receipts, packaging or signage and collect praise on the spot.',
   },
   {
-    name: 'Fed',
-    role: 'Founder, BetterProof',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: 'Promoting and sharing testimonials has been fantastic. The social proof already paid for itself!',
-    highlight: 'paid for itself',
-  },
-  {
-    name: 'Jay Clouse',
-    role: 'Founder, Creator Science',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: "I've already seen a tangible impact on revenue and conversion by sharing more social proof.",
+    icon: <Sparkles className="w-6 h-6 text-amber-400" />,
+    title: 'Free forever plan',
+    text: 'Start collecting today. No credit card required — upgrade only when it pays for itself.',
   },
 ];
 
 export const ScrollingTestimonials: React.FC = () => {
   // Duplicate for seamless infinite loop
-  const duplicatedList = [...TESTIMONIALS_LIST, ...TESTIMONIALS_LIST];
+  const duplicatedList = [...FEATURES_LIST, ...FEATURES_LIST];
 
   return (
     <div className="hidden lg:flex lg:w-1/2 bg-[#6701e6] p-8 xl:p-12 flex-col justify-center relative overflow-hidden text-white select-none">
@@ -90,36 +66,21 @@ export const ScrollingTestimonials: React.FC = () => {
       {/* Infinite Upward Scrolling Container */}
       <div className="relative z-10 max-w-lg mx-auto w-full h-[760px] overflow-hidden">
         <div className="animate-vertical-scroll space-y-5 hover:[animation-play-state:paused]">
-          {duplicatedList.map((t, idx) => (
+          {duplicatedList.map((f, idx) => (
             <div
-              key={`${t.name}-${idx}`}
+              key={`${f.title}-${idx}`}
               className="rounded-3xl bg-white/10 border border-white/15 p-6 backdrop-blur-md shadow-xl transition-transform hover:scale-[1.01]"
             >
               <div className="flex items-start gap-4">
-                <img
-                  src={t.avatar}
-                  alt={t.name}
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover ring-2 ring-white/20 shrink-0"
-                />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 flex items-center justify-center ring-2 ring-white/20 shrink-0">
+                  {f.icon}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex text-amber-400 text-sm mb-1.5">
-                    {'★'.repeat(t.stars)}
-                  </div>
                   <p className="text-base sm:text-lg font-bold leading-snug break-words">
-                    {t.highlight ? (
-                      <>
-                        {t.text.split(t.highlight)[0]}
-                        <span className="underline decoration-amber-300 decoration-2 underline-offset-2">
-                          {t.highlight}
-                        </span>
-                        {t.text.split(t.highlight)[1]}
-                      </>
-                    ) : (
-                      t.text
-                    )}
+                    {f.title}
                   </p>
-                  <p className="text-xs text-white/80 mt-2 font-medium">
-                    {t.name} <span className="text-emerald-400 font-semibold">/ {t.role}</span>
+                  <p className="text-xs sm:text-sm text-white/80 mt-2 font-medium leading-relaxed">
+                    {f.text}
                   </p>
                 </div>
               </div>
@@ -135,5 +96,5 @@ export const ScrollingTestimonials: React.FC = () => {
 
     </div>
   );
-};
+}
 export default ScrollingTestimonials;

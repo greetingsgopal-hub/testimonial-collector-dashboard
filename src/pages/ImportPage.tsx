@@ -27,24 +27,25 @@ interface PlatformInfo {
   description: string;
   color: string;
   available: boolean;
+  comingSoon?: boolean;
 }
 
 const PLATFORMS: PlatformInfo[] = [
   { id: 'csv', name: 'CSV / Excel', icon: <FileSpreadsheet size={20} className="text-emerald-600" />, description: 'Upload a CSV or Excel file', color: 'emerald', available: true },
   { id: 'google_reviews', name: 'Google Reviews', icon: <span className="text-lg">🔍</span>, description: 'Import from Google Business', color: 'blue', available: true },
-  { id: 'twitter', name: 'Twitter / X', icon: <span className="text-lg font-bold">𝕏</span>, description: 'Import tweets and threads', color: 'sky', available: true },
   { id: 'linkedin', name: 'LinkedIn', icon: <span className="text-lg font-bold text-blue-600">in</span>, description: 'Import recommendations', color: 'blue', available: true },
-  { id: 'g2', name: 'G2', icon: <span className="text-lg">🏆</span>, description: 'Import G2 reviews', color: 'orange', available: true },
-  { id: 'trustpilot', name: 'Trustpilot', icon: <Star size={20} className="text-emerald-600 fill-emerald-600" />, description: 'Import Trustpilot reviews', color: 'green', available: true },
-  { id: 'producthunt', name: 'Product Hunt', icon: <span className="text-lg">🚀</span>, description: 'Import Product Hunt reviews', color: 'orange', available: true },
-  { id: 'capterra', name: 'Capterra', icon: <span className="text-lg">📊</span>, description: 'Import Capterra reviews', color: 'blue', available: true },
-  { id: 'yelp', name: 'Yelp', icon: <span className="text-lg">🍽️</span>, description: 'Import Yelp reviews', color: 'red', available: true },
-  { id: 'shopify', name: 'Shopify', icon: <span className="text-lg">🛍️</span>, description: 'Import Shopify reviews', color: 'green', available: true },
-  { id: 'appstore', name: 'App Store', icon: <span className="text-lg">🍎</span>, description: 'Import iOS app reviews', color: 'blue', available: true },
-  { id: 'playstore', name: 'Google Play', icon: <span className="text-lg">▶️</span>, description: 'Import Android app reviews', color: 'green', available: true },
   { id: 'facebook', name: 'Facebook', icon: <span className="text-lg font-bold text-blue-700">f</span>, description: 'Import Facebook reviews', color: 'blue', available: true },
-  { id: 'reddit', name: 'Reddit', icon: <span className="text-lg">🤖</span>, description: 'Import Reddit mentions', color: 'orange', available: true },
   { id: 'manual', name: 'Manual Entry', icon: <span className="text-lg">✍️</span>, description: 'Add testimonials manually', color: 'violet', available: true },
+  { id: 'twitter', name: 'Twitter / X', icon: <span className="text-lg font-bold">𝕏</span>, description: 'Coming soon — URL import', color: 'sky', available: true, comingSoon: true },
+  { id: 'g2', name: 'G2', icon: <span className="text-lg">🏆</span>, description: 'Coming soon — URL import', color: 'orange', available: true, comingSoon: true },
+  { id: 'trustpilot', name: 'Trustpilot', icon: <Star size={20} className="text-emerald-600 fill-emerald-600" />, description: 'Coming soon — URL import', color: 'green', available: true, comingSoon: true },
+  { id: 'producthunt', name: 'Product Hunt', icon: <span className="text-lg">🚀</span>, description: 'Coming soon — URL import', color: 'orange', available: true, comingSoon: true },
+  { id: 'capterra', name: 'Capterra', icon: <span className="text-lg">📊</span>, description: 'Coming soon — URL import', color: 'blue', available: true, comingSoon: true },
+  { id: 'yelp', name: 'Yelp', icon: <span className="text-lg">🍽️</span>, description: 'Coming soon — URL import', color: 'red', available: true, comingSoon: true },
+  { id: 'shopify', name: 'Shopify', icon: <span className="text-lg">🛍️</span>, description: 'Coming soon — URL import', color: 'green', available: true, comingSoon: true },
+  { id: 'appstore', name: 'App Store', icon: <span className="text-lg">🍎</span>, description: 'Coming soon — URL import', color: 'blue', available: true, comingSoon: true },
+  { id: 'playstore', name: 'Google Play', icon: <span className="text-lg">▶️</span>, description: 'Coming soon — URL import', color: 'green', available: true, comingSoon: true },
+  { id: 'reddit', name: 'Reddit', icon: <span className="text-lg">🤖</span>, description: 'Coming soon — URL import', color: 'orange', available: true, comingSoon: true },
 ];
 
 const CSV_SAMPLE = `name,email,rating,content,company,role
@@ -54,7 +55,7 @@ const CSV_SAMPLE = `name,email,rating,content,company,role
 export const ImportPage: React.FC = () => {
   usePageSeo({
     title: 'Import Testimonials — Panda Praise',
-    description: 'Import testimonials from 30+ platforms or upload a CSV file.',
+  description: 'Import testimonials from a CSV file, or connect your review platforms.',
   });
 
   const { project } = useAuth();
@@ -238,16 +239,15 @@ export const ImportPage: React.FC = () => {
 
   const handleUrlImport = useCallback(async () => {
     if (!project || !importUrl.trim() || !selectedPlatform) return;
-    setIsImporting(true);
-
-    setTimeout(() => {
-      setImportResult({
-        success: true,
-        count: 0,
-        errors: ['URL-based import requires server-side processing. Configure your API endpoints in Settings > Integrations.'],
-      });
-      setIsImporting(false);
-    }, 1500);
+    // URL-based scraping imports are not implemented server-side yet.
+    // Report honestly instead of simulating success.
+    setImportResult({
+      success: false,
+      count: 0,
+      errors: [
+        'URL-based import is not available yet. To import reviews today: upload a CSV file, or connect Google, LinkedIn, Instagram or Facebook under Integrations.',
+      ],
+    });
   }, [project, importUrl, selectedPlatform]);
 
   const resetImport = () => {
@@ -324,9 +324,9 @@ export const ImportPage: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-bold text-gray-900 group-hover:text-[#6701e6] transition-colors">Auto-Import</h3>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-[#6701e6]">21 Platforms</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-[#6701e6]">4 Available</span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">Connect to 21 platforms and Panda Praise will automatically import your new proof.</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Connect Google, LinkedIn, Instagram or Facebook and Panda Praise will automatically import your new proof.</p>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#6701e6] transition-colors" />
@@ -343,7 +343,7 @@ export const ImportPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-gray-900 group-hover:text-[#6701e6] transition-colors">Import from web</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Paste a URL and Panda Praise will import your proof.</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Paste a review URL to import proof (coming soon — CSV and connected platforms work today).</p>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#6701e6] transition-colors" />
@@ -394,7 +394,7 @@ export const ImportPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-gray-900 group-hover:text-[#6701e6] transition-colors">Migrate</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Paste your Testimonial.to Wall of Love URL and Panda Praise will import your proof.</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Migrating from another tool? Export your testimonials to CSV and upload them here.</p>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#6701e6] transition-colors" />
@@ -453,7 +453,12 @@ export const ImportPage: React.FC = () => {
                   {platform.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900">{platform.name}</p>
+                  <p className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                    {platform.name}
+                    {platform.comingSoon && (
+                      <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wide">Soon</span>
+                    )}
+                  </p>
                   <p className="text-xs text-gray-500 truncate">{platform.description}</p>
                 </div>
                 <ChevronRight size={16} className="text-gray-400 group-hover:text-[#6701e6] flex-shrink-0 transition-colors" />
@@ -743,8 +748,8 @@ export const ImportPage: React.FC = () => {
               <p className="text-xs text-amber-800 flex items-start gap-2">
                 <AlertCircle size={14} className="flex-shrink-0 mt-0.5 text-amber-600" />
                 <span>
-                  URL-based imports are processed server-side. The import may take a few minutes
-                  depending on the number of reviews. You'll be notified when it's complete.
+                  URL-based import is coming soon. Today you can import via CSV upload, or connect
+                  Google, LinkedIn, Instagram or Facebook under Integrations to pull reviews in.
                 </span>
               </p>
             </div>

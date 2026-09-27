@@ -44,21 +44,20 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Can I import my existing reviews from other platforms?',
-    a: 'Yes! You can import existing reviews from Google, Trustpilot, Twitter/X, LinkedIn, G2, Capterra, Product Hunt, or upload via CSV in one click.',
+    a: 'Yes! Upload a CSV of your existing reviews, or connect Google, LinkedIn, Instagram or Facebook to pull reviews in.',
   },
 ];
 
-const CLIENT_LOGOS = [
-  { name: 'Acme Corp', node: <span className="text-base font-bold text-gray-700 flex items-center gap-2"><span className="w-5 h-5 rounded-md bg-slate-900 text-white flex items-center justify-center text-[10px] font-black" aria-hidden="true">A</span> Acme Corp</span> },
-  { name: 'SaaSify', node: <span className="text-base font-bold text-gray-700 flex items-center gap-2"><span className="w-3.5 h-3.5 rounded-full bg-brand-600 inline-block" aria-hidden="true" /> SaaSify</span> },
-  { name: 'GlobalTech', node: <span className="text-base font-semibold tracking-wide text-gray-700 flex items-center gap-1.5 font-mono"><span className="text-brand-600 font-bold" aria-hidden="true">///</span> GlobalTech</span> },
-  { name: 'Venture Labs', node: <span className="text-base font-bold text-gray-700 flex items-center gap-2"><span className="w-5 h-5 rounded-md bg-brand-100 text-brand-700 flex items-center justify-center text-[10px] font-extrabold" aria-hidden="true">VL</span> Venture Labs</span> },
-  { name: 'Apex Digital', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span className="text-amber-500 text-xs" aria-hidden="true">▲</span> Apex Digital</span> },
-  { name: 'CloudScale', node: <span className="text-base font-semibold text-gray-700 flex items-center gap-2"><span className="w-4 h-4 rounded-md bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold" aria-hidden="true">◆</span> CloudScale</span> },
-  { name: 'Novastream', node: <span className="text-base font-bold text-gray-700 flex items-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-brand-600 inline-block" aria-hidden="true" /> Novastream</span> },
-  { name: 'SyncPulse', node: <span className="text-base font-bold text-gray-700 flex items-center gap-1.5"><span className="text-brand-600 font-bold text-sm" aria-hidden="true">⚡</span> SyncPulse</span> },
-  { name: 'HyperGrowth', node: <span className="text-base font-extrabold tracking-tight text-gray-700 font-display">HyperGrowth</span> },
-  { name: 'OmniFlow', node: <span className="text-base font-semibold text-gray-700 flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-slate-200 text-slate-800 flex items-center justify-center text-[10px] font-bold" aria-hidden="true">◎</span> OmniFlow</span> },
+// Feature marquee replaces the fabricated client-logo strip. When real
+// customer logos exist, they can be swapped in here without further changes.
+const MARQUEE_ITEMS = [
+  'Collect via public link, QR & widgets',
+  'Moderate before publishing',
+  'Import from Google & CSV',
+  'Embed Walls of Love',
+  'Publish to LinkedIn, Instagram & Facebook',
+  'Rich snippet SEO export',
+  'Free forever plan',
 ];
 
 export const LandingPage: React.FC = () => {
@@ -69,7 +68,7 @@ export const LandingPage: React.FC = () => {
   });
 
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, enableDemoMode } = useAuth();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [activeShareTab, setActiveShareTab] = useState<'widgets' | 'videos' | 'walls' | 'popups' | 'images' | 'hosting'>('widgets');
   const [selectedWidgetTag, setSelectedWidgetTag] = useState('Testimonial Image Gallery');
@@ -90,13 +89,16 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   const handleLaunchDemo = () => {
-    analytics.ctaClicked('demo_mode', user ? '/dashboard' : '/signup');
+    analytics.ctaClicked('demo_mode', user ? '/dashboard' : '/dashboard');
     if (user) {
       navigate('/dashboard');
     } else {
-      navigate('/signup');
+      // Launch the real sample-data demo instead of routing to signup —
+      // the button says "Try Interactive Demo" and must deliver one.
+      enableDemoMode();
+      navigate('/dashboard');
     }
-  };
+ };
 
   const toggleFaq = (idx: number) => {
     setOpenFaqIndex(openFaqIndex === idx ? null : idx);
@@ -264,7 +266,7 @@ export const LandingPage: React.FC = () => {
         {/* Top Eyebrow Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50/80 border border-purple-200/60 mb-5 shadow-xs">
           <span className="flex h-2 w-2 rounded-full bg-[#6701e6] animate-pulse" />
-          <span className="text-xs font-semibold text-[#6701e6]">The #1 Social Proof Platform for Growing Businesses</span>
+          <span className="text-xs font-semibold text-[#6701e6]">Collect. Moderate. Publish. — Social Proof for Growing Businesses</span>
         </div>
 
         {/* Primary H1: Exactly two centered lines with highlighted treatment */}
@@ -288,7 +290,7 @@ export const LandingPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-1.5">
             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Import from 30+ platforms in 1 click</span>
+            <span>Import existing reviews from CSV</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -327,33 +329,16 @@ export const LandingPage: React.FC = () => {
           Free forever • No credit card required • 2-minute setup
         </p>
 
-        {/* Avatar Stack + "loved by 20,000+ customers" */}
+        {/* Free-plan reassurance (replaces fabricated customer-count proof) */}
         <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2.5">
-          <div className="flex items-center -space-x-2">
-            {[
-              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
-              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80',
-              'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80',
-              'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80',
-              'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&auto=format&fit=crop&q=80',
-            ].map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                alt="Happy customer"
-                className="w-7 h-7 rounded-full object-cover ring-2 ring-white"
-              />
-            ))}
-          </div>
-          <div className="flex items-center gap-1.5 text-xs">
-            <span role="img" aria-label="5 stars" className="text-amber-500 font-bold tracking-tight">
-              <span aria-hidden="true">★★★★★</span>
-            </span>
-            <span className="font-semibold text-gray-700">loved by 20,000+ customers</span>
+          <div className="flex items-center gap-3 text-xs font-semibold text-gray-700">
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600" /> Free forever plan</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600" /> No credit card required</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600" /> Cancel anytime</span>
           </div>
         </div>
 
-        {/* Compact Featured Customer Proof Strip */}
+        {/* Compact Founder Quote (the one real, attributable quote) */}
         <div className="mt-7 max-w-lg mx-auto py-3.5 px-5 sm:py-4 sm:px-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-purple-100/80 shadow-xs flex flex-col items-center text-center">
           <div role="img" aria-label="Rated 5 out of 5 stars" className="flex items-center justify-center gap-1 text-amber-500 mb-1.5">
             {[1, 2, 3, 4, 5].map((s) => (
@@ -375,25 +360,27 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 4. Client Logo Moving Marquee (Senja Exact Parity) ── */}
+      {/* ── 4. Feature Marquee (replaces fabricated client logos; real customer
+             logos can be added here once genuine customers exist) ── */}
       <section className="relative w-full overflow-hidden py-8 border-y border-gray-200/70 bg-white/60">
         <div className="marquee-track flex items-center gap-12 sm:gap-16">
-          {CLIENT_LOGOS.map((logo, idx) => (
+          {MARQUEE_ITEMS.map((item, idx) => (
             <div
-              key={`logo-a-${idx}`}
-              className="shrink-0 flex items-center justify-center text-gray-700 hover:text-gray-950 transition-colors select-none cursor-default"
+              key={`marquee-a-${idx}`}
+              className="shrink-0 flex items-center justify-center gap-2 text-gray-600 hover:text-gray-950 transition-colors select-none cursor-default"
             >
-              {logo.node}
+              <span className="w-1.5 h-1.5 rounded-full bg-[#6701e6] opacity-60" aria-hidden="true" />
+              <span className="text-sm font-semibold tracking-wide">{item}</span>
             </div>
           ))}
-          {/* Duplicate loop for seamless infinite rotation */}
-          {CLIENT_LOGOS.map((logo, idx) => (
+          {MARQUEE_ITEMS.map((item, idx) => (
             <div
-              key={`logo-b-${idx}`}
+              key={`marquee-b-${idx}`}
               aria-hidden="true"
-              className="shrink-0 flex items-center justify-center text-gray-700 hover:text-gray-950 transition-colors select-none cursor-default"
+              className="shrink-0 flex items-center justify-center gap-2 text-gray-600 hover:text-gray-950 transition-colors select-none cursor-default"
             >
-              {logo.node}
+              <span className="w-1.5 h-1.5 rounded-full bg-[#6701e6] opacity-60" aria-hidden="true" />
+              <span className="text-sm font-semibold tracking-wide">{item}</span>
             </div>
           ))}
         </div>
@@ -552,11 +539,11 @@ export const LandingPage: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Import from 30+ platforms including Google, Trustpilot & CSV</span>
+                  <span>Import existing reviews from CSV, or connect Google, LinkedIn, Instagram & Facebook</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Automate triggers with Zapier, webhooks & collection APIs</span>
+                  <span>Automate with API access & webhooks (Starter plan)</span>
                 </li>
               </ul>
 
@@ -578,24 +565,23 @@ export const LandingPage: React.FC = () => {
                 </Link>
               </div>
 
-              {/* In-Section Testimonial Quote */}
+              {/* In-Section Quote — real, attributable founder quote */}
               <figure className="relative border-l-2 border-brand-600 py-2 pl-4 text-left mt-8 max-w-lg">
                 <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                   <p>
-                    Panda Praise made it so easy and quick to collect testimonials.{' '}
                     <mark className="senja-yellow-mark">
-                      Took me less than 5 minutes to start collecting
-                    </mark>
-                    , and adding them to my website was even quicker!
+                      I've seen a tangible impact on revenue and conversion
+                    </mark>{' '}
+                    by sharing customer proof.
                   </p>
                 </blockquote>
                 <figcaption className="mt-2.5 flex items-center gap-2.5">
                   <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-400 text-white font-bold text-xs flex items-center justify-center border border-indigo-100 shadow-xs select-none">
-                    AM
+                    GT
                   </div>
                   <div>
-                    <p className="font-bold text-gray-900 text-xs">Alex M.</p>
-                    <p className="text-[11px] text-gray-600">SaaS Founder</p>
+                    <p className="font-bold text-gray-900 text-xs">Gopal Thakur</p>
+                    <p className="text-[11px] text-gray-600">Founder, Papasystem</p>
                   </div>
                 </figcaption>
               </figure>
@@ -608,7 +594,7 @@ export const LandingPage: React.FC = () => {
                   <div className="flex items-center gap-3 mb-4">
                     <img
                       src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                      alt="Creator"
+                      alt="Sample collector form preview"
                       loading="lazy"
                       width="44"
                       height="44"
@@ -809,25 +795,19 @@ export const LandingPage: React.FC = () => {
                 </li>
               </ul>
 
-              {/* In-Section Testimonial Quote */}
+              {/* In-Section Quote — product truth, no fabricated attribution */}
               <figure className="relative border-l-2 border-black py-2 pl-4 text-left mt-8 max-w-lg">
                 <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                   <p>
-                    Within ten minutes of signing up,{' '}
+                    Every testimonial you collect flows through moderation —{' '}
                     <mark className="senja-yellow-mark">
-                      I had already upgraded twice
+                      nothing goes live until you approve it
                     </mark>{' '}
-                    because I immediately wanted all our client stories organized in Panda Praise.
+                    , and one click publishes it to your Wall of Love, website, or socials.
                   </p>
                 </blockquote>
-                <figcaption className="mt-2.5 flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-400 text-white font-bold text-xs flex items-center justify-center border border-indigo-100 shadow-xs select-none">
-                    MK
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900 text-xs">Melissa K.</p>
-                    <p className="text-[11px] text-gray-500">Tech Founder</p>
-                  </div>
+                <figcaption className="mt-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+                  Built into every plan
                 </figcaption>
               </figure>
             </div>
@@ -953,7 +933,7 @@ export const LandingPage: React.FC = () => {
                     })}
                   </div>
 
-                  {/* Live Widget Cards Preview */}
+                  {/* Live Widget Cards Preview (sample data) */}
                   <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left max-w-4xl mx-auto">
                     {INITIAL_REVIEWS.slice(0, 3).map((r, i) => (
                       <div key={i} className="p-4 rounded-xl border border-gray-200 bg-white shadow-xs hover:border-indigo-200 transition-colors">
@@ -969,6 +949,7 @@ export const LandingPage: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                  <p className="mt-3 text-[11px] text-gray-400">Sample preview — your own approved testimonials appear here.</p>
                 </div>
               )}
 
@@ -1038,7 +1019,7 @@ export const LandingPage: React.FC = () => {
                   <div className="mt-6 max-w-md mx-auto p-4 rounded-2xl bg-white border border-gray-200 shadow-lg text-left flex items-start gap-3">
                     <img
                       src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80"
-                      alt="Reviewer"
+                      alt="Sample popup preview"
                       loading="lazy"
                       width="40"
                       height="40"
@@ -1046,8 +1027,8 @@ export const LandingPage: React.FC = () => {
                     />
                     <div>
                       <div role="img" aria-label="5 out of 5 stars" className="flex text-amber-500 text-xs mb-1"><span aria-hidden="true">★★★★★</span></div>
-                      <p className="text-xs text-gray-800">"Panda Praise made our checkout conversion jump 28% in 2 weeks."</p>
-                      <p className="text-[11px] text-gray-600 mt-1 font-semibold">David K. · Just now</p>
+                      <p className="text-xs text-gray-800">"This is how a testimonial popup appears to your website visitors."</p>
+                      <p className="text-[11px] text-gray-600 mt-1 font-semibold">Sample preview · Just now</p>
                     </div>
                   </div>
                 </div>
@@ -1064,12 +1045,8 @@ export const LandingPage: React.FC = () => {
                   <div className="mt-6 max-w-md mx-auto p-6 rounded-2xl bg-gradient-to-r from-[#6701e6] to-indigo-600 text-white shadow-xl text-left">
                     <div role="img" aria-label="5 out of 5 stars" className="flex text-amber-300 text-xs mb-2"><span aria-hidden="true">★★★★★</span></div>
                     <p className="text-sm font-semibold mb-3">"Panda Praise is the single most valuable growth tool we adopted this year."</p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-white text-[#6701e6] font-bold text-xs flex items-center justify-center">E</div>
-                      <div className="text-xs">
-                        <span className="font-bold block">Elena Rostova</span>
-                        <span className="text-purple-200 text-[11px]">VP Growth @ SaaSify</span>
-                      </div>
+                    <div className="text-xs text-purple-100">
+                      Your customer's photo, name, company & role — on a branded image ready to share.
                     </div>
                   </div>
                 </div>
@@ -1323,7 +1300,7 @@ export const LandingPage: React.FC = () => {
           <path d="M60 34 C60 20 48 10 34 10 C16 10 6 24 6 38 C6 66 36 84 60 102 C84 84 114 66 114 38 C114 24 104 10 86 10 C72 10 60 20 60 34 Z" />
         </svg>
 
-        {/* Rotating Circular Stamp */}
+        {/* Rotating Circular Stamp (decorative — no fabricated counts) */}
         <div className="pointer-events-none absolute right-10 top-1/2 hidden -translate-y-1/2 text-white/80 lg:block" aria-hidden="true">
           <svg className="stamp-spin" width="140" height="140" viewBox="0 0 170 170" fill="none">
             <defs>
@@ -1332,7 +1309,7 @@ export const LandingPage: React.FC = () => {
             <circle cx="85" cy="85" r="80" stroke="currentColor" strokeWidth="2" />
             <circle cx="85" cy="85" r="44" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 6" />
             <text fontSize="12" fontWeight="600" letterSpacing="3" fill="currentColor">
-              <textPath href="#stamp-circle-closing">✦ LOVED BY 20,000+ CUSTOMERS </textPath>
+              <textPath href="#stamp-circle-closing">✦ COLLECT • MODERATE • PUBLISH • </textPath>
             </text>
           </svg>
         </div>
@@ -1353,7 +1330,7 @@ export const LandingPage: React.FC = () => {
             </li>
             <li className="flex items-center gap-2">
               <Check className="w-4 h-4 text-emerald-300" />
-              <span>Import testimonials from over 30 platforms</span>
+              <span>Import existing reviews from CSV or connected platforms</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="w-4 h-4 text-emerald-300" />

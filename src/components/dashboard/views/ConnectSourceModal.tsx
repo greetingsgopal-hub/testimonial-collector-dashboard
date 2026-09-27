@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { 
   X, 
   Check, 
+  AlertCircle,
   ExternalLink, 
   Sparkles, 
   ArrowLeft, 
@@ -44,27 +45,27 @@ interface PlatformItem {
 }
 
 const PLATFORMS: PlatformItem[] = [
-  { id: 'google', name: 'Google', category: 'Reviews', type: 'api', icon: 'https://www.google.com/favicon.ico', color: '#4285F4', inputLabel: 'Google Business Place ID / Profile URL', placeholder: 'e.g. ChIJN1t_tDeuEmsRUsoyG83frY4 or https://maps.google.com/...' },
-  { id: 'facebook', name: 'Facebook Page', category: 'Social & Reviews', type: 'api', icon: 'https://facebook.com/favicon.ico', color: '#1877F2', inputLabel: 'Facebook Page URL or Recommendation Link', placeholder: 'https://facebook.com/yourpage or https://facebook.com/yourpage/reviews' },
-  { id: 'instagram', name: 'Instagram', category: 'Social & Comments', type: 'api', icon: 'https://instagram.com/favicon.ico', color: '#E4405F', inputLabel: 'Instagram Post or Reel URL', placeholder: 'https://www.instagram.com/p/... or https://www.instagram.com/reel/...' },
-  { id: 'twitter', name: 'Twitter / X', category: 'Social', type: 'url', icon: 'https://twitter.com/favicon.ico', color: '#000000', inputLabel: 'Tweet / Post URL', placeholder: 'https://x.com/username/status/1234567890' },
-  { id: 'linkedin', name: 'LinkedIn', category: 'Social', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
-  { id: 'g2', name: 'G2', category: 'B2B Software', type: 'api', icon: 'https://www.g2.com/favicon.ico', color: '#FF492C', inputLabel: 'G2 Product URL or API Token', placeholder: 'https://www.g2.com/products/your-product/reviews' },
-  { id: 'trustpilot', name: 'Trustpilot', category: 'Reviews', type: 'api', icon: 'https://www.trustpilot.com/favicon.ico', color: '#00B67A', inputLabel: 'Trustpilot Business Domain / API Key', placeholder: 'e.g. yourcompany.com or API Token' },
-  { id: 'producthunt', name: 'Product Hunt', category: 'Launches', type: 'url', icon: 'https://www.producthunt.com/favicon.ico', color: '#DA552F', inputLabel: 'Product Hunt Review / Comment URL', placeholder: 'https://www.producthunt.com/posts/your-product#reviews' },
-  { id: 'shopify', name: 'Shopify', category: 'Ecommerce', type: 'api', icon: 'https://www.shopify.com/favicon.ico', color: '#96bf48', inputLabel: 'Shopify Store URL & App API Key', placeholder: 'your-store.myshopify.com' },
-  { id: 'capterra', name: 'Capterra', category: 'B2B Software', type: 'api', icon: 'https://www.capterra.com/favicon.ico', color: '#00587C', inputLabel: 'Capterra Vendor Profile URL', placeholder: 'https://www.capterra.com/p/123456/Your-Product/' },
-  { id: 'yelp', name: 'Yelp', category: 'Local', type: 'api', icon: 'https://www.yelp.com/favicon.ico', color: '#D32323', inputLabel: 'Yelp Business URL', placeholder: 'https://www.yelp.com/biz/your-business-name' },
-  { id: 'udemy', name: 'Udemy', category: 'Courses', type: 'api', icon: 'https://www.udemy.com/favicon.ico', color: '#A435F0', inputLabel: 'Udemy Course URL', placeholder: 'https://www.udemy.com/course/your-course-name/' },
-  { id: 'amazon', name: 'Amazon', category: 'Ecommerce', type: 'api', icon: 'https://www.amazon.com/favicon.ico', color: '#FF9900', inputLabel: 'Amazon ASIN / Product Review URL', placeholder: 'https://www.amazon.com/dp/B000XXXXXX' },
-  { id: 'airbnb', name: 'Airbnb', category: 'Hospitality', type: 'api', icon: 'https://www.airbnb.com/favicon.ico', color: '#FF5A5F', inputLabel: 'Airbnb Listing URL', placeholder: 'https://www.airbnb.com/rooms/12345678' },
-  { id: 'appstore', name: 'App Store', category: 'Mobile Apps', type: 'api', icon: 'https://www.apple.com/favicon.ico', color: '#0070c9', inputLabel: 'App Store App ID / URL', placeholder: 'https://apps.apple.com/app/id123456789' },
-  { id: 'playstore', name: 'Google Play', category: 'Mobile Apps', type: 'api', icon: 'https://play.google.com/favicon.ico', color: '#01875f', inputLabel: 'Google Play Package Name / URL', placeholder: 'com.yourcompany.app' },
-  { id: 'whop', name: 'Whop', category: 'Communities', type: 'api', icon: 'https://whop.com/favicon.ico', color: '#FF5C00', inputLabel: 'Whop Experience / Store URL', placeholder: 'https://whop.com/your-store' },
-  { id: 'wordpress', name: 'WordPress', category: 'CMS', type: 'api', icon: 'https://wordpress.org/favicon.ico', color: '#21759B', inputLabel: 'WordPress Plugin / Theme Slug', placeholder: 'https://wordpress.org/plugins/your-plugin/' },
-  { id: 'discourse', name: 'Discourse', category: 'Forums', type: 'url', icon: 'https://www.discourse.org/favicon.ico', color: '#2B3B48', inputLabel: 'Discourse Topic / Post URL', placeholder: 'https://community.yourcompany.com/t/topic/1234' },
-  { id: 'reddit', name: 'Reddit', category: 'Social', type: 'url', icon: 'https://www.reddit.com/favicon.ico', color: '#FF4500', inputLabel: 'Reddit Post or Comment URL', placeholder: 'https://www.reddit.com/r/saas/comments/...' },
-  { id: 'tiktok', name: 'TikTok', category: 'Video', type: 'url', icon: 'https://www.tiktok.com/favicon.ico', color: '#000000', inputLabel: 'TikTok Video URL', placeholder: 'https://www.tiktok.com/@username/video/123456789' },
+  { id: 'google', name: 'Google', category: 'Available now', type: 'api', icon: 'https://www.google.com/favicon.ico', color: '#4285F4', inputLabel: 'Google Business Place ID / Profile URL', placeholder: 'e.g. ChIJN1t_tDeuEmsRUsoyG83frY4 or https://maps.google.com/...' },
+  { id: 'facebook', name: 'Facebook Page', category: 'Available now', type: 'api', icon: 'https://facebook.com/favicon.ico', color: '#1877F2', inputLabel: 'Facebook Page URL or Recommendation Link', placeholder: 'https://facebook.com/yourpage or https://facebook.com/yourpage/reviews' },
+  { id: 'instagram', name: 'Instagram', category: 'Available now', type: 'api', icon: 'https://instagram.com/favicon.ico', color: '#E4405F', inputLabel: 'Instagram Post or Reel URL', placeholder: 'https://www.instagram.com/p/... or https://www.instagram.com/reel/...' },
+  { id: 'linkedin', name: 'LinkedIn', category: 'Available now', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
+  { id: 'twitter', name: 'Twitter / X', category: 'Coming soon', type: 'url', icon: 'https://twitter.com/favicon.ico', color: '#000000', inputLabel: 'Tweet / Post URL', placeholder: 'https://x.com/username/status/1234567890' },
+  { id: 'g2', name: 'G2', category: 'Coming soon', type: 'api', icon: 'https://www.g2.com/favicon.ico', color: '#FF492C', inputLabel: 'G2 Product URL or API Token', placeholder: 'https://www.g2.com/products/your-product/reviews' },
+  { id: 'trustpilot', name: 'Trustpilot', category: 'Coming soon', type: 'api', icon: 'https://www.trustpilot.com/favicon.ico', color: '#00B67A', inputLabel: 'Trustpilot Business Domain / API Key', placeholder: 'e.g. yourcompany.com or API Token' },
+  { id: 'producthunt', name: 'Product Hunt', category: 'Coming soon', type: 'url', icon: 'https://www.producthunt.com/favicon.ico', color: '#DA552F', inputLabel: 'Product Hunt Review / Comment URL', placeholder: 'https://www.producthunt.com/posts/your-product#reviews' },
+  { id: 'shopify', name: 'Shopify', category: 'Coming soon', type: 'api', icon: 'https://www.shopify.com/favicon.ico', color: '#96bf48', inputLabel: 'Shopify Store URL & App API Key', placeholder: 'your-store.myshopify.com' },
+  { id: 'capterra', name: 'Capterra', category: 'Coming soon', type: 'api', icon: 'https://www.capterra.com/favicon.ico', color: '#00587C', inputLabel: 'Capterra Vendor Profile URL', placeholder: 'https://www.capterra.com/p/123456/Your-Product/' },
+  { id: 'yelp', name: 'Yelp', category: 'Coming soon', type: 'api', icon: 'https://www.yelp.com/favicon.ico', color: '#D32323', inputLabel: 'Yelp Business URL', placeholder: 'https://www.yelp.com/biz/your-business-name' },
+  { id: 'udemy', name: 'Udemy', category: 'Coming soon', type: 'api', icon: 'https://www.udemy.com/favicon.ico', color: '#A435F0', inputLabel: 'Udemy Course URL', placeholder: 'https://www.udemy.com/course/your-course-name/' },
+  { id: 'amazon', name: 'Amazon', category: 'Coming soon', type: 'api', icon: 'https://www.amazon.com/favicon.ico', color: '#FF9900', inputLabel: 'Amazon ASIN / Product Review URL', placeholder: 'https://www.amazon.com/dp/B000XXXXXX' },
+  { id: 'airbnb', name: 'Airbnb', category: 'Coming soon', type: 'api', icon: 'https://www.airbnb.com/favicon.ico', color: '#FF5A5F', inputLabel: 'Airbnb Listing URL', placeholder: 'https://www.airbnb.com/rooms/12345678' },
+  { id: 'appstore', name: 'App Store', category: 'Coming soon', type: 'api', icon: 'https://www.apple.com/favicon.ico', color: '#0070c9', inputLabel: 'App Store App ID / URL', placeholder: 'https://apps.apple.com/app/id123456789' },
+  { id: 'playstore', name: 'Google Play', category: 'Coming soon', type: 'api', icon: 'https://play.google.com/favicon.ico', color: '#01875f', inputLabel: 'Google Play Package Name / URL', placeholder: 'com.yourcompany.app' },
+  { id: 'whop', name: 'Whop', category: 'Coming soon', type: 'api', icon: 'https://whop.com/favicon.ico', color: '#FF5C00', inputLabel: 'Whop Experience / Store URL', placeholder: 'https://whop.com/your-store' },
+  { id: 'wordpress', name: 'WordPress', category: 'Coming soon', type: 'api', icon: 'https://wordpress.org/favicon.ico', color: '#21759B', inputLabel: 'WordPress Plugin / Theme Slug', placeholder: 'https://wordpress.org/plugins/your-plugin/' },
+  { id: 'discourse', name: 'Discourse', category: 'Coming soon', type: 'url', icon: 'https://www.discourse.org/favicon.ico', color: '#2B3B48', inputLabel: 'Discourse Topic / Post URL', placeholder: 'https://community.yourcompany.com/t/topic/1234' },
+  { id: 'reddit', name: 'Reddit', category: 'Coming soon', type: 'url', icon: 'https://www.reddit.com/favicon.ico', color: '#FF4500', inputLabel: 'Reddit Post or Comment URL', placeholder: 'https://www.reddit.com/r/saas/comments/...' },
+  { id: 'tiktok', name: 'TikTok', category: 'Coming soon', type: 'url', icon: 'https://www.tiktok.com/favicon.ico', color: '#000000', inputLabel: 'TikTok Video URL', placeholder: 'https://www.tiktok.com/@username/video/123456789' },
 ];
 
 interface ConnectSourceModalProps {
@@ -87,6 +88,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   const [apiKey, setApiKey] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
+  const [importError, setImportError] = useState<string>('');
   const [foundCount, setFoundCount] = useState<number>(0);
   const [detectedLocationName, setDetectedLocationName] = useState<string>('');
   const [autoBackgroundSync, setAutoBackgroundSync] = useState<boolean>(() => {
@@ -100,6 +102,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   const handleSelectPlatform = (id: string) => {
     setSelectedId(id);
     setSyncSuccess(false);
+    setImportError('');
     setInputUrl('');
     setApiKey('');
     setDetectedLocationName('');
@@ -108,18 +111,21 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   const handleContinue = () => {
     setStep('configure');
     setSyncSuccess(false);
+    setImportError('');
     setIsProcessing(false);
   };
 
   const handleBackToSelect = () => {
     setStep('select');
     setSyncSuccess(false);
+    setImportError('');
     setIsProcessing(false);
   };
 
   const handleClose = () => {
     setStep('select');
     setSyncSuccess(false);
+    setImportError('');
     setIsProcessing(false);
     setInputUrl('');
     setApiKey('');
@@ -158,6 +164,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   const handleExecuteImport = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
+    setImportError('');
 
     if (selectedId === 'google') {
       try {
@@ -199,19 +206,12 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
       }
     }
 
-    // Default simulation fallback for other platforms / offline demo
-    setTimeout(() => {
-      setIsProcessing(false);
-      setSyncSuccess(true);
-      setFoundCount(currentPlatform.type === 'url' ? 1 : Math.floor(Math.random() * 12) + 6);
-      if (selectedId === 'google') {
-        setDetectedLocationName(inputUrl.trim() ? 'Google Business Location' : 'Google Maps Reviews');
-      } else if (selectedId === 'facebook') {
-        setDetectedLocationName(inputUrl.trim() ? 'Facebook Page Reviews' : 'Facebook Page Praise');
-      } else if (selectedId === 'instagram') {
-        setDetectedLocationName('Instagram Post Comments');
-      }
-    }, 900);
+    // No server-side import endpoint exists for this platform yet.
+    // Report honestly instead of simulating a successful sync.
+    setIsProcessing(false);
+    setImportError(
+      `${currentPlatform.name} imports are coming soon. Today you can import via CSV upload, or connect Google, LinkedIn, Instagram or Facebook.`
+    );
   };
 
   const handleCompleteFlow = () => {
@@ -308,7 +308,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
             <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => alert('Platform source sync imports reviews via public links, direct Meta/Google OAuth 2.0, or Places APIs. All testimonials are synced directly into your inbox.')}
+                onClick={() => alert('Available today: Google Business (Places API), Facebook Page (Meta OAuth), Instagram Business (Meta OAuth), LinkedIn (OAuth), plus CSV upload and manual entry. Other platforms are coming soon.')}
                 className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <span>Need help? Source guide</span>
@@ -390,6 +390,12 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
             {/* Form Content */}
             {!syncSuccess ? (
               <div className="space-y-4">
+                {importError && (
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800 leading-relaxed flex items-start gap-2">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600" />
+                    <span>{importError}</span>
+                  </div>
+                )}
                 {/* ── SPECIALIZED FACEBOOK PAGE VIEW ── */}
                 {selectedId === 'facebook' ? (
                   <div className="space-y-4">

@@ -691,7 +691,7 @@ export const DashboardPage = () => {
                   </div>
                   <h3 className="text-lg font-bold font-display text-gray-900">No Testimonials Yet</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    Testimonials you collect will show up here. Already got testimonials? Import them from 30+ sources.
+                    Testimonials you collect will show up here. Already got testimonials? Import them from a CSV file or a connected platform.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                     <button

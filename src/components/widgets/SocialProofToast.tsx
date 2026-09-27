@@ -20,53 +20,8 @@ interface CuratedToast {
   platformIcon?: 'x' | 'facebook' | 'producthunt' | 'google';
 }
 
-const CURATED_TOASTS: CuratedToast[] = [
-  {
-    name: 'David S.',
-    role: 'Product Lead',
-    avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=160&auto=format&fit=crop&q=80',
-    fullTextBefore: 'We have been using Panda Praise for over a year and ',
-    highlightText: "it completely streamlined how we collect and publish testimonials",
-    fullTextAfter: ' across our entire site.',
-    platformIcon: 'google',
-  },
-  {
-    name: 'Felix B.',
-    role: 'SaaS Founder',
-    avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=160&auto=format&fit=crop&q=80',
-    fullTextBefore: 'Just added the Panda Praise widgets to our landing page. ',
-    highlightText: 'It made an immediate positive impact on conversions',
-    fullTextAfter: ' for our software.',
-    platformIcon: 'x',
-  },
-  {
-    name: 'Marcus V.',
-    role: 'Growth Lead',
-    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=160&auto=format&fit=crop&q=80',
-    fullTextBefore: 'Panda Praise made collecting and showcasing social proof effortless. ',
-    highlightText: 'Our conversion rate jumped significantly in week one',
-    fullTextAfter: ', and our customers love the submission flow.',
-    platformIcon: 'google',
-  },
-  {
-    name: 'Elena K.',
-    role: 'Founder & CEO',
-    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80',
-    fullTextBefore: 'Within ten minutes of setting up Panda Praise, ',
-    highlightText: 'we collected our first 5 verified video reviews',
-    fullTextAfter: ' with zero friction.',
-    platformIcon: 'x',
-  },
-  {
-    name: 'Jason V.',
-    role: 'Marketing Director',
-    avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&auto=format&fit=crop&q=80',
-    fullTextBefore: 'Super simple onboarding, ',
-    highlightText: 'great UX and an absolute joy to use',
-    fullTextAfter: '. Hands down the best social proof platform.',
-    platformIcon: 'producthunt',
-  },
-];
+// Toasts now render the REAL reviews passed in via props — the previous
+// hardcoded fake-person toasts (attributed to invented customers) were removed.
 
 export const SocialProofToast: React.FC<SocialProofToastProps> = ({
   reviews: _reviews = [],
@@ -78,6 +33,19 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+
+  // Only real, approved reviews passed via props are shown. No fake fallbacks.
+  const toasts: CuratedToast[] = React.useMemo(() => {
+    const approved = _reviews.filter((r) => r.status === 'approved' && r.content?.trim());
+    return approved.map((r) => ({
+      name: r.name,
+      role: r.role || r.company || 'Customer',
+      avatarUrl: r.avatarUrl || '',
+      highlightText: r.title || '',
+      fullTextBefore: r.title ? '' : r.content.slice(0, 140),
+      fullTextAfter: r.title ? r.content.slice(0, 140) : '',
+    }));
+  }, [_reviews]);
 
   useEffect(() => {
     if (isDismissed) return;
@@ -96,20 +64,20 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
     const hideTimer = setTimeout(() => {
       setIsVisible(false);
 
-      setTimeout(() => {
-        if (!isDismissed) {
-          setCurrentIndex((prev) => (prev + 1) % CURATED_TOASTS.length);
-          setIsVisible(true);
-        }
-      }, interval);
+        setTimeout(() => {
+          if (!isDismissed && toasts.length > 0) {
+            setCurrentIndex((prev) => (prev + 1) % toasts.length);
+            setIsVisible(true);
+          }
+        }, interval);
     }, displayDuration);
 
     return () => clearTimeout(hideTimer);
   }, [isVisible, isDismissed, displayDuration, interval]);
 
-  if (isDismissed || !isVisible) return null;
+  if (isDismissed || !isVisible || toasts.length === 0) return null;
 
-  const current = CURATED_TOASTS[currentIndex];
+  const current = toasts[currentIndex % toasts.length];
   if (!current) return null;
 
   const positionClasses = {
@@ -142,12 +110,18 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
 
         {/* Reviewer Photo with rounded corners */}
         <div className="shrink-0">
-          <img
-            src={current.avatarUrl}
-            alt={current.name}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover ring-1 ring-gray-200 shadow-xs"
-            loading="lazy"
-          />
+          {current.avatarUrl ? (
+            <img
+              src={current.avatarUrl}
+              alt={current.name}
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover ring-1 ring-gray-200 shadow-xs"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gray-100 ring-1 ring-gray-200 shadow-xs flex items-center justify-center text-sm font-bold text-gray-500">
+              {current.name?.trim()?.[0]?.toUpperCase() || '?'}
+            </div>
+          )}
         </div>
 
         {/* Content */}

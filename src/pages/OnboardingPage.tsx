@@ -15,38 +15,24 @@ const SELLING_OPTIONS = [
   'Live events',
 ];
 
-const ONBOARDING_TESTIMONIALS = [
+// Honest "what happens next" cards replace fabricated customer testimonials.
+// When real testimonials exist, they can be swapped back in here.
+const ONBOARDING_NEXT_STEPS = [
   {
-    name: 'LaShonda Brown',
-    role: 'Tech Educator & YouTuber',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: 'Effective tech tools are great. Effective tools run by incredibly supportive humans, even better.',
-    badge: '𝕏',
+    title: 'Share your collection link',
+    text: 'Send your public testimonial link or QR code to customers. They can submit text or video in under a minute.',
   },
   {
-    name: 'femke',
-    role: '@femkesvs',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: "I switched to @PandaPraise to collect testimonials and it's my fav tool of the year! A+ all around from their design to their support, speed & innovation 🦄 🔥",
-    badge: '𝕏',
-    highlight: "it's my fav tool of the year",
+    title: 'Approve in your inbox',
+    text: 'Every submission lands in your moderation inbox first. Nothing goes live until you approve it.',
   },
   {
-    name: 'Devin Lee',
-    role: 'Systems Strategist',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: 'I thooouugghhtt I had a great system for collecting testimonials. It wasn’t until I started using Panda Praise that I realized how much better it could be!',
+    title: 'Publish anywhere',
+    text: 'Add approved testimonials to your website with embeddable Walls of Love, widgets, or shareable images.',
   },
   {
-    name: 'Anke V.',
-    role: 'Web Designer',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=160&auto=format&fit=crop&q=80',
-    stars: 5,
-    text: 'Super easy to set up and start collecting testimonials with video or text. I highly recommend it to all my clients.',
-    highlight: 'recommend it to all',
+    title: 'Import what you already have',
+    text: 'Upload a CSV of existing reviews, or connect Google, LinkedIn, Instagram or Facebook to pull them in.',
   },
 ];
 
@@ -502,51 +488,23 @@ export const OnboardingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Join 1000s of happy users Testimonial Carousel */}
+            {/* What happens next (honest onboarding education) */}
             <div className="mt-14 w-full">
               <h3 className="text-sm font-bold text-gray-900 mb-5">
-                Join 1000s of happy users
+                What happens next
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left max-w-5xl mx-auto px-2">
-                {ONBOARDING_TESTIMONIALS.map((t, idx) => (
+                {ONBOARDING_NEXT_STEPS.map((s, idx) => (
                   <div
                     key={idx}
                     className="p-4 rounded-2xl border border-gray-200 bg-white shadow-xs flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <img
-                            src={t.avatar}
-                            alt={t.name}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                          <div className="min-w-0">
-                            <p className="font-bold text-xs text-gray-900 truncate">{t.name}</p>
-                            <p className="text-[10px] text-gray-500 truncate">{t.role}</p>
-                          </div>
-                        </div>
-                        {t.badge && (
-                          <span className="text-[11px] font-mono text-gray-400 font-bold">{t.badge}</span>
-                        )}
-                      </div>
-
-                      <div className="flex text-amber-500 text-xs mb-2">★★★★★</div>
-
-                      <p className="text-xs text-gray-700 leading-relaxed">
-                        {t.highlight ? (
-                          <>
-                            {t.text.split(t.highlight)[0]}
-                            <mark className="bg-amber-100/90 text-gray-950 px-1 py-0.5 rounded font-medium">
-                              {t.highlight}
-                            </mark>
-                            {t.text.split(t.highlight)[1]}
-                          </>
-                        ) : (
-                          t.text
-                        )}
+                      <p className="font-bold text-xs text-gray-900 mb-1.5">
+                        <span className="text-[#6701e6] mr-1">{idx + 1}.</span>{s.title}
                       </p>
+                      <p className="text-xs text-gray-700 leading-relaxed">{s.text}</p>
                     </div>
                   </div>
                 ))}

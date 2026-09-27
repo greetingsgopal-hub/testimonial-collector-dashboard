@@ -75,8 +75,9 @@ export const OnboardingUpgradePage: React.FC = () => {
           <span className="block">With Panda Praise, share your testimonials</span>
           <span className="block">in more ways than anywhere else!</span>
         </h1>
-        <p className="text-sm sm:text-base text-gray-500 mt-3 max-w-3xl mx-auto leading-relaxed sm:whitespace-nowrap">
+        <p className="text-sm sm:text-base text-gray-500 mt-3 max-w-3xl mx-auto leading-relaxed">
           Here are just a few of the widgets, social images, and Walls of Love you can create.
+          <span className="block text-xs text-gray-400 mt-1">Sample previews — your own customers' testimonials appear in these formats.</span>
         </p>
 
         {/* View Switcher Pill (Showcase vs Commercial Plans) */}
@@ -111,10 +112,10 @@ export const OnboardingUpgradePage: React.FC = () => {
         <div className="mt-10 px-4 sm:px-6 max-w-6xl mx-auto w-full animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
             
-            {/* ── Column 1: Card 1 (Denis Kulikov) + Card 2 (Widget Snippets) ── */}
+            {/* ── Column 1: Card 1 (Dark Image Card) + Card 2 (Widget Snippets) ── */}
             <div className="space-y-4">
               
-              {/* Card 1: Denis Kulikov Dark Image Card */}
+              {/* Card 1: Dark Image Card */}
               <div className="rounded-2xl bg-[#1c1c1f] text-white p-5 border border-zinc-800 shadow-md relative overflow-hidden">
                 <div className="flex justify-end mb-3">
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/10 text-white/90 text-[11px] font-medium border border-white/15">
@@ -125,18 +126,18 @@ export const OnboardingUpgradePage: React.FC = () => {
                 <div className="flex gap-3.5 items-start">
                   <img
                     src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80"
-                    alt="Denis Kulikov"
+                    alt="Sample customer"
                     className="w-14 h-14 rounded-xl object-cover shrink-0 grayscale ring-1 ring-white/10"
                   />
                   <div>
                     <div className="flex text-amber-400 text-xs mb-1.5">★★★★★</div>
                     <p className="text-xs sm:text-[13px] leading-relaxed font-normal">
                       <mark className="bg-amber-300 text-zinc-950 px-1 py-0.5 rounded font-semibold">
-                        Hands down the best testimonial tool for SaaS.
+                        Your customer's testimonial,
                       </mark>{' '}
-                      We sell x2 more just because every landing page has a stunning wall of love.
+                      photo, name and company on a branded, shareable image card.
                     </p>
-                    <p className="text-[11px] text-zinc-400 mt-3 font-medium">Denis Kulikov</p>
+                    <p className="text-[11px] text-zinc-400 mt-3 font-medium">Your customer's name & photo</p>
                   </div>
                 </div>
 
@@ -149,7 +150,7 @@ export const OnboardingUpgradePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Card 2: Beatrice / Multi-Widget Card */}
+              {/* Card 2: Multi-Widget Card */}
               <div className="rounded-2xl bg-white p-4 border border-gray-200 shadow-xs relative">
                 <div className="flex justify-end mb-3">
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[11px] font-medium border border-gray-200">
@@ -162,13 +163,13 @@ export const OnboardingUpgradePage: React.FC = () => {
                     <div className="flex items-center gap-2 mb-1">
                       <div className="w-5 h-5 rounded-full bg-emerald-500 text-white text-[9px] font-bold flex items-center justify-center">B</div>
                       <div>
-                        <p className="text-[11px] font-bold text-gray-900 leading-none">Beatrice</p>
-                        <p className="text-[9px] text-gray-400 leading-none mt-0.5">French private tutor maths & physics</p>
+                        <p className="text-[11px] font-bold text-gray-900 leading-none">Sample widget preview</p>
+                        <p className="text-[9px] text-gray-400 leading-none mt-0.5">Your customer's testimonial here</p>
                       </div>
                     </div>
                     <div className="text-amber-400 text-[10px]">★★★★★</div>
                     <p className="text-[10px] text-gray-600 mt-1">
-                      Before Panda Praise, I tested many testimonial aggregators. They were expensive, lacked flexibility. Support was non-responsive.
+                      Sample testimonial — your customer's words, photo and rating appear here.
                     </p>
                   </div>
 
@@ -176,13 +177,13 @@ export const OnboardingUpgradePage: React.FC = () => {
                     <div className="flex items-center gap-2 mb-1">
                       <div className="w-5 h-5 rounded-full bg-purple-500 text-white text-[9px] font-bold flex items-center justify-center">A</div>
                       <div>
-                        <p className="text-[11px] font-bold text-gray-900 leading-none">Alastair Dodge</p>
-                        <p className="text-[9px] text-gray-400 leading-none mt-0.5">Founder of General English</p>
+                        <p className="text-[11px] font-bold text-gray-900 leading-none">Sample widget preview</p>
+                        <p className="text-[9px] text-gray-400 leading-none mt-0.5">Your customer's testimonial here</p>
                       </div>
                     </div>
                     <div className="text-amber-400 text-[10px]">★★★★★</div>
                     <p className="text-[10px] text-gray-600 mt-1">
-                      I previously managed all testimonials manually, and it was both a time-sink and meant I didn't collect nearly enough.
+                      Sample testimonial — your customer's words, photo and rating appear here.
                     </p>
                   </div>
                 </div>
@@ -190,7 +191,7 @@ export const OnboardingUpgradePage: React.FC = () => {
 
             </div>
 
-            {/* ── Column 2: Card 3 (Mobile Widget Modal) + Card 4 (Wall of Love Bungee) ── */}
+            {/* ── Column 2: Card 3 (Mobile Widget Modal) + Card 4 (Wall of Love) ── */}
             <div className="space-y-4">
               
               {/* Card 3: Mobile Pop-up Widget */}
@@ -216,13 +217,13 @@ export const OnboardingUpgradePage: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-[10px] font-bold flex items-center justify-center">LR</div>
                       <div>
-                        <p className="text-[10px] font-bold text-gray-900 leading-none">Luc Rozman</p>
-                        <p className="text-[8px] text-gray-400 leading-none mt-0.5">Creator of GrowthHackers</p>
+                        <p className="text-[10px] font-bold text-gray-900 leading-none">Sample popup preview</p>
+                        <p className="text-[8px] text-gray-400 leading-none mt-0.5">Your customer's testimonial here</p>
                       </div>
                     </div>
                     <div className="text-amber-400 text-[9px] mt-1">★★★★★</div>
                     <p className="text-[9px] text-gray-600 mt-1 leading-snug">
-                      Absolutely Panda Praise's biggest fan. This app is changing the game on getting social proof and making it so effortless on my side.
+                      Your customer's testimonial appears here, with their name, photo and rating — exactly as your site visitors will see it.
                     </p>
                     <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between text-[8px] text-gray-400">
                       <span>❤️ Made with Panda Praise</span>
@@ -232,7 +233,7 @@ export const OnboardingUpgradePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Card 4: Wall of Love for Bungee */}
+              {/* Card 4: Wall of Love */}
               <div className="rounded-2xl bg-[#6701e6] text-white p-4 border border-purple-400/30 shadow-md relative overflow-hidden">
                 <div className="flex justify-end mb-2">
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/15 text-white text-[11px] font-medium border border-white/20">
@@ -245,9 +246,9 @@ export const OnboardingUpgradePage: React.FC = () => {
                     <div className="w-0 h-0 border-y-4 border-y-transparent border-l-6 border-l-white ml-0.5" />
                   </div>
                   <div>
-                    <p className="font-extrabold text-sm leading-tight">Testimonials for Bungee</p>
+                    <p className="font-extrabold text-sm leading-tight">Your Wall of Love</p>
                     <p className="text-[11px] text-white/80 mt-1">
-                      We're loved by entrepreneurs, creators, freelancers and...
+                      Built for entrepreneurs, creators, freelancers and...
                     </p>
                   </div>
                 </div>
@@ -255,7 +256,7 @@ export const OnboardingUpgradePage: React.FC = () => {
 
             </div>
 
-            {/* ── Column 3: Card 5 (Michel Bardelmeijer Social Video with Retro Shapes) ── */}
+            {/* ── Column 3: Card 5 (Social Video with Retro Shapes) ── */}
             <div className="space-y-4">
               
               <div className="rounded-2xl p-4 shadow-md relative overflow-hidden border border-orange-200/50"
@@ -275,7 +276,7 @@ export const OnboardingUpgradePage: React.FC = () => {
                 <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200 relative z-10">
                   <div className="flex text-amber-500 text-xs mb-1.5">★★★★★</div>
                   <p className="text-xs text-gray-800 leading-relaxed font-normal">
-                    Loving Panda Praise! We needed an easy-to-use testimonial solution with great design for redirect.pizza, which{' '}
+                    Your customer's video testimonial, transcribed and branded —{' '}
                     <mark className="bg-amber-200 text-gray-900 px-1 py-0.5 rounded font-semibold">
                       Panda Praise fully delivers
                     </mark>
@@ -285,12 +286,12 @@ export const OnboardingUpgradePage: React.FC = () => {
                   <div className="flex items-center gap-2 mt-3 pt-2 border-t border-gray-100">
                     <img
                       src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80"
-                      alt="Michel"
+                      alt="Sample customer"
                       className="w-7 h-7 rounded-full object-cover"
                     />
                     <div>
-                      <p className="text-[11px] font-bold text-gray-900 leading-none">Michel Bardelmeijer</p>
-                      <p className="text-[9px] text-gray-500 leading-none mt-0.5">Founder of redirect.pizza</p>
+                      <p className="text-[11px] font-bold text-gray-900 leading-none">Your customer's name & photo</p>
+                      <p className="text-[9px] text-gray-500 leading-none mt-0.5">Sample social video preview</p>
                     </div>
                   </div>
                 </div>
@@ -310,10 +311,10 @@ export const OnboardingUpgradePage: React.FC = () => {
 
             </div>
 
-            {/* ── Column 4: Card 6 (Fed - Pastel Image Card) + Card 7 (Jay Clouse) ── */}
+            {/* ── Column 4: Card 6 (Pastel Image Card) + Card 7 (Creator Card) ── */}
             <div className="space-y-4">
               
-              {/* Card 6: Fed Sage/Pastel Editorial Image Card */}
+              {/* Card 6: Pastel Editorial Image Card */}
               <div className="rounded-2xl bg-[#e3dcd1] text-gray-900 p-4 border border-[#cfc5b8] shadow-sm relative overflow-hidden">
                 <div className="flex justify-end mb-2">
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/70 text-gray-800 text-[11px] font-medium border border-gray-300">
@@ -324,22 +325,22 @@ export const OnboardingUpgradePage: React.FC = () => {
                 <div className="flex gap-3 items-start">
                   <img
                     src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=160&auto=format&fit=crop&q=80"
-                    alt="Fed"
+                    alt="Sample customer"
                     className="w-16 h-18 rounded-2xl object-cover shrink-0 shadow-xs"
                   />
                   <div>
-                    <p className="font-extrabold text-sm text-gray-950">Fed</p>
+                    <p className="font-extrabold text-sm text-gray-950">Your customer</p>
                     <div className="flex text-amber-600 text-xs my-0.5">★★★★★</div>
-                    <p className="text-[10px] text-gray-600 font-medium">Founder, BetterProof</p>
+                    <p className="text-[10px] text-gray-600 font-medium">Sample image card preview</p>
                   </div>
                 </div>
 
                 <p className="text-xs text-gray-800 mt-2.5 leading-relaxed">
-                  Promoting in the newsletter and working with the founder has been a fantastic experience! I sponsored 2 newsletters, and{' '}
+                  Your customer's photo, name, company & role on a branded image card —{' '}
                   <mark className="bg-yellow-200 text-gray-950 px-1 py-0.5 rounded font-semibold">
-                    the ads already paid for themselves
+                    ready to share anywhere
                   </mark>{' '}
-                  even after just the first one went out.
+                  in one click.
                 </p>
 
                 {/* Bottom decorative semicircle shapes row */}
@@ -352,20 +353,20 @@ export const OnboardingUpgradePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Card 7: Jay Clouse Purple Creator Card */}
+              {/* Card 7: Purple Creator Card */}
               <div className="rounded-2xl bg-gradient-to-r from-[#6701e6] to-[#7c3aed] text-white p-3.5 shadow-md flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <img
                     src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80"
-                    alt="Jay Clouse"
+                    alt="Sample customer"
                     className="w-9 h-9 rounded-full object-cover ring-2 ring-white/30"
                   />
                   <div>
                     <div className="flex items-center gap-1">
-                      <p className="font-bold text-xs">Jay Clouse</p>
+                      <p className="font-bold text-xs">Your customer</p>
                       <span className="text-[10px] text-sky-300">✔</span>
                     </div>
-                    <p className="text-[10px] text-purple-200">@jayclouse</p>
+                    <p className="text-[10px] text-purple-200">Sample creator card</p>
                   </div>
                 </div>
                 <div className="flex gap-1">

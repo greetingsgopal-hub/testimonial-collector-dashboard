@@ -60,10 +60,10 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
   {
     title: 'Integrations & Automation',
     features: [
-      { name: 'Import from 30+ platforms', free: false, starter: true, pro: true },
+      { name: 'Import from CSV & connected platforms', free: false, starter: true, pro: true },
       { name: 'API access', free: false, starter: true, pro: true },
       { name: 'Webhooks', free: false, starter: true, pro: true },
-      { name: 'Zapier & Slack integrations', free: false, starter: true, pro: true },
+      { name: 'Zapier integration', free: false, starter: true, pro: true, tooltip: 'Coming soon — join the waitlist from the Integrations page' },
       { name: 'AI case study generator', free: false, starter: false, pro: true },
     ],
   },
@@ -230,9 +230,9 @@ export const PricingPage = () => {
             <span className="text-amber-400 font-bold flex items-center gap-0.5">
               <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
             </span>
-            <span className="font-semibold text-white">Rated 4.9/5 by SaaS Founders</span>
+            <span className="font-semibold text-white">Start free — upgrade only when it pays for itself</span>
             <span className="text-zinc-600">•</span>
-            <span className="text-zinc-400">Loved by 20,000+ businesses</span>
+            <span className="text-zinc-400">No credit card required</span>
           </div>
 
           <p className="text-lg text-zinc-400 max-w-xl mx-auto mb-8">
@@ -482,7 +482,7 @@ export const PricingPage = () => {
               Ready to turn happy customers into your best marketing?
             </h3>
             <p className="text-zinc-400 mb-6 max-w-md mx-auto">
-              Join thousands of businesses using Panda Praise to collect, manage, and share testimonials.
+              Start collecting, managing, and sharing testimonials with Panda Praise today.
             </p>
             <Link
               to="/signup"
