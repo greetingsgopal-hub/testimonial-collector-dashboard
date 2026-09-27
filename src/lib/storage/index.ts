@@ -31,6 +31,14 @@ class DelegatingStorageAdapter implements StorageAdapter {
   updateCollectionForm(id: string, updates: any) { return this.adapter.updateCollectionForm(id, updates); }
   createCollectionForm(form: any) { return this.adapter.createCollectionForm(form); }
   getCollectionFormBySlug(publicSlug: string) { return this.adapter.getCollectionFormBySlug(publicSlug); }
+  async evaluateAutoApproval(reviewId: string, projectId?: string): Promise<import('../../types').Review | null> {
+    if (!this.adapter.evaluateAutoApproval) return null;
+    return this.adapter.evaluateAutoApproval(reviewId, projectId);
+  }
+  async resetToSampleData(projectId?: string): Promise<void> {
+    if (!this.adapter.resetToSampleData) return;
+    return this.adapter.resetToSampleData(projectId);
+  }
 }
 
 export const storage: StorageAdapter = new DelegatingStorageAdapter();
