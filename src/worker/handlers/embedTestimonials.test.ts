@@ -73,4 +73,33 @@ describe('MEDIUM: embed endpoint server-side auth and projectId filter', () => {
     const res = await handleEmbedTestimonials(embedGet('limit=10'), ENV);
     expect(res.status).toBe(400);
   });
+
+  it('rate-limits excessive requests from one client (429)', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ([]),
+    } as any)));
+
+    // Exhaust the 120/min limit for this test client IP
+    for (let i = 0; i < 120; i++) {
+      const res = await handleEmbedTestimonials(
+        new Request('https://worker.dev/api/embed/testimonials?projectId=p', {
+          method: 'GET',
+          headers: { 'CF-Connecting-IP': '203.0.113.99' },
+        }),
+        ENV
+      );
+      expect(res.status).toBe(200);
+    }
+    // The 121st request from the same IP must be rejected
+    const res = await handleEmbedTestimonials(
+      new Request('https://worker.dev/api/embed/testimonials?projectId=p', {
+        method: 'GET',
+        headers: { 'CF-Connecting-IP': '203.0.113.99' },
+      }),
+      ENV
+    );
+    expect(res.status).toBe(429);
+  });
 });

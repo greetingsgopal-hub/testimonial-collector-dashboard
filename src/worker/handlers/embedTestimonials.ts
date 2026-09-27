@@ -1,5 +1,6 @@
 import { WorkerEnv } from '../types';
 import { getAuthHeader } from '../lib/firestoreAdmin';
+import { checkRateLimit } from '../lib/rateLimit';
 
 export interface PublicEmbedReview {
   id: string;
@@ -16,6 +17,20 @@ export interface PublicEmbedReview {
 
 export async function handleEmbedTestimonials(request: Request, env: WorkerEnv): Promise<Response> {
   const url = new URL(request.url);
+  // Public endpoint: rate-limit per client IP to blunt quota-exhaustion abuse.
+  // Generous limit — legitimate embed widgets are served to many visitors, and
+  // the response is cacheable (s-maxage=300), so real-world traffic is low.
+  const clientIp =
+    request.headers.get('CF-Connecting-IP') ||
+    request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
+    'unknown';
+  const rateCheck = checkRateLimit(`embed_api_${clientIp}`, 120, 60000);
+  if (!rateCheck.allowed) {
+    return new Response(JSON.stringify({ error: 'Too many requests.' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    });
+  }
   const projectId = url.searchParams.get('projectId') || url.searchParams.get('project') || '';
   const minRating = parseInt(url.searchParams.get('minRating') || '0', 10);
   const sourcesParam = url.searchParams.get('sources');
