@@ -26,6 +26,13 @@ export interface WorkerEnv {
   FIREBASE_CLIENT_EMAIL?: string;
   FIREBASE_PRIVATE_KEY?: string;
   NODE_ENV?: string;
+  // Stripe subscription billing
+  STRIPE_SECRET_KEY?: string;
+  STRIPE_WEBHOOK_SECRET?: string;
+  STRIPE_PRICE_STARTER_MONTHLY?: string;
+  STRIPE_PRICE_STARTER_ANNUAL?: string;
+  STRIPE_PRICE_PRO_MONTHLY?: string;
+  STRIPE_PRICE_PRO_ANNUAL?: string;
 }
 
 export interface ScheduledEvent {

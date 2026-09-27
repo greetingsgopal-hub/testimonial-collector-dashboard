@@ -13,6 +13,8 @@ import { handleInstagramFetchMentions } from './handlers/instagramFetchMentions'
 import { handleFacebookAuthInit } from './handlers/facebookAuthInit';
 import { handleFacebookAuthCallback } from './handlers/facebookAuthCallback';
 import { handleFacebookWebhook } from './handlers/facebookWebhook';
+import { handleStripeWebhook } from './handlers/stripeWebhook';
+import { handleCreateCheckoutSession, handleBillingPortal, handleGetSubscription } from './handlers/stripeCheckout';
 import { handleSocialPublish } from './handlers/socialPublish';
 import { handleSocialStatus } from './handlers/socialStatus';
 import { handleSocialDisconnect } from './handlers/socialDisconnect';
@@ -55,6 +57,20 @@ export default {
         case 'webhook/facebook':
         case 'facebook-webhook':
           return await handleFacebookWebhook(request, env);
+
+        // Stripe subscription billing
+        case 'webhooks/stripe':
+        case 'stripe-webhook':
+          return await handleStripeWebhook(request, env);
+
+        case 'stripe/checkout':
+          return await handleCreateCheckoutSession(request, env);
+
+        case 'stripe/billing-portal':
+          return await handleBillingPortal(request, env);
+
+        case 'stripe/subscription':
+          return await handleGetSubscription(request, env);
 
         case 'auth/instagram':
         case 'instagram-auth':

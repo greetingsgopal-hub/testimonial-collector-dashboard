@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { getFirebaseAuth } from '../lib/firebase';
 import {
   Check,
   X,
@@ -108,6 +110,63 @@ export const PricingPage = () => {
 
   const [isAnnual, setIsAnnual] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const { user } = useAuth();
+  const [checkoutLoading, setCheckoutLoading] = useState<PlanTier | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const PRICE_IDS: Record<'starter' | 'pro', { monthly?: string; annual?: string }> = {
+    starter: {
+      monthly: import.meta.env.VITE_STRIPE_PRICE_STARTER_MONTHLY,
+      annual: import.meta.env.VITE_STRIPE_PRICE_STARTER_ANNUAL,
+    },
+    pro: {
+      monthly: import.meta.env.VITE_STRIPE_PRICE_PRO_MONTHLY,
+      annual: import.meta.env.VITE_STRIPE_PRICE_PRO_ANNUAL,
+    },
+  };
+
+  const handleCheckout = async (tier: PlanTier) => {
+    if (tier === 'free') return;
+    setCheckoutError(null);
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
+    const priceId = isAnnual ? PRICE_IDS[tier].annual : PRICE_IDS[tier].monthly;
+    if (!priceId) {
+      setCheckoutError('Checkout is not yet configured. Please try again later.');
+      return;
+    }
+    setCheckoutLoading(tier);
+    try {
+      const idToken = await getFirebaseAuth().currentUser?.getIdToken();
+      if (!idToken) {
+        setCheckoutError('Please sign in again to upgrade.');
+        return;
+      }
+      const res = await fetch(`${import.meta.env.VITE_FUNCTIONS_API_URL || ''}/api/stripe/checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ priceId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+      }
+      const err = await res.json().catch(() => null);
+      setCheckoutError(err?.error || 'Failed to start checkout. Please try again.');
+    } catch {
+      setCheckoutError('Failed to start checkout. Please try again.');
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   const getPrice = (plan: PlanTier) => {
     const pricing = PLAN_PRICING[plan];
@@ -204,6 +263,11 @@ export const PricingPage = () => {
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+          {checkoutError && (
+            <div className="md:col-span-3 mb-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm text-center">
+              {checkoutError}
+            </div>
+          )}
           {plans.map(({ tier, badge, highlighted }) => {
             const Icon = planIcons[tier];
             const price = getPrice(tier);
@@ -252,16 +316,31 @@ export const PricingPage = () => {
                   )}
                 </div>
 
-                <Link
-                  to="/signup"
-                  className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200
+                {user && tier !== 'free' ? (
+                  <button
+                    type="button"
+                    onClick={() => handleCheckout(tier)}
+                    disabled={checkoutLoading !== null}
+                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50
                     ${highlighted
                       ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/20'
                       : 'bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10'}`}
-                >
-                  {tier === 'free' ? 'Start Free' : `Start with ${pricing.name}`}
-                  <ArrowRight size={16} />
-                </Link>
+                  >
+                    {checkoutLoading === tier ? 'Starting checkout…' : `Upgrade to ${pricing.name}`}
+                    <ArrowRight size={16} />
+                  </button>
+                ) : (
+                  <Link
+                    to="/signup"
+                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200
+                    ${highlighted
+                      ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/20'
+                      : 'bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10'}`}
+                  >
+                    {tier === 'free' ? 'Start Free' : `Start with ${pricing.name}`}
+                    <ArrowRight size={16} />
+                  </Link>
+                )}
 
                 {/* Quick feature list */}
                 <ul className="mt-6 space-y-2.5">

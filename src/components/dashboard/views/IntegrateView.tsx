@@ -10,8 +10,6 @@ import {
   Check, 
   ArrowUpRight,
   Search,
-  KeyRound,
-  Copy,
   Zap,
   Send,
   MessageSquare
@@ -138,16 +136,13 @@ export const IntegrateView: React.FC = () => {
   const [connectingInstagram, setConnectingInstagram] = useState(false);
   const [disconnectingInstagram, setDisconnectingInstagram] = useState(false);
 
-  // Stripe Integration State
-  const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
-  const [stripeSecretKey, setStripeSecretKey] = useState('');
-  const [stripeWebhookSecret, setStripeWebhookSecret] = useState('');
-  const [stripeDelayDays, setStripeDelayDays] = useState('3');
-  const [isStripeConnected, setIsStripeConnected] = useState<boolean>(() => {
-    return Boolean(localStorage.getItem('pandapraise_stripe_connected') === 'true');
-  });
-  const [stripeSaving, setStripeSaving] = useState(false);
-  const [copiedWebhookUrl, setCopiedWebhookUrl] = useState(false);
+  // Stripe subscription status (from workspace, synced via webhooks)
+  const [stripeSubscription, setStripeSubscription] = useState<{
+    plan: string;
+    subscriptionStatus: string | null;
+  } | null>(null);
+  const [, setLoadingSubscription] = useState(false);
+  const [billingPortalLoading, setBillingPortalLoading] = useState(false);
 
   // Slack Integration State
   const [isSlackModalOpen, setIsSlackModalOpen] = useState(false);
@@ -179,10 +174,7 @@ export const IntegrateView: React.FC = () => {
 
   useEffect(() => {
     fetchStatus();
-    const storedSecret = localStorage.getItem('pandapraise_stripe_whsec');
-    if (storedSecret) {
-      setStripeWebhookSecret(storedSecret);
-    }
+    fetchStripeSubscription();
 
     // Check for LinkedIn, Instagram, or Facebook OAuth callback redirect
     const params = new URLSearchParams(window.location.search);
@@ -292,45 +284,56 @@ export const IntegrateView: React.FC = () => {
     }
   };
 
-  // Stripe Handlers
-  const handleSaveStripe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!stripeWebhookSecret.trim() && !stripeSecretKey.trim()) {
-      showToast('Please enter a Webhook Secret Key or API Key.');
-      return;
-    }
-
-    setStripeSaving(true);
-    setTimeout(() => {
-      localStorage.setItem('pandapraise_stripe_connected', 'true');
-      if (stripeWebhookSecret.trim()) {
-        localStorage.setItem('pandapraise_stripe_whsec', stripeWebhookSecret.trim());
+  // Fetch Stripe subscription status from backend
+  const fetchStripeSubscription = async () => {
+    setLoadingSubscription(true);
+    try {
+      const { getFirebaseAuth } = await import('../../../lib/firebase');
+      const idToken = await getFirebaseAuth().currentUser?.getIdToken();
+      if (!idToken) return;
+      const res = await fetch(`${import.meta.env.VITE_FUNCTIONS_API_URL || ''}/api/stripe/subscription`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setStripeSubscription(data);
       }
-      setIsStripeConnected(true);
-      setStripeSaving(false);
-      setIsStripeModalOpen(false);
-      showToast('Stripe webhook integration successfully enabled!');
-    }, 600);
-  };
-
-  const handleDisconnectStripe = () => {
-    if (!confirm('Are you sure you want to disconnect Stripe checkout triggers?')) {
-      return;
+    } catch (err) {
+      console.error('[IntegrateView] Failed to fetch subscription:', err);
+    } finally {
+      setLoadingSubscription(false);
     }
-    localStorage.removeItem('pandapraise_stripe_connected');
-    localStorage.removeItem('pandapraise_stripe_whsec');
-    setIsStripeConnected(false);
-    setStripeSecretKey('');
-    setStripeWebhookSecret('');
-    showToast('Stripe integration disconnected.');
   };
 
-  const handleCopyWebhookUrl = () => {
-    const url = `${window.location.origin}/api/webhooks/stripe`;
-    navigator.clipboard.writeText(url);
-    setCopiedWebhookUrl(true);
-    showToast('Stripe webhook endpoint copied to clipboard!');
-    setTimeout(() => setCopiedWebhookUrl(false), 2000);
+  const handleBillingPortal = async () => {
+    setBillingPortalLoading(true);
+    try {
+      const { getFirebaseAuth } = await import('../../../lib/firebase');
+      const idToken = await getFirebaseAuth().currentUser?.getIdToken();
+      if (!idToken) {
+        showToast('Please sign in to manage billing.');
+        return;
+      }
+      const res = await fetch(`${import.meta.env.VITE_FUNCTIONS_API_URL || ''}/api/stripe/billing-portal`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) window.location.href = data.url;
+      } else {
+        const err = await res.json();
+        showToast(err.error || 'Failed to open billing portal.');
+      }
+    } catch (err) {
+      console.error('[IntegrateView] Billing portal failed:', err);
+      showToast('Failed to open billing portal.');
+    } finally {
+      setBillingPortalLoading(false);
+    }
   };
 
   // Slack Handlers
@@ -422,9 +425,9 @@ export const IntegrateView: React.FC = () => {
           id: 'stripe',
           name: 'Stripe',
           icon: <StripeIcon className="w-6 h-6 text-[#635BFF]" />,
-          description: 'Automatically trigger review request emails 3 days after a customer completes a checkout on Stripe.',
-          badgeType: isStripeConnected ? 'connected' : 'active',
-          badgeLabel: isStripeConnected ? 'Connected' : 'Active',
+          description: 'Manage your PandaPraise subscription — upgrade, downgrade, or cancel via Stripe.',
+          badgeType: stripeSubscription?.plan && stripeSubscription.plan !== 'free' ? 'connected' : 'active',
+          badgeLabel: stripeSubscription?.plan && stripeSubscription.plan !== 'free' ? 'Subscribed' : 'Free Plan',
           isStripeDirect: true,
         },
         {
@@ -543,131 +546,7 @@ export const IntegrateView: React.FC = () => {
         </div>
       )}
 
-      {/* Stripe Configuration Modal */}
-      {isStripeModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-gray-100 space-y-5 animate-scale-in text-left">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#635BFF]/10 flex items-center justify-center text-[#635BFF]">
-                  <StripeIcon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 text-base">Configure Stripe Webhook</h3>
-                  <p className="text-xs text-gray-500">Automate customer review requests</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsStripeModalOpen(false)}
-                className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-xs font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveStripe} className="space-y-4">
-              {/* Webhook Endpoint Box to Copy */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700 block">
-                  1. Add this Webhook Endpoint in Stripe Dashboard:
-                </label>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 border border-gray-200">
-                  <span className="text-[11px] font-mono text-gray-700 truncate flex-1 select-all">
-                    {window.location.origin}/api/webhooks/stripe
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleCopyWebhookUrl}
-                    className="p-1.5 rounded-lg hover:bg-white text-gray-600 hover:text-gray-900 border border-transparent hover:border-gray-200 transition-all text-xs flex items-center gap-1 font-medium cursor-pointer"
-                  >
-                    {copiedWebhookUrl ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedWebhookUrl ? 'Copied' : 'Copy'}</span>
-                  </button>
-                </div>
-                <p className="text-[11px] text-gray-500">
-                  Events to listen for: <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-800">checkout.session.completed</code>, <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-800">invoice.payment_succeeded</code>
-                </p>
-              </div>
-
-              {/* Webhook Secret Key */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-                  <KeyRound className="w-3.5 h-3.5 text-gray-400" />
-                  <span>2. Stripe Webhook Signing Secret (whsec_...)</span>
-                </label>
-                <input
-                  type="password"
-                  value={stripeWebhookSecret}
-                  onChange={(e) => setStripeWebhookSecret(e.target.value)}
-                  placeholder="Paste your whsec_ signing secret"
-                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 font-mono text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
-                />
-              </div>
-
-              {/* Restricted API Key */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-                  <KeyRound className="w-3.5 h-3.5 text-gray-400" />
-                  <span>3. Stripe Restricted API Key (Optional)</span>
-                </label>
-                <input
-                  type="password"
-                  value={stripeSecretKey}
-                  onChange={(e) => setStripeSecretKey(e.target.value)}
-                  placeholder="Paste your rk_ restricted key"
-                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 font-mono text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
-                />
-              </div>
-
-              {/* Trigger Delay Option */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-700 block">
-                  4. Review Request Timing Delay
-                </label>
-                <select
-                  value={stripeDelayDays}
-                  onChange={(e) => setStripeDelayDays(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
-                >
-                  <option value="0">Immediately after checkout</option>
-                  <option value="1">1 day after checkout</option>
-                  <option value="3">3 days after checkout (Recommended)</option>
-                  <option value="7">7 days after checkout</option>
-                  <option value="14">14 days after checkout</option>
-                </select>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-3 flex items-center justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setIsStripeModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={stripeSaving}
-                  className="px-5 py-2 rounded-xl bg-[#635BFF] hover:bg-[#534be7] text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  {stripeSaving ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      <span>Saving...</span>
-                    </>
-                  ) : (
-                    <span>Save & Enable Webhook</span>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Slack Configuration Modal */}
+{/* Slack Configuration Modal */}
       {isSlackModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-gray-100 space-y-5 animate-scale-in text-left">
@@ -1001,23 +880,23 @@ export const IntegrateView: React.FC = () => {
                         </div>
                       )}
 
-                      {/* Special Stripe Connected Info */}
-                      {item.id === 'stripe' && isStripeConnected && (
+                      {/* Special Stripe Subscription Info */}
+                      {item.id === 'stripe' && stripeSubscription?.plan && stripeSubscription.plan !== 'free' && (
                         <div className="mt-3 p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 flex items-center justify-between gap-2">
                           <div className="min-w-0 flex-1">
-                            <span className="text-[11px] font-bold text-emerald-950 block">
-                              Checkout Triggers Active
+                            <span className="text-[11px] font-bold text-emerald-950 block capitalize">
+                              {stripeSubscription.plan} Plan
                             </span>
                             <span className="text-[10px] text-emerald-700">
-                              Delay: {stripeDelayDays} days post-purchase
+                              Status: {stripeSubscription.subscriptionStatus || 'active'}
                             </span>
                           </div>
                           <button
                             type="button"
-                            onClick={() => setIsStripeModalOpen(true)}
+                            onClick={handleBillingPortal}
                             className="text-[10px] font-bold text-brand-600 hover:underline cursor-pointer"
                           >
-                            Settings
+                            Manage
                           </button>
                         </div>
                       )}
@@ -1170,30 +1049,28 @@ export const IntegrateView: React.FC = () => {
 
                       {/* Stripe Card Actions */}
                       {item.id === 'stripe' && (
-                        isStripeConnected ? (
+                        stripeSubscription?.plan && stripeSubscription.plan !== 'free' ? (
                           <div className="flex items-center gap-2">
+                            <div className="flex-1 py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold text-center flex items-center justify-center gap-1.5 shadow-2xs">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span className="capitalize">{stripeSubscription.plan} Plan</span>
+                            </div>
                             <button
                               type="button"
-                              onClick={() => setIsStripeModalOpen(true)}
-                              className="flex-1 py-2 px-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer"
+                              onClick={handleBillingPortal}
+                              disabled={billingPortalLoading}
+                              className="flex-1 py-2 px-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer disabled:opacity-50"
                             >
-                              Config
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleDisconnectStripe}
-                              className="flex-1 py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer"
-                            >
-                              Disconnect
+                              {billingPortalLoading ? 'Loading...' : 'Manage'}
                             </button>
                           </div>
                         ) : (
                           <button
                             type="button"
-                            onClick={() => setIsStripeModalOpen(true)}
+                            onClick={() => window.location.href = '/pricing'}
                             className="w-full py-2 px-3 rounded-xl bg-[#635BFF] hover:bg-[#5249e0] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                           >
-                            <span>Connect Stripe</span>
+                            <span>Upgrade Plan</span>
                             <ArrowUpRight className="w-3.5 h-3.5" />
                           </button>
                         )
