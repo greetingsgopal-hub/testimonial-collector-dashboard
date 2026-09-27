@@ -29,9 +29,16 @@ service cloud.firestore {
                     isOwnerUnchanged() &&
                     !request.resource.data.diff(resource.data).affectedKeys().hasAny([
                       'plan', 'subscriptionStatus', 'billingCycle',
-                      'stripeCustomerId', 'stripeSubscriptionId', 'planExpiresAt'
+                      'stripeCustomerId', 'stripeSubscriptionId', 'planExpiresAt',
+                      'currentPeriodEnd'
                     ]);
       allow delete: if isOwner(resource.data.ownerId);
+    }
+
+    // Stripe webhook idempotency ledger — Worker-only (service account bypasses rules).
+    // Explicit deny: clients must never read or write processed-event markers.
+    match /stripe_events/{eventId} {
+      allow read, write: if false;
     }
 
     // 2. Projects
