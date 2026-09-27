@@ -30,9 +30,15 @@ if (isFirebaseConfigured) {
   try {
     app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
 
-    // App Check is deliberately opt-in.
-    // A misconfigured reCAPTCHA Enterprise key can cause Firebase Auth requests
-    // to surface as auth/internal-error even when Authentication itself is healthy.
+    // App Check abuse protection for the anonymous public submission path.
+    // The anonymous create in firestore.rules (public collection forms) is the
+    // product's most exposed write surface; App Check is the volume/abuse layer
+    // on top of the rules' data-integrity layer.
+    //
+    // App Check remains opt-in via VITE_FIREBASE_APPCHECK_ENABLED so that:
+    // - Local dev keeps working (use a debug token, see below).
+    // - A misconfigured reCAPTCHA Enterprise key cannot break Firebase Auth
+    //   (a bad key surfaces as auth/internal-error even when Auth is healthy).
     // Enable it only after the production domain/key pair has been verified in
     // Firebase Console > App Check.
     const appCheckSiteKey =
@@ -43,6 +49,14 @@ if (isFirebaseConfigured) {
 
     if (appCheckEnabled && appCheckSiteKey && typeof window !== 'undefined') {
       try {
+        // Local development support: the App Check SDK prints a debug token
+        // to the console when VITE_FIREBASE_APPCHECK_DEBUG=true is set.
+        // Register that token in Firebase Console > App Check > Apps > Manage
+        // debug tokens so localhost requests pass while enforcement is on.
+        if (import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG === 'true') {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (window as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+        }
         appCheck = initializeAppCheck(app, {
           provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey),
           isTokenAutoRefreshEnabled: true,
