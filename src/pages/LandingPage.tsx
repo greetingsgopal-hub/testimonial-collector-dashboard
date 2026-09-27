@@ -338,26 +338,6 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Compact Founder Quote (the one real, attributable quote) */}
-        <div className="mt-7 max-w-lg mx-auto py-3.5 px-5 sm:py-4 sm:px-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-purple-100/80 shadow-xs flex flex-col items-center text-center">
-          <div role="img" aria-label="Rated 5 out of 5 stars" className="flex items-center justify-center gap-1 text-amber-500 mb-1.5">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <span key={s} className="text-xs" aria-hidden="true">★</span>
-            ))}
-          </div>
-          <blockquote className="text-xs sm:text-sm font-medium text-gray-800 italic leading-snug max-w-md mx-auto">
-            “I've seen a tangible impact on revenue and conversion by sharing customer proof.”
-          </blockquote>
-          <div className="mt-2.5 flex items-center justify-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#6701e6] text-white flex items-center justify-center font-bold text-[10px] ring-2 ring-purple-100 shrink-0 select-none" aria-hidden="true">
-              GT
-            </div>
-            <div className="text-left leading-tight">
-              <span className="text-xs font-bold text-gray-900 block">Gopal Thakur</span>
-              <span className="text-[11px] text-gray-600">Papasystem</span>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* ── 4. Feature Marquee (replaces fabricated client logos; real customer
@@ -565,26 +545,6 @@ export const LandingPage: React.FC = () => {
                 </Link>
               </div>
 
-              {/* In-Section Quote — real, attributable founder quote */}
-              <figure className="relative border-l-2 border-brand-600 py-2 pl-4 text-left mt-8 max-w-lg">
-                <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                  <p>
-                    <mark className="senja-yellow-mark">
-                      I've seen a tangible impact on revenue and conversion
-                    </mark>{' '}
-                    by sharing customer proof.
-                  </p>
-                </blockquote>
-                <figcaption className="mt-2.5 flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-400 text-white font-bold text-xs flex items-center justify-center border border-indigo-100 shadow-xs select-none">
-                    GT
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900 text-xs">Gopal Thakur</p>
-                    <p className="text-[11px] text-gray-600">Founder, Papasystem</p>
-                  </div>
-                </figcaption>
-              </figure>
             </div>
 
             {/* Column B: Product Demonstration Mockup */}

@@ -383,7 +383,7 @@ export const IntegrateView: React.FC = () => {
 
   const linkedIn = statusData?.connections?.linkedin;
   const isLinkedInConnected = Boolean((linkedIn?.connected && linkedIn?.status === 'connected') || localStorage.getItem('pandapraise_linkedin_connected') === 'true');
-  const linkedInAccountName = linkedIn?.accountName || localStorage.getItem('pandapraise_linkedin_name') || 'Gopal Thakur';
+  const linkedInAccountName = linkedIn?.accountName || localStorage.getItem('pandapraise_linkedin_name') || 'Your LinkedIn account';
   const linkedInProfilePic = linkedIn?.profilePicture;
 
   // Structured Integration Categories
