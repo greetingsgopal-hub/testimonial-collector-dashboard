@@ -153,6 +153,19 @@ describe('C2: Meta webhook signature verification (POST)', () => {
     expect(saveDocument).not.toHaveBeenCalled();
   });
 
+  it('GET verification uses timing-safe token comparison (length-mismatched token rejected)', async () => {
+    // A token of different length must be rejected without error (timing-safe
+    // path never compares mismatched lengths).
+    const res = await handleFacebookWebhook(
+      new Request(
+        `https://worker.dev/api/webhook/facebook?hub.mode=subscribe&hub.verify_token=short&hub.challenge=abc`,
+        { method: 'GET' }
+      ),
+      ENV
+    );
+    expect(res.status).toBe(403);
+  });
+
   it('uses timingSafeEqual for comparison (not string equality)', async () => {
     const spy = vi.spyOn(crypto, 'timingSafeEqual');
     await handleFacebookWebhook(

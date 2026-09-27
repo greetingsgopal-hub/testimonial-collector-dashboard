@@ -13,7 +13,9 @@ service firebase.storage {
 
     function isValidImage() {
       return request.resource.size < 5 * 1024 * 1024 &&
-             request.resource.contentType.matches('image/(jpeg|png|webp|gif|svg\\+xml)');
+             // SVG excluded: public-readable SVG served from the app origin can
+             // execute embedded scripts when opened directly (stored XSS).
+             request.resource.contentType.matches('image/(jpeg|png|webp|gif)');
     }
 
     // Public avatars and testimonial media:

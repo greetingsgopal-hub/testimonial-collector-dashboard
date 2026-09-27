@@ -54,7 +54,12 @@ export async function handleFacebookWebhook(request: Request, env: WorkerEnv): P
       return new Response('Forbidden', { status: 403 });
     }
 
-    if (mode === 'subscribe' && token === expectedToken) {
+    // Timing-safe comparison for the verify token (matches the HMAC path).
+    const tokenMatches =
+      typeof token === 'string' &&
+      token.length === expectedToken.length &&
+      crypto.timingSafeEqual(Buffer.from(token, 'utf8'), Buffer.from(expectedToken, 'utf8'));
+    if (mode === 'subscribe' && tokenMatches) {
       console.log('[FacebookWebhook] Verification challenge succeeded.');
       return new Response(challenge || 'OK', {
         status: 200,
