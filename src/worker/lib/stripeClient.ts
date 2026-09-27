@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import { WorkerEnv } from '../types';
 import { getDocument, saveDocument } from './firestoreAdmin';
+import { getServiceAccountAccessToken } from './googleAuth';
 
 /**
  * Stripe client for PandaPraise subscription billing.
@@ -199,9 +200,18 @@ export async function getWorkspaceByCustomerId(
   const projectId = env.FIREBASE_PROJECT_ID || 'testimonialcollectordashboard';
   const queryUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`;
 
+  // Authenticate as the service account — the workspaces collection is not
+  // readable by unauthenticated REST queries (Firestore rules require isOwner).
+  // Without this header the query 403s and subscription sync silently breaks.
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const saToken = await getServiceAccountAccessToken(env);
+  if (saToken) {
+    headers['Authorization'] = `Bearer ${saToken}`;
+  }
+
   const res = await fetch(queryUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({
       structuredQuery: {
         from: [{ collectionId: 'workspaces' }],
