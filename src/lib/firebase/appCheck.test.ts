@@ -44,4 +44,9 @@ describe('App Check wiring (src/lib/firebase/index.ts)', () => {
   it('reads the site key from the documented VITE_FIREBASE_APPCHECK_SITE_KEY var', () => {
     expect(source).toMatch(/VITE_FIREBASE_APPCHECK_SITE_KEY/);
   });
+
+  it('uses the reCAPTCHA Enterprise provider with token auto-refresh', () => {
+    expect(source).toMatch(/ReCaptchaEnterpriseProvider/);
+    expect(source).toMatch(/isTokenAutoRefreshEnabled:\s*true/);
+  });
 });
