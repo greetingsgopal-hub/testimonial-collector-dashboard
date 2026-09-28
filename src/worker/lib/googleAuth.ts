@@ -35,7 +35,9 @@ function parseCredentials(env: WorkerEnv): ServiceAccountCredentials | null {
         };
       }
     } catch (e) {
-      console.error('[GoogleAuth] Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY JSON:', (e as Error).message);
+      // Log only the error class, never the raw message — a malformed key value
+      // could otherwise be echoed into Worker logs.
+      console.error('[GoogleAuth] Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY JSON: invalid format');
     }
   }
 
@@ -107,8 +109,9 @@ export async function getServiceAccountAccessToken(env: WorkerEnv): Promise<stri
     });
 
     if (!tokenRes.ok) {
-      const errText = await tokenRes.text();
-      console.error('[GoogleAuth] Token exchange failed:', tokenRes.status, errText);
+      // Log only the HTTP status — the error body is not echoed to avoid
+      // leaking any credential fragments into Worker logs.
+      console.error('[GoogleAuth] Token exchange failed with status:', tokenRes.status);
       return null;
     }
 
@@ -125,7 +128,9 @@ export async function getServiceAccountAccessToken(env: WorkerEnv): Promise<stri
 
     return cachedToken.accessToken;
   } catch (err: any) {
-    console.error('[GoogleAuth] Failed to generate service account token:', err?.message || err);
+    // Log only the error class — err.message can contain key material on
+    // signing failures (e.g. crypto error text including the private key).
+    console.error('[GoogleAuth] Failed to generate service account token:', err?.constructor?.name || 'Error');
     return null;
   }
 }
