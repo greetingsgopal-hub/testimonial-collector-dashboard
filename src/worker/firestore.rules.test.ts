@@ -27,6 +27,15 @@ function stripeEventsBlock(): string {
   return m![0];
 }
 
+/** Extract the reviews match block */
+function reviewsBlock(): string {
+  const start = rules.indexOf('match /reviews/{reviewId} {');
+  expect(start, 'reviews match block must exist in firestore.rules').toBeGreaterThan(-1);
+  const end = rules.indexOf('match /public_reviews/{reviewId} {');
+  expect(end, 'public_reviews match block must exist after reviews').toBeGreaterThan(start);
+  return rules.slice(start, end);
+}
+
 describe('C5: Firestore rules — subscription state protection', () => {
   it('locks plan against client updates in the workspaces rule', () => {
     const block = workspaceBlock();
@@ -72,6 +81,35 @@ describe('C5: Firestore rules — stripe_events ledger protection', () => {
   it('does not grant any allow on stripe_events', () => {
     const block = stripeEventsBlock();
     expect(block).not.toMatch(/allow [^:]+: if (?!false)/);
+  });
+});
+
+describe('Owner review creation path (manual entry / CSV import)', () => {
+  it('allows authenticated owners to create reviews in their own tenant only', () => {
+    const block = reviewsBlock();
+    expect(block).toMatch(/allow create: if\s+isAuthenticated\(\) &&\s+request\.resource\.data\.ownerId == request\.auth\.uid/);
+  });
+
+  it('restricts owner-created review status to pending or approved', () => {
+    const block = reviewsBlock();
+    expect(block).toMatch(/request\.resource\.data\.status in \['pending', 'approved'\]/);
+  });
+
+  it('keeps the anonymous submission path forcing pending/form/consent', () => {
+    const block = reviewsBlock();
+    // The anonymous create must still force status == 'pending', source == 'form',
+    // consent == true, isFeatured == false.
+    expect(block).toMatch(/request\.resource\.data\.status == 'pending'/);
+    expect(block).toMatch(/request\.resource\.data\.source == 'form'/);
+    expect(block).toMatch(/request\.resource\.data\.consent == true/);
+    expect(block).toMatch(/request\.resource\.data\.isFeatured == false/);
+  });
+
+  it('caps review content, rating, and tags on the owner path', () => {
+    const block = reviewsBlock();
+    expect(block).toMatch(/request\.resource\.data\.rating >= 1/);
+    expect(block).toMatch(/request\.resource\.data\.rating <= 5/);
+    expect(block).toMatch(/request\.resource\.data\.tags\.size\(\) <= 10/);
   });
 });
 
