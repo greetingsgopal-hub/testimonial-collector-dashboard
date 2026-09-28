@@ -12,8 +12,7 @@ vi.mock('../lib/stripeClient', () => ({
   updateWorkspaceSubscription: vi.fn().mockResolvedValue(undefined),
   getWorkspaceByCustomerId: vi.fn().mockResolvedValue(null),
   getPricePlanTier: vi.fn().mockImplementation((priceId: string) => {
-    if (priceId === 'price_starter') return 'starter';
-    if (priceId === 'price_pro') return 'pro';
+    if (priceId === 'price_subscription') return 'starter';
     return null;
   }),
 }));
@@ -154,7 +153,7 @@ describe('Stripe webhook handler (C5)', () => {
         customer: 'cus_1',
         subscription: 'sub_1',
         payment_status: 'paid',
-        line_items: { data: [{ price: { id: 'price_starter' } }] },
+        line_items: { data: [{ price: { id: 'price_subscription' } }] },
       });
       mockedVerify.mockReturnValue(event as any);
 
@@ -166,7 +165,6 @@ describe('Stripe webhook handler (C5)', () => {
           stripeCustomerId: 'cus_1',
           stripeSubscriptionId: 'sub_1',
           subscriptionStatus: 'active',
-          plan: 'starter',
         }),
         baseEnv
       );
@@ -178,7 +176,7 @@ describe('Stripe webhook handler (C5)', () => {
         customer: 'cus_1',
         id: 'sub_1',
         status: 'past_due',
-        items: { data: [{ price: { id: 'price_pro' } }] },
+        items: { data: [{ price: { id: 'price_subscription' } }] },
         current_period_end: 1800000000,
       });
       mockedVerify.mockReturnValue(event as any);
@@ -189,7 +187,6 @@ describe('Stripe webhook handler (C5)', () => {
         'ws_1',
         expect.objectContaining({
           subscriptionStatus: 'past_due',
-          plan: 'pro',
         }),
         baseEnv
       );

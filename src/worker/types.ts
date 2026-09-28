@@ -29,10 +29,8 @@ export interface WorkerEnv {
   // Stripe subscription billing
   STRIPE_SECRET_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;
-  STRIPE_PRICE_STARTER_MONTHLY?: string;
-  STRIPE_PRICE_STARTER_ANNUAL?: string;
-  STRIPE_PRICE_PRO_MONTHLY?: string;
-  STRIPE_PRICE_PRO_ANNUAL?: string;
+  STRIPE_PRICE_SUBSCRIPTION_MONTHLY?: string;
+  STRIPE_PRICE_SUBSCRIPTION_ANNUAL?: string;
 }
 
 export interface ScheduledEvent {

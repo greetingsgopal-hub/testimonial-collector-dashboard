@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { usePageSeo } from '../../lib/seo';
-import { PLAN_PRICING } from '../../lib/planLimits';
 import { TeamRole, PLAN_LIMITS, Project } from '../../types';
 
 type SettingsTab = 'general' | 'team' | 'billing' | 'branding' | 'api';
@@ -38,7 +37,6 @@ export const WorkspaceSettings: React.FC = () => {
 
   const plan = workspace?.plan || 'free';
   const limits = PLAN_LIMITS[plan];
-  const pricing = PLAN_PRICING[plan];
 
   const projectsList = allProjects.length > 0 ? allProjects : (project ? [project] : []);
 
@@ -245,7 +243,7 @@ export const WorkspaceSettings: React.FC = () => {
                 {limits.maxSeats <= 1 && (
                   <p className="text-xs text-amber-800 bg-amber-50 p-3 rounded-xl border border-amber-200 flex items-center gap-1.5">
                     <Crown size={12} className="text-amber-600" />
-                    Team seats require a Starter or Pro plan.
+                    Team seats require a paid plan.
                   </p>
                 )}
               </div>
@@ -281,10 +279,13 @@ export const WorkspaceSettings: React.FC = () => {
                         ${plan === 'pro' ? 'bg-purple-100 text-[#6701e6]' :
                           plan === 'starter' ? 'bg-purple-50 text-[#6701e6]' :
                           'bg-gray-100 text-gray-700'}`}>
-                        {pricing.name}
+                        {plan === 'free' ? 'Free' : 'Paid'}
                       </span>
-                      <span className="text-2xl font-extrabold text-gray-950">${PLAN_PRICING[plan].monthly}</span>
-                      <span className="text-xs text-gray-500">/month</span>
+                      {plan === 'free' ? (
+                        <span className="text-xs text-gray-500">Up to 15 testimonials</span>
+                      ) : (
+                        <span className="text-xs text-gray-500">Full access</span>
+                      )}
                     </div>
                   </div>
                   {plan === 'free' && (
@@ -389,7 +390,7 @@ export const WorkspaceSettings: React.FC = () => {
                     />
                     {!limits.customDomain && (
                       <p className="mt-1.5 text-xs text-amber-700 flex items-center gap-1 font-medium">
-                        <Crown size={11} className="text-amber-500" /> Available on Starter plan and above
+                        <Crown size={11} className="text-amber-500" /> Available on paid plans
                       </p>
                     )}
                   </div>
@@ -433,7 +434,7 @@ export const WorkspaceSettings: React.FC = () => {
                   <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                     <p className="text-xs font-medium text-amber-800 flex items-center gap-2">
                       <Crown size={14} className="text-amber-600" />
-                      API access requires a Starter plan or above.
+                      API access requires a paid plan.
                     </p>
                   </div>
                 )}
@@ -457,7 +458,7 @@ export const WorkspaceSettings: React.FC = () => {
                   <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                     <p className="text-xs font-medium text-amber-800 flex items-center gap-2">
                       <Crown size={14} className="text-amber-600" />
-                      Webhooks require a Starter plan or above.
+                      Webhooks require a paid plan.
                     </p>
                   </div>
                 )}

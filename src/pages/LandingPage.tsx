@@ -524,7 +524,7 @@ export const LandingPage: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Automate with API access & webhooks (Starter plan)</span>
+                  <span>Automate with API access & webhooks (paid plans)</span>
                 </li>
               </ul>
 

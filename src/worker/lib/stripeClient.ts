@@ -28,17 +28,12 @@ export function getStripeClient(env: WorkerEnv): Stripe {
  * Configure these in Stripe Dashboard and set as Worker vars.
  */
 export function getPricePlanTier(priceId: string, env: WorkerEnv): 'starter' | 'pro' | null {
-  const starterPrices = [
-    env.STRIPE_PRICE_STARTER_MONTHLY,
-    env.STRIPE_PRICE_STARTER_ANNUAL,
-  ].filter(Boolean);
-  const proPrices = [
-    env.STRIPE_PRICE_PRO_MONTHLY,
-    env.STRIPE_PRICE_PRO_ANNUAL,
+  const subscriptionPrices = [
+    env.STRIPE_PRICE_SUBSCRIPTION_MONTHLY,
+    env.STRIPE_PRICE_SUBSCRIPTION_ANNUAL,
   ].filter(Boolean);
 
-  if (starterPrices.includes(priceId)) return 'starter';
-  if (proPrices.includes(priceId)) return 'pro';
+  if (subscriptionPrices.includes(priceId)) return 'starter';
   return null;
 }
 

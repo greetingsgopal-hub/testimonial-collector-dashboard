@@ -32,10 +32,8 @@ const mockedCreateCheckout = vi.mocked(createCheckoutSession);
 const mockedCreatePortal = vi.mocked(createBillingPortalSession);
 
 const baseEnv = {
-  STRIPE_PRICE_STARTER_MONTHLY: 'price_starter_m',
-  STRIPE_PRICE_STARTER_ANNUAL: 'price_starter_a',
-  STRIPE_PRICE_PRO_MONTHLY: 'price_pro_m',
-  STRIPE_PRICE_PRO_ANNUAL: 'price_pro_a',
+  STRIPE_PRICE_SUBSCRIPTION_MONTHLY: 'price_subscription_m',
+  STRIPE_PRICE_SUBSCRIPTION_ANNUAL: 'price_subscription_a',
 };
 
 function makeRequest(method: string, body?: any, headers: Record<string, string> = {}) {
@@ -112,8 +110,8 @@ describe('Stripe checkout endpoint (C5)', () => {
       mockedGetOrCreateCustomer.mockResolvedValue('cus_new');
       mockedCreateCheckout.mockResolvedValue('https://checkout.stripe.com/test');
 
-      const res = await handleCreateCheckoutSession(
-        makeRequest('POST', { priceId: 'price_starter_m' }, { Authorization: 'Bearer valid' }),
+    const res = await handleCreateCheckoutSession(
+        makeRequest('POST', { priceId: 'price_subscription_m' }, { Authorization: 'Bearer valid' }),
         baseEnv as any
       );
 
@@ -121,7 +119,7 @@ describe('Stripe checkout endpoint (C5)', () => {
       const data = await res.json();
       expect(data.url).toBe('https://checkout.stripe.com/test');
       expect(mockedGetOrCreateCustomer).toHaveBeenCalledWith('user_1', { plan: 'free' }, 'test@example.com', baseEnv);
-      expect(mockedCreateCheckout).toHaveBeenCalledWith('user_1', 'cus_new', 'price_starter_m', baseEnv);
+      expect(mockedCreateCheckout).toHaveBeenCalledWith('user_1', 'cus_new', 'price_subscription_m', baseEnv);
     });
 
     it('returns 404 when workspace not found', async () => {
@@ -129,7 +127,7 @@ describe('Stripe checkout endpoint (C5)', () => {
       mockedGetDocument.mockResolvedValue(null);
 
       const res = await handleCreateCheckoutSession(
-        makeRequest('POST', { priceId: 'price_starter_m' }, { Authorization: 'Bearer valid' }),
+        makeRequest('POST', { priceId: 'price_subscription_m' }, { Authorization: 'Bearer valid' }),
         baseEnv as any
       );
 
@@ -144,7 +142,7 @@ describe('Stripe checkout endpoint (C5)', () => {
       mockedCreateCheckout.mockRejectedValue(new Error('Stripe error: sk_live_secret_key'));
 
       const res = await handleCreateCheckoutSession(
-        makeRequest('POST', { priceId: 'price_starter_m' }, { Authorization: 'Bearer valid' }),
+        makeRequest('POST', { priceId: 'price_subscription_m' }, { Authorization: 'Bearer valid' }),
         baseEnv as any
       );
 

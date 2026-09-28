@@ -57,10 +57,8 @@ export async function handleCreateCheckoutSession(request: Request, env: WorkerE
 
   // Validate price ID against configured prices
   const validPrices = [
-    env.STRIPE_PRICE_STARTER_MONTHLY,
-    env.STRIPE_PRICE_STARTER_ANNUAL,
-    env.STRIPE_PRICE_PRO_MONTHLY,
-    env.STRIPE_PRICE_PRO_ANNUAL,
+    env.STRIPE_PRICE_SUBSCRIPTION_MONTHLY,
+    env.STRIPE_PRICE_SUBSCRIPTION_ANNUAL,
   ].filter(Boolean);
 
   if (!validPrices.includes(priceId)) {

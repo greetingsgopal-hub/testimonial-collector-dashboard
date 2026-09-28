@@ -16,7 +16,6 @@ import {
 import { getActiveBackendInfo } from '../lib/storage';
 import { useAuth } from '../context/AuthContext';
 import { ProjectSwitcher } from './dashboard/ProjectSwitcher';
-import { PLAN_PRICING } from '../lib/planLimits';
 
 export type DashboardView = 'dashboard' | 'widgets' | 'import' | 'settings';
 
@@ -40,7 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
 
   const plan = workspace?.plan || 'free';
-  const planName = PLAN_PRICING[plan].name;
+  const planName = plan === 'free' ? 'Free' : 'Paid';
 
   const collectionUrl = collectionForm
     ? `${window.location.origin}/c/${collectionForm.publicSlug}`

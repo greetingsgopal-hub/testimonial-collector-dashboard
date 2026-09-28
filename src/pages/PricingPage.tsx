@@ -1,35 +1,29 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getFirebaseAuth } from '../lib/firebase';
 import {
   Check,
   X,
-  Sparkles,
   ArrowRight,
   Crown,
-  Zap,
   Shield,
   ChevronDown,
   Star,
   HelpCircle,
+  Gem,
 } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
-import { PLAN_PRICING } from '../lib/planLimits';
-import { PlanTier } from '../types';
 
 interface PlanFeature {
   name: string;
   free: string | boolean;
-  starter: string | boolean;
-  pro: string | boolean;
+  paid: string | boolean;
   tooltip?: string;
 }
 
 interface FeatureCategory {
   title: string;
-  icon?: string;
   features: PlanFeature[];
 }
 
@@ -37,130 +31,86 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
   {
     title: 'Core Features & Limits',
     features: [
-      { name: 'Testimonials', free: 'Up to 15', starter: 'Unlimited', pro: 'Unlimited' },
-      { name: 'Projects', free: '1', starter: '1', pro: '5 (add-ons available)' },
-      { name: 'Team seats', free: '1', starter: '2', pro: '5 (add-ons available)' },
-      { name: 'Collection forms', free: true, starter: true, pro: true },
-      { name: 'Text & video testimonials', free: true, starter: true, pro: true },
-      { name: 'Widget views', free: 'Unlimited', starter: 'Unlimited', pro: 'Unlimited' },
-      { name: 'CSV & JSON export', free: true, starter: true, pro: true },
+      { name: 'Testimonials', free: 'Up to 15', paid: 'Unlimited' },
+      { name: 'Projects', free: '1', paid: '1' },
+      { name: 'Team seats', free: '1', paid: '2' },
+      { name: 'Collection forms', free: true, paid: true },
+      { name: 'Text & video testimonials', free: true, paid: true },
+      { name: 'Widget views', free: 'Unlimited', paid: 'Unlimited' },
+      { name: 'CSV & JSON export', free: true, paid: true },
     ],
   },
   {
     title: 'Widgets & Customization',
     features: [
-      { name: 'Wall of Love', free: true, starter: true, pro: true },
-      { name: 'Social card creator', free: true, starter: true, pro: true },
-      { name: 'Remove Panda Praise branding', free: false, starter: true, pro: true },
-      { name: 'HD video quality', free: false, starter: true, pro: true },
-      { name: 'Custom domain', free: false, starter: true, pro: true, tooltip: 'Point your own domain to your Wall of Love' },
-      { name: 'Rich Snippets (SEO Schema)', free: false, starter: false, pro: true, tooltip: 'Show star ratings directly in Google search results' },
+      { name: 'Wall of Love', free: true, paid: true },
+      { name: 'Social card creator', free: true, paid: true },
+      { name: 'Remove Panda Praise branding', free: false, paid: true },
+      { name: 'HD video quality', free: false, paid: true },
+      { name: 'Custom domain', free: false, paid: true, tooltip: 'Point your own domain to your Wall of Love' },
     ],
   },
   {
     title: 'Integrations & Automation',
     features: [
-      { name: 'Import from CSV & connected platforms', free: false, starter: true, pro: true },
-      { name: 'API access', free: false, starter: true, pro: true },
-      { name: 'Webhooks', free: false, starter: true, pro: true },
-      { name: 'Zapier integration', free: false, starter: true, pro: true, tooltip: 'Coming soon — join the waitlist from the Integrations page' },
-      { name: 'AI case study generator', free: false, starter: false, pro: true },
+      { name: 'Import from CSV & connected platforms', free: false, paid: true },
+      { name: 'API access', free: false, paid: 'Coming soon' },
+      { name: 'Webhooks', free: false, paid: 'Coming soon' },
+      { name: 'Zapier integration', free: false, paid: 'Coming soon', tooltip: 'Join the waitlist from the Integrations page' },
     ],
   },
   {
-    title: 'Analytics, AI & Security',
+    title: 'Analytics & Support',
     features: [
-      { name: 'Sentiment analysis', free: false, starter: true, pro: true },
-      { name: 'Testimonial translation', free: false, starter: false, pro: true },
-      { name: 'Priority support', free: false, starter: false, pro: true },
+      { name: 'Sentiment analysis', free: false, paid: 'Coming soon' },
+      { name: 'Email support', free: false, paid: true },
     ],
   },
 ];
 
-const FEATURES: PlanFeature[] = FEATURE_CATEGORIES.flatMap((cat) => cat.features);
-
 const FAQ_ITEMS = [
   {
+    q: 'What is the Founding Member offer?',
+    a: 'Founding Members pay $150 once and get lifetime access to Panda Praise. This is a limited early-supporter offer before we move to subscription-only pricing.',
+  },
+  {
+    q: 'What happens after I pay $150?',
+    a: 'You get lifetime access to all current and future features. No recurring charges. Ever.',
+  },
+  {
+    q: 'Can I just subscribe instead?',
+    a: 'Yes. You can pay $10/month (billed monthly) or $5/month (billed annually as $60). Founding Member is the better deal if you plan to use Panda Praise long-term.',
+  },
+  {
     q: 'Can I try Panda Praise before paying?',
-    a: 'Yes! The Free plan is fully functional and never expires. Use it as long as you like. When you need more features or testimonials, upgrade anytime.',
+    a: 'Yes! The Free plan is fully functional and never expires. Use it as long as you like. Upgrade when you need more features or testimonials.',
   },
   {
     q: 'Can I cancel my subscription?',
-    a: 'Absolutely. Cancel anytime from your billing dashboard. You\'ll keep your current plan until the end of the billing period, then you\'ll be moved to the Free plan.',
-  },
-  {
-    q: 'What happens to my testimonials if I downgrade?',
-    a: 'Your testimonials are safe. If you exceed the Free plan limit, older testimonials will be hidden (not deleted) until you upgrade again or remove some.',
-  },
-  {
-    q: 'Can I add more projects or seats to the Pro plan?',
-    a: 'Yes! On the Pro plan, you can purchase additional projects ($10/mo each) and team seats ($5/mo each) as add-ons.',
-  },
-  {
-    q: 'Do you offer annual billing?',
-    a: 'Yes. Save up to 20% with annual billing. Toggle between monthly and annual pricing on this page to see the difference.',
+    a: 'Absolutely. Cancel anytime from your billing dashboard. You keep your current plan until the end of the billing period, then move to Free.',
   },
 ];
 
 export const PricingPage = () => {
   usePageSeo({
     title: 'Pricing — Panda Praise',
-    description: 'Simple, transparent pricing for testimonial collection. Start free, upgrade when you need more.',
+    description: 'Lifetime access for $150 — pay once, use forever. Or subscribe at $5/month (billed annually).',
   });
 
-  const [isAnnual, setIsAnnual] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const { user } = useAuth();
-  const [checkoutLoading, setCheckoutLoading] = useState<PlanTier | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState<'founding' | 'subscription' | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
-  const PRICE_IDS: Record<'starter' | 'pro', { monthly?: string; annual?: string }> = {
-    starter: {
-      monthly: import.meta.env.VITE_STRIPE_PRICE_STARTER_MONTHLY,
-      annual: import.meta.env.VITE_STRIPE_PRICE_STARTER_ANNUAL,
-    },
-    pro: {
-      monthly: import.meta.env.VITE_STRIPE_PRICE_PRO_MONTHLY,
-      annual: import.meta.env.VITE_STRIPE_PRICE_PRO_ANNUAL,
-    },
-  };
-
-  const handleCheckout = async (tier: PlanTier) => {
-    if (tier === 'free') return;
+  const handleCheckout = async (plan: 'founding' | 'subscription') => {
     setCheckoutError(null);
     if (!user) {
       window.location.href = '/login';
       return;
     }
-    const priceId = isAnnual ? PRICE_IDS[tier].annual : PRICE_IDS[tier].monthly;
-    if (!priceId) {
-      setCheckoutError('Checkout is not yet configured. Please try again later.');
-      return;
-    }
-    setCheckoutLoading(tier);
+    setCheckoutLoading(plan);
     try {
-      const idToken = await getFirebaseAuth().currentUser?.getIdToken();
-      if (!idToken) {
-        setCheckoutError('Please sign in again to upgrade.');
-        return;
-      }
-      const res = await fetch(`${import.meta.env.VITE_FUNCTIONS_API_URL || ''}/api/stripe/checkout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({ priceId }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.url) {
-          window.location.href = data.url;
-          return;
-        }
-      }
-      const err = await res.json().catch(() => null);
-      setCheckoutError(err?.error || 'Failed to start checkout. Please try again.');
+      setCheckoutError('Checkout is not yet configured. Please contact support@pandapraise.com to purchase.');
     } catch {
       setCheckoutError('Failed to start checkout. Please try again.');
     } finally {
@@ -168,32 +118,8 @@ export const PricingPage = () => {
     }
   };
 
-  const getPrice = (plan: PlanTier) => {
-    const pricing = PLAN_PRICING[plan];
-    return isAnnual ? pricing.annual : pricing.monthly;
-  };
-
-  const plans: { tier: PlanTier; badge?: string; highlighted?: boolean }[] = [
-    { tier: 'free' },
-    { tier: 'starter', badge: 'Most Popular', highlighted: true },
-    { tier: 'pro', badge: 'Best Value' },
-  ];
-
-  const planIcons: Record<PlanTier, typeof Zap> = {
-    free: Sparkles,
-    starter: Zap,
-    pro: Crown,
-  };
-
-  const planGradients: Record<PlanTier, string> = {
-    free: 'from-zinc-500 to-zinc-600',
-    starter: 'from-violet-500 to-purple-600',
-    pro: 'from-amber-500 to-orange-600',
-  };
-
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Header */}
       <header className="border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
@@ -204,232 +130,97 @@ export const PricingPage = () => {
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/login" className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors">Sign In</Link>
-            <Link
-              to="/signup"
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors"
-            >
-              Get Started Free
-            </Link>
+            <Link to="/signup" className="px-4 py-2 rounded-lg text-sm font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors">Get Started Free</Link>
           </div>
         </div>
       </header>
 
       <div className="max-w-6xl mx-auto px-6 py-16 sm:py-24">
-        {/* Hero */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-medium mb-6">
             <Shield size={12} />
-            Simple, transparent pricing
+            Simple pricing
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 leading-tight">
-            Start free. Upgrade when<br className="hidden sm:block" /> you're ready to grow.
-          </h1>
-
-          {/* Trust Micro-Copy Social Proof Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs text-zinc-300 mb-6 shadow-2xs">
-            <span className="text-amber-400 font-bold flex items-center gap-0.5">
-              <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-            </span>
-            <span className="font-semibold text-white">Start free — upgrade only when it pays for itself</span>
-            <span className="text-zinc-600">•</span>
-            <span className="text-zinc-400">No credit card required</span>
-          </div>
-
-          <p className="text-lg text-zinc-400 max-w-xl mx-auto mb-8">
-            No credit card required. No hidden fees. Cancel anytime.
-          </p>
-
-          {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-3 bg-white/5 rounded-full p-1 border border-white/10">
-            <button
-              onClick={() => setIsAnnual(false)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer
-                ${!isAnnual ? 'bg-violet-600 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200'}`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setIsAnnual(true)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5 cursor-pointer
-                ${isAnnual ? 'bg-violet-600 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200'}`}
-            >
-              Annual
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">
-                SAVE 20%
-              </span>
-            </button>
-          </div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 leading-tight">Pay once. Use forever.</h1>
+          <p className="text-lg text-zinc-400 max-w-xl mx-auto">Founding members lock in lifetime access. Or subscribe month-to-month.</p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
-          {checkoutError && (
-            <div className="md:col-span-3 mb-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm text-center">
-              {checkoutError}
+        {checkoutError && <div className="max-w-2xl mx-auto mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm text-center">{checkoutError}</div>}
+
+        <div className="max-w-2xl mx-auto mb-12">
+          <div className="relative rounded-3xl bg-gradient-to-b from-violet-500/20 to-purple-500/10 border-2 border-violet-500/40 p-8 sm:p-10 shadow-2xl shadow-violet-500/20">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-extrabold uppercase tracking-wider shadow-lg flex items-center gap-1.5"><Gem size={12} />Founding Member</span>
             </div>
-          )}
-          {plans.map(({ tier, badge, highlighted }) => {
-            const Icon = planIcons[tier];
-            const price = getPrice(tier);
-            const pricing = PLAN_PRICING[tier];
-
-            return (
-              <div
-                key={tier}
-                className={`relative rounded-2xl p-6 sm:p-8 transition-all duration-300
-                  ${highlighted
-                    ? 'bg-gradient-to-b from-violet-500/10 to-purple-500/5 border-2 border-violet-500/30 shadow-2xl shadow-violet-500/10 scale-[1.02]'
-                    : 'bg-white/[0.02] border border-white/10 hover:border-white/20'}`}
-              >
-                {badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold
-                      ${tier === 'starter'
-                        ? 'bg-violet-600 text-white'
-                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`}>
-                      {badge}
-                    </span>
-                  </div>
-                )}
-
-                <div className="mb-6">
-                  <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${planGradients[tier]} mb-4`}>
-                    <Icon size={18} className="text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white">{pricing.name}</h3>
-                  <p className="text-sm text-zinc-500 mt-1">{pricing.tagline}</p>
-                </div>
-
-                <div className="mb-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-extrabold text-white">
-                      ${price}
-                    </span>
-                    {price > 0 && (
-                      <span className="text-sm text-zinc-500">/mo</span>
-                    )}
-                  </div>
-                  {isAnnual && price > 0 && (
-                    <p className="text-xs text-zinc-500 mt-1">
-                      Billed ${price * 12}/year
-                    </p>
-                  )}
-                </div>
-
-                {user && tier !== 'free' ? (
-                  <button
-                    type="button"
-                    onClick={() => handleCheckout(tier)}
-                    disabled={checkoutLoading !== null}
-                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50
-                    ${highlighted
-                      ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/20'
-                      : 'bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10'}`}
-                  >
-                    {checkoutLoading === tier ? 'Starting checkout…' : `Upgrade to ${pricing.name}`}
-                    <ArrowRight size={16} />
-                  </button>
-                ) : (
-                  <Link
-                    to="/signup"
-                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200
-                    ${highlighted
-                      ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/20'
-                      : 'bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10'}`}
-                  >
-                    {tier === 'free' ? 'Start Free' : `Start with ${pricing.name}`}
-                    <ArrowRight size={16} />
-                  </Link>
-                )}
-
-                {/* Quick feature list */}
-                <ul className="mt-6 space-y-2.5">
-                  {FEATURES.slice(0, 9).map((f) => {
-                    const val = f[tier];
-                    const isAvailable = val === true || (typeof val === 'string' && val !== '');
-                    return (
-                      <li key={f.name} className="flex items-start gap-2.5 text-sm">
-                        {isAvailable ? (
-                          <Check size={15} className="text-emerald-400 flex-shrink-0 mt-0.5" />
-                        ) : (
-                          <X size={15} className="text-zinc-600 flex-shrink-0 mt-0.5" />
-                        )}
-                        <span className={isAvailable ? 'text-zinc-300' : 'text-zinc-600'}>
-                          {typeof val === 'string' ? `${f.name}: ${val}` : f.name}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
+            <div className="text-center">
+              <div className="flex items-baseline justify-center gap-2 mb-2">
+                <span className="text-6xl sm:text-7xl font-black text-white">$150</span>
+                <span className="text-lg font-bold text-violet-300">ONE TIME</span>
               </div>
-            );
-          })}
+              <p className="text-violet-200 font-semibold mb-6">Pay once. Use Panda Praise for life.</p>
+              <p className="text-sm text-zinc-400 mb-6 max-w-md mx-auto">Founding members lock in lifetime access before regular pricing.<span className="block mt-1 text-zinc-500">Designed to deliver long-term value.</span></p>
+              <button type="button" onClick={() => handleCheckout('founding')} disabled={checkoutLoading !== null} className="w-full sm:w-auto px-8 py-4 rounded-2xl text-base font-bold bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mx-auto">{checkoutLoading === 'founding' ? 'Starting checkout…' : <><Crown size={18} className="text-amber-400" />Become a Founding Member</>}</button>
+            </div>
+          </div>
         </div>
 
-        {/* Feature Comparison Table with Clean Categorization */}
+        <div className="flex items-center gap-4 max-w-2xl mx-auto mb-12">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Or subscribe</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+
+        <div className="max-w-2xl mx-auto mb-20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="relative rounded-2xl bg-gradient-to-b from-emerald-500/15 to-emerald-500/5 border-2 border-emerald-500/40 p-6 text-left">
+              <div className="absolute -top-2.5 left-4"><span className="px-2.5 py-1 rounded-full bg-emerald-500 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-md">Best Value</span></div>
+              <p className="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1">Annual</p>
+              <div className="flex items-baseline gap-1 mb-2"><span className="text-4xl font-black text-white">$5</span><span className="text-sm text-zinc-400">/month</span></div>
+              <p className="text-xs text-zinc-400 mb-4">$60 billed annually</p>
+              <p className="text-[11px] text-emerald-300 font-medium">Save 50% vs monthly</p>
+            </div>
+            <div className="relative rounded-2xl bg-white/[0.03] border border-white/10 p-6 text-left">
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Monthly</p>
+              <div className="flex items-baseline gap-1 mb-2"><span className="text-4xl font-black text-white">$10</span><span className="text-sm text-zinc-400">/month</span></div>
+              <p className="text-xs text-zinc-500 mb-4">Billed monthly</p>
+              <p className="text-[11px] text-zinc-600">Cancel anytime</p>
+            </div>
+          </div>
+          <p className="text-center text-xs text-zinc-500 mt-4">Both plans include the same features. Annual saves you money.</p>
+        </div>
+
+        <div className="text-center mb-20">
+          <p className="text-sm text-zinc-400 mb-2">Not ready to pay?</p>
+          <Link to="/signup" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10 transition-all">Start with Free Plan<ArrowRight size={16} /></Link>
+          <p className="text-xs text-zinc-600 mt-2">Up to 15 testimonials, forever free.</p>
+        </div>
+
         <div className="mb-20 max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-white">Feature Comparison</h2>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-              Compare all features across Free, Starter, and Pro plans side by side.
-            </p>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">Compare Free vs Paid (Founding Member or Subscription).</p>
           </div>
-
           <div className="overflow-x-auto rounded-2xl border border-white/10 bg-zinc-900/40 shadow-xl">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10 bg-white/[0.04]">
                   <th className="text-left py-3 px-4 text-zinc-200 font-semibold text-xs sm:text-sm">Feature</th>
                   <th className="text-center py-3 px-4 text-zinc-300 font-semibold text-xs sm:text-sm w-28 sm:w-32">Free</th>
-                  <th className="text-center py-3 px-4 text-violet-300 font-semibold text-xs sm:text-sm w-28 sm:w-32">Starter</th>
-                  <th className="text-center py-3 px-4 text-amber-300 font-semibold text-xs sm:text-sm w-28 sm:w-32">Pro</th>
+                  <th className="text-center py-3 px-4 text-emerald-300 font-semibold text-xs sm:text-sm w-28 sm:w-32">Paid</th>
                 </tr>
               </thead>
               <tbody>
                 {FEATURE_CATEGORIES.map((category) => (
                   <React.Fragment key={category.title}>
-                    {/* Category Subheading Row */}
                     <tr className="border-y border-white/10 bg-gradient-to-r from-violet-950/40 via-purple-950/30 to-transparent">
-                      <td
-                        colSpan={4}
-                        className="py-2.5 px-4 text-left text-xs font-bold uppercase tracking-wider text-violet-300"
-                      >
-                        {category.title}
-                      </td>
+                      <td colSpan={3} className="py-2.5 px-4 text-left text-xs font-bold uppercase tracking-wider text-violet-300">{category.title}</td>
                     </tr>
-
-                    {/* Category Feature Rows */}
                     {category.features.map((f, idx) => (
-                      <tr
-                        key={f.name}
-                        className={`transition-colors hover:bg-white/[0.04] border-b border-white/[0.04] ${
-                          idx % 2 === 0 ? 'bg-white/[0.015]' : 'bg-transparent'
-                        }`}
-                      >
-                        <td className="py-2.5 px-4 text-zinc-300 flex items-center gap-1.5 font-medium text-xs sm:text-sm">
-                          {f.name}
-                          {f.tooltip && (
-                            <span className="group relative inline-flex items-center">
-                              <HelpCircle size={13} className="text-zinc-500 cursor-help hover:text-zinc-300 transition-colors" />
-                              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-lg bg-zinc-800 text-xs text-zinc-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10 shadow-lg z-20">
-                                {f.tooltip}
-                              </span>
-                            </span>
-                          )}
-                        </td>
-                        {(['free', 'starter', 'pro'] as PlanTier[]).map((tier) => {
+                      <tr key={f.name} className={`transition-colors hover:bg-white/[0.04] border-b border-white/[0.04] ${idx % 2 === 0 ? 'bg-white/[0.015]' : 'bg-transparent'}`}>
+                        <td className="py-2.5 px-4 text-zinc-300 flex items-center gap-1.5 font-medium text-xs sm:text-sm">{f.name}{f.tooltip && (<span className="group relative inline-flex items-center"><HelpCircle size={13} className="text-zinc-500 cursor-help hover:text-zinc-300 transition-colors" /><span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-lg bg-zinc-800 text-xs text-zinc-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10 shadow-lg z-20">{f.tooltip}</span></span>)}</td>
+                        {(['free', 'paid'] as const).map((tier) => {
                           const val = f[tier];
-                          return (
-                            <td key={tier} className="text-center py-2.5 px-4 text-xs sm:text-sm">
-                              {val === true ? (
-                                <Check size={16} className="text-emerald-400 mx-auto" />
-                              ) : val === false ? (
-                                <X size={16} className="text-zinc-700 mx-auto" />
-                              ) : (
-                                <span className="text-zinc-300 font-medium">{val}</span>
-                              )}
-                            </td>
-                          );
+                          return (<td key={tier} className="text-center py-2.5 px-4 text-xs sm:text-sm">{val === true ? (<Check size={16} className="text-emerald-400 mx-auto" />) : val === false ? (<X size={16} className="text-zinc-700 mx-auto" />) : (<span className="text-zinc-300 font-medium">{val}</span>)}</td>);
                         })}
                       </tr>
                     ))}
@@ -440,75 +231,32 @@ export const PricingPage = () => {
           </div>
         </div>
 
-        {/* FAQ */}
         <div className="max-w-2xl mx-auto mb-20">
           <h2 className="text-2xl font-bold text-white text-center mb-8">Frequently Asked Questions</h2>
           <div className="space-y-3">
             {FAQ_ITEMS.map((item, idx) => (
-              <div
-                key={idx}
-                className="rounded-xl border border-white/10 overflow-hidden transition-colors hover:border-white/15"
-              >
-                <button
-                  onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
-                  className="w-full flex items-center justify-between px-5 py-4 text-left"
-                >
-                  <span className="text-sm font-medium text-zinc-200">{item.q}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`text-zinc-500 flex-shrink-0 ml-4 transition-transform duration-200
-                      ${openFaqIndex === idx ? 'rotate-180' : ''}`}
-                  />
-                </button>
-                {openFaqIndex === idx && (
-                  <div className="px-5 pb-4">
-                    <p className="text-sm text-zinc-400 leading-relaxed">{item.a}</p>
-                  </div>
-                )}
+              <div key={idx} className="rounded-xl border border-white/10 overflow-hidden transition-colors hover:border-white/15">
+                <button onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)} className="w-full flex items-center justify-between px-5 py-4 text-left"><span className="text-sm font-medium text-zinc-200">{item.q}</span><ChevronDown size={16} className={`text-zinc-500 flex-shrink-0 ml-4 transition-transform duration-200 ${openFaqIndex === idx ? 'rotate-180' : ''}`} /></button>
+                {openFaqIndex === idx && (<div className="px-5 pb-4"><p className="text-sm text-zinc-400 leading-relaxed">{item.a}</p></div>)}
               </div>
             ))}
           </div>
         </div>
 
-        {/* Final CTA */}
         <div className="text-center pb-12">
           <div className="p-8 sm:p-12 rounded-2xl bg-gradient-to-b from-violet-500/10 to-transparent border border-violet-500/20">
-            <div className="flex justify-center gap-0.5 mb-4">
-              {[1, 2, 3, 4, 5].map(i => (
-                <Star key={i} size={20} className="text-amber-400 fill-amber-400" />
-              ))}
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-3">
-              Ready to turn happy customers into your best marketing?
-            </h3>
-            <p className="text-zinc-400 mb-6 max-w-md mx-auto">
-              Start collecting, managing, and sharing testimonials with Panda Praise today.
-            </p>
-            <Link
-              to="/signup"
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold
-                       bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500
-                       text-white shadow-lg shadow-violet-500/20 transition-all duration-200"
-            >
-              Get Started Free
-              <ArrowRight size={16} />
-            </Link>
+            <div className="flex justify-center gap-0.5 mb-4">{[1, 2, 3, 4, 5].map(i => (<Star key={i} size={20} className="text-amber-400 fill-amber-400" />))}</div>
+            <h3 className="text-2xl font-bold text-white mb-3">Ready to turn happy customers into your best marketing?</h3>
+            <p className="text-zinc-400 mb-6 max-w-md mx-auto">Start collecting, managing, and sharing testimonials with Panda Praise today.</p>
+            <Link to="/signup" className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/20 transition-all duration-200">Get Started Free<ArrowRight size={16} /></Link>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="border-t border-white/10 py-8 text-xs text-zinc-500">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          <div className="flex items-center justify-center sm:justify-start gap-2">
-            <PandaPraiseIcon size={20} />
-            <span>© 2026 Panda Praise Ltd. All rights reserved.</span>
-          </div>
-          <div className="flex items-center justify-center gap-6">
-            <Link to="/" className="hover:text-zinc-300 transition-colors">Home</Link>
-            <Link to="/terms" className="hover:text-zinc-300 transition-colors">Terms of Service</Link>
-            <Link to="/privacy-policy" className="hover:text-zinc-300 transition-colors">Privacy Policy</Link>
-          </div>
+          <div className="flex items-center justify-center sm:justify-start gap-2"><PandaPraiseIcon size={20} /><span>© 2026 Panda Praise Ltd. All rights reserved.</span></div>
+          <div className="flex items-center justify-center gap-6"><Link to="/" className="hover:text-zinc-300 transition-colors">Home</Link><Link to="/terms" className="hover:text-zinc-300 transition-colors">Terms of Service</Link><Link to="/privacy-policy" className="hover:text-zinc-300 transition-colors">Privacy Policy</Link></div>
         </div>
       </footer>
     </div>

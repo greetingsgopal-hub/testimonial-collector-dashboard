@@ -103,28 +103,6 @@ export function getUsageSummary(workspace: Workspace | null): {
   };
 }
 
-/** Get pricing info for display */
-export const PLAN_PRICING: Record<PlanTier, { monthly: number; annual: number; name: string; tagline: string }> = {
-  free: {
-    monthly: 0,
-    annual: 0,
-    name: 'Free',
-    tagline: 'For trying things out',
-  },
-  starter: {
-    monthly: 29,
-    annual: 24,
-    name: 'Starter',
-    tagline: 'For growing businesses',
-  },
-  pro: {
-    monthly: 59,
-    annual: 49,
-    name: 'Pro',
-    tagline: 'For scaling teams & agencies',
-  },
-};
-
 // ── Internal helpers ──────────────────────────────────────────
 
 function formatFeatureName(feature: keyof PlanLimits): string {
