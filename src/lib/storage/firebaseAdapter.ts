@@ -160,7 +160,7 @@ export class FirebaseAdapter implements StorageAdapter {
     return created;
   }
 
-  async evaluateAutoApproval(reviewId: string, projectId?: string): Promise<Review | null> {
+  async evaluateAutoApproval(reviewId: string, _projectId?: string): Promise<Review | null> {
     const auth = getFirebaseAuth();
     const currentUser = auth.currentUser;
     if (!currentUser) return null;
@@ -178,9 +178,23 @@ export class FirebaseAdapter implements StorageAdapter {
       return this.mapDocToReview(reviewId, data);
     }
 
-    const form = await this.getCollectionForm(projectId || data.projectId);
-    if (form?.settings?.autoApprove && Number(data.rating) >= 4) {
-      return this.updateReview(reviewId, { status: 'approved' });
+    // Fetch the form doc directly by collectionFormId. A collection-wide query
+    // (getCollectionForm) is rejected by Firestore rules: the per-doc read rule is
+    // an OR of owner-scoped and isActive conditions, which cannot be guaranteed
+    // for a projectId-only query. A doc-level get passes (owner or active form).
+    // This evaluation is best-effort: any failure leaves the review pending.
+    try {
+      if (data.collectionFormId) {
+        const formSnap = await getDoc(doc(db, 'collection_forms', data.collectionFormId));
+        if (formSnap.exists()) {
+          const formData = formSnap.data();
+          if (formData?.settings?.autoApprove && Number(data.rating) >= 4) {
+            return this.updateReview(reviewId, { status: 'approved' });
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[FirebaseAdapter] Auto-approval evaluation failed (review stays pending):', err);
     }
 
     return this.mapDocToReview(reviewId, data);

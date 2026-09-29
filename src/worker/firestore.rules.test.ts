@@ -111,6 +111,16 @@ describe('Owner review creation path (manual entry / CSV import)', () => {
     expect(block).toMatch(/request\.resource\.data\.rating <= 5/);
     expect(block).toMatch(/request\.resource\.data\.tags\.size\(\) <= 10/);
   });
+
+  it('accepts a null avatarUrl on review create (regression: null-avatar submissions were rejected)', () => {
+    // The adapter always writes the avatarUrl key (null when the reviewer has no
+    // photo). A rule of the form "absent || is string" rejects null because the key
+    // IS present. Every avatar guard must therefore also permit `== null`, otherwise
+    // anonymous submissions without an avatar get PERMISSION_DENIED and the public
+    // collection form silently breaks in production.
+    const block = reviewsBlock();
+    expect(block).toMatch(/request\.resource\.data\.avatarUrl == null/);
+  });
 });
 
 describe('C5: Worker Firestore write path uses service account (rules bypass)', () => {
