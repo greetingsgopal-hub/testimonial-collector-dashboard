@@ -41,4 +41,33 @@ describe('TASK 4 regression: public submission end-to-end', () => {
     expect(body).toMatch(/catch/);
     expect(body).toMatch(/review stays pending|Auto-approval evaluation failed/);
   });
+
+  it('anonymous getReviews resolves project slugs for the public Wall of Love', () => {
+    // Wall of Love URLs use the project SLUG (/love/:slug), but public_reviews
+    // docs store the Firestore project ID. Without a slug bridge, the public
+    // wall is always empty for strangers. The anonymous path must fall back to
+    // a projectSlug query when the direct projectId match returns nothing.
+    const m = adapterSrc.match(/async getReviews[\s\S]*?\n  \}/);
+    expect(m, 'getReviews must exist').not.toBeNull();
+    const body = m![0];
+    expect(body).toContain("'public_reviews'");
+    expect(body).toContain("where('projectSlug', '==', projectId)");
+  });
+
+  it('syncPublicReview writes projectSlug onto public_reviews docs', () => {
+    const m = adapterSrc.match(/private async syncPublicReview[\s\S]*?\n  \}/);
+    expect(m, 'syncPublicReview must exist').not.toBeNull();
+    const body = m![0];
+    expect(body).toContain('projectSlug');
+    expect(body).toContain("doc(db, 'projects', review.projectId)");
+  });
+
+  it('rules permit the projectSlug field on public_reviews create and update', () => {
+    const m = rules.match(/match \/public_reviews\/\{reviewId\} \{[\s\S]*?\n    \}/);
+    expect(m, 'public_reviews block must exist').not.toBeNull();
+    const block = m![0];
+    // projectSlug must appear in both the create hasOnly list and the update affectedKeys list
+    const occurrences = block.match(/'projectSlug'/g) ?? [];
+    expect(occurrences.length).toBeGreaterThanOrEqual(2);
+  });
 });

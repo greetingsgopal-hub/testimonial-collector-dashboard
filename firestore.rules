@@ -159,7 +159,7 @@ service cloud.firestore {
 
       allow create: if isAuthenticated() &&
         request.resource.data.keys().hasOnly([
-          'projectId', 'collectionFormId', 'ownerId', 'name', 'role', 'company', 'avatarUrl',
+          'projectId', 'projectSlug', 'collectionFormId', 'ownerId', 'name', 'role', 'company', 'avatarUrl',
           'rating', 'title', 'content', 'type', 'videoUrl', 'tags', 'isFeatured', 'status',
           'createdAt', 'updatedAt'
         ]) &&
@@ -173,7 +173,7 @@ service cloud.firestore {
 
       allow update: if isAuthenticated() &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'projectId', 'collectionFormId', 'ownerId', 'name', 'role', 'company', 'avatarUrl',
+          'projectId', 'projectSlug', 'collectionFormId', 'ownerId', 'name', 'role', 'company', 'avatarUrl',
           'rating', 'title', 'content', 'type', 'videoUrl', 'tags', 'isFeatured', 'status',
           'createdAt', 'updatedAt'
         ]) &&

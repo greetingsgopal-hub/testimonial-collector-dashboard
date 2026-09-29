@@ -66,14 +66,28 @@ export class FirebaseAdapter implements StorageAdapter {
       return [];
     }
 
-    const qByProj = query(
+    // Anonymous public reads (Wall of Love / embed widgets). The identifier
+    // arriving here is either a project ID (embed widgets) or a project slug
+    // (Wall of Love URLs, /love/:slug). Try a direct projectId match first;
+    // if nothing matches, resolve the slug via the projectSlug bridge field
+    // written at sync time (projects/ is owner-only, so we cannot look it up).
+    const byId = await getDocs(query(
       collection(db, 'public_reviews'),
       where('projectId', '==', projectId),
       where('status', '==', 'approved')
-    );
-    const snapshot = await getDocs(qByProj);
-    const list = snapshot.docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
+    ));
+    let docs = byId.docs;
 
+    if (docs.length === 0) {
+      const bySlug = await getDocs(query(
+        collection(db, 'public_reviews'),
+        where('projectSlug', '==', projectId),
+        where('status', '==', 'approved')
+      ));
+      docs = bySlug.docs;
+    }
+
+    const list = docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
     return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
@@ -285,10 +299,26 @@ export class FirebaseAdapter implements StorageAdapter {
     }
 
     const db = getFirebaseDb();
+
+    // Resolve the project slug so the public Wall of Love (/love/:slug) can
+    // query public_reviews anonymously. projects/ docs are owner-only, so this
+    // lookup only succeeds for the authenticated owner (which is exactly when
+    // sync is called: create-for-owner, or approve/reject by owner).
+    let projectSlug: string | null = null;
+    if (review.projectId) {
+      try {
+        const projSnap = await getDoc(doc(db, 'projects', review.projectId));
+        if (projSnap.exists()) projectSlug = projSnap.data()?.slug || null;
+      } catch (err) {
+        console.warn('[FirebaseAdapter] Could not resolve project slug for public sync:', err);
+      }
+    }
+
     const publicRef = doc(db, 'public_reviews', id);
 
     const publicData = {
       projectId: review.projectId,
+      projectSlug,
       collectionFormId: review.collectionFormId || null,
       ownerId: ownerId,
       name: review.name,
