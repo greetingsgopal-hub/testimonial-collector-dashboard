@@ -8,7 +8,7 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
 (function () {
   'use strict';
 
-  var API_BASE = 'https://testimonial-collector-dashboard2.greetings-gopal.workers.dev';
+  var API_BASE = 'https://pandapraise.com';
   // Security: HTML escaping to prevent XSS
   function escapeHtml(str) {
     if (!str) return '';
@@ -396,7 +396,7 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
 
     html += '</div>';
     html += '<div class="pp-footer-badge">';
-    html += '  <a href="https://testimonial-collector-dashboard2.greetings-gopal.workers.dev" target="_blank" rel="noopener" class="pp-footer-link">';
+  html += '  <a href="https://pandapraise.com" target="_blank" rel="noopener" class="pp-footer-link">';
     html += '    ' + ICONS.heart + ' Verified with Panda Praise';
     html += '  </a>';
     html += '</div>';

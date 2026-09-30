@@ -136,7 +136,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
     );
   };
 
-  const runtimeScriptUrl = 'https://testimonial-collector-dashboard2.greetings-gopal.workers.dev/embed.js';
+  const runtimeScriptUrl = 'https://pandapraise.com/embed.js';
 
   const getEmbedSnippet = () => {
     const projId = projectWidgetId || '';

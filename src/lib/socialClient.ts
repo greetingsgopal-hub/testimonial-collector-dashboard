@@ -24,8 +24,8 @@ async function getAuthToken(): Promise<string | null> {
 
 function getEndpointUrl(path: string): string {
   // The frontend and API share the same origin on the unified Cloudflare
-  // Worker deployment (workers.dev today, pandapraise.com once bound), and
-  // on the local Vite dev server. Always use same-origin /api/*.
+  // Worker deployment (pandapraise.com), and on the local Vite dev server.
+  // Always use same-origin /api/*.
   return `/api/${path}`;
 }
 
