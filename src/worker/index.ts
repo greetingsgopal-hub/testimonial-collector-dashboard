@@ -46,6 +46,19 @@ export default {
       const endpoint = pathname.replace(/^\/api\//, '').split('?')[0].replace(/\/$/, '');
 
       switch (endpoint) {
+        // Unauthenticated liveness probe for uptime monitoring.
+        // Deliberately cheap: no Firestore/Stripe calls, no secrets exposed.
+        case 'health': {
+          return new Response(
+            JSON.stringify({
+              status: 'ok',
+              service: 'pandapraise-api',
+              timestamp: new Date().toISOString(),
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+
         case 'auth/facebook':
         case 'facebook-auth':
           return await handleFacebookAuthInit(request, env);
