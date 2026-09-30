@@ -273,7 +273,7 @@ export const LandingPage: React.FC = () => {
         {/* Primary H1: Exactly two centered lines with highlighted treatment */}
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight leading-[1.18] max-w-3xl mx-auto text-center">
           <span className="block">Turn Customer Praise Into</span>
-          <span className="senja-purple-mark mt-1 sm:mt-2 inline-block whitespace-nowrap">
+          <span className="senja-purple-mark mt-1 sm:mt-2 inline-block">
             Your #1 Growth Engine
           </span>
         </h1>
