@@ -719,6 +719,10 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           />
           <span className="text-xs text-gray-700 leading-normal font-medium font-sans">
             I give permission to feature this testimonial on your public website, marketing materials, and social proof widgets.
+            {' '}
+            <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline text-gray-500 hover:text-gray-700">
+              Privacy Policy
+            </a>
           </span>
         </label>
       </div>

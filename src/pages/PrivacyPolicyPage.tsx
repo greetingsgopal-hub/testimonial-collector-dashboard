@@ -59,7 +59,7 @@ export const PrivacyPolicyPage = () => {
             Privacy Policy
           </h1>
           <p className="text-sm text-zinc-400 mt-2">
-            Last updated: September 13, 2026
+            Last updated: September 29, 2026
           </p>
         </div>
 
@@ -162,7 +162,7 @@ export const PrivacyPolicyPage = () => {
             <ul className="list-disc list-inside space-y-1 text-zinc-400 pl-2">
               <li><strong className="text-zinc-200">Google Firebase / Cloud Firestore:</strong> Authentication identity management, encrypted database storage, and file hosting. Data access is governed by security rules verifying tenant ownership.</li>
               <li><strong className="text-zinc-200">Cloudflare Workers:</strong> Global delivery and secure hosting for the Panda Praise frontend and embeddable widget assets over encrypted HTTPS.</li>
-                  <li><strong className="text-zinc-200">Netlify Functions:</strong> Serverless backend endpoints used for social OAuth and publishing operations.</li>
+                  <li><strong className="text-zinc-200">Google reCAPTCHA Enterprise (App Check):</strong> Optional abuse protection for public form submissions, activated per site configuration.</li>
             </ul>
           </section>
 

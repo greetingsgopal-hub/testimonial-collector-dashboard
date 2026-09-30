@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, FileCheck, Scale, AlertTriangle, LifeBuoy, Mail, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Shield, FileCheck, Scale, AlertTriangle, LifeBuoy, Mail, ArrowLeft, CheckCircle, CreditCard } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
 
@@ -59,7 +59,7 @@ export const TermsPage = () => {
             Terms of Service
           </h1>
           <p className="text-sm text-zinc-400 mt-2">
-            Last updated: September 13, 2026
+            Last updated: September 29, 2026
           </p>
         </div>
 
@@ -157,22 +157,40 @@ export const TermsPage = () => {
             </p>
           </section>
 
-          {/* Section 8 */}
+          {/* Section 8 — Billing */}
+          <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
+            <div className="flex items-center gap-2.5 text-white font-semibold text-base">
+              <CreditCard className="w-5 h-5 text-brand-400" />
+              <h2>8. Billing & Subscriptions</h2>
+            </div>
+            <p>
+              Paid plans are billed in advance on a monthly or annual basis, or as a one-time
+              lifetime purchase, at the prices displayed on our pricing page at the time of
+              purchase. You may cancel a subscription at any time from your billing dashboard;
+              you retain access to your paid plan until the end of the current billing period,
+              after which your account reverts to the Free plan. Fees already paid for the
+              current period are non-refundable except where required by applicable law.
+              One-time lifetime purchases are non-refundable once access has been granted,
+              except where required by applicable law.
+            </p>
+          </section>
+
+          {/* Section 10 */}
           <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
             <div className="flex items-center gap-2.5 text-white font-semibold text-base">
               <Shield className="w-5 h-5 text-brand-400" />
-              <h2>8. Limitation of Liability</h2>
+              <h2>9. Limitation of Liability</h2>
             </div>
             <p>
               To the maximum extent permitted by applicable law, Panda Praise and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits, data, or goodwill arising out of or in connection with your access to or use of the Service.
             </p>
           </section>
 
-          {/* Section 9 */}
+          {/* Section 10 */}
           <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
             <div className="flex items-center gap-2.5 text-white font-semibold text-base">
               <Mail className="w-5 h-5 text-brand-400" />
-              <h2>9. Termination & Contact</h2>
+              <h2>10. Termination & Contact</h2>
             </div>
             <p>
               We reserve the right to suspend or terminate accounts that violate these Terms. You may stop using the Service and request deletion of your account and data at any time.
