@@ -18,6 +18,7 @@ import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { ImportPlatform, ReviewInput, CsvColumnMapping } from '../types';
 import { storage } from '../lib/storage';
+import { PLAN_LIMITS } from '../types';
 import { ConnectSourceModal } from '../components/dashboard/views/ConnectSourceModal';
 
 interface PlatformInfo {
@@ -58,7 +59,7 @@ export const ImportPage: React.FC = () => {
   description: 'Import testimonials from a CSV file, or connect your review platforms.',
   });
 
-  const { project } = useAuth();
+  const { project, workspace } = useAuth();
   const [selectedPlatform, setSelectedPlatform] = useState<ImportPlatform | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [importUrl, setImportUrl] = useState('');
@@ -188,6 +189,24 @@ export const ImportPage: React.FC = () => {
         status: 'approved' as const,
       })).filter(r => r.content.trim().length > 0);
 
+      // Free-plan limit: "Up to 15 testimonials" (pricing page + PLAN_LIMITS).
+      // Owner-initiated imports are capped; anonymous form submissions are not.
+      const maxTestimonials = workspace ? PLAN_LIMITS[workspace.plan].maxTestimonials : -1;
+      if (maxTestimonials !== -1) {
+        const existing = await storage.getReviews(project.id);
+        const remaining = maxTestimonials - existing.length;
+        if (remaining <= 0) {
+          setImportResult({ success: false, count: 0, errors: [`Free plan is limited to ${maxTestimonials} testimonials. Upgrade to import more.`] });
+          setCsvStep('done');
+          return;
+        }
+        if (reviews.length > remaining) {
+          setImportResult({ success: false, count: 0, errors: [`This CSV contains ${reviews.length} testimonials but your Free plan only has ${remaining} slots left (limit ${maxTestimonials}). Upgrade to import more.`] });
+          setCsvStep('done');
+          return;
+        }
+      }
+
       let imported = 0;
       for (const r of reviews) {
         await storage.createReview(r);
@@ -201,13 +220,22 @@ export const ImportPage: React.FC = () => {
     }
 
     setIsImporting(false);
-  }, [project, csvData, columnMapping, csvHeaders]);
+  }, [project, workspace, csvData, columnMapping, csvHeaders]);
 
   const handleManualImport = useCallback(async () => {
     if (!project || !manualName.trim() || !manualContent.trim()) return;
     setIsImporting(true);
 
     try {
+      // Free-plan limit: "Up to 15 testimonials" (pricing page + PLAN_LIMITS).
+      const maxTestimonials = workspace ? PLAN_LIMITS[workspace.plan].maxTestimonials : -1;
+      if (maxTestimonials !== -1) {
+        const existing = await storage.getReviews(project.id);
+        if (existing.length >= maxTestimonials) {
+          setImportResult({ success: false, count: 0, errors: [`Free plan is limited to ${maxTestimonials} testimonials. Upgrade to add more.`] });
+          return;
+        }
+      }
       await storage.createReview({
         projectId: project.id,
         name: manualName.trim(),
@@ -235,7 +263,7 @@ export const ImportPage: React.FC = () => {
     }
 
     setIsImporting(false);
-  }, [project, manualName, manualEmail, manualContent, manualRating, manualCompany, manualRole]);
+  }, [project, workspace, manualName, manualEmail, manualContent, manualRating, manualCompany, manualRole]);
 
   const handleUrlImport = useCallback(async () => {
     if (!project || !importUrl.trim() || !selectedPlatform) return;
