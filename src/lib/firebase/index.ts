@@ -47,12 +47,9 @@ if (isFirebaseConfigured) {
     const appCheckEnabled =
       import.meta.env.VITE_FIREBASE_APPCHECK_ENABLED === 'true';
 
+    // Local development support: register debug token in Firebase Console > App Check > Apps.
     if (appCheckEnabled && appCheckSiteKey && typeof window !== 'undefined') {
       try {
-        // Local development support: the App Check SDK prints a debug token
-        // to the console when VITE_FIREBASE_APPCHECK_DEBUG=true is set.
-        // Register that token in Firebase Console > App Check > Apps > Manage
-        // debug tokens so localhost requests pass while enforcement is on.
         if (import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG === 'true') {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (window as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;

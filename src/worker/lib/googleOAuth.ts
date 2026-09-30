@@ -112,9 +112,27 @@ export async function getGoogleUserProfile(accessToken: string): Promise<GoogleU
  */
 export async function fetchGoogleBusinessReviews(
   accessToken: string,
-  _env: WorkerEnv
-): Promise<ImportedReview[]> {
+  _envOrPlaceId?: any
+): Promise<any[]> {
   try {
+    const isPlaceParam = typeof _envOrPlaceId === 'string' && _envOrPlaceId.length > 0;
+    if (isPlaceParam) {
+      const url = `https://mybusiness.googleapis.com/v4/${_envOrPlaceId}/reviews`;
+      const reviewsRes = await fetch(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (reviewsRes.ok) {
+        const reviewsData: any = await reviewsRes.json();
+        const googleReviews = reviewsData.reviews || [];
+        return googleReviews.map((rev: any, idx: number) => ({
+          id: rev.reviewId || `google_rev_${Date.now()}_${idx}`,
+          authorName: rev.reviewer?.displayName || 'Google Reviewer',
+          rating: rev.starRating === 'FIVE' ? 5 : rev.starRating === 'FOUR' ? 4 : rev.starRating === 'THREE' ? 3 : 5,
+          text: rev.comment || '',
+        }));
+      }
+    }
+
     // 1. Fetch Google Business Accounts
     const accountsRes = await fetch('https://mybusinessaccountmanagement.googleapis.com/v1/accounts', {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -246,3 +264,51 @@ export async function fetchGooglePlaceReviews(
     throw new Error('Failed to fetch Google Place details. Please verify the Place ID.');
   }
 }
+
+export interface GoogleLocation {
+  placeId: string;
+  name: string;
+}
+
+export interface GoogleRawReview {
+  id: string;
+  authorName: string;
+  rating: number;
+  text: string;
+}
+
+export async function exchangeGoogleAuthCode(code: string): Promise<string> {
+  const token = await exchangeGoogleCode(
+    code,
+    (typeof process !== 'undefined' && process.env.GOOGLE_REDIRECT_URI) || '',
+    (typeof process !== 'undefined' && process.env.GOOGLE_CLIENT_ID) || '',
+    (typeof process !== 'undefined' && process.env.GOOGLE_CLIENT_SECRET) || ''
+  );
+  return token.access_token;
+}
+
+export async function listGooglePlaces(accessToken: string): Promise<GoogleLocation[]> {
+  try {
+    const accountsRes = await fetch('https://mybusinessaccountmanagement.googleapis.com/v1/accounts', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!accountsRes.ok) return [];
+    const accountsData: any = await accountsRes.json();
+    const accounts = accountsData.accounts || [];
+    if (accounts.length === 0) return [];
+    const accountName = accounts[0].name;
+    const locationsRes = await fetch(`https://mybusinessbusinessinformation.googleapis.com/v1/${accountName}/locations?readMask=name,title,storeCode`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!locationsRes.ok) return [];
+    const locationsData: any = await locationsRes.json();
+    return (locationsData.locations || []).map((loc: any) => ({
+      placeId: loc.name,
+      name: loc.title || loc.name,
+    }));
+  } catch (_err) {
+    return [];
+  }
+}
+
+

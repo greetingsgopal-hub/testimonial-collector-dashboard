@@ -130,8 +130,8 @@ export async function getFacebookPages(userAccessToken: string): Promise<Faceboo
 export async function fetchFacebookPageReviews(
   pageAccessToken: string,
   pageId: string,
-  _env: WorkerEnv
-): Promise<FacebookReviewItem[]> {
+  _env?: WorkerEnv
+): Promise<any[]> {
   try {
     const url = `https://graph.facebook.com/v19.0/${pageId}/ratings?fields=created_time,has_rating,rating,review_text,reviewer{name,id,picture}&access_token=${encodeURIComponent(
       pageAccessToken
@@ -223,3 +223,9 @@ export function transformFacebookWebhookPayload(payload: any): FacebookReviewIte
 
   return reviews;
 }
+
+export async function listFacebookPages(accessToken: string): Promise<any[]> {
+  const pages = await getFacebookPages(accessToken);
+  return pages.map((p) => ({ pageId: p.id, name: p.name }));
+}
+

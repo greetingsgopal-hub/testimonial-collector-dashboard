@@ -200,3 +200,27 @@ export function extractInstagramPostReview(postUrl: string): InstagramCommentRev
   void postUrl;
   return [];
 }
+
+export interface InstagramBusinessAccount {
+  accountId: string;
+  name: string;
+}
+
+export interface InstagramRawReview {
+  id: string;
+  author: string;
+  rating: number;
+  text: string;
+}
+
+export async function listInstagramAccounts(_accessToken: string): Promise<InstagramBusinessAccount[]> {
+  return [];
+}
+
+export async function fetchInstagramReviews(
+  _accessToken: string,
+  _accountId: string
+): Promise<InstagramRawReview[]> {
+  return [];
+}
+

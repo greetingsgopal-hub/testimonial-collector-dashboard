@@ -20,6 +20,7 @@ import { handleSocialStatus } from './handlers/socialStatus';
 import { handleSocialDisconnect } from './handlers/socialDisconnect';
 import { handleEmbedScript } from './handlers/embedScript';
 import { handleEmbedTestimonials } from './handlers/embedTestimonials';
+import { handleImportProvider } from './handlers/importProviderHandler';
 import { executeAutomatedBackgroundSync } from './lib/backgroundSync';
 
 export default {
@@ -138,6 +139,11 @@ export default {
         case 'embed-testimonials':
         case 'testimonials/embed':
           return await handleEmbedTestimonials(request, env);
+
+        case 'import':
+        case 'import-reviews':
+        case 'import/provider':
+          return await handleImportProvider(request, env);
 
         default:
           return new Response(JSON.stringify({ error: `API route '${pathname}' not found.` }), {
