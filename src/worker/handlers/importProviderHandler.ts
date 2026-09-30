@@ -128,6 +128,7 @@ export async function handleImportProvider(request: Request, _env?: any): Promis
     authToken: body.authToken || body.providerAuthToken, // Third-party provider OAuth token
     firebaseIdToken, // Authenticated Panda Praise user token
   };
+  (importRequest as any).env = _env;
 
   // 7. Invoke existing ImportEngine pipeline
   let result;

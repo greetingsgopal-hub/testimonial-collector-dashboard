@@ -1,19 +1,10 @@
 // src/worker/lib/firestore.ts
 // Canonical Firestore persistence and ownership helpers for Panda Praise reviews.
+// Pure HTTP REST implementation compatible with Cloudflare Workers isolates.
 
 import { createHash } from 'crypto';
-import { initializeApp, getApps } from 'firebase-admin/app';
-import { getFirestore, Firestore } from 'firebase-admin/firestore';
-
-// Initialize Firebase Admin SDK if not already initialized
-if (!getApps().length) {
-  initializeApp();
-}
-
-export const db: Firestore = getFirestore();
-export const reviewsCollection = db.collection('reviews');
-export const workspacesCollection = db.collection('workspaces');
-export const projectsCollection = db.collection('projects');
+import { getDocument, saveDocument, queryUserDocuments } from './firestoreAdmin';
+import { verifyFirebaseToken } from './firebaseAuth';
 
 /**
  * Validates that an external review identifier conforms to safe Firestore / application standards.
@@ -48,17 +39,19 @@ export function generateReviewDocId(ownerId: string, provider: string, externalI
  * Verifies the Panda Praise Firebase ID token and extracts the authenticated UID.
  * Rejects unauthenticated callers or invalid tokens.
  */
-export async function verifyFirebaseIdentity(firebaseIdToken?: string): Promise<string> {
+export async function verifyFirebaseIdentity(firebaseIdToken?: string, env?: any): Promise<string> {
   if (!firebaseIdToken || typeof firebaseIdToken !== 'string' || !firebaseIdToken.trim()) {
     throw new Error('Missing or empty Firebase ID token');
   }
-  // Lazily load getAuth to avoid premature ESM module resolution in test runtimes
-  const { getAuth } = require('firebase-admin/auth');
-  const decoded = await getAuth().verifyIdToken(firebaseIdToken.trim());
-  if (!decoded || !decoded.uid) {
+  const fallbackEnv = env || {
+    FIREBASE_API_KEY: (typeof process !== 'undefined' && process.env?.FIREBASE_API_KEY) || 'AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE',
+    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' && process.env?.FIREBASE_PROJECT_ID) || 'testimonialcollectordashboard',
+  };
+  const verified = await verifyFirebaseToken(firebaseIdToken.trim(), fallbackEnv);
+  if (!verified || !verified.uid) {
     throw new Error('Invalid Firebase authentication token');
   }
-  return decoded.uid;
+  return verified.uid;
 }
 
 /**
@@ -67,41 +60,39 @@ export async function verifyFirebaseIdentity(firebaseIdToken?: string): Promise<
  */
 export async function resolveUserOwnership(
   ownerId: string,
-  requestedProjectId?: string
+  requestedProjectId?: string,
+  env?: any
 ): Promise<{ ownerId: string; workspaceId: string; projectId: string }> {
-  // 1. Resolve workspace
+  const fallbackEnv = env || {
+    FIREBASE_API_KEY: (typeof process !== 'undefined' && process.env?.FIREBASE_API_KEY) || 'AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE',
+    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' && process.env?.FIREBASE_PROJECT_ID) || 'testimonialcollectordashboard',
+  };
+
   let workspaceId = `ws_${ownerId}`;
   try {
-    const wsSnap = await workspacesCollection.where('ownerId', '==', ownerId).limit(1).get();
-    if (!wsSnap.empty) {
-      workspaceId = wsSnap.docs[0].id;
+    const workspaces = await queryUserDocuments('workspaces', ownerId, null, fallbackEnv);
+    if (workspaces && workspaces.length > 0) {
+      workspaceId = workspaces[0].id;
     }
-  } catch (err) {
-    // Tolerant fallback for environments with fresh databases
-  }
+  } catch (_err) {}
 
-  // 2. Resolve project
   let projectId = `proj_${ownerId}`;
   if (requestedProjectId && typeof requestedProjectId === 'string') {
     try {
-      const projDoc = await projectsCollection.doc(requestedProjectId).get();
-      if (projDoc.exists && projDoc.data()?.ownerId === ownerId) {
+      const projDoc = await getDocument('projects', requestedProjectId, null, fallbackEnv);
+      if (projDoc && projDoc.ownerId === ownerId) {
         projectId = requestedProjectId;
       }
-    } catch (err) {
-      // Fall through to query by ownerId
-    }
+    } catch (_err) {}
   }
 
   if (projectId === `proj_${ownerId}`) {
     try {
-      const projSnap = await projectsCollection.where('ownerId', '==', ownerId).limit(1).get();
-      if (!projSnap.empty) {
-        projectId = projSnap.docs[0].id;
+      const projects = await queryUserDocuments('projects', ownerId, null, fallbackEnv);
+      if (projects && projects.length > 0) {
+        projectId = projects[0].id;
       }
-    } catch (err) {
-      // Tolerant fallback
-    }
+    } catch (_err) {}
   }
 
   return { ownerId, workspaceId, projectId };
@@ -111,22 +102,16 @@ export async function resolveUserOwnership(
  * Checks whether a review with the given provider and externalId already exists for this owner.
  * Scoped by ownerId + provider + externalId.
  */
-export async function isDuplicate(ownerId: string, provider: string, externalId: string): Promise<boolean> {
+export async function isDuplicate(ownerId: string, provider: string, externalId: string, env?: any): Promise<boolean> {
   const docId = generateReviewDocId(ownerId, provider, externalId);
-  const doc = await reviewsCollection.doc(docId).get();
-  if (doc.exists) {
-    return true;
-  }
-  // Secondary check against indexed fields
+  const fallbackEnv = env || {
+    FIREBASE_API_KEY: (typeof process !== 'undefined' && process.env?.FIREBASE_API_KEY) || 'AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE',
+    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' && process.env?.FIREBASE_PROJECT_ID) || 'testimonialcollectordashboard',
+  };
   try {
-    const q = await reviewsCollection
-      .where('ownerId', '==', ownerId)
-      .where('provider', '==', provider)
-      .where('externalId', '==', externalId)
-      .limit(1)
-      .get();
-    return !q.empty;
-  } catch (e) {
+    const doc = await getDocument('reviews', docId, null, fallbackEnv);
+    return Boolean(doc);
+  } catch (_e) {
     return false;
   }
 }
@@ -141,16 +126,19 @@ export async function saveReviewsBatch(
   projectId: string,
   provider: string,
   resourceId: string | undefined,
-  reviews: any[]
+  reviews: any[],
+  env?: any
 ): Promise<any[]> {
-  const batch = db.batch();
+  const fallbackEnv = env || {
+    FIREBASE_API_KEY: (typeof process !== 'undefined' && process.env?.FIREBASE_API_KEY) || 'AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE',
+    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' && process.env?.FIREBASE_PROJECT_ID) || 'testimonialcollectordashboard',
+  };
   const now = new Date().toISOString();
   const savedDocs: any[] = [];
 
   for (const review of reviews) {
     const safeExternalId = validateExternalId(review.externalId);
     const docId = generateReviewDocId(ownerId, provider, safeExternalId);
-    const docRef = reviewsCollection.doc(docId);
 
     const canonicalReview = {
       id: docId,
@@ -158,14 +146,14 @@ export async function saveReviewsBatch(
       workspaceId,
       projectId,
       collectionFormId: null,
-      name: review.name || 'Anonymous',
+      name: review.author || review.name || 'Anonymous',
       email: review.email || '',
       role: review.role || 'Customer',
       company: review.company || null,
       avatarUrl: review.avatarUrl || null,
       rating: typeof review.rating === 'number' ? review.rating : 5,
       title: review.title || null,
-      content: review.content || '',
+      content: review.text || review.content || '',
       type: review.type || 'text',
       tags: Array.isArray(review.tags) && review.tags.length > 0 ? review.tags : ['imported', provider],
       source: provider,
@@ -183,12 +171,9 @@ export async function saveReviewsBatch(
       importedAt: now,
     };
 
-    batch.set(docRef, canonicalReview);
+    await saveDocument('reviews', docId, canonicalReview, null, fallbackEnv);
     savedDocs.push(canonicalReview);
   }
 
-  if (savedDocs.length > 0) {
-    await batch.commit();
-  }
   return savedDocs;
 }

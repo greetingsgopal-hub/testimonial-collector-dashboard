@@ -20,5 +20,11 @@
   },
   "triggers": {
     "crons": ["0 */6 * * *"]
-  }
+  },
+  "routes": [
+    {
+      "pattern": "pandapraise.com/*",
+      "zone_name": "pandapraise.com"
+    }
+  ]
 }

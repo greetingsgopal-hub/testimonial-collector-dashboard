@@ -74,8 +74,8 @@ export async function importProvider(request: ImportRequest): Promise<EngineResu
   let workspaceId: string;
   let projectId: string;
   try {
-    ownerId = await verifyFirebaseIdentity(request.firebaseIdToken);
-    const ownership = await resolveUserOwnership(ownerId, request.params?.projectId);
+    ownerId = await verifyFirebaseIdentity(request.firebaseIdToken, (request as any).env);
+    const ownership = await resolveUserOwnership(ownerId, request.params?.projectId, (request as any).env);
     workspaceId = ownership.workspaceId;
     projectId = ownership.projectId;
   } catch (authErr) {
@@ -154,7 +154,7 @@ export async function importProvider(request: ImportRequest): Promise<EngineResu
   for (const r of normalized) {
     try {
       const validId = validateExternalId(r.externalId);
-      const isDup = await isDuplicate(ownerId, request.providerId, validId);
+      const isDup = await isDuplicate(ownerId, request.providerId, validId, (request as any).env);
       if (!isDup) {
         uniqueReviews.push(r);
       }
@@ -173,7 +173,8 @@ export async function importProvider(request: ImportRequest): Promise<EngineResu
       projectId,
       request.providerId,
       selectedResourceId,
-      uniqueReviews
+      uniqueReviews,
+      (request as any).env
     );
   }
 
