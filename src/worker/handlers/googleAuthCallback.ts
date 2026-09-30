@@ -1,7 +1,7 @@
 import { WorkerEnv } from '../types';
 import { verifyOAuthState, encryptToken } from '../lib/crypto';
 import { exchangeGoogleCode, getGoogleUserProfile, fetchGoogleBusinessReviews } from '../lib/googleOAuth';
-import { saveDocument } from '../lib/firestoreAdmin';
+import { saveDocument, queryUserDocuments } from '../lib/firestoreAdmin';
 import { checkRateLimit } from '../lib/rateLimit';
 
 export async function handleGoogleAuthCallback(request: Request, env: WorkerEnv): Promise<Response> {
@@ -71,6 +71,22 @@ export async function handleGoogleAuthCallback(request: Request, env: WorkerEnv)
     // 3. Fetch Google Business / Places Reviews
     const reviews = await fetchGoogleBusinessReviews(tokenData.access_token, env);
 
+    // 3b. Resolve the owner's most recent project so imported reviews are
+    // visible in the dashboard (reviews are always listed per-project).
+    let projectId: string | undefined;
+    try {
+      const projects = await queryUserDocuments('projects', userId, undefined, env);
+      const sorted = projects
+        .filter((p: any) => p && typeof p.id === 'string' && p.id.length > 0)
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+        );
+      projectId = sorted[0]?.id;
+    } catch (projErr) {
+      console.warn('[GoogleOAuthCallback] Project lookup failed, importing without projectId:', projErr);
+    }
+
     const now = new Date().toISOString();
     const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000).toISOString();
 
@@ -96,22 +112,33 @@ export async function handleGoogleAuthCallback(request: Request, env: WorkerEnv)
     const docId = `${userId}_google`;
     await saveDocument('social_connections', docId, connectionDoc, undefined, env);
 
-    // 5. Save imported reviews to testimonials collection
+    // 5. Save imported reviews to the reviews collection (the dashboard reads
+    // `reviews`, not `testimonials`) with the full Review doc shape.
     for (const rev of reviews) {
-      const testimonialDoc = {
+      const reviewDoc = {
         ownerId: userId,
-        author: rev.authorName,
-        avatar: rev.authorAvatar,
+        ...(projectId ? { projectId } : {}),
+        name: rev.authorName || 'Google Reviewer',
+        email: '',
+        role: 'Google Reviewer',
+        ...(rev.authorAvatar ? { avatarUrl: rev.authorAvatar } : {}),
         rating: rev.rating,
-        text: rev.text,
+        content: rev.text,
+        type: 'text',
+        tags: [],
         source: 'google',
-        verified: true,
         status: 'approved',
-        createdAt: rev.date,
-        importedAt: now,
+        isFeatured: false,
+        consent: true,
+        helpfulCount: 0,
+        createdAt: rev.date || now,
+        updatedAt: now,
       };
-      await saveDocument('testimonials', rev.id, testimonialDoc, undefined, env).catch((e) =>
-        console.warn('[GoogleCallback] Testimonial save skipped:', e)
+      // Firestore doc IDs cannot contain '/'. Google review IDs are opaque
+      // alphanumeric strings, but sanitize defensively.
+      const docId = `google_${rev.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+      await saveDocument('reviews', docId, reviewDoc, undefined, env).catch((e) =>
+        console.warn('[GoogleCallback] Review save skipped:', e)
       );
     }
 

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { getFirebaseAuth } from '../../../lib/firebase';
+import { socialClient } from '../../../lib/socialClient';
 import { 
   X, 
   Check, 
@@ -72,12 +74,14 @@ interface ConnectSourceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectPlatform: (platformId: string) => void;
+  projectId?: string;
 }
 
 export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   isOpen,
   onClose,
   onSelectPlatform,
+  projectId,
 }) => {
   const [step, setStep] = useState<'select' | 'configure'>('select');
   const [selectedId, setSelectedId] = useState<string>('google');
@@ -134,11 +138,25 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   };
 
   /**
-   * Triggers the real backend OAuth 2.0 flow for Google Reviews / Business Profile
+   * Triggers the real backend OAuth 2.0 flow for Google Reviews / Business
+   * Profile. Uses the authenticated POST /api/oauth-init route — the browser
+   * cannot attach an Authorization header to a plain navigation, so a GET
+   * /api/auth/google redirect can never authenticate.
    */
-  const handleGoogleOAuthRedirect = () => {
+  const handleGoogleOAuthRedirect = async () => {
     setIsProcessing(true);
-    window.location.href = '/api/auth/google';
+    const res = await socialClient.initOAuth('google');
+    if (res.error) {
+      setIsProcessing(false);
+      setImportError(res.error);
+      return;
+    }
+    if (res.authUrl) {
+      window.location.href = res.authUrl;
+    } else {
+      setIsProcessing(false);
+      setImportError('Failed to start Google sign-in. Please try again.');
+    }
   };
 
   /**
@@ -168,10 +186,15 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
 
     if (selectedId === 'google') {
       try {
+        const auth = getFirebaseAuth();
+        const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
         const response = await fetch('/api/google/import-place', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ placeId: inputUrl.trim() }),
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+          },
+          body: JSON.stringify({ placeId: inputUrl.trim(), ...(projectId ? { projectId } : {}) }),
         });
 
         if (response.ok) {

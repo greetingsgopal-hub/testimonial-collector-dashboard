@@ -4,7 +4,7 @@ import { deleteDocument } from '../lib/firestoreAdmin';
 import { getCorsHeaders } from '../lib/cors';
 import { checkRateLimit } from '../lib/rateLimit';
 
-const ALLOWED_PLATFORMS = ['linkedin', 'twitter', 'facebook', 'instagram'];
+const ALLOWED_PLATFORMS = ['linkedin', 'twitter', 'facebook', 'instagram', 'google'];
 
 export async function handleSocialDisconnect(request: Request, env: WorkerEnv): Promise<Response> {
   const origin = request.headers.get('Origin');

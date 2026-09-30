@@ -438,6 +438,7 @@ export const ImportPage: React.FC = () => {
           <ConnectSourceModal
             isOpen={showConnectModal}
             onClose={() => setShowConnectModal(false)}
+            projectId={project?.id}
             onSelectPlatform={(pid) => {
               if (pid === 'google') setSelectedPlatform('google_reviews');
               else if (pid === 'twitter') setSelectedPlatform('twitter');

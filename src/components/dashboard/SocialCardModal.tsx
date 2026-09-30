@@ -18,7 +18,7 @@ import {
   Link as LinkIcon,
   Layers
 } from 'lucide-react';
-import { Review, SocialPlatform } from '../../types';
+import { Review, PublishPlatform } from '../../types';
 import { analytics } from '../../lib/analytics';
 import { socialClient, SocialStatusResponse } from '../../lib/socialClient';
 import { ConnectedAccountsModal } from './ConnectedAccountsModal';
@@ -138,7 +138,7 @@ const THEMES: Record<
 };
 
 const PLATFORMS: Record<
-  SocialPlatform,
+  PublishPlatform,
   {
     name: string;
     defaultFormat: SocialCardFormat;
@@ -187,7 +187,7 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
   const { isEmailVerified } = useAuth();
 
   // Selected Platform
-  const [selectedPlatform, setSelectedPlatform] = useState<SocialPlatform>('linkedin');
+  const [selectedPlatform, setSelectedPlatform] = useState<PublishPlatform>('linkedin');
 
   // Format & Theme
   const [format, setFormat] = useState<SocialCardFormat>('landscape');
@@ -250,7 +250,7 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
     }
   }, [review, projectName]);
 
-  const handleSelectPlatform = (platform: SocialPlatform) => {
+  const handleSelectPlatform = (platform: PublishPlatform) => {
     setSelectedPlatform(platform);
     setFormat(PLATFORMS[platform].defaultFormat);
     setPublishSuccess(null);
@@ -522,7 +522,7 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
       setPublishError('Email verification required. Please verify your email address to enable 1-click social broadcasting.');
       return;
     }
-    const connectedPlatforms = (['linkedin', 'twitter', 'facebook', 'instagram'] as SocialPlatform[]).filter(
+    const connectedPlatforms = (['linkedin', 'twitter', 'facebook', 'instagram'] as PublishPlatform[]).filter(
       (p) => statusData.connections[p]?.connected
     );
 
@@ -571,7 +571,7 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
   };
 
   // Connect Account Trigger
-  const handleConnectPlatform = async (platform: SocialPlatform) => {
+  const handleConnectPlatform = async (platform: PublishPlatform) => {
     if (!isEmailVerified) {
       setPublishError('Email verification required. Please verify your email address before connecting external social accounts.');
       return;
@@ -674,7 +674,7 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
   const isConnected = currentConnection?.connected;
   const isExpired = currentConnection?.status === 'expired';
   const totalConnectedCount = statusData
-    ? (['linkedin', 'twitter', 'facebook', 'instagram'] as SocialPlatform[]).filter(
+    ? (['linkedin', 'twitter', 'facebook', 'instagram'] as PublishPlatform[]).filter(
         (p) => statusData.connections[p]?.connected
       ).length
     : 0;
@@ -754,7 +754,7 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
               </div>
 
               <div className="grid grid-cols-4 gap-2">
-                {(Object.keys(PLATFORMS) as SocialPlatform[]).map((pKey) => {
+                {(Object.keys(PLATFORMS) as PublishPlatform[]).map((pKey) => {
                   const p = PLATFORMS[pKey];
                   const Icon = p.icon;
                   const isSelected = selectedPlatform === pKey;

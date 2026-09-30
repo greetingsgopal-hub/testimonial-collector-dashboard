@@ -3,7 +3,7 @@ import { extractBearerToken, verifyFirebaseToken } from '../lib/firebaseAuth';
 import { getCorsHeaders } from '../lib/cors';
 import { checkRateLimit } from '../lib/rateLimit';
 import { fetchGooglePlaceReviews } from '../lib/googleOAuth';
-import { saveDocument } from '../lib/firestoreAdmin';
+import { saveDocument, queryUserDocuments } from '../lib/firestoreAdmin';
 
 export async function handleGooglePlaceImport(request: Request, env: WorkerEnv): Promise<Response> {
   const origin = request.headers.get('Origin');
@@ -49,6 +49,10 @@ export async function handleGooglePlaceImport(request: Request, env: WorkerEnv):
   try {
     const body: any = await request.json().catch(() => ({}));
     const placeInput = body.placeId || body.url || body.input;
+    // Optional target project so imported reviews appear in the dashboard
+    // (reviews are listed per-project). Falls back to most recent project.
+    const requestedProjectId =
+      typeof body.projectId === 'string' && body.projectId.trim() ? body.projectId.trim() : '';
 
     if (!placeInput || typeof placeInput !== 'string' || !placeInput.trim()) {
       return new Response(
@@ -63,22 +67,47 @@ export async function handleGooglePlaceImport(request: Request, env: WorkerEnv):
     const result = await fetchGooglePlaceReviews(placeInput.trim(), env);
     const now = new Date().toISOString();
 
-    // Save reviews to testimonials collection
+    let projectId: string | undefined = requestedProjectId;
+    if (!projectId) {
+      try {
+        const projects = await queryUserDocuments('projects', userId, undefined, env);
+        const sorted = projects
+          .filter((p: any) => p && typeof p.id === 'string' && p.id.length > 0)
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+          );
+        projectId = sorted[0]?.id;
+      } catch (projErr) {
+        console.warn('[GooglePlaceImport] Project lookup failed:', projErr);
+      }
+    }
+
+    // Save reviews to the reviews collection (the dashboard reads `reviews`,
+    // not `testimonials`) with the full Review doc shape.
     for (const rev of result.reviews) {
-      const testimonialDoc = {
+      const reviewDoc = {
         ownerId: userId,
-        author: rev.authorName,
-        avatar: rev.authorAvatar,
+        ...(projectId ? { projectId } : {}),
+        name: rev.authorName || 'Google User',
+        email: '',
+        role: 'Google Reviewer',
+        ...(rev.authorAvatar ? { avatarUrl: rev.authorAvatar } : {}),
         rating: rev.rating,
-        text: rev.text,
+        content: rev.text,
+        type: 'text',
+        tags: [],
         source: 'google',
-        verified: true,
         status: 'approved',
-        placeName: result.placeName,
-        createdAt: rev.date,
-        importedAt: now,
+        isFeatured: false,
+        consent: true,
+        helpfulCount: 0,
+        createdAt: rev.date || now,
+        updatedAt: now,
       };
-      await saveDocument('testimonials', rev.id, testimonialDoc, undefined, env).catch((e) =>
+      // fetchGooglePlaceReviews already generates safe ids (google_place_<ts>_<idx>)
+      const docId = rev.id.replace(/[^a-zA-Z0-9_-]/g, '_');
+      await saveDocument('reviews', docId, reviewDoc, undefined, env).catch((e) =>
         console.warn('[GooglePlaceImport] Save skipped:', e)
       );
     }

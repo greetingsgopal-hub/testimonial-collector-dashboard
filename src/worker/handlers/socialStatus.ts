@@ -38,7 +38,7 @@ export async function handleSocialStatus(request: Request, env: WorkerEnv): Prom
   }
 
   try {
-    const platforms = ['linkedin', 'twitter', 'facebook', 'instagram'];
+    const platforms = ['linkedin', 'twitter', 'facebook', 'instagram', 'google'];
     const connectionDocs = await Promise.all(
       platforms.map((p) => getDocument('social_connections', `${user.uid}_${p}`, idToken, env))
     );
@@ -49,6 +49,7 @@ export async function handleSocialStatus(request: Request, env: WorkerEnv): Prom
       twitter: { connected: false },
       facebook: { connected: false },
       instagram: { connected: false },
+      google: { connected: false },
     };
 
     for (const conn of connectionDocs) {

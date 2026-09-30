@@ -391,7 +391,11 @@ export interface WallOfLoveConfig {
 }
 
 // ── Social / Publishing ─────────────────────────────────────
-export type SocialPlatform = 'linkedin' | 'twitter' | 'facebook' | 'instagram';
+// 'google' is import-only (Google Business Profile reviews); it is NOT a
+// publishing platform and is rejected by the social publish handler.
+export type SocialPlatform = 'linkedin' | 'twitter' | 'facebook' | 'instagram' | 'google';
+// Publishing platforms only (excludes import-only 'google').
+export type PublishPlatform = Exclude<SocialPlatform, 'google'>;
 export type SocialConnectionStatus = 'connected' | 'expired' | 'revoked' | 'unauthorized' | 'not_connected';
 export type SocialPublicationStatus = 'draft' | 'publishing' | 'published' | 'failed' | 'revoked';
 

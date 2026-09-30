@@ -106,6 +106,13 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
       iconColor: '#e1306c',
       note: 'Restricted by Meta to Business/Creator accounts linked to a Facebook Page.',
     },
+    {
+      id: 'google',
+      name: 'Google Business Profile',
+      description: 'Import verified Google reviews from your Business Profile locations.',
+      iconColor: '#4285F4',
+      note: 'Import-only: connects Google Business Profile for review sync, not social publishing.',
+    },
   ];
 
   return (
