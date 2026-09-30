@@ -34,6 +34,13 @@ export function getPricePlanTier(priceId: string, env: WorkerEnv): 'starter' | '
   ].filter(Boolean);
 
   if (subscriptionPrices.includes(priceId)) return 'starter';
+
+  // Founding Member: one-time $150 lifetime purchase. Pricing page promises
+  // "lifetime access to all current and future features" - that is the pro tier.
+  if (env.STRIPE_PRICE_FOUNDING_LIFETIME && priceId === env.STRIPE_PRICE_FOUNDING_LIFETIME) {
+    return 'pro';
+  }
+
   return null;
 }
 
@@ -78,14 +85,15 @@ export async function createCheckoutSession(
   workspaceId: string,
   customerId: string,
   priceId: string,
+  origin: string,
   env: WorkerEnv
 ): Promise<string> {
   const stripe = getStripeClient(env);
-  const origin = 'https://testimonial-collector-dashboard2.greetings-gopal.workers.dev';
+  const isOneTime = env.STRIPE_PRICE_FOUNDING_LIFETIME && priceId === env.STRIPE_PRICE_FOUNDING_LIFETIME;
 
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
-    mode: 'subscription',
+    mode: isOneTime ? 'payment' : 'subscription',
     line_items: [
       {
         price: priceId,
@@ -97,11 +105,9 @@ export async function createCheckoutSession(
     metadata: {
       workspaceId,
     },
-    subscription_data: {
-      metadata: {
-        workspaceId,
-      },
-    },
+    ...(isOneTime
+      ? { payment_intent_data: { metadata: { workspaceId } } }
+      : { subscription_data: { metadata: { workspaceId } } }),
   });
 
   return session.url || '';
@@ -112,10 +118,10 @@ export async function createCheckoutSession(
  */
 export async function createBillingPortalSession(
   customerId: string,
+  origin: string,
   env: WorkerEnv
 ): Promise<string> {
   const stripe = getStripeClient(env);
-  const origin = 'https://testimonial-collector-dashboard2.greetings-gopal.workers.dev';
 
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,

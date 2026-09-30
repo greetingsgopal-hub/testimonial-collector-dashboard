@@ -1,7 +1,7 @@
 import { WorkerEnv } from '../types';
 import { extractBearerToken, verifyFirebaseToken } from '../lib/firebaseAuth';
 import { getCorsHeaders } from '../lib/cors';
-import { getDocument } from '../lib/firestoreAdmin';
+import { queryUserDocuments } from '../lib/firestoreAdmin';
 import {
   getOrCreateStripeCustomer,
   createCheckoutSession,
@@ -55,10 +55,11 @@ export async function handleCreateCheckoutSession(request: Request, env: WorkerE
     });
   }
 
-  // Validate price ID against configured prices
+  // Validate price ID against configured prices (subscriptions + founding lifetime)
   const validPrices = [
     env.STRIPE_PRICE_SUBSCRIPTION_MONTHLY,
     env.STRIPE_PRICE_SUBSCRIPTION_ANNUAL,
+    env.STRIPE_PRICE_FOUNDING_LIFETIME,
   ].filter(Boolean);
 
   if (!validPrices.includes(priceId)) {
@@ -68,10 +69,12 @@ export async function handleCreateCheckoutSession(request: Request, env: WorkerE
     });
   }
 
-  // Get user's workspace
-  const workspaceId = user.uid; // Single-user workspace
-  const workspaceDoc = await getDocument('workspaces', workspaceId, undefined, env);
-  if (!workspaceDoc) {
+  // Resolve the user's workspace by ownerId (workspace doc IDs are
+  // auto-generated - they are NOT the auth uid).
+  const workspaces = await queryUserDocuments('workspaces', user.uid, undefined, env);
+  const workspace = workspaces[0];
+  const workspaceId = workspace?.id;
+  if (!workspaceId) {
     return new Response(JSON.stringify({ error: 'Workspace not found.' }), {
       status: 404,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -82,7 +85,7 @@ export async function handleCreateCheckoutSession(request: Request, env: WorkerE
   const email = user.email || user.uid;
   let customerId: string;
   try {
-    customerId = await getOrCreateStripeCustomer(workspaceId, workspaceDoc, email, env);
+    customerId = await getOrCreateStripeCustomer(workspaceId, workspace, email, env);
   } catch (err: any) {
     console.error('[StripeCheckout] Failed to create customer:', err);
     return new Response(JSON.stringify({ error: 'Failed to create Stripe customer.' }), {
@@ -94,7 +97,8 @@ export async function handleCreateCheckoutSession(request: Request, env: WorkerE
   // Create checkout session
   let checkoutUrl: string;
   try {
-    checkoutUrl = await createCheckoutSession(workspaceId, customerId, priceId, env);
+    const origin = new URL(request.url).origin;
+    checkoutUrl = await createCheckoutSession(workspaceId, customerId, priceId, origin, env);
   } catch (err: any) {
     console.error('[StripeCheckout] Failed to create session:', err);
     return new Response(JSON.stringify({ error: 'Failed to create checkout session.' }), {
@@ -136,9 +140,10 @@ export async function handleBillingPortal(request: Request, env: WorkerEnv): Pro
     });
   }
 
-  // Get user's workspace
-  const workspaceId = user.uid;
-  const workspaceDoc = await getDocument('workspaces', workspaceId, undefined, env);
+  // Resolve the user's workspace by ownerId (workspace doc IDs are
+  // auto-generated - they are NOT the auth uid).
+  const workspaces = await queryUserDocuments('workspaces', user.uid, undefined, env);
+  const workspaceDoc = workspaces[0];
   if (!workspaceDoc) {
     return new Response(JSON.stringify({ error: 'Workspace not found.' }), {
       status: 404,
@@ -157,7 +162,8 @@ export async function handleBillingPortal(request: Request, env: WorkerEnv): Pro
   // Create billing portal session
   let portalUrl: string;
   try {
-    portalUrl = await createBillingPortalSession(customerId, env);
+    const origin = new URL(request.url).origin;
+    portalUrl = await createBillingPortalSession(customerId, origin, env);
   } catch (err: any) {
     console.error('[StripeCheckout] Failed to create portal session:', err);
     return new Response(JSON.stringify({ error: 'Failed to create billing portal session.' }), {
@@ -199,9 +205,10 @@ export async function handleGetSubscription(request: Request, env: WorkerEnv): P
     });
   }
 
-  // Get user's workspace
-  const workspaceId = user.uid;
-  const workspaceDoc = await getDocument('workspaces', workspaceId, undefined, env);
+  // Resolve the user's workspace by ownerId (workspace doc IDs are
+  // auto-generated - they are NOT the auth uid).
+  const workspaces = await queryUserDocuments('workspaces', user.uid, undefined, env);
+  const workspaceDoc = workspaces[0];
   if (!workspaceDoc) {
     return new Response(JSON.stringify({ error: 'Workspace not found.' }), {
       status: 404,

@@ -31,6 +31,7 @@ export interface WorkerEnv {
   STRIPE_WEBHOOK_SECRET?: string;
   STRIPE_PRICE_SUBSCRIPTION_MONTHLY?: string;
   STRIPE_PRICE_SUBSCRIPTION_ANNUAL?: string;
+  STRIPE_PRICE_FOUNDING_LIFETIME?: string;
 }
 
 export interface ScheduledEvent {
