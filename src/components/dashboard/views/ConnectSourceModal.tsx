@@ -16,8 +16,7 @@ import {
   Search,
   ShieldCheck,
   MapPin,
-  Globe,
-  MessageCircle
+  Globe
 } from 'lucide-react';
 
 const InstagramIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
@@ -49,8 +48,8 @@ interface PlatformItem {
 const PLATFORMS: PlatformItem[] = [
   { id: 'google', name: 'Google', category: 'Available now', type: 'api', icon: 'https://www.google.com/favicon.ico', color: '#4285F4', inputLabel: 'Google Business Place ID / Profile URL', placeholder: 'e.g. ChIJN1t_tDeuEmsRUsoyG83frY4 or https://maps.google.com/...' },
   { id: 'facebook', name: 'Facebook Page', category: 'Available now', type: 'api', icon: 'https://facebook.com/favicon.ico', color: '#1877F2', inputLabel: 'Facebook Page URL or Recommendation Link', placeholder: 'https://facebook.com/yourpage or https://facebook.com/yourpage/reviews' },
-  { id: 'instagram', name: 'Instagram', category: 'Available now', type: 'api', icon: 'https://instagram.com/favicon.ico', color: '#E4405F', inputLabel: 'Instagram Post or Reel URL', placeholder: 'https://www.instagram.com/p/... or https://www.instagram.com/reel/...' },
-  { id: 'linkedin', name: 'LinkedIn', category: 'Available now', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
+  { id: 'instagram', name: 'Instagram', category: 'Coming soon', type: 'url', icon: 'https://instagram.com/favicon.ico', color: '#E4405F', inputLabel: 'Instagram Post or Reel URL', placeholder: 'https://www.instagram.com/p/... or https://www.instagram.com/reel/...' },
+  { id: 'linkedin', name: 'LinkedIn', category: 'Coming soon', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
   { id: 'twitter', name: 'Twitter / X', category: 'Coming soon', type: 'url', icon: 'https://twitter.com/favicon.ico', color: '#000000', inputLabel: 'Tweet / Post URL', placeholder: 'https://x.com/username/status/1234567890' },
   { id: 'g2', name: 'G2', category: 'Coming soon', type: 'api', icon: 'https://www.g2.com/favicon.ico', color: '#FF492C', inputLabel: 'G2 Product URL or API Token', placeholder: 'https://www.g2.com/products/your-product/reviews' },
   { id: 'trustpilot', name: 'Trustpilot', category: 'Coming soon', type: 'api', icon: 'https://www.trustpilot.com/favicon.ico', color: '#00B67A', inputLabel: 'Trustpilot Business Domain / API Key', placeholder: 'e.g. yourcompany.com or API Token' },
@@ -182,14 +181,6 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   };
 
   /**
-   * Triggers the real backend OAuth 2.0 flow for Instagram Business Account
-   */
-  const handleInstagramOAuthRedirect = () => {
-    setIsProcessing(true);
-    window.location.href = '/api/auth/instagram';
-  };
-
-  /**
    * Executes manual import for Place ID, Instagram URL, Facebook link, or general source
    */
   const handleExecuteImport = async (e: React.FormEvent) => {
@@ -221,32 +212,13 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
       } catch (err) {
         console.warn('[ConnectSourceModal] Google direct API error:', err);
       }
-    } else if (selectedId === 'instagram') {
-      try {
-        const response = await fetch('/api/instagram/import-post', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ postUrl: inputUrl.trim() }),
-        });
-
-        if (response.ok) {
-          const data: any = await response.json();
-          setIsProcessing(false);
-          setSyncSuccess(true);
-          setFoundCount(data.importedCount || 2);
-          setDetectedLocationName(inputUrl.includes('reel') ? 'Instagram Reel Praise' : 'Instagram Feed Post');
-          return;
-        }
-      } catch (err) {
-        console.warn('[ConnectSourceModal] Instagram extract error:', err);
-      }
     }
 
-    // No server-side import endpoint exists for this platform yet.
+    // No server-side direct import endpoint exists for this platform.
     // Report honestly instead of simulating a successful sync.
     setIsProcessing(false);
     setImportError(
-      `${currentPlatform.name} imports are coming soon. Today you can import via CSV upload, or connect Google, LinkedIn, Instagram or Facebook.`
+      `${currentPlatform.name} review import is coming soon. Today you can import via CSV upload, connect your Google or Facebook account, or enter testimonials manually.`
     );
   };
 
@@ -547,98 +519,41 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
                     </form>
                   </div>
                 ) : selectedId === 'instagram' ? (
-                  <div className="space-y-4">
-                    {/* Primary Meta OAuth Button */}
-                    <div className="p-4 rounded-2xl bg-gradient-to-br from-pink-50/80 via-purple-50/50 to-orange-50/50 border border-pink-100 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
-                          <InstagramIcon className="w-3.5 h-3.5 text-[#E4405F]" />
-                          <span>Instagram Business Account (Recommended)</span>
-                        </span>
-                        <span className="text-[10px] font-bold text-purple-700 bg-white px-2 py-0.5 rounded-full border border-purple-200 shadow-2xs">
-                          Meta OAuth 2.0
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-gray-600 leading-relaxed">
-                        Connect your Instagram Business account to continuously stream praise comments, reviews, and mentions into your Proof Vault.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleInstagramOAuthRedirect}
-                        disabled={isProcessing}
-                        className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-95 text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-md active:scale-[0.99] disabled:opacity-60"
-                      >
-                        {isProcessing ? (
-                          <>
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                            <span>Redirecting to Meta...</span>
-                          </>
-                        ) : (
-                          <>
-                            <InstagramIcon className="w-4 h-4" />
-                            <span>Connect Instagram Business Account</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="relative flex items-center justify-center">
-                      <div className="border-t border-gray-200 w-full"></div>
-                      <span className="bg-white px-2.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider relative">
-                        or extract from link
+                  <div className="p-5 rounded-2xl bg-gradient-to-br from-pink-50/80 via-purple-50/40 to-orange-50/30 border border-pink-100 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                        <InstagramIcon className="w-3.5 h-3.5 text-[#E4405F]" />
+                        <span>Instagram Reviews</span>
+                      </span>
+                      <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200">
+                        Coming soon
                       </span>
                     </div>
-
-                    {/* Secondary Manual Post / Reel Extraction Form */}
-                    <form onSubmit={handleExecuteImport} className="space-y-3">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-700 flex items-center justify-between">
-                          <span className="flex items-center gap-1.5">
-                            <MessageCircle className="w-3.5 h-3.5 text-gray-400" />
-                            <span>Paste a public Instagram post/reel URL to extract comments:</span>
-                          </span>
-                        </label>
-                        <input
-                          type="url"
-                          required
-                          value={inputUrl}
-                          onChange={(e) => setInputUrl(e.target.value)}
-                          placeholder="https://www.instagram.com/p/... or https://www.instagram.com/reel/..."
-                          className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#E4405F]/20 focus:border-[#E4405F] transition-all"
-                        />
-                        <p className="text-[11px] text-gray-500">
-                          Extracts author handles, comment text, and verified timestamps directly into moderation.
-                        </p>
-                      </div>
-
-                      <div className="pt-2 flex items-center justify-end gap-2.5">
-                        <button
-                          type="button"
-                          onClick={handleBackToSelect}
-                          className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={isProcessing}
-                          className="px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                        >
-                          {isProcessing ? (
-                            <>
-                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                              <span>Extracting...</span>
-                            </>
-                          ) : (
-                            <>
-                              <span>Extract Post Comments</span>
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </form>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Direct review import is not supported by Instagram&apos;s official API. Automated capture of post praise and comments is currently under development.
+                    </p>
+                    <div className="p-3 bg-white/80 rounded-xl border border-pink-100/60 text-xs text-gray-500">
+                      💡 To import customer feedback from Instagram today, you can export or copy them into a CSV file, or add them using manual entry.
+                    </div>
+                    <div className="pt-2 flex items-center justify-end gap-2.5">
+                      <button
+                        type="button"
+                        onClick={handleBackToSelect}
+                        className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        All Platforms
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSelectPlatform('csv');
+                          handleClose();
+                        }}
+                        className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      >
+                        Upload CSV Instead
+                      </button>
+                    </div>
                   </div>
                 ) : selectedId === 'google' ? (
                   /* ── SPECIALIZED GOOGLE REVIEWS VIEW ── */

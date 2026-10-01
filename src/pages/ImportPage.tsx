@@ -13,6 +13,7 @@ import {
   Search,
   ChevronDown,
   PenTool,
+  Clock,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
@@ -20,20 +21,26 @@ import { ImportPlatform, ReviewInput, CsvColumnMapping, PLAN_LIMITS } from '../t
 import { storage } from '../lib/storage';
 import { ConnectSourceModal } from '../components/dashboard/views/ConnectSourceModal';
 
-interface ImportSourceOption {
+export type SourceStatus = 'available' | 'coming_soon';
+
+export interface SourceDefinition {
   id: string;
   name: string;
+  status: SourceStatus;
+  statusLabel?: string;
+  description: string;
+  unsupportedReason?: string;
   keywords: string[];
   icon: React.ReactNode;
-  action: 'connect' | 'view';
-  connectPlatform?: string;
-  viewPlatform?: ImportPlatform;
+  actionType: 'google' | 'facebook' | 'csv' | 'manual' | 'unsupported';
 }
 
-const IMPORT_SOURCES: ImportSourceOption[] = [
+const IMPORT_SOURCES: SourceDefinition[] = [
   {
     id: 'google_reviews',
     name: 'Google Reviews',
+    status: 'available',
+    description: 'Import verified ratings and customer reviews from your Google Business Profile.',
     keywords: ['google', 'reviews', 'business', 'maps', 'places', 'gmb'],
     icon: (
       <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
@@ -43,36 +50,45 @@ const IMPORT_SOURCES: ImportSourceOption[] = [
         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
       </svg>
     ),
-    action: 'connect',
-    connectPlatform: 'google',
+    actionType: 'google',
   },
   {
     id: 'facebook',
     name: 'Facebook Reviews',
+    status: 'available',
+    description: 'Import page recommendations and verified ratings from your Facebook Page.',
     keywords: ['facebook', 'reviews', 'fb', 'meta', 'page', 'recommendations'],
     icon: (
       <svg className="w-5 h-5 text-[#1877F2] shrink-0" viewBox="0 0 24 24" fill="currentColor">
         <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
       </svg>
     ),
-    action: 'connect',
-    connectPlatform: 'facebook',
+    actionType: 'facebook',
   },
   {
     id: 'linkedin',
     name: 'LinkedIn',
+    status: 'coming_soon',
+    statusLabel: 'Coming soon',
+    description: 'LinkedIn recommendation import is currently under development.',
+    unsupportedReason:
+      'LinkedIn does not provide an official API for importing user recommendations directly. Automated recommendation capture is currently under development. To import LinkedIn testimonials today, you can upload them via a CSV file or add them manually.',
     keywords: ['linkedin', 'in', 'recommendations', 'posts', 'profile'],
     icon: (
       <svg className="w-5 h-5 text-[#0A66C2] shrink-0" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
       </svg>
     ),
-    action: 'connect',
-    connectPlatform: 'linkedin',
+    actionType: 'unsupported',
   },
   {
     id: 'instagram',
     name: 'Instagram',
+    status: 'coming_soon',
+    statusLabel: 'Coming soon',
+    description: 'Direct review import is not supported by Instagram’s official API.',
+    unsupportedReason:
+      'Instagram does not provide an official API for reading user reviews or recommendations. Automated capture of post praise and comments is currently under development. To bring customer feedback from Instagram into Panda Praise today, you can export them to CSV or enter them manually.',
     keywords: ['instagram', 'insta', 'ig', 'reels', 'posts', 'comments'],
     icon: (
       <svg className="w-5 h-5 text-[#E4405F] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -81,32 +97,37 @@ const IMPORT_SOURCES: ImportSourceOption[] = [
         <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
       </svg>
     ),
-    action: 'connect',
-    connectPlatform: 'instagram',
+    actionType: 'unsupported',
   },
   {
     id: 'csv',
-    name: 'CSV / Excel',
-    keywords: ['csv', 'excel', 'spreadsheet', 'xls', 'xlsx', 'upload', 'file'],
+    name: 'CSV',
+    status: 'available',
+    description: 'Upload a CSV file containing your customer reviews or testimonials.',
+    keywords: ['csv', 'spreadsheet', 'upload', 'file', 'table'],
     icon: <FileSpreadsheet className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />,
-    action: 'view',
-    viewPlatform: 'csv',
+    actionType: 'csv',
   },
   {
     id: 'web',
     name: 'Web page',
+    status: 'coming_soon',
+    statusLabel: 'Coming soon',
+    description: 'Direct web page URL review import is under development.',
+    unsupportedReason:
+      'Direct web page URL review scraping is currently under development. To import your customer proof into Panda Praise today, connect your Google Business Profile or Facebook Page, or upload a CSV file.',
     keywords: ['web', 'page', 'url', 'website', 'link', 'scrape', 'online'],
     icon: <Globe className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />,
-    action: 'view',
-    viewPlatform: 'google_reviews', // uses standard review URL input view
+    actionType: 'unsupported',
   },
   {
     id: 'manual',
     name: 'Manual testimonial',
+    status: 'available',
+    description: 'Create a custom testimonial with customer details, star rating, and text.',
     keywords: ['manual', 'testimonial', 'write', 'entry', 'type', 'custom'],
     icon: <PenTool className="w-5 h-5 text-purple-600 dark:text-purple-400 shrink-0" />,
-    action: 'view',
-    viewPlatform: 'manual',
+    actionType: 'manual',
   },
 ];
 
@@ -114,22 +135,26 @@ const CSV_SAMPLE = `name,email,rating,content,company,role
 "Jane Smith","jane@example.com",5,"Amazing product! Totally transformed our workflow.","Acme Inc","CTO"
 "John Doe","john@example.com",4,"Great tool, highly recommend it.","StartupXYZ","Founder"`;
 
-export const ImportPage: React.FC = () => {
+interface ImportPageProps {
+  onViewProof?: () => void;
+}
+
+export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
   usePageSeo({
     title: 'Import Testimonials — Panda Praise',
-    description: 'Import testimonials from Google, Facebook, LinkedIn, Instagram, CSV or enter them manually.',
+    description: 'Bring your existing customer proof into Panda Praise from Google, Facebook, CSV, or manual entry.',
   });
 
   const { project, workspace } = useAuth();
   const [selectedPlatform, setSelectedPlatform] = useState<ImportPlatform | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [importUrl, setImportUrl] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [connectPlatform, setConnectPlatform] = useState<string>('google');
+  const [unsupportedModalSource, setUnsupportedModalSource] = useState<SourceDefinition | null>(null);
   const [importResult, setImportResult] = useState<{ success: boolean; count: number; errors?: string[] } | null>(null);
 
-  // CSV state
+  // CSV state (strict .csv only)
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<string[][]>([]);
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
@@ -207,6 +232,17 @@ export const ImportPage: React.FC = () => {
 
   const handleFileUpload = useCallback(
     (file: File) => {
+      if (!file.name.toLowerCase().endsWith('.csv') && file.type !== 'text/csv') {
+        setImportResult({
+          success: false,
+          count: 0,
+          errors: [
+            'Only CSV (.csv) files are supported. Excel spreadsheets (.xlsx, .xls) must be saved or exported as CSV before uploading.',
+          ],
+        });
+        return;
+      }
+
       setCsvFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -223,7 +259,7 @@ export const ImportPage: React.FC = () => {
       e.preventDefault();
       setIsDragOver(false);
       const file = e.dataTransfer.files[0];
-      if (file && (file.name.endsWith('.csv') || file.name.endsWith('.xls') || file.name.endsWith('.xlsx'))) {
+      if (file) {
         handleFileUpload(file);
       }
     },
@@ -351,17 +387,6 @@ export const ImportPage: React.FC = () => {
     setIsImporting(false);
   }, [project, workspace, manualName, manualEmail, manualContent, manualRating, manualCompany, manualRole]);
 
-  const handleUrlImport = useCallback(async () => {
-    if (!project || !importUrl.trim()) return;
-    setImportResult({
-      success: false,
-      count: 0,
-      errors: [
-        'URL-based import is not available yet. To import reviews today: upload a CSV file, or connect Google, Facebook, LinkedIn or Instagram under Integrations.',
-      ],
-    });
-  }, [project, importUrl]);
-
   const resetImport = () => {
     setSelectedPlatform(null);
     setCsvFile(null);
@@ -370,15 +395,25 @@ export const ImportPage: React.FC = () => {
     setColumnMapping({});
     setCsvStep('upload');
     setImportResult(null);
-    setImportUrl('');
+    setUnsupportedModalSource(null);
   };
 
-  const handleSelectSource = (source: ImportSourceOption) => {
-    if (source.action === 'connect' && source.connectPlatform) {
-      setConnectPlatform(source.connectPlatform);
+  const handleSelectSource = (source: SourceDefinition) => {
+    if (source.status === 'coming_soon' || source.actionType === 'unsupported') {
+      setUnsupportedModalSource(source);
+      return;
+    }
+
+    if (source.actionType === 'google') {
+      setConnectPlatform('google');
       setShowConnectModal(true);
-    } else if (source.viewPlatform) {
-      setSelectedPlatform(source.viewPlatform);
+    } else if (source.actionType === 'facebook') {
+      setConnectPlatform('facebook');
+      setShowConnectModal(true);
+    } else if (source.actionType === 'csv') {
+      setSelectedPlatform('csv');
+    } else if (source.actionType === 'manual') {
+      setSelectedPlatform('manual');
     }
   };
 
@@ -390,17 +425,17 @@ export const ImportPage: React.FC = () => {
           className={`max-w-xl mx-auto mb-6 p-4 rounded-2xl border flex items-start gap-3 shadow-xs
           ${
             importResult.success
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-              : 'bg-rose-50 border-rose-200 text-rose-900'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-100'
+              : 'bg-rose-50 border-rose-200 text-rose-900 dark:bg-rose-950/30 dark:border-rose-800 dark:text-rose-100'
           }`}
         >
           {importResult.success ? (
-            <Check size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+            <Check size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
           ) : (
-            <AlertCircle size={18} className="text-rose-600 shrink-0 mt-0.5" />
+            <AlertCircle size={18} className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
           )}
           <div className="flex-1">
-            <p className={`text-sm font-semibold ${importResult.success ? 'text-emerald-800' : 'text-rose-800'}`}>
+            <p className={`text-sm font-semibold ${importResult.success ? 'text-emerald-800 dark:text-emerald-200' : 'text-rose-800 dark:text-rose-200'}`}>
               {importResult.success
                 ? `Successfully imported ${importResult.count} testimonial${importResult.count !== 1 ? 's' : ''}!`
                 : 'Import failed'}
@@ -408,7 +443,7 @@ export const ImportPage: React.FC = () => {
             {importResult.errors && importResult.errors.length > 0 && (
               <ul className="mt-2 space-y-1">
                 {importResult.errors.slice(0, 5).map((err, i) => (
-                  <li key={i} className="text-xs text-gray-600">
+                  <li key={i} className="text-xs text-gray-600 dark:text-gray-300">
                     • {err}
                   </li>
                 ))}
@@ -418,13 +453,13 @@ export const ImportPage: React.FC = () => {
               </ul>
             )}
           </div>
-          <button onClick={() => setImportResult(null)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+          <button onClick={() => setImportResult(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
             <X size={16} />
           </button>
         </div>
       )}
 
-      {/* Main Selection View (Matches ASCII wireframe) */}
+      {/* Main Selection View (Matches exact ASCII wireframe layout) */}
       {!selectedPlatform ? (
         <div className="max-w-xl mx-auto">
           {/* Header */}
@@ -462,30 +497,43 @@ export const ImportPage: React.FC = () => {
               )}
             </div>
 
-            {/* 7 Sources List */}
+            {/* Source Rows */}
             <div className="divide-y divide-gray-100 dark:divide-gray-800/60">
-              {filteredSources.map((source) => (
-                <button
-                  key={source.id}
-                  onClick={() => handleSelectSource(source)}
-                  className="w-full flex items-center justify-between px-3.5 py-3.5 rounded-xl
-                           hover:bg-gray-50 dark:hover:bg-gray-800/70
-                           transition-all duration-150 group text-left cursor-pointer"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-700/50">
-                      {source.icon}
+              {filteredSources.map((source) => {
+                const isAvailable = source.status === 'available';
+
+                return (
+                  <button
+                    key={source.id}
+                    onClick={() => handleSelectSource(source)}
+                    className="w-full flex items-center justify-between px-3.5 py-3.5 rounded-xl
+                             hover:bg-gray-50 dark:hover:bg-gray-800/70
+                             transition-all duration-150 group text-left cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-700/50">
+                        {source.icon}
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-[#6701e6] dark:group-hover:text-purple-400 transition-colors truncate">
+                        {source.name}
+                      </span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-[#6701e6] dark:group-hover:text-purple-400 transition-colors">
-                      {source.name}
-                    </span>
-                  </div>
-                  <ArrowRight
-                    size={18}
-                    className="text-gray-400 dark:text-gray-500 group-hover:text-[#6701e6] dark:group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all"
-                  />
-                </button>
-              ))}
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {!isAvailable && (
+                        <span className="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 flex items-center gap-1">
+                          <Clock size={11} className="shrink-0" />
+                          <span>Coming soon</span>
+                        </span>
+                      )}
+                      <ArrowRight
+                        size={18}
+                        className="text-gray-400 dark:text-gray-500 group-hover:text-[#6701e6] dark:group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all"
+                      />
+                    </div>
+                  </button>
+                );
+              })}
 
               {filteredSources.length === 0 && (
                 <div className="py-8 text-center text-sm text-gray-400 dark:text-gray-500">
@@ -500,24 +548,91 @@ export const ImportPage: React.FC = () => {
             All your proof. One place.
           </p>
 
-          {/* Connect Source Modal */}
+          {/* Connect Source Modal for Available Providers (Google, Facebook) */}
           <ConnectSourceModal
             isOpen={showConnectModal}
             onClose={() => setShowConnectModal(false)}
             initialPlatform={connectPlatform}
             projectId={project?.id}
             onSelectPlatform={(pid) => {
-              if (pid === 'google') setSelectedPlatform('google_reviews');
+              if (pid === 'csv') setSelectedPlatform('csv');
+              else if (pid === 'manual') setSelectedPlatform('manual');
+              else if (pid === 'google') setSelectedPlatform('google_reviews');
               else if (pid === 'facebook') setSelectedPlatform('facebook');
-              else if (pid === 'linkedin') setSelectedPlatform('linkedin');
-              else if (pid === 'instagram') setSelectedPlatform('instagram');
-              else setSelectedPlatform('google_reviews');
             }}
           />
+
+          {/* Honest Informational Modal for Coming Soon / Unsupported Providers */}
+          {unsupportedModalSource && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setUnsupportedModalSource(null);
+                }
+              }}
+            >
+              <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl p-6 sm:p-7 text-left space-y-4">
+                <button
+                  type="button"
+                  onClick={() => setUnsupportedModalSource(null)}
+                  className="absolute top-5 right-5 p-1.5 rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  aria-label="Close modal"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center border border-gray-100 dark:border-gray-700">
+                    {unsupportedModalSource.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                      {unsupportedModalSource.name}
+                    </h3>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
+                      <Clock size={12} /> Coming soon
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                  {unsupportedModalSource.unsupportedReason}
+                </p>
+
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-100 dark:border-gray-700/60 text-xs text-gray-500 dark:text-gray-400">
+                  💡 In the meantime, you can upload existing reviews via a CSV file, connect Google or Facebook, or enter testimonials manually.
+                </div>
+
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUnsupportedModalSource(null);
+                      setSelectedPlatform('manual');
+                    }}
+                    className="w-full sm:w-auto px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-xs font-semibold transition-colors cursor-pointer text-center"
+                  >
+                    Enter Manually
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUnsupportedModalSource(null);
+                      setSelectedPlatform('csv');
+                    }}
+                    className="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs cursor-pointer text-center"
+                  >
+                    Upload CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ) : null}
 
-      {/* CSV Import Flow */}
+      {/* CSV Import Flow (Strictly CSV, accurate labeling) */}
       {selectedPlatform === 'csv' && (
         <div className="max-w-2xl mx-auto space-y-4">
           <div className="flex items-center gap-3">
@@ -528,7 +643,7 @@ export const ImportPage: React.FC = () => {
               <ArrowLeft size={16} /> Back to sources
             </button>
             <span className="text-gray-300 dark:text-gray-700">•</span>
-            <span className="text-sm font-semibold text-gray-900 dark:text-white">CSV / Excel Import</span>
+            <span className="text-sm font-semibold text-gray-900 dark:text-white">CSV Import</span>
           </div>
 
           {csvStep === 'upload' && (
@@ -548,12 +663,14 @@ export const ImportPage: React.FC = () => {
             >
               <Upload size={36} className="mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                Drag & drop your CSV or Excel file here
+                Drag & drop your CSV file here
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">or click to browse from your computer</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+                or click to browse from your computer (.csv files only)
+              </p>
               <input
                 type="file"
-                accept=".csv,.xls,.xlsx"
+                accept=".csv,text/csv"
                 onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
                 className="hidden"
                 id="csv-upload"
@@ -564,7 +681,7 @@ export const ImportPage: React.FC = () => {
                          bg-[#6701e6] hover:bg-[#5200bd] text-white cursor-pointer transition-colors shadow-xs"
               >
                 <FileSpreadsheet size={16} />
-                Choose File
+                Choose CSV File
               </label>
 
               <div className="mt-8 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80 text-left max-w-lg mx-auto">
@@ -717,20 +834,29 @@ export const ImportPage: React.FC = () => {
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
                 {importResult?.count || 0} testimonials imported into your dashboard.
               </p>
-              <div className="flex justify-center gap-3">
+              <div className="flex justify-center items-center gap-3">
                 <button
                   onClick={resetImport}
-                  className="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#6701e6] hover:bg-[#5200bd] text-white cursor-pointer shadow-xs"
+                  className="px-5 py-2.5 rounded-xl text-sm font-semibold border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
                 >
                   Import More
                 </button>
+                {onViewProof && (
+                  <button
+                    onClick={onViewProof}
+                    className="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#6701e6] hover:bg-[#5200bd] text-white cursor-pointer shadow-xs transition-colors flex items-center gap-1.5"
+                  >
+                    <span>View Proof Library</span>
+                    <ArrowRight size={15} />
+                  </button>
+                )}
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Manual Entry Flow */}
+      {/* Manual Testimonial Flow */}
       {selectedPlatform === 'manual' && (
         <div className="max-w-2xl mx-auto space-y-4">
           <div className="flex items-center gap-3">
@@ -817,91 +943,32 @@ export const ImportPage: React.FC = () => {
               />
             </div>
 
-            <div className="flex justify-end pt-2">
-              <button
-                onClick={handleManualImport}
-                disabled={!manualName.trim() || !manualContent.trim() || isImporting}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold
-                         bg-[#6701e6] hover:bg-[#5200bd] text-white
-                         disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
-              >
-                {isImporting ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <Check size={15} />
-                )}
-                Add Testimonial
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* URL / Web Page Import */}
-      {selectedPlatform && selectedPlatform !== 'csv' && selectedPlatform !== 'manual' && (
-        <div className="max-w-2xl mx-auto space-y-4">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={resetImport}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors"
-            >
-              <ArrowLeft size={16} /> Back to sources
-            </button>
-            <span className="text-gray-300 dark:text-gray-700">•</span>
-            <span className="text-sm font-semibold text-gray-900 dark:text-white">Web Page Import</span>
-          </div>
-
-          <div className="p-6 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm space-y-4">
-            <div>
-              <label className="text-sm font-bold text-gray-900 dark:text-white mb-1.5 block">
-                Paste the URL of the page with reviews
-              </label>
-              <div className="relative">
-                <Globe size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="url"
-                  value={importUrl}
-                  onChange={(e) => setImportUrl(e.target.value)}
-                  placeholder="https://example.com/reviews or https://g.co/kgs/..."
-                  className="w-full pl-10 pr-4 py-3 text-sm rounded-xl
-                           bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700
-                           text-gray-900 dark:text-white placeholder-gray-400 shadow-2xs
-                           focus:outline-none focus:ring-2 focus:ring-[#6701e6]/20 focus:border-[#6701e6]"
-                />
+            <div className="flex justify-between items-center pt-2">
+              {onViewProof && (
+                <button
+                  type="button"
+                  onClick={onViewProof}
+                  className="text-xs font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  View Proof Library →
+                </button>
+              )}
+              <div className="flex items-center gap-2.5 ml-auto">
+                <button
+                  onClick={handleManualImport}
+                  disabled={!manualName.trim() || !manualContent.trim() || isImporting}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold
+                           bg-[#6701e6] hover:bg-[#5200bd] text-white
+                           disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
+                >
+                  {isImporting ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Check size={15} />
+                  )}
+                  Add Testimonial
+                </button>
               </div>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50">
-              <p className="text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                <AlertCircle size={14} className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
-                <span>
-                  URL-based web page scraping is being rolled out. Today you can import via CSV upload, or connect
-                  Google, Facebook, LinkedIn or Instagram to pull reviews directly.
-                </span>
-              </p>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                onClick={resetImport}
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUrlImport}
-                disabled={!importUrl.trim() || isImporting}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold
-                         bg-[#6701e6] hover:bg-[#5200bd] text-white
-                         disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
-              >
-                {isImporting ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <ArrowRight size={15} />
-                )}
-                Start Import
-              </button>
             </div>
           </div>
         </div>

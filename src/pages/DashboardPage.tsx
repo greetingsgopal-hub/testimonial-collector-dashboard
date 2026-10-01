@@ -392,7 +392,7 @@ export const DashboardPage = () => {
           {/* Import Page */}
           {activeTab === 'import' && (
             <div className="max-w-6xl mx-auto">
-              <ImportPage />
+              <ImportPage onViewProof={() => setActiveTab('proof')} />
             </div>
           )}
 
