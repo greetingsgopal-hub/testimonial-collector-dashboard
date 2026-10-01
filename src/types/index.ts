@@ -252,6 +252,7 @@ export type ImportPlatform =
   | 'google_reviews'
   | 'twitter'
   | 'linkedin'
+  | 'instagram'
   | 'g2'
   | 'trustpilot'
   | 'producthunt'
@@ -263,6 +264,7 @@ export type ImportPlatform =
   | 'facebook'
   | 'reddit'
   | 'csv'
+  | 'web'
   | 'manual';
 
 export interface ImportJob {

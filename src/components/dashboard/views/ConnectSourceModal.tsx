@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getFirebaseAuth } from '../../../lib/firebase';
 import { socialClient } from '../../../lib/socialClient';
 import { 
@@ -75,6 +75,7 @@ interface ConnectSourceModalProps {
   onClose: () => void;
   onSelectPlatform: (platformId: string) => void;
   projectId?: string;
+  initialPlatform?: string;
 }
 
 export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
@@ -82,10 +83,22 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   onClose,
   onSelectPlatform,
   projectId,
+  initialPlatform,
 }) => {
-  const [step, setStep] = useState<'select' | 'configure'>('select');
-  const [selectedId, setSelectedId] = useState<string>('google');
+  const [step, setStep] = useState<'select' | 'configure'>(initialPlatform ? 'configure' : 'select');
+  const [selectedId, setSelectedId] = useState<string>(initialPlatform || 'google');
   const [hoveredName, setHoveredName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialPlatform) {
+        setSelectedId(initialPlatform);
+        setStep('configure');
+      } else {
+        setStep('select');
+      }
+    }
+  }, [isOpen, initialPlatform]);
 
   // Configure Step State
   const [inputUrl, setInputUrl] = useState('');
