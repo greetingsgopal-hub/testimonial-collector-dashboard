@@ -14,11 +14,18 @@ import {
   ChevronDown,
   PenTool,
   Clock,
+  MapPin,
+  CheckSquare,
+  Square,
+  Sparkles,
+  RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { ImportPlatform, ReviewInput, CsvColumnMapping, PLAN_LIMITS } from '../types';
 import { storage } from '../lib/storage';
+import { getFirebaseAuth } from '../lib/firebase';
+import { socialClient } from '../lib/socialClient';
 import { ConnectSourceModal } from '../components/dashboard/views/ConnectSourceModal';
 
 export type SourceStatus = 'available' | 'coming_soon';
@@ -135,6 +142,23 @@ const CSV_SAMPLE = `name,email,rating,content,company,role
 "Jane Smith","jane@example.com",5,"Amazing product! Totally transformed our workflow.","Acme Inc","CTO"
 "John Doe","john@example.com",4,"Great tool, highly recommend it.","StartupXYZ","Founder"`;
 
+interface GoogleImportReview {
+  id: string;
+  authorName: string;
+  authorAvatar?: string;
+  rating: number;
+  text: string;
+  date?: string;
+  platformUrl?: string;
+}
+
+interface GooglePlaceDetails {
+  placeName: string;
+  rating: number;
+  totalReviews: number;
+  placeId: string;
+}
+
 interface ImportPageProps {
   onViewProof?: () => void;
 }
@@ -153,6 +177,17 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
   const [connectPlatform, setConnectPlatform] = useState<string>('google');
   const [unsupportedModalSource, setUnsupportedModalSource] = useState<SourceDefinition | null>(null);
   const [importResult, setImportResult] = useState<{ success: boolean; count: number; errors?: string[] } | null>(null);
+
+  // ── Google Reviews Flow State ──
+  const [googleStep, setGoogleStep] = useState<'choose' | 'maps_input' | 'oauth_search' | 'preview_select' | 'done'>('choose');
+  const [googleMapsUrl, setGoogleMapsUrl] = useState('');
+  const [googlePlaceDetails, setGooglePlaceDetails] = useState<GooglePlaceDetails | null>(null);
+  const [googleReviews, setGoogleReviews] = useState<GoogleImportReview[]>([]);
+  const [selectedReviewIds, setSelectedReviewIds] = useState<string[]>([]);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isGoogleImporting, setIsGoogleImporting] = useState(false);
+  const [googleError, setGoogleError] = useState('');
+  const [googleImportResult, setGoogleImportResult] = useState<{ count: number } | null>(null);
 
   // CSV state (strict .csv only)
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -179,6 +214,162 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
     );
   });
 
+  // ── Google Reviews Flow Handlers ──
+  const handleGoogleMapsPreview = async (placeInput: string) => {
+    if (!placeInput.trim()) {
+      setGoogleError('Please paste a Google Maps URL, business link, or Place ID.');
+      return;
+    }
+
+    setIsGoogleLoading(true);
+    setGoogleError('');
+
+    try {
+      const auth = getFirebaseAuth();
+      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+
+      const res = await fetch('/api/google/import-place', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          placeId: placeInput.trim(),
+          previewOnly: true,
+          projectId: project?.id,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Failed to verify Google Place. Please check the URL or ID.');
+      }
+
+      setGooglePlaceDetails({
+        placeName: data.placeName || 'Google Business Location',
+        rating: data.rating || 5,
+        totalReviews: data.totalReviews || (data.reviews || []).length,
+        placeId: placeInput.trim(),
+      });
+
+      const reviews: GoogleImportReview[] = data.reviews || [];
+      setGoogleReviews(reviews);
+      // Select all reviews by default
+      setSelectedReviewIds(reviews.map((r) => r.id));
+      setGoogleStep('preview_select');
+    } catch (err: any) {
+      setGoogleError(err.message || 'Failed to fetch reviews for this place.');
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleOAuthRedirect = async () => {
+    setIsGoogleLoading(true);
+    setGoogleError('');
+    try {
+      const res = await socialClient.initOAuth('google');
+      if (res.error) {
+        setIsGoogleLoading(false);
+        setGoogleError(res.error);
+        return;
+      }
+      if (res.authUrl) {
+        window.location.href = res.authUrl;
+      } else {
+        setIsGoogleLoading(false);
+        setGoogleError('Failed to initialize Google sign-in. Please try again.');
+      }
+    } catch (err: any) {
+      setIsGoogleLoading(false);
+      setGoogleError(err.message || 'Google authentication error.');
+    }
+  };
+
+  const handleGoogleImportSelected = async () => {
+    if (!project || selectedReviewIds.length === 0) return;
+    setIsGoogleImporting(true);
+    setGoogleError('');
+
+    try {
+      // Free-plan limit check: "Up to 15 testimonials"
+      const maxTestimonials = workspace ? PLAN_LIMITS[workspace.plan].maxTestimonials : -1;
+      if (maxTestimonials !== -1) {
+        const existing = await storage.getReviews(project.id);
+        const remaining = maxTestimonials - existing.length;
+        if (remaining <= 0) {
+          setGoogleError(`Free plan is limited to ${maxTestimonials} testimonials. Upgrade to import more.`);
+          setIsGoogleImporting(false);
+          return;
+        }
+        if (selectedReviewIds.length > remaining) {
+          setGoogleError(
+            `You selected ${selectedReviewIds.length} testimonials, but your Free plan only has ${remaining} slots left (limit ${maxTestimonials}).`
+          );
+          setIsGoogleImporting(false);
+          return;
+        }
+      }
+
+      const reviewsToSave = googleReviews.filter((r) => selectedReviewIds.includes(r.id));
+      const auth = getFirebaseAuth();
+      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+
+      const res = await fetch('/api/google/import-place', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          placeId: googlePlaceDetails?.placeId || googleMapsUrl,
+          selectedReviews: reviewsToSave,
+          projectId: project.id,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Failed to save Google reviews.');
+      }
+
+      setGoogleImportResult({
+        count: data.importedCount || reviewsToSave.length,
+      });
+      setGoogleStep('done');
+    } catch (err: any) {
+      setGoogleError(err.message || 'Failed to import reviews.');
+    } finally {
+      setIsGoogleImporting(false);
+    }
+  };
+
+  const toggleSelectReview = (id: string) => {
+    setSelectedReviewIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAllReviews = () => {
+    if (selectedReviewIds.length === googleReviews.length) {
+      setSelectedReviewIds([]);
+    } else {
+      setSelectedReviewIds(googleReviews.map((r) => r.id));
+    }
+  };
+
+  const resetGoogleFlow = () => {
+    setGoogleStep('choose');
+    setGoogleMapsUrl('');
+    setGooglePlaceDetails(null);
+    setGoogleReviews([]);
+    setSelectedReviewIds([]);
+    setGoogleError('');
+    setGoogleImportResult(null);
+  };
+
+  // ── CSV Parsing & Import ──
   const parseCsv = useCallback((text: string) => {
     const lines = text.split('\n').filter((l) => l.trim());
     if (lines.length < 2) return;
@@ -396,6 +587,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
     setCsvStep('upload');
     setImportResult(null);
     setUnsupportedModalSource(null);
+    resetGoogleFlow();
   };
 
   const handleSelectSource = (source: SourceDefinition) => {
@@ -405,8 +597,8 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
     }
 
     if (source.actionType === 'google') {
-      setConnectPlatform('google');
-      setShowConnectModal(true);
+      setSelectedPlatform('google_reviews');
+      setGoogleStep('choose');
     } else if (source.actionType === 'facebook') {
       setConnectPlatform('facebook');
       setShowConnectModal(true);
@@ -419,7 +611,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
 
   return (
     <div className="py-6 sm:py-10 px-4">
-      {/* Success/Error Banner */}
+      {/* Global Success/Error Banner */}
       {importResult && (
         <div
           className={`max-w-xl mx-auto mb-6 p-4 rounded-2xl border flex items-start gap-3 shadow-xs
@@ -459,7 +651,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
         </div>
       )}
 
-      {/* Main Selection View (Matches exact ASCII wireframe layout) */}
+      {/* ── MAIN SELECTION VIEW (Capability-Driven ASCII Wireframe) ── */}
       {!selectedPlatform ? (
         <div className="max-w-xl mx-auto">
           {/* Header */}
@@ -548,7 +740,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
             All your proof. One place.
           </p>
 
-          {/* Connect Source Modal for Available Providers (Google, Facebook) */}
+          {/* Connect Source Modal for Available Providers (Facebook) */}
           <ConnectSourceModal
             isOpen={showConnectModal}
             onClose={() => setShowConnectModal(false)}
@@ -562,7 +754,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
             }}
           />
 
-          {/* Honest Informational Modal for Coming Soon / Unsupported Providers */}
+          {/* Honest Informational Modal for Coming Soon Providers */}
           {unsupportedModalSource && (
             <div
               className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in"
@@ -632,7 +824,475 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
         </div>
       ) : null}
 
-      {/* CSV Import Flow (Strictly CSV, accurate labeling) */}
+      {/* ── GOOGLE REVIEWS FULL-PAGE WIZARD (Matches exact user diagram) ── */}
+      {selectedPlatform === 'google_reviews' && (
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* Header navigation */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={resetImport}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors"
+              >
+                <ArrowLeft size={16} /> Back to sources
+              </button>
+              <span className="text-gray-300 dark:text-gray-700">•</span>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-1.5">
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                </svg>
+                Google Reviews Import
+              </span>
+            </div>
+
+            {googleStep !== 'choose' && googleStep !== 'done' && (
+              <button
+                onClick={resetGoogleFlow}
+                className="text-xs font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white cursor-pointer"
+              >
+                Change Method
+              </button>
+            )}
+          </div>
+
+          {/* Error Banner */}
+          {googleError && (
+            <div className="p-4 rounded-2xl border bg-rose-50 border-rose-200 text-rose-900 dark:bg-rose-950/30 dark:border-rose-800 dark:text-rose-100 flex items-start gap-3 text-sm">
+              <AlertCircle size={18} className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+              <div className="flex-1">{googleError}</div>
+              <button onClick={() => setGoogleError('')} className="text-gray-400 hover:text-gray-600">
+                <X size={16} />
+              </button>
+            </div>
+          )}
+
+          {/* STEP 1: METHOD SELECTION (Find my business OR Import from Google Maps) */}
+          {googleStep === 'choose' && (
+            <div className="space-y-6">
+              <div className="text-center space-y-1.5">
+                <h2 className="text-2xl font-bold font-display text-gray-900 dark:text-white">
+                  Connect Google Reviews
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                  Select how you want to discover and import your verified Google proof.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Method 1: Find my business (OAuth) */}
+                <div className="p-6 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-[#6701e6]/60 dark:hover:border-purple-500/60 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 text-[#4285F4]" />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white group-hover:text-[#6701e6] dark:group-hover:text-purple-400 transition-colors">
+                          Find my business
+                        </h3>
+                        <span className="text-[10px] font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
+                          Recommended
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
+                        Sign in with Google OAuth to automatically search your Google Business Profile locations and sync verified reviews.
+                      </p>
+                    </div>
+
+                    <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1.5 pt-2 border-t border-gray-100 dark:border-gray-800">
+                      <li className="flex items-center gap-2">
+                        <Check size={14} className="text-emerald-500 shrink-0" />
+                        <span>Official Google OAuth 2.0</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check size={14} className="text-emerald-500 shrink-0" />
+                        <span>Automatic Business Profile search</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check size={14} className="text-emerald-500 shrink-0" />
+                        <span>Continuous background sync</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="pt-6">
+                    <button
+                      type="button"
+                      onClick={handleGoogleOAuthRedirect}
+                      disabled={isGoogleLoading}
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#4285F4] hover:bg-[#3367d6] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      {isGoogleLoading ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>Connecting Google...</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" viewBox="0 0 24 24">
+                            <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                            <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                          </svg>
+                          <span>Sign in with Google</span>
+                          <ArrowRight size={14} />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Method 2: Import from Google Maps (URL / Place ID) */}
+                <div className="p-6 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-[#6701e6]/60 dark:hover:border-purple-500/60 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900/40 flex items-center justify-center">
+                      <MapPin className="w-6 h-6 text-[#6701e6] dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white group-hover:text-[#6701e6] dark:group-hover:text-purple-400 transition-colors">
+                          Import from Google Maps
+                        </h3>
+                        <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full border border-gray-200 dark:border-gray-700">
+                          Instant URL
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
+                        Paste a public Google Maps link or Place ID. Panda will extract the location and preview reviews directly.
+                      </p>
+                    </div>
+
+                    <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1.5 pt-2 border-t border-gray-100 dark:border-gray-800">
+                      <li className="flex items-center gap-2">
+                        <Check size={14} className="text-emerald-500 shrink-0" />
+                        <span>Paste any Google Maps link or Place ID</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check size={14} className="text-emerald-500 shrink-0" />
+                        <span>Panda automatically extracts Place ID</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check size={14} className="text-emerald-500 shrink-0" />
+                        <span>Preview & select specific reviews</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="pt-6">
+                    <button
+                      type="button"
+                      onClick={() => setGoogleStep('maps_input')}
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <span>Continue with Google Maps</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2B: IMPORT FROM GOOGLE MAPS (Paste URL / Place ID -> Extract & Verify) */}
+          {googleStep === 'maps_input' && (
+            <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm space-y-5">
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <MapPin className="text-[#6701e6] dark:text-purple-400" size={20} />
+                  <span>Enter Google Maps URL or Place ID</span>
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Panda will extract your Place ID, verify your location details, and load your customer reviews for preview.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block">
+                  Google Maps URL, Place Link, or Place ID *
+                </label>
+                <div className="relative">
+                  <Globe size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    value={googleMapsUrl}
+                    onChange={(e) => setGoogleMapsUrl(e.target.value)}
+                    placeholder="e.g. https://maps.app.goo.gl/... or ChIJN1t_tDeuEmsRUsoyG83frY4"
+                    className="w-full pl-10 pr-4 py-3 text-sm rounded-xl
+                             bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700
+                             text-gray-900 dark:text-white placeholder-gray-400
+                             focus:outline-none focus:ring-2 focus:ring-[#6701e6]/20 focus:border-[#6701e6] transition-all"
+                  />
+                </div>
+                <p className="text-[11px] text-gray-400 dark:text-gray-500">
+                  💡 Tip: On Google Maps, click &quot;Share&quot; on your business profile and choose &quot;Copy link&quot;, then paste it here.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setGoogleStep('choose')}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white cursor-pointer"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleGoogleMapsPreview(googleMapsUrl)}
+                  disabled={!googleMapsUrl.trim() || isGoogleLoading}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  {isGoogleLoading ? (
+                    <>
+                      <RefreshCw size={14} className="animate-spin" />
+                      <span>Extracting Place ID...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Extract & Verify Place</span>
+                      <ArrowRight size={14} />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: PREVIEW REVIEWS & SELECT TESTIMONIALS */}
+          {googleStep === 'preview_select' && (
+            <div className="space-y-5">
+              {/* Verified Place Card */}
+              {googlePlaceDetails && (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-100 dark:border-blue-900/40 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 flex items-center justify-center shrink-0 shadow-2xs">
+                      <MapPin size={20} className="text-[#4285F4]" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                          {googlePlaceDetails.placeName}
+                        </h3>
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                          <Check size={10} /> Verified
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <div className="flex items-center text-amber-500">
+                          <Star size={12} className="fill-amber-400 text-amber-400" />
+                          <span className="ml-1 font-semibold text-gray-700 dark:text-gray-300">
+                            {googlePlaceDetails.rating.toFixed(1)}
+                          </span>
+                        </div>
+                        <span>•</span>
+                        <span>{googlePlaceDetails.totalReviews} total ratings on Google</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setGoogleStep('maps_input')}
+                    className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
+
+              {/* Selection Toolbar */}
+              <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs">
+                <button
+                  type="button"
+                  onClick={toggleSelectAllReviews}
+                  className="flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer"
+                >
+                  {selectedReviewIds.length === googleReviews.length && googleReviews.length > 0 ? (
+                    <CheckSquare size={16} className="text-[#6701e6]" />
+                  ) : (
+                    <Square size={16} className="text-gray-400" />
+                  )}
+                  <span>
+                    {selectedReviewIds.length === googleReviews.length
+                      ? 'Deselect All'
+                      : 'Select All Reviews'}
+                  </span>
+                </button>
+
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  <span className="text-[#6701e6] dark:text-purple-400 font-bold">
+                    {selectedReviewIds.length}
+                  </span>{' '}
+                  of {googleReviews.length} selected
+                </div>
+              </div>
+
+              {/* Reviews List */}
+              <div className="space-y-3">
+                {googleReviews.map((rev) => {
+                  const isSelected = selectedReviewIds.includes(rev.id);
+
+                  return (
+                    <div
+                      key={rev.id}
+                      onClick={() => toggleSelectReview(rev.id)}
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer text-left
+                        ${
+                          isSelected
+                            ? 'bg-purple-50/40 dark:bg-purple-950/20 border-[#6701e6]/40 dark:border-purple-500/40 shadow-xs'
+                            : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
+                        }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSelectReview(rev.id);
+                          }}
+                          className="mt-0.5 text-gray-400 hover:text-[#6701e6] cursor-pointer"
+                        >
+                          {isSelected ? (
+                            <CheckSquare size={18} className="text-[#6701e6]" />
+                          ) : (
+                            <Square size={18} />
+                          )}
+                        </button>
+
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {rev.authorAvatar ? (
+                                <img
+                                  src={rev.authorAvatar}
+                                  alt={rev.authorName}
+                                  className="w-6 h-6 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex items-center justify-center">
+                                  {rev.authorName.charAt(0) || 'G'}
+                                </div>
+                              )}
+                              <span className="text-xs font-bold text-gray-900 dark:text-white">
+                                {rev.authorName}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1 text-amber-400">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  size={12}
+                                  className={i < rev.rating ? 'fill-amber-400' : 'text-gray-200 dark:text-gray-700'}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                            {rev.text || <span className="italic text-gray-400">No review comment provided.</span>}
+                          </p>
+
+                          {rev.date && (
+                            <p className="text-[10px] text-gray-400">
+                              {new Date(rev.date).toLocaleDateString(undefined, {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                              })}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {googleReviews.length === 0 && (
+                  <div className="p-8 text-center bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 text-sm text-gray-400">
+                    No reviews were returned for this location.
+                  </div>
+                )}
+              </div>
+
+              {/* Action Bar */}
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setGoogleStep('maps_input')}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer"
+                >
+                  Back
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleGoogleImportSelected}
+                  disabled={selectedReviewIds.length === 0 || isGoogleImporting}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  {isGoogleImporting ? (
+                    <>
+                      <RefreshCw size={14} className="animate-spin" />
+                      <span>Importing Testimonials...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Import {selectedReviewIds.length} Testimonials</span>
+                      <ArrowRight size={14} />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: SUCCESS COMPLETION */}
+          {googleStep === 'done' && (
+            <div className="p-8 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm text-center space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 mx-auto flex items-center justify-center border border-emerald-100 dark:border-emerald-900/40">
+                <Check size={32} />
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Google Reviews Imported!
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
+                  {googleImportResult?.count || selectedReviewIds.length} verified testimonials from{' '}
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {googlePlaceDetails?.placeName || 'Google'}
+                  </span>{' '}
+                  have been imported into your Proof Library.
+                </p>
+              </div>
+
+              <div className="flex justify-center items-center gap-3 pt-2">
+                <button
+                  onClick={resetImport}
+                  className="px-5 py-2.5 rounded-xl text-xs font-semibold border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                >
+                  Import More
+                </button>
+                {onViewProof && (
+                  <button
+                    onClick={onViewProof}
+                    className="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#6701e6] hover:bg-[#5200bd] text-white cursor-pointer shadow-xs transition-colors flex items-center gap-1.5"
+                  >
+                    <span>View in Proof Library</span>
+                    <ArrowRight size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── CSV IMPORT FLOW (Strictly CSV, accurate labeling) ── */}
       {selectedPlatform === 'csv' && (
         <div className="max-w-2xl mx-auto space-y-4">
           <div className="flex items-center gap-3">
@@ -856,7 +1516,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
         </div>
       )}
 
-      {/* Manual Testimonial Flow */}
+      {/* ── MANUAL TESTIMONIAL FLOW ── */}
       {selectedPlatform === 'manual' && (
         <div className="max-w-2xl mx-auto space-y-4">
           <div className="flex items-center gap-3">

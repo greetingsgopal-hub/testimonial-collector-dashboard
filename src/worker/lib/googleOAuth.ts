@@ -206,7 +206,14 @@ export async function fetchGooglePlaceReviews(
   // Extract clean place ID or query string
   let placeId = placeIdOrQuery.trim();
   
-  if (placeId.includes('place/')) {
+  // 1. Direct standard Place ID (e.g. ChIJ...)
+  const chijMatch = placeId.match(/\b(ChIJ[a-zA-Z0-9_-]{20,})\b/);
+  if (chijMatch) {
+    placeId = chijMatch[1];
+  } else if (placeId.includes('place_id=')) {
+    const match = placeId.match(/place_id=([^&]+)/);
+    if (match && match[1]) placeId = decodeURIComponent(match[1]);
+  } else if (placeId.includes('place/')) {
     const match = placeId.match(/place\/([^\/]+)/);
     if (match && match[1]) {
       placeId = decodeURIComponent(match[1]);
@@ -218,12 +225,31 @@ export async function fetchGooglePlaceReviews(
     }
   }
 
-  const apiKey = env.GOOGLE_PLACES_API_KEY;
+  const apiKey = env.GOOGLE_PLACES_API_KEY || env.FIREBASE_API_KEY;
   if (!apiKey) {
     throw new Error('GOOGLE_PLACES_API_KEY is not configured in Worker environment variables.');
   }
+
+  // 2. If input is still a full URL or name query, resolve via Google Places Find Place
+  if (placeId.startsWith('http') || placeId.includes('/') || !placeId.startsWith('ChIJ')) {
+    try {
+      const findUrl = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(
+        placeId
+      )}&inputtype=textquery&fields=place_id,name,rating,user_ratings_total&key=${encodeURIComponent(apiKey)}`;
+      const findRes = await fetch(findUrl);
+      if (findRes.ok) {
+        const findData: any = await findRes.json();
+        if (findData.candidates && findData.candidates[0]?.place_id) {
+          placeId = findData.candidates[0].place_id;
+        }
+      }
+    } catch (findErr) {
+      console.warn('[GooglePlaces] findplacefromtext error:', findErr);
+    }
+  }
+
   if (!placeId || placeId.startsWith('http')) {
-    throw new Error('Please provide a valid Google Place ID (not a raw URL).');
+    throw new Error('Please provide a valid Google Place ID or Google Maps link.');
   }
 
   try {

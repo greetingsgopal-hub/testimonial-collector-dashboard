@@ -65,6 +65,24 @@ export async function handleGooglePlaceImport(request: Request, env: WorkerEnv):
     }
 
     const result = await fetchGooglePlaceReviews(placeInput.trim(), env);
+
+    // If caller requests preview only, return place details & reviews without saving
+    if (body.previewOnly === true) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          placeName: result.placeName,
+          rating: result.rating,
+          totalReviews: result.totalReviews,
+          reviews: result.reviews,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     const now = new Date().toISOString();
 
     let projectId: string | undefined = requestedProjectId;
@@ -83,9 +101,16 @@ export async function handleGooglePlaceImport(request: Request, env: WorkerEnv):
       }
     }
 
+    // Determine which reviews to save: selective or all
+    const reviewsToSave = Array.isArray(body.selectedReviews) && body.selectedReviews.length > 0
+      ? body.selectedReviews
+      : Array.isArray(body.selectedReviewIds) && body.selectedReviewIds.length > 0
+      ? result.reviews.filter((r) => body.selectedReviewIds.includes(r.id))
+      : result.reviews;
+
     // Save reviews to the reviews collection (the dashboard reads `reviews`,
     // not `testimonials`) with the full Review doc shape.
-    for (const rev of result.reviews) {
+    for (const rev of reviewsToSave) {
       const reviewDoc = {
         ownerId: userId,
         ...(projectId ? { projectId } : {}),
@@ -106,7 +131,7 @@ export async function handleGooglePlaceImport(request: Request, env: WorkerEnv):
         updatedAt: now,
       };
       // fetchGooglePlaceReviews already generates safe ids (google_place_<ts>_<idx>)
-      const docId = rev.id.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const docId = (rev.id || `google_place_${Date.now()}`).replace(/[^a-zA-Z0-9_-]/g, '_');
       await saveDocument('reviews', docId, reviewDoc, undefined, env).catch((e) =>
         console.warn('[GooglePlaceImport] Save skipped:', e)
       );
@@ -118,8 +143,8 @@ export async function handleGooglePlaceImport(request: Request, env: WorkerEnv):
         placeName: result.placeName,
         rating: result.rating,
         totalReviews: result.totalReviews,
-        importedCount: result.reviews.length,
-        reviews: result.reviews,
+        importedCount: reviewsToSave.length,
+        reviews: reviewsToSave,
       }),
       {
         status: 200,
