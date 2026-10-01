@@ -46,7 +46,7 @@ interface PlatformItem {
 }
 
 const PLATFORMS: PlatformItem[] = [
-  { id: 'google', name: 'Google', category: 'Available now', type: 'api', icon: 'https://www.google.com/favicon.ico', color: '#4285F4', inputLabel: 'Google Business Place ID / Profile URL', placeholder: 'e.g. ChIJN1t_tDeuEmsRUsoyG83frY4 or https://maps.google.com/...' },
+  { id: 'google', name: 'Google Reviews', category: 'Available now', type: 'api', icon: 'https://www.google.com/favicon.ico', color: '#4285F4', inputLabel: 'Google Maps Business Link', placeholder: 'https://maps.app.goo.gl/... or https://maps.google.com/...' },
   { id: 'facebook', name: 'Facebook Page', category: 'Available now', type: 'api', icon: 'https://facebook.com/favicon.ico', color: '#1877F2', inputLabel: 'Facebook Page URL or Recommendation Link', placeholder: 'https://facebook.com/yourpage or https://facebook.com/yourpage/reviews' },
   { id: 'instagram', name: 'Instagram', category: 'Coming soon', type: 'url', icon: 'https://instagram.com/favicon.ico', color: '#E4405F', inputLabel: 'Instagram Post or Reel URL', placeholder: 'https://www.instagram.com/p/... or https://www.instagram.com/reel/...' },
   { id: 'linkedin', name: 'LinkedIn', category: 'Coming soon', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
@@ -570,7 +570,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
                         </span>
                       </div>
                       <p className="text-[11px] text-blue-800/80 leading-relaxed">
-                        Authorize Panda Praise to automatically fetch verified 5-star Google reviews and keep your showcase in continuous sync.
+                        Connect your Google Business Profile to import owner-verified customer reviews.
                       </p>
                       <button
                         type="button"
@@ -591,7 +591,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
                               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                             </svg>
-                            <span>Sign in with Google & Sync Reviews</span>
+                            <span>Connect Google Business Profile</span>
                           </>
                         )}
                       </button>
@@ -601,17 +601,17 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
                     <div className="relative flex items-center justify-center">
                       <div className="border-t border-gray-200 w-full"></div>
                       <span className="bg-white px-2.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider relative">
-                        or link directly
+                        or import from Google Maps
                       </span>
                     </div>
 
-                    {/* Fallback Manual Place ID / Link Form */}
+                    {/* Fallback Manual Google Maps Link Form */}
                     <form onSubmit={handleExecuteImport} className="space-y-3">
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-gray-700 flex items-center justify-between">
                           <span className="flex items-center gap-1.5">
                             <MapPin className="w-3.5 h-3.5 text-gray-400" />
-                            <span>Google Maps Place ID or Business Profile Link:</span>
+                            <span>Google Maps Business Link:</span>
                           </span>
                         </label>
                         <input
@@ -619,7 +619,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
                           required
                           value={inputUrl}
                           onChange={(e) => setInputUrl(e.target.value)}
-                          placeholder="e.g. ChIJN1t_tDeuEmsRUsoyG83frY4 or https://maps.google.com/..."
+                          placeholder="e.g. https://maps.app.goo.gl/... or https://maps.google.com/..."
                           className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#6701e6]/20 focus:border-[#6701e6] transition-all"
                         />
                         <p className="text-[11px] text-gray-500">

@@ -4,7 +4,12 @@ import { handleOAuthInit } from './handlers/oauthInit';
 import { handleOAuthCallback } from './handlers/oauthCallback';
 import { handleGoogleAuthInit } from './handlers/googleAuthInit';
 import { handleGoogleAuthCallback } from './handlers/googleAuthCallback';
-import { handleGooglePlaceImport } from './handlers/googlePlaceImport';
+import { handleGooglePlaceImport, handleGooglePlaceResolve } from './handlers/googlePlaceImport';
+import {
+  handleGoogleBusinessDiscover,
+  handleGoogleBusinessPreviewReviews,
+  handleGoogleBusinessImportReviews,
+} from './handlers/googleBusinessHandlers';
 import { handleLinkedInAuthInit } from './handlers/linkedinAuthInit';
 import { handleLinkedInAuthCallback } from './handlers/linkedinAuthCallback';
 import { handleInstagramAuthInit } from './handlers/instagramAuthInit';
@@ -115,10 +120,27 @@ export default {
         case 'google-callback':
           return await handleGoogleAuthCallback(request, env);
 
+        case 'google/resolve-place':
+        case 'google-place-resolve':
+        case 'places/resolve':
+          return await handleGooglePlaceResolve(request, env);
+
         case 'google/import-place':
         case 'google-place-import':
         case 'places/import':
           return await handleGooglePlaceImport(request, env);
+
+        case 'google/discover-businesses':
+        case 'google-discover-businesses':
+          return await handleGoogleBusinessDiscover(request, env);
+
+        case 'google/preview-business-reviews':
+        case 'google-preview-business-reviews':
+          return await handleGoogleBusinessPreviewReviews(request, env);
+
+        case 'google/import-business-reviews':
+        case 'google-import-business-reviews':
+          return await handleGoogleBusinessImportReviews(request, env);
 
         case 'oauth-init':
           return await handleOAuthInit(request, env);
