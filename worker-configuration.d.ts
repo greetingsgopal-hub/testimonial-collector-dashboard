@@ -3,7 +3,7 @@
 // Runtime types generated with workerd@1.20260923.1 2026-09-15 nodejs_compat
 interface __BaseEnv_Env {
 	ASSETS: Fetcher;
-	FIREBASE_API_KEY: "AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE";
+	FIREBASE_API_KEY?: string;
 	FIREBASE_PROJECT_ID: "testimonialcollectordashboard";
 	VITE_FIREBASE_API_KEY: string;
 	VITE_FIREBASE_AUTH_DOMAIN: string;

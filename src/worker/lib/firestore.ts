@@ -44,8 +44,8 @@ export async function verifyFirebaseIdentity(firebaseIdToken?: string, env?: any
     throw new Error('Missing or empty Firebase ID token');
   }
   const fallbackEnv = env || {
-    FIREBASE_API_KEY: (typeof process !== 'undefined' && process.env?.FIREBASE_API_KEY) || 'AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE',
-    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' && process.env?.FIREBASE_PROJECT_ID) || 'testimonialcollectordashboard',
+    FIREBASE_API_KEY: (typeof process !== 'undefined' ? process.env?.FIREBASE_API_KEY : undefined),
+    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' ? process.env?.FIREBASE_PROJECT_ID : undefined) || 'testimonialcollectordashboard',
   };
   const verified = await verifyFirebaseToken(firebaseIdToken.trim(), fallbackEnv);
   if (!verified || !verified.uid) {
@@ -64,8 +64,8 @@ export async function resolveUserOwnership(
   env?: any
 ): Promise<{ ownerId: string; workspaceId: string; projectId: string }> {
   const fallbackEnv = env || {
-    FIREBASE_API_KEY: (typeof process !== 'undefined' && process.env?.FIREBASE_API_KEY) || 'AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE',
-    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' && process.env?.FIREBASE_PROJECT_ID) || 'testimonialcollectordashboard',
+    FIREBASE_API_KEY: (typeof process !== 'undefined' ? process.env?.FIREBASE_API_KEY : undefined),
+    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' ? process.env?.FIREBASE_PROJECT_ID : undefined) || 'testimonialcollectordashboard',
   };
 
   let workspaceId = `ws_${ownerId}`;
@@ -105,8 +105,8 @@ export async function resolveUserOwnership(
 export async function isDuplicate(ownerId: string, provider: string, externalId: string, env?: any): Promise<boolean> {
   const docId = generateReviewDocId(ownerId, provider, externalId);
   const fallbackEnv = env || {
-    FIREBASE_API_KEY: (typeof process !== 'undefined' && process.env?.FIREBASE_API_KEY) || 'AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE',
-    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' && process.env?.FIREBASE_PROJECT_ID) || 'testimonialcollectordashboard',
+    FIREBASE_API_KEY: (typeof process !== 'undefined' ? process.env?.FIREBASE_API_KEY : undefined),
+    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' ? process.env?.FIREBASE_PROJECT_ID : undefined) || 'testimonialcollectordashboard',
   };
   try {
     const doc = await getDocument('reviews', docId, null, fallbackEnv);
@@ -130,8 +130,8 @@ export async function saveReviewsBatch(
   env?: any
 ): Promise<any[]> {
   const fallbackEnv = env || {
-    FIREBASE_API_KEY: (typeof process !== 'undefined' && process.env?.FIREBASE_API_KEY) || 'AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE',
-    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' && process.env?.FIREBASE_PROJECT_ID) || 'testimonialcollectordashboard',
+    FIREBASE_API_KEY: (typeof process !== 'undefined' ? process.env?.FIREBASE_API_KEY : undefined),
+    FIREBASE_PROJECT_ID: (typeof process !== 'undefined' ? process.env?.FIREBASE_PROJECT_ID : undefined) || 'testimonialcollectordashboard',
   };
   const now = new Date().toISOString();
   const savedDocs: any[] = [];
