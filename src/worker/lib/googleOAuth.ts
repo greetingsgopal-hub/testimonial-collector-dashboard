@@ -208,7 +208,10 @@ export async function fetchGooglePlaceDetailsNew(
   input: string,
   env: WorkerEnv
 ): Promise<GoogleResolvedPlace> {
-  const apiKey = env.GOOGLE_PLACES_API_KEY || env.FIREBASE_API_KEY;
+  // GOOGLE_PLACES_API_KEY only — the Firebase web API key is NOT a Places
+  // credential; falling back to it masks a missing/invalid Places key with
+  // a misleading Google 403 instead of a clear configuration error.
+  const apiKey = env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) {
     throw new Error('Google Places API key (GOOGLE_PLACES_API_KEY) is not configured in the system environment.');
   }

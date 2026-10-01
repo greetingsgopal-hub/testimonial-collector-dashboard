@@ -75,7 +75,18 @@ export async function handleGooglePlaceResolve(request: Request, env: WorkerEnv)
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
-    console.warn('[GooglePlaceResolve] Error resolving Google Maps place:', err);
+    // Structured diagnostics — stage + error class only. Never logs tokens,
+    // API keys, cookies, or user-supplied URL content.
+    console.warn(
+      '[GooglePlaceResolve] Failure:',
+      JSON.stringify({
+        stage: 'resolve_place',
+        auth: userId ? 'verified' : 'missing',
+        placesKeyConfigured: Boolean(env.GOOGLE_PLACES_API_KEY),
+        errorName: err?.name || 'Error',
+        errorMessage: err?.message || 'unknown',
+      })
+    );
     const errMsg = err?.message || 'Failed to resolve Google Maps place.';
     return new Response(
       JSON.stringify({
@@ -227,7 +238,17 @@ export async function handleGooglePlaceImport(request: Request, env: WorkerEnv):
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
-    console.error('[GooglePlaceImport] Import failed:', err);
+    // Structured diagnostics — stage + error class only. Never logs tokens,
+    // API keys, cookies, or review content.
+    console.error(
+      '[GooglePlaceImport] Failure:',
+      JSON.stringify({
+        stage: 'import_place',
+        auth: userId ? 'verified' : 'missing',
+        errorName: err?.name || 'Error',
+        errorMessage: err?.message || 'unknown',
+      })
+    );
     return new Response(
       JSON.stringify({ error: err?.message || 'Failed to import reviews from Google Place.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

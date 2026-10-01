@@ -26,7 +26,16 @@ export async function verifyFirebaseToken(idToken: string, env: WorkerEnv): Prom
     });
 
     if (!response.ok) {
-      console.warn('[FirebaseAuth] Token verification failed:', response.status);
+      // Log status + Google's error reason only — never the token itself.
+      let reason = 'unknown';
+      try {
+        const errBody: any = await response.json();
+        reason = errBody?.error?.message || errBody?.error?.code || 'unknown';
+      } catch { /* body not JSON */ }
+      console.warn(
+        '[FirebaseAuth] Token verification failed:',
+        JSON.stringify({ status: response.status, reason })
+      );
       return null;
     }
 
