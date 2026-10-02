@@ -23,12 +23,23 @@ export interface FacebookReviewItem {
 
 /**
  * Builds Meta OAuth 2.0 URL requesting Facebook Page management & ratings scopes.
+ *
+ * Minimal scope set for the documented Page Reviews import flow:
+ * - pages_show_list: required to GET /me/accounts (discover the user's Pages
+ *   and obtain per-Page access tokens).
+ * - pages_read_user_content: required by the Page ratings edge
+ *   (GET /{page-id}/ratings) per Meta's Graph API reference.
+ * - public_profile, email: standard Facebook Login permissions.
+ *
+ * Removed (never consumed by any Graph call in this codebase and not required
+ * by the ratings edge): pages_read_engagement, pages_manage_metadata
+ * (pages_manage_metadata is only needed for creating Pages or subscribing
+ * webhooks via subscribed_apps — neither is performed).
  */
 export function buildFacebookAuthUrl(state: string, appId: string, redirectUri: string): string {
   const scopes = [
-    'pages_read_engagement',
     'pages_show_list',
-    'pages_manage_metadata',
+    'pages_read_user_content',
     'public_profile',
     'email',
   ].join(',');

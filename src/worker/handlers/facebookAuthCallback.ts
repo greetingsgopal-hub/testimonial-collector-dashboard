@@ -95,7 +95,7 @@ export async function handleFacebookAuthCallback(request: Request, env: WorkerEn
       accessTokenEncrypted: encryptToken(pageToken, env),
       userAccessTokenEncrypted: encryptToken(tokenData.accessToken, env),
       tokenExpiresAt: expiresAt,
-      scopes: ['pages_read_engagement', 'pages_show_list', 'pages_manage_metadata', 'pages_read_user_content'],
+      scopes: ['pages_show_list', 'pages_read_user_content'],
       status: 'connected',
       backgroundSyncEnabled: true,
       reviewsSyncedCount: reviews.length,

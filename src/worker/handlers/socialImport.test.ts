@@ -74,7 +74,10 @@ describe('oauth-init dispatches facebook and instagram (authenticated POST)', ()
     const body = await res.json();
     expect(body.authUrl).toMatch(/^https:\/\/www\.facebook\.com\/v19\.0\/dialog\/oauth\?/);
     expect(body.authUrl).toContain('state=');
-    expect(body.authUrl).toContain('pages_read_engagement');
+    expect(body.authUrl).toContain('pages_show_list');
+    expect(body.authUrl).toContain('pages_read_user_content');
+    expect(body.authUrl).not.toContain('pages_read_engagement');
+    expect(body.authUrl).not.toContain('pages_manage_metadata');
     expect(body.platform).toBe('facebook');
   });
 
