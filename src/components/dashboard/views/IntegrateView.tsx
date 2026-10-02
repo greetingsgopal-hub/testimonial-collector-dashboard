@@ -205,7 +205,7 @@ export const IntegrateView: React.FC = () => {
         setIsFacebookConnected(true);
         openFbPagePicker();
       } else if (fbOutcome === 'fb_no_pages') {
-        const msg = 'No Facebook Pages found. Please ensure you have admin access to a Facebook Business Page, then try again.';
+        const msg = socialError || 'No Facebook Pages found. Please ensure you have admin access to a Facebook Business Page, then try again.';
         setFacebookOutcomeError(msg);
         showToast(msg);
       } else if (fbOutcome === 'fb_token_exchange_failed') {
@@ -213,19 +213,18 @@ export const IntegrateView: React.FC = () => {
         setFacebookOutcomeError(msg);
         showToast(msg);
       } else if (fbOutcome === 'fb_page_discovery_failed') {
-        const msg = 'Failed to discover your Facebook Pages. Please ensure your Facebook account manages at least one Business Page.';
+        const msg = socialError || 'Failed to discover your Facebook Pages. Please ensure your Facebook account manages at least one Business Page.';
         setFacebookOutcomeError(msg);
         showToast(msg);
       } else {
-        const msg = 'Facebook connection failed during authorization. Please try connecting your Facebook Page again.';
+        const msg = socialError || 'Facebook connection failed during authorization. Please try connecting your Facebook Page again.';
         setFacebookOutcomeError(msg);
         showToast(msg);
       }
     } else if (socialError && (params.get('platform') === 'facebook' || params.get('provider') === 'facebook' || socialError.toLowerCase().includes('facebook') || params.get('tab') === 'integrate')) {
       window.history.replaceState({}, document.title, window.location.pathname);
-      const msg = 'Facebook connection failed during authorization. Please try connecting your Facebook Page again.';
-      setFacebookOutcomeError(msg);
-      showToast(msg);
+      setFacebookOutcomeError(socialError);
+      showToast(socialError);
     }
     if (socialConnected === 'linkedin') {
       localStorage.setItem('pandapraise_linkedin_connected', 'true');

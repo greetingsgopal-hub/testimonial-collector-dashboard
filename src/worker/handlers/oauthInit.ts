@@ -130,9 +130,10 @@ export async function handleOAuthInit(request: Request, env: WorkerEnv): Promise
     }
 
     if (platform === 'facebook') {
-      const appId = env.META_APP_ID;
-      const redirectUri =
-        env.FACEBOOK_REDIRECT_URI || `${new URL(request.url).origin}/api/auth/facebook/callback`;
+      const appId = (env.META_APP_ID || '').trim();
+      const redirectUri = (
+        env.FACEBOOK_REDIRECT_URI || `${new URL(request.url).origin}/api/auth/facebook/callback`
+      ).trim();
 
       if (!appId) {
         return new Response(

@@ -1,4 +1,4 @@
-﻿import crypto from 'node:crypto';
+import crypto from 'node:crypto';
 import { WorkerEnv } from '../types';
 import { verifyOAuthState, encryptToken } from '../lib/crypto';
 import { exchangeFacebookCode, getFacebookPages } from '../lib/facebookOAuth';
@@ -62,9 +62,9 @@ export async function handleFacebookAuthCallback(request: Request, env: WorkerEn
 
   const { userId } = stateResult;
 
-  const appId = env.META_APP_ID || '';
-  const appSecret = env.META_APP_SECRET || '';
-  const redirectUri = env.FACEBOOK_REDIRECT_URI || `${baseUrl}/api/auth/facebook/callback`;
+  const appId = (env.META_APP_ID || '').trim();
+  const appSecret = (env.META_APP_SECRET || '').trim();
+  const redirectUri = (env.FACEBOOK_REDIRECT_URI || `${baseUrl}/api/auth/facebook/callback`).trim();
 
   if (!appId || !appSecret) {
     console.error('[facebook.oauth.callback] META_APP_ID/META_APP_SECRET missing in environment.');
@@ -76,16 +76,17 @@ export async function handleFacebookAuthCallback(request: Request, env: WorkerEn
   try {
     tokenData = await exchangeFacebookCode(code, redirectUri, appId, appSecret);
   } catch (err: any) {
+    const errorDetail = sanitizeMetaError(err?.message);
     // Structured diagnostic: stage + sanitized Meta error. No tokens logged.
     console.error(
       JSON.stringify({
         stage: 'facebook.oauth.token_exchange',
         provider: 'facebook',
         ownerHash: hashUid(userId),
-        error: sanitizeMetaError(err?.message),
+        error: errorDetail,
       })
     );
-    return redirectWithOutcome(baseUrl, 'fb_token_exchange_failed', 'Facebook authorization could not be completed.');
+    return redirectWithOutcome(baseUrl, 'fb_token_exchange_failed', errorDetail || 'Facebook authorization could not be completed.');
   }
 
   // ── Stage 2: Page discovery ──────────────────────────────────────────
@@ -93,15 +94,16 @@ export async function handleFacebookAuthCallback(request: Request, env: WorkerEn
   try {
     pages = await getFacebookPages(tokenData.accessToken);
   } catch (err: any) {
+    const pageDiscoveryError = sanitizeMetaError(err?.message);
     console.error(
       JSON.stringify({
         stage: 'facebook.pages.discovery',
         provider: 'facebook',
         ownerHash: hashUid(userId),
-        error: sanitizeMetaError(err?.message),
+        error: pageDiscoveryError,
       })
     );
-    return redirectWithOutcome(baseUrl, 'fb_page_discovery_failed', 'Facebook connected, but Panda Praise could not list your Facebook Pages.');
+    return redirectWithOutcome(baseUrl, 'fb_page_discovery_failed', pageDiscoveryError || 'Facebook connected, but Panda Praise could not list your Facebook Pages.');
   }
 
   if (pages.length === 0) {

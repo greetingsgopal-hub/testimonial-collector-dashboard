@@ -1,4 +1,4 @@
-﻿import { WorkerEnv } from '../types';
+import { WorkerEnv } from '../types';
 import crypto from 'node:crypto';
 
 /**
@@ -114,11 +114,16 @@ export async function exchangeFacebookCode(
   appId: string,
   appSecret: string
 ): Promise<{ accessToken: string; expiresIn: number }> {
+  const cleanAppId = appId.trim();
+  const cleanSecret = appSecret.trim();
+  const cleanRedirectUri = redirectUri.trim();
+  const cleanCode = code.trim();
+
   const tokenUrl = new URL(`${GRAPH_BASE}/oauth/access_token`);
-  tokenUrl.searchParams.set('client_id', appId);
-  tokenUrl.searchParams.set('client_secret', appSecret);
-  tokenUrl.searchParams.set('redirect_uri', redirectUri);
-  tokenUrl.searchParams.set('code', code);
+  tokenUrl.searchParams.set('client_id', cleanAppId);
+  tokenUrl.searchParams.set('client_secret', cleanSecret);
+  tokenUrl.searchParams.set('redirect_uri', cleanRedirectUri);
+  tokenUrl.searchParams.set('code', cleanCode);
 
   const res = await fetch(tokenUrl.toString());
   if (!res.ok) {
@@ -139,8 +144,8 @@ export async function exchangeFacebookCode(
   try {
     const longTokenUrl = new URL(`${GRAPH_BASE}/oauth/access_token`);
     longTokenUrl.searchParams.set('grant_type', 'fb_exchange_token');
-    longTokenUrl.searchParams.set('client_id', appId);
-    longTokenUrl.searchParams.set('client_secret', appSecret);
+    longTokenUrl.searchParams.set('client_id', cleanAppId);
+    longTokenUrl.searchParams.set('client_secret', cleanSecret);
     longTokenUrl.searchParams.set('fb_exchange_token', shortLivedToken);
 
     const longRes = await fetch(longTokenUrl.toString());
