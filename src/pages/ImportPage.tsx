@@ -525,7 +525,22 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
   // ── CSV Parsing & Import ──
   const parseCsv = useCallback((text: string) => {
     const lines = text.split('\n').filter((l) => l.trim());
-    if (lines.length < 2) return;
+    if (lines.length === 0) {
+      setImportResult({
+        success: false,
+        count: 0,
+        errors: ['This file is empty. Please upload a CSV with a header row and at least one testimonial.'],
+      });
+      return;
+    }
+    if (lines.length < 2) {
+      setImportResult({
+        success: false,
+        count: 0,
+        errors: ['This CSV has no data rows. Please include a header row plus at least one testimonial row.'],
+      });
+      return;
+    }
 
     const parseLine = (line: string): string[] => {
       const result: string[] = [];
@@ -547,6 +562,16 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
     };
 
     const headers = parseLine(lines[0]);
+    if (headers.length < 2) {
+      setImportResult({
+        success: false,
+        count: 0,
+        errors: [
+          'This does not look like a valid CSV: only one column was found. Make sure your file is comma-separated with a header row (e.g. name,email,rating,content).',
+        ],
+      });
+      return;
+    }
     const rows = lines.slice(1).map(parseLine);
 
     setCsvHeaders(headers);
@@ -641,12 +666,43 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
         }))
         .filter((r) => r.content.trim().length > 0);
 
+      // Load existing reviews once: used for both duplicate detection and the
+      // free-plan limit check.
+      const existingReviews = await storage.getReviews(project.id);
+
+      // Duplicate detection: skip rows whose content matches an existing
+      // review (normalized) so re-importing the same CSV is idempotent.
+      const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ');
+      const existingContent = new Set(existingReviews.map((r) => normalize(r.content)));
+      const seenInFile = new Set<string>();
+      let duplicatesSkipped = 0;
+      const newReviews = reviews.filter((r) => {
+        const key = normalize(r.content);
+        if (existingContent.has(key) || seenInFile.has(key)) {
+          duplicatesSkipped++;
+          return false;
+        }
+        seenInFile.add(key);
+        return true;
+      });
+
+      if (newReviews.length === 0) {
+        setImportResult({
+          success: true,
+          count: 0,
+          errors: [
+            `All ${reviews.length} testimonial${reviews.length === 1 ? '' : 's'} in this CSV already exist in your project. No duplicates were imported.`,
+          ],
+        });
+        setCsvStep('done');
+        return;
+      }
+
       // Free-plan limit: "Up to 15 testimonials" (pricing page + PLAN_LIMITS).
       // Owner-initiated imports are capped; anonymous form submissions are not.
       const maxTestimonials = workspace ? PLAN_LIMITS[workspace.plan].maxTestimonials : -1;
       if (maxTestimonials !== -1) {
-        const existing = await storage.getReviews(project.id);
-        const remaining = maxTestimonials - existing.length;
+        const remaining = maxTestimonials - existingReviews.length;
         if (remaining <= 0) {
           setImportResult({
             success: false,
@@ -656,12 +712,12 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
           setCsvStep('done');
           return;
         }
-        if (reviews.length > remaining) {
+        if (newReviews.length > remaining) {
           setImportResult({
             success: false,
             count: 0,
             errors: [
-              `This CSV contains ${reviews.length} testimonials but your Free plan only has ${remaining} slots left (limit ${maxTestimonials}). Upgrade to import more.`,
+              `This CSV contains ${newReviews.length} new testimonials but your Free plan only has ${remaining} slots left (limit ${maxTestimonials}). Upgrade to import more.`,
             ],
           });
           setCsvStep('done');
@@ -670,12 +726,16 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
       }
 
       let imported = 0;
-      for (const r of reviews) {
+      for (const r of newReviews) {
         await storage.createReview(r);
         imported++;
       }
 
-      setImportResult({ success: true, count: imported });
+      setImportResult({
+        success: true,
+        count: imported,
+        errors: duplicatesSkipped > 0 ? [`${duplicatesSkipped} duplicate${duplicatesSkipped === 1 ? '' : 's'} skipped.`] : undefined,
+      });
       setCsvStep('done');
     } catch (err: any) {
       setImportResult({ success: false, count: 0, errors: [err.message] });
