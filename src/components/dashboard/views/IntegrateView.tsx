@@ -11,6 +11,7 @@ import {
   ArrowUpRight,
   Search,
   Zap,
+  X,
 } from 'lucide-react';
 import { socialClient, SocialStatusResponse } from '../../../lib/socialClient';
 
@@ -128,6 +129,7 @@ export const IntegrateView: React.FC = () => {
   const [fbSelectedPageId, setFbSelectedPageId] = useState<string | null>(null);
   const [fbPickerLoading, setFbPickerLoading] = useState(false);
   const [fbSelectingPage, setFbSelectingPage] = useState(false);
+  const [facebookOutcomeError, setFacebookOutcomeError] = useState<string | null>(null);
 
   // Instagram Integration State
   const [isInstagramConnected, setIsInstagramConnected] = useState<boolean>(() => {
@@ -194,24 +196,36 @@ export const IntegrateView: React.FC = () => {
     const socialConnected = params.get('social_connected');
     const accountName = params.get('account_name');
     const fbOutcome = params.get('fb_outcome');
-    if (fbOutcome === 'fb_oauth_success') {
-      // OAuth + Page discovery succeeded: open the explicit Page selection UI.
+    const socialError = params.get('social_error');
+
+    if (fbOutcome) {
       window.history.replaceState({}, document.title, window.location.pathname);
-      localStorage.setItem('pandapraise_facebook_connected', 'true');
-      setIsFacebookConnected(true);
-      openFbPagePicker();
-    } else if (fbOutcome === 'fb_no_pages') {
+      if (fbOutcome === 'fb_oauth_success') {
+        localStorage.setItem('pandapraise_facebook_connected', 'true');
+        setIsFacebookConnected(true);
+        openFbPagePicker();
+      } else if (fbOutcome === 'fb_no_pages') {
+        const msg = 'No Facebook Pages found. Please ensure you have admin access to a Facebook Business Page, then try again.';
+        setFacebookOutcomeError(msg);
+        showToast(msg);
+      } else if (fbOutcome === 'fb_token_exchange_failed') {
+        const msg = 'Facebook connection failed during authorization. Please try connecting your Facebook Page again.';
+        setFacebookOutcomeError(msg);
+        showToast(msg);
+      } else if (fbOutcome === 'fb_page_discovery_failed') {
+        const msg = 'Failed to discover your Facebook Pages. Please ensure your Facebook account manages at least one Business Page.';
+        setFacebookOutcomeError(msg);
+        showToast(msg);
+      } else {
+        const msg = 'Facebook connection failed during authorization. Please try connecting your Facebook Page again.';
+        setFacebookOutcomeError(msg);
+        showToast(msg);
+      }
+    } else if (socialError && (params.get('platform') === 'facebook' || params.get('provider') === 'facebook' || socialError.toLowerCase().includes('facebook') || params.get('tab') === 'integrate')) {
       window.history.replaceState({}, document.title, window.location.pathname);
-      showToast('No Facebook Pages were available for this account.');
-    } else if (fbOutcome === 'fb_token_exchange_failed') {
-      window.history.replaceState({}, document.title, window.location.pathname);
-      showToast('Facebook connection is currently unavailable for review importing. Please use CSV import or manual testimonials instead.');
-    } else if (fbOutcome === 'fb_page_discovery_failed') {
-      window.history.replaceState({}, document.title, window.location.pathname);
-      showToast('Facebook connection is currently unavailable for review importing. Please use CSV import or manual testimonials instead.');
-    } else if (fbOutcome === 'fb_oauth_failed') {
-      window.history.replaceState({}, document.title, window.location.pathname);
-      showToast('Facebook connection is currently unavailable for review importing. Please use CSV import or manual testimonials instead.');
+      const msg = 'Facebook connection failed during authorization. Please try connecting your Facebook Page again.';
+      setFacebookOutcomeError(msg);
+      showToast(msg);
     }
     if (socialConnected === 'linkedin') {
       localStorage.setItem('pandapraise_linkedin_connected', 'true');
@@ -643,6 +657,28 @@ export const IntegrateView: React.FC = () => {
         <div className="fixed bottom-6 right-6 z-50 animate-bounce-in bg-gray-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs border border-gray-800">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span className="font-medium">{feedbackToast}</span>
+        </div>
+      )}
+
+      {/* Facebook Dedicated Outcome Notice Banner */}
+      {facebookOutcomeError && (
+        <div
+          id="facebook-outcome-banner"
+          className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-3 animate-fade-in"
+        >
+          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex-1 text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+            <span className="font-bold block text-sm mb-0.5 text-amber-900 dark:text-amber-100">Facebook Connection Notice</span>
+            {facebookOutcomeError}
+          </div>
+          <button
+            type="button"
+            onClick={() => setFacebookOutcomeError(null)}
+            className="p-1 text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 transition-colors cursor-pointer"
+            aria-label="Dismiss notice"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -1085,6 +1121,7 @@ export const IntegrateView: React.FC = () => {
       {/* ── Facebook Page Selection Modal (explicit selection, no IDs shown) ── */}
       {showFbPagePicker && (
         <div
+          id="facebook-page-picker-modal"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in"
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowFbPagePicker(false);
@@ -1141,6 +1178,7 @@ export const IntegrateView: React.FC = () => {
                 </div>
 
                 <button
+                  id="confirm-facebook-page-btn"
                   type="button"
                   onClick={handleFbSelectPageAndImport}
                   disabled={!fbSelectedPageId || fbSelectingPage}

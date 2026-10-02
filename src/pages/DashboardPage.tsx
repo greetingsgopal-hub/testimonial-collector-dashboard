@@ -114,7 +114,30 @@ export const DashboardPage = () => {
     const accountName = params.get('account_name');
     const socialError = params.get('social_error');
     const requestedTab = params.get('tab');
+    const fbOutcome = params.get('fb_outcome');
+    const platform = params.get('platform');
+    const provider = params.get('provider');
     const pathname = window.location.pathname;
+
+    // Facebook OAuth callback parameters must be exclusively owned by IntegrateView.
+    // DashboardPage must NOT consume, display, or remove Facebook fb_outcome or social_error parameters.
+    const isFacebookCallback = Boolean(
+      fbOutcome ||
+      socialConnected === 'facebook' ||
+      platform === 'facebook' ||
+      provider === 'facebook' ||
+      (socialError && (
+        params.has('fb_outcome') ||
+        (requestedTab === 'integrate' && socialError.toLowerCase().includes('facebook')) ||
+        (pathname.includes('/integrate') && socialError.toLowerCase().includes('facebook'))
+      ))
+    );
+
+    if (isFacebookCallback) {
+      setActiveTab('integrate');
+      return;
+    }
+
     if (socialConnected || requestedTab === 'integrate' || pathname.includes('/integrate')) {
       setActiveTab('integrate');
     }
