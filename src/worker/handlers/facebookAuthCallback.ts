@@ -123,9 +123,12 @@ export async function handleFacebookAuthCallback(request: Request, env: WorkerEn
   const connectionDoc = {
     ownerId: userId,
     platform: 'facebook',
-    platformUserId: pages[0].id,
-    platformAccountName: pages[0].name,
-    platformProfilePicture: pages[0].profilePicture || null,
+    // No Page is selected at OAuth time. These fields represent the selected
+    // resource and must remain null until the user explicitly chooses one in
+    // /api/facebook/select-page. Never use pages[0] as an implicit selection.
+    platformUserId: null,
+    platformAccountName: null,
+    platformProfilePicture: null,
     accountType: 'page',
     pageId: null, // Set when the user explicitly selects a Page
     pageName: null,
