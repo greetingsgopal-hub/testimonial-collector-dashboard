@@ -135,9 +135,13 @@ export const OnboardingPage: React.FC = () => {
 
   const handleStep3Submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (websiteUrl.trim()) {
-      setStep(4);
-    }
+    const trimmed = websiteUrl.trim();
+    if (!trimmed) return;
+    // Accept bare domains (e.g. "mycompany.com") as well as full URLs.
+    // type="url" silently blocked bare domains with no user-visible error.
+    const normalized = /^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    setWebsiteUrl(normalized);
+    setStep(4);
   };
 
   const setupRanRef = useRef(false);
@@ -362,7 +366,8 @@ export const OnboardingPage: React.FC = () => {
                 Website URL
               </label>
               <input
-                type="url"
+                type="text"
+                inputMode="url"
                 autoFocus
                 required
                 value={websiteUrl}
