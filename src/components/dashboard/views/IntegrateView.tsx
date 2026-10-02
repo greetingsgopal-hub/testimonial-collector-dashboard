@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { socialClient, SocialStatusResponse } from '../../../lib/socialClient';
+import { ConnectSourceModal } from './ConnectSourceModal';
 
 // Custom Brand Icons
 const LinkedInIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
@@ -130,6 +131,8 @@ export const IntegrateView: React.FC = () => {
   const [fbPickerLoading, setFbPickerLoading] = useState(false);
   const [fbSelectingPage, setFbSelectingPage] = useState(false);
   const [facebookOutcomeError, setFacebookOutcomeError] = useState<string | null>(null);
+  const [showConnectModal, setShowConnectModal] = useState<boolean>(false);
+  const [connectModalPlatform, setConnectModalPlatform] = useState<string>('facebook');
 
   // Instagram Integration State
   const [isInstagramConnected, setIsInstagramConnected] = useState<boolean>(() => {
@@ -989,25 +992,40 @@ export const IntegrateView: React.FC = () => {
                             </button>
                           </div>
                         ) : (
-                          <button
-                            id="connect-facebook-btn"
-                            type="button"
-                            onClick={handleConnectFacebook}
-                            disabled={connectingFacebook}
-                            className="w-full py-2 px-3 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
-                          >
-                            {connectingFacebook ? (
-                              <>
-                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                <span>Redirecting to Meta...</span>
-                              </>
-                            ) : (
-                              <>
-                                <span>Connect Facebook Page</span>
-                                <ArrowUpRight className="w-3.5 h-3.5" />
-                              </>
-                            )}
-                          </button>
+                          <div className="space-y-2">
+                            <button
+                              id="import-facebook-url-btn"
+                              type="button"
+                              onClick={() => {
+                                setConnectModalPlatform('facebook');
+                                setShowConnectModal(true);
+                              }}
+                              className="w-full py-2 px-3 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              <span>Import Reviews via URL (Zero Login)</span>
+                            </button>
+                            <button
+                              id="connect-facebook-btn"
+                              type="button"
+                              onClick={handleConnectFacebook}
+                              disabled={connectingFacebook}
+                              className="w-full py-1.5 px-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-[11px] font-semibold transition-all shadow-2xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                            >
+                              {connectingFacebook ? (
+                                <>
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                  <span>Redirecting to Meta...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <FacebookBrandIcon className="w-3.5 h-3.5 text-[#1877F2]" />
+                                  <span>Connect via Meta OAuth</span>
+                                  <ArrowUpRight className="w-3 h-3" />
+                                </>
+                              )}
+                            </button>
+                          </div>
                         )
                       )}
 
@@ -1052,6 +1070,36 @@ export const IntegrateView: React.FC = () => {
                         )
                       )}
 
+                      {/* Google Reviews Card Action */}
+                      {item.id === 'google-reviews' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setConnectModalPlatform('google');
+                            setShowConnectModal(true);
+                          }}
+                          className="w-full py-2 px-3 rounded-xl bg-[#4285F4] hover:bg-[#3367d6] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Import Google Reviews</span>
+                        </button>
+                      )}
+
+                      {/* Trustpilot Card Action */}
+                      {item.id === 'trustpilot' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setConnectModalPlatform('trustpilot');
+                            setShowConnectModal(true);
+                          }}
+                          className="w-full py-2 px-3 rounded-xl bg-[#00B67A] hover:bg-[#009c68] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Import Trustpilot Reviews</span>
+                        </button>
+                      )}
+
                       {/* Stripe Card Actions */}
                       {item.id === 'stripe' && (
                         stripeSubscription?.plan && stripeSubscription.plan !== 'free' ? (
@@ -1082,7 +1130,12 @@ export const IntegrateView: React.FC = () => {
                       )}
 
                       {/* Other Waitlist Cards */}
-                      {item.id !== 'linkedin' && item.id !== 'stripe' && (
+                      {item.id !== 'linkedin' &&
+                        item.id !== 'stripe' &&
+                        item.id !== 'facebook' &&
+                        item.id !== 'instagram' &&
+                        item.id !== 'google-reviews' &&
+                        item.id !== 'trustpilot' && (
                         <button
                           type="button"
                           onClick={() => handleJoinWaitlist(item.id, item.name)}
@@ -1198,6 +1251,16 @@ export const IntegrateView: React.FC = () => {
         </div>
       )}
 
+      {/* Universal Zero-Auth URL & Review Ingestion Modal */}
+      <ConnectSourceModal
+        isOpen={showConnectModal}
+        onClose={() => setShowConnectModal(false)}
+        onSelectPlatform={() => {
+          setShowConnectModal(false);
+          fetchStatus();
+        }}
+        initialPlatform={connectModalPlatform}
+      />
     </div>
   );
 };

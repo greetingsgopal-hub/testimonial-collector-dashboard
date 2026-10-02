@@ -5,27 +5,17 @@ import {
   X, 
   Check, 
   AlertCircle,
-  ExternalLink, 
   Sparkles, 
   ArrowLeft, 
   ArrowRight, 
   RefreshCw, 
   Link as LinkIcon, 
-  KeyRound, 
   CheckCircle2, 
-  Search,
-  ShieldCheck,
-  MapPin,
-  Globe
+  MapPin, 
+  Star,
+  CheckSquare,
+  Square
 } from 'lucide-react';
-
-const InstagramIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-  </svg>
-);
 
 const FacebookBrandIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -36,7 +26,7 @@ const FacebookBrandIcon = ({ className = 'w-4 h-4' }: { className?: string }) =>
 interface PlatformItem {
   id: string;
   name: string;
-  category: string;
+  category: 'Available now' | 'Coming soon';
   type: 'url' | 'api';
   icon: string;
   color: string;
@@ -46,27 +36,27 @@ interface PlatformItem {
 }
 
 const PLATFORMS: PlatformItem[] = [
-  { id: 'google', name: 'Google Reviews', category: 'Available now', type: 'api', icon: 'https://www.google.com/favicon.ico', color: '#4285F4', inputLabel: 'Google Maps Business Link', placeholder: 'https://maps.app.goo.gl/... or https://maps.google.com/...' },
-  { id: 'facebook', name: 'Facebook Page', category: 'Experimental', type: 'api', icon: 'https://facebook.com/favicon.ico', color: '#1877F2', inputLabel: 'Facebook Page URL or Recommendation Link', placeholder: 'https://facebook.com/yourpage or https://facebook.com/yourpage/reviews' },
+  { id: 'google', name: 'Google Reviews', category: 'Available now', type: 'url', icon: 'https://www.google.com/favicon.ico', color: '#4285F4', inputLabel: 'Google Maps Business Link or Place ID', placeholder: 'https://maps.app.goo.gl/... or https://maps.google.com/...' },
+  { id: 'facebook', name: 'Facebook Page', category: 'Available now', type: 'url', icon: 'https://facebook.com/favicon.ico', color: '#1877F2', inputLabel: 'Facebook Page URL or Reviews Link', placeholder: 'https://facebook.com/yourpage or https://facebook.com/yourpage/reviews' },
+  { id: 'trustpilot', name: 'Trustpilot', category: 'Available now', type: 'url', icon: 'https://www.trustpilot.com/favicon.ico', color: '#00B67A', inputLabel: 'Trustpilot Business Link or Domain', placeholder: 'https://www.trustpilot.com/review/company.com or company.com' },
+  { id: 'appstore', name: 'App Store', category: 'Available now', type: 'url', icon: 'https://www.apple.com/favicon.ico', color: '#0070c9', inputLabel: 'App Store App Link or ID', placeholder: 'https://apps.apple.com/app/id123456789' },
+  { id: 'producthunt', name: 'Product Hunt', category: 'Available now', type: 'url', icon: 'https://www.producthunt.com/favicon.ico', color: '#DA552F', inputLabel: 'Product Hunt Product Link', placeholder: 'https://www.producthunt.com/products/your-product/reviews' },
+  { id: 'g2', name: 'G2', category: 'Available now', type: 'url', icon: 'https://www.g2.com/favicon.ico', color: '#FF492C', inputLabel: 'G2 Product Reviews Link', placeholder: 'https://www.g2.com/products/your-product/reviews' },
+  { id: 'capterra', name: 'Capterra', category: 'Available now', type: 'url', icon: 'https://www.capterra.com/favicon.ico', color: '#00587C', inputLabel: 'Capterra Vendor Profile Link', placeholder: 'https://www.capterra.com/p/123456/Your-Product/' },
+  { id: 'yelp', name: 'Yelp', category: 'Available now', type: 'url', icon: 'https://www.yelp.com/favicon.ico', color: '#D32323', inputLabel: 'Yelp Business Page Link', placeholder: 'https://www.yelp.com/biz/your-business-name' },
+  { id: 'playstore', name: 'Google Play', category: 'Available now', type: 'url', icon: 'https://play.google.com/favicon.ico', color: '#01875f', inputLabel: 'Google Play Store Link or Package Name', placeholder: 'https://play.google.com/store/apps/details?id=com.app' },
+  { id: 'web', name: 'Web Page', category: 'Available now', type: 'url', icon: 'https://www.google.com/s2/favicons?domain=example.com', color: '#4F46E5', inputLabel: 'Website or Testimonials Page URL', placeholder: 'https://example.com/testimonials or any public review link' },
   { id: 'instagram', name: 'Instagram', category: 'Coming soon', type: 'url', icon: 'https://instagram.com/favicon.ico', color: '#E4405F', inputLabel: 'Instagram Post or Reel URL', placeholder: 'https://www.instagram.com/p/... or https://www.instagram.com/reel/...' },
   { id: 'linkedin', name: 'LinkedIn', category: 'Coming soon', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
   { id: 'twitter', name: 'Twitter / X', category: 'Coming soon', type: 'url', icon: 'https://twitter.com/favicon.ico', color: '#000000', inputLabel: 'Tweet / Post URL', placeholder: 'https://x.com/username/status/1234567890' },
-  { id: 'g2', name: 'G2', category: 'Coming soon', type: 'api', icon: 'https://www.g2.com/favicon.ico', color: '#FF492C', inputLabel: 'G2 Product URL or API Token', placeholder: 'https://www.g2.com/products/your-product/reviews' },
-  { id: 'trustpilot', name: 'Trustpilot', category: 'Coming soon', type: 'api', icon: 'https://www.trustpilot.com/favicon.ico', color: '#00B67A', inputLabel: 'Trustpilot Business Domain / API Key', placeholder: 'e.g. yourcompany.com or API Token' },
-  { id: 'producthunt', name: 'Product Hunt', category: 'Coming soon', type: 'url', icon: 'https://www.producthunt.com/favicon.ico', color: '#DA552F', inputLabel: 'Product Hunt Review / Comment URL', placeholder: 'https://www.producthunt.com/posts/your-product#reviews' },
-  { id: 'shopify', name: 'Shopify', category: 'Coming soon', type: 'api', icon: 'https://www.shopify.com/favicon.ico', color: '#96bf48', inputLabel: 'Shopify Store URL & App API Key', placeholder: 'your-store.myshopify.com' },
-  { id: 'capterra', name: 'Capterra', category: 'Coming soon', type: 'api', icon: 'https://www.capterra.com/favicon.ico', color: '#00587C', inputLabel: 'Capterra Vendor Profile URL', placeholder: 'https://www.capterra.com/p/123456/Your-Product/' },
-  { id: 'yelp', name: 'Yelp', category: 'Coming soon', type: 'api', icon: 'https://www.yelp.com/favicon.ico', color: '#D32323', inputLabel: 'Yelp Business URL', placeholder: 'https://www.yelp.com/biz/your-business-name' },
+  { id: 'shopify', name: 'Shopify', category: 'Coming soon', type: 'api', icon: 'https://www.shopify.com/favicon.ico', color: '#96bf48', inputLabel: 'Shopify Store URL', placeholder: 'your-store.myshopify.com' },
   { id: 'udemy', name: 'Udemy', category: 'Coming soon', type: 'api', icon: 'https://www.udemy.com/favicon.ico', color: '#A435F0', inputLabel: 'Udemy Course URL', placeholder: 'https://www.udemy.com/course/your-course-name/' },
   { id: 'amazon', name: 'Amazon', category: 'Coming soon', type: 'api', icon: 'https://www.amazon.com/favicon.ico', color: '#FF9900', inputLabel: 'Amazon ASIN / Product Review URL', placeholder: 'https://www.amazon.com/dp/B000XXXXXX' },
   { id: 'airbnb', name: 'Airbnb', category: 'Coming soon', type: 'api', icon: 'https://www.airbnb.com/favicon.ico', color: '#FF5A5F', inputLabel: 'Airbnb Listing URL', placeholder: 'https://www.airbnb.com/rooms/12345678' },
-  { id: 'appstore', name: 'App Store', category: 'Coming soon', type: 'api', icon: 'https://www.apple.com/favicon.ico', color: '#0070c9', inputLabel: 'App Store App ID / URL', placeholder: 'https://apps.apple.com/app/id123456789' },
-  { id: 'playstore', name: 'Google Play', category: 'Coming soon', type: 'api', icon: 'https://play.google.com/favicon.ico', color: '#01875f', inputLabel: 'Google Play Package Name / URL', placeholder: 'com.yourcompany.app' },
   { id: 'whop', name: 'Whop', category: 'Coming soon', type: 'api', icon: 'https://whop.com/favicon.ico', color: '#FF5C00', inputLabel: 'Whop Experience / Store URL', placeholder: 'https://whop.com/your-store' },
   { id: 'wordpress', name: 'WordPress', category: 'Coming soon', type: 'api', icon: 'https://wordpress.org/favicon.ico', color: '#21759B', inputLabel: 'WordPress Plugin / Theme Slug', placeholder: 'https://wordpress.org/plugins/your-plugin/' },
   { id: 'discourse', name: 'Discourse', category: 'Coming soon', type: 'url', icon: 'https://www.discourse.org/favicon.ico', color: '#2B3B48', inputLabel: 'Discourse Topic / Post URL', placeholder: 'https://community.yourcompany.com/t/topic/1234' },
   { id: 'reddit', name: 'Reddit', category: 'Coming soon', type: 'url', icon: 'https://www.reddit.com/favicon.ico', color: '#FF4500', inputLabel: 'Reddit Post or Comment URL', placeholder: 'https://www.reddit.com/r/saas/comments/...' },
-  { id: 'tiktok', name: 'TikTok', category: 'Coming soon', type: 'url', icon: 'https://www.tiktok.com/favicon.ico', color: '#000000', inputLabel: 'TikTok Video URL', placeholder: 'https://www.tiktok.com/@username/video/123456789' },
 ];
 
 interface ConnectSourceModalProps {
@@ -84,7 +74,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   projectId,
   initialPlatform,
 }) => {
-  const [step, setStep] = useState<'select' | 'configure'>(initialPlatform ? 'configure' : 'select');
+  const [step, setStep] = useState<'select' | 'configure' | 'preview'>(initialPlatform ? 'configure' : 'select');
   const [selectedId, setSelectedId] = useState<string>(initialPlatform || 'google');
   const [hoveredName, setHoveredName] = useState<string | null>(null);
 
@@ -101,15 +91,20 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
 
   // Configure Step State
   const [inputUrl, setInputUrl] = useState('');
-  const [apiKey, setApiKey] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
   const [importError, setImportError] = useState<string>('');
   const [foundCount, setFoundCount] = useState<number>(0);
   const [detectedLocationName, setDetectedLocationName] = useState<string>('');
-  const [autoBackgroundSync, setAutoBackgroundSync] = useState<boolean>(() => {
+  const [autoBackgroundSync] = useState<boolean>(() => {
     return localStorage.getItem('pandapraise_facebook_auto_sync') !== 'false';
   });
+
+  // Preview & Selection State (Senja.io pattern)
+  const [extractedReviews, setExtractedReviews] = useState<any[]>([]);
+  const [selectedReviewIds, setSelectedReviewIds] = useState<string[]>([]);
+  const [resolvedEntity, setResolvedEntity] = useState<any>(null);
+  const [isCommitting, setIsCommitting] = useState(false);
 
   if (!isOpen) return null;
 
@@ -120,8 +115,10 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
     setSyncSuccess(false);
     setImportError('');
     setInputUrl('');
-    setApiKey('');
     setDetectedLocationName('');
+    setExtractedReviews([]);
+    setSelectedReviewIds([]);
+    setResolvedEntity(null);
   };
 
   const handleContinue = () => {
@@ -144,17 +141,13 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
     setImportError('');
     setIsProcessing(false);
     setInputUrl('');
-    setApiKey('');
     setDetectedLocationName('');
+    setExtractedReviews([]);
+    setSelectedReviewIds([]);
+    setResolvedEntity(null);
     onClose();
   };
 
-  /**
-   * Triggers the real backend OAuth 2.0 flow for Google Reviews / Business
-   * Profile. Uses the authenticated POST /api/oauth-init route — the browser
-   * cannot attach an Authorization header to a plain navigation, so a GET
-   * /api/auth/google redirect can never authenticate.
-   */
   const handleGoogleOAuthRedirect = async () => {
     setIsProcessing(true);
     const res = await socialClient.initOAuth('google');
@@ -171,11 +164,6 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
     }
   };
 
-  /**
-   * Triggers the real backend OAuth 2.0 flow for Facebook Page reviews & comments.
-   * Uses the authenticated POST /api/oauth-init route — a browser GET to
-   * /api/auth/facebook can never carry the Firebase Bearer token.
-   */
   const handleFacebookOAuthRedirect = async () => {
     localStorage.setItem('pandapraise_facebook_auto_sync', autoBackgroundSync ? 'true' : 'false');
     setIsProcessing(true);
@@ -194,45 +182,119 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   };
 
   /**
-   * Executes manual import for Place ID, Instagram URL, Facebook link, or general source
+   * Senja.io Zero-Auth URL Resolution
    */
   const handleExecuteImport = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!inputUrl.trim()) {
+      setImportError('Please enter a valid review page or public profile link.');
+      return;
+    }
+
     setIsProcessing(true);
     setImportError('');
 
-    if (selectedId === 'google') {
-      try {
-        const auth = getFirebaseAuth();
-        const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
-        const response = await fetch('/api/google/import-place', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
-          },
-          body: JSON.stringify({ placeId: inputUrl.trim(), ...(projectId ? { projectId } : {}) }),
-        });
+    try {
+      const auth = getFirebaseAuth();
+      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
 
-        if (response.ok) {
-          const data: any = await response.json();
-          setIsProcessing(false);
-          setSyncSuccess(true);
-          setFoundCount(data.importedCount || 5);
-          setDetectedLocationName(data.placeName || 'Google Business Location');
-          return;
-        }
-      } catch (err) {
-        console.warn('[ConnectSourceModal] Google direct API error:', err);
+      const response = await fetch('/api/import/resolve-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          url: inputUrl.trim(),
+          platform: selectedId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to extract reviews from this link. Please check the URL.');
       }
+
+      setResolvedEntity(data.entity || { name: currentPlatform.name, url: inputUrl });
+      const reviews = Array.isArray(data.reviews) ? data.reviews : [];
+      setExtractedReviews(reviews);
+      setSelectedReviewIds(reviews.map((r: any) => r.id));
+      setIsProcessing(false);
+
+      if (reviews.length > 0) {
+        // Move to interactive review selection preview
+        setStep('preview');
+      } else {
+        // Entity resolved, but zero reviews were present on that public page
+        setDetectedLocationName(data.entity?.name || currentPlatform.name);
+        setFoundCount(0);
+        setSyncSuccess(true);
+      }
+    } catch (err: any) {
+      setIsProcessing(false);
+      setImportError(err.message || 'Failed to resolve reviews. Please check the link and try again.');
+    }
+  };
+
+  /**
+   * Commit selected reviews into Panda Praise canonical store
+   */
+  const handleCommitReviews = async () => {
+    if (selectedReviewIds.length === 0) {
+      setImportError('Please select at least one review to import.');
+      return;
     }
 
-    // No server-side direct import endpoint exists for this platform.
-    // Report honestly instead of simulating a successful sync.
-    setIsProcessing(false);
-    setImportError(
-      `${currentPlatform.name} review import is coming soon. Today you can import via CSV upload, connect your Google account, or enter testimonials manually.`
+    setIsCommitting(true);
+    setImportError('');
+
+    try {
+      const reviewsToCommit = extractedReviews.filter((r) => selectedReviewIds.includes(r.id));
+      const auth = getFirebaseAuth();
+      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+
+      const response = await fetch('/api/import/commit-reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          projectId,
+          platform: selectedId,
+          sourceUrl: inputUrl.trim(),
+          reviews: reviewsToCommit,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to import reviews into canonical store.');
+      }
+
+      setFoundCount(data.importedCount || reviewsToCommit.length);
+      setDetectedLocationName(resolvedEntity?.name || currentPlatform.name);
+      setSyncSuccess(true);
+    } catch (err: any) {
+      setImportError(err.message || 'Failed to save testimonials. Please try again.');
+    } finally {
+      setIsCommitting(false);
+    }
+  };
+
+  const toggleSelectReview = (id: string) => {
+    setSelectedReviewIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedReviewIds.length === extractedReviews.length) {
+      setSelectedReviewIds([]);
+    } else {
+      setSelectedReviewIds(extractedReviews.map((r) => r.id));
+    }
   };
 
   const handleCompleteFlow = () => {
@@ -249,7 +311,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
         }
       }}
     >
-      <div className="relative w-full max-w-lg bg-white rounded-3xl border border-gray-200 shadow-2xl p-6 sm:p-8 animate-slide-up flex flex-col text-left">
+      <div className="relative w-full max-w-xl bg-white rounded-3xl border border-gray-200 shadow-2xl p-6 sm:p-8 animate-slide-up flex flex-col text-left max-h-[90vh] overflow-y-auto">
         
         {/* Close Button */}
         <button
@@ -264,20 +326,19 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
         {/* ── STEP 1: SELECT PLATFORM ── */}
         {step === 'select' && (
           <div className="space-y-6">
-            {/* Modal Header */}
             <div className="text-center space-y-1.5 mb-2">
               <div className="w-10 h-10 rounded-2xl bg-purple-50 text-[#6701e6] flex items-center justify-center mx-auto mb-2 border border-purple-100 shadow-2xs">
                 <Sparkles className="w-5 h-5 fill-[#6701e6]" />
               </div>
               <h2 className="text-xl font-bold text-gray-900 tracking-tight font-display">
-                Connect Source
+                Connect Source (Zero-OAuth Import)
               </h2>
               <p className="text-xs text-gray-500 max-w-xs mx-auto leading-relaxed">
-                Where are you currently collecting testimonials? Select your platform to continue.
+                Import reviews instantly by pasting any public link — no passwords or OAuth app review required.
               </p>
             </div>
 
-            {/* Platform Grid (21 items) */}
+            {/* Platform Grid */}
             <div className="grid grid-cols-5 sm:grid-cols-7 gap-2.5 p-1">
               {PLATFORMS.map((platform) => {
                 const isSelected = selectedId === platform.id;
@@ -327,14 +388,9 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
 
             {/* Footer Actions */}
             <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-              <button
-                type="button"
-    onClick={() => alert('Available today: Google Business (Places API), plus CSV upload and manual entry. Facebook Page and Instagram Business connect via Meta OAuth but review import availability depends on Meta API access. Other platforms are coming soon.')}
-                className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-              >
-                <span>Need help? Source guide</span>
-                <ExternalLink className="w-3 h-3" />
-              </button>
+              <span className="text-[11px] text-gray-400">
+                Powered by Zero-Auth Extractor
+              </span>
 
               <button
                 type="button"
@@ -349,7 +405,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
         )}
 
         {/* ── STEP 2: CONFIGURE & IMPORT ── */}
-        {step === 'configure' && (
+        {step === 'configure' && !syncSuccess && (
           <div className="space-y-5">
             {/* Header with Back button */}
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
@@ -362,16 +418,8 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
                 <span>All Platforms</span>
               </button>
 
-              <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full">
-                {selectedId === 'google' 
-                  ? 'Google Reviews Sync' 
-                  : selectedId === 'facebook'
-                    ? 'Facebook Page Sync'
-                    : selectedId === 'instagram'
-                      ? 'Instagram Comments Sync'
-                      : currentPlatform.type === 'url' 
-                        ? 'Direct URL Import' 
-                        : 'API & Store Sync'}
+              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                Zero-Auth URL Import
               </span>
             </div>
 
@@ -390,424 +438,366 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
                   <span>{currentPlatform.name}</span>
-                  <span className="text-[10px] font-medium text-gray-500 bg-white px-2 py-0.5 rounded border border-gray-200">
-                    {currentPlatform.category}
+                  <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    Instant Link
                   </span>
                 </h3>
                 <p className="text-[11px] text-gray-500 truncate">
-                  {selectedId === 'google'
-                    ? 'Sync 5-star customer ratings from Google Business Profile & Google Maps.'
-                    : selectedId === 'facebook'
-                      ? 'Sync verified page ratings, recommendation reviews, and post comments directly from your Facebook Page.'
-                      : selectedId === 'instagram'
-                        ? 'Capture customer praise comments & mentions from Instagram Business posts and reels.'
-                        : currentPlatform.type === 'url'
-                          ? 'Paste the public link to capture customer praise instantly.'
-                          : 'Connect your public profile or API key to sync verified ratings.'}
+                  Paste the public link to fetch verified reviews with zero authentication barriers.
                 </p>
               </div>
             </div>
 
-            {/* Form Content */}
-            {!syncSuccess ? (
+            {importError && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800 leading-relaxed flex items-start gap-2">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600" />
+                <span>{importError}</span>
+              </div>
+            )}
+
+            {/* ── SPECIALIZED FACEBOOK VIEW ── */}
+            {selectedId === 'facebook' ? (
               <div className="space-y-4">
-                {importError && (
-                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800 leading-relaxed flex items-start gap-2">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600" />
-                    <span>{importError}</span>
+                {/* Primary Zero-Auth URL Form */}
+                <form onSubmit={handleExecuteImport} className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/80 via-indigo-50/50 to-blue-50/30 border border-blue-100 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                      <FacebookBrandIcon className="w-3.5 h-3.5 text-[#1877F2]" />
+                      <span>Instant Facebook Page Import (Zero OAuth Login)</span>
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-white px-2 py-0.5 rounded-full border border-emerald-200 shadow-2xs">
+                      Senja Style
+                    </span>
                   </div>
-                )}
-                {/* ── SPECIALIZED FACEBOOK PAGE VIEW ── */}
-                {selectedId === 'facebook' ? (
-                  <div className="space-y-4">
-                    {/* Primary Meta OAuth Button */}
-                    <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/80 via-indigo-50/50 to-blue-50/30 border border-blue-100 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
-                          <FacebookBrandIcon className="w-3.5 h-3.5 text-[#1877F2]" />
-                          <span>Facebook Page Integration (Recommended)</span>
-                        </span>
-                        <span className="text-[10px] font-bold text-blue-700 bg-white px-2 py-0.5 rounded-full border border-blue-200 shadow-2xs">
-                          Meta Graph API
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-gray-600 leading-relaxed">
-                        Connect your official Facebook Page to ingest verified page recommendations and customer comments in real-time.
-                      </p>
+                  <p className="text-[11px] text-gray-600 leading-relaxed">
+                    Paste your public Facebook Page or Reviews link. We extract public reviews and ratings without requiring Meta Business Verification.
+                  </p>
 
-                      {/* Sync preference toggle */}
-                      <label className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/90 border border-blue-100 cursor-pointer transition-all hover:bg-white shadow-2xs">
-                        <input
-                          type="checkbox"
-                          checked={autoBackgroundSync}
-                          onChange={(e) => setAutoBackgroundSync(e.target.checked)}
-                          className="mt-0.5 rounded border-gray-300 text-[#1877F2] focus:ring-[#1877F2] cursor-pointer"
-                        />
-                        <div className="text-[11px] leading-tight">
-                          <span className="font-bold text-gray-900 block">
-                            Automatically keep syncing new comments and page ratings in the background.
-                          </span>
-                          <span className="text-gray-500 text-[10.5px]">
-                            Continuous polling via Cloudflare Worker Cron and real-time Meta webhooks.
-                          </span>
-                        </div>
-                      </label>
-
-                      <button
-                        type="button"
-                        onClick={handleFacebookOAuthRedirect}
-                        disabled={isProcessing}
-                        className="w-full py-2.5 px-4 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-md active:scale-[0.99] disabled:opacity-60"
-                      >
-                        {isProcessing ? (
-                          <>
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                            <span>Connecting to Meta...</span>
-                          </>
-                        ) : (
-                          <>
-                            <FacebookBrandIcon className="w-4 h-4" />
-                            <span>Connect Facebook Page</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="relative flex items-center justify-center">
-                      <div className="border-t border-gray-200 w-full"></div>
-                      <span className="bg-white px-2.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider relative">
-                        or link public page directly
-                      </span>
-                    </div>
-
-                    {/* Fallback Manual Link */}
-                    <form onSubmit={handleExecuteImport} className="space-y-3">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-700 flex items-center justify-between">
-                          <span className="flex items-center gap-1.5">
-                            <Globe className="w-3.5 h-3.5 text-gray-400" />
-                            <span>Paste Facebook Page URL or Recommendation Link:</span>
-                          </span>
-                        </label>
-                        <input
-                          type="url"
-                          required
-                          value={inputUrl}
-                          onChange={(e) => setInputUrl(e.target.value)}
-                          placeholder="https://facebook.com/yourpage or https://facebook.com/yourpage/reviews"
-                          className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#1877F2]/20 focus:border-[#1877F2] transition-all"
-                        />
-                        <p className="text-[11px] text-gray-500">
-                          Extracts publicly visible recommendations, star ratings, and user comments.
-                        </p>
-                      </div>
-
-                      <div className="pt-2 flex items-center justify-end gap-2.5">
-                        <button
-                          type="button"
-                          onClick={handleBackToSelect}
-                          className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={isProcessing}
-                          className="px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                        >
-                          {isProcessing ? (
-                            <>
-                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                              <span>Importing...</span>
-                            </>
-                          ) : (
-                            <>
-                              <span>Import Page Ratings</span>
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </form>
+                  <div className="space-y-1.5">
+                    <input
+                      type="url"
+                      required
+                      value={inputUrl}
+                      onChange={(e) => setInputUrl(e.target.value)}
+                      placeholder="https://facebook.com/your-page or https://facebook.com/your-page/reviews"
+                      className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-blue-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#1877F2]/20 focus:border-[#1877F2] transition-all"
+                    />
                   </div>
-                ) : selectedId === 'instagram' ? (
-                  <div className="p-5 rounded-2xl bg-gradient-to-br from-pink-50/80 via-purple-50/40 to-orange-50/30 border border-pink-100 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
-                        <InstagramIcon className="w-3.5 h-3.5 text-[#E4405F]" />
-                        <span>Instagram Reviews</span>
-                      </span>
-                      <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200">
-                        Coming soon
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-600 leading-relaxed">
-                      Direct review import is not supported by Instagram&apos;s official API. Automated capture of post praise and comments is currently under development.
-                    </p>
-                    <div className="p-3 bg-white/80 rounded-xl border border-pink-100/60 text-xs text-gray-500">
-                      💡 To import customer feedback from Instagram today, you can export or copy them into a CSV file, or add them using manual entry.
-                    </div>
-                    <div className="pt-2 flex items-center justify-end gap-2.5">
-                      <button
-                        type="button"
-                        onClick={handleBackToSelect}
-                        className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
-                      >
-                        All Platforms
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onSelectPlatform('csv');
-                          handleClose();
-                        }}
-                        className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
-                      >
-                        Upload CSV Instead
-                      </button>
-                    </div>
-                  </div>
-                ) : selectedId === 'google' ? (
-                  /* ── SPECIALIZED GOOGLE REVIEWS VIEW ── */
-                  <div className="space-y-4">
-                    {/* Primary OAuth 2.0 Button */}
-                    <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/70 to-indigo-50/50 border border-blue-100 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                          <Globe className="w-3.5 h-3.5 text-blue-600" />
-                          <span>Google Business Profile (Recommended)</span>
-                        </span>
-                        <span className="text-[10px] font-bold text-blue-700 bg-white px-2 py-0.5 rounded-full border border-blue-200 shadow-2xs">
-                          OAuth 2.0 Secure
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-blue-800/80 leading-relaxed">
-                        Connect your Google Business Profile to import owner-verified customer reviews.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleGoogleOAuthRedirect}
-                        disabled={isProcessing}
-                        className="w-full py-2.5 px-4 rounded-xl bg-[#4285F4] hover:bg-[#3367d6] text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-md active:scale-[0.99] disabled:opacity-60"
-                      >
-                        {isProcessing ? (
-                          <>
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                            <span>Redirecting to Google...</span>
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-4 h-4 bg-white rounded-full p-0.5" viewBox="0 0 24 24">
-                              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                            </svg>
-                            <span>Connect Google Business Profile</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
 
-                    {/* Divider */}
-                    <div className="relative flex items-center justify-center">
-                      <div className="border-t border-gray-200 w-full"></div>
-                      <span className="bg-white px-2.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider relative">
-                        or import from Google Maps
-                      </span>
-                    </div>
-
-                    {/* Fallback Manual Google Maps Link Form */}
-                    <form onSubmit={handleExecuteImport} className="space-y-3">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-700 flex items-center justify-between">
-                          <span className="flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 text-gray-400" />
-                            <span>Google Maps Business Link:</span>
-                          </span>
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={inputUrl}
-                          onChange={(e) => setInputUrl(e.target.value)}
-                          placeholder="e.g. https://maps.app.goo.gl/... or https://maps.google.com/..."
-                          className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#6701e6]/20 focus:border-[#6701e6] transition-all"
-                        />
-                        <p className="text-[11px] text-gray-500">
-                          Instant linking without full OAuth login. Pulls public Google rating and top reviews.
-                        </p>
-                      </div>
-
-                      <div className="pt-2 flex items-center justify-end gap-2.5">
-                        <button
-                          type="button"
-                          onClick={handleBackToSelect}
-                          className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={isProcessing}
-                          className="px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                        >
-                          {isProcessing ? (
-                            <>
-                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                              <span>Importing...</span>
-                            </>
-                          ) : (
-                            <>
-                              <span>Import Place Reviews</span>
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                ) : (
-                  /* ── GENERAL URL / API PLATFORMS VIEW ── */
-                  <form onSubmit={handleExecuteImport} className="space-y-4">
-                    {currentPlatform.type === 'url' ? (
-                      /* URL-based Source Input */
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-                          <LinkIcon className="w-3.5 h-3.5 text-gray-400" />
-                          <span>Paste the public URL of the review/post:</span>
-                        </label>
-                        <input
-                          type="url"
-                          required
-                          value={inputUrl}
-                          onChange={(e) => setInputUrl(e.target.value)}
-                          placeholder={currentPlatform.placeholder || 'https://...'}
-                          className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#6701e6]/20 focus:border-[#6701e6] transition-all"
-                        />
-                        <p className="text-[11px] text-gray-500">
-                          We'll extract the author's avatar, name, star rating, and review text automatically.
-                        </p>
-                      </div>
+                  <button
+                    type="submit"
+                    disabled={isProcessing}
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-md active:scale-[0.99] disabled:opacity-60"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Fetching Facebook Reviews...</span>
+                      </>
                     ) : (
-                      /* API / Account Connection Inputs */
-                      <div className="space-y-3">
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-                            <Search className="w-3.5 h-3.5 text-gray-400" />
-                            <span>{currentPlatform.inputLabel || 'Enter Profile ID or URL:'}</span>
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={inputUrl}
-                            onChange={(e) => setInputUrl(e.target.value)}
-                            placeholder={currentPlatform.placeholder || 'e.g. your-business-slug'}
-                            className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#6701e6]/20 focus:border-[#6701e6] transition-all"
-                          />
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-                            <KeyRound className="w-3.5 h-3.5 text-gray-400" />
-                            <span>Enter your API Key or connect account (Optional):</span>
-                          </label>
-                          <input
-                            type="password"
-                            value={apiKey}
-                            onChange={(e) => setApiKey(e.target.value)}
-                            placeholder="API Token / Secret Key (if required)"
-                            className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#6701e6]/20 focus:border-[#6701e6] transition-all"
-                          />
-                          <p className="text-[11px] text-gray-500 flex items-center gap-1">
-                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>Encrypted read-only access. We never post on your behalf.</span>
-                          </p>
-                        </div>
-                      </div>
+                      <>
+                        <span>Fetch Facebook Reviews</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
                     )}
+                  </button>
+                </form>
 
-                    <div className="pt-2 flex items-center justify-end gap-2.5">
-                      <button
-                        type="button"
-                        onClick={handleBackToSelect}
-                        className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isProcessing}
-                        className="px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                      >
-                        {isProcessing ? (
-                          <>
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                            <span>Connecting & Fetching...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>{currentPlatform.type === 'url' ? 'Import Review' : 'Connect & Sync Reviews'}</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                )}
+                {/* Optional Meta OAuth background sync */}
+                <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-200/80 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] text-gray-500">
+                    <span className="font-semibold text-gray-700">Need real-time background webhook sync?</span>
+                    <button
+                      type="button"
+                      onClick={handleFacebookOAuthRedirect}
+                      className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer underline text-[11px]"
+                    >
+                      Connect Meta OAuth &rarr;
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : selectedId === 'google' ? (
+              /* ── SPECIALIZED GOOGLE REVIEWS VIEW ── */
+              <div className="space-y-4">
+                <form onSubmit={handleExecuteImport} className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/70 to-indigo-50/50 border border-blue-100 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Google Maps Review Import (Zero OAuth Login)</span>
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-700 bg-white px-2 py-0.5 rounded-full border border-blue-200 shadow-2xs">
+                      Public Link
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-blue-800/80 leading-relaxed">
+                    Paste your Google Maps link or Place ID. We fetch verified reviews directly.
+                  </p>
+                  <input
+                    type="text"
+                    required
+                    value={inputUrl}
+                    onChange={(e) => setInputUrl(e.target.value)}
+                    placeholder="https://maps.app.goo.gl/... or https://maps.google.com/..."
+                    className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-blue-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#4285F4]/20 focus:border-[#4285F4] transition-all"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isProcessing}
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#4285F4] hover:bg-[#3367d6] text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-md active:scale-[0.99] disabled:opacity-60"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Resolving Google Place...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Fetch Google Reviews</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-200/80 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] text-gray-500">
+                    <span className="font-semibold text-gray-700">Are you the verified business owner?</span>
+                    <button
+                      type="button"
+                      onClick={handleGoogleOAuthRedirect}
+                      className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer underline text-[11px]"
+                    >
+                      Connect Business Profile OAuth &rarr;
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (
-              /* Success State */
-              <div className="space-y-4 text-center py-2 animate-scale-in">
-                <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200 shadow-2xs">
-                  <CheckCircle2 className="w-6 h-6" />
-                </div>
-
-                <div className="space-y-1">
-                  <h4 className="text-base font-bold text-gray-900">
-                    {selectedId === 'instagram' 
-                      ? 'Instagram Comments Synced!' 
-                      : selectedId === 'google' 
-                        ? 'Google Reviews Synced!' 
-                        : 'Connection Successful!'}
-                  </h4>
-                  <p className="text-xs text-gray-600 max-w-sm mx-auto leading-relaxed">
-                    Found <strong className="text-emerald-700">{foundCount} verified {foundCount === 1 ? 'testimonial' : 'testimonials'}</strong> {detectedLocationName ? `from "${detectedLocationName}"` : `ready to import from ${currentPlatform.name}`}.
+              /* ── UNIVERSAL ZERO-AUTH URL FORM FOR TRUSTPILOT, APP STORE, PRODUCT HUNT, G2, ETC. ── */
+              <form onSubmit={handleExecuteImport} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                    <LinkIcon className="w-3.5 h-3.5 text-gray-400" />
+                    <span>{currentPlatform.inputLabel || 'Enter public review page link:'}</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={inputUrl}
+                    onChange={(e) => setInputUrl(e.target.value)}
+                    placeholder={currentPlatform.placeholder || 'https://...'}
+                    className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 font-mono placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-[#6701e6]/20 focus:border-[#6701e6] transition-all"
+                  />
+                  <p className="text-[11px] text-gray-500">
+                    Zero authentication barriers. We extract verified star ratings, customer text, and author avatars directly.
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-200 text-left text-xs space-y-1.5">
-                  <div className="flex items-center justify-between text-gray-500 text-[11px]">
-                    <span>Source Platform:</span>
-                    <span className="font-bold text-gray-800 flex items-center gap-1">
-                      <img src={currentPlatform.icon} alt="" className="w-3 h-3" />
-                      {currentPlatform.name}
+                <div className="pt-2 flex items-center justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleBackToSelect}
+                    className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isProcessing}
+                    className="px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Fetching Reviews...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Fetch Reviews</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
+
+        {/* ── STEP 3: PREVIEW & SELECTION (Senja.io Pattern) ── */}
+        {step === 'preview' && !syncSuccess && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+              <button
+                type="button"
+                onClick={() => setStep('configure')}
+                className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Change Link</span>
+              </button>
+
+              <span className="text-xs font-bold text-gray-700">
+                {selectedReviewIds.length} of {extractedReviews.length} selected
+              </span>
+            </div>
+
+            {/* Entity Header Banner */}
+            {resolvedEntity && (
+              <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-200/80 flex items-center gap-3">
+                {resolvedEntity.avatar && (
+                  <img
+                    src={resolvedEntity.avatar}
+                    alt=""
+                    className="w-10 h-10 rounded-xl object-cover border border-gray-200"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-xs font-bold text-gray-900 truncate">
+                    {resolvedEntity.name}
+                  </h4>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {typeof resolvedEntity.rating === 'number' && (
+                      <span className="text-[11px] font-bold text-amber-600 flex items-center gap-0.5">
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                        {resolvedEntity.rating.toFixed(1)}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-gray-400">
+                      {extractedReviews.length} reviews found
                     </span>
-                  </div>
-                  {detectedLocationName && (
-                    <div className="flex items-center justify-between text-gray-500 text-[11px]">
-                      <span>Source Reference:</span>
-                      <span className="font-bold text-gray-800 truncate max-w-[200px]">{detectedLocationName}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between text-gray-500 text-[11px]">
-                    <span>Target Inbox:</span>
-                    <span className="font-bold text-[#6701e6]">Proof Vault (Published)</span>
                   </div>
                 </div>
 
-                <div className="pt-2 flex items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCompleteFlow}
-                    className="w-full py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-md transition-all cursor-pointer hover:bg-[#5200bd]"
-                  >
-                    Finish & View In Proof Vault
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={toggleSelectAll}
+                  className="px-2.5 py-1 text-[11px] font-semibold text-[#6701e6] bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors cursor-pointer"
+                >
+                  {selectedReviewIds.length === extractedReviews.length ? 'Deselect All' : 'Select All'}
+                </button>
               </div>
             )}
+
+            {/* Reviews Scrollable List */}
+            <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+              {extractedReviews.map((rev) => {
+                const isChecked = selectedReviewIds.includes(rev.id);
+                return (
+                  <div
+                    key={rev.id}
+                    onClick={() => toggleSelectReview(rev.id)}
+                    className={`p-3 rounded-xl border text-xs transition-all cursor-pointer flex items-start gap-3 ${
+                      isChecked
+                        ? 'bg-purple-50/50 border-[#6701e6]/40'
+                        : 'bg-white border-gray-200 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <div className="mt-0.5 text-[#6701e6]">
+                      {isChecked ? (
+                        <CheckSquare className="w-4 h-4 fill-purple-100 text-[#6701e6]" />
+                      ) : (
+                        <Square className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-gray-900 truncate">{rev.authorName}</span>
+                        <div className="flex items-center gap-0.5 text-amber-500">
+                          {Array.from({ length: rev.rating || 5 }).map((_, i) => (
+                            <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-gray-600 line-clamp-3 leading-relaxed text-[11px]">
+                        {rev.text}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Commit Button */}
+            <div className="pt-2 border-t border-gray-100 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setStep('configure')}
+                className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={handleCommitReviews}
+                disabled={isCommitting || selectedReviewIds.length === 0}
+                className="px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 hover:scale-[1.01]"
+              >
+                {isCommitting ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Importing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Import {selectedReviewIds.length} Testimonials</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── STEP 4: SUCCESS STATE ── */}
+        {syncSuccess && (
+          <div className="space-y-4 text-center py-2 animate-scale-in">
+            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200 shadow-2xs">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+
+            <div className="space-y-1">
+              <h4 className="text-base font-bold text-gray-900">
+                Testimonials Imported Successfully!
+              </h4>
+              <p className="text-xs text-gray-600 max-w-sm mx-auto leading-relaxed">
+                Imported <strong className="text-emerald-700">{foundCount} verified {foundCount === 1 ? 'testimonial' : 'testimonials'}</strong> {detectedLocationName ? `from "${detectedLocationName}"` : `via ${currentPlatform.name}`}.
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-200 text-left text-xs space-y-1.5">
+              <div className="flex items-center justify-between text-gray-500 text-[11px]">
+                <span>Source Platform:</span>
+                <span className="font-bold text-gray-800 flex items-center gap-1">
+                  <img src={currentPlatform.icon} alt="" className="w-3 h-3" />
+                  {currentPlatform.name}
+                </span>
+              </div>
+              {detectedLocationName && (
+                <div className="flex items-center justify-between text-gray-500 text-[11px]">
+                  <span>Source Reference:</span>
+                  <span className="font-bold text-gray-800 truncate max-w-[200px]">{detectedLocationName}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between text-gray-500 text-[11px]">
+                <span>Target Inbox:</span>
+                <span className="font-bold text-[#6701e6]">Canonical Proof Vault (/reviews)</span>
+              </div>
+            </div>
+
+            <div className="pt-2 flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={handleCompleteFlow}
+                className="w-full py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-md transition-all cursor-pointer"
+              >
+                Finish & View In Proof Vault
+              </button>
+            </div>
           </div>
         )}
 
