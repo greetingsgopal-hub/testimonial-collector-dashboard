@@ -3,7 +3,8 @@ import { extractBearerToken, verifyFirebaseToken } from '../lib/firebaseAuth';
 import { getCorsHeaders } from '../lib/cors';
 import { checkRateLimit } from '../lib/rateLimit';
 import { extractInstagramPostReview, fetchInstagramCommentsAndMentions } from '../lib/instagramOAuth';
-import { saveDocument, getDocument } from '../lib/firestoreAdmin';
+import { getDocument } from '../lib/firestoreAdmin';
+import { resolveUserOwnership, isDuplicate, validateExternalId, saveReviewsBatch } from '../lib/firestore';
 import { decryptToken } from '../lib/crypto';
 
 export async function handleInstagramFetchMentions(request: Request, env: WorkerEnv): Promise<Response> {
@@ -52,7 +53,6 @@ export async function handleInstagramFetchMentions(request: Request, env: Worker
     const postUrl = body.postUrl || body.url || body.link;
 
     let importedReviews: any[] = [];
-    const now = new Date().toISOString();
 
     if (postUrl && typeof postUrl === 'string' && postUrl.trim()) {
       // Direct post/reel extraction requires the authenticated Graph API.
@@ -94,31 +94,37 @@ export async function handleInstagramFetchMentions(request: Request, env: Worker
       }
     }
 
-    // Save reviews to testimonials collection
+    // Import into the canonical `reviews` collection (nothing reads
+    // `testimonials`) with tenant-scoped dedupe so repeated syncs are idempotent.
+    const ownership = await resolveUserOwnership(userId, undefined, env);
+    const deduped: any[] = [];
     for (const rev of importedReviews) {
-      const testimonialDoc = {
-        ownerId: userId,
-        author: rev.authorName,
-        avatar: rev.authorAvatar,
-        rating: rev.rating,
-        text: rev.text,
-        source: 'instagram',
-        verified: true,
-        status: 'approved',
-        postUrl: rev.postUrl,
-        createdAt: rev.date,
-        importedAt: now,
-      };
-      await saveDocument('testimonials', rev.id, testimonialDoc, undefined, env).catch((e) =>
-        console.warn('[InstagramFetchMentions] Save skipped:', e)
-      );
+      try {
+        const externalId = validateExternalId(rev.id);
+        if (!(await isDuplicate(userId, 'instagram', externalId, env))) {
+          deduped.push({
+            author: rev.authorName,
+            avatarUrl: rev.authorAvatar,
+            rating: typeof rev.rating === 'number' ? rev.rating : 5,
+            text: rev.text,
+            createdAt: rev.date,
+            externalId,
+            sourceUrl: rev.postUrl || null,
+          });
+        }
+      } catch (_err) {
+        continue;
+      }
+    }
+    if (deduped.length > 0) {
+      await saveReviewsBatch(userId, ownership.workspaceId, ownership.projectId, 'instagram', undefined, deduped, env);
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        importedCount: importedReviews.length,
-        reviews: importedReviews,
+        importedCount: deduped.length,
+        reviews: deduped,
       }),
       {
         status: 200,

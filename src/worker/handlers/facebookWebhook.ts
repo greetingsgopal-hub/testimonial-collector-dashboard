@@ -1,7 +1,8 @@
 import { WorkerEnv } from '../types';
 import { getCorsHeaders } from '../lib/cors';
 import { transformFacebookWebhookPayload } from '../lib/facebookOAuth';
-import { saveDocument, queryDocumentsByField } from '../lib/firestoreAdmin';
+import { queryDocumentsByField } from '../lib/firestoreAdmin';
+import { resolveUserOwnership, isDuplicate, validateExternalId, saveReviewsBatch } from '../lib/firestore';
 import crypto from 'node:crypto';
 
 /**
@@ -97,7 +98,6 @@ export async function handleFacebookWebhook(request: Request, env: WorkerEnv): P
       }
 
       const reviews = transformFacebookWebhookPayload(payload);
-      const now = new Date().toISOString();
 
       for (const rev of reviews) {
         if (!rev.pageId) {
@@ -113,24 +113,36 @@ export async function handleFacebookWebhook(request: Request, env: WorkerEnv): P
           continue;
         }
 
-        const testimonialDoc = {
-          ownerId: owner.ownerId,
-          author: rev.authorName,
-          avatar: rev.authorAvatar,
-          rating: rev.rating,
-          text: rev.text,
-          source: 'facebook',
-          verified: true,
-          status: 'approved',
-          pageId: rev.pageId,
-          postUrl: rev.postUrl,
-          createdAt: rev.date,
-          importedAt: now,
-        };
-
-        await saveDocument('testimonials', rev.id, testimonialDoc, undefined, env).catch((e) =>
-          console.warn('[FacebookWebhook] Testimonial insert failed:', e)
-        );
+        // Write to the canonical `reviews` collection (nothing reads
+        // `testimonials`) with tenant-scoped dedupe so webhook replays are
+        // idempotent.
+        try {
+          const externalId = validateExternalId(rev.id);
+          if (!(await isDuplicate(owner.ownerId, 'facebook', externalId, env))) {
+            const ownership = await resolveUserOwnership(owner.ownerId, undefined, env);
+            await saveReviewsBatch(
+              owner.ownerId,
+              ownership.workspaceId,
+              ownership.projectId,
+              'facebook',
+              rev.pageId,
+              [
+                {
+                  author: rev.authorName,
+                  avatarUrl: rev.authorAvatar,
+                  rating: typeof rev.rating === 'number' ? rev.rating : 5,
+                  text: rev.text,
+                  createdAt: rev.date,
+                  externalId,
+                  sourceUrl: rev.postUrl || `https://facebook.com/${rev.pageId}`,
+                },
+              ],
+              env
+            );
+          }
+        } catch (e) {
+          console.warn('[FacebookWebhook] Review insert failed:', e);
+        }
       }
 
       console.log(`[FacebookWebhook] Processed webhook entries for ${reviews.length} reviews (bound pages only).`);

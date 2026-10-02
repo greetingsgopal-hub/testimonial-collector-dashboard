@@ -172,12 +172,25 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   };
 
   /**
-   * Triggers the real backend OAuth 2.0 flow for Facebook Page reviews & comments
+   * Triggers the real backend OAuth 2.0 flow for Facebook Page reviews & comments.
+   * Uses the authenticated POST /api/oauth-init route — a browser GET to
+   * /api/auth/facebook can never carry the Firebase Bearer token.
    */
-  const handleFacebookOAuthRedirect = () => {
+  const handleFacebookOAuthRedirect = async () => {
     localStorage.setItem('pandapraise_facebook_auto_sync', autoBackgroundSync ? 'true' : 'false');
     setIsProcessing(true);
-    window.location.href = '/api/auth/facebook';
+    const res = await socialClient.initOAuth('facebook');
+    if (res.error) {
+      setIsProcessing(false);
+      setImportError(res.error);
+      return;
+    }
+    if (res.authUrl) {
+      window.location.href = res.authUrl;
+    } else {
+      setIsProcessing(false);
+      setImportError('Failed to start Facebook sign-in. Please try again.');
+    }
   };
 
   /**

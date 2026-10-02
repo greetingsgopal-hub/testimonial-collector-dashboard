@@ -2,7 +2,8 @@ import { WorkerEnv, ScheduledEvent, ExecutionContext } from '../types';
 import { decryptToken } from './crypto';
 import { fetchFacebookPageReviews } from './facebookOAuth';
 import { fetchInstagramCommentsAndMentions } from './instagramOAuth';
-import { saveDocument, getDocument, queryDocumentsByField } from './firestoreAdmin';
+import { getDocument, queryDocumentsByField } from './firestoreAdmin';
+import { resolveUserOwnership, isDuplicate, validateExternalId, saveReviewsBatch } from './firestore';
 
 /**
  * Executes automated background polling for connected Facebook Pages and Instagram accounts.
@@ -42,25 +43,35 @@ export async function executeAutomatedBackgroundSync(
 
           if (pageToken && pageId) {
             const reviews = await fetchFacebookPageReviews(pageToken, pageId, env);
-            const now = new Date().toISOString();
-
-            for (const rev of reviews) {
-              const testimonialDoc = {
-                ownerId: userId,
-                author: rev.authorName,
-                avatar: rev.authorAvatar,
-                rating: rev.rating,
-                text: rev.text,
-                source: 'facebook',
-                verified: true,
-                status: 'approved',
-                pageId,
-                createdAt: rev.date,
-                importedAt: now,
-              };
-              await saveDocument('testimonials', rev.id, testimonialDoc, undefined, env).catch(() => {});
+            // Import into the canonical `reviews` collection with tenant-scoped dedupe.
+            let savedCount = 0;
+            if (reviews.length > 0) {
+              const ownership = await resolveUserOwnership(userId, undefined, env);
+              const deduped: any[] = [];
+              for (const rev of reviews) {
+                try {
+                  const externalId = validateExternalId(rev.id);
+                  if (!(await isDuplicate(userId, 'facebook', externalId, env))) {
+                    deduped.push({
+                      author: rev.authorName,
+                      avatarUrl: rev.authorAvatar,
+                      rating: typeof rev.rating === 'number' ? rev.rating : 5,
+                      text: rev.text,
+                      createdAt: rev.date,
+                      externalId,
+                      sourceUrl: rev.postUrl || `https://facebook.com/${pageId}`,
+                    });
+                  }
+                } catch (_err) {
+                  continue;
+                }
+              }
+              if (deduped.length > 0) {
+                await saveReviewsBatch(userId, ownership.workspaceId, ownership.projectId, 'facebook', pageId, deduped, env);
+                savedCount = deduped.length;
+              }
             }
-            console.log(`[BackgroundSync] Facebook polling synced ${reviews.length} reviews for ${userId}`);
+            console.log(`[BackgroundSync] Facebook polling synced ${savedCount} new reviews for ${userId} (${reviews.length} fetched)`);
           }
         } catch (decryptErr) {
           console.warn(`[BackgroundSync] Failed to decrypt Facebook token for ${userId}:`, decryptErr);
@@ -82,25 +93,35 @@ export async function executeAutomatedBackgroundSync(
 
           if (userToken && igBusinessId) {
             const reviews = await fetchInstagramCommentsAndMentions(userToken, igBusinessId, env);
-            const now = new Date().toISOString();
-
-            for (const rev of reviews) {
-              const testimonialDoc = {
-                ownerId: userId,
-                author: rev.authorName,
-                avatar: rev.authorAvatar,
-                rating: rev.rating,
-                text: rev.text,
-                source: 'instagram',
-                verified: true,
-                status: 'approved',
-                postUrl: rev.postUrl,
-                createdAt: rev.date,
-                importedAt: now,
-              };
-              await saveDocument('testimonials', rev.id, testimonialDoc, undefined, env).catch(() => {});
+            // Import into the canonical `reviews` collection with tenant-scoped dedupe.
+            let savedCount = 0;
+            if (reviews.length > 0) {
+              const ownership = await resolveUserOwnership(userId, undefined, env);
+              const deduped: any[] = [];
+              for (const rev of reviews) {
+                try {
+                  const externalId = validateExternalId(rev.id);
+                  if (!(await isDuplicate(userId, 'instagram', externalId, env))) {
+                    deduped.push({
+                      author: rev.authorName,
+                      avatarUrl: rev.authorAvatar,
+                      rating: typeof rev.rating === 'number' ? rev.rating : 5,
+                      text: rev.text,
+                      createdAt: rev.date,
+                      externalId,
+                      sourceUrl: rev.postUrl || null,
+                    });
+                  }
+                } catch (_err) {
+                  continue;
+                }
+              }
+              if (deduped.length > 0) {
+                await saveReviewsBatch(userId, ownership.workspaceId, ownership.projectId, 'instagram', igBusinessId, deduped, env);
+                savedCount = deduped.length;
+              }
             }
-            console.log(`[BackgroundSync] Instagram polling synced ${reviews.length} comments for ${userId}`);
+            console.log(`[BackgroundSync] Instagram polling synced ${savedCount} new comments for ${userId} (${reviews.length} fetched)`);
           }
         } catch (decryptErr) {
           console.warn(`[BackgroundSync] Failed to decrypt Instagram token for ${userId}:`, decryptErr);

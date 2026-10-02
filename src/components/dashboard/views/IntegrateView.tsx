@@ -115,7 +115,7 @@ export const IntegrateView: React.FC = () => {
     return Boolean(localStorage.getItem('pandapraise_facebook_connected') === 'true');
   });
   const [facebookPageName, setFacebookPageName] = useState(() => {
-    return localStorage.getItem('pandapraise_facebook_name') || 'Panda Praise Official';
+    return localStorage.getItem('pandapraise_facebook_name') || '';
   });
   const [facebookAutoSync, setFacebookAutoSync] = useState<boolean>(() => {
     return localStorage.getItem('pandapraise_facebook_auto_sync') !== 'false';
@@ -128,7 +128,7 @@ export const IntegrateView: React.FC = () => {
     return Boolean(localStorage.getItem('pandapraise_instagram_connected') === 'true');
   });
   const [instagramAccountName, setInstagramAccountName] = useState(() => {
-    return localStorage.getItem('pandapraise_instagram_name') || '@pandapraise_official';
+    return localStorage.getItem('pandapraise_instagram_name') || '';
   });
   const [connectingInstagram, setConnectingInstagram] = useState(false);
   const [disconnectingInstagram, setDisconnectingInstagram] = useState(false);
@@ -151,6 +151,25 @@ export const IntegrateView: React.FC = () => {
       setError(null);
       const data = await socialClient.getStatus();
       setStatusData(data);
+      // Server truth wins over localStorage flags: mark connected only when
+      // the stored social_connections doc says so, and clear stale local
+      // "connected" flags when the server says the account is gone.
+      if (data?.connections) {
+        const fb = data.connections.facebook;
+        if (fb?.connected && fb.status === 'connected') {
+          setIsFacebookConnected(true);
+          if (fb.accountName) setFacebookPageName(fb.accountName);
+        } else if (fb && !fb.connected) {
+          setIsFacebookConnected(false);
+        }
+        const ig = data.connections.instagram;
+        if (ig?.connected && ig.status === 'connected') {
+          setIsInstagramConnected(true);
+          if (ig.accountName) setInstagramAccountName(ig.accountName);
+        } else if (ig && !ig.connected) {
+          setIsInstagramConnected(false);
+        }
+      }
     } catch (err: any) {
       console.error('[IntegrateView] Failed to fetch social status:', err);
     } finally {
@@ -174,14 +193,14 @@ export const IntegrateView: React.FC = () => {
       showToast(`✓ Connected to LinkedIn${accountName ? ` as ${accountName}` : ''}! 1-Click Social Publishing is now enabled.`);
     } else if (socialConnected === 'facebook') {
       localStorage.setItem('pandapraise_facebook_connected', 'true');
-      const formattedPage = accountName || 'Panda Praise Official';
+      const formattedPage = accountName || 'Your Facebook Page';
       localStorage.setItem('pandapraise_facebook_name', formattedPage);
       setFacebookPageName(formattedPage);
       setIsFacebookConnected(true);
       showToast(`✓ Connected to Facebook Page (${formattedPage})! Automated comments and page ratings are syncing.`);
     } else if (socialConnected === 'instagram') {
       localStorage.setItem('pandapraise_instagram_connected', 'true');
-      const formattedName = accountName ? `@${accountName.replace(/^@/, '')}` : '@pandapraise_official';
+      const formattedName = accountName ? `@${accountName.replace(/^@/, '')}` : 'Your Instagram account';
       localStorage.setItem('pandapraise_instagram_name', formattedName);
       setInstagramAccountName(formattedName);
       setIsInstagramConnected(true);
@@ -195,24 +214,49 @@ export const IntegrateView: React.FC = () => {
   };
 
   // Facebook Handlers
-  const handleConnectFacebook = () => {
+  // Uses the authenticated POST /api/oauth-init route — a browser GET to
+  // /api/auth/facebook can never carry the Firebase Bearer token, so the
+  // GET branch bounced every signed-in user to a sign-in error.
+  const handleConnectFacebook = async () => {
     setConnectingFacebook(true);
     localStorage.setItem('pandapraise_facebook_auto_sync', facebookAutoSync ? 'true' : 'false');
-    window.location.href = '/api/auth/facebook';
+    const res = await socialClient.initOAuth('facebook');
+    if (res.error) {
+      setConnectingFacebook(false);
+      showToast(res.error);
+      return;
+    }
+    if (res.authUrl) {
+      window.location.href = res.authUrl;
+    } else {
+      setConnectingFacebook(false);
+      showToast('Failed to start Facebook sign-in. Please try again.');
+    }
   };
 
-  const handleDisconnectFacebook = () => {
+  const handleDisconnectFacebook = async () => {
     if (!confirm('Are you sure you want to disconnect Facebook Page review and comment sync?')) {
       return;
     }
     setDisconnectingFacebook(true);
-    setTimeout(() => {
+    try {
+      // Real server-side disconnect — clears the stored connection so the
+      // background cron stops importing reviews. localStorage-only removal
+      // left the server connection 'connected' and syncing continued.
+      const res = await socialClient.disconnect('facebook');
+      if (!res.success) {
+        showToast(res.error || 'Failed to disconnect Facebook. Please try again.');
+        return;
+      }
       localStorage.removeItem('pandapraise_facebook_connected');
       localStorage.removeItem('pandapraise_facebook_name');
       setIsFacebookConnected(false);
-      setDisconnectingFacebook(false);
+      setFacebookPageName('');
+      await fetchStatus();
       showToast('Facebook Page successfully disconnected.');
-    }, 400);
+    } finally {
+      setDisconnectingFacebook(false);
+    }
   };
 
   const handleToggleFacebookAutoSync = () => {
@@ -223,31 +267,62 @@ export const IntegrateView: React.FC = () => {
   };
 
   // Instagram Handlers
-  const handleConnectInstagram = () => {
+  // Same authenticated-init fix as Facebook (see handleConnectFacebook).
+  const handleConnectInstagram = async () => {
     setConnectingInstagram(true);
-    window.location.href = '/api/auth/instagram';
+    const res = await socialClient.initOAuth('instagram');
+    if (res.error) {
+      setConnectingInstagram(false);
+      showToast(res.error);
+      return;
+    }
+    if (res.authUrl) {
+      window.location.href = res.authUrl;
+    } else {
+      setConnectingInstagram(false);
+      showToast('Failed to start Instagram sign-in. Please try again.');
+    }
   };
 
-  const handleDisconnectInstagram = () => {
+  const handleDisconnectInstagram = async () => {
     if (!confirm('Are you sure you want to disconnect Instagram comment sync?')) {
       return;
     }
     setDisconnectingInstagram(true);
-    setTimeout(() => {
+    try {
+      const res = await socialClient.disconnect('instagram');
+      if (!res.success) {
+        showToast(res.error || 'Failed to disconnect Instagram. Please try again.');
+        return;
+      }
       localStorage.removeItem('pandapraise_instagram_connected');
       localStorage.removeItem('pandapraise_instagram_name');
       setIsInstagramConnected(false);
-      setDisconnectingInstagram(false);
+      setInstagramAccountName('');
+      await fetchStatus();
       showToast('Instagram account successfully disconnected.');
-    }, 400);
+    } finally {
+      setDisconnectingInstagram(false);
+    }
   };
 
   // LinkedIn Handlers
-  const handleConnectLinkedIn = () => {
+  // Same authenticated-init fix as Facebook/Instagram.
+  const handleConnectLinkedIn = async () => {
     setConnecting(true);
     setError(null);
-    // Redirect directly to the backend OAuth initiation endpoint
-    window.location.href = '/api/auth/linkedin';
+    const res = await socialClient.initOAuth('linkedin');
+    if (res.error) {
+      setConnecting(false);
+      setError(res.error);
+      return;
+    }
+    if (res.authUrl) {
+      window.location.href = res.authUrl;
+    } else {
+      setConnecting(false);
+      setError('Failed to start LinkedIn sign-in. Please try again.');
+    }
   };
 
   const handleDisconnectLinkedIn = async () => {

@@ -2,6 +2,7 @@ import { WorkerEnv } from '../types';
 import { verifyOAuthState, encryptToken } from '../lib/crypto';
 import { exchangeInstagramCode, getInstagramBusinessAccount, fetchInstagramCommentsAndMentions } from '../lib/instagramOAuth';
 import { saveDocument } from '../lib/firestoreAdmin';
+import { resolveUserOwnership, isDuplicate, validateExternalId, saveReviewsBatch } from '../lib/firestore';
 import { checkRateLimit } from '../lib/rateLimit';
 
 export async function handleInstagramAuthCallback(request: Request, env: WorkerEnv): Promise<Response> {
@@ -94,30 +95,50 @@ export async function handleInstagramAuthCallback(request: Request, env: WorkerE
     const docId = `${userId}_instagram`;
     await saveDocument('social_connections', docId, connectionDoc, undefined, env);
 
-    // 5. Save imported comments to testimonials collection
-    for (const rev of reviews) {
-      const testimonialDoc = {
-        ownerId: userId,
-        author: rev.authorName,
-        avatar: rev.authorAvatar,
-        rating: rev.rating,
-        text: rev.text,
-        source: 'instagram',
-        verified: true,
-        status: 'approved',
-        postUrl: rev.postUrl,
-        createdAt: rev.date,
-        importedAt: now,
-      };
-      await saveDocument('testimonials', rev.id, testimonialDoc, undefined, env).catch((e) =>
-        console.warn('[InstagramCallback] Testimonial save skipped:', e)
-      );
+    // 5. Import comments into the canonical `reviews` collection (the
+    // dashboard reads `reviews` — nothing reads a `testimonials` collection).
+    // OAuth success never implies import success: comments are only saved
+    // when the Graph API actually returns them, with tenant-scoped dedupe.
+    let importedCount = 0;
+    if (reviews.length > 0) {
+      const ownership = await resolveUserOwnership(userId, undefined, env);
+      const deduped: any[] = [];
+      for (const rev of reviews) {
+        try {
+          const externalId = validateExternalId(rev.id);
+          if (!(await isDuplicate(userId, 'instagram', externalId, env))) {
+            deduped.push({
+              author: rev.authorName,
+              avatarUrl: rev.authorAvatar,
+              rating: typeof rev.rating === 'number' ? rev.rating : 5,
+              text: rev.text,
+              createdAt: rev.date,
+              externalId,
+              sourceUrl: rev.postUrl || null,
+            });
+          }
+        } catch (_err) {
+          continue;
+        }
+      }
+      if (deduped.length > 0) {
+        await saveReviewsBatch(
+          userId,
+          ownership.workspaceId,
+          ownership.projectId,
+          'instagram',
+          account.id,
+          deduped,
+          env
+        );
+        importedCount = deduped.length;
+      }
     }
 
     console.log(`[InstagramOAuthCallback] Connected Instagram for owner: ${userId} (${account.username})`);
 
     return Response.redirect(
-      `${baseUrl}/dashboard/integrate?social_connected=instagram&account_name=${encodeURIComponent(account.username)}&imported_count=${reviews.length}`,
+      `${baseUrl}/dashboard/integrate?social_connected=instagram&account_name=${encodeURIComponent(account.username)}&imported_count=${importedCount}`,
       302
     );
   } catch (err: any) {

@@ -2,6 +2,7 @@ import { WorkerEnv } from '../types';
 import { verifyOAuthState, encryptToken } from '../lib/crypto';
 import { exchangeFacebookCode, getFacebookPages, fetchFacebookPageReviews } from '../lib/facebookOAuth';
 import { saveDocument } from '../lib/firestoreAdmin';
+import { resolveUserOwnership, isDuplicate, validateExternalId, saveReviewsBatch } from '../lib/firestore';
 import { checkRateLimit } from '../lib/rateLimit';
 
 export async function handleFacebookAuthCallback(request: Request, env: WorkerEnv): Promise<Response> {
@@ -105,30 +106,50 @@ export async function handleFacebookAuthCallback(request: Request, env: WorkerEn
     const docId = `${userId}_facebook`;
     await saveDocument('social_connections', docId, connectionDoc, undefined, env);
 
-    // 5. Save imported reviews to testimonials collection
-    for (const rev of reviews) {
-      const testimonialDoc = {
-        ownerId: userId,
-        author: rev.authorName,
-        avatar: rev.authorAvatar,
-        rating: rev.rating,
-        text: rev.text,
-        source: 'facebook',
-        verified: true,
-        status: 'approved',
-        pageId: primaryPage.id,
-        createdAt: rev.date,
-        importedAt: now,
-      };
-      await saveDocument('testimonials', rev.id, testimonialDoc, undefined, env).catch((e) =>
-        console.warn('[FacebookCallback] Testimonial save skipped:', e)
-      );
+    // 5. Import page reviews into the canonical `reviews` collection (the
+    // dashboard reads `reviews` — nothing reads a `testimonials` collection).
+    // OAuth success never implies import success: reviews are only saved when
+    // the Graph API actually returns them, with tenant-scoped dedupe.
+    let importedCount = 0;
+    if (reviews.length > 0) {
+      const ownership = await resolveUserOwnership(userId, undefined, env);
+      const deduped: any[] = [];
+      for (const rev of reviews) {
+        try {
+          const externalId = validateExternalId(rev.id);
+          if (!(await isDuplicate(userId, 'facebook', externalId, env))) {
+            deduped.push({
+              author: rev.authorName,
+              avatarUrl: rev.authorAvatar,
+              rating: typeof rev.rating === 'number' ? rev.rating : 5,
+              text: rev.text,
+              createdAt: rev.date,
+              externalId,
+              sourceUrl: rev.postUrl || `https://facebook.com/${primaryPage.id}`,
+            });
+          }
+        } catch (_err) {
+          continue;
+        }
+      }
+      if (deduped.length > 0) {
+        await saveReviewsBatch(
+          userId,
+          ownership.workspaceId,
+          ownership.projectId,
+          'facebook',
+          primaryPage.id,
+          deduped,
+          env
+        );
+        importedCount = deduped.length;
+      }
     }
 
     console.log(`[FacebookOAuthCallback] Connected Facebook Page for owner: ${userId} (${primaryPage.name})`);
 
     return Response.redirect(
-      `${baseUrl}/dashboard/integrate?social_connected=facebook&account_name=${encodeURIComponent(primaryPage.name)}&imported_count=${reviews.length}`,
+      `${baseUrl}/dashboard/integrate?social_connected=facebook&account_name=${encodeURIComponent(primaryPage.name)}&imported_count=${importedCount}`,
       302
     );
   } catch (err: any) {

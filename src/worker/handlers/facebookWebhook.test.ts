@@ -61,6 +61,8 @@ function webhookPost(body: string, headers: Record<string, string> = {}) {
 // Mock Firestore so tests assert on calls without touching real infrastructure
 vi.mock('../lib/firestoreAdmin', () => ({
   saveDocument: vi.fn().mockResolvedValue(undefined),
+  getDocument: vi.fn().mockResolvedValue(null),
+  queryUserDocuments: vi.fn().mockResolvedValue([{ id: 'proj_user_1' }]),
   queryDocumentsByField: vi.fn().mockResolvedValue([
     { id: 'user_1_facebook', ownerId: 'user_1', pageId: 'page_123', status: 'connected' },
   ]),
@@ -127,7 +129,7 @@ describe('C2: Meta webhook signature verification (POST)', () => {
     expect(saveDocument).not.toHaveBeenCalled();
   });
 
-  it('accepts POST with correct HMAC over the exact raw body and writes the testimonial', async () => {
+  it('accepts POST with correct HMAC over the exact raw body and writes to the canonical reviews collection', async () => {
     const res = await handleFacebookWebhook(
       webhookPost(VALID_PAYLOAD, { 'X-Hub-Signature-256': sign(VALID_PAYLOAD) }),
       ENV
@@ -135,12 +137,16 @@ describe('C2: Meta webhook signature verification (POST)', () => {
     expect(res.status).toBe(200);
     expect(saveDocument).toHaveBeenCalledTimes(1);
     const [collection, docId, doc] = (saveDocument as any).mock.calls[0];
-    expect(collection).toBe('testimonials');
-    expect(docId).toBe('fb_webhook_rev_1');
-    expect(doc.text).toBe('Great service, highly recommended!');
-    expect(doc.verified).toBe(true);
-    expect(doc.status).toBe('approved');
+    // The dashboard reads `reviews` — the old `testimonials` collection was
+    // a dead write path (nothing read it).
+    expect(collection).toBe('reviews');
+    expect(docId).toMatch(/^imp_user_1_[0-9a-f]{32}$/);
+    expect(doc.content).toBe('Great service, highly recommended!');
     expect(doc.ownerId).toBe('user_1'); // resolved from pageId binding, not a demo user
+    expect(doc.source).toBe('facebook');
+    expect(doc.status).toBe('approved');
+    expect(doc.projectId).toBeTruthy();
+    expect(doc.consent).toBe(true);
   });
 
   it('skips reviews for pages with no connected owner (no demo-user attribution)', async () => {

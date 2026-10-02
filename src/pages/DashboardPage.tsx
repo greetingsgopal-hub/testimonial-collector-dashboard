@@ -121,9 +121,13 @@ export const DashboardPage = () => {
 
     if (socialConnected) {
       const isImportOnly = socialConnected === 'google';
+      // Facebook/Instagram connections enable review/comment import only —
+      // direct API publishing is not live for them (see worker providers.ts),
+      // so never claim publishing is enabled for those platforms.
+      const isPublishEnabled = socialConnected === 'linkedin';
       setSocialNotification({
         type: 'success',
-        message: `✓ Successfully connected ${socialConnected.toUpperCase()}${accountName ? ` as ${accountName}` : ''}!${isImportOnly ? ' Your reviews will now sync automatically.' : ' 1-Click Social Publishing is now enabled.'}`
+        message: `✓ Successfully connected ${socialConnected.toUpperCase()}${accountName ? ` as ${accountName}` : ''}!${isImportOnly ? ' Your reviews will now sync automatically.' : isPublishEnabled ? ' 1-Click Social Publishing is now enabled.' : ' Your reviews and comments will now sync automatically.'}`
       });
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (socialError) {

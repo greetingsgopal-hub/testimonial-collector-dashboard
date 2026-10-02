@@ -3,6 +3,8 @@ import { extractBearerToken, verifyFirebaseToken } from '../lib/firebaseAuth';
 import { generateOAuthState } from '../lib/crypto';
 import { getCorsHeaders } from '../lib/cors';
 import { checkRateLimit } from '../lib/rateLimit';
+import { buildFacebookAuthUrl } from '../lib/facebookOAuth';
+import { buildInstagramAuthUrl } from '../lib/instagramOAuth';
 
 export async function handleOAuthInit(request: Request, env: WorkerEnv): Promise<Response> {
   const origin = request.headers.get('Origin');
@@ -119,6 +121,74 @@ export async function handleOAuthInit(request: Request, env: WorkerEnv): Promise
           authUrl,
           state,
           platform: 'google',
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    if (platform === 'facebook') {
+      const appId = env.META_APP_ID;
+      const redirectUri =
+        env.FACEBOOK_REDIRECT_URI || `${new URL(request.url).origin}/api/auth/facebook/callback`;
+
+      if (!appId) {
+        return new Response(
+          JSON.stringify({
+            error: 'Facebook OAuth is not configured on the server. META_APP_ID must be set in Worker environment variables.',
+            configured: false,
+          }),
+          {
+            status: 503,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      const state = generateOAuthState(user.uid, 'facebook', env);
+      const authUrl = buildFacebookAuthUrl(state, appId, redirectUri);
+
+      return new Response(
+        JSON.stringify({
+          authUrl,
+          state,
+          platform: 'facebook',
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    if (platform === 'instagram') {
+      const appId = env.META_APP_ID;
+      const redirectUri =
+        env.INSTAGRAM_REDIRECT_URI || `${new URL(request.url).origin}/api/auth/instagram/callback`;
+
+      if (!appId) {
+        return new Response(
+          JSON.stringify({
+            error: 'Instagram OAuth is not configured on the server. META_APP_ID must be set in Worker environment variables.',
+            configured: false,
+          }),
+          {
+            status: 503,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      const state = generateOAuthState(user.uid, 'instagram', env);
+      const authUrl = buildInstagramAuthUrl(state, appId, redirectUri);
+
+      return new Response(
+        JSON.stringify({
+          authUrl,
+          state,
+          platform: 'instagram',
         }),
         {
           status: 200,
