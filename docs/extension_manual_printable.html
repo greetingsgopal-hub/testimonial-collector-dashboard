@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PandaPraise Chrome Extension - Official User Guide & Manual</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@600;700;800&display=swap');
+
+    @page {
+      size: A4;
+      margin: 1.8cm 1.5cm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #0f172a;
+      line-height: 1.55;
+      background: #ffffff;
+      font-size: 13px;
+    }
+
+    .header-cover {
+      border-bottom: 2px solid #6701e6;
+      padding-bottom: 24px;
+      margin-bottom: 28px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .logo-badge {
+      background: #6701e6;
+      color: #ffffff;
+      font-size: 26px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .doc-type {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #6701e6;
+    }
+
+    h1 {
+      font-family: 'Outfit', 'Inter', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .meta-pills {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .pill.pro {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+
+    .pill.india {
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+
+    h2 {
+      font-family: 'Outfit', 'Inter', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #1e1b4b;
+      margin-top: 26px;
+      margin-bottom: 12px;
+      border-left: 4px solid #6701e6;
+      padding-left: 10px;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #334155;
+      margin-top: 16px;
+      margin-bottom: 6px;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin-bottom: 10px;
+      color: #334155;
+    }
+
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 14px;
+      color: #334155;
+    }
+
+    li {
+      margin-bottom: 5px;
+    }
+
+    /* Comparison Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 20px 0;
+      font-size: 12px;
+      page-break-inside: avoid;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #0f172a;
+      text-align: left;
+      padding: 10px;
+      border: 1px solid #e2e8f0;
+      font-weight: 700;
+    }
+
+    td {
+      padding: 9px 10px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #fafafa;
+    }
+
+    .highlight-cell {
+      background: #f5f3ff !important;
+      font-weight: 600;
+      color: #5b21b6;
+    }
+
+    /* Callout Card */
+    .callout {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #6701e6;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+    }
+
+    .callout.green {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      border-left-color: #10b981;
+    }
+
+    .callout-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-box {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      page-break-inside: avoid;
+    }
+
+    .step-num {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      background: #6701e6;
+      color: #ffffff;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 22px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    code {
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 11px;
+      background: #f1f5f9;
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: #0f172a;
+    }
+
+    .footer {
+      margin-top: 36px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 12px;
+      font-size: 10px;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- COVER / HEADER -->
+  <div class="header-cover">
+    <div class="brand-row">
+      <div class="logo-badge">🐼</div>
+      <div>
+        <div class="doc-type">Product Manual & Strategic Playbook</div>
+        <h1>PandaPraise Chrome Extension</h1>
+      </div>
+    </div>
+    <div class="subtitle">1-Click WhatsApp Web Clipper, UPI Transaction Proof Validator, Hinglish Polisher & Sales Accelerator</div>
+    <div class="meta-pills">
+      <span class="pill pro">Version 1.1.0 (Production)</span>
+      <span class="pill india">🇮🇳 Validated India Unfair Advantage</span>
+      <span class="pill">7-Day Free Trial • ₹100/mo</span>
+      <span class="pill">Manifest V3 Secure</span>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <h2>1. Executive Summary & Product Introduction</h2>
+  <p>
+    The <strong>PandaPraise Chrome Extension</strong> is an enterprise browser extension engineered to capture, verify, and deploy customer social proof with zero friction.
+  </p>
+  <p>
+    Traditional testimonial software (like Senja.io) was built for the Silicon Valley tech bubble, focusing predominantly on Twitter/X, Product Hunt, and email forms. However, in India and global emerging markets, <strong>over 90% of business deals, client approvals, freelancer feedbacks, and D2C customer praises occur inside WhatsApp Web, validated by UPI payment confirmations.</strong>
+  </p>
+  <p>
+    PandaPraise converts your web browser into a <strong>bi-directional trust engine</strong>:
+  </p>
+  <ul>
+    <li><strong>Inbound Capture</strong>: 1-click praise clipping directly from WhatsApp Web chats, Twitter/X feeds, and LinkedIn recommendations straight into your private Proof Vault.</li>
+    <li><strong>Outbound Conversion</strong>: An instant sales objection solver allowing founders and sales reps to search their testimonial database and inject verified social proof into active WhatsApp or LinkedIn chats in under 2 seconds.</li>
+  </ul>
+
+  <!-- SECTION 2 -->
+  <h2>2. The Validated Unfair Advantage (PandaPraise vs. Senja.io)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Capability / Dimension</th>
+        <th>Senja.io Chrome Extension</th>
+        <th>PandaPraise Chrome Extension</th>
+        <th>Strategic Unfair Advantage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Primary Channel</strong></td>
+        <td>Twitter/X & Web forms</td>
+        <td class="highlight-cell">WhatsApp Web Native In-Chat</td>
+        <td><strong>500M+ WhatsApp users in India.</strong> Injects 1-click hover clip buttons directly onto WhatsApp chat bubbles.</td>
+      </tr>
+      <tr>
+        <td><strong>Transaction Proof</strong></td>
+        <td>None (text only)</td>
+        <td class="highlight-cell">Auto UPI & Payment Detector</td>
+        <td>Scans for UPI IDs, UTR numbers, and ₹ amounts to tag endorsements as <strong>Verified Paid Customer Proof</strong>.</td>
+      </tr>
+      <tr>
+        <td><strong>Language Nuance</strong></td>
+        <td>English only</td>
+        <td class="highlight-cell">1-Click Hinglish Polisher</td>
+        <td>Converts informal feedback (<em>"bhai kaam bohot mast hua"</em>) into crisp corporate English while preserving raw quote authenticity.</td>
+      </tr>
+      <tr>
+        <td><strong>Sales Pitch Engine</strong></td>
+        <td>Read-only search & copy</td>
+        <td class="highlight-cell">"Drop into Active Chat"</td>
+        <td>Automatically types and inserts formatted citations directly into your active WhatsApp Web composer with 1 click.</td>
+      </tr>
+      <tr>
+        <td><strong>Pricing & Currency</strong></td>
+        <td>$39 to $79/mo (~₹3,300 to ₹6,600/mo)</td>
+        <td class="highlight-cell">₹100 / month (~₹3/day)</td>
+        <td><strong>40x price advantage.</strong> Eliminates RBI credit card mandate failure via seamless UPI (Google Pay, PhonePe, Paytm).</td>
+      </tr>
+      <tr>
+        <td><strong>Trial & Onboarding</strong></td>
+        <td>Tier-locked features</td>
+        <td class="highlight-cell">7-Day Free Full Trial</td>
+        <td>100% unlocked access upon installation with live countdown pill.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 3 -->
+  <div class="page-break"></div>
+  <h2>3. Core Capabilities & Feature Breakdown</h2>
+
+  <div class="callout green">
+    <div class="callout-title">💬 1. Native WhatsApp Web In-Chat Clipper</div>
+    <p>
+      Monitors <code>web.whatsapp.com</code> chat streams. Hovering over any incoming client message reveals a subtle <strong>🐼 Clip</strong> button. Clicking it instantly extracts the contact's name or phone, message body, and timestamp.
+    </p>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">💳 2. Automated UPI & Transaction Proof Verification</div>
+    <p>
+      Detects financial markers (<code>₹</code>, <code>INR</code>, <code>UTR</code>, <code>UPI</code>, <code>GPay</code>, <code>PhonePe</code>, <code>Paytm</code>, <code>credited</code>). It auto-checks the <code>Verified UPI Proof</code> badge and attaches cryptographic transaction tags to eliminate skepticism of fake reviews.
+    </p>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">🪄 3. 1-Click Hinglish <-> Global English AI Polisher</div>
+    <p>
+      Tapping <strong>🪄 Hinglish Polish</strong> recognizes vernacular phrases (<em>"ekdum top class"</em>, <em>"paisa vasool"</em>, <em>"dil khush ho gaya"</em>) and produces an international corporate version (<em>"Top-tier service delivering exceptional value and results"</em>). You can toggle back to original anytime.
+    </p>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">⚡ 4. Sales Vault Search & 1-Click "Drop into Chat"</div>
+    <p>
+      Search all stored testimonials by keyword, client name, or tag. Clicking <strong>💬 Drop in Chat</strong> automatically executes direct DOM insertion into WhatsApp Web's or LinkedIn's message composer.
+    </p>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">🔄 5. Zero-Touch Auto-Auth Sync</div>
+    <p>
+      Whenever you are logged into <code>pandapraise.com/dashboard</code>, the extension automatically pairs your active project ID. No manual copy-pasting of API keys is required.
+    </p>
+  </div>
+
+  <!-- SECTION 4 -->
+  <h2>4. Step-by-Step Installation Manual (10 Seconds)</h2>
+
+  <div class="step-box">
+    <span class="step-num">1</span><strong>Open Extension Settings</strong>: In Chrome, go to <code>chrome://extensions</code> (or <code>edge://extensions</code> in Microsoft Edge).
+  </div>
+  <div class="step-box">
+    <span class="step-num">2</span><strong>Enable Developer Mode</strong>: Toggle the <strong>Developer mode</strong> switch in the top-right corner to <strong>ON</strong>.
+  </div>
+  <div class="step-box">
+    <span class="step-num">3</span><strong>Load Unpacked Extension</strong>: Click <strong>"Load unpacked"</strong> in the top-left corner and select the directory:
+    <br><code>testimonial-collector-dashboard\extension</code>
+  </div>
+  <div class="step-box">
+    <span class="step-num">4</span><strong>Pin & Auto-Sync</strong>: Click the puzzle icon in your browser toolbar and pin <strong>PandaPraise</strong>. Open your dashboard at <code>https://pandapraise.com/dashboard</code> and your account will auto-pair!
+  </div>
+
+  <!-- SECTION 5 -->
+  <h2>5. Commercial Model & Licensing</h2>
+  <div class="callout">
+    <div class="callout-title">⭐ 7-Day Free Trial + ₹100 / Month Subscription</div>
+    <p>
+      Upon first launch, users receive a <strong>7-Day Unrestricted Free Trial</strong>. After 7 days, founders can subscribe for <strong>₹100 / month</strong> (~₹3/day) via UPI (Google Pay, PhonePe, Paytm, BHIM), RuPay, NetBanking, or Credit/Debit Cards.
+    </p>
+  </div>
+
+  <div class="footer">
+    <span>PandaPraise India Edition • Confidential & Proprietary</span>
+    <span>https://pandapraise.com</span>
+  </div>
+
+</body>
+</html>
