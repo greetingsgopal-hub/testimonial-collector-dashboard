@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PandaPraise Chrome Extension - Pitch Deck & Complete Platform Manual</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@600;700;800;900&display=swap');
+
+    @page {
+      size: A4 landscape;
+      margin: 1.2cm 1.4cm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #0f172a;
+      background: #ffffff;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .slide {
+      page-break-after: always;
+      height: 100%;
+      min-height: 170mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding-bottom: 10px;
+    }
+
+    .slide:last-child {
+      page-break-after: auto;
+    }
+
+    /* Header bar on each slide */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+
+    .slide-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-box {
+      width: 32px;
+      height: 32px;
+      background: #6701e6;
+      color: #ffffff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .brand-tag {
+      font-size: 10px;
+      font-weight: 700;
+      background: #f5f3ff;
+      color: #6701e6;
+      border: 1px solid #ddd6fe;
+      padding: 2px 7px;
+      border-radius: 12px;
+      margin-left: 6px;
+    }
+
+    .slide-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    /* Slide Titles */
+    .title-area {
+      margin-bottom: 16px;
+    }
+
+    .category-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #6701e6;
+      margin-bottom: 4px;
+    }
+
+    h1.slide-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .slide-subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    /* Content Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      flex: 1;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card.purple {
+      background: #faf5ff;
+      border-color: #e9d5ff;
+    }
+
+    .card.green {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .card.blue {
+      background: #f0f9ff;
+      border-color: #bae6fd;
+    }
+
+    .card.amber {
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card p {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .card ul, .card ol {
+      margin-left: 18px;
+      font-size: 12px;
+      color: #334155;
+    }
+
+    .card li {
+      margin-bottom: 6px;
+    }
+
+    /* Big Metric Box */
+    .metric-hero {
+      text-align: center;
+      padding: 16px;
+      background: #ffffff;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      margin-top: 8px;
+    }
+
+    .metric-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: #6701e6;
+      line-height: 1;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    /* Step numbers */
+    .step-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #6701e6;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 11px;
+      margin-right: 6px;
+      flex-shrink: 0;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 10px 12px;
+      border-radius: 8px;
+    }
+
+    .step-text strong {
+      display: block;
+      font-size: 12px;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+
+    .step-text p {
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      margin-top: 8px;
+    }
+
+    th {
+      background: #f1f5f9;
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 700;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+    }
+
+    td {
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+      color: #334155;
+    }
+
+    tr:nth-child(even) td {
+      background: #fafafa;
+    }
+
+    .td-highlight {
+      background: #f5f3ff !important;
+      font-weight: 700;
+      color: #6701e6;
+    }
+
+    /* Footer */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 8px;
+      margin-top: 12px;
+      font-size: 10px;
+      color: #94a3b8;
+    }
+
+    /* Badges */
+    .tag-wa { background: #25d366; color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+    .tag-tw { background: #1da1f2; color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+    .tag-li { background: #0a66c2; color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+    .tag-sl { background: #4a154b; color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+    .tag-gm { background: #ea4335; color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+    .tag-web { background: #475569; color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+
+    /* Code Snippet */
+    code {
+      font-family: Consolas, monospace;
+      font-size: 10.5px;
+      background: #f1f5f9;
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 1: PITCH DECK TITLE / EXECUTIVE OVERVIEW -->
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-brand">
+        <div class="logo-box">🐼</div>
+        <span class="brand-name">PandaPraise</span>
+        <span class="brand-tag">Extension Pitch Deck & Manual</span>
+      </div>
+      <span class="slide-num">SLIDE 01 / 10</span>
+    </div>
+
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 20px 40px;">
+      <div class="category-label" style="font-size: 14px; margin-bottom: 8px;">THE ULTIMATE TRUST-CAPTURING & SALES-CLOSING WEAPON</div>
+      <h1 class="slide-title" style="font-size: 34px; margin-bottom: 12px; color: #1e1b4b;">
+        PandaPraise Chrome Extension
+      </h1>
+      <p class="slide-subtitle" style="font-size: 16px; max-width: 750px; margin: 0 auto 24px auto; color: #475569;">
+        1-Click WhatsApp In-Chat Clipper, Multi-Platform Social Ingestion, UPI Payment Proof Validator & Instant Sales Pitch Accelerator.
+      </p>
+
+      <div style="display: flex; justify-content: center; gap: 14px; margin-bottom: 28px;">
+        <span style="background: #f5f3ff; color: #6701e6; border: 1px solid #ddd6fe; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 12px;">🇮🇳 Validated India Unfair Advantage</span>
+        <span style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 12px;">⚡ Works Across 100% of the Web</span>
+        <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 12px;">7-Day Free Trial • ₹100/month</span>
+      </div>
+
+      <div class="grid-3" style="max-width: 850px; margin: 0 auto; text-align: left;">
+        <div class="card purple">
+          <div class="card-title">📥 Inbound Capture</div>
+          <p>Clip from WhatsApp Web, Twitter, LinkedIn, Slack & Gmail in 1 click.</p>
+        </div>
+        <div class="card green">
+          <div class="card-title">💳 Trust Verification</div>
+          <p>Auto-detects UPI references & ₹ amounts to verify paid customer proof.</p>
+        </div>
+        <div class="card blue">
+          <div class="card-title">📤 Outbound Conversion</div>
+          <p>Search Proof Vault & drop quotes directly into live client sales chats.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PandaPraise India & Global Edition • Confidential Pitch Deck</span>
+      <span>pandapraise.com</span>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 2: THE PROBLEM VS. THE PANDAPRAISE SOLUTION -->
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-brand">
+        <div class="logo-box">🐼</div>
+        <span class="brand-name">PandaPraise</span>
+        <span class="brand-tag">Market Reality</span>
+      </div>
+      <span class="slide-num">SLIDE 02 / 10</span>
+    </div>
+
+    <div class="title-area">
+      <div class="category-label">THE MASSIVE FRICTION GAP</div>
+      <h1 class="slide-title">Why Founders Lose 80% of Customer Social Proof</h1>
+      <p class="slide-subtitle">Silicon Valley tools like Senja are built for Twitter bubbles. In India & global commerce, proof lives elsewhere.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-left: 4px solid #ef4444; background: #fff5f5;">
+        <div class="card-title" style="color: #991b1b;">❌ The Traditional Nightmare (Senja & Manual Chaos)</div>
+        <ul>
+          <li><strong>Screenshots Die in Phone Galleries</strong>: Clients say *"bhai kya mast kaam hua"* on WhatsApp, you screenshot it, and it never reaches your landing page.</li>
+          <li><strong>Zero WhatsApp Integration</strong>: Western tools ignore WhatsApp Web entirely, forcing slow, manual copy-pasting.</li>
+          <li><strong>Unverified Skepticism</strong>: Buyers doubt text testimonials. Without transaction proof, they assume quotes are fabricated.</li>
+          <li><strong>Exorbitant USD Pricing</strong>: Senja charges $39 to $79/mo (~₹3,300 to ₹6,600/mo) via Stripe which constantly fails on Indian RBI cards.</li>
+          <li><strong>Hinglish Dilemma</strong>: Raw Indian vernacular praise doesn't work for US clients, while sanitized corporate English loses Indian trust.</li>
+        </ul>
+      </div>
+
+      <div class="card green" style="border-left: 4px solid #10b981;">
+        <div class="card-title" style="color: #065f46;">✅ The PandaPraise Unfair Advantage</div>
+        <ul>
+          <li><strong>Native WhatsApp Web Hover Clipper</strong>: Hover over any message bubble in <code>web.whatsapp.com</code> and click 🐼 Clip in 1 second.</li>
+          <li><strong>Auto UPI & Payment Verification</strong>: Scans for ₹, INR, UTR, and UPI IDs to automatically tag reviews as <em>Verified Paid Client Proof</em>.</li>
+          <li><strong>🪄 1-Click Hinglish Polisher</strong>: Keep raw Hinglish for Indian leads, or 1-click polish into crisp corporate English for international clients.</li>
+          <li><strong>"Drop into Active Chat" Sales Tool</strong>: Type nothing during sales calls; 1-click injects client proof into WhatsApp or LinkedIn DMs.</li>
+          <li><strong>Disruptive Micro-Pricing</strong>: ₹100/month (~₹3/day) with 7-Day Free Trial and seamless UPI (GPay, PhonePe, Paytm).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Solving the $10B Social Proof Friction Problem</span>
+      <span>pandapraise.com</span>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 3: STRATEGIC COMPARISON MATRIX (VS. SENJA.IO) -->
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-brand">
+        <div class="logo-box">🐼</div>
+        <span class="brand-name">PandaPraise</span>
+        <span class="brand-tag">Competitive Audit</span>
+      </div>
+      <span class="slide-num">SLIDE 03 / 10</span>
+    </div>
+
+    <div class="title-area">
+      <div class="category-label">HEAD-TO-HEAD BENCHMARK</div>
+      <h1 class="slide-title">How PandaPraise Beats Senja.io on Every Front</h1>
+      <p class="slide-subtitle">A feature-by-feature breakdown of why PandaPraise provides an unbeatable commercial advantage.</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Capability / Feature</th>
+          <th>Senja.io Extension</th>
+          <th>PandaPraise Extension</th>
+          <th>The Commercial Impact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>WhatsApp Web In-Chat Clipper</strong></td>
+          <td>❌ None (Manual copy-paste)</td>
+          <td class="td-highlight">✅ Native 1-Click Hover Clipper</td>
+          <td>Taps India's 500M+ WhatsApp user base where 90% of business approvals happen.</td>
+        </tr>
+        <tr>
+          <td><strong>UPI & Transaction Proof Detection</strong></td>
+          <td>❌ None</td>
+          <td class="td-highlight">✅ Auto UPI, UTR & ₹ Detector</td>
+          <td>Provides incontestable proof that testimonials come from real paying clients.</td>
+        </tr>
+        <tr>
+          <td><strong>Vernacular / Hinglish Polisher</strong></td>
+          <td>❌ None (English only)</td>
+          <td class="td-highlight">✅ 1-Click Dual-Mode AI Polisher</td>
+          <td>Preserves authentic Indian slang or converts to global enterprise pitch English.</td>
+        </tr>
+        <tr>
+          <td><strong>Sales Chat Injector ("Drop in Chat")</strong></td>
+          <td>❌ Copy text only</td>
+          <td class="td-highlight">✅ 1-Click Injects into Composer</td>
+          <td>Sales reps close leads 3x faster without leaving their WhatsApp/LinkedIn chat.</td>
+        </tr>
+        <tr>
+          <td><strong>Twitter/X & LinkedIn Feed Buttons</strong></td>
+          <td>✅ In-feed buttons</td>
+          <td class="td-highlight">✅ In-feed buttons + Context Menu</td>
+          <td>Full parity with Western tools plus universal highlight menu on any blog or site.</td>
+        </tr>
+        <tr>
+          <td><strong>Monthly Price</strong></td>
+          <td>$39 to $79/mo (~₹3,300 to ₹6,600)</td>
+          <td class="td-highlight">₹100 / month (~$1.20)</td>
+          <td><strong>40x lower price.</strong> Zero purchase resistance; impulse buy for freelancers & agencies.</td>
+        </tr>
+        <tr>
+          <td><strong>Payment Rails</strong></td>
+          <td>US Stripe (High Indian decline rate)</td>
+          <td class="td-highlight">UPI (GPay, PhonePe, Paytm) + Cards</td>
+          <td>Zero payment failures caused by RBI recurring e-mandate regulations.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="slide-footer">
+      <span>Independent Feature & Pricing Audit • Validated Market Facts</span>
+      <span>pandapraise.com</span>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 4: PLATFORM 1 & 2 MANUAL — WHATSAPP WEB & TWITTER/X -->
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-brand">
+        <div class="logo-box">🐼</div>
+        <span class="brand-name">PandaPraise</span>
+        <span class="brand-tag">Platform Manual Part 1</span>
+      </div>
+      <span class="slide-num">SLIDE 04 / 10</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- WhatsApp Web -->
+      <div>
+        <div class="title-area">
+          <div class="category-label"><span class="tag-wa">WHATSAPP WEB</span> USER MANUAL</div>
+          <h1 class="slide-title" style="font-size: 20px;">1-Click In-Chat Clipping</h1>
+          <p class="slide-subtitle">Capturing client praise directly inside <code>web.whatsapp.com</code></p>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">1</span>
+          <div class="step-text">
+            <strong>Open WhatsApp Web</strong>
+            <p>Navigate to <code>web.whatsapp.com</code> and open any conversation containing client feedback.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">2</span>
+          <div class="step-text">
+            <strong>Hover & Click the 🐼 Clip Button</strong>
+            <p>Hover over the praise message. A purple <strong>🐼 Clip</strong> button automatically appears on the top-right of the message bubble. Click it.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">3</span>
+          <div class="step-text">
+            <strong>Auto-Extract & UPI Detection</strong>
+            <p>The extension extracts sender name, timestamp, and checks for payment references (₹, UTR, UPI). A toast confirms: <em>"Praise Clipped!"</em></p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">4</span>
+          <div class="step-text">
+            <strong>Save to Proof Vault</strong>
+            <p>Click the Panda toolbar icon, verify stars (1-5), and press <strong>"Save to Proof Vault"</strong>. Done!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Twitter / X -->
+      <div>
+        <div class="title-area">
+          <div class="category-label"><span class="tag-tw">TWITTER / X</span> USER MANUAL</div>
+          <h1 class="slide-title" style="font-size: 20px;">In-Feed Tweet Ingestion</h1>
+          <p class="slide-subtitle">Clipping public testimonials on <code>x.com</code> and <code>twitter.com</code></p>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">1</span>
+          <div class="step-text">
+            <strong>Browse Any Tweet or Reply</strong>
+            <p>Scroll your timeline or notification feed on X/Twitter where a customer praised your product.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">2</span>
+          <div class="step-text">
+            <strong>Click the 🐼 Action Icon</strong>
+            <p>Look at the tweet action bar (next to Retweet, Like, and Bookmark). Click the embedded <strong>🐼</strong> icon.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">3</span>
+          <div class="step-text">
+            <strong>Full Profile Metadata Captured</strong>
+            <p>Author's full name, @handle, profile avatar URL, tweet copy, and direct tweet URL are pulled automatically.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">4</span>
+          <div class="step-text">
+            <strong>1-Click Vault Sync</strong>
+            <p>Open the extension popup and click <strong>"Save to Proof Vault"</strong>. It immediately appears in your Wall of Love!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PandaPraise Platform Manual • Complete Step-by-Step Instructions</span>
+      <span>pandapraise.com</span>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 5: PLATFORM 3 & 4 MANUAL — LINKEDIN & SLACK -->
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-brand">
+        <div class="logo-box">🐼</div>
+        <span class="brand-name">PandaPraise</span>
+        <span class="brand-tag">Platform Manual Part 2</span>
+      </div>
+      <span class="slide-num">SLIDE 05 / 10</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- LinkedIn -->
+      <div>
+        <div class="title-area">
+          <div class="category-label"><span class="tag-li">LINKEDIN</span> USER MANUAL</div>
+          <h1 class="slide-title" style="font-size: 20px;">B2B Recommendation Ingestion</h1>
+          <p class="slide-subtitle">Clipping posts, comments, and recommendations on <code>linkedin.com</code></p>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">1</span>
+          <div class="step-text">
+            <strong>Locate Post or Recommendation</strong>
+            <p>Navigate to any LinkedIn post, comment, or client recommendation mentioning your services.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">2</span>
+          <div class="step-text">
+            <strong>Click "🐼 Clip Praise" Button</strong>
+            <p>PandaPraise injects an official <strong>🐼 Clip Praise</strong> button directly into LinkedIn's post action bar.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">3</span>
+          <div class="step-text">
+            <strong>Automatic Connection Name & URL</strong>
+            <p>Grabs the executive's name, post text, and backlink to verify high-authority B2B social proof.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">4</span>
+          <div class="step-text">
+            <strong>Save with Star Rating</strong>
+            <p>Assign 5 stars in the popup and click <strong>"Save to Proof Vault"</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slack Web -->
+      <div>
+        <div class="title-area">
+          <div class="category-label"><span class="tag-sl">SLACK WEB</span> USER MANUAL</div>
+          <h1 class="slide-title" style="font-size: 20px;">Client Shared Channel Clipping</h1>
+          <p class="slide-subtitle">Clipping client accolades on <code>app.slack.com</code></p>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">1</span>
+          <div class="step-text">
+            <strong>Highlight Praise in Slack</strong>
+            <p>When a client posts positive feedback in a shared Slack channel, simply highlight their message.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">2</span>
+          <div class="step-text">
+            <strong>Right-Click Context Menu</strong>
+            <p>Right-click the selected quote and click <strong>"Send highlighted quote to PandaPraise"</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">3</span>
+          <div class="step-text">
+            <strong>Auto-Tagged with Slack</strong>
+            <p>The extension identifies the source as Slack and prepares it for your proof vault.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">4</span>
+          <div class="step-text">
+            <strong>Instant Vault Storage</strong>
+            <p>Open popup, verify details, and click <strong>"Save to Proof Vault"</strong>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PandaPraise Platform Manual • Complete Step-by-Step Instructions</span>
+      <span>pandapraise.com</span>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 6: PLATFORM 5 & 6 MANUAL — GMAIL & ANY WEBPAGE -->
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-brand">
+        <div class="logo-box">🐼</div>
+        <span class="brand-name">PandaPraise</span>
+        <span class="brand-tag">Platform Manual Part 3</span>
+      </div>
+      <span class="slide-num">SLIDE 06 / 10</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- Gmail / Email -->
+      <div>
+        <div class="title-area">
+          <div class="category-label"><span class="tag-gm">GMAIL / OUTLOOK</span> USER MANUAL</div>
+          <h1 class="slide-title" style="font-size: 20px;">Email Feedback Ingestion</h1>
+          <p class="slide-subtitle">Capturing praise from client emails, newsletters, and support replies</p>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">1</span>
+          <div class="step-text">
+            <strong>Open Client Email</strong>
+            <p>Open the email message in Gmail or Outlook Web containing your client's praise or project review.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">2</span>
+          <div class="step-text">
+            <strong>Highlight & Right-Click</strong>
+            <p>Highlight the testimonial sentences. Right-click and choose <strong>"Send highlighted quote to PandaPraise"</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">3</span>
+          <div class="step-text">
+            <strong>Auto-Fills Client Name & Quote</strong>
+            <p>Click the extension popup. The quote is already pre-filled. Enter the client's email name or company.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">4</span>
+          <div class="step-text">
+            <strong>Committed to Database</strong>
+            <p>Click <strong>"Save to Proof Vault"</strong>. Your email praise is now a verifiable marketing asset.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Any Webpage / Reddit / Product Hunt -->
+      <div>
+        <div class="title-area">
+          <div class="category-label"><span class="tag-web">ANY WEBPAGE / BLOG</span> USER MANUAL</div>
+          <h1 class="slide-title" style="font-size: 20px;">Universal Web Highlighter</h1>
+          <p class="slide-subtitle">Works on Reddit, Product Hunt, Trustpilot, G2, Substack, Medium & blogs</p>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">1</span>
+          <div class="step-text">
+            <strong>Select Any Text on the Web</strong>
+            <p>Whenever you spot a favorable review, Reddit comment, or blog mention, highlight it with your cursor.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">2</span>
+          <div class="step-text">
+            <strong>Instant Context Capture</strong>
+            <p>Click the <strong>Panda toolbar icon</strong> directly. It automatically grabs the highlighted text, page title, and URL!</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">3</span>
+          <div class="step-text">
+            <strong>Right-Click Alternative</strong>
+            <p>You can also right-click anywhere and select <strong>"Send highlighted quote to PandaPraise"</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">4</span>
+          <div class="step-text">
+            <strong>1-Click Ingestion</strong>
+            <p>Assign stars, verify author name, and save to your vault with zero friction.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Universal Web Ingestion • 100% Website Compatibility</span>
+      <span>pandapraise.com</span>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 7: THE SALES SECRET WEAPON — "SEARCH VAULT & DROP IN CHAT" -->
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-brand">
+        <div class="logo-box">🐼</div>
+        <span class="brand-name">PandaPraise</span>
+        <span class="brand-tag">Sales Pitch Weapon</span>
+      </div>
+      <span class="slide-num">SLIDE 07 / 10</span>
+    </div>
+
+    <div class="title-area">
+      <div class="category-label">OUTBOUND CONVERSION ENGINE</div>
+      <h1 class="slide-title">Turning Testimonials into Live Revenue</h1>
+      <p class="slide-subtitle">Overcoming prospect objections in real-time without leaving your active chat conversation.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card purple">
+        <div class="card-title">⚡ How "Drop into Active Chat" Works</div>
+        <p>
+          When you are chatting with a hesitant lead on <strong>WhatsApp Web</strong>, <strong>LinkedIn DMs</strong>, or <strong>Email</strong>, they might ask:
+          <br><em>"Can you share how you helped similar clients in our industry?"</em>
+        </p>
+        <div class="step-item">
+          <span class="step-pill">1</span>
+          <div class="step-text">
+            <strong>Open "Search Vault" Tab</strong>
+            <p>Click the Panda icon in your browser toolbar and switch to the <strong>Search Vault</strong> tab.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <span class="step-pill">2</span>
+          <div class="step-text">
+            <strong>Filter by Keyword</strong>
+            <p>Type keywords like <code>"conversion"</code>, <code>"speed"</code>, <code>"ROI"</code>, or a client company name.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <span class="step-pill">3</span>
+          <div class="step-text">
+            <strong>Click "💬 Drop in Chat"</strong>
+            <p>Click the green <strong>💬 Drop in Chat</strong> button. The quote and citation are typed directly into your active WhatsApp message composer!</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-title">📈 Why This Closes Leads 3x Faster</div>
+        <ul>
+          <li><strong>Zero Tab-Switching</strong>: You never leave the chat window to search Notion documents, Drive folders, or screenshot galleries.</li>
+          <li><strong>Instant Momentum</strong>: Objections are addressed within 5 seconds while the lead is hot and engaged.</li>
+          <li><strong>Credible Attribution</strong>: Formatted with exact client name, role, and verified transaction tags.</li>
+        </ul>
+
+        <div class="metric-hero">
+          <div class="metric-value">5.2 Seconds</div>
+          <div class="metric-label">Average time to find, format, and drop verified social proof into a live sales pitch</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PandaPraise Bi-Directional Sales Engine • Outbound Conversion</span>
+      <span>pandapraise.com</span>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 8: THE HINGLISH <-> ENGLISH DUAL-AUDIENCE POLISHER -->
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-brand">
+        <div class="logo-box">🐼</div>
+        <span class="brand-name">PandaPraise</span>
+        <span class="brand-tag">AI Translation & Nuance</span>
+      </div>
+      <span class="slide-num">SLIDE 08 / 10</span>
+    </div>
+
+    <div class="title-area">
+      <div class="category-label">CULTURAL & LINGUISTIC ADAPTATION</div>
+      <h1 class="slide-title">The 1-Click Hinglish <-> Global English Polisher</h1>
+      <p class="slide-subtitle">Capturing authentic vernacular social proof and adapting it for high-ticket enterprise buyers.</p>
+    </div>
+
+    <div class="card purple" style="margin-bottom: 14px;">
+      <div class="card-title">🪄 The Problem with Raw Client Praise</div>
+      <p>
+        In India, clients talk passionately in Hinglish: <em>"Bhai kaam bohot mast hua, conversion double ho gaya, paisa vasool service!"</em>
+        <br>While this converts Indian buyers exceptionally well due to high relatability, presenting this to an enterprise client in New York or London requires corporate polish.
+        PandaPraise lets you switch between both with <strong>1 click of the 🪄 Hinglish Polish button</strong>!
+      </p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Raw Indian Client Feedback (Authentic)</th>
+          <th>1-Click AI Polished Global Pitch English</th>
+          <th>Recommended Audience</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><em>"Bhai kaam bohot mast hua hai, sales increase ho gayi!"</em></td>
+          <td><strong>"The deliverables were outstanding and exceeded our expectations with significant sales growth."</strong></td>
+          <td>US / UK Enterprise Clients & LinkedIn Case Studies</td>
+        </tr>
+        <tr>
+          <td><em>"Ekdum top class service, paisa vasool hai!"</em></td>
+          <td><strong>"Absolutely top-tier service providing tremendous return on investment."</strong></td>
+          <td>High-Ticket Corporate RFP Pitches</td>
+        </tr>
+        <tr>
+          <td><em>"Dil khush ho gaya, time pe delivery mil gayi."</em></td>
+          <td><strong>"We are completely thrilled with the final results, delivered right on schedule."</strong></td>
+          <td>Upwork / Freelance Bidding Proposals</td>
+        </tr>
+        <tr>
+          <td><em>"Service ekdum first class, instant reply karta hai team."</em></td>
+          <td><strong>"The customer service was truly world-class with remarkable responsiveness."</strong></td>
+          <td>Global SaaS Landing Page Widgets</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="slide-footer">
+      <span>PandaPraise AI Polisher • Preserves Authentic Raw Testimonials</span>
+      <span>pandapraise.com</span>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 9: 10-SECOND INSTALLATION & ZERO-TOUCH AUTO-SYNC -->
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-brand">
+        <div class="logo-box">🐼</div>
+        <span class="brand-name">PandaPraise</span>
+        <span class="brand-tag">Installation Manual</span>
+      </div>
+      <span class="slide-num">SLIDE 09 / 10</span>
+    </div>
+
+    <div class="title-area">
+      <div class="category-label">FAST-TRACK ONBOARDING</div>
+      <h1 class="slide-title">10-Second Setup in Google Chrome or Microsoft Edge</h1>
+      <p class="slide-subtitle">No complex configuration. Zero manual API keys. Instant auto-pairing.</p>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="step-item">
+          <span class="step-pill">1</span>
+          <div class="step-text">
+            <strong>Open Extensions Management</strong>
+            <p>In your browser address bar, navigate to:<br><code>chrome://extensions</code> (Chrome) or <code>edge://extensions</code> (Edge).</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">2</span>
+          <div class="step-text">
+            <strong>Enable Developer Mode</strong>
+            <p>Toggle the <strong>Developer mode</strong> switch in the top-right corner to <strong>ON</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">3</span>
+          <div class="step-text">
+            <strong>Click "Load unpacked"</strong>
+            <p>Click the <strong>Load unpacked</strong> button in the top-left and select your project's extension directory:<br>
+            <code>Desktop\MY PROJ\testimonial-collector-dashboard\extension</code></p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-pill">4</span>
+          <div class="step-text">
+            <strong>Pin Extension to Toolbar</strong>
+            <p>Click the puzzle icon in Chrome and click the pin icon next to <strong>PandaPraise</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card purple">
+        <div class="card-title">⚡ Zero-Touch Auto-Sync Architecture</div>
+        <p>
+          Most Chrome extensions force you to copy-paste messy API tokens and Project IDs.
+          <strong>PandaPraise eliminates this completely.</strong>
+        </p>
+        <div class="step-item" style="background: #ffffff;">
+          <span class="step-pill" style="background: #10b981;">✓</span>
+          <div class="step-text">
+            <strong>Visit Your Dashboard Once</strong>
+            <p>Simply navigate to <code>https://pandapraise.com/dashboard</code>. The extension background worker instantly pairs your active workspace.</p>
+          </div>
+        </div>
+        <div class="step-item" style="background: #ffffff;">
+          <span class="step-pill" style="background: #10b981;">✓</span>
+          <div class="step-text">
+            <strong>Ready in 1 Second</strong>
+            <p>Open the extension popup: you will see your project already connected and your <strong>7-Day Free Trial</strong> active!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Zero-Friction Manifest V3 Setup • Works on Chrome, Edge, Brave & Opera</span>
+      <span>pandapraise.com</span>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <!-- SLIDE 10: PRICING, 7-DAY TRIAL & COMMERCIAL MODEL -->
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-brand">
+        <div class="logo-box">🐼</div>
+        <span class="brand-name">PandaPraise</span>
+        <span class="brand-tag">Pricing & Economics</span>
+      </div>
+      <span class="slide-num">SLIDE 10 / 10</span>
+    </div>
+
+    <div class="title-area">
+      <div class="category-label">MICRO-SAAS PRICING DISRUPTION</div>
+      <h1 class="slide-title">Unbeatable Economics: 7-Day Trial + ₹100/Month</h1>
+      <p class="slide-subtitle">Delivering enterprise social proof infrastructure at less than the cost of a daily cup of chai.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card amber">
+        <div class="card-title">✨ 7-Day Full Trial</div>
+        <div class="metric-hero" style="background: transparent; border: none; padding: 0 0 10px 0;">
+          <div class="metric-value" style="color: #b45309; font-size: 28px;">FREE</div>
+          <div class="metric-label">100% Unrestricted Access</div>
+        </div>
+        <ul>
+          <li>Unlimited WhatsApp Web clipping</li>
+          <li>UPI payment proof detection</li>
+          <li>In-feed Twitter & LinkedIn buttons</li>
+          <li>Sales Vault search & chat injection</li>
+          <li>No credit card required upfront</li>
+        </ul>
+      </div>
+
+      <div class="card green">
+        <div class="card-title">🚀 PandaPraise Pro</div>
+        <div class="metric-hero" style="background: transparent; border: none; padding: 0 0 10px 0;">
+          <div class="metric-value" style="color: #047857; font-size: 28px;">₹100 <span style="font-size: 13px; font-weight: 600; color: #64748b;">/ month</span></div>
+          <div class="metric-label">Just ₹3.30 per day</div>
+        </div>
+        <ul>
+          <li>Everything in 7-day trial, unlocked forever</li>
+          <li>Unlimited clips across all platforms</li>
+          <li>Instant Hinglish <-> English AI polisher</li>
+          <li>Direct integration with PandaPraise widgets</li>
+          <li>Seamless UPI, NetBanking & Card billing</li>
+        </ul>
+      </div>
+
+      <div class="card" style="border-left: 4px solid #ef4444; background: #fff5f5;">
+        <div class="card-title" style="color: #991b1b;">❌ Competitor Pricing (Senja)</div>
+        <div class="metric-hero" style="background: transparent; border: none; padding: 0 0 10px 0;">
+          <div class="metric-value" style="color: #991b1b; font-size: 28px;">₹3,300+ <span style="font-size: 13px; font-weight: 600; color: #64748b;">/ month</span></div>
+          <div class="metric-label">($39 to $79/mo in USD)</div>
+        </div>
+        <ul>
+          <li>40x more expensive</li>
+          <li>No WhatsApp Web support</li>
+          <li>No UPI payment verification</li>
+          <li>Frequent card declines on Indian banks</li>
+          <li>No Hinglish or vernacular awareness</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card purple" style="margin-top: 14px; text-align: center; padding: 12px;">
+      <div class="card-title" style="justify-content: center;">🐼 Start Your 7-Day Free Trial Today</div>
+      <p style="margin-bottom: 0;">
+        Install the extension in 10 seconds or visit <strong>https://pandapraise.com</strong> to start collecting and deploying high-converting social proof!
+      </p>
+    </div>
+
+    <div class="slide-footer">
+      <span>PandaPraise India & Global Edition • All Rights Reserved</span>
+      <span>pandapraise.com</span>
+    </div>
+  </div>
+
+</body>
+</html>
