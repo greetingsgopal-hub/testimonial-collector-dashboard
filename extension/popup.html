@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PandaPraise Clipper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo-mark">🐼</div>
+        <div class="brand-text">
+          <span class="brand-title">Panda Praise</span>
+          <span class="brand-sub">Testimonial Clipper</span>
+        </div>
+      </div>
+      <a href="https://pandapraise.com/dashboard" target="_blank" class="dashboard-link" title="Open PandaPraise Dashboard">
+        Vault ↗
+      </a>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" id="tab-clip">Clip Praise</button>
+      <button class="tab-btn" id="tab-search">Search Vault</button>
+      <button class="tab-btn" id="tab-settings">Settings</button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- ── TAB 1: CLIP PRAISE ── -->
+      <section id="view-clip" class="view active">
+        <!-- Detection Pill -->
+        <div class="detected-badge" id="platform-badge">
+          <span class="status-dot"></span>
+          <span id="platform-name">Detecting page...</span>
+        </div>
+
+        <form id="clip-form">
+          <div class="form-group">
+            <label for="author-name">Client / Author Name *</label>
+            <input type="text" id="author-name" required placeholder="e.g. Sarah Jenkins">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="author-handle">Handle / Company</label>
+              <input type="text" id="author-handle" placeholder="@sarah or Acme Inc">
+            </div>
+            <div class="form-group">
+              <label>Rating</label>
+              <div class="star-rating" id="star-container">
+                <span class="star active" data-rating="1">★</span>
+                <span class="star active" data-rating="2">★</span>
+                <span class="star active" data-rating="3">★</span>
+                <span class="star active" data-rating="4">★</span>
+                <span class="star active" data-rating="5">★</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="quote-text">Testimonial Quote *</label>
+            <textarea id="quote-text" required rows="3" placeholder="Highlight text on the page or paste praise here..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="source-url">Source Link</label>
+            <input type="url" id="source-url" placeholder="https://...">
+          </div>
+
+          <button type="submit" id="save-btn" class="primary-btn">
+            <span id="save-text">Save to Proof Vault</span>
+            <div id="save-spinner" class="spinner hidden"></div>
+          </button>
+        </form>
+
+        <div class="quick-actions">
+          <button type="button" id="copy-form-link-btn" class="secondary-btn">
+            🔗 Copy Collection Form Link
+          </button>
+        </div>
+
+        <div id="clip-status" class="status-msg hidden"></div>
+      </section>
+
+      <!-- ── TAB 2: SEARCH VAULT (Sales Pitch Tool) ── -->
+      <section id="view-search" class="view">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="Search proof by keyword, name, or objection...">
+        </div>
+        <div id="search-results" class="results-list">
+          <div class="empty-state">
+            <p>Connect your account in Settings to search your live testimonials library during sales chats.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB 3: SETTINGS ── -->
+      <section id="view-settings" class="view">
+        <form id="settings-form" class="space-y">
+          <div class="form-group">
+            <label for="api-url">PandaPraise API URL</label>
+            <input type="url" id="api-url" value="https://pandapraise.com">
+          </div>
+
+          <div class="form-group">
+            <label for="project-id">Active Project ID / Slug *</label>
+            <input type="text" id="project-id" placeholder="e.g. your-project-id">
+            <small>Find this in your Dashboard -> Settings</small>
+          </div>
+
+          <div class="form-group">
+            <label for="api-key">API Token / Secret (Optional)</label>
+            <input type="password" id="api-key" placeholder="Bearer token or leave blank if using Project ID">
+          </div>
+
+          <div class="form-group">
+            <label for="collection-slug">Public Collection Slug</label>
+            <input type="text" id="collection-slug" placeholder="e.g. acme">
+            <small>Used for 1-click 'Copy Form Link'</small>
+          </div>
+
+          <button type="submit" id="save-settings-btn" class="primary-btn">
+            Save Settings
+          </button>
+        </form>
+        <div id="settings-status" class="status-msg hidden"></div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>PandaPraise v1.0 • Zero-Auth Ingestion</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

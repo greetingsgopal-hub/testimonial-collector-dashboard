@@ -4,7 +4,7 @@ import { extractBearerToken, verifyFirebaseToken } from '../lib/firebaseAuth';
 import { getCorsHeaders } from '../lib/cors';
 import { checkRateLimit } from '../lib/rateLimit';
 import { resolveReviewsFromPublicUrl, ExtractedReview } from '../lib/universalExtractor';
-import { saveDocument, queryUserDocuments } from '../lib/firestoreAdmin';
+import { saveDocument, queryUserDocuments, getDocument } from '../lib/firestoreAdmin';
 
 /**
  * Route: POST /api/import/resolve-url
@@ -108,16 +108,27 @@ export async function handleUniversalReviewsCommit(request: Request, env: Worker
     if (user) userId = user.uid;
   }
 
-  if (!userId) {
-    return new Response(JSON.stringify({ error: 'Authentication required.' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
   try {
     const body: any = await request.json().catch(() => ({}));
     const requestedProjectId = typeof body.projectId === 'string' && body.projectId.trim() ? body.projectId.trim() : undefined;
+
+    // Allow Chrome Extension to authenticate with Project ID
+    if (!userId && requestedProjectId) {
+      try {
+        const projDoc = await getDocument('projects', requestedProjectId, null, env);
+        if (projDoc && (projDoc.ownerId || projDoc.userId)) {
+          userId = projDoc.ownerId || projDoc.userId;
+        }
+      } catch (_e) {}
+    }
+
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Authentication required. Please provide a valid session or Project ID.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const platform = body.platform || 'web';
     const sourceUrl = body.sourceUrl || '';
     const reviewsToSave: ExtractedReview[] = Array.isArray(body.reviews) ? body.reviews : (Array.isArray(body.selectedReviews) ? body.selectedReviews : []);

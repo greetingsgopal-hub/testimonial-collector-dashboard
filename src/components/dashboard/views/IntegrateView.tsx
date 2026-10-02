@@ -711,6 +711,34 @@ export const IntegrateView: React.FC = () => {
         </div>
       </div>
 
+      {/* Official Chrome Extension Card */}
+      <div className="p-6 rounded-3xl bg-gradient-to-br from-[#1e1035] via-[#2d1254] to-[#0f0728] text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-purple-500/30">
+        <div className="space-y-2 max-w-xl text-left">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-xs font-bold text-purple-300 border border-purple-400/30">
+            <span>✨ New Release</span>
+            <span>•</span>
+            <span>Chrome Extension</span>
+          </div>
+          <h2 className="text-xl font-bold tracking-tight text-white font-display">
+            PandaPraise 1-Click Testimonial & Review Clipper
+          </h2>
+          <p className="text-xs text-purple-200/90 leading-relaxed">
+            Clip customer praise from Twitter/X, LinkedIn, WhatsApp Web, Slack, and any web page straight to your Proof Vault in 1 second. Also includes instant sales pitch search to copy testimonials during prospect calls.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <a
+            href="https://github.com/greetingsgopal-hub/testimonial-collector-dashboard/tree/main/extension"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-5 py-2.5 rounded-xl bg-white hover:bg-gray-100 text-gray-950 text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
+          >
+            <span>Get Chrome Extension</span>
+            <ArrowUpRight className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
+
       {/* AI Case Study Generator — Coming Soon Banner (no simulated toggle) */}
       <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-50/60 to-indigo-50/60 border border-purple-100 shadow-xs flex items-center justify-between gap-4">
         <div className="flex items-start gap-3">
