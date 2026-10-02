@@ -10,7 +10,8 @@ import {
   Video, 
   MoreHorizontal,
   Clock,
-  Globe
+  Globe,
+  Share2
 } from 'lucide-react';
 import { Review, ReviewStatus } from '../../types';
 import { sanitizeUrl } from '../../lib/security';
@@ -225,6 +226,19 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             </p>
           </div>
         </div>
+
+        {/* Quick Social Share / Export Image Button */}
+        {onOpenSocialCard && (
+          <button
+            type="button"
+            onClick={() => onOpenSocialCard(review)}
+            className="w-full py-1.5 px-3 rounded-xl bg-purple-50 hover:bg-purple-100/90 border border-purple-200 text-[#6701e6] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs"
+            title="Create branded social media image for Twitter, LinkedIn, and Instagram"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span>Export as Social Image (PNG)</span>
+          </button>
+        )}
 
         {/* Moderation Action Buttons Bar */}
         <div className="grid grid-cols-4 gap-1.5 pt-1">

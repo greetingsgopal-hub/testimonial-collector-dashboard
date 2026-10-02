@@ -9,16 +9,12 @@ import {
   MessageSquare,
   Tag,
   Sparkles,
-  Film,
-  HeartHandshake,
-  Palette,
   Search,
   BarChart3,
   Puzzle,
   Settings,
   ChevronDown,
   LogOut,
-  Lock,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Project } from '../../types';
@@ -31,9 +27,6 @@ export type DashboardTab =
   | 'feedback'
   | 'tags'
   | 'studio'
-  | 'proof-reels'
-  | 'thank-yous'
-  | 'brand-kit'
   | 'rich-snippet'
   | 'analyze'
   | 'integrate'
@@ -232,48 +225,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             </span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('proof-reels')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-              activeTab === 'proof-reels'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Film className="w-4 h-4 text-gray-400" />
-              <span>Proof Reels</span>
-            </div>
-          </button>
 
-          <button
-            onClick={() => setActiveTab('thank-yous')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-              activeTab === 'thank-yous'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <HeartHandshake className="w-4 h-4 text-gray-400" />
-              <span>Thank Yous</span>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('brand-kit')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-              activeTab === 'brand-kit'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Palette className="w-4 h-4 text-gray-400" />
-              <span>Brand Kit</span>
-            </div>
-            <Lock className="w-3 h-3 text-gray-400" />
-          </button>
 
           <button
             onClick={() => setActiveTab('rich-snippet')}

@@ -20,9 +20,6 @@ import { FeedbackView } from '../components/dashboard/views/FeedbackView';
 import { TagsView } from '../components/dashboard/views/TagsView';
 import { StudioView } from '../components/dashboard/views/StudioView';
 import { WidgetStudio } from '../components/dashboard/WidgetStudio';
-import { ProofReelsView } from '../components/dashboard/views/ProofReelsView';
-import { ThankYousView } from '../components/dashboard/views/ThankYousView';
-import { BrandKitView } from '../components/dashboard/views/BrandKitView';
 import { RichSnippetView } from '../components/dashboard/views/RichSnippetView';
 import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
@@ -36,16 +33,16 @@ import {
   Sparkles, 
   Send, 
   Copy, 
-  ExternalLink,
-  Settings,
-  Clock,
-  Link as LinkIcon,
-  History,
-  Layers,
-  Star,
-  LayoutGrid,
-  Database,
-  Check
+  ExternalLink, 
+  Settings, 
+  Clock, 
+  Link as LinkIcon, 
+  History, 
+  Layers, 
+  Star, 
+  LayoutGrid, 
+  Database, 
+  Check 
 } from 'lucide-react';
 
 export const DashboardPage = () => {
@@ -55,7 +52,7 @@ export const DashboardPage = () => {
   });
 
   const { project, collectionForm } = useAuth();
-  const [activeTab, setActiveTab] = useState<DashboardTab>('welcome');
+  const [activeTab, setActiveTab] = useState<DashboardTab>('proof');
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<ReviewStats>({
@@ -460,21 +457,6 @@ export const DashboardPage = () => {
                 onCollect={() => setActiveTab('forms')}
               />
             )
-          )}
-
-          {/* Proof Reels */}
-          {activeTab === 'proof-reels' && (
-            <ProofReelsView onCollectVideo={() => window.open(collectionUrl, '_blank')} />
-          )}
-
-          {/* Thank Yous Center */}
-          {activeTab === 'thank-yous' && (
-            <ThankYousView reviews={reviews} />
-          )}
-
-          {/* Brand Kit */}
-          {activeTab === 'brand-kit' && (
-            <BrandKitView />
           )}
 
           {/* Rich Snippet (SEO Schema) */}

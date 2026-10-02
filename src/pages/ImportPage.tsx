@@ -265,6 +265,21 @@ const IMPORT_SOURCES: SourceDefinition[] = [
     actionType: 'url',
   },
   {
+    id: 'screenshot',
+    name: 'Screenshot / Chat Proof',
+    status: 'available',
+    description: 'Upload WhatsApp, Slack, Stripe, or email screenshot testimonials.',
+    keywords: ['screenshot', 'image', 'chat', 'whatsapp', 'slack', 'dm', 'stripe', 'email'],
+    icon: (
+      <svg className="w-5 h-5 text-indigo-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+        <circle cx="9" cy="9" r="2" />
+        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+      </svg>
+    ),
+    actionType: 'manual',
+  },
+  {
     id: 'manual',
     name: 'Manual testimonial',
     status: 'available',
@@ -363,6 +378,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
   const [manualRating, setManualRating] = useState(5);
   const [manualCompany, setManualCompany] = useState('');
   const [manualRole, setManualRole] = useState('');
+  const [manualScreenshot, setManualScreenshot] = useState<string | null>(null);
 
   const filteredSources = IMPORT_SOURCES.filter((s) => {
     if (!searchQuery.trim()) return true;
@@ -906,8 +922,9 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
         content: manualContent.trim(),
         company: manualCompany.trim() || undefined,
         role: manualRole.trim() || '',
-        tags: ['manual-entry'],
-        source: 'manual',
+        avatarUrl: manualScreenshot || undefined,
+        tags: manualScreenshot ? ['screenshot', 'chat-proof'] : ['manual-entry'],
+        source: manualScreenshot ? 'import' : 'manual',
         type: 'text',
         consent: true,
         status: 'approved',
@@ -920,6 +937,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
       setManualRating(5);
       setManualCompany('');
       setManualRole('');
+      setManualScreenshot(null);
     } catch (err: any) {
       setImportResult({ success: false, count: 0, errors: [err.message] });
     }
@@ -2348,14 +2366,62 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 block">Testimonial *</label>
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 block">Testimonial Quote / Key Takeaway *</label>
               <textarea
                 value={manualContent}
                 onChange={(e) => setManualContent(e.target.value)}
                 rows={4}
-                placeholder="Write the testimonial content..."
+                placeholder="Paste the testimonial quote, Slack message text, or customer feedback..."
                 className="w-full px-3.5 py-2.5 text-sm rounded-xl resize-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6]"
               />
+            </div>
+
+            {/* Optional Screenshot Attachment */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block">
+                Attach Proof Screenshot (WhatsApp, Slack, Stripe, DM)
+              </label>
+              {manualScreenshot ? (
+                <div className="relative p-2 rounded-2xl border border-purple-200 bg-purple-50/50 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <img src={manualScreenshot} alt="Proof Screenshot" className="w-14 h-14 object-cover rounded-xl border border-gray-200" />
+                    <div>
+                      <span className="text-xs font-bold text-gray-900">Screenshot Attached</span>
+                      <p className="text-[10px] text-gray-500">Will be featured on your social proof cards</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setManualScreenshot(null)}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 transition-colors cursor-pointer text-xs font-semibold"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center p-4 border border-dashed border-gray-300 dark:border-gray-700 rounded-2xl hover:border-[#6701e6] hover:bg-purple-50/30 transition-all cursor-pointer">
+                  <Upload className="w-5 h-5 text-gray-400 mb-1" />
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Click to upload screenshot or image</span>
+                  <span className="text-[10px] text-gray-400">PNG, JPG, WebP up to 5MB</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          if (typeof reader.result === 'string') {
+                            setManualScreenshot(reader.result);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </label>
+              )}
             </div>
 
             <div className="flex justify-between items-center pt-2">
