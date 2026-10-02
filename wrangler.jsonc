@@ -12,7 +12,8 @@
     "run_worker_first": true
   },
   "vars": {
-    "FIREBASE_PROJECT_ID": "testimonialcollectordashboard"
+    "FIREBASE_PROJECT_ID": "testimonialcollectordashboard",
+    "META_APP_ID": "2208349859896414"
   },
   "observability": {
     "enabled": true
