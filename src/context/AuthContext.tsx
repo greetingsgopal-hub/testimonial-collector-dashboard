@@ -616,6 +616,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe();
   }, [isDemoMode]);
 
+  // ── Sync Active Project with Browser Extension ───────────
+  useEffect(() => {
+    if (project?.id) {
+      try {
+        localStorage.setItem('pandapraise_project_id', project.id);
+        if (project.slug) localStorage.setItem('pandapraise_collection_slug', project.slug);
+        window.postMessage({ type: 'PANDAPRAISE_AUTH_SYNC', projectId: project.id, slug: project.slug }, '*');
+      } catch {
+        // Ignored
+      }
+    }
+  }, [project]);
+
   const signUp = async (email: string, password: string) => {
     setAuthError(null);
     if (!isFirebaseConfigured || !auth) {

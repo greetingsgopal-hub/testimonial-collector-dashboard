@@ -1,5 +1,6 @@
 // extension/popup.js
 // Client logic for PandaPraise Chrome Extension Popup
+// India Edition: 7-Day Free Trial, ₹100/mo Subscription, WhatsApp Web In-Chat Clipper, UPI Proof Tags, Hinglish Polisher
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Elements
@@ -13,11 +14,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const platformBadge = document.getElementById('platform-badge');
   const platformName = document.getElementById('platform-name');
+  const trialBadge = document.getElementById('trial-badge');
 
   const clipForm = document.getElementById('clip-form');
   const authorNameInput = document.getElementById('author-name');
   const authorHandleInput = document.getElementById('author-handle');
   const quoteTextInput = document.getElementById('quote-text');
+  const isPaymentProofInput = document.getElementById('is-payment-proof');
+  const hinglishBtn = document.getElementById('hinglish-btn');
   const sourceUrlInput = document.getElementById('source-url');
   const saveBtn = document.getElementById('save-btn');
   const saveText = document.getElementById('save-text');
@@ -33,15 +37,83 @@ document.addEventListener('DOMContentLoaded', async () => {
   const settingsForm = document.getElementById('settings-form');
   const apiUrlInput = document.getElementById('api-url');
   const projectIdInput = document.getElementById('project-id');
-  const apiKeyInput = document.getElementById('api-key');
   const collectionSlugInput = document.getElementById('collection-slug');
   const settingsStatus = document.getElementById('settings-status');
+  const subStatusText = document.getElementById('sub-status-text');
 
   // Search elements
   const searchInput = document.getElementById('search-input');
   const searchResults = document.getElementById('search-results');
 
-  // 1. Tab Navigation
+  // Paywall elements
+  const paywallOverlay = document.getElementById('paywall-overlay');
+  const licenseKeyInput = document.getElementById('license-key-input');
+  const activateKeyBtn = document.getElementById('activate-key-btn');
+
+  // ─────────────────────────────────────────────────────────────
+  // 1. TRIAL ENGINE & ₹100/MO SUBSCRIPTION SYSTEM
+  // ─────────────────────────────────────────────────────────────
+  const storageData = await chrome.storage.local.get([
+    'trialStart',
+    'isProUser',
+    'proExpiresAt',
+    'apiUrl',
+    'projectId',
+    'collectionSlug',
+    'cachedReviews',
+    'quickClip'
+  ]);
+
+  let trialStart = storageData.trialStart;
+  if (!trialStart) {
+    trialStart = Date.now();
+    await chrome.storage.local.set({ trialStart });
+  }
+
+  const TRIAL_DAYS = 7;
+  const trialDurationMs = TRIAL_DAYS * 24 * 60 * 60 * 1000;
+  const elapsedMs = Date.now() - trialStart;
+  const daysLeft = Math.max(0, Math.ceil((trialDurationMs - elapsedMs) / (24 * 60 * 60 * 1000)));
+
+  const isPro = Boolean(storageData.isProUser && (storageData.proExpiresAt ? storageData.proExpiresAt > Date.now() : true));
+
+  if (isPro) {
+    trialBadge.textContent = '⭐ PRO (₹100/mo)';
+    trialBadge.classList.add('pro-active');
+    if (subStatusText) subStatusText.textContent = 'Status: Active Subscriber (₹100/month)';
+  } else if (daysLeft > 0) {
+    trialBadge.textContent = `✨ ${daysLeft}d Trial Left`;
+    if (subStatusText) subStatusText.textContent = `Status: 7-Day Free Trial (${daysLeft} days remaining)`;
+  } else {
+    trialBadge.textContent = 'Trial Ended';
+    if (subStatusText) subStatusText.textContent = 'Status: Trial Expired — ₹100/month required';
+    // Display Paywall
+    paywallOverlay.classList.remove('hidden');
+  }
+
+  // License Key Activation
+  if (activateKeyBtn) {
+    activateKeyBtn.addEventListener('click', async () => {
+      const key = (licenseKeyInput.value || '').trim().toUpperCase();
+      if (key.length >= 6) {
+        // Unlock Pro
+        const proExpiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+        await chrome.storage.local.set({ isProUser: true, proExpiresAt });
+        paywallOverlay.classList.add('hidden');
+        trialBadge.textContent = '⭐ PRO (₹100/mo)';
+        trialBadge.classList.add('pro-active');
+        alert('🎉 PandaPraise Pro successfully activated for 30 days!');
+      } else {
+        alert('Please enter a valid activation key or purchase a subscription.');
+      }
+    });
+  }
+
+  trialBadge.addEventListener('click', () => switchTab(viewSettings, tabSettings));
+
+  // ─────────────────────────────────────────────────────────────
+  // 2. TAB NAVIGATION
+  // ─────────────────────────────────────────────────────────────
   function switchTab(targetView, targetBtn) {
     [viewClip, viewSearch, viewSettings].forEach(v => v.classList.remove('active'));
     [tabClip, tabSearch, tabSettings].forEach(b => b.classList.remove('active'));
@@ -57,7 +129,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   tabSettings.addEventListener('click', () => switchTab(viewSettings, tabSettings));
 
-  // 2. Star Rating Selection
+  // ─────────────────────────────────────────────────────────────
+  // 3. STAR RATING SELECTION
+  // ─────────────────────────────────────────────────────────────
   starContainer.addEventListener('click', (e) => {
     const star = e.target.closest('.star');
     if (!star) return;
@@ -78,74 +152,143 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 3. Load Stored Configuration
-  const config = await chrome.storage.local.get([
-    'apiUrl',
-    'projectId',
-    'apiKey',
-    'collectionSlug',
-    'cachedReviews'
-  ]);
+  // ─────────────────────────────────────────────────────────────
+  // 4. LOAD SAVED CONFIG & POPULATE FIELDS
+  // ─────────────────────────────────────────────────────────────
+  if (storageData.apiUrl) apiUrlInput.value = storageData.apiUrl;
+  if (storageData.projectId) projectIdInput.value = storageData.projectId;
+  if (storageData.collectionSlug) collectionSlugInput.value = storageData.collectionSlug;
 
-  if (config.apiUrl) apiUrlInput.value = config.apiUrl;
-  if (config.projectId) projectIdInput.value = config.projectId;
-  if (config.apiKey) apiKeyInput.value = config.apiKey;
-  if (config.collectionSlug) collectionSlugInput.value = config.collectionSlug;
+  // ─────────────────────────────────────────────────────────────
+  // 5. QUICK-CLIP / IN-PAGE DATA POPULATION
+  // ─────────────────────────────────────────────────────────────
+  let originalQuote = '';
+  let isPolished = false;
 
-  // 4. Capture Data from Current Web Page
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab && tab.id) {
-      sourceUrlInput.value = tab.url || '';
-
-      // Check if quickClip exists from context menu
-      const { quickClip } = await chrome.storage.local.get('quickClip');
-      if (quickClip && (Date.now() - quickClip.timestamp < 30000)) {
-        quoteTextInput.value = quickClip.text || '';
-        if (quickClip.url) sourceUrlInput.value = quickClip.url;
-        chrome.storage.local.remove('quickClip');
+  async function populateFromCurrentContext() {
+    // 1. Check quickClip from WhatsApp or Twitter hover buttons
+    if (storageData.quickClip && (Date.now() - storageData.quickClip.timestamp < 300000)) {
+      const clip = storageData.quickClip;
+      if (clip.text) {
+        quoteTextInput.value = clip.text;
+        originalQuote = clip.text;
       }
+      if (clip.author) authorNameInput.value = clip.author;
+      if (clip.handle) authorHandleInput.value = clip.handle;
+      if (clip.url) sourceUrlInput.value = clip.url;
+      if (clip.isPaymentProof) isPaymentProofInput.checked = true;
 
-      // Send message to content script to detect author/selection
-      chrome.tabs.sendMessage(tab.id, { type: 'GET_PAGE_DATA' }, (response) => {
-        if (chrome.runtime.lastError || !response) {
-          // Fallback if script cannot inject (e.g. chrome:// tabs)
-          platformName.textContent = tab.url ? new URL(tab.url).hostname : 'Web Page';
-          return;
-        }
-
-        if (response.platform) {
-          platformName.textContent = response.platform.toUpperCase() + ' detected';
-        }
-
-        if (response.author && !authorNameInput.value) {
-          authorNameInput.value = response.author;
-        }
-
-        if (response.handle && !authorHandleInput.value) {
-          authorHandleInput.value = response.handle;
-        }
-
-        if (response.text && !quoteTextInput.value) {
-          quoteTextInput.value = response.text;
-        }
-      });
+      platformName.textContent = (clip.platform || 'whatsapp').toUpperCase() + ' (Quick Clip ready)';
+      chrome.storage.local.remove('quickClip');
+      return;
     }
-  } catch (err) {
-    platformName.textContent = 'Ready to clip';
+
+    // 2. Query active browser tab
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab && tab.id) {
+        sourceUrlInput.value = tab.url || '';
+
+        chrome.tabs.sendMessage(tab.id, { type: 'GET_PAGE_DATA' }, (response) => {
+          if (chrome.runtime.lastError || !response) {
+            platformName.textContent = tab.url ? new URL(tab.url).hostname : 'Web Page';
+            return;
+          }
+
+          if (response.platform) {
+            platformName.textContent = response.platform.toUpperCase() + ' detected';
+          }
+          if (response.author && !authorNameInput.value) {
+            authorNameInput.value = response.author;
+          }
+          if (response.handle && !authorHandleInput.value) {
+            authorHandleInput.value = response.handle;
+          }
+          if (response.text && !quoteTextInput.value) {
+            quoteTextInput.value = response.text;
+            originalQuote = response.text;
+            detectPaymentProof(response.text);
+          }
+        });
+      }
+    } catch {
+      platformName.textContent = 'Ready to clip';
+    }
   }
 
-  // 5. Submit Testimonial to PandaPraise
+  function detectPaymentProof(text) {
+    if (!text) return;
+    if (/(upi|utr|₹|rs\.?|inr|gpay|phonepe|paytm|payment received|credited)/i.test(text)) {
+      isPaymentProofInput.checked = true;
+    }
+  }
+
+  quoteTextInput.addEventListener('input', () => {
+    originalQuote = quoteTextInput.value;
+    isPolished = false;
+    detectPaymentProof(quoteTextInput.value);
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 6. HINGLISH <-> GLOBAL ENGLISH POLISHER (INDIA UNFAIR ADVANTAGE)
+  // ─────────────────────────────────────────────────────────────
+  hinglishBtn.addEventListener('click', () => {
+    const text = quoteTextInput.value.trim();
+    if (!text) return;
+
+    if (!isPolished) {
+      originalQuote = text;
+      const polished = polishHinglish(text);
+      quoteTextInput.value = polished;
+      isPolished = true;
+      hinglishBtn.textContent = '↩ Show Original';
+    } else {
+      quoteTextInput.value = originalQuote;
+      isPolished = false;
+      hinglishBtn.textContent = '🪄 Hinglish Polish';
+    }
+  });
+
+  function polishHinglish(input) {
+    let t = input;
+    const rules = [
+      { regex: /bhai\s*(kaam\s*bohot\s*mast\s*hua|kaam\s*bahut\s*mast\s*hai)/gi, replace: "The deliverables were outstanding and exceeded our expectations." },
+      { regex: /ekdum\s*(top\s*class|mast|badhiya|shandar)/gi, replace: "absolutely top-tier and highly professional" },
+      { regex: /paisa\s*vasool/gi, replace: "tremendous return on investment" },
+      { regex: /bohot\s*(acha|badhiya|mast|fast)/gi, replace: "exceptionally good and remarkably fast" },
+      { regex: /dil\s*khush\s*ho\s*gaya/gi, replace: "we are completely thrilled with the final results" },
+      { regex: /service\s*ekdum\s*first\s*class/gi, replace: "the customer service was truly world-class" },
+      { regex: /kaam\s*bahut\s*accha\s*hai/gi, replace: "the execution quality is top-notch" },
+      { regex: /time\s*pe\s*delivery\s*mil\s*gayi/gi, replace: "project delivered right on schedule" },
+      { regex: /bhai/gi, replace: "Team" }
+    ];
+
+    rules.forEach(rule => {
+      t = t.replace(rule.regex, rule.replace);
+    });
+
+    // Capitalize first letter
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // 7. SUBMIT TESTIMONIAL TO PANDAPRAISE
+  // ─────────────────────────────────────────────────────────────
   clipForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // Check trial expiration
+    if (!isPro && daysLeft <= 0) {
+      paywallOverlay.classList.remove('hidden');
+      return;
+    }
+
     const apiUrl = (apiUrlInput.value || 'https://pandapraise.com').replace(/\/+$/, '');
     const projectId = projectIdInput.value.trim();
-    const apiKey = apiKeyInput.value.trim();
 
-    if (!projectId && !apiKey) {
+    if (!projectId) {
       switchTab(viewSettings, tabSettings);
-      showStatus(settingsStatus, 'Please enter your Project ID or API Token first.', 'error');
+      showStatus(settingsStatus, 'Please enter your Project ID or log into pandapraise.com.', 'error');
       return;
     }
 
@@ -153,11 +296,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const quoteText = quoteTextInput.value.trim();
     const sourceUrl = sourceUrlInput.value.trim();
     const roleHandle = authorHandleInput.value.trim();
+    const isPayment = isPaymentProofInput.checked;
 
     saveBtn.disabled = true;
     saveText.textContent = 'Saving...';
     saveSpinner.classList.remove('hidden');
     clipStatus.classList.add('hidden');
+
+    const tags = ['chrome_extension'];
+    if (isPayment) tags.push('verified_upi_proof');
+    if (roleHandle.toLowerCase().includes('whatsapp')) tags.push('whatsapp');
 
     const reviewPayload = {
       id: `ext_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
@@ -165,22 +313,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       rating: currentRating,
       text: quoteText,
       platformUrl: sourceUrl,
-      source: 'chrome_extension'
+      source: 'chrome_extension',
+      role: roleHandle,
+      tags
     };
 
     try {
-      const headers = { 'Content-Type': 'application/json' };
-      if (apiKey) {
-        headers['Authorization'] = `Bearer ${apiKey}`;
-      }
-
       const res = await fetch(`${apiUrl}/api/import/commit-reviews`, {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          projectId: projectId || undefined,
-          apiKey: apiKey || undefined,
-          platform: 'chrome_extension',
+          projectId,
+          platform: isPayment ? 'whatsapp_payment' : 'chrome_extension',
           sourceUrl,
           reviews: [reviewPayload]
         })
@@ -193,10 +337,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         quoteTextInput.value = '';
         authorNameInput.value = '';
         authorHandleInput.value = '';
+        isPaymentProofInput.checked = false;
+        isPolished = false;
+        hinglishBtn.textContent = '🪄 Hinglish Polish';
       } else {
         showStatus(clipStatus, data.error || 'Failed to save review. Please check your Project ID.', 'error');
       }
-    } catch (err) {
+    } catch {
       showStatus(clipStatus, 'Network error. Ensure your PandaPraise instance is reachable.', 'error');
     } finally {
       saveBtn.disabled = false;
@@ -205,7 +352,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 6. Copy Collection Form Link
+  // ─────────────────────────────────────────────────────────────
+  // 8. COPY COLLECTION FORM LINK
+  // ─────────────────────────────────────────────────────────────
   copyFormLinkBtn.addEventListener('click', () => {
     const slug = collectionSlugInput.value.trim() || projectIdInput.value.trim() || 'your-brand';
     const formUrl = `https://pandapraise.com/c/${slug}`;
@@ -218,13 +367,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 7. Save Settings
+  // ─────────────────────────────────────────────────────────────
+  // 9. SAVE SETTINGS
+  // ─────────────────────────────────────────────────────────────
   settingsForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const settings = {
       apiUrl: apiUrlInput.value.trim(),
       projectId: projectIdInput.value.trim(),
-      apiKey: apiKeyInput.value.trim(),
       collectionSlug: collectionSlugInput.value.trim()
     };
 
@@ -236,7 +386,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 8. Search Reviews Vault (Sales Flow)
+  // ─────────────────────────────────────────────────────────────
+  // 10. SEARCH REVIEWS VAULT (SALES TOOL + DROP INTO ACTIVE CHAT)
+  // ─────────────────────────────────────────────────────────────
   async function loadSearchReviews() {
     const projectId = projectIdInput.value.trim();
     if (!projectId) {
@@ -255,7 +407,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         chrome.storage.local.set({ cachedReviews: list });
         renderReviews(list);
       } else {
-        // Fallback to cached reviews
         const { cachedReviews } = await chrome.storage.local.get('cachedReviews');
         renderReviews(cachedReviews || []);
       }
@@ -294,13 +445,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="result-actions">
           <button class="copy-mini-btn" data-quote="${escapeHtml(r.content || '')}">Copy Quote</button>
           <button class="copy-mini-btn" data-author="${escapeHtml(r.name)} - ${escapeHtml(r.company || r.role || '')}">Copy Citation</button>
+          <button class="copy-mini-btn chat-drop-btn" data-drop-text="&quot;${escapeHtml(r.content || '')}&quot; — ${escapeHtml(r.name)}">💬 Drop in Chat</button>
         </div>
       </div>
     `).join('');
 
-    // Attach copy handlers
+    // Attach copy & chat drop handlers
     searchResults.querySelectorAll('.copy-mini-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
+        const dropText = btn.getAttribute('data-drop-text');
+        if (dropText) {
+          // Drop into active WhatsApp / LinkedIn / web composer
+          try {
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tab && tab.id) {
+              chrome.tabs.sendMessage(tab.id, { type: 'PASTE_INTO_CHAT', text: dropText }, (res) => {
+                if (res && res.success) {
+                  btn.textContent = '✓ Dropped!';
+                  setTimeout(() => { btn.textContent = '💬 Drop in Chat'; }, 2000);
+                } else {
+                  // Fallback: copy to clipboard
+                  navigator.clipboard.writeText(dropText);
+                  btn.textContent = '✓ Copied!';
+                  setTimeout(() => { btn.textContent = '💬 Drop in Chat'; }, 2000);
+                }
+              });
+            }
+          } catch {
+            navigator.clipboard.writeText(dropText);
+          }
+          return;
+        }
+
         const text = btn.getAttribute('data-quote') || btn.getAttribute('data-author');
         if (text) {
           navigator.clipboard.writeText(text).then(() => {
@@ -333,4 +509,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!str) return '';
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
+
+  // Populate data on start
+  populateFromCurrentContext();
 });

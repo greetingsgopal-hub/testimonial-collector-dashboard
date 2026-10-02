@@ -13,8 +13,11 @@
       <div class="brand">
         <div class="logo-mark">🐼</div>
         <div class="brand-text">
-          <span class="brand-title">Panda Praise</span>
-          <span class="brand-sub">Testimonial Clipper</span>
+          <div class="brand-line">
+            <span class="brand-title">Panda Praise</span>
+            <span id="trial-badge" class="trial-pill">✨ 7d Trial</span>
+          </div>
+          <span class="brand-sub">WhatsApp & Social Proof Clipper</span>
         </div>
       </div>
       <a href="https://pandapraise.com/dashboard" target="_blank" class="dashboard-link" title="Open PandaPraise Dashboard">
@@ -37,19 +40,19 @@
         <!-- Detection Pill -->
         <div class="detected-badge" id="platform-badge">
           <span class="status-dot"></span>
-          <span id="platform-name">Detecting page...</span>
+          <span id="platform-name">Detecting context...</span>
         </div>
 
         <form id="clip-form">
           <div class="form-group">
             <label for="author-name">Client / Author Name *</label>
-            <input type="text" id="author-name" required placeholder="e.g. Sarah Jenkins">
+            <input type="text" id="author-name" required placeholder="e.g. Ramesh Kumar or @acme">
           </div>
 
           <div class="form-row">
             <div class="form-group flex-1">
-              <label for="author-handle">Handle / Company</label>
-              <input type="text" id="author-handle" placeholder="@sarah or Acme Inc">
+              <label for="author-handle">Channel / Role</label>
+              <input type="text" id="author-handle" placeholder="WhatsApp • Client">
             </div>
             <div class="form-group">
               <label>Rating</label>
@@ -64,8 +67,22 @@
           </div>
 
           <div class="form-group">
-            <label for="quote-text">Testimonial Quote *</label>
-            <textarea id="quote-text" required rows="3" placeholder="Highlight text on the page or paste praise here..."></textarea>
+            <div class="label-with-action">
+              <label for="quote-text">Testimonial / Praise Quote *</label>
+              <button type="button" id="hinglish-btn" class="text-action-btn" title="Convert Hinglish praise into clean English pitch text">
+                🪄 Hinglish Polish
+              </button>
+            </div>
+            <textarea id="quote-text" required rows="3" placeholder="Highlight text or click 🐼 Clip in WhatsApp / Twitter..."></textarea>
+          </div>
+
+          <!-- India Unfair Advantage: UPI & Payment Tag -->
+          <div class="upi-proof-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="is-payment-proof">
+              <span class="checkbox-text">💳 Verified UPI / Transaction Proof</span>
+            </label>
+            <span class="india-badge">🇮🇳 High Trust</span>
           </div>
 
           <div class="form-group">
@@ -91,7 +108,7 @@
       <!-- ── TAB 2: SEARCH VAULT (Sales Pitch Tool) ── -->
       <section id="view-search" class="view">
         <div class="search-box">
-          <input type="text" id="search-input" placeholder="Search proof by keyword, name, or objection...">
+          <input type="text" id="search-input" placeholder="Search testimonials for sales pitch...">
         </div>
         <div id="search-results" class="results-list">
           <div class="empty-state">
@@ -102,6 +119,15 @@
 
       <!-- ── TAB 3: SETTINGS ── -->
       <section id="view-settings" class="view">
+        <!-- Auto-sync banner -->
+        <div class="auto-sync-banner" id="auto-sync-box">
+          <span class="sync-icon">⚡</span>
+          <div class="sync-text">
+            <strong>Auto-Sync Active</strong>
+            <p>Your logged-in session on PandaPraise syncs automatically.</p>
+          </div>
+        </div>
+
         <form id="settings-form" class="space-y">
           <div class="form-group">
             <label for="api-url">PandaPraise API URL</label>
@@ -111,12 +137,7 @@
           <div class="form-group">
             <label for="project-id">Active Project ID / Slug *</label>
             <input type="text" id="project-id" placeholder="e.g. your-project-id">
-            <small>Find this in your Dashboard -> Settings</small>
-          </div>
-
-          <div class="form-group">
-            <label for="api-key">API Token / Secret (Optional)</label>
-            <input type="password" id="api-key" placeholder="Bearer token or leave blank if using Project ID">
+            <small>Automatically filled when logged into pandapraise.com</small>
           </div>
 
           <div class="form-group">
@@ -129,14 +150,53 @@
             Save Settings
           </button>
         </form>
+
+        <!-- Subscription Card inside Settings -->
+        <div class="subscription-card">
+          <div class="sub-header">
+            <span class="sub-plan-name">PandaPraise Pro Extension</span>
+            <span class="sub-price">₹100/mo</span>
+          </div>
+          <p class="sub-desc">Unlimited WhatsApp Web in-chat clipping, UPI payment proof tags & Sales Vault.</p>
+          <div id="sub-status-text" class="sub-status">Status: 7-Day Free Trial Active</div>
+          <a href="https://pandapraise.com/pricing?plan=extension_inr100" target="_blank" class="upgrade-btn">
+            Manage Subscription (UPI / Card)
+          </a>
+        </div>
+
         <div id="settings-status" class="status-msg hidden"></div>
+      </section>
+
+      <!-- ── PAYWALL OVERLAY (TRIGGERS AFTER 7 DAYS TRIAL) ── -->
+      <section id="paywall-overlay" class="paywall-modal hidden">
+        <div class="paywall-content">
+          <div class="paywall-icon">🐼✨</div>
+          <h3>Your 7-Day Trial has Ended</h3>
+          <p class="paywall-pitch">
+            Keep unlimited 1-click WhatsApp clipping, in-feed social buttons, and sales chat proof drops.
+          </p>
+          <div class="pricing-badge">
+            <span class="inr-price">₹100</span>
+            <span class="inr-period">/ month (₹3/day)</span>
+          </div>
+          <p class="inr-note">Supports UPI (GPay, PhonePe, Paytm), NetBanking & Cards</p>
+
+          <a href="https://pandapraise.com/pricing?plan=extension_inr100" target="_blank" class="paywall-btn">
+            Upgrade for ₹100/month
+          </a>
+
+          <div class="license-key-box">
+            <input type="text" id="license-key-input" placeholder="Have an activation key?">
+            <button type="button" id="activate-key-btn">Activate</button>
+          </div>
+        </div>
       </section>
 
     </main>
 
     <!-- Footer -->
     <footer class="footer">
-      <span>PandaPraise v1.0 • Zero-Auth Ingestion</span>
+      <span>PandaPraise India Edition • WhatsApp & UPI Enabled</span>
     </footer>
   </div>
 

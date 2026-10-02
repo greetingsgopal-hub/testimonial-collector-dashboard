@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "PandaPraise — 1-Click Testimonial & Review Clipper",
-  "version": "1.0.0",
-  "description": "Capture customer praise from Twitter/X, LinkedIn, Slack, WhatsApp, and any webpage straight to your PandaPraise Proof Vault.",
+  "name": "PandaPraise — 1-Click WhatsApp & Social Praise Clipper",
+  "version": "1.1.0",
+  "description": "1-Click clip customer praise & payment proof from WhatsApp Web, Twitter/X, LinkedIn & Slack straight to your PandaPraise Proof Vault.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -26,6 +26,10 @@
     "scripting"
   ],
   "host_permissions": [
+    "https://*.whatsapp.com/*",
+    "https://*.twitter.com/*",
+    "https://*.x.com/*",
+    "https://*.linkedin.com/*",
     "https://pandapraise.com/*",
     "http://localhost:*/*",
     "http://127.0.0.1:*/*"
@@ -38,6 +42,12 @@
       "matches": ["<all_urls>"],
       "js": ["content.js"],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

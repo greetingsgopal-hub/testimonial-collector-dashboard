@@ -1,8 +1,32 @@
-# PandaPraise Chrome Extension
+# PandaPraise Chrome Extension (India & Global Edition)
 
-The official **1-Click Testimonial & Review Clipper** for PandaPraise.
+The official **1-Click WhatsApp & Social Praise Clipper** for PandaPraise.
 
-Clip customer praise from Twitter/X, LinkedIn, WhatsApp Web, Slack, Gmail, and any web page straight to your PandaPraise Proof Vault.
+Clip customer praise & payment proof directly from **WhatsApp Web**, **Twitter/X**, **LinkedIn**, and any webpage straight to your PandaPraise Proof Vault.
+
+---
+
+## 🇮🇳 The Validated Unfair Advantage (Why This Beats Senja)
+
+1. **Native WhatsApp Web In-Chat Clipper**:
+   - Hover over any message inside `web.whatsapp.com` to see a 1-click **🐼 Clip** button.
+   - Extracts the contact's name, message, and timestamp automatically.
+2. **UPI & Transaction Proof Auto-Detector**:
+   - Detects UPI references, UTR numbers, and ₹ amounts from WhatsApp or payment confirmations, automatically tagging them as **Verified Transaction / Paid Customer Proof**.
+3. **1-Click Hinglish <-> English AI Polisher**:
+   - Click **🪄 Hinglish Polish** to convert informal Hinglish feedback (*"bhai kaam bohot mast hua"*) into high-converting, professional English pitch copy while preserving the authentic original testimonial.
+4. **"Drop into Active Chat" (Instant WhatsApp Sales Tool)**:
+   - When pitching leads on WhatsApp Web or LinkedIn, open **Search Vault** and click **💬 Drop into Chat** to paste the social proof directly into your active message composer.
+5. **Auto-Session Sync**:
+   - Automatically syncs your active Project ID when you visit `pandapraise.com/dashboard`—no manual copying and pasting.
+
+---
+
+## 💳 Pricing & 7-Day Free Trial
+
+* **7-Day Free Trial**: Full, unrestricted access to all features upon install.
+* **₹100 / Month (Micro-SaaS)**: After 7 days, subscribe for ₹100/month (~₹3/day) via UPI (Google Pay, PhonePe, Paytm), NetBanking, or Cards.
+* Compared to Senja's $39–$79/month (~₹3,300–₹6,600/mo), PandaPraise is tailored with 40x better value and local payment friction eliminated.
 
 ---
 
@@ -13,36 +37,8 @@ Clip customer praise from Twitter/X, LinkedIn, WhatsApp Web, Slack, Gmail, and a
    - Edge: `edge://extensions`
 2. Turn **ON** the **"Developer mode"** toggle in the top-right corner.
 3. Click the **"Load unpacked"** button in the top-left corner.
-4. Select the `extension` folder located inside this project:
+4. Select the directory:
    ```
-   testimonial-collector-dashboard/extension
+   C:\Users\User\OneDrive\Desktop\MY PROJ\testimonial-collector-dashboard\extension
    ```
 5. Click the puzzle icon in your browser toolbar and **pin PandaPraise** to your bar!
-
----
-
-## ⚡ How to Use It
-
-### 1. Clip Praise from Any Webpage
-- When viewing a compliment on Twitter/X, LinkedIn, or an article, click the PandaPraise extension icon.
-- It will automatically detect the tweet/post text, author name, and URL!
-- Select a star rating (1–5) and click **"Save to Proof Vault"**.
-
-### 2. Right-Click Quick Clip
-- Highlight any sentence or client message on any page (e.g. WhatsApp Web or Slack).
-- Right-click and choose **"Send highlighted quote to PandaPraise"**.
-- Click the extension icon to verify and save.
-
-### 3. Sales Pitch Testimonial Search (The "Reverse Flow")
-- While chatting with a sales lead, click the extension and switch to **"Search Vault"**.
-- Type keywords (e.g. `"fast"`, `"pricing"`, `"support"`) to find relevant quotes and copy them into your chat in 2 seconds.
-
-### 4. 1-Click Collection Form Link
-- Click the extension and press **"🔗 Copy Collection Form Link"** to immediately get your public review collection URL.
-
----
-
-## ⚙️ Configuration
-- Open the extension and go to the **Settings** tab.
-- Enter your **Project ID** from your PandaPraise Dashboard (`https://pandapraise.com/dashboard`).
-- Click **Save Settings**.

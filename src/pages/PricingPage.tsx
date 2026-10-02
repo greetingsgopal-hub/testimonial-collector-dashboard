@@ -187,6 +187,36 @@ export const PricingPage = () => {
             </div>
           </div>
           <p className="text-center text-xs text-zinc-500 mt-4">Both plans include the same features. Annual saves you money.</p>
+
+          {/* India Micro-SaaS Extension Plan */}
+          <div className="mt-8 rounded-2xl bg-gradient-to-r from-violet-950/40 via-purple-900/20 to-zinc-900/60 border border-violet-500/30 p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="text-left">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider mb-2">
+                🇮🇳 India Edition • 7-Day Free Trial
+              </div>
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                PandaPraise Chrome Extension Pro
+              </h3>
+              <p className="text-xs text-zinc-400 mt-1 max-w-md">
+                1-Click WhatsApp Web in-chat clipper, UPI payment proof tags, and instant sales chat drops. Just ₹3/day.
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <div className="flex items-baseline gap-1 justify-end">
+                  <span className="text-3xl font-extrabold text-white">₹100</span>
+                  <span className="text-xs text-zinc-400">/month</span>
+                </div>
+                <span className="text-[10px] text-emerald-400 font-semibold">7-Day Free Trial Included</span>
+              </div>
+              <a
+                href="/dashboard"
+                className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-lg shadow-violet-600/30 transition-all whitespace-nowrap"
+              >
+                Start 7-Day Trial
+              </a>
+            </div>
+          </div>
         </div>
 
         <div className="text-center mb-20">
