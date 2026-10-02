@@ -29,7 +29,7 @@ export interface FacebookReviewItem {
  *   and obtain per-Page access tokens).
  * - pages_read_user_content: required by the Page ratings edge
  *   (GET /{page-id}/ratings) per Meta's Graph API reference.
- * - public_profile, email: standard Facebook Login permissions.
+ * - public_profile: standard Facebook Login permission.
  *
  * Removed (never consumed by any Graph call in this codebase and not required
  * by the ratings edge): pages_read_engagement, pages_manage_metadata
@@ -41,7 +41,6 @@ export function buildFacebookAuthUrl(state: string, appId: string, redirectUri: 
     'pages_show_list',
     'pages_read_user_content',
     'public_profile',
-    'email',
   ].join(',');
 
   const params = new URLSearchParams({
