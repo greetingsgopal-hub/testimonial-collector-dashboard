@@ -205,13 +205,13 @@ export const IntegrateView: React.FC = () => {
       showToast('No Facebook Pages were available for this account.');
     } else if (fbOutcome === 'fb_token_exchange_failed') {
       window.history.replaceState({}, document.title, window.location.pathname);
-      showToast('Facebook authorization could not be completed. Please try again.');
+      showToast('Facebook connection is currently unavailable for review importing. Please use CSV import or manual testimonials instead.');
     } else if (fbOutcome === 'fb_page_discovery_failed') {
       window.history.replaceState({}, document.title, window.location.pathname);
-      showToast('Facebook connected, but Panda Praise could not list your Facebook Pages. Please try again.');
+      showToast('Facebook connection is currently unavailable for review importing. Please use CSV import or manual testimonials instead.');
     } else if (fbOutcome === 'fb_oauth_failed') {
       window.history.replaceState({}, document.title, window.location.pathname);
-      showToast('Facebook authorization could not be completed. Please try again.');
+      showToast('Facebook connection is currently unavailable for review importing. Please use CSV import or manual testimonials instead.');
     }
     if (socialConnected === 'linkedin') {
       localStorage.setItem('pandapraise_linkedin_connected', 'true');
@@ -225,7 +225,7 @@ export const IntegrateView: React.FC = () => {
       localStorage.setItem('pandapraise_facebook_name', formattedPage);
       setFacebookPageName(formattedPage);
       setIsFacebookConnected(true);
-      showToast(`✓ Connected to Facebook Page (${formattedPage})! Automated comments and page ratings are syncing.`);
+      showToast(`✓ Connected to Facebook Page (${formattedPage}). Review import availability depends on Meta API access.`);
     } else if (socialConnected === 'instagram') {
       localStorage.setItem('pandapraise_instagram_connected', 'true');
       const formattedName = accountName ? `@${accountName.replace(/^@/, '')}` : 'Your Instagram account';
@@ -507,7 +507,7 @@ export const IntegrateView: React.FC = () => {
           id: 'facebook',
           name: 'Facebook Page',
           icon: <FacebookBrandIcon className="w-6 h-6 text-[#1877F2]" />,
-          description: 'Stream 5-star page ratings, verified recommendations, and post comments directly from your connected Facebook Page in the background.',
+          description: 'Connect your Facebook Page. Review import availability depends on Meta API access — connection and review importing are tracked separately.',
           badgeType: isFacebookConnected ? 'connected' : 'active',
           badgeLabel: isFacebookConnected ? 'Connected' : 'Active',
           isLiveOAuth: true,
@@ -824,7 +824,11 @@ export const IntegrateView: React.FC = () => {
                               <span className="text-[11px] font-bold text-blue-950 block truncate">
                                 {facebookPageName}
                               </span>
-                              <span className="text-[10px] text-blue-700">Page reviews & comment stream active</span>
+                              <span className="text-[10px] text-blue-700">
+                                {facebookPageName
+                                  ? 'Page connected — review import availability depends on Meta API access'
+                                  : 'Facebook connection is currently unavailable for review importing.'}
+                              </span>
                             </div>
                           </div>
 

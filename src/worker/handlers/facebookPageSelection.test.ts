@@ -114,6 +114,7 @@ describe('Facebook Page selection flow (explicit selection, canonical import)', 
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.status).toBe('OK');
+    expect(body.diagnostic).toBe('PAGE_DISCOVERY_SUCCESS');
     expect(body.pages.length).toBe(2);
     expect(body.pages[0]).toEqual({ pageId: 'page_1', name: 'Alpha Page', profilePicture: null });
     expect(JSON.stringify(body)).not.toContain('page-token-abc');
@@ -151,6 +152,7 @@ describe('Facebook Page selection flow (explicit selection, canonical import)', 
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.status).toBe('IMPORT_SUCCESS');
+    expect(body.diagnostic).toBe('REVIEW_IMPORT_AVAILABLE');
     expect(body.importedCount).toBe(2);
     expect(body.pageName).toBe('Alpha Page');
 
@@ -176,6 +178,7 @@ describe('Facebook Page selection flow (explicit selection, canonical import)', 
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.status).toBe('EMPTY_SUCCESS');
+    expect(body.diagnostic).toBe('REVIEW_IMPORT_AVAILABLE');
     expect(body.importedCount).toBe(0);
   });
 
@@ -186,6 +189,7 @@ describe('Facebook Page selection flow (explicit selection, canonical import)', 
     expect(res.status).toBe(502);
     const body = await res.json();
     expect(body.status).toBe('REVIEW_FETCH_FAILED');
+    expect(body.diagnostic).toBe('REVIEW_IMPORT_BLOCKED');
   });
 
   it('POST /facebook/select-page: PAGE_TOKEN_FAILED when the engine reports auth failure', async () => {
@@ -193,7 +197,9 @@ describe('Facebook Page selection flow (explicit selection, canonical import)', 
     importProviderMock.mockResolvedValue({ status: 'AUTH_REQUIRED', error: 'token expired' });
     const res = await handleFacebookPageSelection(postReq({ pageId: 'page_1' }), ENV);
     expect(res.status).toBe(401);
-    expect((await res.json()).status).toBe('PAGE_TOKEN_FAILED');
+    const body = await res.json();
+    expect(body.status).toBe('PAGE_TOKEN_FAILED');
+    expect(body.diagnostic).toBe('REVIEW_IMPORT_BLOCKED');
   });
 
   it('POST /facebook/select-page: INVALID_PAGE when no pageId supplied', async () => {

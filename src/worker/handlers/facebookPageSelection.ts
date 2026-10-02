@@ -31,6 +31,13 @@ import { checkRateLimit } from '../lib/rateLimit';
  *   IMPORT_SUCCESS | EMPTY_SUCCESS | REVIEW_FETCH_FAILED | PAGE_TOKEN_FAILED
  *   | NO_PAGES_FOUND | INVALID_PAGE | AUTH_REQUIRED | NOT_CONNECTED
  *   | RATE_LIMITED | IMPORT_FAILED
+ *
+ * Internal diagnostic status (returned as `diagnostic` on POST responses so
+ * the connection can never be mistaken for verified review importing):
+ *   CONNECTED                    - a stored Facebook connection exists
+ *   PAGE_DISCOVERY_SUCCESS       - Pages were discovered and listed
+ *   REVIEW_IMPORT_AVAILABLE      - a full import round-trip succeeded
+ *   REVIEW_IMPORT_BLOCKED        - Meta API prevented review retrieval
  */
 export async function handleFacebookPageSelection(request: Request, env: WorkerEnv): Promise<Response> {
   const origin = request.headers.get('Origin');
@@ -61,11 +68,12 @@ export async function handleFacebookPageSelection(request: Request, env: WorkerE
   // ── GET: list available Pages (customer-safe) ─────────────────────────
   if (request.method === 'GET') {
     if (pages.length === 0) {
-      return json({ status: 'NO_PAGES_FOUND', error: 'No Facebook Pages were available for this account.' }, 200, corsHeaders);
+      return json({ status: 'NO_PAGES_FOUND', diagnostic: 'CONNECTED', error: 'No Facebook Pages were available for this account.' }, 200, corsHeaders);
     }
     return json(
       {
         status: 'OK',
+        diagnostic: 'PAGE_DISCOVERY_SUCCESS',
         pages: pages.map((p) => ({ pageId: p.id, name: p.name, profilePicture: p.profilePicture || null })),
       },
       200,
@@ -178,19 +186,20 @@ export async function handleFacebookPageSelection(request: Request, env: WorkerE
   switch (result.status) {
     case ImportStatus.SUCCESS:
       return json(
-        { status: 'IMPORT_SUCCESS', importedCount: result.importedCount ?? 0, pageName: selectedPage.name },
+        { status: 'IMPORT_SUCCESS', diagnostic: 'REVIEW_IMPORT_AVAILABLE', importedCount: result.importedCount ?? 0, pageName: selectedPage.name },
         200,
         corsHeaders
       );
     case ImportStatus.EMPTY_SUCCESS:
-      return json({ status: 'EMPTY_SUCCESS', importedCount: 0, pageName: selectedPage.name }, 200, corsHeaders);
+      return json({ status: 'EMPTY_SUCCESS', diagnostic: 'REVIEW_IMPORT_AVAILABLE', importedCount: 0, pageName: selectedPage.name }, 200, corsHeaders);
     case ImportStatus.AUTH_REQUIRED:
-      return json({ status: 'PAGE_TOKEN_FAILED', pageName: selectedPage.name, error: 'Facebook Page authorization expired. Please reconnect Facebook.' }, 401, corsHeaders);
+      return json({ status: 'PAGE_TOKEN_FAILED', diagnostic: 'REVIEW_IMPORT_BLOCKED', pageName: selectedPage.name, error: 'Facebook Page authorization expired. Please reconnect Facebook.' }, 401, corsHeaders);
     default:
       // FAILED / UNSUPPORTED / anything else from the engine fetch stage
       return json(
         {
           status: 'REVIEW_FETCH_FAILED',
+          diagnostic: 'REVIEW_IMPORT_BLOCKED',
           pageName: selectedPage.name,
           error: 'Facebook connected successfully, but Panda Praise could not retrieve reviews from this Page.',
         },

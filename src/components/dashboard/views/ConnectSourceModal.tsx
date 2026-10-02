@@ -47,7 +47,7 @@ interface PlatformItem {
 
 const PLATFORMS: PlatformItem[] = [
   { id: 'google', name: 'Google Reviews', category: 'Available now', type: 'api', icon: 'https://www.google.com/favicon.ico', color: '#4285F4', inputLabel: 'Google Maps Business Link', placeholder: 'https://maps.app.goo.gl/... or https://maps.google.com/...' },
-  { id: 'facebook', name: 'Facebook Page', category: 'Available now', type: 'api', icon: 'https://facebook.com/favicon.ico', color: '#1877F2', inputLabel: 'Facebook Page URL or Recommendation Link', placeholder: 'https://facebook.com/yourpage or https://facebook.com/yourpage/reviews' },
+  { id: 'facebook', name: 'Facebook Page', category: 'Experimental', type: 'api', icon: 'https://facebook.com/favicon.ico', color: '#1877F2', inputLabel: 'Facebook Page URL or Recommendation Link', placeholder: 'https://facebook.com/yourpage or https://facebook.com/yourpage/reviews' },
   { id: 'instagram', name: 'Instagram', category: 'Coming soon', type: 'url', icon: 'https://instagram.com/favicon.ico', color: '#E4405F', inputLabel: 'Instagram Post or Reel URL', placeholder: 'https://www.instagram.com/p/... or https://www.instagram.com/reel/...' },
   { id: 'linkedin', name: 'LinkedIn', category: 'Coming soon', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
   { id: 'twitter', name: 'Twitter / X', category: 'Coming soon', type: 'url', icon: 'https://twitter.com/favicon.ico', color: '#000000', inputLabel: 'Tweet / Post URL', placeholder: 'https://x.com/username/status/1234567890' },
@@ -231,7 +231,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
     // Report honestly instead of simulating a successful sync.
     setIsProcessing(false);
     setImportError(
-      `${currentPlatform.name} review import is coming soon. Today you can import via CSV upload, connect your Google or Facebook account, or enter testimonials manually.`
+      `${currentPlatform.name} review import is coming soon. Today you can import via CSV upload, connect your Google account, or enter testimonials manually.`
     );
   };
 
@@ -329,7 +329,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
             <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => alert('Available today: Google Business (Places API), Facebook Page (Meta OAuth), Instagram Business (Meta OAuth), LinkedIn (OAuth), plus CSV upload and manual entry. Other platforms are coming soon.')}
+    onClick={() => alert('Available today: Google Business (Places API), plus CSV upload and manual entry. Facebook Page and Instagram Business connect via Meta OAuth but review import availability depends on Meta API access. Other platforms are coming soon.')}
                 className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <span>Need help? Source guide</span>
