@@ -106,6 +106,37 @@ export async function exchangeGoogleCode(
 }
 
 /**
+ * Refreshes a Google access token using a stored refresh token.
+ * Returns { access_token, expires_in } on success; throws on failure.
+ */
+export async function refreshGoogleAccessToken(
+  refreshToken: string,
+  clientId: string,
+  clientSecret: string
+): Promise<{ access_token: string; expires_in?: number }> {
+  const params = new URLSearchParams({
+    refresh_token: refreshToken,
+    client_id: clientId,
+    client_secret: clientSecret,
+    grant_type: 'refresh_token',
+  });
+
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('[GoogleOAuth] Token refresh failed:', res.status, errorText);
+    throw new Error(`Google token refresh error (${res.status}): ${errorText}`);
+  }
+
+  return (await res.json()) as { access_token: string; expires_in?: number };
+ }
+
+/**
  * Retrieves the authenticated Google user's profile info.
  */
 export async function getGoogleUserProfile(accessToken: string): Promise<GoogleUserProfile> {

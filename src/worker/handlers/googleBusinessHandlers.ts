@@ -5,9 +5,11 @@ import { checkRateLimit } from '../lib/rateLimit';
 import {
   listGoogleBusinessAccountsAndLocations,
   fetchGoogleBusinessLocationReviews,
+  refreshGoogleAccessToken,
 } from '../lib/googleOAuth';
 import { getDocument } from '../lib/firestoreAdmin';
-import { decryptToken } from '../lib/crypto';
+import { saveDocument } from '../lib/firestoreAdmin';
+import { decryptToken, encryptToken } from '../lib/crypto';
 import { saveReviewsBatch, isDuplicate, resolveUserOwnership, validateExternalId } from '../lib/firestore';
 
 /**
@@ -27,9 +29,41 @@ async function resolveGoogleAccessToken(
 
   try {
     const connectionDoc = await getDocument('social_connections', `${userId}_google`, null, env);
-    if (connectionDoc && connectionDoc.accessTokenEncrypted) {
-      const decrypted = decryptToken(connectionDoc.accessTokenEncrypted, env);
-      return decrypted || null;
+    if (connectionDoc && (connectionDoc.accessTokenEncrypted || connectionDoc.refreshTokenEncrypted)) {
+      // Google access tokens expire after ~1 hour, so prefer refreshing from
+      // the stored refresh token whenever one exists (Google refresh tokens
+      // are long-lived and reusable). Fall back to the stored access token
+      // only if refresh is impossible or fails.
+      let storedAccess: string | null = null;
+      if (connectionDoc.accessTokenEncrypted) {
+        storedAccess = decryptToken(connectionDoc.accessTokenEncrypted, env) || null;
+      }
+      if (connectionDoc.refreshTokenEncrypted && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
+        const refresh = decryptToken(connectionDoc.refreshTokenEncrypted, env);
+        if (refresh) {
+          try {
+            const refreshed = await refreshGoogleAccessToken(
+              refresh,
+              env.GOOGLE_CLIENT_ID,
+              env.GOOGLE_CLIENT_SECRET
+            );
+            await saveDocument(
+              'social_connections',
+              `${userId}_google`,
+              { ...connectionDoc, accessTokenEncrypted: encryptToken(refreshed.access_token, env), tokenRefreshedAt: new Date().toISOString() },
+              undefined,
+              env
+            ).catch(() => { /* persistence failure is non-fatal; token still valid for this call */ });
+            return refreshed.access_token;
+          } catch (refreshErr) {
+            // Refresh failed (revoked/expired refresh token, Google outage).
+            // Fall through to the stored access token — it may still work.
+            console.warn('[GoogleBusiness] Token refresh failed, trying stored access token:', refreshErr instanceof Error ? refreshErr.message : refreshErr);
+            return storedAccess;
+          }
+        }
+      }
+      return storedAccess;
     }
   } catch (err) {
     console.warn('[GoogleBusiness] Failed to read social_connection token:', err);
