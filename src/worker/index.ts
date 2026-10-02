@@ -66,6 +66,42 @@ export default {
           );
         }
 
+        case 'facebook/health': {
+          const appId = (env.META_APP_ID || '').trim();
+          const appSecret = (env.META_APP_SECRET || '').trim();
+          if (!appId || !appSecret) {
+            return new Response(JSON.stringify({ configured: false, error: 'META_APP_ID or META_APP_SECRET missing in environment' }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            });
+          }
+          try {
+            const tokenUrl = new URL('https://graph.facebook.com/v26.0/oauth/access_token');
+            tokenUrl.searchParams.set('client_id', appId);
+            tokenUrl.searchParams.set('client_secret', appSecret);
+            tokenUrl.searchParams.set('grant_type', 'client_credentials');
+            const res = await fetch(tokenUrl.toString());
+            const body = await res.text();
+            let parsed: any;
+            try { parsed = JSON.parse(body); } catch { parsed = { raw: body }; }
+            if (res.ok) {
+              return new Response(JSON.stringify({ credentialsValid: true, appId }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+              });
+            }
+            return new Response(JSON.stringify({ credentialsValid: false, appId, error: parsed?.error?.message || 'Meta credentials validation failed' }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            });
+          } catch (e: any) {
+            return new Response(JSON.stringify({ credentialsValid: false, appId, error: e?.message || 'Network error' }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            });
+          }
+        }
+
         case 'auth/facebook':
         case 'facebook-auth':
           return await handleFacebookAuthInit(request, env);
