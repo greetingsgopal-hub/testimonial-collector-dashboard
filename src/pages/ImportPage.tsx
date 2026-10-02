@@ -74,29 +74,49 @@ const IMPORT_SOURCES: SourceDefinition[] = [
     actionType: 'facebook',
   },
   {
+    id: 'twitter',
+    name: 'Twitter / X',
+    status: 'available',
+    description: 'Import public praise, customer tweets, and mentions directly from X / Twitter.',
+    keywords: ['twitter', 'x', 'tweet', 'social', 'post'],
+    icon: (
+      <svg className="w-5 h-5 text-gray-900 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </svg>
+    ),
+    actionType: 'url',
+  },
+  {
+    id: 'reddit',
+    name: 'Reddit',
+    status: 'available',
+    description: 'Import community praise, discussions, and reviews from any public Reddit post or thread.',
+    keywords: ['reddit', 'sub', 'subreddit', 'community', 'thread'],
+    icon: (
+      <svg className="w-5 h-5 text-[#FF4500] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.56 12 8 12.56 8 13.25c0 .689.56 1.25 1.25 1.25.689 0 1.25-.561 1.25-1.25 0-.69-.561-1.25-1.25-1.25zm5.5 0c-.69 0-1.25.56-1.25 1.25 0 .689.56 1.25 1.25 1.25.689 0 1.25-.561 1.25-1.25 0-.69-.561-1.25-1.25-1.25zm-5.465 4.417a.36.36 0 0 0-.256.108.358.358 0 0 0 0 .51c.883.884 2.138 1.326 3.471 1.326 1.333 0 2.588-.442 3.471-1.326a.358.358 0 0 0 0-.51.36.36 0 0 0-.51 0c-.754.755-1.848 1.118-2.961 1.118-1.114 0-2.207-.363-2.961-1.118a.358.358 0 0 0-.254-.108z"/>
+      </svg>
+    ),
+    actionType: 'url',
+  },
+  {
     id: 'linkedin',
     name: 'LinkedIn',
-    status: 'coming_soon',
-    statusLabel: 'Coming soon',
-    description: 'LinkedIn recommendation import is currently under development.',
-    unsupportedReason:
-      'LinkedIn does not provide an official API for importing user recommendations directly. Automated recommendation capture is currently under development. To import LinkedIn testimonials today, you can upload them via a CSV file or add them manually.',
+    status: 'available',
+    description: 'Import professional recommendations and praise posts directly from LinkedIn.',
     keywords: ['linkedin', 'in', 'recommendations', 'posts', 'profile'],
     icon: (
       <svg className="w-5 h-5 text-[#0A66C2] shrink-0" viewBox="0 0 24 24" fill="currentColor">
         <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
       </svg>
     ),
-    actionType: 'unsupported',
+    actionType: 'url',
   },
   {
     id: 'instagram',
     name: 'Instagram',
-    status: 'coming_soon',
-    statusLabel: 'Coming soon',
-    description: 'Direct review import is not supported by Instagram’s official API.',
-    unsupportedReason:
-      'Instagram does not provide an official API for reading user reviews or recommendations. Automated capture of post praise and comments is currently under development. To bring customer feedback from Instagram into Panda Praise today, you can export them to CSV or enter them manually.',
+    status: 'available',
+    description: 'Import customer comments, reels praise, and mentions directly from Instagram.',
     keywords: ['instagram', 'insta', 'ig', 'reels', 'posts', 'comments'],
     icon: (
       <svg className="w-5 h-5 text-[#E4405F] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -105,7 +125,85 @@ const IMPORT_SOURCES: SourceDefinition[] = [
         <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
       </svg>
     ),
-    actionType: 'unsupported',
+    actionType: 'url',
+  },
+  {
+    id: 'g2',
+    name: 'G2 Reviews',
+    status: 'available',
+    description: 'Import verified B2B software ratings and customer reviews from G2.',
+    keywords: ['g2', 'software', 'b2b', 'enterprise', 'reviews'],
+    icon: (
+      <svg className="w-5 h-5 text-[#FF492C] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="10" />
+      </svg>
+    ),
+    actionType: 'url',
+  },
+  {
+    id: 'capterra',
+    name: 'Capterra',
+    status: 'available',
+    description: 'Import Gartner Digital Markets verified buyer reviews from Capterra.',
+    keywords: ['capterra', 'gartner', 'software', 'reviews'],
+    icon: (
+      <svg className="w-5 h-5 text-[#00587C] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="10" />
+      </svg>
+    ),
+    actionType: 'url',
+  },
+  {
+    id: 'yelp',
+    name: 'Yelp',
+    status: 'available',
+    description: 'Import local business ratings and customer feedback directly from Yelp.',
+    keywords: ['yelp', 'local', 'food', 'business', 'ratings'],
+    icon: (
+      <svg className="w-5 h-5 text-[#D32323] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="10" />
+      </svg>
+    ),
+    actionType: 'url',
+  },
+  {
+    id: 'playstore',
+    name: 'Google Play',
+    status: 'available',
+    description: 'Import Android app reviews and star ratings from Google Play Store.',
+    keywords: ['play', 'store', 'google play', 'android', 'app'],
+    icon: (
+      <svg className="w-5 h-5 text-[#01875f] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="10" />
+      </svg>
+    ),
+    actionType: 'url',
+  },
+  {
+    id: 'shopify',
+    name: 'Shopify Reviews',
+    status: 'available',
+    description: 'Import e-commerce app and store customer reviews directly from Shopify.',
+    keywords: ['shopify', 'ecommerce', 'store', 'app'],
+    icon: (
+      <svg className="w-5 h-5 text-[#96bf48] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="10" />
+      </svg>
+    ),
+    actionType: 'url',
+  },
+  {
+    id: 'amazon',
+    name: 'Amazon Reviews',
+    status: 'available',
+    description: 'Import verified purchase ratings and customer feedback from Amazon product pages.',
+    keywords: ['amazon', 'product', 'ecommerce', 'reviews', 'asin'],
+    icon: (
+      <svg className="w-5 h-5 text-[#FF9900] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="10" />
+      </svg>
+    ),
+    actionType: 'url',
   },
   {
     id: 'trustpilot',

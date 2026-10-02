@@ -81,6 +81,30 @@ export function detectPlatform(input: string): string {
   if (trimmed.includes('twitter.com') || trimmed.includes('x.com')) {
     return 'twitter';
   }
+  if (trimmed.includes('reddit.com')) {
+    return 'reddit';
+  }
+  if (trimmed.includes('shopify.com') || trimmed.includes('myshopify.com')) {
+    return 'shopify';
+  }
+  if (trimmed.includes('amazon.') || trimmed.includes('amzn.to')) {
+    return 'amazon';
+  }
+  if (trimmed.includes('udemy.com')) {
+    return 'udemy';
+  }
+  if (trimmed.includes('airbnb.')) {
+    return 'airbnb';
+  }
+  if (trimmed.includes('whop.com')) {
+    return 'whop';
+  }
+  if (trimmed.includes('wordpress.org') || trimmed.includes('wordpress.com')) {
+    return 'wordpress';
+  }
+  if (trimmed.includes('discourse.org')) {
+    return 'discourse';
+  }
   return 'web';
 }
 
@@ -497,6 +521,136 @@ async function extractGenericWebReviews(url: string, platformHint?: string): Pro
 }
 
 /**
+ * Extract public Tweet praise via Twitter's official public oEmbed API (Zero-OAuth).
+ */
+async function extractTwitterPost(url: string): Promise<ResolvedImportPayload> {
+  const targetUrl = url.trim();
+  const oembedUrl = `https://publish.twitter.com/oembed?url=${encodeURIComponent(targetUrl)}&omit_script=true`;
+  const res = await fetch(oembedUrl, {
+    headers: { 'User-Agent': USER_AGENT },
+  }).catch(() => null);
+
+  if (!res || !res.ok) {
+    return await extractGenericWebReviews(targetUrl, 'twitter');
+  }
+
+  const data: any = await res.json().catch(() => null);
+  if (!data || !data.html) {
+    return await extractGenericWebReviews(targetUrl, 'twitter');
+  }
+
+  // Strip HTML tags from tweet html
+  const tweetText = data.html
+    .replace(/<blockquote[^>]*>/gi, '')
+    .replace(/<\/blockquote>/gi, '')
+    .replace(/<p[^>]*>/gi, '')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&mdash;[\s\S]*$/, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .trim();
+
+  const authorName = data.author_name || 'X User';
+  const reviews: ExtractedReview[] = [
+    {
+      id: `twitter_${Date.now()}_0`,
+      authorName,
+      rating: 5,
+      text: tweetText || 'Positive feedback on X',
+      date: new Date().toISOString(),
+      platformUrl: data.url || targetUrl,
+      source: 'twitter',
+    },
+  ];
+
+  return {
+    success: true,
+    platform: 'twitter',
+    entity: {
+      name: `${authorName} on X`,
+      url: data.author_url || targetUrl,
+      avatar: 'https://twitter.com/favicon.ico',
+      reviewCount: 1,
+    },
+    reviews,
+  };
+}
+
+/**
+ * Extract Reddit post praise & top comments via Reddit's public .json endpoint (Zero-OAuth).
+ */
+async function extractRedditPost(url: string): Promise<ResolvedImportPayload> {
+  const cleanUrl = url.split('?')[0].replace(/\/+$/, '');
+  const jsonUrl = `${cleanUrl}.json`;
+  const res = await fetch(jsonUrl, {
+    headers: {
+      'User-Agent': USER_AGENT,
+    },
+  }).catch(() => null);
+
+  if (!res || !res.ok) {
+    return await extractGenericWebReviews(url, 'reddit');
+  }
+
+  const data: any = await res.json().catch(() => null);
+  const postData = data?.[0]?.data?.children?.[0]?.data;
+  if (!postData) {
+    return await extractGenericWebReviews(url, 'reddit');
+  }
+
+  const author = postData.author ? `u/${postData.author}` : 'Reddit User';
+  const title = postData.title || '';
+  const selftext = postData.selftext || '';
+  const content = selftext ? `${title}\n\n${selftext}` : title;
+
+  const reviews: ExtractedReview[] = [];
+  if (content) {
+    reviews.push({
+      id: `reddit_${postData.id || Date.now()}`,
+      authorName: author,
+      rating: 5,
+      text: content,
+      date: postData.created_utc ? new Date(postData.created_utc * 1000).toISOString() : new Date().toISOString(),
+      platformUrl: url,
+      source: 'reddit',
+    });
+  }
+
+  // Also include top comments from the thread
+  const comments = data?.[1]?.data?.children || [];
+  for (let i = 0; i < Math.min(comments.length, 5); i++) {
+    const c = comments[i]?.data;
+    if (c?.body && c.body !== '[deleted]' && c.body !== '[removed]' && c.body.length > 20) {
+      reviews.push({
+        id: `reddit_c_${c.id || i}`,
+        authorName: c.author ? `u/${c.author}` : 'Reddit Commenter',
+        rating: 5,
+        text: c.body,
+        date: c.created_utc ? new Date(c.created_utc * 1000).toISOString() : new Date().toISOString(),
+        platformUrl: url,
+        source: 'reddit',
+      });
+    }
+  }
+
+  return {
+    success: true,
+    platform: 'reddit',
+    entity: {
+      name: postData.subreddit_name_prefixed || 'Reddit Community',
+      url,
+      avatar: 'https://www.reddit.com/favicon.ico',
+      reviewCount: reviews.length,
+    },
+    reviews,
+  };
+}
+
+/**
  * Main public entry point: Resolves reviews and business entity from any URL
  * without requiring third-party OAuth authentication.
  */
@@ -553,11 +707,26 @@ export async function resolveReviewsFromPublicUrl(
     case 'facebook':
       return await extractFacebookPage(trimmed);
 
+    case 'twitter':
+      return await extractTwitterPost(trimmed);
+
+    case 'reddit':
+      return await extractRedditPost(trimmed);
+
     case 'producthunt':
     case 'g2':
     case 'capterra':
     case 'yelp':
     case 'playstore':
+    case 'shopify':
+    case 'amazon':
+    case 'udemy':
+    case 'airbnb':
+    case 'whop':
+    case 'wordpress':
+    case 'discourse':
+    case 'linkedin':
+    case 'instagram':
     default:
       return await extractGenericWebReviews(trimmed, detected);
   }

@@ -45,18 +45,18 @@ const PLATFORMS: PlatformItem[] = [
   { id: 'capterra', name: 'Capterra', category: 'Available now', type: 'url', icon: 'https://www.capterra.com/favicon.ico', color: '#00587C', inputLabel: 'Capterra Vendor Profile Link', placeholder: 'https://www.capterra.com/p/123456/Your-Product/' },
   { id: 'yelp', name: 'Yelp', category: 'Available now', type: 'url', icon: 'https://www.yelp.com/favicon.ico', color: '#D32323', inputLabel: 'Yelp Business Page Link', placeholder: 'https://www.yelp.com/biz/your-business-name' },
   { id: 'playstore', name: 'Google Play', category: 'Available now', type: 'url', icon: 'https://play.google.com/favicon.ico', color: '#01875f', inputLabel: 'Google Play Store Link or Package Name', placeholder: 'https://play.google.com/store/apps/details?id=com.app' },
-  { id: 'web', name: 'Web Page', category: 'Available now', type: 'url', icon: 'https://www.google.com/s2/favicons?domain=example.com', color: '#4F46E5', inputLabel: 'Website or Testimonials Page URL', placeholder: 'https://example.com/testimonials or any public review link' },
-  { id: 'instagram', name: 'Instagram', category: 'Coming soon', type: 'url', icon: 'https://instagram.com/favicon.ico', color: '#E4405F', inputLabel: 'Instagram Post or Reel URL', placeholder: 'https://www.instagram.com/p/... or https://www.instagram.com/reel/...' },
-  { id: 'linkedin', name: 'LinkedIn', category: 'Coming soon', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
-  { id: 'twitter', name: 'Twitter / X', category: 'Coming soon', type: 'url', icon: 'https://twitter.com/favicon.ico', color: '#000000', inputLabel: 'Tweet / Post URL', placeholder: 'https://x.com/username/status/1234567890' },
-  { id: 'shopify', name: 'Shopify', category: 'Coming soon', type: 'api', icon: 'https://www.shopify.com/favicon.ico', color: '#96bf48', inputLabel: 'Shopify Store URL', placeholder: 'your-store.myshopify.com' },
-  { id: 'udemy', name: 'Udemy', category: 'Coming soon', type: 'api', icon: 'https://www.udemy.com/favicon.ico', color: '#A435F0', inputLabel: 'Udemy Course URL', placeholder: 'https://www.udemy.com/course/your-course-name/' },
-  { id: 'amazon', name: 'Amazon', category: 'Coming soon', type: 'api', icon: 'https://www.amazon.com/favicon.ico', color: '#FF9900', inputLabel: 'Amazon ASIN / Product Review URL', placeholder: 'https://www.amazon.com/dp/B000XXXXXX' },
-  { id: 'airbnb', name: 'Airbnb', category: 'Coming soon', type: 'api', icon: 'https://www.airbnb.com/favicon.ico', color: '#FF5A5F', inputLabel: 'Airbnb Listing URL', placeholder: 'https://www.airbnb.com/rooms/12345678' },
-  { id: 'whop', name: 'Whop', category: 'Coming soon', type: 'api', icon: 'https://whop.com/favicon.ico', color: '#FF5C00', inputLabel: 'Whop Experience / Store URL', placeholder: 'https://whop.com/your-store' },
-  { id: 'wordpress', name: 'WordPress', category: 'Coming soon', type: 'api', icon: 'https://wordpress.org/favicon.ico', color: '#21759B', inputLabel: 'WordPress Plugin / Theme Slug', placeholder: 'https://wordpress.org/plugins/your-plugin/' },
-  { id: 'discourse', name: 'Discourse', category: 'Coming soon', type: 'url', icon: 'https://www.discourse.org/favicon.ico', color: '#2B3B48', inputLabel: 'Discourse Topic / Post URL', placeholder: 'https://community.yourcompany.com/t/topic/1234' },
-  { id: 'reddit', name: 'Reddit', category: 'Coming soon', type: 'url', icon: 'https://www.reddit.com/favicon.ico', color: '#FF4500', inputLabel: 'Reddit Post or Comment URL', placeholder: 'https://www.reddit.com/r/saas/comments/...' },
+  { id: 'twitter', name: 'Twitter / X', category: 'Available now', type: 'url', icon: 'https://twitter.com/favicon.ico', color: '#000000', inputLabel: 'Tweet or Post Link', placeholder: 'https://x.com/username/status/1234567890' },
+  { id: 'reddit', name: 'Reddit', category: 'Available now', type: 'url', icon: 'https://www.reddit.com/favicon.ico', color: '#FF4500', inputLabel: 'Reddit Post or Comment Link', placeholder: 'https://www.reddit.com/r/saas/comments/...' },
+  { id: 'instagram', name: 'Instagram', category: 'Available now', type: 'url', icon: 'https://instagram.com/favicon.ico', color: '#E4405F', inputLabel: 'Instagram Post or Reel URL', placeholder: 'https://www.instagram.com/p/... or https://www.instagram.com/reel/...' },
+  { id: 'linkedin', name: 'LinkedIn', category: 'Available now', type: 'url', icon: 'https://www.linkedin.com/favicon.ico', color: '#0A66C2', inputLabel: 'LinkedIn Post or Recommendation URL', placeholder: 'https://www.linkedin.com/posts/username_...' },
+  { id: 'shopify', name: 'Shopify', category: 'Available now', type: 'url', icon: 'https://www.shopify.com/favicon.ico', color: '#96bf48', inputLabel: 'Shopify App or Store Reviews URL', placeholder: 'https://apps.shopify.com/your-app or your-store.myshopify.com' },
+  { id: 'amazon', name: 'Amazon', category: 'Available now', type: 'url', icon: 'https://www.amazon.com/favicon.ico', color: '#FF9900', inputLabel: 'Amazon Product Reviews URL', placeholder: 'https://www.amazon.com/dp/B000XXXXXX' },
+  { id: 'udemy', name: 'Udemy', category: 'Available now', type: 'url', icon: 'https://www.udemy.com/favicon.ico', color: '#A435F0', inputLabel: 'Udemy Course URL', placeholder: 'https://www.udemy.com/course/your-course-name/' },
+  { id: 'airbnb', name: 'Airbnb', category: 'Available now', type: 'url', icon: 'https://www.airbnb.com/favicon.ico', color: '#FF5A5F', inputLabel: 'Airbnb Listing URL', placeholder: 'https://www.airbnb.com/rooms/12345678' },
+  { id: 'whop', name: 'Whop', category: 'Available now', type: 'url', icon: 'https://whop.com/favicon.ico', color: '#FF5C00', inputLabel: 'Whop Product or Reviews URL', placeholder: 'https://whop.com/your-store' },
+  { id: 'wordpress', name: 'WordPress', category: 'Available now', type: 'url', icon: 'https://wordpress.org/favicon.ico', color: '#21759B', inputLabel: 'WordPress Plugin or Theme URL', placeholder: 'https://wordpress.org/plugins/your-plugin/' },
+  { id: 'discourse', name: 'Discourse', category: 'Available now', type: 'url', icon: 'https://www.discourse.org/favicon.ico', color: '#2B3B48', inputLabel: 'Discourse Topic or Post URL', placeholder: 'https://community.yourcompany.com/t/topic/1234' },
+  { id: 'web', name: 'Web Page / Any Link', category: 'Available now', type: 'url', icon: 'https://www.google.com/s2/favicons?domain=example.com', color: '#4F46E5', inputLabel: 'Website or Testimonials Page URL', placeholder: 'https://example.com/testimonials or any public review link' },
 ];
 
 interface ConnectSourceModalProps {
@@ -100,7 +100,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
     return localStorage.getItem('pandapraise_facebook_auto_sync') !== 'false';
   });
 
-  // Preview & Selection State (Senja.io pattern)
+  // Preview & Selection State (PandaPraise Direct Universal Importer)
   const [extractedReviews, setExtractedReviews] = useState<any[]>([]);
   const [selectedReviewIds, setSelectedReviewIds] = useState<string[]>([]);
   const [resolvedEntity, setResolvedEntity] = useState<any>(null);
@@ -187,7 +187,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   };
 
   /**
-   * Senja.io Zero-Auth URL Resolution
+   * Direct Zero-Auth URL Resolution
    */
   const handleExecuteImport = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -530,7 +530,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
                       <span>Instant Facebook Page Import (Zero OAuth Login)</span>
                     </span>
                     <span className="text-[10px] font-bold text-emerald-700 bg-white px-2 py-0.5 rounded-full border border-emerald-200 shadow-2xs">
-                      Senja Style
+                      Direct Zero-Auth
                     </span>
                   </div>
                   <p className="text-[11px] text-gray-600 leading-relaxed">
@@ -689,7 +689,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
           </div>
         )}
 
-        {/* ── STEP 3: PREVIEW & SELECTION (Senja.io Pattern) ── */}
+        {/* ── STEP 3: PREVIEW & SELECTION ── */}
         {step === 'preview' && !syncSuccess && (
           <div className="space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
