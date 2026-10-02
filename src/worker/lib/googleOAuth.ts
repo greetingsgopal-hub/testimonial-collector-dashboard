@@ -371,6 +371,19 @@ export async function listGoogleBusinessAccountsAndLocations(accessToken: string
     let parsed: any;
     try { parsed = JSON.parse(errText); } catch {}
     const msg = parsed?.error?.message || errText;
+    // Google ships the Business Profile APIs with a quota of 0 until the
+    // project is granted access via the GBP API access request form. Surface
+    // that specific state instead of a cryptic "quota exceeded".
+    if (accountsRes.status === 429 && /quota/i.test(msg)) {
+      throw new Error(
+        'Google Business Profile API access has not been granted to this application yet (quota is 0). The app owner must request Business Profile API access from Google (developers.google.com/my-business/content/prereqs#request-access).'
+      );
+    }
+    if (accountsRes.status === 403 && /service_disabled/i.test(msg)) {
+      throw new Error(
+        'Google Business Profile APIs are not enabled on the Google Cloud project. The app owner must enable My Business Account Management API and My Business Business Information API.'
+      );
+    }
     throw new Error(`Google Business Profile API error (${accountsRes.status}): ${msg}`);
   }
 
