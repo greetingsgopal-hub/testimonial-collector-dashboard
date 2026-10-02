@@ -1,4 +1,4 @@
-import { WorkerEnv } from '../types';
+﻿import { WorkerEnv } from '../types';
 
 export interface InstagramTokenResponse {
   access_token: string;
@@ -46,7 +46,7 @@ export function buildInstagramAuthUrl(state: string, appId: string, redirectUri:
     response_type: 'code',
   });
 
-  return `https://www.facebook.com/v19.0/dialog/oauth?${params.toString()}`;
+  return `https://www.facebook.com/v26.0/dialog/oauth?${params.toString()}`;
 }
 
 /**
@@ -59,7 +59,7 @@ export async function exchangeInstagramCode(
   appSecret: string
 ): Promise<{ accessToken: string; expiresIn: number }> {
   // Step 1: Exchange code for short-lived token
-  const tokenUrl = new URL('https://graph.facebook.com/v19.0/oauth/access_token');
+  const tokenUrl = new URL('https://graph.facebook.com/v26.0/oauth/access_token');
   tokenUrl.searchParams.set('client_id', appId);
   tokenUrl.searchParams.set('client_secret', appSecret);
   tokenUrl.searchParams.set('redirect_uri', redirectUri);
@@ -77,7 +77,7 @@ export async function exchangeInstagramCode(
 
   // Step 2: Exchange for long-lived 60-day token
   try {
-    const longTokenUrl = new URL('https://graph.facebook.com/v19.0/oauth/access_token');
+    const longTokenUrl = new URL('https://graph.facebook.com/v26.0/oauth/access_token');
     longTokenUrl.searchParams.set('grant_type', 'fb_exchange_token');
     longTokenUrl.searchParams.set('client_id', appId);
     longTokenUrl.searchParams.set('client_secret', appSecret);
@@ -108,7 +108,7 @@ export async function getInstagramBusinessAccount(
   accessToken: string
 ): Promise<InstagramBusinessProfile> {
   try {
-    const url = `https://graph.facebook.com/v19.0/me/accounts?fields=instagram_business_account{id,username,name,profile_picture_url}&access_token=${encodeURIComponent(
+    const url = `https://graph.facebook.com/v26.0/me/accounts?fields=instagram_business_account{id,username,name,profile_picture_url}&access_token=${encodeURIComponent(
       accessToken
     )}`;
 
@@ -147,7 +147,7 @@ export async function fetchInstagramCommentsAndMentions(
   _env: WorkerEnv
 ): Promise<InstagramCommentReview[]> {
   try {
-    const url = `https://graph.facebook.com/v19.0/${igBusinessId}/media?fields=id,caption,permalink,comments{id,text,username,timestamp,like_count}&limit=10&access_token=${encodeURIComponent(
+    const url = `https://graph.facebook.com/v26.0/${igBusinessId}/media?fields=id,caption,permalink,comments{id,text,username,timestamp,like_count}&limit=10&access_token=${encodeURIComponent(
       accessToken
     )}`;
 
@@ -195,7 +195,7 @@ export async function fetchInstagramCommentsAndMentions(
  */
 export function extractInstagramPostReview(postUrl: string): InstagramCommentReview[] {
   // Comment extraction requires the Graph API (authenticated, server-side).
-  // A bare URL alone cannot yield real comment data — return nothing rather
+  // A bare URL alone cannot yield real comment data â€” return nothing rather
   // than fabricate reviews. Kept as an exported stub so call sites fail safe.
   void postUrl;
   return [];

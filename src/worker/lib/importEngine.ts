@@ -112,22 +112,15 @@ export async function importProvider(request: ImportRequest): Promise<EngineResu
   // 5. Resource discovery / selection
   let selectedResourceId: string | undefined = undefined;
   if (adapter.discoverResources) {
-    const resources = await adapter.discoverResources(request);
     const hasExplicit = Object.keys(request.params).some((k) => k.toLowerCase().includes('id') && request.params[k]);
     if (!hasExplicit) {
+      const resources = await adapter.discoverResources(request);
       if (resources.length === 0) {
-        return { status: ImportStatus.FAILED, error: 'No resources discovered' };
-      }
-      if (resources.length > 1) {
         return { status: ImportStatus.RESOURCE_SELECTION_REQUIRED, resources };
       }
-      // Single resource - auto select
-      const single = resources[0];
-      const idKey = Object.keys(single).find((k) => k.toLowerCase().endsWith('id'));
-      if (idKey) {
-        request.params[idKey] = (single as any)[idKey];
-        selectedResourceId = String((single as any)[idKey]);
-      }
+      // Never silently auto-select a resource - the user must explicitly
+      // choose one (even when only one exists). RESOURCE_SELECTION_REQUIRED
+      // is returned for zero or many resources alike.
     } else {
       // Find the explicit id from params
       const idKey = Object.keys(request.params).find((k) => k.toLowerCase().includes('id') && request.params[k]);

@@ -37,14 +37,12 @@ describe('HIGH-1: fetchers never fabricate data on failure', () => {
     expect(reviews).toEqual([]);
   });
 
-  it('getFacebookPages returns [] when the Graph API is unreachable', async () => {
-    const pages = await getFacebookPages('token');
-    expect(pages).toEqual([]);
+  it('getFacebookPages throws when the Graph API is unreachable (never a silent empty list)', async () => {
+    await expect(getFacebookPages('token')).rejects.toThrow();
   });
 
-  it('fetchFacebookPageReviews returns [] when the Graph API is unreachable', async () => {
-    const reviews = await fetchFacebookPageReviews('token', 'page_1', ENV);
-    expect(reviews).toEqual([]);
+  it('fetchFacebookPageReviews throws when the Graph API is unreachable (API failure is never an empty list)', async () => {
+    await expect(fetchFacebookPageReviews('token', 'page_1', ENV)).rejects.toThrow();
   });
 
   it('fetchInstagramCommentsAndMentions returns [] when the Graph API is unreachable', async () => {

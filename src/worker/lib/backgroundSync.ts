@@ -36,7 +36,9 @@ export async function executeAutomatedBackgroundSync(
       const fbDocId = `${userId}_facebook`;
       const fbConn = await getDocument('social_connections', fbDocId, undefined, env);
 
-      if (fbConn && fbConn.status === 'connected' && fbConn.accessTokenEncrypted) {
+      // Only sync the Page the user explicitly selected (pageSelected=true).
+      // OAuth success alone never triggers review import.
+      if (fbConn && fbConn.status === 'connected' && fbConn.pageSelected && fbConn.accessTokenEncrypted) {
         try {
           const pageToken = decryptToken(fbConn.accessTokenEncrypted, env);
           const pageId = fbConn.pageId || fbConn.platformUserId;

@@ -31,6 +31,50 @@ function getEndpointUrl(path: string): string {
 
 export const socialClient = {
   /**
+   * List the Facebook Pages available for selection (after FB OAuth).
+   * Returns customer-safe descriptors only: pageId + name.
+   */
+  async listFacebookPages(): Promise<{ status?: string; pages?: { pageId: string; name: string; profilePicture?: string | null }[]; error?: string }> {
+    const token = await getAuthToken();
+    if (!token) return { error: 'Please sign in to continue.' };
+    try {
+      const res = await fetch(getEndpointUrl('facebook/pages'), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) return { error: data.error || 'Failed to list Facebook Pages.' };
+      return data;
+    } catch (err) {
+      console.error('[SocialClient] listFacebookPages error:', err);
+      return { error: 'Network error listing Facebook Pages. Please try again.' };
+    }
+  },
+
+  /**
+   * Explicitly select a Facebook Page and import its reviews.
+   */
+  async selectFacebookPage(pageId: string): Promise<{ status?: string; importedCount?: number; pageName?: string; error?: string }> {
+    const token = await getAuthToken();
+    if (!token) return { error: 'Please sign in to continue.' };
+    try {
+      const res = await fetch(getEndpointUrl('facebook/select-page'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ pageId }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { status: data.status, error: data.error || 'Failed to select Facebook Page.' };
+      return data;
+    } catch (err) {
+      console.error('[SocialClient] selectFacebookPage error:', err);
+      return { error: 'Network error selecting Facebook Page. Please try again.' };
+    }
+  },
+
+  /**
    * Request official OAuth authorization URL for the target platform.
    */
   async initOAuth(platform: SocialPlatform): Promise<{ authUrl?: string; error?: string }> {

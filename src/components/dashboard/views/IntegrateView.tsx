@@ -122,6 +122,12 @@ export const IntegrateView: React.FC = () => {
   });
   const [connectingFacebook, setConnectingFacebook] = useState(false);
   const [disconnectingFacebook, setDisconnectingFacebook] = useState(false);
+  // Facebook Page selection flow (explicit selection - never silent auto-select)
+  const [showFbPagePicker, setShowFbPagePicker] = useState(false);
+  const [fbPages, setFbPages] = useState<{ pageId: string; name: string; profilePicture?: string | null }[]>([]);
+  const [fbSelectedPageId, setFbSelectedPageId] = useState<string | null>(null);
+  const [fbPickerLoading, setFbPickerLoading] = useState(false);
+  const [fbSelectingPage, setFbSelectingPage] = useState(false);
 
   // Instagram Integration State
   const [isInstagramConnected, setIsInstagramConnected] = useState<boolean>(() => {
@@ -181,10 +187,32 @@ export const IntegrateView: React.FC = () => {
     fetchStatus();
     fetchStripeSubscription();
 
-    // Check for LinkedIn, Instagram, or Facebook OAuth callback redirect
+    // Check for LinkedIn, Instagram, or Facebook OAuth callback redirect.
+    // Facebook now returns an explicit outcome code (fb_outcome) - the flow
+    // requires the user to select a Page before anything is imported.
     const params = new URLSearchParams(window.location.search);
     const socialConnected = params.get('social_connected');
     const accountName = params.get('account_name');
+    const fbOutcome = params.get('fb_outcome');
+    if (fbOutcome === 'fb_oauth_success') {
+      // OAuth + Page discovery succeeded: open the explicit Page selection UI.
+      window.history.replaceState({}, document.title, window.location.pathname);
+      localStorage.setItem('pandapraise_facebook_connected', 'true');
+      setIsFacebookConnected(true);
+      openFbPagePicker();
+    } else if (fbOutcome === 'fb_no_pages') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showToast('No Facebook Pages were available for this account.');
+    } else if (fbOutcome === 'fb_token_exchange_failed') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showToast('Facebook authorization could not be completed. Please try again.');
+    } else if (fbOutcome === 'fb_page_discovery_failed') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showToast('Facebook connected, but Panda Praise could not list your Facebook Pages. Please try again.');
+    } else if (fbOutcome === 'fb_oauth_failed') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showToast('Facebook authorization could not be completed. Please try again.');
+    }
     if (socialConnected === 'linkedin') {
       localStorage.setItem('pandapraise_linkedin_connected', 'true');
       if (accountName) {
@@ -211,6 +239,57 @@ export const IntegrateView: React.FC = () => {
   const showToast = (msg: string) => {
     setFeedbackToast(msg);
     setTimeout(() => setFeedbackToast(null), 3500);
+  };
+
+  // ── Facebook Page selection flow ─────────────────────────────────────
+  const openFbPagePicker = async () => {
+    setShowFbPagePicker(true);
+    setFbPickerLoading(true);
+    setFbSelectedPageId(null);
+    const res = await socialClient.listFacebookPages();
+    setFbPickerLoading(false);
+    if (res.error) {
+      showToast(res.error);
+      setShowFbPagePicker(false);
+      return;
+    }
+    if (!res.pages || res.pages.length === 0) {
+      showToast('No Facebook Pages were available for this account.');
+      setShowFbPagePicker(false);
+      return;
+    }
+    setFbPages(res.pages);
+    // If exactly one Page exists, pre-select it in the UI but still require
+    // the user to click Continue - never silent auto-selection.
+    if (res.pages.length === 1) setFbSelectedPageId(res.pages[0].pageId);
+  };
+
+  const handleFbSelectPageAndImport = async () => {
+    if (!fbSelectedPageId) {
+      showToast('Select a Facebook Page to continue.');
+      return;
+    }
+    setFbSelectingPage(true);
+    const res = await socialClient.selectFacebookPage(fbSelectedPageId);
+    setFbSelectingPage(false);
+    if (res.error) {
+      showToast(res.error);
+      return;
+    }
+    setShowFbPagePicker(false);
+    if (res.status === 'IMPORT_SUCCESS') {
+      setFacebookPageName(res.pageName || 'Your Facebook Page');
+      localStorage.setItem('pandapraise_facebook_name', res.pageName || 'Your Facebook Page');
+      showToast(`✓ ${res.importedCount} testimonial${res.importedCount !== 1 ? 's' : ''} imported successfully.`);
+    } else if (res.status === 'EMPTY_SUCCESS') {
+      setFacebookPageName(res.pageName || 'Your Facebook Page');
+      localStorage.setItem('pandapraise_facebook_name', res.pageName || 'Your Facebook Page');
+      showToast('Facebook connected successfully. No reviews were found on this Page.');
+    } else if (res.status === 'REVIEW_FETCH_FAILED') {
+      showToast('Facebook connected successfully, but Panda Praise could not retrieve reviews from this Page.');
+    } else {
+      showToast('Facebook connected, but the import could not be completed. Please try again.');
+    }
   };
 
   // Facebook Handlers
@@ -998,6 +1077,85 @@ export const IntegrateView: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* ── Facebook Page Selection Modal (explicit selection, no IDs shown) ── */}
+      {showFbPagePicker && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowFbPagePicker(false);
+          }}
+        >
+          <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl p-6 sm:p-7 text-left space-y-4">
+            <button
+              type="button"
+              onClick={() => setShowFbPagePicker(false)}
+              className="absolute top-5 right-5 p-1.5 rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              ✕
+            </button>
+
+            <div className="flex items-center gap-3">
+              <FacebookBrandIcon className="w-9 h-9 text-[#1877F2]" />
+              <div>
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">Select a Facebook Page</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Choose the Page whose reviews you want to import.</p>
+              </div>
+            </div>
+
+            {fbPickerLoading ? (
+              <div className="py-8 flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Loading your Facebook Pages…</span>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {fbPages.map((p) => (
+                    <button
+                      key={p.pageId}
+                      type="button"
+                      onClick={() => setFbSelectedPageId(p.pageId)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                        fbSelectedPageId === p.pageId
+                          ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700'
+                          : 'bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:border-blue-200'
+                      }`}
+                    >
+                      {p.profilePicture ? (
+                        <img src={p.profilePicture} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+                          <FacebookBrandIcon className="w-4 h-4 text-[#1877F2]" />
+                        </div>
+                      )}
+                      <span className="flex-1 text-sm font-semibold text-gray-900 dark:text-white truncate">{p.name}</span>
+                      {fbSelectedPageId === p.pageId && <Check className="w-4 h-4 text-blue-600 shrink-0" />}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleFbSelectPageAndImport}
+                  disabled={!fbSelectedPageId || fbSelectingPage}
+                  className="w-full py-3 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white text-sm font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {fbSelectingPage ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Importing reviews…</span>
+                    </>
+                  ) : (
+                    <span>Continue</span>
+                  )}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

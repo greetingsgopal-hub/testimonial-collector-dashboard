@@ -1,46 +1,96 @@
-import { WorkerEnv } from '../types';
+﻿import { WorkerEnv } from '../types';
+import crypto from 'node:crypto';
+
+/**
+ * Graph API version pin.
+ *
+ * v26.0 is the latest Graph API version (released 2026-07-29) per Meta's
+ * official changelog (developers.facebook.com/docs/graph-api/changelog/).
+ * The previously hardcoded v19.0 EXPIRED on 2026-05-2026 (Meta versions
+ * table) - every call to it failed, which was the root cause of the
+ * production "Failed to complete Facebook authentication" error: the
+ * OAuth token exchange hit a dead API version and fell into the callback's
+ * generic catch.
+ */
+export const GRAPH_API_VERSION = 'v26.0';
+const GRAPH_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
 
 export interface FacebookPageInfo {
   id: string;
   name: string;
-  category?: string;
+  category?: string | null;
   pageAccessToken?: string;
-  profilePicture?: string;
+  profilePicture?: string | null;
 }
 
 export interface FacebookReviewItem {
   id: string;
-  authorName: string;
-  authorAvatar?: string;
-  rating: number;
+  authorName: string | null;
+  authorAvatar: string | null;
+  rating: number | null;
   text: string;
-  date: string;
+  date: string | null;
   source: 'facebook';
-  verified: boolean;
   pageId?: string;
   postUrl?: string;
 }
 
 /**
- * Builds Meta OAuth 2.0 URL requesting Facebook Page management & ratings scopes.
+ * Extracts a sanitized, log-safe description of a Graph API error.
+ * NEVER includes the request URL (which carries the access token) or the
+ * token itself - only HTTP status plus Meta's error code/type/message.
+ */
+function describeGraphError(status: number, body: string): string {
+  let metaMessage = body.slice(0, 300);
+  let metaCode: number | undefined;
+  let metaType: string | undefined;
+  try {
+    const parsed = JSON.parse(body);
+    metaMessage = parsed?.error?.message || metaMessage;
+    metaCode = parsed?.error?.code;
+    metaType = parsed?.error?.type;
+  } catch {
+    // non-JSON body - keep the truncated raw text
+  }
+  return `HTTP ${status}${metaCode ? ` code ${metaCode}` : ''}${metaType ? ` (${metaType})` : ''}: ${metaMessage}`;
+}
+
+/**
+ * Deterministic external ID for a Facebook rating/recommendation.
  *
- * Minimal scope set for the documented Page Reviews import flow:
- * - pages_show_list: required to GET /me/accounts (discover the user's Pages
- *   and obtain per-Page access tokens).
+ * Uses the real Graph rating node id when Meta provides one. When it does
+ * not, derives a stable SHA-256 hash from immutable source fields - never
+ * Date.now() (which breaks dedupe and creates duplicate identities on
+ * every fetch).
+ */
+export function buildFacebookReviewExternalId(pageId: string, r: any): string {
+  if (r?.id) return `fb_rating_${String(r.id)}`;
+  const stable = `${pageId}|${r?.reviewer?.id || ''}|${r?.created_time || ''}|${r?.review_text || ''}`;
+  return `fb_rating_${crypto.createHash('sha256').update(stable).digest('hex').slice(0, 32)}`;
+}
+
+/**
+ * Builds the Meta OAuth 2.0 authorization URL.
+ *
+ * Scope set matches the production Meta app's "Manage everything on your
+ * Page" use case (required: business_management, pages_show_list,
+ * public_profile; optional enabled: pages_read_user_content):
+ * - pages_show_list: GET /me/accounts - discover the user's Pages and
+ *   obtain per-Page access tokens.
  * - pages_read_user_content: required by the Page ratings edge
  *   (GET /{page-id}/ratings) per Meta's Graph API reference.
- * - public_profile: standard Facebook Login permission.
+ * - business_management: required permission of the app's Page use case.
+ * - public_profile: standard login permission.
  *
- * Removed (never consumed by any Graph call in this codebase and not required
- * by the ratings edge): pages_read_engagement, pages_manage_metadata
- * (pages_manage_metadata is only needed for creating Pages or subscribing
- * webhooks via subscribed_apps — neither is performed).
+ * The `email` scope is NOT requested (it triggered Invalid Scopes against
+ * the production app configuration and is not needed for Page reviews).
  */
 export function buildFacebookAuthUrl(state: string, appId: string, redirectUri: string): string {
   const scopes = [
     'pages_show_list',
     'pages_read_user_content',
     'public_profile',
+    'business_management',
   ].join(',');
 
   const params = new URLSearchParams({
@@ -51,11 +101,12 @@ export function buildFacebookAuthUrl(state: string, appId: string, redirectUri: 
     response_type: 'code',
   });
 
-  return `https://www.facebook.com/v19.0/dialog/oauth?${params.toString()}`;
+  return `https://www.facebook.com/${GRAPH_API_VERSION}/dialog/oauth?${params.toString()}`;
 }
 
 /**
- * Exchanges authorization code for long-lived Meta user token.
+ * Exchanges the OAuth authorization code for a long-lived Meta user token.
+ * Throws on failure - never returns a fabricated or partial token.
  */
 export async function exchangeFacebookCode(
   code: string,
@@ -63,7 +114,7 @@ export async function exchangeFacebookCode(
   appId: string,
   appSecret: string
 ): Promise<{ accessToken: string; expiresIn: number }> {
-  const tokenUrl = new URL('https://graph.facebook.com/v19.0/oauth/access_token');
+  const tokenUrl = new URL(`${GRAPH_BASE}/oauth/access_token`);
   tokenUrl.searchParams.set('client_id', appId);
   tokenUrl.searchParams.set('client_secret', appSecret);
   tokenUrl.searchParams.set('redirect_uri', redirectUri);
@@ -72,16 +123,21 @@ export async function exchangeFacebookCode(
   const res = await fetch(tokenUrl.toString());
   if (!res.ok) {
     const errText = await res.text();
-    console.error('[FacebookOAuth] Short token exchange failed:', res.status, errText);
-    throw new Error(`Facebook token exchange failed (${res.status}): ${errText}`);
+    const description = describeGraphError(res.status, errText);
+    console.error('[FacebookOAuth] Token exchange failed:', description);
+    throw new Error(`Facebook token exchange failed (${description})`);
   }
 
   const tokenData: any = await res.json();
   const shortLivedToken = tokenData.access_token;
+  if (!shortLivedToken) {
+    throw new Error('Facebook token exchange returned no access token');
+  }
 
-  // Exchange for long-lived 60-day token
+  // Exchange for a long-lived (~60 day) user token. The short-lived token
+  // remains usable if this upgrade fails, so a failure is logged, not thrown.
   try {
-    const longTokenUrl = new URL('https://graph.facebook.com/v19.0/oauth/access_token');
+    const longTokenUrl = new URL(`${GRAPH_BASE}/oauth/access_token`);
     longTokenUrl.searchParams.set('grant_type', 'fb_exchange_token');
     longTokenUrl.searchParams.set('client_id', appId);
     longTokenUrl.searchParams.set('client_secret', appSecret);
@@ -92,11 +148,12 @@ export async function exchangeFacebookCode(
       const longData: any = await longRes.json();
       return {
         accessToken: longData.access_token || shortLivedToken,
-        expiresIn: longData.expires_in || 5184000,
+        expiresIn: longData.expires_in || tokenData.expires_in || 5184000,
       };
     }
+    console.warn('[FacebookOAuth] Long-lived token upgrade failed:', describeGraphError(longRes.status, await longRes.text()));
   } catch (e) {
-    console.warn('[FacebookOAuth] Long token exchange warning, using short token:', e);
+    console.warn('[FacebookOAuth] Long-lived token upgrade error, using short-lived token:', (e as Error).message);
   }
 
   return {
@@ -106,84 +163,84 @@ export async function exchangeFacebookCode(
 }
 
 /**
- * Fetches managed Facebook Pages and their Page Access Tokens.
+ * Fetches the Facebook Pages the user manages, with per-Page access tokens.
+ * Throws on API failure - never returns fabricated Pages.
  */
 export async function getFacebookPages(userAccessToken: string): Promise<FacebookPageInfo[]> {
-  try {
-    const url = `https://graph.facebook.com/v19.0/me/accounts?fields=id,name,category,access_token,picture{url}&access_token=${encodeURIComponent(
-      userAccessToken
-    )}`;
+  const url = `${GRAPH_BASE}/me/accounts?fields=id,name,category,access_token,picture{url}&access_token=${encodeURIComponent(
+    userAccessToken
+  )}`;
 
-    const res = await fetch(url);
-    if (res.ok) {
-      const data: any = await res.json();
-      const accounts = data.data || [];
-      return accounts.map((acc: any) => ({
-        id: acc.id,
-        name: acc.name || 'Facebook Page',
-        category: acc.category || 'Business',
-        pageAccessToken: acc.access_token,
-        profilePicture: acc.picture?.data?.url || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150',
-      }));
-    }
-  } catch (err) {
-    console.warn('[FacebookOAuth] Failed to get accounts from Graph API:', err);
+  const res = await fetch(url);
+  if (!res.ok) {
+    const errText = await res.text();
+    const description = describeGraphError(res.status, errText);
+    console.error('[FacebookOAuth] Page discovery failed:', description);
+    throw new Error(`Facebook Page discovery failed (${description})`);
   }
 
-  // No fabricated fallback page: return what the Graph API actually gave us.
-  return [];
+  const data: any = await res.json();
+  const accounts = Array.isArray(data?.data) ? data.data : [];
+  return accounts.map((acc: any) => ({
+    id: String(acc.id),
+    name: acc.name || 'Facebook Page',
+    category: acc.category || null,
+    pageAccessToken: acc.access_token,
+    // Real profile picture only - no fabricated fallback avatars.
+    profilePicture: acc?.picture?.data?.url || null,
+  }));
 }
 
 /**
- * Fetches ratings, recommendations, and praise comments from Facebook Page.
+ * Fetches Page ratings/recommendations (GET /{page-id}/ratings).
+ *
+ * Throws when the Graph API call fails - an API failure is NEVER converted
+ * into an empty review list. A successful call returning zero reviews
+ * simply returns [] (EMPTY_SUCCESS upstream).
  */
 export async function fetchFacebookPageReviews(
   pageAccessToken: string,
   pageId: string,
   _env?: WorkerEnv
-): Promise<any[]> {
-  try {
-    const url = `https://graph.facebook.com/v19.0/${pageId}/ratings?fields=created_time,has_rating,rating,review_text,reviewer{name,id,picture}&access_token=${encodeURIComponent(
-      pageAccessToken
-    )}`;
+): Promise<FacebookReviewItem[]> {
+  const url = `${GRAPH_BASE}/${pageId}/ratings?fields=id,created_time,has_rating,rating,review_text,reviewer{name,id,picture}&access_token=${encodeURIComponent(
+    pageAccessToken
+  )}`;
 
-    const res = await fetch(url);
-    if (res.ok) {
-      const data: any = await res.json();
-      const ratings = data.data || [];
-      const reviews: FacebookReviewItem[] = [];
-
-      for (const r of ratings) {
-        if (r.review_text && r.review_text.length > 5) {
-          reviews.push({
-            id: `fb_rating_${r.reviewer?.id || Date.now()}`,
-            authorName: r.reviewer?.name || 'Verified Facebook User',
-            authorAvatar: r.reviewer?.picture?.data?.url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-            rating: r.rating || (r.has_rating ? 5 : 5),
-            text: r.review_text,
-            date: r.created_time || new Date().toISOString(),
-            source: 'facebook',
-            verified: true,
-            pageId,
-            postUrl: `https://facebook.com/${pageId}`,
-          });
-        }
-      }
-
-      if (reviews.length > 0) {
-        return reviews;
-      }
-    }
-  } catch (err) {
-    console.warn('[FacebookOAuth] Graph API rating fetch failed, returning empty list:', err);
+  const res = await fetch(url);
+  if (!res.ok) {
+    const errText = await res.text();
+    const description = describeGraphError(res.status, errText);
+    console.error('[FacebookOAuth] Review fetch failed:', description);
+    throw new Error(`Facebook review fetch failed (${description})`);
   }
 
-  // No fabricated fallback reviews: empty list when nothing real is available.
-  return [];
+  const data: any = await res.json();
+  const ratings = Array.isArray(data?.data) ? data.data : [];
+  const reviews: FacebookReviewItem[] = [];
+
+  for (const r of ratings) {
+    if (!r.review_text || !String(r.review_text).trim()) continue;
+    reviews.push({
+      id: buildFacebookReviewExternalId(pageId, r),
+      // Real reviewer data only - null when Meta does not provide a field.
+      authorName: r.reviewer?.name || null,
+      authorAvatar: r.reviewer?.picture?.data?.url || null,
+      rating: typeof r.rating === 'number' ? r.rating : null,
+      text: String(r.review_text),
+      date: r.created_time || null,
+      source: 'facebook',
+      pageId,
+      postUrl: `https://facebook.com/${pageId}`,
+    });
+  }
+
+  return reviews;
 }
 
 /**
- * Transforms incoming Meta Graph API Webhook push notifications into standardized reviews.
+ * Transforms incoming Meta Graph API Webhook push notifications into
+ * standardized review items. Only real payload fields are used.
  */
 export function transformFacebookWebhookPayload(payload: any): FacebookReviewItem[] {
   const reviews: FacebookReviewItem[] = [];
@@ -201,13 +258,15 @@ export function transformFacebookWebhookPayload(payload: any): FacebookReviewIte
         const text = value.review_text || value.message;
         if (text) {
           reviews.push({
-            id: `fb_webhook_${value.review_id || Date.now()}`,
-            authorName: value.reviewer_name || 'Facebook User',
-            rating: value.rating || (value.recommendation_type === 'positive' ? 5 : 4),
+            id: value.review_id
+              ? `fb_rating_${String(value.review_id)}`
+              : buildFacebookReviewExternalId(pageId, { reviewer: { id: value.reviewer_id }, created_time: value.created_time, review_text: text }),
+            authorName: value.reviewer_name || null,
+            authorAvatar: null,
+            rating: typeof value.rating === 'number' ? value.rating : value.recommendation_type === 'positive' ? 5 : null,
             text,
-            date: value.created_time ? new Date(value.created_time * 1000).toISOString() : new Date().toISOString(),
+            date: value.created_time ? new Date(value.created_time * 1000).toISOString() : null,
             source: 'facebook',
-            verified: true,
             pageId,
             postUrl: `https://facebook.com/${pageId}`,
           });
@@ -215,14 +274,15 @@ export function transformFacebookWebhookPayload(payload: any): FacebookReviewIte
       } else if (field === 'feed' && value.item === 'comment' && value.verb === 'add') {
         if (value.message && value.message.length > 10) {
           reviews.push({
-            id: `fb_webhook_comment_${value.comment_id || Date.now()}`,
-            authorName: value.from?.name || 'Facebook Commenter',
-            authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-            rating: 5,
+            id: value.comment_id
+              ? `fb_rating_${String(value.comment_id)}`
+              : buildFacebookReviewExternalId(pageId, { reviewer: { id: value.from?.id }, created_time: value.created_time, review_text: value.message }),
+            authorName: value.from?.name || null,
+            authorAvatar: null,
+            rating: null,
             text: value.message,
-            date: value.created_time ? new Date(value.created_time * 1000).toISOString() : new Date().toISOString(),
+            date: value.created_time ? new Date(value.created_time * 1000).toISOString() : null,
             source: 'facebook',
-            verified: true,
             pageId,
             postUrl: value.post_id ? `https://facebook.com/${value.post_id}` : `https://facebook.com/${pageId}`,
           });
@@ -234,8 +294,11 @@ export function transformFacebookWebhookPayload(payload: any): FacebookReviewIte
   return reviews;
 }
 
-export async function listFacebookPages(accessToken: string): Promise<any[]> {
+/**
+ * Lists the user's Facebook Pages as customer-safe descriptors
+ * (pageId + name only - no tokens, no internal document IDs).
+ */
+export async function listFacebookPages(accessToken: string): Promise<{ pageId: string; name: string }[]> {
   const pages = await getFacebookPages(accessToken);
   return pages.map((p) => ({ pageId: p.id, name: p.name }));
 }
-

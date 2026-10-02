@@ -17,6 +17,7 @@ import { handleInstagramAuthCallback } from './handlers/instagramAuthCallback';
 import { handleInstagramFetchMentions } from './handlers/instagramFetchMentions';
 import { handleFacebookAuthInit } from './handlers/facebookAuthInit';
 import { handleFacebookAuthCallback } from './handlers/facebookAuthCallback';
+import { handleFacebookPageSelection } from './handlers/facebookPageSelection';
 import { handleFacebookWebhook } from './handlers/facebookWebhook';
 import { handleStripeWebhook } from './handlers/stripeWebhook';
 import { handleCreateCheckoutSession, handleBillingPortal, handleGetSubscription } from './handlers/stripeCheckout';
@@ -72,6 +73,10 @@ export default {
         case 'auth/facebook/callback':
         case 'facebook-callback':
           return await handleFacebookAuthCallback(request, env);
+
+        case 'facebook/pages':
+        case 'facebook/select-page':
+          return await handleFacebookPageSelection(request, env);
 
         case 'webhook/facebook':
         case 'facebook-webhook':

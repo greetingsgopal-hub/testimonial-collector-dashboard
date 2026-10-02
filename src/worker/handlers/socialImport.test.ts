@@ -1,15 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 /**
  * FB/IG/LinkedIn import regression tests.
  *
  * 1. oauth-init must support facebook and instagram (the UI connects through
- *    this authenticated POST route — browser GET to /api/auth/* can never
+ *    this authenticated POST route â€” browser GET to /api/auth/* can never
  *    carry the Firebase Bearer token, so the old GET flow was dead).
  * 2. FB/IG OAuth callbacks and background sync must write imported reviews to
  *    the canonical `reviews` collection (dashboard reads `reviews`; the old
  *    `testimonials` writes were a dead path).
- * 3. OAuth success never implies import success — reviews are only saved when
+ * 3. OAuth success never implies import success â€” reviews are only saved when
  *    the provider API actually returns them, with tenant-scoped dedupe.
  */
 
@@ -72,7 +72,7 @@ describe('oauth-init dispatches facebook and instagram (authenticated POST)', ()
     const res = await handleOAuthInit(post('oauth-init', { platform: 'facebook' }), ENV);
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.authUrl).toMatch(/^https:\/\/www\.facebook\.com\/v19\.0\/dialog\/oauth\?/);
+    expect(body.authUrl).toMatch(/^https:\/\/www\.facebook\.com\/v26.0\/dialog\/oauth\?/);
     expect(body.authUrl).toContain('state=');
     expect(body.authUrl).toContain('pages_show_list');
     expect(body.authUrl).toContain('pages_read_user_content');
@@ -85,7 +85,7 @@ describe('oauth-init dispatches facebook and instagram (authenticated POST)', ()
     const res = await handleOAuthInit(post('oauth-init', { platform: 'instagram' }), ENV);
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.authUrl).toMatch(/^https:\/\/www\.facebook\.com\/v19\.0\/dialog\/oauth\?/);
+    expect(body.authUrl).toMatch(/^https:\/\/www\.facebook\.com\/v26.0\/dialog\/oauth\?/);
     expect(body.authUrl).toContain('instagram_basic');
     expect(body.platform).toBe('instagram');
   });
@@ -141,7 +141,7 @@ describe('FB/IG OAuth callbacks write imports to the canonical reviews collectio
     });
   }
 
-  it('facebook callback: saves page reviews to `reviews` (not testimonials) with full Review shape', async () => {
+  it('facebook callback: OAuth + discovery only - stores connection with pages, imports NOTHING', async () => {
     vi.stubGlobal(
       'fetch',
       mockMetaFetch(
@@ -161,35 +161,41 @@ describe('FB/IG OAuth callbacks write imports to the canonical reviews collectio
     const res = await handleFacebookAuthCallback(callbackGet('auth/facebook/callback', 'facebook'), ENV);
     expect(res.status).toBe(302);
     const location = res.headers.get('Location') || '';
-    expect(location).toMatch(/social_connected=facebook/);
+    // Explicit outcome code; user must select a Page before any import
+    expect(location).toMatch(/fb_outcome=fb_oauth_success/);
+    expect(location).toMatch(/fb_pages=1/);
 
-    const reviewsCalls = saveDocumentMock.mock.calls.filter((c) => c[0] === 'reviews');
-    expect(reviewsCalls.length).toBe(1);
-    const [collection, docId, doc] = reviewsCalls[0] as any[];
-    expect(collection).toBe('reviews');
-    expect(docId).toMatch(/^imp_user_123_[0-9a-f]{32}$/);
-    expect(doc.ownerId).toBe('user_123');
-    expect(doc.projectId).toBe('proj_user_123');
-    expect(doc.name).toBe('Alice Smith');
-    expect(doc.content).toBe('Great service, highly recommended!');
-    expect(doc.source).toBe('facebook');
-    expect(doc.status).toBe('approved');
-    expect(doc.consent).toBe(true);
-    expect(doc.tags).toContain('imported');
-    expect(doc.externalId).toBe('fb_rating_fbu_1');
+    // The callback persists a social_connections doc (not reviews) with all
+    // discovered pages, pageSelected=false, and no pageId yet
+    const connCalls = saveDocumentMock.mock.calls.filter((c) => c[0] === 'social_connections');
+    expect(connCalls.length).toBe(1);
+    const [, connDocId, connDoc] = connCalls[0] as any[];
+    expect(connDocId).toBe('user_123_facebook');
+    expect(connDoc.ownerId).toBe('user_123');
+    expect(connDoc.status).toBe('connected');
+    expect(connDoc.pageSelected).toBe(false);
+    expect(connDoc.pageId).toBe(null);
+    expect(connDoc.pages.length).toBe(1);
+    expect(connDoc.pages[0].id).toBe('page_1');
+    expect(connDoc.pages[0].name).toBe('Test Page');
+    expect(connDoc.pages[0].pageAccessTokenEncrypted).toBeTruthy();
+    // No page access tokens stored in plaintext
+    expect(JSON.stringify(connDoc)).not.toContain('page-token-xyz');
 
     // No writes to the dead testimonials collection
     const testimonialCalls = saveDocumentMock.mock.calls.filter((c) => c[0] === 'testimonials');
     expect(testimonialCalls.length).toBe(0);
+    // No reviews imported by the callback itself
+    expect(saveDocumentMock.mock.calls.filter((c) => c[0] === 'reviews').length).toBe(0);
     vi.unstubAllGlobals();
   });
 
-  it('facebook callback: OAuth success with zero page reviews imports nothing (no fabrication)', async () => {
+  it('facebook callback: OAuth success with zero pages redirects with fb_no_pages (no fabrication)', async () => {
     vi.stubGlobal('fetch', mockMetaFetch([{ id: 'page_1', name: 'Test Page', access_token: 'page-token-xyz' }], []));
 
     const res = await handleFacebookAuthCallback(callbackGet('auth/facebook/callback', 'facebook'), ENV);
     expect(res.status).toBe(302);
-    expect(res.headers.get('Location')).toMatch(/social_connected=facebook/);
+    expect(res.headers.get('Location')).toMatch(/fb_outcome=fb_oauth_success/);
     expect(saveDocumentMock.mock.calls.filter((c) => c[0] === 'reviews').length).toBe(0);
     vi.unstubAllGlobals();
   });

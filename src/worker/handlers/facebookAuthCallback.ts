@@ -1,10 +1,33 @@
+﻿import crypto from 'node:crypto';
 import { WorkerEnv } from '../types';
 import { verifyOAuthState, encryptToken } from '../lib/crypto';
-import { exchangeFacebookCode, getFacebookPages, fetchFacebookPageReviews } from '../lib/facebookOAuth';
+import { exchangeFacebookCode, getFacebookPages } from '../lib/facebookOAuth';
 import { saveDocument } from '../lib/firestoreAdmin';
-import { resolveUserOwnership, isDuplicate, validateExternalId, saveReviewsBatch } from '../lib/firestore';
 import { checkRateLimit } from '../lib/rateLimit';
 
+/**
+ * Facebook OAuth callback - authentication and Page discovery ONLY.
+ *
+ * Architectural contract (decoupled from import):
+ *   1. verify state (CSRF/expiry/user binding)
+ *   2. exchange authorization code for a long-lived user token
+ *   3. discover the user's Facebook Pages
+ *   4. persist the connection with all discovered Pages (tokens encrypted)
+ *   5. redirect to the dashboard with an explicit outcome code
+ *
+ * This callback NEVER imports reviews and NEVER silently selects a Page.
+ * Page selection and review import happen in a dedicated, authenticated
+ * step (POST /api/facebook/select-page + POST /api/import via the
+ * canonical Import Engine) after the user explicitly picks a Page.
+ *
+ * Outcome codes (distinguish failure stages; never collapse into one
+ * generic "authentication failed"):
+ *   - fb_oauth_success          OAuth + discovery OK; user must select a Page
+ *   - fb_no_pages               OAuth OK but the account manages no Pages
+ *   - fb_token_exchange_failed  code exchange against Meta failed
+ *   - fb_page_discovery_failed  token OK but /me/accounts failed
+ *   - fb_oauth_failed           any other unexpected failure
+ */
 export async function handleFacebookAuthCallback(request: Request, env: WorkerEnv): Promise<Response> {
   const clientIp = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
   const url = new URL(request.url);
@@ -13,150 +36,171 @@ export async function handleFacebookAuthCallback(request: Request, env: WorkerEn
   // Rate limiting: max 20 attempts per minute per IP
   const rateCheck = checkRateLimit(`facebook_callback_${clientIp}`, 20, 60000);
   if (!rateCheck.allowed) {
-    return Response.redirect(
-      `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent('Too many requests. Please wait a moment.')}`,
-      302
-    );
+    return redirectWithOutcome(baseUrl, 'fb_rate_limited', 'Too many requests. Please wait a moment.');
   }
 
   const queryError = url.searchParams.get('error');
   if (queryError) {
-    console.warn('[FacebookOAuthCallback] Meta returned error:', queryError);
-    return Response.redirect(
-      `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent('Facebook authorization was cancelled or denied.')}`,
-      302
-    );
+    console.warn('[facebook.oauth.callback] Meta returned error param:', queryError);
+    return redirectWithOutcome(baseUrl, 'fb_access_denied', 'Facebook authorization was cancelled or denied.');
   }
 
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
 
   if (!code || !state) {
-    return Response.redirect(
-      `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent('Missing authorization parameters from Facebook.')}`,
-      302
-    );
+    console.warn('[facebook.oauth.callback] Missing code or state parameter');
+    return redirectWithOutcome(baseUrl, 'fb_oauth_failed', 'Missing authorization parameters from Facebook.');
   }
 
   // Validate state token against CSRF, expiration, and user binding
   const stateResult = verifyOAuthState(state, env);
   if (!stateResult.valid || !stateResult.userId) {
-    console.error('[FacebookOAuthCallback] State verification failed:', stateResult.error);
-    return Response.redirect(
-      `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent(stateResult.error || 'Invalid or expired OAuth state.')}`,
-      302
-    );
+    console.error('[facebook.oauth.callback] State verification failed:', stateResult.error);
+    return redirectWithOutcome(baseUrl, 'fb_oauth_failed', stateResult.error || 'Invalid or expired OAuth state. Please try connecting again.');
   }
 
   const { userId } = stateResult;
 
-  try {
-    const appId = env.META_APP_ID || '';
-    const appSecret = env.META_APP_SECRET || '';
-    const redirectUri = env.FACEBOOK_REDIRECT_URI || `${baseUrl}/api/auth/facebook/callback`;
+  const appId = env.META_APP_ID || '';
+  const appSecret = env.META_APP_SECRET || '';
+  const redirectUri = env.FACEBOOK_REDIRECT_URI || `${baseUrl}/api/auth/facebook/callback`;
 
-    if (!appId || !appSecret) {
-      console.error('[FacebookOAuthCallback] Meta credentials missing in environment.');
-      return Response.redirect(
-        `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent('Server configuration error. Contact administrator.')}`,
-        302
-      );
-    }
-
-    // 1. Exchange authorization code for access token
-    const tokenData = await exchangeFacebookCode(code, redirectUri, appId, appSecret);
-
-    // 2. Fetch managed Facebook Pages
-    const pages = await getFacebookPages(tokenData.accessToken);
-    const primaryPage = pages[0];
-    if (!primaryPage) {
-      throw new Error(
-        'No Facebook Pages found for this account. Create a Facebook Page and grant the app access, then try again.'
-      );
-    }
-
-    // 3. Fetch initial ratings and recommendations
-    const pageToken = primaryPage.pageAccessToken || tokenData.accessToken;
-    const reviews = await fetchFacebookPageReviews(pageToken, primaryPage.id, env);
-
-    const now = new Date().toISOString();
-    const expiresAt = new Date(Date.now() + tokenData.expiresIn * 1000).toISOString();
-
-    // 4. Encrypt and store connection document in Firestore
-    const connectionDoc = {
-      ownerId: userId,
-      platform: 'facebook',
-      platformUserId: primaryPage.id,
-      platformAccountName: primaryPage.name,
-      platformProfilePicture: primaryPage.profilePicture || null,
-      accountType: 'page',
-      pageId: primaryPage.id,
-      pageName: primaryPage.name,
-      accessTokenEncrypted: encryptToken(pageToken, env),
-      userAccessTokenEncrypted: encryptToken(tokenData.accessToken, env),
-      tokenExpiresAt: expiresAt,
-      scopes: ['pages_show_list', 'pages_read_user_content'],
-      status: 'connected',
-      backgroundSyncEnabled: true,
-      reviewsSyncedCount: reviews.length,
-      connectedAt: now,
-      updatedAt: now,
-    };
-
-    const docId = `${userId}_facebook`;
-    await saveDocument('social_connections', docId, connectionDoc, undefined, env);
-
-    // 5. Import page reviews into the canonical `reviews` collection (the
-    // dashboard reads `reviews` — nothing reads a `testimonials` collection).
-    // OAuth success never implies import success: reviews are only saved when
-    // the Graph API actually returns them, with tenant-scoped dedupe.
-    let importedCount = 0;
-    if (reviews.length > 0) {
-      const ownership = await resolveUserOwnership(userId, undefined, env);
-      const deduped: any[] = [];
-      for (const rev of reviews) {
-        try {
-          const externalId = validateExternalId(rev.id);
-          if (!(await isDuplicate(userId, 'facebook', externalId, env))) {
-            deduped.push({
-              author: rev.authorName,
-              avatarUrl: rev.authorAvatar,
-              rating: typeof rev.rating === 'number' ? rev.rating : 5,
-              text: rev.text,
-              createdAt: rev.date,
-              externalId,
-              sourceUrl: rev.postUrl || `https://facebook.com/${primaryPage.id}`,
-            });
-          }
-        } catch (_err) {
-          continue;
-        }
-      }
-      if (deduped.length > 0) {
-        await saveReviewsBatch(
-          userId,
-          ownership.workspaceId,
-          ownership.projectId,
-          'facebook',
-          primaryPage.id,
-          deduped,
-          env
-        );
-        importedCount = deduped.length;
-      }
-    }
-
-    console.log(`[FacebookOAuthCallback] Connected Facebook Page for owner: ${userId} (${primaryPage.name})`);
-
-    return Response.redirect(
-      `${baseUrl}/dashboard/integrate?social_connected=facebook&account_name=${encodeURIComponent(primaryPage.name)}&imported_count=${importedCount}`,
-      302
-    );
-  } catch (err: any) {
-    console.error('[FacebookOAuthCallback] Failed to complete OAuth exchange:', err);
-    return Response.redirect(
-      `${baseUrl}/dashboard/integrate?social_error=${encodeURIComponent('Failed to complete Facebook authentication. Please try again.')}`,
-      302
-    );
+  if (!appId || !appSecret) {
+    console.error('[facebook.oauth.callback] META_APP_ID/META_APP_SECRET missing in environment.');
+    return redirectWithOutcome(baseUrl, 'fb_oauth_failed', 'Server configuration error. Contact administrator.');
   }
+
+  // ── Stage 1: token exchange ──────────────────────────────────────────
+  let tokenData: { accessToken: string; expiresIn: number };
+  try {
+    tokenData = await exchangeFacebookCode(code, redirectUri, appId, appSecret);
+  } catch (err: any) {
+    // Structured diagnostic: stage + sanitized Meta error. No tokens logged.
+    console.error(
+      JSON.stringify({
+        stage: 'facebook.oauth.token_exchange',
+        provider: 'facebook',
+        ownerHash: hashUid(userId),
+        error: sanitizeMetaError(err?.message),
+      })
+    );
+    return redirectWithOutcome(baseUrl, 'fb_token_exchange_failed', 'Facebook authorization could not be completed.');
+  }
+
+  // ── Stage 2: Page discovery ──────────────────────────────────────────
+  let pages: Awaited<ReturnType<typeof getFacebookPages>>;
+  try {
+    pages = await getFacebookPages(tokenData.accessToken);
+  } catch (err: any) {
+    console.error(
+      JSON.stringify({
+        stage: 'facebook.pages.discovery',
+        provider: 'facebook',
+        ownerHash: hashUid(userId),
+        error: sanitizeMetaError(err?.message),
+      })
+    );
+    return redirectWithOutcome(baseUrl, 'fb_page_discovery_failed', 'Facebook connected, but Panda Praise could not list your Facebook Pages.');
+  }
+
+  if (pages.length === 0) {
+    console.warn(
+      JSON.stringify({
+        stage: 'facebook.pages.discovery',
+        provider: 'facebook',
+        ownerHash: hashUid(userId),
+        outcome: 'NO_PAGES_FOUND',
+      })
+    );
+    return redirectWithOutcome(baseUrl, 'fb_no_pages', 'No Facebook Pages were available for this account.');
+  }
+
+  // ── Stage 3: persist connection (tokens encrypted, never exposed) ────
+  const now = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + tokenData.expiresIn * 1000).toISOString();
+
+  const connectionDoc = {
+    ownerId: userId,
+    platform: 'facebook',
+    platformUserId: pages[0].id,
+    platformAccountName: pages[0].name,
+    platformProfilePicture: pages[0].profilePicture || null,
+    accountType: 'page',
+    pageId: null, // Set when the user explicitly selects a Page
+    pageName: null,
+    pages: pages.map((p) => ({
+      id: p.id,
+      name: p.name,
+      category: p.category || null,
+      pageAccessTokenEncrypted: p.pageAccessToken ? encryptToken(p.pageAccessToken, env) : null,
+      profilePicture: p.profilePicture || null,
+    })),
+    accessTokenEncrypted: encryptToken(tokenData.accessToken, env),
+    userAccessTokenEncrypted: encryptToken(tokenData.accessToken, env),
+    tokenExpiresAt: expiresAt,
+    scopes: ['pages_show_list', 'pages_read_user_content', 'public_profile', 'business_management'],
+    status: 'connected',
+    pageSelected: false,
+    backgroundSyncEnabled: true,
+    reviewsSyncedCount: 0,
+    connectedAt: now,
+    updatedAt: now,
+  };
+
+  try {
+    await saveDocument('social_connections', `${userId}_facebook`, connectionDoc, undefined, env);
+  } catch (err: any) {
+    console.error(
+      JSON.stringify({
+        stage: 'facebook.connection.persist',
+        provider: 'facebook',
+        ownerHash: hashUid(userId),
+        error: sanitizeMetaError(err?.message),
+      })
+    );
+    return redirectWithOutcome(baseUrl, 'fb_oauth_failed', 'Facebook connected, but Panda Praise could not save the connection. Please try again.');
+  }
+
+  console.log(
+    JSON.stringify({
+      stage: 'facebook.pages.discovery',
+      provider: 'facebook',
+      ownerHash: hashUid(userId),
+      outcome: 'OAUTH_SUCCESS',
+      pagesFound: pages.length,
+    })
+  );
+
+  return redirectWithOutcome(baseUrl, 'fb_oauth_success', '', pages.length);
+}
+
+/**
+ * Redirects to the dashboard Integrate tab with an explicit machine-readable
+ * outcome code plus a customer-safe message. The outcome code drives the
+ * frontend state machine; the message is display-only.
+ */
+function redirectWithOutcome(baseUrl: string, outcome: string, message: string, pagesFound?: number): Response {
+  const params = new URLSearchParams();
+  params.set('fb_outcome', outcome);
+  if (message) params.set('social_error', message);
+  if (typeof pagesFound === 'number') params.set('fb_pages', String(pagesFound));
+  return Response.redirect(`${baseUrl}/dashboard/integrate?${params.toString()}`, 302);
+}
+
+/**
+ * Opaque server-side identifier for logs; never the raw Firebase UID.
+ */
+function hashUid(uid: string): string {
+  return `uid_${crypto.createHash('sha256').update(uid).digest('hex').slice(0, 12)}`;
+}
+
+/**
+ * Strips accidental token/secret material from error strings before logging.
+ */
+function sanitizeMetaError(message: string | undefined): string {
+  if (!message) return 'unknown error';
+  return message
+    .replace(/(EA[A-Za-z0-9]{20,}|access_token[^&\s]*|client_secret[^&\s]*)/gi, '[redacted]')
+    .slice(0, 300);
 }
