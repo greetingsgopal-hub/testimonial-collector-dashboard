@@ -74,7 +74,7 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   projectId,
   initialPlatform,
 }) => {
-  const [step, setStep] = useState<'select' | 'configure' | 'preview'>(initialPlatform ? 'configure' : 'select');
+  const [step, setStep] = useState<'select' | 'configure' | 'preview' | 'profile_capture'>(initialPlatform ? 'configure' : 'select');
   const [selectedId, setSelectedId] = useState<string>(initialPlatform || 'google');
   const [hoveredName, setHoveredName] = useState<string | null>(null);
 
@@ -105,6 +105,11 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
   const [selectedReviewIds, setSelectedReviewIds] = useState<string[]>([]);
   const [resolvedEntity, setResolvedEntity] = useState<any>(null);
   const [isCommitting, setIsCommitting] = useState(false);
+
+  // Profile Capture State (when 0 automated reviews exist on a personal profile/link)
+  const [customAuthor, setCustomAuthor] = useState('');
+  const [customQuote, setCustomQuote] = useState('');
+  const [customRating, setCustomRating] = useState(5);
 
   if (!isOpen) return null;
 
@@ -226,14 +231,73 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
         // Move to interactive review selection preview
         setStep('preview');
       } else {
-        // Entity resolved, but zero reviews were present on that public page
-        setDetectedLocationName(data.entity?.name || currentPlatform.name);
-        setFoundCount(0);
-        setSyncSuccess(true);
+        // Zero reviews found on this link (e.g. personal profile, custom page)
+        // Transition to profile capture so they can capture client praise from this profile
+        setCustomAuthor(data.entity?.name ? `${data.entity.name}'s Client` : 'Client');
+        setCustomQuote('');
+        setCustomRating(5);
+        setStep('profile_capture');
       }
     } catch (err: any) {
       setIsProcessing(false);
       setImportError(err.message || 'Failed to resolve reviews. Please check the link and try again.');
+    }
+  };
+
+  /**
+   * Saves a testimonial / client quote from a personal profile or post
+   */
+  const handleSaveProfileQuote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customQuote.trim()) {
+      setImportError('Please enter the testimonial text or client praise.');
+      return;
+    }
+
+    setIsCommitting(true);
+    setImportError('');
+
+    try {
+      const auth = getFirebaseAuth();
+      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+
+      const response = await fetch('/api/import/commit-reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          projectId,
+          platform: selectedId,
+          sourceUrl: inputUrl.trim(),
+          reviews: [
+            {
+              id: `${selectedId}_profile_quote_${Date.now()}`,
+              authorName: customAuthor.trim() || (resolvedEntity?.name ? `Client of ${resolvedEntity.name}` : 'Verified Client'),
+              authorAvatar: resolvedEntity?.avatar,
+              rating: customRating,
+              text: customQuote.trim(),
+              date: new Date().toISOString(),
+              platformUrl: inputUrl.trim(),
+              source: selectedId,
+            },
+          ],
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save testimonial into canonical store.');
+      }
+
+      setFoundCount(data.importedCount || 1);
+      setDetectedLocationName(resolvedEntity?.name || currentPlatform.name);
+      setSyncSuccess(true);
+    } catch (err: any) {
+      setImportError(err.message || 'Failed to save testimonial. Please try again.');
+    } finally {
+      setIsCommitting(false);
     }
   };
 
@@ -751,6 +815,146 @@ export const ConnectSourceModal: React.FC<ConnectSourceModalProps> = ({
               </button>
             </div>
           </div>
+        )}
+
+        {/* ── STEP 3B: PROFILE & POST TESTIMONIAL CAPTURE (When 0 automated reviews exist) ── */}
+        {step === 'profile_capture' && !syncSuccess && (
+          <form onSubmit={handleSaveProfileQuote} className="space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+              <button
+                type="button"
+                onClick={() => setStep('configure')}
+                className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Try Another Link</span>
+              </button>
+
+              <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                1-Click Profile Testimonial
+              </span>
+            </div>
+
+            {/* Resolved Profile Banner */}
+            {resolvedEntity && (
+              <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-200/80 flex items-center gap-3">
+                {resolvedEntity.avatar ? (
+                  <img
+                    src={resolvedEntity.avatar}
+                    alt=""
+                    className="w-10 h-10 rounded-xl object-cover border border-gray-200"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#1877F2] flex items-center justify-center font-bold text-xs">
+                    fb
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-xs font-bold text-gray-900 truncate flex items-center gap-1">
+                    <span>{resolvedEntity.name}</span>
+                  </h4>
+                  <p className="text-[10.5px] text-gray-400 truncate">
+                    {inputUrl}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Clarification banner */}
+            <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-100 text-[11px] text-blue-900 leading-relaxed space-y-1">
+              <span className="font-bold block">
+                💡 Personal profile detected (No public Reviews tab)
+              </span>
+              <span>
+                Facebook only publishes automatic star ratings on <strong>Business Pages</strong>. Since you do business through your profile, you can capture customer comments, timeline recommendations, or message praise directly below:
+              </span>
+            </div>
+
+            {/* Reviewer / Client Name */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-700 block">
+                Client / Reviewer Name:
+              </label>
+              <input
+                type="text"
+                required
+                value={customAuthor}
+                onChange={(e) => setCustomAuthor(e.target.value)}
+                placeholder="e.g. John Smith"
+                className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#6701e6]/20 focus:border-[#6701e6] transition-all"
+              />
+            </div>
+
+            {/* Star Rating */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-700 block">
+                Rating:
+              </label>
+              <div className="flex items-center gap-1.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setCustomRating(star)}
+                    className="p-1 text-amber-400 hover:scale-110 transition-transform cursor-pointer"
+                  >
+                    <Star
+                      className={`w-5 h-5 ${
+                        star <= customRating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'
+                      }`}
+                    />
+                  </button>
+                ))}
+                <span className="text-xs font-bold text-gray-600 ml-1.5">{customRating} Stars</span>
+              </div>
+            </div>
+
+            {/* Testimonial Quote */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-700 block">
+                Testimonial / Praise Text:
+              </label>
+              <textarea
+                required
+                rows={3}
+                value={customQuote}
+                onChange={(e) => setCustomQuote(e.target.value)}
+                placeholder="Paste the recommendation, comment praise, or feedback received on this profile..."
+                className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#6701e6]/20 focus:border-[#6701e6] transition-all resize-none"
+              />
+            </div>
+
+            {/* Buttons */}
+            <div className="pt-2 border-t border-gray-100 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setStep('configure')}
+                className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors cursor-pointer"
+              >
+                Back
+              </button>
+              <button
+                type="submit"
+                disabled={isCommitting || !customQuote.trim()}
+                className="px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 hover:scale-[1.01]"
+              >
+                {isCommitting ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Save to Proof Vault</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         )}
 
         {/* ── STEP 4: SUCCESS STATE ── */}
