@@ -66,15 +66,16 @@ export const PublicCollectorPage = () => {
       setIsClosed(false);
 
       try {
-        if (!collectionSlug) {
+        const cleanSlug = (collectionSlug || '').replace(/^[\[%5B]+|[\]%5D]+$/gi, '').trim();
+        if (!cleanSlug) {
           setError('Invalid or missing collection link.');
           setIsLoading(false);
           return;
         }
 
-        const result = await storage.getCollectionFormBySlug(collectionSlug);
+        const result = await storage.getCollectionFormBySlug(cleanSlug);
         if (!result) {
-          setError(`Collection form "${collectionSlug}" was not found.`);
+          setError(`Collection form "${cleanSlug}" was not found.`);
           setIsLoading(false);
           return;
         }
@@ -224,15 +225,38 @@ export const PublicCollectorPage = () => {
 
   if (error || !formConfig) {
     return (
-      <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center p-4 text-center font-sans">
-        <div className="max-w-md p-8 rounded-3xl bg-white border border-red-200 space-y-4 shadow-lg">
-          <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex flex-col items-center justify-center p-4 text-center font-sans">
+        <div className="max-w-md w-full p-8 sm:p-10 rounded-3xl bg-white border border-slate-200/80 space-y-5 shadow-xl shadow-slate-900/5">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h3 className="text-xl font-bold font-display text-gray-900">Form Unavailable</h3>
-          <p className="text-xs text-gray-600 leading-relaxed">
-            {error || 'This testimonial collection form does not exist.'}
-          </p>
+          <div className="space-y-1">
+            <h3 className="text-xl font-bold font-display text-gray-900">Collection Form Not Found</h3>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              The review link <code className="bg-slate-100 px-1.5 py-0.5 rounded text-gray-800 font-mono">/c/{collectionSlug}</code> does not exist or has not been configured yet.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-left text-xs text-slate-600 space-y-2">
+            <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+              <span>Are you the business owner?</span>
+            </div>
+            <p className="text-[11px] text-slate-500 leading-tight">
+              Log in to your PandaPraise dashboard to activate your collection link and view your active project slug.
+            </p>
+            <a
+              href="/dashboard"
+              className="inline-flex items-center justify-center w-full mt-2 py-2.5 px-4 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs transition-colors shadow-xs"
+            >
+              Open Dashboard
+            </a>
+          </div>
+
+          <div className="pt-2">
+            <a href="/" className="text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors">
+              ← Return to PandaPraise Home
+            </a>
+          </div>
         </div>
       </div>
     );

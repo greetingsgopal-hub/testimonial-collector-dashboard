@@ -355,12 +355,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ─────────────────────────────────────────────────────────────
   // 8. COPY COLLECTION FORM LINK & SAFE INVITE
   // ─────────────────────────────────────────────────────────────
+  function getActiveSlug() {
+    const slug = (collectionSlugInput.value || '').trim() || (projectIdInput.value || '').trim();
+    if (!slug || slug === 'your-brand' || slug.includes('[')) {
+      switchTab(viewSettings, tabSettings);
+      showStatus(settingsStatus, '⚠️ Please enter your Project Slug or ID first (or open pandapraise.com/dashboard to auto-sync).', 'error');
+      projectIdInput.focus();
+      return null;
+    }
+    return slug;
+  }
+
   copyFormLinkBtn.addEventListener('click', () => {
-    const slug = collectionSlugInput.value.trim() || projectIdInput.value.trim() || 'your-brand';
-    const formUrl = `https://pandapraise.com/c/${slug}`;
+    const slug = getActiveSlug();
+    if (!slug) return;
+
+    const formUrl = `https://pandapraise.com/c/${encodeURIComponent(slug)}`;
     navigator.clipboard.writeText(formUrl).then(() => {
       const originalText = copyFormLinkBtn.textContent;
-      copyFormLinkBtn.textContent = '✓ Copied!';
+      copyFormLinkBtn.textContent = '✓ Copied Link!';
       setTimeout(() => {
         copyFormLinkBtn.textContent = originalText;
       }, 2000);
@@ -370,8 +383,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const copySafeInviteBtn = document.getElementById('copy-safe-invite-btn');
   if (copySafeInviteBtn) {
     copySafeInviteBtn.addEventListener('click', () => {
-      const slug = collectionSlugInput.value.trim() || projectIdInput.value.trim() || 'your-brand';
-      const formUrl = `https://pandapraise.com/c/${slug}`;
+      const slug = getActiveSlug();
+      if (!slug) return;
+
+      const formUrl = `https://pandapraise.com/c/${encodeURIComponent(slug)}`;
       const safeInviteMsg = `Hi! Could you take 30 seconds to share quick feedback on our work together? (100% safe link, no login, app, or password needed): ${formUrl}`;
       navigator.clipboard.writeText(safeInviteMsg).then(() => {
         const originalText = copySafeInviteBtn.textContent;
