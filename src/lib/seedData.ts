@@ -48,7 +48,7 @@ export const INITIAL_REVIEWS: Review[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
     rating: 5,
     title: 'Our clients are obsessed with the Wall of Love',
-    content: 'The typography, glassmorphic cards, and subtle animations make our client wall look like a high-end luxury brand. Submitting a review takes 30 seconds and our clients actually enjoy it.',
+    content: 'The typography, glassmorphic cards, and subtle animations make our client wall look like a high-end luxury brand. Submitting a review takes 2 seconds and our clients actually enjoy it.',
     type: 'text',
     tags: ['UI/UX', 'Design', 'Client Feedback'],
     source: 'form',

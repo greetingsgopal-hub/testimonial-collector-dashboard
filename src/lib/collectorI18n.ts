@@ -14,7 +14,7 @@ export const COLLECTOR_TRANSLATIONS = {
     },
     ribbon: {
       safeLink: 'Safe Review Link',
-      bullets: 'Takes 30 seconds • No passwords, OTPs, or payments will ever be requested.',
+      bullets: 'Takes 2 seconds • No passwords, OTPs, or payments will ever be requested.',
     },
     guaranteeCard: {
       title: 'Safe Feedback Guarantee',
@@ -164,7 +164,7 @@ export const COLLECTOR_TRANSLATIONS = {
     },
     ribbon: {
       safeLink: '100% Safe Review Link',
-      bullets: 'Sirf 30 seconds lagenge • Koi password, OTP ya payment nahi manga jayega.',
+      bullets: 'Sirf 2 seconds lagenge • Koi password, OTP ya payment nahi manga jayega.',
     },
     guaranteeCard: {
       title: 'Safe Feedback Guarantee',
