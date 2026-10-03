@@ -5,7 +5,7 @@ import { LivePreviewCard } from '../components/collector/LivePreviewCard';
 import { SuccessModal } from '../components/collector/SuccessModal';
 import { Review, ReviewInput, CollectionForm, Project } from '../types';
 import { storage, getActiveBackendInfo } from '../lib/storage';
-import { AlertCircle, ArrowLeft, Building2, Clock, Star, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Building2, Clock, Star, CheckCircle2, ShieldCheck, Lock } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
 import { cleanBrandOrProductName, deduplicateRepeatedString } from '../lib/security';
@@ -239,10 +239,10 @@ export const PublicCollectorPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-gray-900 font-sans selection:bg-purple-100 selection:text-purple-900 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50/40 via-slate-50 to-slate-100 text-gray-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 flex flex-col">
       
       {/* Public Header */}
-      <header className="w-full border-b border-gray-200/80 bg-white/90 backdrop-blur-md py-4 px-4 sm:px-8">
+      <header className="w-full border-b border-gray-200/70 bg-white/90 backdrop-blur-md py-3.5 px-4 sm:px-8 sticky top-0 z-30 shadow-xs">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="font-extrabold text-sm text-[#6701e6] font-display shrink-0">
@@ -259,21 +259,47 @@ export const PublicCollectorPage = () => {
             )}
           </div>
 
-          <div className="text-[11px] text-gray-400 shrink-0">
-            Powered by <span className="font-bold text-[#6701e6]">Panda Praise</span>
+          <div className="flex items-center gap-2 text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full shrink-0">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="hidden sm:inline">Verified Feedback Form</span>
+            <span className="sm:hidden">Verified</span>
           </div>
         </div>
       </header>
 
+      {/* Safety Reassurance Top Ribbon */}
+      <div className="w-full bg-emerald-500/10 border-b border-emerald-500/20 py-2 px-4 text-center">
+        <div className="max-w-4xl mx-auto flex items-center justify-center gap-2 text-[11px] font-medium text-emerald-900">
+          <Lock className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+          <span><strong>Safe Review Link</strong> • Takes 30 seconds • No passwords, OTPs, or payments will ever be requested.</span>
+        </div>
+      </div>
+
       {/* Main Experience */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-8">
         
-        {/* ── STEP 1: INITIAL 5-STAR RATING CARD (Matches Senja 02:33 in video) ── */}
+        {/* ── STEP 1: INITIAL 5-STAR RATING CARD ── */}
         {step === 'rating' && (
-          <div className="w-full max-w-lg bg-white rounded-3xl border border-gray-200/80 shadow-xl p-8 sm:p-12 text-center space-y-6 animate-scale-in">
+          <div className="w-full max-w-lg bg-white rounded-3xl border border-emerald-100 shadow-xl shadow-emerald-950/5 p-7 sm:p-10 text-center space-y-6 animate-scale-in">
             
-            {/* Brand Logo */}
-            <div className="space-y-1">
+            {/* Safe Feedback Guarantee Badge */}
+            <div className="mx-auto max-w-sm bg-gradient-to-r from-emerald-50 to-teal-50/70 border border-emerald-200/80 rounded-2xl p-3 flex items-center gap-3 text-left">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <ShieldCheck className="w-4.5 h-4.5" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[11px] font-bold text-emerald-950 flex items-center gap-1.5">
+                  <span>Safe Feedback Guarantee</span>
+                  <span className="text-[9px] font-extrabold bg-emerald-200/70 text-emerald-800 px-1.5 py-0.2 rounded-full">Encrypted</span>
+                </div>
+                <p className="text-[10px] text-emerald-800/90 leading-tight mt-0.5">
+                  No sign-in or payment needed. Your review goes directly to {displayBrand || 'the business'}.
+                </p>
+              </div>
+            </div>
+
+            {/* Brand Logo & Question */}
+            <div className="space-y-1 pt-1">
               <span className="font-black text-xl text-[#6701e6] font-display">
                 Panda Praise
               </span>
@@ -281,12 +307,12 @@ export const PublicCollectorPage = () => {
                 Do you enjoy using {displayProductName}?
               </h2>
               <p className="text-xs text-gray-500">
-                On a scale of 1 to 5, how would you rate us?
+                On a scale of 1 to 5, how would you rate your experience?
               </p>
             </div>
 
             {/* 5 Interactive Stars */}
-            <div className="flex items-center justify-center gap-2 py-4">
+            <div className="flex items-center justify-center gap-2 py-2">
               {[1, 2, 3, 4, 5].map((star) => {
                 const isActive = (hoverRating || selectedRating) >= star;
                 return (
@@ -316,8 +342,30 @@ export const PublicCollectorPage = () => {
               Continue
             </button>
 
+            {/* 3-Pillar Security Seal */}
+            <div className="pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-[10px] text-slate-500 font-medium">
+              <div className="flex flex-col items-center gap-1">
+                <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                  <Lock className="w-3 h-3" />
+                </div>
+                <span>256-bit SSL</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                  <CheckCircle2 className="w-3 h-3" />
+                </div>
+                <span>No Login Needed</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                  <ShieldCheck className="w-3 h-3" />
+                </div>
+                <span>Zero Financial Ask</span>
+              </div>
+            </div>
+
             {/* Viral Growth Referral Link */}
-            <div className="pt-2 text-center">
+            <div className="pt-1 text-center">
               <a
                 href="/?ref=collector_badge"
                 target="_blank"
@@ -408,13 +456,20 @@ export const PublicCollectorPage = () => {
         {step === 'positive-form' && (
           <div className="w-full max-w-5xl mx-auto py-6 animate-fade-in space-y-6">
             
-            <button
-              onClick={() => setStep('rating')}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Change rating</span>
-            </button>
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setStep('rating')}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Change rating</span>
+              </button>
+
+              <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Safe 256-bit Encrypted Feedback</span>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               <div className="lg:col-span-7">

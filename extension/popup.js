@@ -353,19 +353,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // 8. COPY COLLECTION FORM LINK
+  // 8. COPY COLLECTION FORM LINK & SAFE INVITE
   // ─────────────────────────────────────────────────────────────
   copyFormLinkBtn.addEventListener('click', () => {
     const slug = collectionSlugInput.value.trim() || projectIdInput.value.trim() || 'your-brand';
     const formUrl = `https://pandapraise.com/c/${slug}`;
     navigator.clipboard.writeText(formUrl).then(() => {
       const originalText = copyFormLinkBtn.textContent;
-      copyFormLinkBtn.textContent = '✓ Copied link to clipboard!';
+      copyFormLinkBtn.textContent = '✓ Copied!';
       setTimeout(() => {
         copyFormLinkBtn.textContent = originalText;
       }, 2000);
     });
   });
+
+  const copySafeInviteBtn = document.getElementById('copy-safe-invite-btn');
+  if (copySafeInviteBtn) {
+    copySafeInviteBtn.addEventListener('click', () => {
+      const slug = collectionSlugInput.value.trim() || projectIdInput.value.trim() || 'your-brand';
+      const formUrl = `https://pandapraise.com/c/${slug}`;
+      const safeInviteMsg = `Hi! Could you take 30 seconds to share quick feedback on our work together? (100% safe link, no login, app, or password needed): ${formUrl}`;
+      navigator.clipboard.writeText(safeInviteMsg).then(() => {
+        const originalText = copySafeInviteBtn.textContent;
+        copySafeInviteBtn.textContent = '✓ Copied Safe Invite!';
+        setTimeout(() => {
+          copySafeInviteBtn.textContent = originalText;
+        }, 2000);
+      });
+    });
+  }
 
   // ─────────────────────────────────────────────────────────────
   // 9. SAVE SETTINGS
