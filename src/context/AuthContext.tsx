@@ -318,15 +318,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let currentProj: Project;
 
       if (projSnapshot.empty) {
-        let initialProjName = 'My Testimonials';
+        let initialProjName = 'My Business';
         if (customerFirstName) {
-          initialProjName = `${customerFirstName}'s Testimonials`;
+          initialProjName = customerFirstName;
         } else if (currentUser.displayName) {
           const firstName = currentUser.displayName.trim().split(' ')[0];
-          initialProjName = `${firstName}'s Testimonials`;
+          initialProjName = firstName || 'My Business';
         } else if (currentUser.email) {
           const prefix = currentUser.email.split('@')[0];
-          initialProjName = `${prefix}'s Testimonials`;
+          initialProjName = prefix || 'My Business';
         }
 
         const projSlug = `${currentWs.slug}-project`;

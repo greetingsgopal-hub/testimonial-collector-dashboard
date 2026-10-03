@@ -50,10 +50,121 @@ document.addEventListener('DOMContentLoaded', async () => {
   const licenseKeyInput = document.getElementById('license-key-input');
   const activateKeyBtn = document.getElementById('activate-key-btn');
 
+  // Language elements
+  const extLangEn = document.getElementById('ext-lang-en');
+  const extLangHi = document.getElementById('ext-lang-hi');
+
+  const brandSub = document.getElementById('brand-sub');
+  const lblAuthorName = document.getElementById('lbl-author-name');
+  const lblAuthorHandle = document.getElementById('lbl-author-handle');
+  const lblRating = document.getElementById('lbl-rating');
+  const lblQuoteText = document.getElementById('lbl-quote-text');
+  const upiText = document.getElementById('upi-text');
+  const lblSourceUrl = document.getElementById('lbl-source-url');
+  const copyLinkText = document.getElementById('copy-link-text');
+  const copySafeInviteText = document.getElementById('copy-safe-invite-text');
+  const searchEmptyText = document.getElementById('search-empty-text');
+
+  const EXT_I18N = {
+    en: {
+      brandSub: 'WhatsApp & Social Proof Clipper',
+      tabClip: 'Clip Praise',
+      tabSearch: 'Search Vault',
+      tabSettings: 'Settings',
+      authorLabel: 'Client / Author Name *',
+      authorPlaceholder: 'e.g. Ramesh Kumar or @acme',
+      roleLabel: 'Channel / Role',
+      rolePlaceholder: 'WhatsApp • Client',
+      ratingLabel: 'Rating',
+      quoteLabel: 'Testimonial / Praise Quote *',
+      quotePlaceholder: 'Highlight text or click 🐼 Clip in WhatsApp / Twitter...',
+      hinglishBtn: '🪄 Hinglish Polish',
+      upiProof: '💳 Verified UPI / Transaction Proof',
+      sourceUrlLabel: 'Source Link',
+      saveBtn: 'Save to Proof Vault',
+      copyLinkBtn: '🔗 Copy Link',
+      copySafeInviteBtn: '🛡️ Copy Safe Invite',
+      searchInputPlaceholder: 'Search testimonials for sales pitch...',
+      searchEmpty: 'Connect your account in Settings to search your live testimonials library during sales chats.',
+      safeInviteTemplate: (url) => `Hi! Could you take 30 seconds to share quick feedback on our work together? (100% safe link, no login, app, or password needed): ${url}`,
+      copiedLink: '✓ Copied Link!',
+      copiedInvite: '✓ Copied Safe Invite!',
+      savedSuccess: '✨ Saved to Proof Vault successfully!',
+    },
+    hi: {
+      brandSub: 'WhatsApp aur Social Media Proof Clipper',
+      tabClip: 'Praise Clip Karein',
+      tabSearch: 'Vault Search',
+      tabSettings: 'Settings',
+      authorLabel: 'Client / Customer ka Naam *',
+      authorPlaceholder: 'e.g. Ramesh Kumar ya @brand',
+      roleLabel: 'Channel / Role',
+      rolePlaceholder: 'WhatsApp • Customer',
+      ratingLabel: 'Rating',
+      quoteLabel: 'Testimonial / Review Quote *',
+      quotePlaceholder: 'Text select karein ya WhatsApp / Twitter par 🐼 Clip dabayein...',
+      hinglishBtn: '🪄 Hinglish Polish',
+      upiProof: '💳 Verified UPI / Payment Proof',
+      sourceUrlLabel: 'Source Link',
+      saveBtn: 'Proof Vault Mein Save Karein 🚀',
+      copyLinkBtn: '🔗 Link Copy Karein',
+      copySafeInviteBtn: '🛡️ Safe Invite Copy Karein',
+      searchInputPlaceholder: 'Sales chat ke liye testimonials search karein...',
+      searchEmpty: 'Sales chat ke dauran testimonials search karne ke liye Settings mein account connect karein.',
+      safeInviteTemplate: (url) => `Namaste! 🙏 Kya aap humare sath apne anubhav par 30 seconds nikal kar quick review de sakte hain? Yeh 100% safe link hai (koi login ya payment nahi chahiye): ${url}`,
+      copiedLink: '✓ Link Copy Ho Gaya!',
+      copiedInvite: '✓ Safe Invite Copy Ho Gaya!',
+      savedSuccess: '✨ Vault mein save ho gaya!',
+    }
+  };
+
+  let currentExtLang = 'en';
+
+  function applyExtensionLanguage(lang) {
+    currentExtLang = lang;
+    const t = EXT_I18N[lang] || EXT_I18N.en;
+
+    if (extLangEn && extLangHi) {
+      if (lang === 'hi') {
+        extLangHi.classList.add('active');
+        extLangEn.classList.remove('active');
+      } else {
+        extLangEn.classList.add('active');
+        extLangHi.classList.remove('active');
+      }
+    }
+
+    if (brandSub) brandSub.textContent = t.brandSub;
+    if (tabClip) tabClip.textContent = t.tabClip;
+    if (tabSearch) tabSearch.textContent = t.tabSearch;
+    if (tabSettings) tabSettings.textContent = t.tabSettings;
+
+    if (lblAuthorName) lblAuthorName.textContent = t.authorLabel;
+    if (authorNameInput) authorNameInput.placeholder = t.authorPlaceholder;
+
+    if (lblAuthorHandle) lblAuthorHandle.textContent = t.roleLabel;
+    if (authorHandleInput) authorHandleInput.placeholder = t.rolePlaceholder;
+
+    if (lblRating) lblRating.textContent = t.ratingLabel;
+    if (lblQuoteText) lblQuoteText.textContent = t.quoteLabel;
+    if (quoteTextInput) quoteTextInput.placeholder = t.quotePlaceholder;
+
+    if (upiText) upiText.textContent = t.upiProof;
+    if (lblSourceUrl) lblSourceUrl.textContent = t.sourceUrlLabel;
+    if (saveText) saveText.textContent = t.saveBtn;
+
+    if (copyLinkText) copyLinkText.textContent = t.copyLinkBtn;
+    if (copySafeInviteText) copySafeInviteText.textContent = t.copySafeInviteBtn;
+
+    if (searchInput) searchInput.placeholder = t.searchInputPlaceholder;
+    if (searchEmptyText) searchEmptyText.textContent = t.searchEmpty;
+  }
+
   // ─────────────────────────────────────────────────────────────
   // 1. TRIAL ENGINE & ₹100/MO SUBSCRIPTION SYSTEM
   // ─────────────────────────────────────────────────────────────
   const storageData = await chrome.storage.local.get([
+    'extLang',
     'trialStart',
     'isProUser',
     'proExpiresAt',
@@ -63,6 +174,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     'cachedReviews',
     'quickClip'
   ]);
+
+  if (storageData.extLang) {
+    applyExtensionLanguage(storageData.extLang);
+  } else {
+    applyExtensionLanguage('en');
+  }
+
+  if (extLangEn) {
+    extLangEn.addEventListener('click', async () => {
+      applyExtensionLanguage('en');
+      await chrome.storage.local.set({ extLang: 'en' });
+    });
+  }
+
+  if (extLangHi) {
+    extLangHi.addEventListener('click', async () => {
+      applyExtensionLanguage('hi');
+      await chrome.storage.local.set({ extLang: 'hi' });
+    });
+  }
 
   let trialStart = storageData.trialStart;
   if (!trialStart) {
@@ -333,21 +464,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       const data = await res.json().catch(() => ({}));
 
       if (res.ok && (data.success || data.importedCount)) {
-        showStatus(clipStatus, '✨ Saved to Proof Vault successfully!', 'success');
+        const t = EXT_I18N[currentExtLang] || EXT_I18N.en;
+        showStatus(clipStatus, t.savedSuccess, 'success');
         quoteTextInput.value = '';
         authorNameInput.value = '';
         authorHandleInput.value = '';
         isPaymentProofInput.checked = false;
         isPolished = false;
-        hinglishBtn.textContent = '🪄 Hinglish Polish';
+        hinglishBtn.textContent = t.hinglishBtn || '🪄 Hinglish Polish';
       } else {
         showStatus(clipStatus, data.error || 'Failed to save review. Please check your Project ID.', 'error');
       }
     } catch {
       showStatus(clipStatus, 'Network error. Ensure your PandaPraise instance is reachable.', 'error');
     } finally {
+      const t = EXT_I18N[currentExtLang] || EXT_I18N.en;
       saveBtn.disabled = false;
-      saveText.textContent = 'Save to Proof Vault';
+      saveText.textContent = t.saveBtn;
       saveSpinner.classList.add('hidden');
     }
   });
@@ -370,12 +503,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const slug = getActiveSlug();
     if (!slug) return;
 
-    const formUrl = `https://pandapraise.com/c/${encodeURIComponent(slug)}`;
+    const langParam = currentExtLang === 'hi' ? '?lang=hi' : '';
+    const formUrl = `https://pandapraise.com/c/${encodeURIComponent(slug)}${langParam}`;
+    const t = EXT_I18N[currentExtLang] || EXT_I18N.en;
     navigator.clipboard.writeText(formUrl).then(() => {
-      const originalText = copyFormLinkBtn.textContent;
-      copyFormLinkBtn.textContent = '✓ Copied Link!';
+      const originalText = copyLinkText ? copyLinkText.textContent : copyFormLinkBtn.textContent;
+      if (copyLinkText) copyLinkText.textContent = t.copiedLink;
+      else copyFormLinkBtn.textContent = t.copiedLink;
       setTimeout(() => {
-        copyFormLinkBtn.textContent = originalText;
+        if (copyLinkText) copyLinkText.textContent = originalText;
+        else copyFormLinkBtn.textContent = originalText;
       }, 2000);
     });
   });
@@ -386,13 +523,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       const slug = getActiveSlug();
       if (!slug) return;
 
-      const formUrl = `https://pandapraise.com/c/${encodeURIComponent(slug)}`;
-      const safeInviteMsg = `Hi! Could you take 30 seconds to share quick feedback on our work together? (100% safe link, no login, app, or password needed): ${formUrl}`;
+      const langParam = currentExtLang === 'hi' ? '?lang=hi' : '';
+      const formUrl = `https://pandapraise.com/c/${encodeURIComponent(slug)}${langParam}`;
+      const t = EXT_I18N[currentExtLang] || EXT_I18N.en;
+      const safeInviteMsg = t.safeInviteTemplate(formUrl);
       navigator.clipboard.writeText(safeInviteMsg).then(() => {
-        const originalText = copySafeInviteBtn.textContent;
-        copySafeInviteBtn.textContent = '✓ Copied Safe Invite!';
+        const originalText = copySafeInviteText ? copySafeInviteText.textContent : copySafeInviteBtn.textContent;
+        if (copySafeInviteText) copySafeInviteText.textContent = t.copiedInvite;
+        else copySafeInviteBtn.textContent = t.copiedInvite;
         setTimeout(() => {
-          copySafeInviteBtn.textContent = originalText;
+          if (copySafeInviteText) copySafeInviteText.textContent = originalText;
+          else copySafeInviteBtn.textContent = originalText;
         }, 2000);
       });
     });

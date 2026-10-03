@@ -135,12 +135,18 @@ export function deduplicateRepeatedString(str?: string | null): string {
 /**
  * Cleans brand or product names by deduplicating and filtering out generic form prompts
  * like "Share Your Experience", "Rate your experience", or "Customer Testimonials".
+ * Also strips trailing "'s Testimonials" or " Testimonials" so customer sees the business name.
  */
 export function cleanBrandOrProductName(raw?: string | null): string {
   const deduped = deduplicateRepeatedString(raw);
   if (!deduped) return '';
 
-  const lower = deduped.toLowerCase();
+  let cleaned = deduped.trim();
+  // Strip trailing "'s Testimonials", "'s Reviews", " Testimonials", " Reviews"
+  cleaned = cleaned.replace(/['’]s\s+(testimonials|testimonial|reviews|review)\b/gi, '').trim();
+  cleaned = cleaned.replace(/\s+(testimonials|testimonial|reviews|review)\b/gi, '').trim();
+
+  const lower = cleaned.toLowerCase();
   if (lower.includes('pulse ai')) {
     return 'Panda Praise';
   }
@@ -154,10 +160,12 @@ export function cleanBrandOrProductName(raw?: string | null): string {
     lower === 'feedback' ||
     lower === 'demo product' ||
     lower === 'our product' ||
-    lower === 'our service'
+    lower === 'our service' ||
+    lower === 'testimonials' ||
+    lower === 'reviews'
   ) {
     return '';
   }
 
-  return deduped;
+  return cleaned;
 }

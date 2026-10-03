@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { COLLECTOR_TRANSLATIONS, CollectorLang } from '../collectorI18n';
+import { cleanBrandOrProductName } from '../security';
 
 describe('Collector Bilingual (English & Hinglish) i18n Suite', () => {
   const languages: CollectorLang[] = ['en', 'hi'];
@@ -23,6 +24,15 @@ describe('Collector Bilingual (English & Hinglish) i18n Suite', () => {
       expect(t.livePreview.badge).toBeTruthy();
       expect(t.successModal.viralBtn).toBeTruthy();
     });
+  });
+
+  it('cleans business names by stripping redundant owner testimonials suffixes', () => {
+    expect(cleanBrandOrProductName("Gopal's Testimonials")).toBe('Gopal');
+    expect(cleanBrandOrProductName("Gopal’s Testimonials")).toBe('Gopal');
+    expect(cleanBrandOrProductName("Acme Testimonials")).toBe('Acme');
+    expect(cleanBrandOrProductName("Rahul's Reviews")).toBe('Rahul');
+    expect(cleanBrandOrProductName("Panda Praise")).toBe('Panda Praise');
+    expect(cleanBrandOrProductName("Testimonials")).toBe('');
   });
 
   it('generates friendly brand-interpolated guarantee messages in English and Hinglish', () => {
@@ -51,3 +61,4 @@ describe('Collector Bilingual (English & Hinglish) i18n Suite', () => {
     expect(COLLECTOR_TRANSLATIONS.hi.positiveForm.suggestedPrompts.length).toBeGreaterThanOrEqual(3);
   });
 });
+

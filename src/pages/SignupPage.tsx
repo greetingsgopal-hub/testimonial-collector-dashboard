@@ -73,9 +73,9 @@ export const SignupPage: React.FC = () => {
       analytics.viralCollectionLinkGenerated();
 
       // Ensure project name is neutral or based on the new user (Requirement 10: NEVER name Customer B after Business A!)
-      const rawName = viralContext?.customerFirstName || viralContext?.customerName || userEmail.split('@')[0] || 'My';
+      const rawName = viralContext?.customerFirstName || viralContext?.customerName || userEmail.split('@')[0] || 'My Business';
       const cleanFirstName = rawName.trim().split(' ')[0];
-      const newBusinessName = `${cleanFirstName}'s Testimonials`;
+      const newBusinessName = cleanFirstName || 'My Business';
       const formTitle = `Share your experience with ${newBusinessName}`;
 
       if (project?.id && updateProjectDetails) {

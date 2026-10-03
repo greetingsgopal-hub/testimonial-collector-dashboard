@@ -76,8 +76,8 @@ export const PublicCollectorPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedReview, setSubmittedReview] = useState<Review | null>(null);
 
-  const displayBrand = cleanBrandOrProductName(project?.name || formConfig?.settings?.brandName);
-  const displayProductName = displayBrand || 'our product';
+  const displayBrand = cleanBrandOrProductName(formConfig?.settings?.brandName) || cleanBrandOrProductName(project?.name);
+  const displayProductName = displayBrand || 'our business';
   const cleanedTitle = deduplicateRepeatedString(formConfig?.title) || 'Share Your Experience';
 
   const pageTitle = displayBrand && displayBrand.toLowerCase() !== 'panda praise'
@@ -368,37 +368,8 @@ export const PublicCollectorPage = () => {
         
         {/* ── STEP 1: INITIAL 5-STAR RATING CARD ── */}
         {step === 'rating' && (
-          <div className="w-full max-w-lg bg-white rounded-3xl border border-emerald-100 shadow-xl shadow-emerald-950/5 p-7 sm:p-10 text-center space-y-5 sm:space-y-6 animate-scale-in">
+          <div className="w-full max-w-lg bg-white rounded-3xl border border-emerald-100 shadow-xl shadow-emerald-950/5 p-7 sm:p-10 text-center space-y-6 animate-scale-in">
             
-            {/* Card Language Quick Switcher */}
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <span className="text-[11px] font-semibold text-slate-500">Language / भाषा:</span>
-              <div className="inline-flex items-center p-0.5 bg-slate-100 rounded-full border border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => handleSetLang('en')}
-                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
-                    lang === 'en'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  🇬🇧 English
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSetLang('hi')}
-                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
-                    lang === 'hi'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  🇮🇳 Hinglish
-                </button>
-              </div>
-            </div>
-
             {/* Safe Feedback Guarantee Badge */}
             <div className="mx-auto max-w-sm bg-gradient-to-r from-emerald-50 to-teal-50/70 border border-emerald-200/80 rounded-2xl p-3 flex items-center gap-3 text-left">
               <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
