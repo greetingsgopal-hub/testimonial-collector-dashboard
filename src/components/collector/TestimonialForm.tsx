@@ -29,48 +29,15 @@ import {
   INSPIRATION_STARTERS, 
   TestimonialTone 
 } from '../../lib/ai-assistant';
+import { CollectorLang, COLLECTOR_TRANSLATIONS } from '../../lib/collectorI18n';
 
 interface TestimonialFormProps {
   formData: ReviewInput;
   setFormData: React.Dispatch<React.SetStateAction<ReviewInput>>;
   onSubmit: (data: ReviewInput) => Promise<void>;
   isSubmitting: boolean;
+  lang?: CollectorLang;
 }
-
-const RATING_DESCRIPTIONS: Record<number, string> = {
-  1: '😞 Disappointing (1/5)',
-  2: '😐 Needs Improvement (2/5)',
-  3: '🙂 Met Expectations (3/5)',
-  4: '😊 Very Satisfied (4/5)',
-  5: '🚀 Absolutely Phenomenal! (5/5)',
-};
-
-const SENJA_GUIDED_QUESTIONS = [
-  {
-    icon: '🎯',
-    label: 'The Challenge',
-    prompt: 'What problem were you trying to solve before using this?',
-    starter: 'Before finding this, our biggest challenge was ',
-  },
-  {
-    icon: '📈',
-    label: 'The Outcome',
-    prompt: 'What specific metric or result improved the most?',
-    starter: 'Since adopting it, the most noticeable result has been ',
-  },
-  {
-    icon: '💬',
-    label: 'Recommendation',
-    prompt: 'What would you say to someone considering trying it?',
-    starter: 'To anyone considering this, I would say: ',
-  },
-];
-
-const SUGGESTED_PROMPTS = [
-  'What problem did we solve for you?',
-  'What metric or result improved most?',
-  'How was your onboarding experience?',
-];
 
 const PRESET_AVATARS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
@@ -87,7 +54,9 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
   setFormData,
   onSubmit,
   isSubmitting,
+  lang = 'en',
 }) => {
+  const t = COLLECTOR_TRANSLATIONS[lang].positiveForm;
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [newTagInput, setNewTagInput] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -246,13 +215,13 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
       <div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-[#6701e6] text-xs font-semibold uppercase tracking-wider mb-2 border border-purple-200/80">
           <Sparkles className="w-3.5 h-3.5" />
-          Customer Voice
+          {t.badge}
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-gray-950 tracking-tight">
-          Share Your Feedback
+          {t.title}
         </h2>
         <p className="text-sm text-gray-600 mt-1 font-sans">
-          Your honest experience helps us improve and helps others make informed decisions.
+          {t.subtitle}
         </p>
       </div>
 
@@ -272,7 +241,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5" />
-            <span>Write Review</span>
+            <span>{t.modeText}</span>
           </button>
 
           <button
@@ -288,13 +257,13 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
             }`}
           >
             <Video className="w-3.5 h-3.5" />
-            <span>Video Review</span>
+            <span>{t.modeVideo}</span>
           </button>
         </div>
 
         <span className="text-[11px] text-purple-700 font-medium px-2 flex items-center gap-1.5 self-center sm:self-auto">
           <Gift className="w-3.5 h-3.5 text-purple-600" />
-          <span>Reward unlocked on submission!</span>
+          <span>{t.rewardNotice}</span>
         </span>
       </div>
 
@@ -302,18 +271,18 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
       {isVideoMode && (
         <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-2 animate-fade-in">
           <label className="block text-xs font-bold uppercase tracking-wider text-[#6701e6]">
-            Video Link (Loom, YouTube, Vimeo, or MP4) <span className="text-pink-500">*</span>
+            {t.videoLabel} <span className="text-pink-500">*</span>
           </label>
           <input
             type="url"
-            placeholder="https://www.loom.com/share/... or https://youtube.com/watch?v=..."
+            placeholder={t.videoPlaceholder}
             value={formData.videoUrl || ''}
             onChange={(e) => setFormData((p) => ({ ...p, videoUrl: e.target.value }))}
             className="w-full px-4 py-2.5 rounded-xl text-xs sm:text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
             required={isVideoMode}
           />
           <p className="text-[11px] text-gray-500">
-            Paste your Loom, YouTube, or Vimeo recording link. It will automatically render on the live social wall!
+            {t.videoHelp}
           </p>
         </div>
       )}
@@ -321,7 +290,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
       {/* Rating Picker */}
       <div>
         <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
-          Your Overall Rating <span className="text-pink-500">*</span>
+          {t.ratingLabel} <span className="text-pink-500">*</span>
         </label>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5 p-2 rounded-2xl bg-gray-50 border border-gray-200 shadow-xs">
@@ -345,7 +314,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
             ))}
           </div>
           <span className="text-xs sm:text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-            {RATING_DESCRIPTIONS[activeRating]}
+            {t.ratingDescriptions[activeRating] || `${activeRating}/5`}
           </span>
         </div>
       </div>
@@ -353,11 +322,11 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
       {/* Review Headline / Title */}
       <div>
         <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-          Headline (Optional)
+          {t.headlineLabel}
         </label>
         <input
           type="text"
-          placeholder="e.g. Best developer tool we adopted this year"
+          placeholder={t.headlinePlaceholder}
           value={formData.title || ''}
           onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
           className="w-full px-4 py-2.5 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
@@ -370,11 +339,11 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-gray-700">
-              Your Testimonial <span className="text-pink-500">*</span>
+              {t.contentLabel} <span className="text-pink-500">*</span>
             </label>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-[10px] font-semibold text-[#6701e6]">
               <Sparkles className="w-2.5 h-2.5" />
-              AI Assistant
+              {t.aiAssistant}
             </span>
           </div>
           
@@ -385,7 +354,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
               {impact.label}
             </span>
             <span className="text-xs text-gray-500">
-              {formData.content.length} chars
+              {formData.content.length} {t.charsCount}
             </span>
           </div>
         </div>
@@ -400,7 +369,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
               className="px-3.5 py-1.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-50"
             >
               <Wand2 className={`w-3.5 h-3.5 ${isPolishing ? 'animate-spin' : ''}`} />
-              <span>{isPolishing ? 'Enhancing...' : '✨ Polish with AI'}</span>
+              <span>{isPolishing ? t.polishingBtn : t.polishBtn}</span>
             </button>
 
             {originalContent !== null && (
@@ -408,36 +377,36 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
                 type="button"
                 onClick={handleUndo}
                 className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
-                title="Undo AI edit"
+                title="Undo edit"
               >
                 <RotateCcw className="w-3 h-3" />
-                <span>Undo</span>
+                <span>{t.undoBtn}</span>
               </button>
             )}
 
             {aiSuccessBadge && (
               <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1 animate-fade-in">
                 <Check className="w-3 h-3" />
-                {aiSuccessBadge}
+                {t.polishedBadge}
               </span>
             )}
           </div>
 
           {/* Tone Selector */}
           <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-gray-200 shadow-xs">
-            <span className="text-[10px] text-gray-500 uppercase px-1 font-semibold">Tone:</span>
-            {(['enthusiastic', 'professional', 'concise'] as TestimonialTone[]).map((t) => (
+            <span className="text-[10px] text-gray-500 uppercase px-1 font-semibold">{t.toneLabel}</span>
+            {(['enthusiastic', 'professional', 'concise'] as TestimonialTone[]).map((toneKey) => (
               <button
-                key={t}
+                key={toneKey}
                 type="button"
-                onClick={() => setTone(t)}
+                onClick={() => setTone(toneKey)}
                 className={`px-2.5 py-0.5 rounded-lg text-[10px] font-medium capitalize transition-colors cursor-pointer ${
-                  tone === t
+                  tone === toneKey
                     ? 'bg-[#6701e6] text-white shadow-xs'
                     : 'text-gray-600 hover:text-gray-950 hover:bg-gray-100'
                 }`}
               >
-                {t}
+                {t.tones[toneKey] || toneKey}
               </button>
             ))}
           </div>
@@ -445,7 +414,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
 
         <textarea
           rows={4}
-          placeholder="Tell us what you loved, the results you achieved, or how it helped your team... (or type rough notes and click ✨ Polish with AI!)"
+          placeholder={t.contentPlaceholder}
           value={formData.content}
           onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
           className="w-full px-4 py-3 rounded-2xl text-sm leading-relaxed bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
@@ -457,7 +426,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-[11px] font-semibold text-gray-500 flex items-center gap-1">
               <Zap className="w-3 h-3 text-amber-500" />
-              1-Click Starters:
+              {t.startersLabel}
             </span>
             {INSPIRATION_STARTERS.map((starter) => (
               <button
@@ -478,8 +447,8 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] text-gray-500 font-medium">Quick ideas:</span>
-            {SUGGESTED_PROMPTS.map((prompt) => (
+            <span className="text-[11px] text-gray-500 font-medium">{t.quickIdeasLabel}</span>
+            {t.suggestedPrompts.map((prompt: string) => (
               <button
                 key={prompt}
                 type="button"
@@ -500,10 +469,10 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           <div className="pt-3 border-t border-gray-200">
             <span className="text-[11px] font-bold text-gray-700 mb-2 flex items-center gap-1">
               <HelpCircle className="w-3.5 h-3.5 text-[#6701e6]" />
-              Not sure what to write? Click a question to start your draft:
+              {t.guidedHeading}
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1.5">
-              {SENJA_GUIDED_QUESTIONS.map((item) => (
+              {t.guidedQuestions.map((item) => (
                 <button
                   key={item.label}
                   type="button"
@@ -534,13 +503,13 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         {/* Name */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-            Full Name <span className="text-pink-500">*</span>
+            {t.fullNameLabel} <span className="text-pink-500">*</span>
           </label>
           <div className="relative">
             <User className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
             <input
               type="text"
-              placeholder="Alex Rivera"
+              placeholder={t.fullNamePlaceholder}
               value={formData.name}
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
@@ -552,17 +521,17 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         {/* Email */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-            Email Address <span className="text-pink-500">*</span>
+            {t.emailLabel} <span className="text-pink-500">*</span>
             <span className="text-[10px] text-emerald-700 font-semibold lowercase ml-1.5 inline-flex items-center gap-0.5 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
               <ShieldCheck className="w-3 h-3 text-emerald-600" />
-              (kept private)
+              {t.emailPrivateBadge}
             </span>
           </label>
           <div className="relative">
             <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
             <input
               type="email"
-              placeholder="alex@company.com"
+              placeholder={t.emailPlaceholder}
               value={formData.email}
               onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
@@ -574,13 +543,13 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         {/* Role */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-            Role / Job Title <span className="text-pink-500">*</span>
+            {t.roleLabel} <span className="text-pink-500">*</span>
           </label>
           <div className="relative">
             <Briefcase className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
             <input
               type="text"
-              placeholder="Senior Engineer"
+              placeholder={t.rolePlaceholder}
               value={formData.role}
               onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
@@ -592,13 +561,13 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         {/* Company */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-            Company / Organization
+            {t.companyLabel}
           </label>
           <div className="relative">
             <Building2 className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
             <input
               type="text"
-              placeholder="Acme Corp"
+              placeholder={t.companyPlaceholder}
               value={formData.company || ''}
               onChange={(e) => setFormData((prev) => ({ ...prev, company: e.target.value }))}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
@@ -610,7 +579,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
       {/* Avatar / Photo Selection */}
       <div className="p-4 rounded-2xl bg-gray-50/70 border border-gray-200 space-y-3">
         <label className="block text-xs font-bold uppercase tracking-wider text-gray-700">
-          Your Photo / Avatar
+          {t.photoLabel}
         </label>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -628,7 +597,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               <label className="px-3.5 py-1.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer transition-colors">
                 <Upload className="w-3.5 h-3.5" />
-                <span>{isUploadingPhoto ? 'Processing...' : 'Upload Photo'}</span>
+                <span>{isUploadingPhoto ? t.processingPhoto : t.uploadPhotoBtn}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -645,14 +614,14 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
                   className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <Trash2 className="w-3 h-3 text-red-500" />
-                  <span>Remove</span>
+                  <span>{t.removePhotoBtn}</span>
                 </button>
               )}
             </div>
 
             {/* Presets & URL Fallback */}
             <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-gray-500">
-              <span className="font-medium">Or pick preset:</span>
+              <span className="font-medium">{t.pickPreset}</span>
               <div className="flex items-center gap-1.5">
                 {PRESET_AVATARS.map((url, idx) => (
                   <button
@@ -675,7 +644,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
       {/* Category / Topic Tags */}
       <div>
         <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-          Tags / Highlights
+          {t.tagsLabel}
         </label>
         <div className="flex flex-wrap gap-1.5 mb-2">
           {COMMON_TAGS.map((tag) => {
@@ -699,7 +668,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         </div>
         <input
           type="text"
-          placeholder="Type custom tag and press Enter..."
+          placeholder={t.tagsPlaceholder}
           value={newTagInput}
           onChange={(e) => setNewTagInput(e.target.value)}
           onKeyDown={handleAddCustomTag}
@@ -718,10 +687,10 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
             required
           />
           <span className="text-xs text-gray-700 leading-normal font-medium font-sans">
-            I give permission to feature this testimonial on your public website, marketing materials, and social proof widgets.
+            {t.consentText}
             {' '}
             <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline text-gray-500 hover:text-gray-700">
-              Privacy Policy
+              {t.privacyLink}
             </a>
           </span>
         </label>
@@ -744,12 +713,12 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         {isSubmitting ? (
           <>
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span>Submitting Review...</span>
+            <span>{t.submittingBtn}</span>
           </>
         ) : (
           <>
             <Send className="w-4 h-4" />
-            <span>Submit Testimonial</span>
+            <span>{t.submitBtn}</span>
           </>
         )}
       </button>

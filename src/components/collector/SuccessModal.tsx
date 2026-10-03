@@ -5,6 +5,7 @@ import { CheckCircle2, ArrowRight, PlusCircle, Sparkles, Copy, Check, X } from '
 import { Review } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { analytics } from '../../lib/analytics';
+import { CollectorLang, COLLECTOR_TRANSLATIONS } from '../../lib/collectorI18n';
 
 interface SuccessModalProps {
   review: Review | null;
@@ -15,6 +16,7 @@ interface SuccessModalProps {
   businessName?: string;
   projectId?: string;
   formId?: string;
+  lang?: CollectorLang;
 }
 
 export const SuccessModal: React.FC<SuccessModalProps> = ({
@@ -26,7 +28,9 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
   businessName,
   projectId,
   formId,
+  lang = 'en',
 }) => {
+  const t = COLLECTOR_TRANSLATIONS[lang].successModal;
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -110,14 +114,14 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
 
         {/* Clear Status Badge */}
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold mb-3">
-          <span>✓ Testimonial submitted</span>
+          <span>{t.submittedBadge}</span>
         </div>
 
         <h3 className="text-xl sm:text-2xl font-extrabold font-display text-gray-950 mb-2 leading-snug">
-          Thank you{review.name ? `, ${review.name}` : ''}!
+          {t.title(review.name)}
         </h3>
         <p className="text-xs sm:text-sm text-gray-600 mb-5 leading-relaxed font-sans">
-          Your testimonial has been sent to <strong className="text-gray-900 font-semibold">{recipientBusiness}</strong>. It will appear on their website once approved.
+          {t.desc(recipientBusiness)}
         </p>
 
         {/* Review Reference ID (Dashboard view only) */}
@@ -148,10 +152,10 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               </div>
 
               <h4 className="text-sm sm:text-base font-extrabold text-gray-950 font-display leading-snug">
-                Want to collect testimonials for your own business?
+                {t.viralHeading}
               </h4>
               <p className="text-xs text-gray-600 mt-1 leading-relaxed font-sans">
-                Create your free Panda Praise account and get your own testimonial link.
+                {t.viralDesc}
               </p>
 
               <div className="mt-3.5 space-y-2.5">
@@ -159,11 +163,11 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                   onClick={handleViralSignup}
                   className="w-full py-3 px-4 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-95 shadow-md cursor-pointer"
                 >
-                  <span>Create My Free Panda Praise</span>
+                  <span>{t.viralBtn}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <div className="flex items-center justify-between text-[11px] text-gray-500 pt-0.5">
-                  <span>No credit card required.</span>
+                  <span>{t.noCard}</span>
                   <button
                     onClick={() => {
                       onClose();
@@ -171,7 +175,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                     }}
                     className="text-[#6701e6] font-semibold hover:underline cursor-pointer"
                   >
-                    Already have an account? Sign in →
+                    {t.alreadyHaveAccount}
                   </button>
                 </div>
 

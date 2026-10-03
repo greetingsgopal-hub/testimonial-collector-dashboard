@@ -1,19 +1,22 @@
 import React from 'react';
 import { Star, Quote, CheckCircle2, Building2, Play, Video } from 'lucide-react';
 import { ReviewInput } from '../../types';
+import { CollectorLang, COLLECTOR_TRANSLATIONS } from '../../lib/collectorI18n';
 
 interface LivePreviewCardProps {
   data: ReviewInput;
+  lang?: CollectorLang;
 }
 
-export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({ data }) => {
+export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({ data, lang = 'en' }) => {
+  const t = COLLECTOR_TRANSLATIONS[lang].livePreview;
   const stars = [1, 2, 3, 4, 5];
 
   return (
     <div className="relative">
       <div className="absolute -top-3 left-4 z-10 px-3 py-0.5 rounded-full bg-[#6701e6] text-white text-[11px] font-bold tracking-wide uppercase shadow-md flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-        Live Preview
+        {t.badge}
       </div>
 
       <div className="bg-white rounded-3xl p-6 sm:p-7 border border-gray-200 shadow-xl relative overflow-hidden group text-gray-900">
@@ -54,7 +57,7 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({ data }) => {
             <div className="min-w-0 flex-1">
               <div className="text-xs font-bold text-[#6701e6] flex items-center gap-1.5">
                 <Video className="w-3.5 h-3.5 text-[#6701e6]" />
-                <span>Video Testimonial Attached</span>
+                <span>{t.videoAttached}</span>
               </div>
               <p className="text-[11px] text-gray-600 truncate">{data.videoUrl}</p>
             </div>
@@ -67,7 +70,7 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({ data }) => {
             `"${data.content}"`
           ) : (
             <span className="text-gray-400 not-italic">
-              Your feedback and testimonial will appear here in real time as you fill out the form...
+              {t.placeholderContent}
             </span>
           )}
         </p>
