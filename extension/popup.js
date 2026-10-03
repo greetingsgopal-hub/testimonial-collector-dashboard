@@ -49,6 +49,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const paywallOverlay = document.getElementById('paywall-overlay');
   const licenseKeyInput = document.getElementById('license-key-input');
   const activateKeyBtn = document.getElementById('activate-key-btn');
+  const paywallTitle = document.getElementById('paywall-title');
+  const paywallPitch = document.getElementById('paywall-pitch');
+  const paywallNote = document.getElementById('paywall-note');
+  const paywallBtn = document.getElementById('paywall-btn');
+  const paywallCloseBtn = document.getElementById('paywall-close-btn');
+  const previewPaywallBtn = document.getElementById('preview-paywall-btn');
 
   // Language elements
   const extLangEn = document.getElementById('ext-lang-en');
@@ -90,6 +96,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       copiedLink: '✓ Copied Link!',
       copiedInvite: '✓ Copied Safe Invite!',
       savedSuccess: '✨ Saved to Proof Vault successfully!',
+      previewUpgradeBtn: '👑 View Pro Upgrade Screen',
+      paywallTitle: 'Your 7-Day Trial has Ended',
+      paywallPitch: 'Keep unlimited 1-click WhatsApp clipping, in-feed social buttons, and sales chat proof drops.',
+      paywallNote: 'Supports UPI (GPay, PhonePe, Paytm), NetBanking & Cards',
+      paywallBtn: 'Upgrade for ₹100/month',
+      licensePlaceholder: 'Have an activation key?',
+      activateBtn: 'Activate',
     },
     hi: {
       brandSub: 'WhatsApp aur Social Media Proof Clipper',
@@ -115,6 +128,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       copiedLink: '✓ Link Copy Ho Gaya!',
       copiedInvite: '✓ Safe Invite Copy Ho Gaya!',
       savedSuccess: '✨ Vault mein save ho gaya!',
+      previewUpgradeBtn: '👑 Pro Upgrade Screen Dekhein',
+      paywallTitle: 'Aapka 7-Day Free Trial Samapt Ho Gaya',
+      paywallPitch: 'Unlimited 1-click WhatsApp clipping, social buttons aur sales proof drop jari rakhne ke liye Pro upgrade karein.',
+      paywallNote: 'UPI (GPay, PhonePe, Paytm), NetBanking aur Cards supported',
+      paywallBtn: '₹100/mahina mein Upgrade Karein 🚀',
+      licensePlaceholder: 'Activation key hai?',
+      activateBtn: 'Activate Karein',
     }
   };
 
@@ -158,6 +178,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (searchInput) searchInput.placeholder = t.searchInputPlaceholder;
     if (searchEmptyText) searchEmptyText.textContent = t.searchEmpty;
+
+    if (previewPaywallBtn) previewPaywallBtn.textContent = t.previewUpgradeBtn;
+    if (paywallTitle) paywallTitle.textContent = t.paywallTitle;
+    if (paywallPitch) paywallPitch.textContent = t.paywallPitch;
+    if (paywallNote) paywallNote.textContent = t.paywallNote;
+    if (paywallBtn) paywallBtn.textContent = t.paywallBtn;
+    if (licenseKeyInput) licenseKeyInput.placeholder = t.licensePlaceholder;
+    if (activateKeyBtn) activateKeyBtn.textContent = t.activateBtn;
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -237,6 +265,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         alert('Please enter a valid activation key or purchase a subscription.');
       }
+    });
+  }
+
+  if (previewPaywallBtn) {
+    previewPaywallBtn.addEventListener('click', () => {
+      paywallOverlay.classList.remove('hidden');
+    });
+  }
+
+  if (paywallCloseBtn) {
+    paywallCloseBtn.addEventListener('click', () => {
+      paywallOverlay.classList.add('hidden');
     });
   }
 

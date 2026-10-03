@@ -558,6 +558,28 @@ small {
   background: #059669;
 }
 
+.preview-upgrade-btn {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  text-align: center;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preview-upgrade-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
 /* Paywall Modal */
 .paywall-modal {
   position: absolute;
@@ -579,11 +601,33 @@ small {
 }
 
 .paywall-content {
+  position: relative;
   background: #ffffff;
   border-radius: 16px;
-  padding: 22px 18px;
+  padding: 24px 18px 20px;
   text-align: center;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  width: 100%;
+}
+
+.paywall-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  font-weight: 700;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.paywall-close-btn:hover {
+  color: #0f172a;
+  background: #f1f5f9;
 }
 
 .paywall-icon {

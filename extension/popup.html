@@ -172,6 +172,9 @@
           <a href="https://pandapraise.com/pricing?plan=extension_inr100" target="_blank" class="upgrade-btn">
             Manage Subscription (UPI / Card)
           </a>
+          <button type="button" id="preview-paywall-btn" class="preview-upgrade-btn">
+            👑 View Pro Upgrade Screen
+          </button>
         </div>
 
         <div id="settings-status" class="status-msg hidden"></div>
@@ -180,18 +183,19 @@
       <!-- ── PAYWALL OVERLAY (TRIGGERS AFTER 7 DAYS TRIAL) ── -->
       <section id="paywall-overlay" class="paywall-modal hidden">
         <div class="paywall-content">
+          <button type="button" id="paywall-close-btn" class="paywall-close-btn" aria-label="Close">&times;</button>
           <div class="paywall-icon">🐼✨</div>
-          <h3>Your 7-Day Trial has Ended</h3>
-          <p class="paywall-pitch">
+          <h3 id="paywall-title">Your 7-Day Trial has Ended</h3>
+          <p id="paywall-pitch" class="paywall-pitch">
             Keep unlimited 1-click WhatsApp clipping, in-feed social buttons, and sales chat proof drops.
           </p>
           <div class="pricing-badge">
             <span class="inr-price">₹100</span>
             <span class="inr-period">/ month (₹3/day)</span>
           </div>
-          <p class="inr-note">Supports UPI (GPay, PhonePe, Paytm), NetBanking & Cards</p>
+          <p id="paywall-note" class="inr-note">Supports UPI (GPay, PhonePe, Paytm), NetBanking & Cards</p>
 
-          <a href="https://pandapraise.com/pricing?plan=extension_inr100" target="_blank" class="paywall-btn">
+          <a id="paywall-btn" href="https://pandapraise.com/pricing?plan=extension_inr100" target="_blank" class="paywall-btn">
             Upgrade for ₹100/month
           </a>
 
