@@ -198,7 +198,7 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
               className="w-full px-3.5 py-2 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6]"
             />
             <p className="text-[11px] text-gray-500 mt-1">
-              Used in the rating question: "Do you enjoy using {cleanBrandOrProductName(brandName) || 'our product'}?"
+              Used in the rating question: "Did you like {cleanBrandOrProductName(brandName) || 'our business'}?"
             </p>
           </div>
 

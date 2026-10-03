@@ -22,7 +22,7 @@ export const COLLECTOR_TRANSLATIONS = {
       desc: (brand: string) => `No sign-in or payment needed. Your review goes directly to ${brand}.`,
     },
     ratingStep: {
-      question: (product: string) => `Do you enjoy using ${product}?`,
+      question: (product: string) => `Did you like ${product}?`,
       subtitle: 'On a scale of 1 to 5, how would you rate your experience?',
       continueBtn: 'Continue',
       seals: {
@@ -173,7 +173,7 @@ export const COLLECTOR_TRANSLATIONS = {
         `Koi sign-in ya payment nahi chahiye. Aapka review sidhe ${brand} ke paas jayega.`,
     },
     ratingStep: {
-      question: (product: string) => `Kya aapko ${product} use karna pasand aaya?`,
+      question: (product: string) => `Kya aapko ${product} pasand aaya?`,
       subtitle: '1 se 5 ke scale par, aap apna experience kaisa rate karenge?',
       continueBtn: 'Aage Badhein →',
       seals: {

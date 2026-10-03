@@ -60,5 +60,10 @@ describe('Collector Bilingual (English & Hinglish) i18n Suite', () => {
     expect(COLLECTOR_TRANSLATIONS.en.positiveForm.suggestedPrompts.length).toBeGreaterThanOrEqual(3);
     expect(COLLECTOR_TRANSLATIONS.hi.positiveForm.suggestedPrompts.length).toBeGreaterThanOrEqual(3);
   });
+
+  it('formats rating step question as "Did you like [brand]?" without using/use karna', () => {
+    expect(COLLECTOR_TRANSLATIONS.en.ratingStep.question('Gopal')).toBe('Did you like Gopal?');
+    expect(COLLECTOR_TRANSLATIONS.hi.ratingStep.question('Gopal')).toBe('Kya aapko Gopal pasand aaya?');
+  });
 });
 
