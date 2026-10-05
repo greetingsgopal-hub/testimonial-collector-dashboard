@@ -195,11 +195,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         const row = formSnapshot.docs[0];
         const data = row.data();
+        let loadedTitle = deduplicateRepeatedString(data.title) || 'Share your experience';
+        if (
+          loadedTitle.includes("Gopal's Testimonials") ||
+          loadedTitle.includes("Gopal’s Testimonials") ||
+          loadedTitle.toLowerCase().includes('testimonials') ||
+          loadedTitle.endsWith('Testimonial Form')
+        ) {
+          const cleanP = cleanBrandOrProductName(currentProj.name);
+          if (cleanP) {
+            loadedTitle = `Share your experience with ${cleanP}`;
+          }
+        }
         setCollectionForm({
           id: row.id,
           projectId: data.projectId,
           publicSlug: data.publicSlug,
-          title: deduplicateRepeatedString(data.title) || 'Share your experience',
+          title: loadedTitle,
           description: data.description,
           isActive: data.isActive,
           allowVideo: data.allowVideo,

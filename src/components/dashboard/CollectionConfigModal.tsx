@@ -17,6 +17,7 @@ import { cleanBrandOrProductName, deduplicateRepeatedString } from '../../lib/se
 interface CollectionConfigModalProps {
   collectionForm: CollectionForm | null;
   projectId?: string;
+  projectName?: string;
   onClose: () => void;
   onSaved: (form: CollectionForm) => void;
 }
@@ -24,15 +25,28 @@ interface CollectionConfigModalProps {
 export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
   collectionForm,
   projectId = 'proj-demo-1',
+  projectName,
   onClose,
   onSaved,
 }) => {
-  const [title, setTitle] = useState(
-    deduplicateRepeatedString(collectionForm?.title) || 'Share Your Experience'
-  );
-  const [brandName, setBrandName] = useState(
-    collectionForm?.settings?.brandName || (collectionForm as any)?.publicBrandName || ''
-  );
+  const fallbackBrand = cleanBrandOrProductName(projectName) || projectName || '';
+  const initialBrand =
+    collectionForm?.settings?.brandName || (collectionForm as any)?.publicBrandName || fallbackBrand;
+
+  const rawTitle = deduplicateRepeatedString(collectionForm?.title) || '';
+  const isStaleTitle =
+    !rawTitle ||
+    rawTitle.includes("Gopal's Testimonials") ||
+    rawTitle.includes("Gopal’s Testimonials") ||
+    rawTitle.toLowerCase().includes('testimonials') ||
+    rawTitle.endsWith('Testimonial Form');
+
+  const initialTitle = isStaleTitle
+    ? `Share your experience with ${initialBrand || fallbackBrand || 'our business'}`
+    : rawTitle;
+
+  const [title, setTitle] = useState(initialTitle);
+  const [brandName, setBrandName] = useState(initialBrand);
   const [description, setDescription] = useState(
     collectionForm?.description || 'Your honest feedback helps our team and community grow.'
   );

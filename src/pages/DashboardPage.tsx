@@ -410,6 +410,8 @@ export const DashboardPage = () => {
               onConfigureForm={() => setShowCollectionModal(true)}
               onSendInvites={handleCopyLink}
               onViewProof={() => setActiveTab('proof')}
+              reviews={reviews}
+              stats={stats}
             />
           )}
 
@@ -789,6 +791,7 @@ export const DashboardPage = () => {
         <CollectionConfigModal
           collectionForm={currentCollectionForm}
           projectId={activeProjectId}
+          projectName={project?.name}
           onClose={() => setShowCollectionModal(false)}
           onSaved={(updated: CollectionForm) => setCurrentCollectionForm(updated)}
         />
