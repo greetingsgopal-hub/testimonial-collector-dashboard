@@ -7,10 +7,8 @@ import {
   Download,
   CheckCircle2,
   MessageSquare,
-  Tag,
   Sparkles,
   Search,
-  BarChart3,
   Puzzle,
   Settings,
   ChevronDown,
@@ -190,20 +188,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               </span>
             )}
           </button>
-
-          <button
-            onClick={() => setActiveTab('tags')}
-            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-              activeTab === 'tags'
-                ? 'bg-zinc-950 text-white shadow-xs'
-                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Tag className="w-4 h-4 text-zinc-400" />
-              <span>Tags & Groups</span>
-            </div>
-          </button>
         </div>
 
         {/* Section: SHARE */}
@@ -237,24 +221,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             <div className="flex items-center gap-2.5">
               <Search className="w-4 h-4 text-zinc-400" />
               <span>Google Rich Snippets</span>
-            </div>
-          </button>
-        </div>
-
-        {/* Section: ANALYZE */}
-        <div className="space-y-1">
-          <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Intelligence</p>
-          <button
-            onClick={() => setActiveTab('analyze')}
-            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-              activeTab === 'analyze'
-                ? 'bg-zinc-950 text-white shadow-xs'
-                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <BarChart3 className="w-4 h-4 text-zinc-400" />
-              <span>Sentiment AI</span>
             </div>
           </button>
         </div>
