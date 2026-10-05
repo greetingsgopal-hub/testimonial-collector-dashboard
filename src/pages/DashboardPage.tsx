@@ -320,7 +320,6 @@ export const DashboardPage = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         proofCount={reviews.length}
-        feedbackCount={feedbackList.length}
       />
 
       {/* ── Main Content Area ── */}
