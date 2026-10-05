@@ -20,6 +20,8 @@ import {
   Sparkles,
   RefreshCw,
   ExternalLink,
+  Plus,
+  Key,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
@@ -362,6 +364,12 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
   const [googleError, setGoogleError] = useState('');
   const [googleImportResult, setGoogleImportResult] = useState<{ count: number } | null>(null);
   const [isGoogleConnected, setIsGoogleConnected] = useState<boolean | null>(null);
+  const [customGoogleApiKey, setCustomGoogleApiKey] = useState('');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [showAddReviewForm, setShowAddReviewForm] = useState(false);
+  const [newReviewAuthor, setNewReviewAuthor] = useState('');
+  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [newReviewText, setNewReviewText] = useState('');
 
   // CSV state (strict .csv only)
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -549,6 +557,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
         },
         body: JSON.stringify({
           url: googleMapsUrl.trim(),
+          apiKey: customGoogleApiKey.trim() || undefined,
         }),
       });
 
@@ -567,6 +576,27 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
     } finally {
       setIsGoogleLoading(false);
     }
+  };
+
+  const handleAddNewManualGoogleReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReviewText.trim()) return;
+
+    const newRev: GoogleImportReview = {
+      id: `manual_g_${Date.now()}`,
+      authorName: newReviewAuthor.trim() || 'Verified Customer',
+      rating: newReviewRating,
+      text: newReviewText.trim(),
+      date: new Date().toISOString(),
+      platformUrl: resolvedPlace?.googleMapsUri || googleMapsUrl,
+    };
+
+    setGoogleReviews((prev) => [newRev, ...prev]);
+    setSelectedReviewIds((prev) => [...prev, newRev.id]);
+    setNewReviewAuthor('');
+    setNewReviewText('');
+    setNewReviewRating(5);
+    setShowAddReviewForm(false);
   };
 
   const handleImportMapsReviews = async () => {
@@ -1708,13 +1738,29 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
                   <span>Paste Google Maps URL</span>
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Paste your Google Maps link or share link. Panda Praise will resolve your business profile and retrieve legally available reviews.
+                  Paste your Google Maps link, share link, or business name. Panda Praise will resolve your business profile and retrieve customer reviews.
                 </p>
+              </div>
+
+              {/* Official OAuth Tip */}
+              <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 flex items-start gap-3 text-xs text-blue-900 dark:text-blue-200">
+                <Sparkles className="w-4 h-4 text-[#4285F4] shrink-0 mt-0.5" />
+                <div className="flex-1 leading-relaxed">
+                  <span className="font-bold">Own this business on Google?</span> Connect your official Google account in{' '}
+                  <button
+                    type="button"
+                    onClick={() => setGoogleStep('choose')}
+                    className="font-bold underline hover:text-[#4285F4] cursor-pointer"
+                  >
+                    Method A (My business)
+                  </button>{' '}
+                  to sync all verified reviews with 100% authenticity and zero API key needed.
+                </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block">
-                  Google Maps URL *
+                  Google Maps URL or Business Name *
                 </label>
                 <div className="relative">
                   <Globe size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -1722,7 +1768,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
                     type="text"
                     value={googleMapsUrl}
                     onChange={(e) => setGoogleMapsUrl(e.target.value)}
-                    placeholder="e.g. https://maps.app.goo.gl/... or https://maps.google.com/..."
+                    placeholder="e.g. https://maps.app.goo.gl/... or https://maps.google.com/... or business name"
                     className="w-full pl-10 pr-4 py-3 text-sm rounded-xl
                              bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700
                              text-gray-900 dark:text-white placeholder-gray-400
@@ -1730,8 +1776,38 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
                   />
                 </div>
                 <p className="text-[11px] text-gray-400 dark:text-gray-500">
-                  💡 Tip: On Google Maps, click &quot;Share&quot; on your business listing and choose &quot;Copy link&quot;, then paste it here.
+                  💡 Tip: On Google Maps, click &quot;Share&quot; on your business listing and choose &quot;Copy link&quot;, or type your business name directly.
                 </p>
+              </div>
+
+              {/* Optional Custom API Key Accordion */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                  className="text-xs font-semibold text-[#6701e6] dark:text-purple-400 hover:underline flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Key size={13} />
+                  <span>{showApiKeyInput ? 'Hide Google Places API Key' : 'Have a Google Places API Key? (Optional)'}</span>
+                </button>
+
+                {showApiKeyInput && (
+                  <div className="mt-2.5 p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 space-y-2">
+                    <label className="text-[11px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
+                      Custom Google Places API Key
+                    </label>
+                    <input
+                      type="password"
+                      value={customGoogleApiKey}
+                      onChange={(e) => setCustomGoogleApiKey(e.target.value)}
+                      placeholder="AIzaSy..."
+                      className="w-full px-3.5 py-2 text-xs rounded-xl bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                    />
+                    <p className="text-[10px] text-gray-500">
+                      Optional: If provided, queries your Google Cloud Places API directly. If left blank, Panda Praise resolves via Google Maps public data automatically.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
@@ -1877,7 +1953,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
               </div>
 
               {/* Selection Toolbar */}
-              <div className="flex items-center justify-between bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs">
+              <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs">
                 <button
                   type="button"
                   onClick={toggleSelectAllReviews}
@@ -1889,19 +1965,111 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
                     <Square size={16} className="text-gray-400" />
                   )}
                   <span>
-                    {selectedReviewIds.length === googleReviews.length
+                    {selectedReviewIds.length === googleReviews.length && googleReviews.length > 0
                       ? 'Deselect All'
                       : 'Select All Reviews'}
                   </span>
                 </button>
 
-                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                  <span className="text-[#6701e6] dark:text-purple-400 font-bold">
-                    {selectedReviewIds.length}
-                  </span>{' '}
-                  of {googleReviews.length} selected
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddReviewForm(!showAddReviewForm)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#6701e6] border border-purple-200 text-xs font-semibold transition-all cursor-pointer"
+                  >
+                    <Plus size={13} />
+                    <span>Add Review</span>
+                  </button>
+
+                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                    <span className="text-[#6701e6] dark:text-purple-400 font-bold">
+                      {selectedReviewIds.length}
+                    </span>{' '}
+                    of {googleReviews.length} selected
+                  </div>
                 </div>
               </div>
+
+              {/* Inline Add Review Form */}
+              {showAddReviewForm && (
+                <form onSubmit={handleAddNewManualGoogleReview} className="p-5 rounded-2xl bg-white dark:bg-gray-900 border-2 border-dashed border-[#6701e6]/40 dark:border-purple-500/40 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <Plus size={14} className="text-[#6701e6]" />
+                      <span>Add Customer Review for {resolvedPlace.name}</span>
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddReviewForm(false)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 block mb-1">
+                        Reviewer Name
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newReviewAuthor}
+                        onChange={(e) => setNewReviewAuthor(e.target.value)}
+                        placeholder="e.g. John Doe"
+                        className="w-full px-3 py-2 text-xs rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 block mb-1">
+                        Star Rating
+                      </label>
+                      <select
+                        value={newReviewRating}
+                        onChange={(e) => setNewReviewRating(Number(e.target.value))}
+                        className="w-full px-3 py-2 text-xs rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                      >
+                        <option value={5}>⭐⭐⭐⭐⭐ (5 Stars)</option>
+                        <option value={4}>⭐⭐⭐⭐ (4 Stars)</option>
+                        <option value={3}>⭐⭐⭐ (3 Stars)</option>
+                        <option value={2}>⭐⭐ (2 Stars)</option>
+                        <option value={1}>⭐ (1 Star)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 block mb-1">
+                      Review Content
+                    </label>
+                    <textarea
+                      rows={3}
+                      required
+                      value={newReviewText}
+                      onChange={(e) => setNewReviewText(e.target.value)}
+                      placeholder="Paste the customer's Google review here..."
+                      className="w-full px-3 py-2 text-xs rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#6701e6] resize-none"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddReviewForm(false)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-700"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-1.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs"
+                    >
+                      Save & Add to Selection
+                    </button>
+                  </div>
+                </form>
+              )}
 
               {/* Reviews List */}
               <div className="space-y-3">
@@ -1985,8 +2153,34 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
                 })}
 
                 {googleReviews.length === 0 && (
-                  <div className="p-8 text-center bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 text-sm text-gray-400">
-                    No customer reviews were found for this Google listing.
+                  <div className="p-8 text-center bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 space-y-4">
+                    <div className="max-w-md mx-auto space-y-2">
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                        No reviews were automatically found in the public Google listing preview.
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        You can paste your customer reviews for this location below, or connect your official Google account to sync all verified reviews.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddReviewForm(true)}
+                        className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Plus size={14} />
+                        <span>Add / Paste a Google Review</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setGoogleStep('choose')}
+                        className="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5"
+                      >
+                        <span>Connect Google Account (Official Sync)</span>
+                        <ArrowRight size={14} />
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

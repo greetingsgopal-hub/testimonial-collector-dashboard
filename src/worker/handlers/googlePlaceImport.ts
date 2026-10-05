@@ -2,7 +2,8 @@ import { WorkerEnv } from '../types';
 import { extractBearerToken, verifyFirebaseToken } from '../lib/firebaseAuth';
 import { getCorsHeaders } from '../lib/cors';
 import { checkRateLimit } from '../lib/rateLimit';
-import { fetchGooglePlaceDetailsNew, ImportedReview } from '../lib/googleOAuth';
+import { fetchGooglePlaceDetailsNew, ImportedReview, resolveGoogleMapsUrl, GoogleResolvedPlace } from '../lib/googleOAuth';
+import { resolveReviewsFromPublicUrl } from '../lib/universalExtractor';
 import { saveDocument, queryUserDocuments } from '../lib/firestoreAdmin';
 
 /**
@@ -48,6 +49,7 @@ export async function handleGooglePlaceResolve(request: Request, env: WorkerEnv)
   try {
     const body: any = await request.json().catch(() => ({}));
     const inputUrl = body.url || body.input || body.placeId;
+    const customApiKey = typeof body.apiKey === 'string' && body.apiKey.trim() ? body.apiKey.trim() : undefined;
 
     if (!inputUrl || typeof inputUrl !== 'string' || !inputUrl.trim()) {
       return new Response(
@@ -56,33 +58,110 @@ export async function handleGooglePlaceResolve(request: Request, env: WorkerEnv)
       );
     }
 
-    const placeResult = await fetchGooglePlaceDetailsNew(inputUrl.trim(), env);
+    const effectiveApiKey = customApiKey || env.GOOGLE_PLACES_API_KEY;
+    let placeResult: GoogleResolvedPlace | null = null;
+    let apiKeyError: string | null = null;
+
+    // 1. If API key is available, attempt official Places API (New)
+    if (effectiveApiKey) {
+      try {
+        placeResult = await fetchGooglePlaceDetailsNew(inputUrl.trim(), env, effectiveApiKey);
+      } catch (err: any) {
+        apiKeyError = err?.message || 'Places API error';
+        console.warn('[GooglePlaceResolve] Official Places API failed, falling back to zero-key resolution:', apiKeyError);
+      }
+    }
+
+    if (placeResult) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          resolved: true,
+          place: {
+            id: placeResult.placeId,
+            name: placeResult.name,
+            address: placeResult.address,
+            googleMapsUri: placeResult.googleMapsUri,
+            rating: placeResult.rating,
+            totalReviews: placeResult.totalReviews,
+          },
+          reviews: placeResult.reviews,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 2. Graceful Zero-API-Key Fallback:
+    // Resolve destination URL, extract business name and Place metadata from Google public signals
+    const resolution = await resolveGoogleMapsUrl(inputUrl.trim());
+
+    let businessName = resolution.extractedQuery || '';
+    if (!businessName && resolution.finalUrl) {
+      const pMatch = resolution.finalUrl.match(/\/maps\/place\/([^\/@?]+)/);
+      if (pMatch && pMatch[1]) {
+        businessName = decodeURIComponent(pMatch[1].replace(/\+/g, ' '));
+      }
+    }
+
+    // Fallback if URL redirected to generic error or couldn't parse
+    if (!businessName && (!resolution.finalUrl || resolution.finalUrl.includes('share.google/error'))) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Could not resolve this Google Maps link. Please verify the URL or search by typing your business name.',
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Attempt web extractor for public reviews & schema.org metadata
+    let webExtracted: any = null;
+    if (resolution.finalUrl && resolution.finalUrl.startsWith('http') && !resolution.finalUrl.includes('share.google/error')) {
+      try {
+        webExtracted = await resolveReviewsFromPublicUrl(resolution.finalUrl, env);
+      } catch (_e) {}
+    }
+
+    const finalName = businessName || webExtracted?.entity?.name || 'Google Business';
+    const finalAddress = webExtracted?.entity?.address || 'Google Maps Location';
+    const finalRating = typeof webExtracted?.entity?.rating === 'number' ? webExtracted.entity.rating : 5.0;
+    const finalTotal = typeof webExtracted?.entity?.reviewCount === 'number' ? webExtracted.entity.reviewCount : (webExtracted?.reviews?.length || 0);
+
+    const reviews: ImportedReview[] = (webExtracted?.reviews || []).map((r: any, idx: number) => ({
+      id: r.id || `google_web_${Date.now()}_${idx}`,
+      authorName: r.authorName || 'Google Reviewer',
+      authorAvatar: r.authorAvatar,
+      rating: r.rating || 5,
+      text: r.text || '',
+      date: r.date || new Date().toISOString(),
+      platformUrl: r.platformUrl || resolution.finalUrl || inputUrl,
+      source: 'google' as const,
+    }));
 
     return new Response(
       JSON.stringify({
         success: true,
         resolved: true,
         place: {
-          id: placeResult.placeId,
-          name: placeResult.name,
-          address: placeResult.address,
-          googleMapsUri: placeResult.googleMapsUri,
-          rating: placeResult.rating,
-          totalReviews: placeResult.totalReviews,
+          id: resolution.placeId || `google_${Date.now()}`,
+          name: finalName,
+          address: finalAddress,
+          googleMapsUri: resolution.finalUrl || inputUrl,
+          rating: finalRating,
+          totalReviews: finalTotal,
         },
-        reviews: placeResult.reviews,
+        reviews,
+        requiresApiKey: !effectiveApiKey,
+        apiKeyNotice: apiKeyError || 'Resolved via Google Maps public data.',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
-    // Structured diagnostics — stage + error class only. Never logs tokens,
-    // API keys, cookies, or user-supplied URL content.
     console.warn(
       '[GooglePlaceResolve] Failure:',
       JSON.stringify({
         stage: 'resolve_place',
         auth: userId ? 'verified' : 'missing',
-        placesKeyConfigured: Boolean(env.GOOGLE_PLACES_API_KEY),
         errorName: err?.name || 'Error',
         errorMessage: err?.message || 'unknown',
       })
