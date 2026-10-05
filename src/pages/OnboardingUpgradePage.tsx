@@ -64,7 +64,7 @@ export const OnboardingUpgradePage: React.FC = () => {
               Share testimonials in more ways
             </h1>
             <p className="text-sm text-gray-600 mb-8 max-w-lg mx-auto">
-              Create beautiful Walls of Love, embed widgets, generate social cards, and showcase video testimonials everywhere.
+              Create beautiful Walls of Love, embed widgets, generate social cards, and showcase verified testimonials everywhere.
             </p>
 
             {/* Feature Grid */}
@@ -73,7 +73,7 @@ export const OnboardingUpgradePage: React.FC = () => {
                 { icon: Grid, label: 'Wall of Love' },
                 { icon: Crown, label: 'Widget Embeds' },
                 { icon: Gem, label: 'Social Cards' },
-                { icon: Crown, label: 'Video Widgets' },
+                { icon: Crown, label: 'Verified Proof' },
               ].map(({ icon: Icon, label }) => (
                 <div key={label} className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col items-center gap-2 shadow-xs">
                   <Icon className="w-7 h-7 text-[#6701e6]" />

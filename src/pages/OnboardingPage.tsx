@@ -20,7 +20,7 @@ const SELLING_OPTIONS = [
 const ONBOARDING_NEXT_STEPS = [
   {
     title: 'Share your collection link',
-    text: 'Send your public testimonial link or QR code to customers. They can submit text or video in under a minute.',
+    text: 'Send your public testimonial link or QR code to customers. They can submit authentic praise in under 2 seconds.',
   },
   {
     title: 'Approve in your inbox',

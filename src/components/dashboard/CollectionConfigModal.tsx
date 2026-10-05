@@ -38,7 +38,7 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
   );
   const [publicSlug, setPublicSlug] = useState(collectionForm?.publicSlug || 'feedback');
   const [isActive, setIsActive] = useState(collectionForm?.isActive ?? true);
-  const [allowVideo, setAllowVideo] = useState(collectionForm?.allowVideo ?? true);
+  const [allowVideo] = useState(false);
   const [autoTag, setAutoTag] = useState(collectionForm?.settings?.autoTag || '');
   const [autoApprove, setAutoApprove] = useState(collectionForm?.settings?.autoApprove ?? false);
 
@@ -278,26 +278,15 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
               )}
             </div>
 
-            {/* Video Toggle */}
-            <div
-              onClick={() => setAllowVideo(!allowVideo)}
-              className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
-                allowVideo
-                  ? 'bg-purple-50 border-purple-200 text-[#6701e6]'
-                  : 'bg-gray-50 border-gray-200 text-gray-500'
-              }`}
-            >
+            {/* Form Mode Indicator */}
+            <div className="p-3.5 rounded-xl border bg-gray-50 border-gray-200 text-gray-600 flex items-center justify-between">
               <div>
-                <div className="text-xs font-bold">Accept Video Links</div>
+                <div className="text-xs font-bold text-gray-800">Review Input Mode</div>
                 <div className="text-[10px] text-gray-500">
-                  {allowVideo ? 'Loom / YouTube enabled' : 'Text-only form'}
+                  Standard Verified Text Form (Video input is suspended)
                 </div>
               </div>
-              {allowVideo ? (
-                <ToggleRight className="w-6 h-6 text-[#6701e6]" />
-              ) : (
-                <ToggleLeft className="w-6 h-6 text-gray-400" />
-              )}
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-100 text-purple-700">Text Only</span>
             </div>
           </div>
 

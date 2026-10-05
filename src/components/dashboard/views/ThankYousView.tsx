@@ -21,7 +21,7 @@ export const ThankYousView: React.FC<ThankYousViewProps> = ({ reviews = [] }) =>
             <span>🌙</span>
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Send personal thank-you notes, videos, gifts and notes, at any size.
+            Send personal thank-you notes, rewards, e-gifts, and discounts at any scale.
           </p>
         </div>
 

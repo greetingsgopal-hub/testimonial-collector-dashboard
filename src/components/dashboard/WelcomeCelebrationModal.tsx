@@ -185,7 +185,7 @@ export const WelcomeCelebrationModal: React.FC<WelcomeCelebrationModalProps> = (
                     Share your collection form with customers
                   </h4>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Send via email, WhatsApp, or post-purchase link to start collecting text & video reviews.
+                    Send via email, WhatsApp, or post-purchase link to start collecting verified customer reviews.
                   </p>
                   
                   {/* Share URL input */}
@@ -319,7 +319,7 @@ export const WelcomeCelebrationModal: React.FC<WelcomeCelebrationModalProps> = (
                     Design social proof images in Studio
                   </h4>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Create eye-catching images & videos for Twitter, Instagram, and LinkedIn.
+                    Create eye-catching social proof graphics for Twitter, Instagram, and LinkedIn.
                   </p>
                 </div>
               </div>

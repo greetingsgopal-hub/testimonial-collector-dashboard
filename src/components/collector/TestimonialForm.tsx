@@ -13,9 +13,7 @@ import {
   ShieldCheck,
   Flame,
   Zap,
-  Video,
   Gift,
-  MessageSquare,
   HelpCircle,
   Upload,
   Camera,
@@ -148,8 +146,6 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
     }
   };
 
-  const [isVideoMode, setIsVideoMode] = useState(formData.type === 'video');
-
   const activeRating = hoverRating !== null ? hoverRating : formData.rating;
 
   const handleRatingChange = (val: number) => {
@@ -190,8 +186,8 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
     // Sanitize payload fields
     const sanitizedData: ReviewInput = {
       ...formData,
-      type: isVideoMode ? 'video' : 'text',
-      videoUrl: isVideoMode && formData.videoUrl ? sanitizeText(formData.videoUrl, 500) : undefined,
+      type: 'text',
+      videoUrl: undefined,
       name: sanitizeText(formData.name, 100),
       email: formData.email.trim().toLowerCase().slice(0, 150),
       role: sanitizeText(formData.role, 100),
@@ -225,65 +221,11 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         </p>
       </div>
 
-      {/* Mode Switcher (Senja-style: Text vs Video) */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 bg-gray-100/90 rounded-2xl border border-gray-200">
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => {
-              setIsVideoMode(false);
-              setFormData((p) => ({ ...p, type: 'text' }));
-            }}
-            className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              !isVideoMode
-                ? 'bg-[#6701e6] text-white shadow-sm'
-                : 'text-gray-600 hover:text-gray-950'
-            }`}
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>{t.modeText}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setIsVideoMode(true);
-              setFormData((p) => ({ ...p, type: 'video' }));
-            }}
-            className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              isVideoMode
-                ? 'bg-[#6701e6] text-white shadow-sm'
-                : 'text-gray-600 hover:text-gray-950'
-            }`}
-          >
-            <Video className="w-3.5 h-3.5" />
-            <span>{t.modeVideo}</span>
-          </button>
-        </div>
-
-        <span className="text-[11px] text-purple-700 font-medium px-2 flex items-center gap-1.5 self-center sm:self-auto">
-          <Gift className="w-3.5 h-3.5 text-purple-600" />
+      {/* Reward Notice Badge */}
+      {t.rewardNotice && (
+        <div className="flex items-center gap-2 px-3.5 py-2.5 bg-purple-50/80 rounded-2xl border border-purple-200/70 text-xs text-purple-800 font-medium">
+          <Gift className="w-4 h-4 text-purple-600 shrink-0" />
           <span>{t.rewardNotice}</span>
-        </span>
-      </div>
-
-      {/* Video URL Input if in Video Mode */}
-      {isVideoMode && (
-        <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-2 animate-fade-in">
-          <label className="block text-xs font-bold uppercase tracking-wider text-[#6701e6]">
-            {t.videoLabel} <span className="text-pink-500">*</span>
-          </label>
-          <input
-            type="url"
-            placeholder={t.videoPlaceholder}
-            value={formData.videoUrl || ''}
-            onChange={(e) => setFormData((p) => ({ ...p, videoUrl: e.target.value }))}
-            className="w-full px-4 py-2.5 rounded-xl text-xs sm:text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/15 transition-all shadow-xs"
-            required={isVideoMode}
-          />
-          <p className="text-[11px] text-gray-500">
-            {t.videoHelp}
-          </p>
         </div>
       )}
 

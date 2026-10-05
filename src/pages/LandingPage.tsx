@@ -8,7 +8,6 @@ import {
   X as XIcon, 
   Play, 
   Search, 
-  Video, 
   MessageSquare,
   Gift,
   Sparkles,
@@ -71,7 +70,7 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, enableDemoMode } = useAuth();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-  const [activeShareTab, setActiveShareTab] = useState<'widgets' | 'videos' | 'walls' | 'popups' | 'images' | 'hosting'>('widgets');
+  const [activeShareTab, setActiveShareTab] = useState<'widgets' | 'walls' | 'popups' | 'images'>('widgets');
   const [selectedWidgetTag, setSelectedWidgetTag] = useState('Testimonial Image Gallery');
   const [showHeartTab, setShowHeartTab] = useState(false);
   const [showSocialToast, setShowSocialToast] = useState(false);
@@ -287,7 +286,7 @@ export const LandingPage: React.FC = () => {
         <div className="mt-5 max-w-2xl mx-auto flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-gray-600 font-medium">
           <div className="flex items-center gap-1.5">
             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Automate video & text collection</span>
+            <span>Automate customer review collection</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -501,18 +500,18 @@ export const LandingPage: React.FC = () => {
               </div>
 
               <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold font-display text-gray-950 tracking-tight leading-[1.15]">
-                Collect Video & Text Reviews on Autopilot
+                Collect Authentic Reviews & Praise on Autopilot
               </h2>
 
               <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed">
-                Launch branded collection forms in 30 seconds. No apps, downloads, or customer logins required. Capture authentic video stories and 5-star praise effortlessly.
+                Launch branded collection forms in 2 seconds. No apps, downloads, or customer logins required. Capture authentic customer stories and 5-star praise effortlessly.
               </p>
 
               {/* Feature Checklist Bullets */}
               <ul className="mt-6 space-y-3 text-sm text-gray-700 font-medium">
                 <li className="flex items-start gap-2.5">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Automate video and text collection with guided prompts</span>
+                  <span>Automate customer review collection with guided prompts</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -565,17 +564,26 @@ export const LandingPage: React.FC = () => {
                       <h3 className="font-bold text-gray-900 text-sm sm:text-base">
                         Share a testimonial for my course 🫶
                       </h3>
-                      <p className="text-xs text-gray-600">Takes less than 60 seconds</p>
+                      <p className="text-xs text-gray-600">Takes less than 2 seconds</p>
                     </div>
                   </div>
 
-                  {/* Mock video container */}
-                  <div className="rounded-xl bg-gray-900 text-white p-5 mb-4 flex flex-col items-center justify-center text-center aspect-video relative overflow-hidden group">
-                    <div className="w-11 h-11 rounded-full bg-[#6701e6] flex items-center justify-center text-white shadow-lg mb-2 group-hover:scale-110 transition-transform">
-                      <Video className="w-5 h-5" />
+                  {/* Mock collector review container */}
+                  <div className="rounded-2xl bg-purple-50/70 border border-purple-200/80 p-5 mb-4 text-left space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div role="img" aria-label="5 out of 5 stars" className="flex text-amber-500 text-sm">
+                        <span>★★★★★</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                        2-Second Verified
+                      </span>
                     </div>
-                    <p className="text-xs font-semibold">Record a video testimonial</p>
-                    <p className="text-[11px] text-gray-400 mt-1">or submit a written review below</p>
+                    <p className="text-xs text-gray-800 font-medium">
+                      "Panda Praise is genuinely the fastest way we've ever gathered customer testimonials. Zero friction!"
+                    </p>
+                    <p className="text-[11px] text-gray-500">
+                      — Verified Client Feedback
+                    </p>
                   </div>
 
                   {/* Prompt helpers */}
@@ -791,7 +799,7 @@ export const LandingPage: React.FC = () => {
           </h2>
 
           <p className="mt-4 sm:mt-5 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed text-balance">
-            Don't let your best reviews collect digital dust. Panda Praise turns every testimonial into widgets, videos, Reels, popups, and case studies.
+            Don't let your best reviews collect digital dust. Panda Praise turns every testimonial into widgets, social proof cards, popups, and case studies.
           </p>
 
           {/* 6 Checklist Bullets in Balanced Grid */}
@@ -802,7 +810,7 @@ export const LandingPage: React.FC = () => {
             </div>
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Social videos, Reels & feed graphics</span>
+              <span>Social proof cards & feed graphics</span>
             </div>
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -818,7 +826,7 @@ export const LandingPage: React.FC = () => {
             </div>
             <div className="flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Ad-free video hosting built in</span>
+              <span>Lightning-fast CDN widget delivery</span>
             </div>
           </div>
 
@@ -829,11 +837,9 @@ export const LandingPage: React.FC = () => {
             <div className="flex justify-center-safe gap-2 overflow-x-auto pb-2">
               {[
                 { id: 'widgets', label: 'Widgets' },
-                { id: 'videos', label: 'Social Videos' },
                 { id: 'walls', label: 'Walls of Love' },
                 { id: 'popups', label: 'Popups' },
-                { id: 'images', label: 'Testimonial Images' },
-                { id: 'hosting', label: 'Video Hosting' },
+                { id: 'images', label: 'Social Proof Cards' },
               ].map((tab) => {
                 const isActive = activeShareTab === tab.id;
                 return (
@@ -914,35 +920,6 @@ export const LandingPage: React.FC = () => {
                 </div>
               )}
 
-              {activeShareTab === 'videos' && (
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
-                    Share Video Testimonials on Your Social Media
-                  </h3>
-                  <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Get more visits to your site with stunning videos and Reels that you can share directly to your feeds.
-                  </p>
-                  <div className="mt-6 mx-auto max-w-xs aspect-[9/16] rounded-2xl bg-zinc-950 text-white p-5 flex flex-col justify-between shadow-2xl relative">
-                    <div className="flex items-center justify-between text-xs text-zinc-400">
-                      <span>Panda Praise Studio</span>
-                      <span className="text-rose-500 font-bold flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" /> LIVE
-                      </span>
-                    </div>
-                    <div className="text-center my-auto">
-                      <div className="w-14 h-14 rounded-full bg-brand-600 flex items-center justify-center mx-auto text-white shadow-lg mb-3">
-                        <Play className="w-6 h-6 fill-white ml-0.5" />
-                      </div>
-                      <p className="text-sm font-semibold">"This tool 3x'd our customer conversions in 30 days!"</p>
-                    </div>
-                    <div className="text-left text-xs text-zinc-300">
-                      <p className="font-bold text-white">@founder_growth</p>
-                      <p className="text-zinc-400">Auto-captioned with waveform 🎵</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {activeShareTab === 'walls' && (
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
@@ -1012,31 +989,6 @@ export const LandingPage: React.FC = () => {
                   </div>
                 </div>
               )}
-
-              {activeShareTab === 'hosting' && (
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-gray-950">
-                    Unlimited, Ad-Free Hosting for Your Video Testimonials
-                  </h3>
-                  <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    Ditch Wistia, YouTube and Vimeo. Add your video testimonials to your website with dedicated, ad-free video hosting.
-                  </p>
-                  <ul className="mt-6 mx-auto w-fit space-y-2 text-left text-xs sm:text-sm text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>All your video testimonials in one place</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>Share with a link or embed with widgets</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>100% ad-free, fast CDN video delivery</span>
-                    </li>
-                  </ul>
-                </div>
-              )}
             </div>
           </div>
 
@@ -1044,7 +996,7 @@ export const LandingPage: React.FC = () => {
           <figure className="relative border-l-2 border-brand-600 py-2 pl-4 text-left mx-auto mt-10 max-w-xl">
             <blockquote className="text-xs sm:text-sm text-gray-700 leading-relaxed">
               <p>
-                Every testimonial you collect can be turned into a branded image, video, or widget —{' '}
+                Every testimonial you collect can be turned into a branded image, social card, or widget —{' '}
                 <mark className="senja-yellow-mark">
                   ready to share on your socials, in emails, or on your website
                 </mark>
@@ -1124,7 +1076,7 @@ export const LandingPage: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Clock className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
-                  <span>Thank-you videos, e-gifts & reward automation — coming soon</span>
+                  <span>Thank-you notes, e-gifts & reward automation — coming soon</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Clock className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
@@ -1276,7 +1228,7 @@ export const LandingPage: React.FC = () => {
           <ul className="mx-auto mt-6 inline-flex flex-col gap-2 text-left text-xs sm:text-sm text-white/90">
             <li className="flex items-center gap-2">
               <Check className="w-4 h-4 text-emerald-300" />
-              <span>Collect text & video testimonials on autopilot</span>
+              <span>Collect authentic customer reviews on autopilot</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="w-4 h-4 text-emerald-300" />
@@ -1344,7 +1296,7 @@ export const LandingPage: React.FC = () => {
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Collect Testimonials</button></li>
                   <li><button onClick={() => scrollToSection('find-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Import Testimonials</button></li>
-                  <li><Link to="/c/feedback" className="hover:text-gray-900 transition-colors">Video Testimonials</Link></li>
+                  <li><Link to="/c/feedback" className="hover:text-gray-900 transition-colors">Collector Forms</Link></li>
                   <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Testimonial Widgets</button></li>
                   <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Wall of Love</button></li>
                 </ul>

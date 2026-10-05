@@ -32,7 +32,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
   const [ratingValue, setRatingValue] = useState('');
   const [reviewCount, setReviewCount] = useState('');
   const [description, setDescription] = useState(
-    'Collect, manage, and showcase verified customer testimonials and video reviews with Panda Praise.'
+    'Collect, manage, and showcase verified customer testimonials and reviews with Panda Praise.'
   );
 
   const effectiveRating = ratingValue || calculatedRating;

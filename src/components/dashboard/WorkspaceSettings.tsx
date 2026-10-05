@@ -318,7 +318,7 @@ export const WorkspaceSettings: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {[
                     { name: 'Remove branding', ok: limits.removeBranding },
-                    { name: 'HD video', ok: limits.hdVideo },
+                    { name: 'High-res social cards', ok: true },
                     { name: 'Rich Snippets (SEO)', ok: limits.richSnippets },
                     { name: 'Translation', ok: limits.translation },
                     { name: 'API access', ok: limits.apiAccess },

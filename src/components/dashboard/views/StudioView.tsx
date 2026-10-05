@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Sparkles,
   LayoutGrid,
-  Video,
+  Award,
   Layers,
   Image as ImageIcon,
   Heart,
@@ -31,9 +31,9 @@ export const StudioView: React.FC<StudioViewProps> = ({
 
   const studioOptions = [
     { id: 'widget', label: 'Widget', icon: LayoutGrid, action: onOpenWidgetCreator },
-    { id: 'social-video', label: 'Social Video', icon: Video, action: onOpenSocialCard },
+    { id: 'social-card', label: 'Social Card', icon: Sparkles, action: onOpenSocialCard },
     { id: 'popup', label: 'Popup', icon: Layers, action: onOpenWidgetCreator },
-    { id: 'video-embed', label: 'Video embed', icon: Video, action: onOpenWidgetCreator },
+    { id: 'badge-embed', label: 'Badge Embed', icon: Award, action: onOpenWidgetCreator },
     { id: 'image', label: 'Image', icon: ImageIcon, action: onOpenSocialCard },
     { id: 'wall-of-love', label: 'Wall of Love', icon: Heart, action: onOpenWallOfLove },
     { id: 'case-study', label: 'Case study', icon: FileCheck, action: onOpenSocialCard },
