@@ -58,27 +58,28 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   };
 
   return (
-    <aside className="w-64 min-w-[16rem] shrink-0 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 select-none z-30 font-sans text-sm">
+    <aside className="w-64 min-w-[16rem] shrink-0 bg-white/80 backdrop-blur-2xl border-r border-black/[0.06] flex flex-col h-screen sticky top-0 select-none z-30 font-sans text-sm">
       
       {/* Brand Header */}
-      <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-2 group">
-          <span className="font-extrabold text-lg tracking-tight text-[#6701e6] font-display whitespace-nowrap">
+      <div className="px-5 py-4 border-b border-black/[0.04] flex items-center justify-between">
+        <Link to="/dashboard" className="flex items-center gap-2 group apple-touch">
+          <span className="font-extrabold text-lg tracking-tight text-zinc-950 font-display whitespace-nowrap flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-violet-600 shadow-xs shadow-violet-600/50" />
             Panda Praise
           </span>
         </Link>
       </div>
 
       {/* User & Plan Header */}
-      <div className="p-3 border-b border-gray-100">
-        <div className="flex items-center justify-between p-2 rounded-xl bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
+      <div className="p-3 border-b border-black/[0.04]">
+        <div className="flex items-center justify-between p-2 rounded-xl bg-black/[0.02] hover:bg-black/[0.04] transition-colors border border-black/[0.03]">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 rounded-full bg-purple-100 text-[#6701e6] font-bold text-xs flex items-center justify-center shrink-0 border border-purple-200">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
               {userInitial}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-gray-900 truncate leading-tight">{displayName}</p>
-              <p className="text-[11px] font-medium text-gray-500 capitalize">{plan} plan</p>
+              <p className="text-xs font-bold text-zinc-900 truncate leading-tight tracking-tight">{displayName}</p>
+              <p className="text-[11px] font-medium text-zinc-400 capitalize">{plan} plan</p>
             </div>
           </div>
         </div>
@@ -87,104 +88,104 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         {plan === 'free' && (
           <Link
             to="/onboarding/upgrade"
-            className="mt-2 w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/80 hover:border-purple-300 text-[#6701e6] flex items-center justify-center gap-2 text-xs font-bold transition-all shadow-2xs hover:shadow-xs cursor-pointer"
+            className="apple-touch mt-2 w-full py-2 px-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white flex items-center justify-center gap-1.5 text-xs font-semibold shadow-xs shadow-violet-600/20 cursor-pointer"
           >
-            <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
-            <span>Upgrade</span>
+            <Zap className="w-3.5 h-3.5 fill-current" />
+            <span>Upgrade Workspace</span>
           </Link>
         )}
       </div>
 
       {/* Navigation Sections */}
-      <div className="flex-1 overflow-y-auto px-3.5 pt-3 pb-24 space-y-6 scrollbar-thin">
+      <div className="flex-1 overflow-y-auto px-3.5 pt-3 pb-24 space-y-5 scrollbar-thin">
         
         {/* Top Welcome Quick Access */}
         <div>
           <button
             onClick={() => setActiveTab('welcome')}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+            className={`apple-touch w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeTab === 'welcome'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-zinc-950 text-white shadow-xs'
+                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
             }`}
           >
-            <Star className={`w-4 h-4 ${activeTab === 'welcome' ? 'text-[#6701e6] fill-[#6701e6]' : 'text-gray-400'}`} />
-            <span>Welcome</span>
+            <Star className={`w-4 h-4 ${activeTab === 'welcome' ? 'text-amber-400 fill-amber-400' : 'text-zinc-400'}`} />
+            <span>Welcome Hub</span>
           </button>
         </div>
 
         {/* Section: COLLECT */}
         <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Get Proof</p>
+          <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Collect</p>
           <button
             onClick={() => setActiveTab('forms')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeTab === 'forms'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-zinc-950 text-white shadow-xs'
+                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <FileText className="w-4 h-4 text-gray-400" />
-              <span>Forms</span>
+              <FileText className="w-4 h-4 text-zinc-400" />
+              <span>Forms & Capture</span>
             </div>
           </button>
 
           <button
             onClick={() => setActiveTab('import')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeTab === 'import'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-zinc-950 text-white shadow-xs'
+                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <Download className="w-4 h-4 text-gray-400" />
-              <span>Import</span>
+              <Download className="w-4 h-4 text-zinc-400" />
+              <span>Import Sources</span>
             </div>
           </button>
         </div>
 
         {/* Section: MANAGE */}
         <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Manage Proof</p>
+          <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Manage Proof</p>
           <button
             onClick={() => setActiveTab('proof')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeTab === 'proof'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-zinc-950 text-white shadow-xs'
+                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-gray-400" />
-              <span>Proof</span>
+              <CheckCircle2 className="w-4 h-4 text-zinc-400" />
+              <span>Testimonials</span>
             </div>
             {proofCount > 0 ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-[#6701e6]">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                activeTab === 'proof' ? 'bg-white/20 text-white' : 'bg-violet-500/10 text-violet-700'
+              }`}>
                 {proofCount}
               </span>
-            ) : (
-              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">
-                New 1
-              </span>
-            )}
+            ) : null}
           </button>
 
           <button
             onClick={() => setActiveTab('feedback')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeTab === 'feedback'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-zinc-950 text-white shadow-xs'
+                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <MessageSquare className="w-4 h-4 text-gray-400" />
-              <span>Feedback</span>
+              <MessageSquare className="w-4 h-4 text-zinc-400" />
+              <span>Private Feedback</span>
             </div>
             {feedbackCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                activeTab === 'feedback' ? 'bg-white/20 text-white' : 'bg-amber-500/15 text-amber-800'
+              }`}>
                 {feedbackCount}
               </span>
             )}
@@ -192,88 +193,85 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
           <button
             onClick={() => setActiveTab('tags')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeTab === 'tags'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-zinc-950 text-white shadow-xs'
+                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <Tag className="w-4 h-4 text-gray-400" />
-              <span>Tags</span>
+              <Tag className="w-4 h-4 text-zinc-400" />
+              <span>Tags & Groups</span>
             </div>
           </button>
         </div>
 
         {/* Section: SHARE */}
         <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Use Proof</p>
+          <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Studio & Embeds</p>
           <button
             onClick={() => setActiveTab('studio')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeTab === 'studio'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-zinc-950 text-white shadow-xs'
+                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <Sparkles className="w-4 h-4 text-gray-400" />
-              <span>Studio</span>
+              <Sparkles className="w-4 h-4 text-zinc-400" />
+              <span>Widget Studio</span>
             </div>
-            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">
-              New 1
+            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+              Live
             </span>
           </button>
 
-
-
           <button
             onClick={() => setActiveTab('rich-snippet')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeTab === 'rich-snippet'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-zinc-950 text-white shadow-xs'
+                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <Search className="w-4 h-4 text-gray-400" />
-              <span>Rich Snippet</span>
+              <Search className="w-4 h-4 text-zinc-400" />
+              <span>Google Rich Snippets</span>
             </div>
-            <Zap className="w-3 h-3 text-amber-500 fill-amber-400" />
           </button>
         </div>
 
         {/* Section: ANALYZE */}
         <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Understand</p>
+          <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Intelligence</p>
           <button
             onClick={() => setActiveTab('analyze')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeTab === 'analyze'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-zinc-950 text-white shadow-xs'
+                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <BarChart3 className="w-4 h-4 text-gray-400" />
-              <span>Analyze</span>
+              <BarChart3 className="w-4 h-4 text-zinc-400" />
+              <span>Sentiment AI</span>
             </div>
           </button>
         </div>
 
         {/* Utility Section */}
-        <div className="space-y-1 pt-2 border-t border-gray-100">
+        <div className="space-y-1 pt-2 border-t border-black/[0.04]">
           <button
             onClick={() => setActiveTab('integrate')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               activeTab === 'integrate'
-                ? 'bg-purple-50 text-[#6701e6]'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-zinc-950 text-white shadow-xs'
+                : 'text-zinc-600 hover:bg-black/[0.04] hover:text-zinc-950'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <Puzzle className="w-4 h-4 text-gray-400" />
-              <span>Integrate</span>
+              <Puzzle className="w-4 h-4 text-zinc-400" />
+              <span>Integrations</span>
             </div>
           </button>
         </div>
