@@ -6,11 +6,9 @@ import {
   X,
   ArrowRight,
   Crown,
-  Shield,
   ChevronDown,
   Star,
   HelpCircle,
-  Gem,
 } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
@@ -136,86 +134,140 @@ export const PricingPage = () => {
       </header>
 
       <div className="max-w-6xl mx-auto px-6 py-16 sm:py-24">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium mb-6">
-            <Shield size={12} />
-            🇮🇳 Built for Indian Businesses • Pay in ₹ INR
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900 border border-white/10 text-zinc-300 text-xs font-medium mb-5 shadow-xs">
+            <span className="text-sm leading-none">🇮🇳</span>
+            <span>Built for Indians</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 leading-tight">Pay once in ₹. Use forever.</h1>
-          <p className="text-lg text-zinc-400 max-w-xl mx-auto">Founding members lock in lifetime access. UPI, RuPay, Netbanking & Cards accepted.</p>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-3">
+            Pay once. Use forever.
+          </h1>
+          <p className="text-base sm:text-lg text-zinc-400 max-w-xl mx-auto font-normal">
+            Founding members lock in lifetime access.
+          </p>
+          <div className="flex items-center justify-center gap-2 sm:gap-2.5 mt-2.5 text-xs text-zinc-500 font-medium tracking-wide">
+            <span>UPI</span>
+            <span className="text-zinc-700">•</span>
+            <span>RuPay</span>
+            <span className="text-zinc-700">•</span>
+            <span>Netbanking</span>
+            <span className="text-zinc-700">•</span>
+            <span>Cards accepted</span>
+          </div>
         </div>
 
         {checkoutError && <div className="max-w-2xl mx-auto mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm text-center">{checkoutError}</div>}
 
-        <div className="max-w-2xl mx-auto mb-12">
-          <div className="relative rounded-3xl bg-gradient-to-b from-violet-500/20 to-purple-500/10 border-2 border-violet-500/40 p-8 sm:p-10 shadow-2xl shadow-violet-500/20">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-extrabold uppercase tracking-wider shadow-lg flex items-center gap-1.5"><Gem size={12} />Founding Member</span>
+        <div className="max-w-2xl mx-auto mb-16">
+          <div className="relative rounded-3xl bg-zinc-900/80 border border-white/15 p-8 sm:p-10 shadow-2xl backdrop-blur-xl">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+              <span className="px-3.5 py-1 rounded-full bg-zinc-950 border border-amber-500/30 text-amber-300 text-[11px] font-semibold uppercase tracking-wider shadow-lg flex items-center gap-1.5">
+                <Crown size={12} className="text-amber-400" />
+                Founding Member Pass
+              </span>
             </div>
-            <div className="text-center">
+
+            <div className="text-center pt-2">
               <div className="flex items-baseline justify-center gap-2 mb-2">
-                <span className="text-6xl sm:text-7xl font-black text-white">₹4,999</span>
-                <span className="text-lg font-bold text-violet-300">ONE TIME</span>
+                <span className="text-5xl sm:text-7xl font-bold tracking-tight text-white">₹4,999</span>
+                <span className="text-xs uppercase tracking-widest font-semibold text-zinc-400">One-time</span>
               </div>
-              <p className="text-violet-200 font-semibold mb-6">Pay once. Use Panda Praise for life.</p>
-              <p className="text-sm text-zinc-400 mb-6 max-w-md mx-auto">Founding members lock in lifetime access before regular subscription pricing.<span className="block mt-1 text-zinc-500">Zero recurring charges. GST invoice available.</span></p>
-              <button type="button" onClick={() => handleCheckout('founding')} disabled={checkoutLoading !== null} className="w-full sm:w-auto px-8 py-4 rounded-2xl text-base font-bold bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mx-auto">{checkoutLoading === 'founding' ? 'Starting checkout…' : <><Crown size={18} className="text-amber-400" />Become a Founding Member</>}</button>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 max-w-2xl mx-auto mb-12">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Or subscribe</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
-
-        <div className="max-w-2xl mx-auto mb-20">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="relative rounded-2xl bg-gradient-to-b from-emerald-500/15 to-emerald-500/5 border-2 border-emerald-500/40 p-6 text-left">
-              <div className="absolute -top-2.5 left-4"><span className="px-2.5 py-1 rounded-full bg-emerald-500 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-md">Best Value</span></div>
-              <p className="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1">Annual</p>
-              <div className="flex items-baseline gap-1 mb-2"><span className="text-4xl font-black text-white">₹399</span><span className="text-sm text-zinc-400">/month</span></div>
-              <p className="text-xs text-zinc-400 mb-4">₹4,788 billed annually</p>
-              <p className="text-[11px] text-emerald-300 font-medium">Save 50% vs monthly</p>
-            </div>
-            <div className="relative rounded-2xl bg-white/[0.03] border border-white/10 p-6 text-left">
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Monthly</p>
-              <div className="flex items-baseline gap-1 mb-2"><span className="text-4xl font-black text-white">₹799</span><span className="text-sm text-zinc-400">/month</span></div>
-              <p className="text-xs text-zinc-500 mb-4">Billed monthly</p>
-              <p className="text-[11px] text-zinc-600">Cancel anytime</p>
-            </div>
-          </div>
-          <p className="text-center text-xs text-zinc-500 mt-4">Both plans include the same features. Annual saves you 50%.</p>
-
-          {/* India Micro-SaaS Extension Plan */}
-          <div className="mt-8 rounded-2xl bg-gradient-to-r from-violet-950/40 via-purple-900/20 to-zinc-900/60 border border-violet-500/30 p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="text-left">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider mb-2">
-                🇮🇳 India Edition • 7-Day Free Trial
-              </div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                PandaPraise Chrome Extension Pro
-              </h3>
-              <p className="text-xs text-zinc-400 mt-1 max-w-md">
-                1-Click WhatsApp Web in-chat clipper, UPI payment proof tags, and instant sales chat drops. Just ₹3/day.
+              <p className="text-base sm:text-lg font-medium text-zinc-200 mb-6">
+                Pay once. Use Panda Praise for life.
               </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="flex items-baseline gap-1 justify-end">
-                  <span className="text-3xl font-extrabold text-white">₹100</span>
-                  <span className="text-xs text-zinc-400">/month</span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto text-left mb-8 py-5 border-y border-white/10 text-xs text-zinc-300">
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>Unlimited verified testimonials</span>
                 </div>
-                <span className="text-[10px] text-emerald-400 font-semibold">7-Day Free Trial Included</span>
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>Wall of Love & embed widgets</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>No monthly or recurring fees</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>Instant GST invoice on request</span>
+                </div>
               </div>
-              <a
-                href="/dashboard"
-                className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-lg shadow-violet-600/30 transition-all whitespace-nowrap"
+
+              <button
+                type="button"
+                onClick={() => handleCheckout('founding')}
+                disabled={checkoutLoading !== null}
+                className="w-full sm:w-auto px-10 py-3.5 rounded-full text-sm font-semibold bg-white text-zinc-950 hover:bg-zinc-200 active:scale-[0.98] shadow-lg shadow-white/10 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mx-auto cursor-pointer"
               >
-                Start 7-Day Trial
-              </a>
+                {checkoutLoading === 'founding' ? 'Connecting to checkout…' : 'Become a Founding Member'}
+              </button>
             </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 max-w-xl mx-auto mb-10">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">Or subscribe</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+
+        <div className="max-w-xl mx-auto mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="relative rounded-2xl bg-zinc-900/60 border border-white/15 p-6 text-left">
+              <div className="absolute -top-2.5 left-4">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-semibold uppercase tracking-wider">
+                  Save 50%
+                </span>
+              </div>
+              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Annual</p>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-3xl font-bold tracking-tight text-white">₹399</span>
+                <span className="text-xs text-zinc-400">/month</span>
+              </div>
+              <p className="text-xs text-zinc-400">₹4,788 billed annually</p>
+            </div>
+
+            <div className="relative rounded-2xl bg-zinc-900/30 border border-white/10 p-6 text-left">
+              <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Monthly</p>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-3xl font-bold tracking-tight text-white">₹799</span>
+                <span className="text-xs text-zinc-400">/month</span>
+              </div>
+              <p className="text-xs text-zinc-500">Billed monthly • Cancel anytime</p>
+            </div>
+          </div>
+        </div>
+
+        {/* India Micro-SaaS Extension Plan */}
+        <div className="max-w-xl mx-auto mb-16 rounded-2xl bg-zinc-900/60 border border-white/15 p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
+          <div className="text-left">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold uppercase tracking-wider mb-1.5">
+              7-Day Free Trial
+            </div>
+            <h3 className="text-base font-semibold text-white">
+              PandaPraise Chrome Extension Pro
+            </h3>
+            <p className="text-xs text-zinc-400 mt-1 max-w-sm">
+              WhatsApp clipper, UPI payment proof tags & 1-click sales chat drops. Just ₹3/day.
+            </p>
+          </div>
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="text-right">
+              <div className="flex items-baseline gap-1 justify-end">
+                <span className="text-2xl font-bold text-white">₹100</span>
+                <span className="text-xs text-zinc-400">/month</span>
+              </div>
+            </div>
+            <a
+              href="/dashboard"
+              className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white font-medium text-xs transition-all whitespace-nowrap"
+            >
+              Start Trial
+            </a>
           </div>
         </div>
 
