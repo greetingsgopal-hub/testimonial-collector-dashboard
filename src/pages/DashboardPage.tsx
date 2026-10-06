@@ -23,7 +23,7 @@ import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { RichSnippetView } from '../components/dashboard/views/RichSnippetView';
 import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
-import { storage, getActiveBackendInfo } from '../lib/storage';
+import { storage } from '../lib/storage';
 import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
 import { useAuth } from '../context/AuthContext';
@@ -32,8 +32,6 @@ import { EmailVerificationBanner } from '../components/auth/EmailVerificationBan
 import { 
   Sparkles, 
   Send, 
-  Copy, 
-  ExternalLink, 
   Settings, 
   Clock, 
   Link as LinkIcon, 
@@ -41,8 +39,6 @@ import {
   Layers, 
   Star, 
   LayoutGrid, 
-  Database, 
-  Check,
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
@@ -94,8 +90,6 @@ export const DashboardPage = () => {
   const [studioSubView, setStudioSubView] = useState<'overview' | 'widget'>('overview');
   const [publishComplete, setPublishComplete] = useState(false);
   const [showWidgetsDrawer, setShowWidgetsDrawer] = useState(false);
-
-  const backend = getActiveBackendInfo();
   const activeProjectId = project?.id;
 
   useEffect(() => {
@@ -325,59 +319,15 @@ export const DashboardPage = () => {
       {/* ── Main Content Area ── */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         
-        {/* Top Slim Header Bar with Apple Glass Material */}
-        <header className="h-14 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-20">
+        {/* Top Slim Header Bar */}
+        <header className="h-12 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-2.5">
             <span className="text-xs font-bold text-slate-900 capitalize tracking-tight">{activeTab}</span>
             <span className="text-slate-300">•</span>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate max-w-[200px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="truncate font-semibold text-slate-700">{project?.name || 'Main Product'}</span>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate max-w-[240px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="truncate font-medium text-slate-600">{project?.name || 'Main Product'}</span>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            {/* Quick Share Form Actions */}
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={handleCopyLink}
-                className="apple-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600/10 hover:bg-violet-600/15 text-violet-700 border border-violet-600/20 text-xs font-semibold transition-all shadow-2xs cursor-pointer whitespace-nowrap"
-                title="Copy public collector link"
-              >
-                {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedLink ? 'Copied Link!' : 'Copy Link'}</span>
-              </button>
-
-              <a
-                href={collectionUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="apple-touch hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all shadow-xs whitespace-nowrap cursor-pointer"
-                title="Open live collector form in new tab"
-              >
-                <span>Share Form</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            </div>
-
-            {/* Database indicator button */}
-            <button
-              id="database-config-btn"
-              onClick={() => setShowDatabaseModal(true)}
-              title="Database Connection Status"
-              className="apple-touch flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  backend.type === 'firebase' ? 'bg-emerald-400' : 'bg-amber-400'
-                }`}></span>
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                  backend.type === 'firebase' ? 'bg-emerald-500' : 'bg-amber-500'
-                }`}></span>
-              </span>
-              <Database className="w-3 h-3 text-slate-500" />
-              <span className="hidden md:inline text-[11px] font-semibold">{backend.type === 'firebase' ? 'Firebase Live' : 'Demo DB'}</span>
-            </button>
           </div>
         </header>
 

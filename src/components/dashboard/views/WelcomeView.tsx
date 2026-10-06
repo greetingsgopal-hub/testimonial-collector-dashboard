@@ -7,7 +7,6 @@ import {
   ExternalLink,
   Download,
   QrCode,
-  Smartphone,
   X,
   Heart,
   MessageSquareQuote,
@@ -33,7 +32,7 @@ interface WelcomeViewProps {
 
 export const WelcomeView: React.FC<WelcomeViewProps> = ({
   onOpenForm,
-  onCollect,
+  onCollect: _onCollect,
   onImport,
   onProof,
   onStudio,
@@ -89,16 +88,16 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
             </p>
           </div>
 
-          {/* Simple Progress Counter */}
-          <div className="shrink-0 flex flex-col sm:items-end gap-2.5">
-            <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200/80 shadow-2xs">
+          {/* Simple Progress Counter (Light & Uncluttered) */}
+          <div className="shrink-0">
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-slate-50/90 border border-slate-200/80 shadow-2xs">
               <div className="flex gap-1.5">
                 {[1, 2, 3].map((step) => {
                   const isDone = step <= completedSteps;
                   return (
                     <div
                       key={step}
-                      className={`h-2 w-6 rounded-full transition-all duration-500 ${
+                      className={`h-2 w-5 rounded-full transition-all duration-500 ${
                         isDone ? 'bg-violet-600 shadow-xs shadow-violet-500/40' : 'bg-slate-200'
                       }`}
                     />
@@ -108,26 +107,6 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
               <span className="text-xs font-bold text-slate-800">
                 {completedSteps} of 3 done
               </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleCopyLink}
-                className="apple-touch apple-btn-secondary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                title="Copy link"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
-                <span>{copied ? 'Copied Link!' : 'Copy Link'}</span>
-              </button>
-
-              <button
-                onClick={onOpenForm}
-                className="apple-touch apple-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                title="See the form your customers see"
-              >
-                <span>View Form</span>
-                <ExternalLink className="w-3 h-3" />
-              </button>
             </div>
           </div>
         </div>
@@ -166,21 +145,44 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
               1. Ask for reviews
             </h3>
 
-            <p className="text-xs text-slate-600 leading-relaxed mt-1.5 mb-5 font-normal">
+            <p className="text-xs text-slate-600 leading-relaxed mt-1.5 mb-3.5 font-normal">
               Send this link to anyone who bought from you. They click it and type why they love your product.
             </p>
+
+            {/* Direct Form Link Capsule with 1-click Copy & QR code */}
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2 mb-4 shadow-2xs">
+              <span className="text-[11px] font-mono text-slate-600 truncate select-all">{collectionUrl}</span>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={handleCopyLink}
+                  className="apple-touch px-2 py-1 rounded-lg text-[11px] font-bold text-violet-700 hover:bg-violet-100 transition-colors flex items-center gap-1 cursor-pointer"
+                  title="Copy link"
+                >
+                  {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                  <span>{copied ? 'Copied' : 'Copy'}</span>
+                </button>
+                <button
+                  onClick={() => setShowQrModal(true)}
+                  className="apple-touch p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                  title="Show QR Code"
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2 pt-1">
             <button
-              onClick={onCollect}
+              onClick={onOpenForm}
               className="apple-touch apple-btn-primary w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer"
+              title="Open your public review form in a new tab"
             >
               <div className="flex items-center gap-2">
                 <span>💌</span>
-                <span>Open Review Form</span>
+                <span>Preview Review Form</span>
               </div>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ExternalLink className="w-3.5 h-3.5" />
             </button>
 
             <button
@@ -327,7 +329,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
                 <span>Slider Carousel</span>
               </div>
               <div className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
-                <Star className="w-3 h-3 text-amber-500 fill-amber-400" />
+                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
                 <span>Rating Badge</span>
               </div>
             </div>
@@ -349,53 +351,6 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
-
-      </section>
-
-      {/* ── Your Personal Collection Link Box ── */}
-      <section className="apple-glass-card p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="w-10 h-10 rounded-2xl bg-violet-600/10 border border-violet-600/20 flex items-center justify-center shrink-0">
-            <Smartphone className="w-5 h-5 text-violet-700" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-xs font-bold text-slate-900 tracking-tight">
-              Your Review Form Link
-            </p>
-            <p className="text-[11px] font-mono text-slate-500 truncate max-w-xs sm:max-w-md select-all">
-              {collectionUrl}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <button
-            onClick={() => setShowQrModal(true)}
-            className="apple-touch apple-btn-secondary px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 flex items-center gap-1.5 cursor-pointer"
-            title="Show QR Code"
-          >
-            <QrCode className="w-3.5 h-3.5 text-slate-500" />
-            <span>QR Code</span>
-          </button>
-
-          <button
-            onClick={handleCopyLink}
-            className="apple-touch apple-btn-secondary px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 flex items-center gap-1.5 cursor-pointer"
-            title="Copy link"
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
-            <span>{copied ? 'Copied' : 'Copy Link'}</span>
-          </button>
-
-          <button
-            onClick={onOpenForm}
-            className="apple-touch apple-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-            title="Open review form in a new tab"
-          >
-            <span>Open Form</span>
-            <ExternalLink className="w-3 h-3" />
-          </button>
         </div>
       </section>
 
