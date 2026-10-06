@@ -258,8 +258,8 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             onClick={() => onUpdateStatus(review.id, 'approved')}
             className={`apple-touch py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
               review.status === 'approved'
-                ? 'bg-emerald-500/15 text-emerald-800 border border-emerald-500/30 shadow-xs'
-                : 'bg-black/[0.02] hover:bg-emerald-500/10 text-zinc-600 hover:text-emerald-700 border border-black/[0.06]'
+                ? 'bg-emerald-500/15 text-emerald-800 border border-emerald-500/30 shadow-2xs'
+                : 'bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200/80'
             }`}
             title="Approve Review"
           >
@@ -272,8 +272,8 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             onClick={() => onUpdateStatus(review.id, 'rejected')}
             className={`apple-touch py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
               review.status === 'rejected'
-                ? 'bg-rose-500/15 text-rose-800 border border-rose-500/30 shadow-xs'
-                : 'bg-black/[0.02] hover:bg-rose-500/10 text-zinc-600 hover:text-rose-700 border border-black/[0.06]'
+                ? 'bg-rose-500/15 text-rose-800 border border-rose-500/30 shadow-2xs'
+                : 'bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200/80'
             }`}
             title="Reject Review"
           >
@@ -286,8 +286,8 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             onClick={() => onUpdateStatus(review.id, 'archived')}
             className={`apple-touch py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
               review.status === 'archived'
-                ? 'bg-zinc-200 text-zinc-800 border border-zinc-300 shadow-xs'
-                : 'bg-black/[0.02] hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 border border-black/[0.06]'
+                ? 'bg-slate-200 text-slate-800 border border-slate-300 shadow-2xs'
+                : 'bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/80'
             }`}
             title="Archive Review"
           >
@@ -298,7 +298,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           {/* Delete */}
           <button
             onClick={() => onDelete(review.id)}
-            className="apple-touch py-1.5 rounded-xl text-xs font-semibold bg-black/[0.02] hover:bg-rose-500/10 text-zinc-400 hover:text-rose-600 border border-black/[0.06] flex items-center justify-center gap-1 transition-all cursor-pointer"
+            className="apple-touch py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200/80 flex items-center justify-center gap-1 transition-all cursor-pointer"
             title="Delete Permanently"
           >
             <Trash2 className="w-3.5 h-3.5" />

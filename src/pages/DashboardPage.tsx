@@ -326,13 +326,13 @@ export const DashboardPage = () => {
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         
         {/* Top Slim Header Bar with Apple Glass Material */}
-        <header className="h-14 border-b border-black/[0.05] apple-glass px-6 flex items-center justify-between sticky top-0 z-20">
+        <header className="h-14 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-2.5">
-            <span className="text-xs font-semibold text-zinc-900 capitalize tracking-tight">{activeTab}</span>
-            <span className="text-zinc-300">•</span>
-            <div className="flex items-center gap-1.5 text-xs text-zinc-500 truncate max-w-[200px]">
+            <span className="text-xs font-bold text-slate-900 capitalize tracking-tight">{activeTab}</span>
+            <span className="text-slate-300">•</span>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate max-w-[200px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="truncate font-medium">{project?.name || 'Main Product'}</span>
+              <span className="truncate font-semibold text-slate-700">{project?.name || 'Main Product'}</span>
             </div>
           </div>
 
@@ -341,7 +341,7 @@ export const DashboardPage = () => {
             <div className="flex items-center gap-1.5">
               <button
                 onClick={handleCopyLink}
-                className="apple-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-500/10 hover:bg-violet-500/15 text-violet-700 border border-violet-500/20 text-xs font-semibold transition-all shadow-xs cursor-pointer whitespace-nowrap"
+                className="apple-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600/10 hover:bg-violet-600/15 text-violet-700 border border-violet-600/20 text-xs font-semibold transition-all shadow-2xs cursor-pointer whitespace-nowrap"
                 title="Copy public collector link"
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -352,7 +352,7 @@ export const DashboardPage = () => {
                 href={collectionUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="apple-touch hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold transition-all shadow-xs whitespace-nowrap cursor-pointer"
+                className="apple-touch hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all shadow-xs whitespace-nowrap cursor-pointer"
                 title="Open live collector form in new tab"
               >
                 <span>Share Form</span>
@@ -365,7 +365,7 @@ export const DashboardPage = () => {
               id="database-config-btn"
               onClick={() => setShowDatabaseModal(true)}
               title="Database Connection Status"
-              className="apple-touch flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-black/[0.02] hover:bg-black/[0.05] border border-black/[0.06] text-xs font-medium text-zinc-700 transition-colors cursor-pointer"
+              className="apple-touch flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
             >
               <span className="relative flex h-2 w-2">
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
@@ -375,8 +375,8 @@ export const DashboardPage = () => {
                   backend.type === 'firebase' ? 'bg-emerald-500' : 'bg-amber-500'
                 }`}></span>
               </span>
-              <Database className="w-3 h-3 text-zinc-500" />
-              <span className="hidden md:inline text-[11px] font-medium">{backend.type === 'firebase' ? 'Firebase Live' : 'Demo DB'}</span>
+              <Database className="w-3 h-3 text-slate-500" />
+              <span className="hidden md:inline text-[11px] font-semibold">{backend.type === 'firebase' ? 'Firebase Live' : 'Demo DB'}</span>
             </button>
           </div>
         </header>
@@ -490,29 +490,29 @@ export const DashboardPage = () => {
 
           {/* MAIN PROOF DASHBOARD VIEW */}
           {activeTab === 'proof' && (
-            <div className="space-y-6 max-w-7xl mx-auto">
+            <div className="space-y-4 max-w-7xl mx-auto">
               
               {/* Apple Unified Command Center */}
-              <div className="apple-glass-card p-6 sm:p-7 relative overflow-hidden">
+              <div className="apple-glass-card p-5 sm:p-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
                 
                 {/* Header Row */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
                   <div>
-                    <div className="flex items-center gap-3">
-                      <h1 className="text-2xl sm:text-3xl font-extrabold font-display text-zinc-950 tracking-tight">
+                    <div className="flex items-center gap-2.5">
+                      <h1 className="text-xl sm:text-2xl font-extrabold font-display text-slate-950 tracking-tight">
                         Your Proof
                       </h1>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-500/10 text-violet-700 border border-violet-500/20 shadow-xs">
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-500/10 text-violet-700 border border-violet-500/20 shadow-2xs">
                         {reviews.length} {reviews.length === 1 ? 'Entry' : 'Entries'}
                       </span>
-                      <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                      <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         {project?.name || 'Primary Project'}
                       </span>
                     </div>
-                    <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 font-normal">
-                      Manage, moderate, and broadcast your customer testimonials across web and social touchpoints.
+                    <p className="text-xs text-slate-500 mt-1 font-medium">
+                      Collect, approve, and showcase customer testimonials.
                     </p>
                   </div>
 
@@ -520,7 +520,7 @@ export const DashboardPage = () => {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={handleCopyLink}
-                      className="apple-touch apple-btn-primary px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                      className="apple-touch apple-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                       title="Copy customer invitation link"
                     >
                       <Send className="w-3.5 h-3.5" />
@@ -529,33 +529,33 @@ export const DashboardPage = () => {
 
                     <button
                       onClick={() => setShowWidgetsDrawer(!showWidgetsDrawer)}
-                      className={`apple-touch apple-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer ${
-                        showWidgetsDrawer ? 'bg-violet-500/15 text-violet-800 border-violet-500/30' : ''
+                      className={`apple-touch apple-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer ${
+                        showWidgetsDrawer ? 'bg-violet-50 text-violet-800 border-violet-300' : ''
                       }`}
                       title="Toggle Widget & Embed Presets"
                     >
                       <Sparkles className="w-3.5 h-3.5 text-violet-600" />
                       <span>Widgets & Embeds</span>
                       {showWidgetsDrawer ? (
-                        <ChevronUp className="w-3.5 h-3.5 text-zinc-400" />
+                        <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
                       ) : (
-                        <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
                       )}
                     </button>
 
                     <button
                       onClick={() => setShowCarouselModal(true)}
-                      className="apple-touch apple-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                      className="apple-touch apple-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Layers className="w-3.5 h-3.5 text-zinc-500" />
+                      <Layers className="w-3.5 h-3.5 text-slate-500" />
                       <span>Studio</span>
                     </button>
 
                     <button
                       onClick={() => setShowCollectionModal(true)}
-                      className="apple-touch apple-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                      className="apple-touch apple-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Settings className="w-3.5 h-3.5 text-zinc-500" />
+                      <Settings className="w-3.5 h-3.5 text-slate-500" />
                       <span>Configure</span>
                     </button>
 
@@ -564,7 +564,7 @@ export const DashboardPage = () => {
                       className="apple-touch apple-btn-secondary p-2 rounded-xl cursor-pointer"
                       title="Publish History"
                     >
-                      <History className="w-4 h-4 text-zinc-500" />
+                      <History className="w-3.5 h-3.5 text-slate-500" />
                     </button>
 
                     <button
@@ -572,7 +572,7 @@ export const DashboardPage = () => {
                       className="apple-touch apple-btn-secondary p-2 rounded-xl text-emerald-600 cursor-pointer"
                       title="Connected Accounts"
                     >
-                      <LinkIcon className="w-4 h-4" />
+                      <LinkIcon className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -685,19 +685,19 @@ export const DashboardPage = () => {
 
               {/* Priority Pending Moderation Alert */}
               {stats.pendingCount > 0 && (
-                <div className="apple-glass-card p-3.5 border-amber-500/30 bg-amber-500/10 flex items-center justify-between text-xs text-amber-800 animate-fade-in shadow-xs">
+                <div className="apple-glass-card p-3 border-amber-400/50 bg-amber-50/80 flex items-center justify-between text-xs text-amber-900 animate-fade-in shadow-2xs">
                   <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                     <Clock className="w-4 h-4 text-amber-600" />
-                    <span>
-                      <strong>{stats.pendingCount}</strong> customer testimonial(s) awaiting moderation in this project.
+                    <span className="font-medium">
+                      <strong>{stats.pendingCount}</strong> testimonial{stats.pendingCount === 1 ? '' : 's'} awaiting your review.
                     </span>
                   </div>
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, status: 'pending' }))}
-                    className="apple-touch px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 font-semibold transition-colors"
+                    className="apple-touch px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-950 font-bold transition-all cursor-pointer"
                   >
-                    Filter Pending Queue
+                    Review Queue
                   </button>
                 </div>
               )}
@@ -734,28 +734,28 @@ export const DashboardPage = () => {
                   <p className="text-xs">Loading project testimonials...</p>
                 </div>
               ) : filteredReviews.length === 0 ? (
-                <div className="py-20 bg-white rounded-2xl border border-gray-200 shadow-xs text-center p-8 space-y-4 max-w-lg mx-auto">
-                  <div className="w-12 h-12 rounded-xl bg-purple-50 text-[#6701e6] flex items-center justify-center mx-auto border border-purple-100">
-                    <Send className="w-6 h-6" />
+                <div className="py-14 apple-glass-card text-center p-8 space-y-3.5 max-w-md mx-auto">
+                  <div className="w-12 h-12 rounded-2xl bg-violet-600/10 text-violet-600 flex items-center justify-center mx-auto border border-violet-600/20 shadow-2xs">
+                    <Send className="w-5 h-5" />
                   </div>
-                  <h3 className="text-lg font-bold font-display text-gray-900">No Testimonials Yet</h3>
-                  <p className="text-xs text-gray-500 leading-relaxed">
-                    Testimonials you collect will show up here. Already got testimonials? Import them from a CSV file or a connected platform.
+                  <h3 className="text-base font-bold font-display text-slate-900 tracking-tight">No Testimonials Yet</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+                    Share your form link with happy clients or import existing reviews in 1 click.
                   </p>
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
                     <button
                       onClick={() => setActiveTab('import')}
-                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                      className="apple-touch apple-btn-primary w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Import Testimonials</span>
+                      <span>Import Reviews</span>
                     </button>
 
                     <button
                       onClick={handleCopyLink}
-                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-xs font-semibold text-gray-700 hover:text-gray-950 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                      className="apple-touch apple-btn-secondary w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <Copy className="w-3.5 h-3.5" />
+                      <Copy className="w-3.5 h-3.5 text-slate-500" />
                       <span>Copy Form Link</span>
                     </button>
                   </div>
