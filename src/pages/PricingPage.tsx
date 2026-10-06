@@ -97,20 +97,25 @@ export const PricingPage = () => {
 
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const { user } = useAuth();
-  const [checkoutLoading, setCheckoutLoading] = useState<'founding' | 'subscription' | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<'founding' | 'annual' | 'monthly'>('founding');
+  const [checkoutLoading, setCheckoutLoading] = useState<'founding' | 'annual' | 'monthly' | 'extension' | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
-  const handleCheckout = async (plan: 'founding' | 'subscription') => {
+  const handleCheckout = async (plan: 'founding' | 'annual' | 'monthly' | 'extension') => {
+    if (plan !== 'extension') {
+      setSelectedPlan(plan);
+    }
     setCheckoutError(null);
     if (!user) {
-      window.location.href = '/login';
+      window.location.href = `/signup?plan=${plan}`;
       return;
     }
     setCheckoutLoading(plan);
     try {
-      setCheckoutError('Checkout is not yet configured. Please contact support@pandapraise.com to purchase.');
+      window.location.href = `/dashboard/settings?plan=${plan}&checkout=true`;
     } catch {
-      setCheckoutError('Failed to start checkout. Please try again.');
+      setCheckoutError('Redirecting to your billing dashboard…');
+      window.location.href = '/dashboard/settings';
     } finally {
       setCheckoutLoading(null);
     }
@@ -134,7 +139,8 @@ export const PricingPage = () => {
       </header>
 
       <div className="max-w-6xl mx-auto px-6 py-16 sm:py-24">
-        <div className="text-center mb-14">
+        {/* Apple Hero Header */}
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900 border border-white/10 text-zinc-300 text-xs font-medium mb-5 shadow-xs">
             <span className="text-sm leading-none">🇮🇳</span>
             <span>Built for Indians</span>
@@ -156,29 +162,90 @@ export const PricingPage = () => {
           </div>
         </div>
 
+        {/* Apple Segmented Plan Navigator (Allows user to toggle & test all 3) */}
+        <div className="flex items-center justify-center mb-12">
+          <div className="inline-flex p-1.5 rounded-full bg-zinc-900 border border-white/10 shadow-inner max-w-full overflow-x-auto">
+            <button
+              type="button"
+              onClick={() => setSelectedPlan('founding')}
+              className={`px-4 sm:px-6 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                selectedPlan === 'founding'
+                  ? 'bg-white text-zinc-950 shadow-md scale-[1.02]'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              <Crown size={13} className={selectedPlan === 'founding' ? 'text-amber-500' : 'text-zinc-500'} />
+              <span>Lifetime Pass (₹4,999)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedPlan('annual')}
+              className={`px-4 sm:px-6 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                selectedPlan === 'annual'
+                  ? 'bg-white text-zinc-950 shadow-md scale-[1.02]'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              <span>Annual Pro (₹399/mo)</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                selectedPlan === 'annual' ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-400'
+              }`}>
+                Save 50%
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedPlan('monthly')}
+              className={`px-4 sm:px-6 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                selectedPlan === 'monthly'
+                  ? 'bg-white text-zinc-950 shadow-md scale-[1.02]'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              <span>Monthly Pro (₹799/mo)</span>
+            </button>
+          </div>
+        </div>
+
         {checkoutError && <div className="max-w-2xl mx-auto mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm text-center">{checkoutError}</div>}
 
-        <div className="max-w-2xl mx-auto mb-16">
-          <div className="relative rounded-3xl bg-zinc-900/80 border border-white/15 p-8 sm:p-10 shadow-2xl backdrop-blur-xl">
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-              <span className="px-3.5 py-1 rounded-full bg-zinc-950 border border-amber-500/30 text-amber-300 text-[11px] font-semibold uppercase tracking-wider shadow-lg flex items-center gap-1.5">
-                <Crown size={12} className="text-amber-400" />
-                Founding Member Pass
-              </span>
-            </div>
-
-            <div className="text-center pt-2">
-              <div className="flex items-baseline justify-center gap-2 mb-2">
-                <span className="text-5xl sm:text-7xl font-bold tracking-tight text-white">₹4,999</span>
-                <span className="text-xs uppercase tracking-widest font-semibold text-zinc-400">One-time</span>
+        {/* Apple 3-Card Interactive Grid: All 3 are selectable and navigable */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
+          
+          {/* Card 1: Lifetime Pass (Founding Member) */}
+          <div
+            onClick={() => setSelectedPlan('founding')}
+            className={`relative rounded-3xl p-7 sm:p-8 flex flex-col justify-between transition-all duration-200 cursor-pointer ${
+              selectedPlan === 'founding'
+                ? 'bg-zinc-900 border-2 border-white ring-4 ring-white/10 shadow-2xl shadow-violet-500/10 scale-[1.02]'
+                : 'bg-zinc-900/40 border border-white/10 hover:border-white/20 hover:bg-zinc-900/60'
+            }`}
+          >
+            {selectedPlan === 'founding' && (
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            )}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <Crown size={12} className="text-amber-400" />
+                  Lifetime Pass
+                </span>
+                {selectedPlan === 'founding' && (
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                    ● Selected
+                  </span>
+                )}
               </div>
-              <p className="text-base sm:text-lg font-medium text-zinc-200 mb-6">
-                Pay once. Use Panda Praise for life.
-              </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto text-left mb-8 py-5 border-y border-white/10 text-xs text-zinc-300">
+              <h2 className="text-xl font-bold text-white mb-1">Founding Member</h2>
+              <p className="text-xs text-zinc-400 mb-6">Pay once. Use Panda Praise for life.</p>
+
+              <div className="flex items-baseline gap-1.5 mb-6">
+                <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">₹4,999</span>
+                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">One-time</span>
+              </div>
+
+              <div className="space-y-3 py-5 border-t border-white/10 text-xs text-zinc-300">
                 <div className="flex items-center gap-2">
                   <Check size={14} className="text-emerald-400 shrink-0" />
                   <span>Unlimited verified testimonials</span>
@@ -189,85 +256,202 @@ export const PricingPage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span>No monthly or recurring fees</span>
+                  <span>Zero recurring monthly charges</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check size={14} className="text-emerald-400 shrink-0" />
                   <span>Instant GST invoice on request</span>
                 </div>
               </div>
-
-              <button
-                type="button"
-                onClick={() => handleCheckout('founding')}
-                disabled={checkoutLoading !== null}
-                className="w-full sm:w-auto px-10 py-3.5 rounded-full text-sm font-semibold bg-white text-zinc-950 hover:bg-zinc-200 active:scale-[0.98] shadow-lg shadow-white/10 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mx-auto cursor-pointer"
-              >
-                {checkoutLoading === 'founding' ? 'Connecting to checkout…' : 'Become a Founding Member'}
-              </button>
             </div>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCheckout('founding');
+              }}
+              disabled={checkoutLoading !== null}
+              className={`w-full mt-6 py-3.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                selectedPlan === 'founding'
+                  ? 'bg-white text-zinc-950 hover:bg-zinc-200 shadow-lg'
+                  : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white'
+              }`}
+            >
+              {checkoutLoading === 'founding' ? 'Starting checkout…' : 'Get Lifetime Access'}
+            </button>
           </div>
-        </div>
 
-        <div className="flex items-center gap-4 max-w-xl mx-auto mb-10">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">Or subscribe</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
-
-        <div className="max-w-xl mx-auto mb-16">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="relative rounded-2xl bg-zinc-900/60 border border-white/15 p-6 text-left">
-              <div className="absolute -top-2.5 left-4">
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-semibold uppercase tracking-wider">
-                  Save 50%
+          {/* Card 2: Annual Pro */}
+          <div
+            onClick={() => setSelectedPlan('annual')}
+            className={`relative rounded-3xl p-7 sm:p-8 flex flex-col justify-between transition-all duration-200 cursor-pointer ${
+              selectedPlan === 'annual'
+                ? 'bg-zinc-900 border-2 border-white ring-4 ring-white/10 shadow-2xl shadow-emerald-500/10 scale-[1.02]'
+                : 'bg-zinc-900/40 border border-white/10 hover:border-white/20 hover:bg-zinc-900/60'
+            }`}
+          >
+            {selectedPlan === 'annual' && (
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            )}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
+                  Save 50% • Best Value
                 </span>
+                {selectedPlan === 'annual' && (
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                    ● Selected
+                  </span>
+                )}
               </div>
-              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Annual</p>
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-bold tracking-tight text-white">₹399</span>
-                <span className="text-xs text-zinc-400">/month</span>
+
+              <h2 className="text-xl font-bold text-white mb-1">Annual Pro</h2>
+              <p className="text-xs text-zinc-400 mb-6">Best for growing businesses & agencies.</p>
+
+              <div className="flex items-baseline gap-1.5 mb-1">
+                <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">₹399</span>
+                <span className="text-xs font-semibold text-zinc-400">/month</span>
               </div>
-              <p className="text-xs text-zinc-400">₹4,788 billed annually</p>
+              <p className="text-[11px] text-zinc-400 mb-6">₹4,788 billed annually</p>
+
+              <div className="space-y-3 py-5 border-t border-white/10 text-xs text-zinc-300">
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>Unlimited verified testimonials</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>Custom branding & domains</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>Priority email support</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>Save ₹4,800 vs monthly plan</span>
+                </div>
+              </div>
             </div>
 
-            <div className="relative rounded-2xl bg-zinc-900/30 border border-white/10 p-6 text-left">
-              <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Monthly</p>
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-bold tracking-tight text-white">₹799</span>
-                <span className="text-xs text-zinc-400">/month</span>
-              </div>
-              <p className="text-xs text-zinc-500">Billed monthly • Cancel anytime</p>
-            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCheckout('annual');
+              }}
+              disabled={checkoutLoading !== null}
+              className={`w-full mt-6 py-3.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                selectedPlan === 'annual'
+                  ? 'bg-white text-zinc-950 hover:bg-zinc-200 shadow-lg'
+                  : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white'
+              }`}
+            >
+              {checkoutLoading === 'annual' ? 'Starting checkout…' : 'Choose Annual Pro'}
+            </button>
           </div>
+
+          {/* Card 3: Monthly Pro */}
+          <div
+            onClick={() => setSelectedPlan('monthly')}
+            className={`relative rounded-3xl p-7 sm:p-8 flex flex-col justify-between transition-all duration-200 cursor-pointer ${
+              selectedPlan === 'monthly'
+                ? 'bg-zinc-900 border-2 border-white ring-4 ring-white/10 shadow-2xl shadow-violet-500/10 scale-[1.02]'
+                : 'bg-zinc-900/40 border border-white/10 hover:border-white/20 hover:bg-zinc-900/60'
+            }`}
+          >
+            {selectedPlan === 'monthly' && (
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            )}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="px-3 py-1 rounded-full bg-zinc-800 border border-white/10 text-zinc-300 text-[10px] font-bold uppercase tracking-wider">
+                  Flexible
+                </span>
+                {selectedPlan === 'monthly' && (
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                    ● Selected
+                  </span>
+                )}
+              </div>
+
+              <h2 className="text-xl font-bold text-white mb-1">Monthly Pro</h2>
+              <p className="text-xs text-zinc-400 mb-6">Month-to-month agility. Cancel anytime.</p>
+
+              <div className="flex items-baseline gap-1.5 mb-1">
+                <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">₹799</span>
+                <span className="text-xs font-semibold text-zinc-400">/month</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 mb-6">Billed monthly • Cancel anytime</p>
+
+              <div className="space-y-3 py-5 border-t border-white/10 text-xs text-zinc-300">
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>Unlimited verified testimonials</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>Remove Panda Praise branding</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>All core and widget features</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-400 shrink-0" />
+                  <span>Cancel anytime in 1 click</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCheckout('monthly');
+              }}
+              disabled={checkoutLoading !== null}
+              className={`w-full mt-6 py-3.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                selectedPlan === 'monthly'
+                  ? 'bg-white text-zinc-950 hover:bg-zinc-200 shadow-lg'
+                  : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white'
+              }`}
+            >
+              {checkoutLoading === 'monthly' ? 'Starting checkout…' : 'Choose Monthly Pro'}
+            </button>
+          </div>
+
         </div>
 
         {/* India Micro-SaaS Extension Plan */}
-        <div className="max-w-xl mx-auto mb-16 rounded-2xl bg-zinc-900/60 border border-white/15 p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
+        <div className="max-w-4xl mx-auto mb-16 rounded-3xl bg-zinc-900/60 border border-white/15 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
           <div className="text-left">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold uppercase tracking-wider mb-1.5">
-              7-Day Free Trial
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider mb-2">
+              🇮🇳 India Edition • 7-Day Free Trial
             </div>
-            <h3 className="text-base font-semibold text-white">
+            <h3 className="text-lg font-bold text-white">
               PandaPraise Chrome Extension Pro
             </h3>
-            <p className="text-xs text-zinc-400 mt-1 max-w-sm">
-              WhatsApp clipper, UPI payment proof tags & 1-click sales chat drops. Just ₹3/day.
+            <p className="text-xs text-zinc-400 mt-1 max-w-md">
+              1-Click WhatsApp Web in-chat clipper, UPI payment proof tags, and instant sales chat drops. Just ₹3/day.
             </p>
           </div>
           <div className="flex items-center gap-4 shrink-0">
             <div className="text-right">
               <div className="flex items-baseline gap-1 justify-end">
-                <span className="text-2xl font-bold text-white">₹100</span>
+                <span className="text-3xl font-extrabold text-white">₹100</span>
                 <span className="text-xs text-zinc-400">/month</span>
               </div>
+              <span className="text-[10px] text-emerald-400 font-semibold block">7-Day Free Trial</span>
             </div>
-            <a
-              href="/dashboard"
-              className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white font-medium text-xs transition-all whitespace-nowrap"
+            <button
+              type="button"
+              onClick={() => handleCheckout('extension')}
+              className="px-6 py-3 rounded-full bg-white text-zinc-950 hover:bg-zinc-200 font-bold text-xs shadow-lg transition-all whitespace-nowrap cursor-pointer"
             >
-              Start Trial
-            </a>
+              Start 7-Day Trial
+            </button>
           </div>
         </div>
 
