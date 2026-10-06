@@ -35,7 +35,7 @@ export function getPricePlanTier(priceId: string, env: WorkerEnv): 'starter' | '
 
   if (subscriptionPrices.includes(priceId)) return 'starter';
 
-  // Founding Member: one-time $150 lifetime purchase. Pricing page promises
+  // Founding Member: one-time ₹4,999 lifetime purchase. Pricing page promises
   // "lifetime access to all current and future features" - that is the pro tier.
   if (env.STRIPE_PRICE_FOUNDING_LIFETIME && priceId === env.STRIPE_PRICE_FOUNDING_LIFETIME) {
     return 'pro';

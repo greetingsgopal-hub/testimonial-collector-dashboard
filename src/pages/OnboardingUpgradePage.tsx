@@ -13,7 +13,7 @@ import { analytics } from '../lib/analytics';
 export const OnboardingUpgradePage: React.FC = () => {
   usePageSeo({
     title: 'Choose Your Plan — Panda Praise',
-    description: 'Lifetime access for $150 or subscribe monthly. Pick the option that works for you.',
+    description: 'Lifetime access for ₹4,999 or subscribe monthly. Pick the option that works for you.',
   });
 
   const navigate = useNavigate();
@@ -111,7 +111,7 @@ export const OnboardingUpgradePage: React.FC = () => {
                 </div>
 
                 <div className="flex items-baseline justify-center gap-2 mb-2">
-                  <span className="text-5xl font-black text-gray-950">$150</span>
+                  <span className="text-5xl font-black text-gray-950">₹4,999</span>
                   <span className="text-base font-bold text-gray-600">ONE TIME</span>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">Lifetime access. No recurring charges.</p>
@@ -138,15 +138,15 @@ export const OnboardingUpgradePage: React.FC = () => {
               <div className="rounded-2xl bg-white border border-gray-200 p-4 text-left">
                 <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Best Value</p>
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-2xl font-black text-gray-950">$5</span>
+                  <span className="text-2xl font-black text-gray-950">₹399</span>
                   <span className="text-xs text-gray-500">/mo</span>
                 </div>
-                <p className="text-[10px] text-gray-500">$60 billed annually</p>
+                <p className="text-[10px] text-gray-500">₹4,788 billed annually</p>
               </div>
               <div className="rounded-2xl bg-white border border-gray-200 p-4 text-left">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Monthly</p>
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-2xl font-black text-gray-950">$10</span>
+                  <span className="text-2xl font-black text-gray-950">₹799</span>
                   <span className="text-xs text-gray-500">/mo</span>
                 </div>
                 <p className="text-[10px] text-gray-500">Billed monthly</p>

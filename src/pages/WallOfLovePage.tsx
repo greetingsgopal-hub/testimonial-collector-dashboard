@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Star, Quote, ExternalLink, Filter, AlertCircle, RefreshCw } from 'lucide-react';
+import { Star, Quote, ExternalLink, Filter, AlertCircle, RefreshCw, ShieldCheck } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { Review, WallOfLoveTheme } from '../types';
 import { usePageSeo } from '../lib/seo';
@@ -376,8 +376,14 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ review, theme, active
             review.name.charAt(0).toUpperCase()
           )}
         </div>
-        <div>
-          <p className={`text-sm font-medium ${theme.text}`}>{review.name}</p>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <p className={`text-sm font-medium ${theme.text}`}>{review.name}</p>
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+              <ShieldCheck size={10} className="text-emerald-400" />
+              {review.source ? `Verified ${review.source}` : 'Verified Customer'}
+            </span>
+          </div>
           {(review.role || review.company) && (
             <p className={`text-xs ${theme.textSecondary}`}>
               {[review.role, review.company].filter(Boolean).join(' at ')}

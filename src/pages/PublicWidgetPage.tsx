@@ -150,8 +150,13 @@ export const PublicWidgetPage = () => {
         )
       )}
       <div className="min-w-0">
-        <div className={(large ? 'text-sm' : 'text-xs') + ' font-semibold truncate'} style={{ color: foreground }}>
-          {review.name}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <div className={(large ? 'text-sm' : 'text-xs') + ' font-semibold truncate'} style={{ color: foreground }}>
+            {review.name}
+          </div>
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 shrink-0">
+            ✓ Verified
+          </span>
         </div>
         {settings.showCompany && (
           <div className="text-[10px] truncate" style={{ color: muted }}>

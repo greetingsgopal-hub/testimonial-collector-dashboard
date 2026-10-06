@@ -71,15 +71,15 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
 const FAQ_ITEMS = [
   {
     q: 'What is the Founding Member offer?',
-    a: 'Founding Members pay $150 once and get lifetime access to Panda Praise. This is a limited early-supporter offer before we move to subscription-only pricing.',
+    a: 'Founding Members pay ₹4,999 once and get lifetime access to Panda Praise. This is a limited early-supporter offer for Indian founders, agencies, and businesses before we move to subscription-only pricing.',
   },
   {
-    q: 'What happens after I pay $150?',
+    q: 'What happens after I pay ₹4,999?',
     a: 'You get lifetime access to all current and future features. No recurring charges. Ever.',
   },
   {
     q: 'Can I just subscribe instead?',
-    a: 'Yes. You can pay $10/month (billed monthly) or $5/month (billed annually as $60). Founding Member is the better deal if you plan to use Panda Praise long-term.',
+    a: 'Yes. You can pay ₹799/month (billed monthly) or ₹399/month (billed annually as ₹4,788). Founding Member is the best deal if you plan to use Panda Praise long-term.',
   },
   {
     q: 'Can I try Panda Praise before paying?',
@@ -93,8 +93,8 @@ const FAQ_ITEMS = [
 
 export const PricingPage = () => {
   usePageSeo({
-    title: 'Pricing — Panda Praise',
-    description: 'Lifetime access for $150 — pay once, use forever. Or subscribe at $5/month (billed annually).',
+    title: 'Pricing — Panda Praise (India Edition)',
+    description: 'Lifetime access for ₹4,999 — pay once, use forever. Or subscribe at ₹399/month (billed annually). Built for Indian businesses.',
   });
 
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -137,12 +137,12 @@ export const PricingPage = () => {
 
       <div className="max-w-6xl mx-auto px-6 py-16 sm:py-24">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium mb-6">
             <Shield size={12} />
-            Simple pricing
+            🇮🇳 Built for Indian Businesses • Pay in ₹ INR
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 leading-tight">Pay once. Use forever.</h1>
-          <p className="text-lg text-zinc-400 max-w-xl mx-auto">Founding members lock in lifetime access. Or subscribe month-to-month.</p>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 leading-tight">Pay once in ₹. Use forever.</h1>
+          <p className="text-lg text-zinc-400 max-w-xl mx-auto">Founding members lock in lifetime access. UPI, RuPay, Netbanking & Cards accepted.</p>
         </div>
 
         {checkoutError && <div className="max-w-2xl mx-auto mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm text-center">{checkoutError}</div>}
@@ -154,11 +154,11 @@ export const PricingPage = () => {
             </div>
             <div className="text-center">
               <div className="flex items-baseline justify-center gap-2 mb-2">
-                <span className="text-6xl sm:text-7xl font-black text-white">$150</span>
+                <span className="text-6xl sm:text-7xl font-black text-white">₹4,999</span>
                 <span className="text-lg font-bold text-violet-300">ONE TIME</span>
               </div>
               <p className="text-violet-200 font-semibold mb-6">Pay once. Use Panda Praise for life.</p>
-              <p className="text-sm text-zinc-400 mb-6 max-w-md mx-auto">Founding members lock in lifetime access before regular pricing.<span className="block mt-1 text-zinc-500">Designed to deliver long-term value.</span></p>
+              <p className="text-sm text-zinc-400 mb-6 max-w-md mx-auto">Founding members lock in lifetime access before regular subscription pricing.<span className="block mt-1 text-zinc-500">Zero recurring charges. GST invoice available.</span></p>
               <button type="button" onClick={() => handleCheckout('founding')} disabled={checkoutLoading !== null} className="w-full sm:w-auto px-8 py-4 rounded-2xl text-base font-bold bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mx-auto">{checkoutLoading === 'founding' ? 'Starting checkout…' : <><Crown size={18} className="text-amber-400" />Become a Founding Member</>}</button>
             </div>
           </div>
@@ -175,18 +175,18 @@ export const PricingPage = () => {
             <div className="relative rounded-2xl bg-gradient-to-b from-emerald-500/15 to-emerald-500/5 border-2 border-emerald-500/40 p-6 text-left">
               <div className="absolute -top-2.5 left-4"><span className="px-2.5 py-1 rounded-full bg-emerald-500 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-md">Best Value</span></div>
               <p className="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1">Annual</p>
-              <div className="flex items-baseline gap-1 mb-2"><span className="text-4xl font-black text-white">$5</span><span className="text-sm text-zinc-400">/month</span></div>
-              <p className="text-xs text-zinc-400 mb-4">$60 billed annually</p>
+              <div className="flex items-baseline gap-1 mb-2"><span className="text-4xl font-black text-white">₹399</span><span className="text-sm text-zinc-400">/month</span></div>
+              <p className="text-xs text-zinc-400 mb-4">₹4,788 billed annually</p>
               <p className="text-[11px] text-emerald-300 font-medium">Save 50% vs monthly</p>
             </div>
             <div className="relative rounded-2xl bg-white/[0.03] border border-white/10 p-6 text-left">
               <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Monthly</p>
-              <div className="flex items-baseline gap-1 mb-2"><span className="text-4xl font-black text-white">$10</span><span className="text-sm text-zinc-400">/month</span></div>
+              <div className="flex items-baseline gap-1 mb-2"><span className="text-4xl font-black text-white">₹799</span><span className="text-sm text-zinc-400">/month</span></div>
               <p className="text-xs text-zinc-500 mb-4">Billed monthly</p>
               <p className="text-[11px] text-zinc-600">Cancel anytime</p>
             </div>
           </div>
-          <p className="text-center text-xs text-zinc-500 mt-4">Both plans include the same features. Annual saves you money.</p>
+          <p className="text-center text-xs text-zinc-500 mt-4">Both plans include the same features. Annual saves you 50%.</p>
 
           {/* India Micro-SaaS Extension Plan */}
           <div className="mt-8 rounded-2xl bg-gradient-to-r from-violet-950/40 via-purple-900/20 to-zinc-900/60 border border-violet-500/30 p-6 flex flex-col sm:flex-row items-center justify-between gap-6">

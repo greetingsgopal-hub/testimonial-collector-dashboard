@@ -11,6 +11,7 @@ import {
   Sparkles,
   ShieldCheck,
   Layers,
+  Printer,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -264,6 +265,122 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
     }
   };
 
+  const handlePrintStandee = (preset: '4x6' | '5x7') => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const dimensions = preset === '4x6' ? { width: '4in', height: '6in', name: '4" × 6" Acrylic Table Tent' } : { width: '5in', height: '7in', name: '5" × 7" Countertop Stand' };
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>${dimensions.name} - PandaPraise Print</title>
+          <style>
+            @page {
+              size: ${dimensions.width} ${dimensions.height};
+              margin: 0;
+            }
+            body {
+              margin: 0;
+              padding: 0.35in;
+              font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              text-align: center;
+              box-sizing: border-box;
+              height: 100vh;
+              background: #ffffff;
+              color: #0f172a;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .card {
+              border: 1.5px dashed #cbd5e1;
+              border-radius: 20px;
+              padding: 24px;
+              width: 100%;
+              max-width: 320px;
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            }
+            .badge {
+              font-size: 10px;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: #7c3aed;
+              background: #f5f3ff;
+              border: 1px solid #ddd6fe;
+              padding: 4px 12px;
+              border-radius: 9999px;
+              margin-bottom: 12px;
+            }
+            h1 {
+              font-size: 20px;
+              font-weight: 800;
+              margin: 0 0 6px 0;
+              color: #0f172a;
+              letter-spacing: -0.02em;
+            }
+            p.sub {
+              font-size: 12px;
+              color: #64748b;
+              margin: 0 0 18px 0;
+              line-height: 1.4;
+            }
+            .qr-wrap {
+              width: 180px;
+              height: 180px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 16px;
+            }
+            .qr-wrap svg {
+              width: 100%;
+              height: 100%;
+            }
+            .footer {
+              font-size: 11px;
+              color: #94a3b8;
+              font-weight: 600;
+              display: flex;
+              align-items: center;
+              gap: 4px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="badge">Scan with Camera</div>
+            <h1>Enjoyed Your Experience?</h1>
+            <p class="sub">Point your smartphone camera to share quick verified feedback in 30 seconds</p>
+            <div class="qr-wrap">
+              ${qrSvg}
+            </div>
+            <div class="footer">
+              🐼 Powered by PandaPraise • Verified Proof
+            </div>
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 250);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   return (
     <div className="space-y-6">
       {/* Header & Segmented Pill Switch */}
@@ -375,6 +492,33 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
                   </>
                 )}
               </button>
+            </div>
+
+            {/* Acrylic Standee Print Presets */}
+            <div className="w-full pt-2 border-t border-white/5 space-y-1.5">
+              <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block text-left">
+                Print Acrylic Standee
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handlePrintStandee('4x6')}
+                  className="py-2 px-2.5 rounded-xl text-xs font-semibold text-violet-300 bg-violet-950/40 hover:bg-violet-900/50 border border-violet-700/40 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  title="Print formatted 4x6 inch acrylic table tent"
+                >
+                  <Printer size={13} className="text-violet-400" />
+                  <span>4" × 6" Table Tent</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePrintStandee('5x7')}
+                  className="py-2 px-2.5 rounded-xl text-xs font-semibold text-violet-300 bg-violet-950/40 hover:bg-violet-900/50 border border-violet-700/40 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  title="Print formatted 5x7 inch acrylic countertop stand"
+                >
+                  <Printer size={13} className="text-violet-400" />
+                  <span>5" × 7" Counter</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
