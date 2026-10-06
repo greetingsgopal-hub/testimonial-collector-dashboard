@@ -1,70 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Check,
-  X,
   ArrowRight,
   Crown,
   ChevronDown,
   Star,
-  HelpCircle,
 } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
-
-interface PlanFeature {
-  name: string;
-  free: string | boolean;
-  paid: string | boolean;
-  tooltip?: string;
-}
-
-interface FeatureCategory {
-  title: string;
-  features: PlanFeature[];
-}
-
-const FEATURE_CATEGORIES: FeatureCategory[] = [
-  {
-    title: 'Core Features & Limits',
-    features: [
-      { name: 'Testimonials', free: 'Up to 15', paid: 'Unlimited' },
-      { name: 'Projects', free: '1', paid: '1' },
-      { name: 'Team seats', free: '1', paid: '2' },
-      { name: 'Collection forms', free: true, paid: true },
-      { name: 'Customer testimonial collection forms', free: true, paid: true },
-      { name: 'Widget views', free: 'Unlimited', paid: 'Unlimited' },
-      { name: 'CSV & JSON export', free: true, paid: true },
-    ],
-  },
-  {
-    title: 'Widgets & Customization',
-    features: [
-      { name: 'Wall of Love', free: true, paid: true },
-      { name: 'Social card creator', free: true, paid: true },
-      { name: 'Remove Panda Praise branding', free: false, paid: true },
-      { name: 'High-res social proof export', free: false, paid: true },
-      { name: 'Custom domain', free: false, paid: true, tooltip: 'Point your own domain to your Wall of Love' },
-    ],
-  },
-  {
-    title: 'Integrations & Automation',
-    features: [
-      { name: 'Import from CSV & connected platforms', free: false, paid: true },
-      { name: 'API access', free: false, paid: 'Coming soon' },
-      { name: 'Webhooks', free: false, paid: 'Coming soon' },
-      { name: 'Zapier integration', free: false, paid: 'Coming soon', tooltip: 'Join the waitlist from the Integrations page' },
-    ],
-  },
-  {
-    title: 'Analytics & Support',
-    features: [
-      { name: 'Sentiment analysis', free: false, paid: 'Coming soon' },
-      { name: 'Email support', free: false, paid: true },
-    ],
-  },
-];
 
 const FAQ_ITEMS = [
   {
@@ -80,12 +25,8 @@ const FAQ_ITEMS = [
     a: 'Yes. You can pay ₹799/month (billed monthly) or ₹399/month (billed annually as ₹4,788). Founding Member is the best deal if you plan to use Panda Praise long-term.',
   },
   {
-    q: 'Can I try Panda Praise before paying?',
-    a: 'Yes! The Free plan is fully functional and never expires. Use it as long as you like. Upgrade when you need more features or testimonials.',
-  },
-  {
     q: 'Can I cancel my subscription?',
-    a: 'Absolutely. Cancel anytime from your billing dashboard. You keep your current plan until the end of the billing period, then move to Free.',
+    a: 'Absolutely. Cancel anytime from your billing dashboard in 1 click. You retain complete access to your paid plan until the end of your current billing period.',
   },
 ];
 
@@ -133,7 +74,7 @@ export const PricingPage = () => {
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/login" className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors">Sign In</Link>
-            <Link to="/signup" className="px-4 py-2 rounded-lg text-sm font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors">Get Started Free</Link>
+            <Link to="/signup" className="px-4 py-2 rounded-lg text-sm font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors">Get Started</Link>
           </div>
         </div>
       </header>
@@ -455,47 +396,6 @@ export const PricingPage = () => {
           </div>
         </div>
 
-        <div className="text-center mb-20">
-          <p className="text-sm text-zinc-400 mb-2">Not ready to pay?</p>
-          <Link to="/signup" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10 transition-all">Start with Free Plan<ArrowRight size={16} /></Link>
-          <p className="text-xs text-zinc-600 mt-2">Up to 15 testimonials, forever free.</p>
-        </div>
-
-        <div className="mb-20 max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-white">Feature Comparison</h2>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">Compare Free vs Paid (Founding Member or Subscription).</p>
-          </div>
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-zinc-900/40 shadow-xl">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/10 bg-white/[0.04]">
-                  <th className="text-left py-3 px-4 text-zinc-200 font-semibold text-xs sm:text-sm">Feature</th>
-                  <th className="text-center py-3 px-4 text-zinc-300 font-semibold text-xs sm:text-sm w-28 sm:w-32">Free</th>
-                  <th className="text-center py-3 px-4 text-emerald-300 font-semibold text-xs sm:text-sm w-28 sm:w-32">Paid</th>
-                </tr>
-              </thead>
-              <tbody>
-                {FEATURE_CATEGORIES.map((category) => (
-                  <React.Fragment key={category.title}>
-                    <tr className="border-y border-white/10 bg-gradient-to-r from-violet-950/40 via-purple-950/30 to-transparent">
-                      <td colSpan={3} className="py-2.5 px-4 text-left text-xs font-bold uppercase tracking-wider text-violet-300">{category.title}</td>
-                    </tr>
-                    {category.features.map((f, idx) => (
-                      <tr key={f.name} className={`transition-colors hover:bg-white/[0.04] border-b border-white/[0.04] ${idx % 2 === 0 ? 'bg-white/[0.015]' : 'bg-transparent'}`}>
-                        <td className="py-2.5 px-4 text-zinc-300 flex items-center gap-1.5 font-medium text-xs sm:text-sm">{f.name}{f.tooltip && (<span className="group relative inline-flex items-center"><HelpCircle size={13} className="text-zinc-500 cursor-help hover:text-zinc-300 transition-colors" /><span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-lg bg-zinc-800 text-xs text-zinc-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10 shadow-lg z-20">{f.tooltip}</span></span>)}</td>
-                        {(['free', 'paid'] as const).map((tier) => {
-                          const val = f[tier];
-                          return (<td key={tier} className="text-center py-2.5 px-4 text-xs sm:text-sm">{val === true ? (<Check size={16} className="text-emerald-400 mx-auto" />) : val === false ? (<X size={16} className="text-zinc-700 mx-auto" />) : (<span className="text-zinc-300 font-medium">{val}</span>)}</td>);
-                        })}
-                      </tr>
-                    ))}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
 
         <div className="max-w-2xl mx-auto mb-20">
           <h2 className="text-2xl font-bold text-white text-center mb-8">Frequently Asked Questions</h2>
@@ -514,7 +414,7 @@ export const PricingPage = () => {
             <div className="flex justify-center gap-0.5 mb-4">{[1, 2, 3, 4, 5].map(i => (<Star key={i} size={20} className="text-amber-400 fill-amber-400" />))}</div>
             <h3 className="text-2xl font-bold text-white mb-3">Ready to turn happy customers into your best marketing?</h3>
             <p className="text-zinc-400 mb-6 max-w-md mx-auto">Start collecting, managing, and sharing testimonials with Panda Praise today.</p>
-            <Link to="/signup" className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/20 transition-all duration-200">Get Started Free<ArrowRight size={16} /></Link>
+            <Link to="/signup" className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/20 transition-all duration-200">Get Started<ArrowRight size={16} /></Link>
           </div>
         </div>
       </div>

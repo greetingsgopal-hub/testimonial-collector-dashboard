@@ -153,14 +153,7 @@ export const OnboardingUpgradePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Free Option */}
-            <button
-              type="button"
-              onClick={() => handleSelectPlan('free')}
-              className="text-sm text-gray-500 hover:text-gray-700 underline cursor-pointer"
-            >
-              Continue with Free Plan
-            </button>
+
           </div>
         )}
       </div>
