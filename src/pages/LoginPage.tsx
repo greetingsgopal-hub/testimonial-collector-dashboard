@@ -18,7 +18,7 @@ export const LoginPage: React.FC = () => {
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const { signIn, signInWithGoogle, enableDemoMode, authError } = useAuth();
+  const { signIn, signInWithGoogle, authError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -55,11 +55,6 @@ export const LoginPage: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleDemoLogin = () => {
-    enableDemoMode();
-    navigate('/dashboard', { replace: true });
   };
 
   const handleGoogleSignIn = async () => {
@@ -162,14 +157,6 @@ export const LoginPage: React.FC = () => {
             >
               <GoogleIcon className="w-4 h-4 shrink-0" />
               <span>{isGoogleSubmitting ? 'Connecting...' : 'Sign in with Google'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleDemoLogin}
-              className="w-full py-2 px-4 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <span>⚡ Open Demo Workspace</span>
             </button>
           </form>
 
