@@ -5,16 +5,18 @@ import {
   Copy,
   Check,
   ExternalLink,
-  FileText,
-  Sparkles,
   Download,
   QrCode,
   Smartphone,
   X,
-  Layers,
   Heart,
   MessageSquareQuote,
-  ShieldCheck,
+  Star,
+  Layers,
+  Send,
+  ThumbsUp,
+  Globe,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { QrCodeGenerator } from '../QrCodeGenerator';
@@ -46,9 +48,9 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
   const collectionUrl = `${window.location.origin}/c/${publicSlug}`;
 
   const hasProof = reviews.length > 0;
-  const approvedReviews = reviews.filter(r => r.status === 'approved');
+  const approvedReviews = reviews.filter((r) => r.status === 'approved');
   const hasApprovedProof = approvedReviews.length > 0;
-  const pendingCount = reviews.filter(r => r.status === 'pending').length;
+  const pendingCount = reviews.filter((r) => r.status === 'pending').length;
   const avgRating = reviews.length > 0
     ? (reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)
     : '5.0';
@@ -62,291 +64,306 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-4 px-2 sm:px-4 space-y-6 animate-fade-in font-sans">
+    <div className="max-w-5xl mx-auto py-2 sm:py-4 px-2 sm:px-4 space-y-5 animate-fade-in font-sans">
       
-      {/* Apple Executive Hero Header */}
-      <section className="apple-glass-card rounded-2xl p-6 sm:p-7 border border-black/[0.06] bg-white/80 backdrop-blur-2xl relative overflow-hidden">
-        {/* Subtle Ambient Radial Glow */}
-        <div className="absolute -top-16 -right-16 w-56 h-56 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* ── Friendly Apple Welcome Header ── */}
+      <section className="apple-glass-card p-6 sm:p-7 relative overflow-hidden">
+        <div className="absolute -top-16 -right-16 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-52 h-52 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-700 text-[11px] font-bold tracking-tight">
-              <Sparkles className="w-3.5 h-3.5 text-violet-600" />
-              <span>Social Proof Engine</span>
+          <div className="space-y-1.5 max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-600/10 border border-violet-600/20 text-violet-700 text-xs font-bold tracking-tight">
+              <span>🚀</span>
+              <span>Quick Start Guide</span>
               <span className="text-violet-300">•</span>
-              <span className="text-zinc-600 font-medium">{project?.name || 'Workspace'}</span>
+              <span className="text-slate-700 font-semibold">{project?.name || 'My Business'}</span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight font-display">
-              Social proof, engineered to convert.
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight font-display">
+              Get happy reviews in 3 easy steps
             </h1>
 
-            <p className="text-xs sm:text-sm text-zinc-500 leading-relaxed">
-              Three precision stages to capture authentic customer praise, curate high-impact stories, and publish dynamic widgets across your website.
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+              Share your link with customers, pick your favorite reviews, and show them on your website.
             </p>
           </div>
 
-          {/* Apple Progress Capsule & Quick Form Preview */}
-          <div className="shrink-0 flex flex-col sm:items-end gap-3">
-            <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-zinc-50/80 border border-black/[0.06]">
-              <div className="flex gap-1">
+          {/* Simple Progress Counter */}
+          <div className="shrink-0 flex flex-col sm:items-end gap-2.5">
+            <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200/80 shadow-2xs">
+              <div className="flex gap-1.5">
                 {[1, 2, 3].map((step) => {
-                  const isFilled = step <= completedSteps;
+                  const isDone = step <= completedSteps;
                   return (
                     <div
                       key={step}
-                      className={`h-1.5 w-6 rounded-full transition-all duration-500 ${
-                        isFilled ? 'bg-violet-600' : 'bg-zinc-200'
+                      className={`h-2 w-6 rounded-full transition-all duration-500 ${
+                        isDone ? 'bg-violet-600 shadow-xs shadow-violet-500/40' : 'bg-slate-200'
                       }`}
                     />
                   );
                 })}
               </div>
-              <span className="text-xs font-bold text-zinc-800">
-                {completedSteps} / 3 complete
+              <span className="text-xs font-bold text-slate-800">
+                {completedSteps} of 3 done
               </span>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={handleCopyLink}
-                className="apple-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-50 text-zinc-800 border border-black/[0.08] text-xs font-semibold shadow-2xs transition-all cursor-pointer"
-                title="Copy public collection URL"
+                className="apple-touch apple-btn-secondary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                title="Copy link"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-zinc-500" />}
-                <span>{copied ? 'Copied Link' : 'Copy Link'}</span>
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
+                <span>{copied ? 'Copied Link!' : 'Copy Link'}</span>
               </button>
 
               <button
                 onClick={onOpenForm}
-                className="apple-touch inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                title="Preview live form as seen by your customers"
+                className="apple-touch apple-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                title="See the form your customers see"
               >
-                <span>Preview Form</span>
-                <ExternalLink className="w-3 h-3 text-zinc-400" />
+                <span>View Form</span>
+                <ExternalLink className="w-3 h-3" />
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Apple Bento Workflow Architecture (3 Intelligent Stages) */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+      {/* ── 3 Big, Crystal-Clear Cards (Simple Enough for a 12-Year-Old) ── */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
-        {/* Stage 01 · Ingest & Connect */}
-        <div className={`apple-glass-card rounded-2xl p-5 sm:p-6 border transition-all duration-300 flex flex-col justify-between relative overflow-hidden group ${
-          hasProof ? 'border-emerald-500/20 bg-emerald-500/[0.02]' : 'border-violet-500/25 bg-violet-500/[0.02]'
+        {/* STEP 1: Ask for Reviews */}
+        <div className={`apple-glass-card p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden transition-all ${
+          hasProof ? 'border-emerald-500/40 bg-emerald-50/20' : 'border-violet-500/30'
         }`}>
           <div>
             <div className="flex items-center justify-between gap-2 mb-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-                Stage 01 · Ingest
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-violet-100 text-violet-800">
+                Step 1 · Start Here
               </span>
               {hasProof ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                  {reviews.length} Captured
+                  {reviews.length} Received!
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-600 animate-pulse" />
-                  Action Required
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse" />
+                  Waiting for reviews
                 </span>
               )}
             </div>
 
-            <h3 className="text-base font-bold text-zinc-950 tracking-tight">
-              Capture & Ingest Proof
+            <div className="w-10 h-10 rounded-2xl bg-violet-600/10 text-violet-600 flex items-center justify-center mb-3 border border-violet-600/20">
+              <Send className="w-5 h-5" />
+            </div>
+
+            <h3 className="text-base font-bold text-slate-950 tracking-tight">
+              1. Ask for reviews
             </h3>
 
-            <p className="text-xs text-zinc-500 leading-relaxed mt-1.5 mb-5">
-              Collect authentic customer testimonials via your branded form, or sync verified ratings directly from Google Maps and Meta.
+            <p className="text-xs text-slate-600 leading-relaxed mt-1.5 mb-5 font-normal">
+              Send this link to anyone who bought from you. They click it and type why they love your product.
             </p>
           </div>
 
-          <div className="space-y-2 pt-2">
+          <div className="space-y-2 pt-1">
             <button
               onClick={onCollect}
-              className="apple-touch w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+              className="apple-touch apple-btn-primary w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5 text-violet-300" />
-                <span>Collection Form</span>
+                <span>💌</span>
+                <span>Open Review Form</span>
               </div>
-              <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
 
             <button
               onClick={onImport}
-              className="apple-touch w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white hover:bg-zinc-50 text-zinc-800 border border-black/[0.08] text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+              className="apple-touch apple-btn-secondary w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer"
             >
               <div className="flex items-center gap-2">
                 <Download className="w-3.5 h-3.5 text-violet-600" />
-                <span>Import Reviews (Google, Meta)</span>
+                <span>Import from Google & Meta</span>
               </div>
-              <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
             </button>
           </div>
         </div>
 
-        {/* Stage 02 · Curate & Verify */}
-        <div className={`apple-glass-card rounded-2xl p-5 sm:p-6 border transition-all duration-300 flex flex-col justify-between relative overflow-hidden group ${
+        {/* STEP 2: Pick Your Favorites */}
+        <div className={`apple-glass-card p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden transition-all ${
           hasApprovedProof
-            ? 'border-emerald-500/20 bg-emerald-500/[0.02]'
+            ? 'border-emerald-500/40 bg-emerald-50/20'
             : hasProof
-            ? 'border-violet-500/25 bg-violet-500/[0.02]'
-            : 'border-black/[0.06] bg-white/70'
+            ? 'border-violet-500/30'
+            : 'border-slate-200/80 opacity-90'
         }`}>
           <div>
             <div className="flex items-center justify-between gap-2 mb-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-                Stage 02 · Curate
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
+                Step 2 · Moderate
               </span>
               {hasApprovedProof ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                  {approvedReviews.length} Approved
+                  {approvedReviews.length} Approved!
                 </span>
               ) : hasProof ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                  {pendingCount} Pending
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse" />
+                  {pendingCount} to review
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-100 text-zinc-400">
-                  Awaiting Proof
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500">
+                  Waiting for step 1
                 </span>
               )}
             </div>
 
-            <h3 className="text-base font-bold text-zinc-950 tracking-tight">
-              Curate & Spotlight
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mb-3 border border-amber-500/20">
+              <ThumbsUp className="w-5 h-5" />
+            </div>
+
+            <h3 className="text-base font-bold text-slate-950 tracking-tight">
+              2. Pick your favorites
             </h3>
 
-            <p className="text-xs text-zinc-500 leading-relaxed mt-1.5 mb-4">
-              Review feedback, verify authenticity, and spotlight high-impact quotes ready for live embeds.
+            <p className="text-xs text-slate-600 leading-relaxed mt-1.5 mb-4 font-normal">
+              Read what people wrote. Click approve on the best reviews so they can be shown on your website.
             </p>
 
-            {/* Live Moderation Stats Spec */}
-            <div className="px-3 py-2 rounded-xl bg-zinc-50/80 border border-black/[0.04] text-[11px] font-medium text-zinc-600 flex items-center justify-between mb-4">
-              <span>Approved: <strong className="text-emerald-700">{approvedReviews.length}</strong></span>
-              <span className="text-zinc-300">•</span>
-              <span>Pending: <strong className="text-amber-700">{pendingCount}</strong></span>
-              <span className="text-zinc-300">•</span>
-              <span>Rating: <strong className="text-zinc-900">{avgRating}★</strong></span>
+            {/* Simple Stats Pill */}
+            <div className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] font-semibold text-slate-700 flex items-center justify-between mb-4 shadow-2xs">
+              <span className="flex items-center gap-1">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span>{approvedReviews.length} Approved</span>
+              </span>
+              <span className="text-slate-300">•</span>
+              <span className="flex items-center gap-1">
+                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                <span>{avgRating} Average</span>
+              </span>
             </div>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-1">
             <button
               onClick={onProof}
-              className={`apple-touch w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer ${
+              className={`apple-touch w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer ${
                 hasProof
-                  ? 'bg-zinc-950 hover:bg-zinc-800 text-white'
-                  : 'bg-zinc-100 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600'
+                  ? 'apple-btn-primary'
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200/80'
               }`}
             >
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Moderate Library ({reviews.length})</span>
+                <span>⭐</span>
+                <span>Review Testimonials ({reviews.length})</span>
               </div>
-              <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
-        {/* Stage 03 · Broadcast & Studio */}
-        <div className={`apple-glass-card rounded-2xl p-5 sm:p-6 border transition-all duration-300 flex flex-col justify-between relative overflow-hidden group ${
+        {/* STEP 3: Show Them Off */}
+        <div className={`apple-glass-card p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden transition-all ${
           publishComplete
-            ? 'border-emerald-500/20 bg-emerald-500/[0.02]'
+            ? 'border-emerald-500/40 bg-emerald-50/20'
             : hasApprovedProof
-            ? 'border-violet-500/25 bg-violet-500/[0.02]'
-            : 'border-black/[0.06] bg-white/70'
+            ? 'border-violet-500/30'
+            : 'border-slate-200/80 opacity-90'
         }`}>
           <div>
             <div className="flex items-center justify-between gap-2 mb-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-                Stage 03 · Broadcast
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
+                Step 3 · Go Live
               </span>
               {publishComplete ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                  Live on Site
+                  Live on Website!
                 </span>
               ) : hasApprovedProof ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200">
-                  <Sparkles className="w-3 h-3 text-violet-600" />
-                  Ready to Embed
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-800">
+                  <Sparkles className="w-3.5 h-3.5 text-violet-600" />
+                  Ready to show!
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-100 text-zinc-400">
-                  Unlocks with Proof
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500">
+                  Unlocks with reviews
                 </span>
               )}
             </div>
 
-            <h3 className="text-base font-bold text-zinc-950 tracking-tight">
-              Studio & Embeds
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mb-3 border border-emerald-500/20">
+              <Globe className="w-5 h-5" />
+            </div>
+
+            <h3 className="text-base font-bold text-slate-950 tracking-tight">
+              3. Show them off
             </h3>
 
-            <p className="text-xs text-zinc-500 leading-relaxed mt-1.5 mb-4">
-              Deploy approved testimonials as responsive Wall of Love grids, floating social proof toasts, and trust badges.
+            <p className="text-xs text-slate-600 leading-relaxed mt-1.5 mb-4 font-normal">
+              Put your reviews on your website. When visitors see happy customers, they trust you and buy!
             </p>
 
-            {/* Apple Micro-Widget Showcase Chips */}
+            {/* 4 Simple Widget Previews */}
             <div className="grid grid-cols-2 gap-1.5 mb-4">
-              <div className="px-2 py-1.5 rounded-lg bg-zinc-50 border border-black/[0.04] text-[10px] font-semibold text-zinc-700 flex items-center gap-1.5">
-                <Heart className="w-3 h-3 text-rose-500" />
+              <div className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+                <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
                 <span>Wall of Love</span>
               </div>
-              <div className="px-2 py-1.5 rounded-lg bg-zinc-50 border border-black/[0.04] text-[10px] font-semibold text-zinc-700 flex items-center gap-1.5">
+              <div className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
                 <MessageSquareQuote className="w-3 h-3 text-violet-500" />
-                <span>Social Toast</span>
+                <span>Popup Toast</span>
               </div>
-              <div className="px-2 py-1.5 rounded-lg bg-zinc-50 border border-black/[0.04] text-[10px] font-semibold text-zinc-700 flex items-center gap-1.5">
+              <div className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
                 <Layers className="w-3 h-3 text-blue-500" />
-                <span>Marquee Carousel</span>
+                <span>Slider Carousel</span>
               </div>
-              <div className="px-2 py-1.5 rounded-lg bg-zinc-50 border border-black/[0.04] text-[10px] font-semibold text-zinc-700 flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3 text-amber-500" />
-                <span>Trust Badge</span>
+              <div className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+                <Star className="w-3 h-3 text-amber-500 fill-amber-400" />
+                <span>Rating Badge</span>
               </div>
             </div>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-1">
             <button
               onClick={onStudio}
-              className={`apple-touch w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer ${
+              className={`apple-touch w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer ${
                 hasApprovedProof
-                  ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-violet-500/20'
-                  : 'bg-zinc-950 hover:bg-zinc-800 text-white'
+                  ? 'apple-btn-primary'
+                  : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs'
               }`}
             >
               <div className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Launch Studio</span>
+                <span>🎨</span>
+                <span>Customize Widgets</span>
               </div>
-              <ArrowRight className="w-3.5 h-3.5 text-violet-200 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
       </section>
 
-      {/* Integrated Apple Quick Launch Dock (High-Efficiency Spatial Utility) */}
-      <section className="apple-glass-card rounded-2xl p-4 sm:p-5 border border-black/[0.06] bg-white/80 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* ── Your Personal Collection Link Box ── */}
+      <section className="apple-glass-card p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-2xl bg-violet-600/10 border border-violet-600/20 flex items-center justify-center shrink-0">
             <Smartphone className="w-5 h-5 text-violet-700" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-bold text-zinc-950 tracking-tight">
-              Customer Collection Link
+            <p className="text-xs font-bold text-slate-900 tracking-tight">
+              Your Review Form Link
             </p>
-            <p className="text-[11px] font-mono text-zinc-500 truncate max-w-xs sm:max-w-md">
+            <p className="text-[11px] font-mono text-slate-500 truncate max-w-xs sm:max-w-md select-all">
               {collectionUrl}
             </p>
           </div>
@@ -355,41 +372,41 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <button
             onClick={() => setShowQrModal(true)}
-            className="apple-touch px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-50 text-zinc-800 border border-black/[0.08] text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
-            title="Generate high-resolution QR code"
+            className="apple-touch apple-btn-secondary px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 flex items-center gap-1.5 cursor-pointer"
+            title="Show QR Code"
           >
-            <QrCode className="w-3.5 h-3.5 text-zinc-600" />
+            <QrCode className="w-3.5 h-3.5 text-slate-500" />
             <span>QR Code</span>
           </button>
 
           <button
             onClick={handleCopyLink}
-            className="apple-touch px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-50 text-zinc-800 border border-black/[0.08] text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+            className="apple-touch apple-btn-secondary px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 flex items-center gap-1.5 cursor-pointer"
             title="Copy link"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-zinc-500" />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
+            <span>{copied ? 'Copied' : 'Copy Link'}</span>
           </button>
 
           <button
             onClick={onOpenForm}
-            className="apple-touch px-3.5 py-1.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
-            title="Open customer collection form"
+            className="apple-touch apple-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+            title="Open review form in a new tab"
           >
             <span>Open Form</span>
-            <ExternalLink className="w-3 h-3 text-zinc-400" />
+            <ExternalLink className="w-3 h-3" />
           </button>
         </div>
       </section>
 
-      {/* High-Resolution Apple QR Modal */}
+      {/* QR Code Modal */}
       {showQrModal && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
-          <div className="bg-zinc-950 border border-zinc-800/80 rounded-3xl p-6 sm:p-7 max-w-3xl w-full shadow-2xl relative my-auto max-h-[94vh] overflow-y-auto">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-7 max-w-3xl w-full shadow-2xl relative my-auto max-h-[94vh] overflow-y-auto">
             <button
               onClick={() => setShowQrModal(false)}
-              className="apple-touch absolute top-5 right-5 p-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition-colors z-20 cursor-pointer"
-              title="Close modal"
+              className="apple-touch absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors z-20 cursor-pointer"
+              title="Close"
             >
               <X className="w-5 h-5" />
             </button>

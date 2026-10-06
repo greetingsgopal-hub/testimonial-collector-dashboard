@@ -733,34 +733,7 @@ export const DashboardPage = () => {
                   <div className="w-8 h-8 border-2 border-[#6701e6]/30 border-t-[#6701e6] rounded-full animate-spin mb-3" />
                   <p className="text-xs">Loading project testimonials...</p>
                 </div>
-              ) : filteredReviews.length === 0 ? (
-                <div className="py-14 apple-glass-card text-center p-8 space-y-3.5 max-w-md mx-auto">
-                  <div className="w-12 h-12 rounded-2xl bg-violet-600/10 text-violet-600 flex items-center justify-center mx-auto border border-violet-600/20 shadow-2xs">
-                    <Send className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-base font-bold font-display text-slate-900 tracking-tight">No Testimonials Yet</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
-                    Share your form link with happy clients or import existing reviews in 1 click.
-                  </p>
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
-                    <button
-                      onClick={() => setActiveTab('import')}
-                      className="apple-touch apple-btn-primary w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Import Reviews</span>
-                    </button>
-
-                    <button
-                      onClick={handleCopyLink}
-                      className="apple-touch apple-btn-secondary w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <Copy className="w-3.5 h-3.5 text-slate-500" />
-                      <span>Copy Form Link</span>
-                    </button>
-                  </div>
-                </div>
-              ) : viewMode === 'grid' ? (
+              ) : filteredReviews.length === 0 ? null : viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                   {filteredReviews.map((review) => (
                     <ReviewCard
