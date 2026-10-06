@@ -277,7 +277,7 @@ export const WelcomeCelebrationModal: React.FC<WelcomeCelebrationModalProps> = (
             </div>
           </div>
 
-          {/* Step 4: Create Embeddable Widgets & Wall of Love */}
+          {/* Step 4: Publish Wall of Love */}
           <div className="p-4 rounded-2xl border border-gray-200 bg-gray-50/70 hover:bg-gray-50 transition-colors">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
@@ -286,10 +286,10 @@ export const WelcomeCelebrationModal: React.FC<WelcomeCelebrationModalProps> = (
                 </div>
                 <div>
                   <h4 className="font-bold text-sm text-gray-900">
-                    Embed Widgets & Wall of Love on your site
+                    Publish Wall of Love on your site
                   </h4>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Generate customizable embeds, carousel badges, and Walls of Love in 1 click.
+                    Show verified testimonials with your live, branded Wall of Love page.
                   </p>
                 </div>
               </div>
@@ -301,13 +301,13 @@ export const WelcomeCelebrationModal: React.FC<WelcomeCelebrationModalProps> = (
                 }}
                 className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-300 text-gray-800 text-xs font-bold rounded-lg flex items-center gap-1 transition-colors cursor-pointer shrink-0"
               >
-                <span>Widgets</span>
+                <span>Wall of Love</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
           </div>
 
-          {/* Step 5: Studio & Social Cards */}
+          {/* Step 5: Social Cards */}
           <div className="p-4 rounded-2xl border border-gray-200 bg-gray-50/70 hover:bg-gray-50 transition-colors">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
@@ -316,10 +316,10 @@ export const WelcomeCelebrationModal: React.FC<WelcomeCelebrationModalProps> = (
                 </div>
                 <div>
                   <h4 className="font-bold text-sm text-gray-900">
-                    Design social proof images in Studio
+                    Create social proof graphics
                   </h4>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Create eye-catching social proof graphics for Twitter, Instagram, and LinkedIn.
+                    Create eye-catching social proof cards for Twitter, Instagram, and LinkedIn.
                   </p>
                 </div>
               </div>
@@ -331,7 +331,7 @@ export const WelcomeCelebrationModal: React.FC<WelcomeCelebrationModalProps> = (
                 }}
                 className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-300 text-gray-800 text-xs font-bold rounded-lg flex items-center gap-1 transition-colors cursor-pointer shrink-0"
               >
-                <span>Studio</span>
+                <span>Cards</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>

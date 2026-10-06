@@ -9,9 +9,7 @@ import {
   QrCode,
   X,
   Heart,
-  MessageSquareQuote,
   Star,
-  Layers,
   Send,
   ThumbsUp,
   Globe,
@@ -25,7 +23,8 @@ interface WelcomeViewProps {
   onCollect: () => void;
   onImport: () => void;
   onProof: () => void;
-  onStudio: () => void;
+  onOpenWall?: () => void;
+  onRichSnippet?: () => void;
   reviews: Array<{ status: string; rating?: number }>;
   publishComplete: boolean;
 }
@@ -35,7 +34,8 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
   onCollect: _onCollect,
   onImport,
   onProof,
-  onStudio,
+  onOpenWall,
+  onRichSnippet,
   reviews,
   publishComplete,
 }) => {
@@ -272,7 +272,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
           </div>
         </div>
 
-        {/* STEP 3: Show Them Off */}
+        {/* STEP 3: Share Your Proof */}
         <div className={`apple-glass-card p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden transition-all ${
           publishComplete
             ? 'border-emerald-500/40 bg-emerald-50/20'
@@ -283,7 +283,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
           <div>
             <div className="flex items-center justify-between gap-2 mb-3">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
-                Step 3 · Go Live
+                Step 3 · Share Proof
               </span>
               {publishComplete ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
@@ -293,7 +293,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
               ) : hasApprovedProof ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-800">
                   <Sparkles className="w-3.5 h-3.5 text-violet-600" />
-                  Ready to show!
+                  Ready to share!
                 </span>
               ) : (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500">
@@ -307,37 +307,43 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
             </div>
 
             <h3 className="text-base font-bold text-slate-950 tracking-tight">
-              3. Show them off
+              3. Share your proof
             </h3>
 
             <p className="text-xs text-slate-600 leading-relaxed mt-1.5 mb-4 font-normal">
-              Put your reviews on your website. When visitors see happy customers, they trust you and buy!
+              Show off verified customer reviews with your public Wall of Love or rank on Google with SEO rich snippets.
             </p>
 
-            {/* 4 Simple Widget Previews */}
-            <div className="grid grid-cols-2 gap-1.5 mb-4">
-              <div className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
-                <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
-                <span>Wall of Love</span>
-              </div>
-              <div className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
-                <MessageSquareQuote className="w-3 h-3 text-violet-500" />
-                <span>Popup Toast</span>
-              </div>
-              <div className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
-                <Layers className="w-3 h-3 text-blue-500" />
-                <span>Slider Carousel</span>
-              </div>
-              <div className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
-                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
-                <span>Rating Badge</span>
-              </div>
+            <div className="space-y-2 mb-4">
+              <button
+                type="button"
+                onClick={onOpenWall}
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 text-xs font-semibold text-slate-800 flex items-center justify-between transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-2">
+                  <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+                  <span>Public Wall of Love</span>
+                </div>
+                <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-slate-600 transition-colors" />
+              </button>
+
+              <button
+                type="button"
+                onClick={onRichSnippet}
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 text-xs font-semibold text-slate-800 flex items-center justify-between transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Google Rich Snippets (SEO)</span>
+                </div>
+                <ArrowRight className="w-3 h-3 text-slate-400 group-hover:text-slate-600 transition-colors" />
+              </button>
             </div>
           </div>
 
           <div className="pt-1">
             <button
-              onClick={onStudio}
+              onClick={onOpenWall}
               className={`apple-touch w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer ${
                 hasApprovedProof
                   ? 'apple-btn-primary'
@@ -345,8 +351,8 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
               }`}
             >
               <div className="flex items-center gap-2">
-                <span>🎨</span>
-                <span>Customize Widgets</span>
+                <Heart className="w-3.5 h-3.5 fill-current" />
+                <span>Open Wall of Love</span>
               </div>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -356,11 +362,11 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
 
       {/* QR Code Modal */}
       {showQrModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
-          <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-7 max-w-3xl w-full shadow-2xl relative my-auto max-h-[94vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
+          <div className="bg-white/95 backdrop-blur-2xl border border-slate-200/80 rounded-3xl p-6 sm:p-7 max-w-3xl w-full shadow-2xl relative my-auto max-h-[94vh] overflow-y-auto text-slate-900">
             <button
               onClick={() => setShowQrModal(false)}
-              className="apple-touch absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors z-20 cursor-pointer"
+              className="apple-touch absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-20 cursor-pointer"
               title="Close"
             >
               <X className="w-5 h-5" />

@@ -5,7 +5,6 @@ import {
   FileText,
   Download,
   CheckCircle2,
-  Sparkles,
   Search,
   Puzzle,
   Settings,
@@ -22,7 +21,6 @@ export type DashboardTab =
   | 'proof'
   | 'feedback'
   | 'tags'
-  | 'studio'
   | 'rich-snippet'
   | 'analyze'
   | 'integrate'
@@ -156,26 +154,9 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           </button>
         </div>
 
-        {/* Section: SHARE */}
+        {/* Section: EMBEDS & SEO */}
         <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Studio & Embeds</p>
-          <button
-            onClick={() => setActiveTab('studio')}
-            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'studio'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Sparkles className="w-4 h-4 text-slate-400" />
-              <span>Widget Studio</span>
-            </div>
-            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-              Live
-            </span>
-          </button>
-
+          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Embeds & SEO</p>
           <button
             onClick={() => setActiveTab('rich-snippet')}
             className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${

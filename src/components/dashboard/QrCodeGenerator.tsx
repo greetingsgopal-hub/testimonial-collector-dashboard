@@ -5,13 +5,8 @@ import {
   Download,
   Copy,
   Check,
-  Palette,
-  Link as LinkIcon,
-  Smartphone,
-  Sparkles,
-  ShieldCheck,
-  Layers,
   Printer,
+  Layers,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -21,53 +16,48 @@ interface QrCodeGeneratorProps {
 
 export type QrStyle = 'rounded' | 'dots' | 'classic';
 
-interface ColorPreset {
+interface AppleFinish {
   name: string;
   fg: string;
   bg: string;
 }
 
-const COLOR_PRESETS: ColorPreset[] = [
-  { name: 'Classic Onyx', fg: '#000000', bg: '#FFFFFF' },
-  { name: 'Panda Violet', fg: '#7C3AED', bg: '#FAF5FF' },
-  { name: 'Pacific Blue', fg: '#0284C7', bg: '#F0F9FF' },
-  { name: 'Emerald', fg: '#059669', bg: '#ECFDF5' },
-  { name: 'Crimson', fg: '#DC2626', bg: '#FEF2F2' },
-  { name: 'Sunset Amber', fg: '#D97706', bg: '#FFFBEB' },
-  { name: 'Dark Titanium', fg: '#F4F4F5', bg: '#18181B' },
-  { name: 'Midnight Indigo', fg: '#6366F1', bg: '#0F172A' },
+const APPLE_FINISHES: AppleFinish[] = [
+  { name: 'Space Black', fg: '#0f172a', bg: '#ffffff' },
+  { name: 'Panda Violet', fg: '#7c3aed', bg: '#faf5ff' },
+  { name: 'Pacific Blue', fg: '#0284c7', bg: '#f0f9ff' },
+  { name: 'Forest Emerald', fg: '#059669', bg: '#ecfdf5' },
+  { name: 'Sunset Amber', fg: '#d97706', bg: '#fffbeb' },
 ];
 
 /**
  * Builds a standards-compliant, scannable QR code SVG with Apple-level styling.
- * Uses ISO/IEC 18004 matrix with Reed-Solomon Error Correction Level 'H' (30% tolerance).
+ * Level 'H' Reed-Solomon Error Correction (30% tolerance).
  */
 export function generateQrSvg(
   data: string,
   size: number = 320,
-  fg: string = '#000000',
-  bg: string = '#FFFFFF',
+  fg: string = '#0f172a',
+  bg: string = '#ffffff',
   style: QrStyle = 'rounded',
   includeLogo: boolean = true
 ): string {
-  // Validate and sanitize colors and payload to prevent injection into SVG markup
-  const safeFg = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fg) ? fg : '#000000';
-  const safeBg = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(bg) ? bg : '#FFFFFF';
+  const safeFg = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fg) ? fg : '#0f172a';
+  const safeBg = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(bg) ? bg : '#ffffff';
   const safeData = data.replace(/[<>&"']/g, '');
   const safeSize = Number.isFinite(size) && size > 0 && size <= 2000 ? size : 320;
 
-  // Generate ISO/IEC 18004 standard QR matrix with Level 'H' error correction
   const qr = QRCode.create(safeData || 'https://pandapraise.com', {
     errorCorrectionLevel: 'H',
   });
 
   const modCount = qr.modules.size;
-  const margin = 2; // Quiet zone standard
+  const margin = 2;
   const totalMods = modCount + margin * 2;
   const cellSize = safeSize / totalMods;
 
   const centerMod = Math.floor(modCount / 2);
-  const logoCutoutRadius = 3; // 7x7 module center cutout (only ~3.6% area, safe for Level H 30%)
+  const logoCutoutRadius = 3;
 
   let pathData = '';
 
@@ -75,7 +65,6 @@ export function generateQrSvg(
     for (let col = 0; col < modCount; col++) {
       if (!qr.modules.get(row, col)) continue;
 
-      // Check if module falls inside the center emblem cutout
       if (
         includeLogo &&
         Math.abs(row - centerMod) <= logoCutoutRadius &&
@@ -84,7 +73,6 @@ export function generateQrSvg(
         continue;
       }
 
-      // Check if this module is part of the three primary corner finder patterns
       const isFinder =
         (row < 7 && col < 7) ||
         (row < 7 && col >= modCount - 7) ||
@@ -93,50 +81,41 @@ export function generateQrSvg(
       const x = (margin + col) * cellSize;
       const y = (margin + row) * cellSize;
 
-      let rx = cellSize * 0.35; // Default rounded squircle
+      let rx = cellSize * 0.35;
       if (isFinder) {
-        rx = cellSize * 0.25; // Finder patterns keep higher optical contrast
+        rx = cellSize * 0.25;
       } else if (style === 'dots') {
-        rx = cellSize * 0.48; // Circular dots
+        rx = cellSize * 0.48;
       } else if (style === 'classic') {
-        rx = 0; // Pure precision squares
+        rx = 0;
       }
 
-      pathData += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellSize.toFixed(2)}" height="${cellSize.toFixed(2)}" rx="${rx.toFixed(2)}" fill="${safeFg}"/>`;
+      pathData += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellSize.toFixed(2)}" height="${cellSize.toFixed(2)}" rx="${rx.toFixed(2)}" fill="${safeFg}" />`;
     }
   }
 
-  // Render centered Panda emblem when enabled
   let logoSvg = '';
   if (includeLogo) {
-    const centerX = (margin + centerMod + 0.5) * cellSize;
-    const centerY = (margin + centerMod + 0.5) * cellSize;
-    const badgeSize = cellSize * 6.5;
-    const badgeX = centerX - badgeSize / 2;
-    const badgeY = centerY - badgeSize / 2;
-    const badgeRadius = badgeSize * 0.26;
+    const badgeSize = (logoCutoutRadius * 2 + 1) * cellSize;
+    const badgeX = (margin + centerMod - logoCutoutRadius) * cellSize;
+    const badgeY = (margin + centerMod - logoCutoutRadius) * cellSize;
+    const badgeRadius = cellSize * 0.9;
 
-    // Vector Panda Emblem matching PandaPraise brand
     const pandaScale = badgeSize / 100;
     const pandaOffsetX = badgeX;
     const pandaOffsetY = badgeY;
 
     logoSvg = `
       <g>
-        <rect x="${badgeX.toFixed(2)}" y="${badgeY.toFixed(2)}" width="${badgeSize.toFixed(2)}" height="${badgeSize.toFixed(2)}" rx="${badgeRadius.toFixed(2)}" fill="${safeBg}" stroke="${safeFg}" stroke-width="${(cellSize * 0.25).toFixed(2)}" />
+        <rect x="${badgeX.toFixed(2)}" y="${badgeY.toFixed(2)}" width="${badgeSize.toFixed(2)}" height="${badgeSize.toFixed(2)}" rx="${badgeRadius.toFixed(2)}" fill="${safeBg}" stroke="${safeFg}" stroke-width="${(cellSize * 0.22).toFixed(2)}" />
         <g transform="translate(${pandaOffsetX.toFixed(2)}, ${pandaOffsetY.toFixed(2)}) scale(${pandaScale.toFixed(4)})">
-          <!-- Ears -->
           <circle cx="28" cy="26" r="12" fill="${safeFg}" />
           <circle cx="72" cy="26" r="12" fill="${safeFg}" />
-          <!-- Head -->
           <circle cx="50" cy="55" r="34" fill="${safeBg}" stroke="${safeFg}" stroke-width="5" />
-          <!-- Eye patches -->
           <ellipse cx="38" cy="52" rx="9" ry="12" transform="rotate(-15 38 52)" fill="${safeFg}" />
           <ellipse cx="62" cy="52" rx="9" ry="12" transform="rotate(15 62 52)" fill="${safeFg}" />
-          <!-- Eye highlights -->
           <circle cx="39" cy="49" r="3.2" fill="${safeBg}" />
           <circle cx="61" cy="49" r="3.2" fill="${safeBg}" />
-          <!-- Nose & smile -->
           <ellipse cx="50" cy="68" rx="6" ry="4" fill="${safeFg}" />
           <path d="M46 74 Q50 77 54 74" stroke="${safeFg}" stroke-width="2.8" fill="none" stroke-linecap="round" />
         </g>
@@ -155,8 +134,7 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
   const { collectionForm, project } = useAuth();
   const [activeTab, setActiveTab] = useState<'form' | 'wall'>('form');
   const [qrStyle, setQrStyle] = useState<QrStyle>('rounded');
-  const [fgColor, setFgColor] = useState('#000000');
-  const [bgColor, setBgColor] = useState('#FFFFFF');
+  const [selectedFinish, setSelectedFinish] = useState<AppleFinish>(APPLE_FINISHES[0]);
   const [includeEmblem, setIncludeEmblem] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedImage, setCopiedImage] = useState(false);
@@ -164,7 +142,7 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
 
   const collectionUrl = collectionForm
     ? `${window.location.origin}/c/${collectionForm.publicSlug}`
-    : `${window.location.origin}/c/demo`;
+    : `${window.location.origin}/c/feedback`;
 
   const wallUrl = project
     ? `${window.location.origin}/love/${project.slug || project.id}`
@@ -173,8 +151,8 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
   const activeUrl = activeTab === 'form' ? collectionUrl : wallUrl;
 
   const qrSvg = useMemo(() => {
-    return generateQrSvg(activeUrl, 320, fgColor, bgColor, qrStyle, includeEmblem);
-  }, [activeUrl, fgColor, bgColor, qrStyle, includeEmblem]);
+    return generateQrSvg(activeUrl, 320, selectedFinish.fg, selectedFinish.bg, qrStyle, includeEmblem);
+  }, [activeUrl, selectedFinish, qrStyle, includeEmblem]);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(activeUrl);
@@ -184,7 +162,7 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
 
   const renderSvgToBlob = useCallback(async (size: number): Promise<Blob> => {
     return new Promise((resolve, reject) => {
-      const highResSvg = generateQrSvg(activeUrl, size, fgColor, bgColor, qrStyle, includeEmblem);
+      const highResSvg = generateQrSvg(activeUrl, size, selectedFinish.fg, selectedFinish.bg, qrStyle, includeEmblem);
       const svgBlob = new Blob([highResSvg], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(svgBlob);
       const img = new Image();
@@ -199,7 +177,7 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
           reject(new Error('Canvas context unavailable'));
           return;
         }
-        ctx.fillStyle = bgColor;
+        ctx.fillStyle = selectedFinish.bg;
         ctx.fillRect(0, 0, size, size);
         ctx.drawImage(img, 0, 0, size, size);
         URL.revokeObjectURL(url);
@@ -217,17 +195,16 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
 
       img.src = url;
     });
-  }, [activeUrl, fgColor, bgColor, qrStyle, includeEmblem]);
+  }, [activeUrl, selectedFinish, qrStyle, includeEmblem]);
 
   const handleDownloadPng = async () => {
     setIsExporting(true);
     try {
-      // 1200x1200px ultra high-res print master
       const blob = await renderSvgToBlob(1200);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `panda-praise-qr-${activeTab}-1200px.png`;
+      a.download = `panda-praise-qr-${activeTab}.png`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
@@ -260,7 +237,7 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
         handleDownloadPng();
       }
     } catch (e) {
-      console.warn('Clipboard writeImage not permitted, falling back to download:', e);
+      console.warn('Clipboard writeImage failed, falling back to download:', e);
       handleDownloadPng();
     }
   };
@@ -269,14 +246,16 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const dimensions = preset === '4x6' ? { width: '4in', height: '6in', name: '4" × 6" Acrylic Table Tent' } : { width: '5in', height: '7in', name: '5" × 7" Countertop Stand' };
+    const dimensions = preset === '4x6'
+      ? { width: '4in', height: '6in', name: '4" × 6" Table Tent' }
+      : { width: '5in', height: '7in', name: '5" × 7" Counter Stand' };
 
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>${dimensions.name} - PandaPraise Print</title>
+          <title>${dimensions.name} - Panda Praise</title>
           <style>
             @page {
               size: ${dimensions.width} ${dimensions.height};
@@ -299,26 +278,24 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
               print-color-adjust: exact;
             }
             .card {
-              border: 1.5px dashed #cbd5e1;
-              border-radius: 20px;
-              padding: 24px;
+              border: 1.5px dashed #e2e8f0;
+              border-radius: 24px;
+              padding: 28px;
               width: 100%;
-              max-width: 320px;
+              max-width: 340px;
               box-sizing: border-box;
               display: flex;
               flex-direction: column;
               align-items: center;
+              background: #fafafa;
             }
-            .badge {
-              font-size: 10px;
+            .brand {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              font-size: 13px;
               font-weight: 700;
-              text-transform: uppercase;
-              letter-spacing: 0.1em;
-              color: #7c3aed;
-              background: #f5f3ff;
-              border: 1px solid #ddd6fe;
-              padding: 4px 12px;
-              border-radius: 9999px;
+              color: #0f172a;
               margin-bottom: 12px;
             }
             h1 {
@@ -331,16 +308,20 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
             p.sub {
               font-size: 12px;
               color: #64748b;
-              margin: 0 0 18px 0;
+              margin: 0 0 16px 0;
               line-height: 1.4;
             }
             .qr-wrap {
-              width: 180px;
-              height: 180px;
+              width: 190px;
+              height: 190px;
               display: flex;
               align-items: center;
               justify-content: center;
               margin-bottom: 16px;
+              background: #ffffff;
+              border-radius: 18px;
+              padding: 12px;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             }
             .qr-wrap svg {
               width: 100%;
@@ -350,22 +331,19 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
               font-size: 11px;
               color: #94a3b8;
               font-weight: 600;
-              display: flex;
-              align-items: center;
-              gap: 4px;
             }
           </style>
         </head>
         <body>
           <div class="card">
-            <div class="badge">Scan with Camera</div>
-            <h1>Enjoyed Your Experience?</h1>
-            <p class="sub">Point your smartphone camera to share quick verified feedback in 30 seconds</p>
+            <div class="brand">🐼 Panda Praise</div>
+            <h1>Enjoyed your experience?</h1>
+            <p class="sub">Scan with your camera to leave a quick review</p>
             <div class="qr-wrap">
               ${qrSvg}
             </div>
             <div class="footer">
-              🐼 Powered by PandaPraise • Verified Proof
+              Scan with iPhone or Android camera
             </div>
           </div>
           <script>
@@ -382,247 +360,120 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header & Segmented Pill Switch */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400">
-              <QrCode size={18} />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-white tracking-tight flex items-center gap-2">
-                QR Code Studio
-                <span className="text-[10px] font-medium tracking-wide uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Vector Ready
-                </span>
-              </h2>
-              <p className="text-xs text-zinc-400">
-                Generate high-resolution, branded touchpoints for physical print & packaging
-              </p>
-            </div>
+    <div className="space-y-6 font-sans">
+      
+      {/* ── Apple Header & Destination Switcher ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-violet-600/10 border border-violet-600/20 flex items-center justify-center text-violet-700 shadow-2xs">
+            <QrCode className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight flex items-center gap-2">
+              Review QR Card
+            </h2>
+            <p className="text-xs text-slate-500">
+              Customers point their smartphone camera to leave a review in seconds.
+            </p>
           </div>
         </div>
 
-        {/* Apple-style Segmented Control */}
-        <div className="inline-flex p-1 rounded-xl bg-zinc-900 border border-zinc-800 self-start sm:self-auto">
+        {/* Apple Segmented Switch */}
+        <div className="inline-flex p-1 rounded-2xl bg-slate-100 border border-slate-200/80 self-start sm:self-auto shadow-2xs">
           <button
             onClick={() => setActiveTab('form')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'form'
-                ? 'bg-violet-600 text-white shadow-sm shadow-violet-900/30'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-white text-slate-950 shadow-xs'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            <span>📝</span> Collection Form
+            Review Form
           </button>
           <button
             onClick={() => setActiveTab('wall')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'wall'
-                ? 'bg-violet-600 text-white shadow-sm shadow-violet-900/30'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-white text-slate-950 shadow-xs'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            <span>💜</span> Wall of Love
+            Wall of Love
           </button>
         </div>
       </div>
 
-      {/* Two-Stage Responsive Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Stage: Hero Physical Artifact Preview (Cols 1-5) */}
-        <div className="lg:col-span-5 flex flex-col items-center gap-4">
-          <div className="w-full relative group">
-            <div className="absolute -inset-1 bg-gradient-to-b from-violet-500/20 to-purple-500/0 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity pointer-events-none" />
-            <div className="relative p-5 rounded-2xl bg-zinc-900/90 border border-zinc-800 shadow-2xl flex flex-col items-center">
-              {/* QR Container */}
+      {/* ── Main Two-Column Apple Workspace ── */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+        
+        {/* Left: The Physical Apple Card Preview */}
+        <div className="md:col-span-5 flex flex-col items-center gap-3">
+          <div className="w-full rounded-3xl bg-slate-50 border border-slate-200/80 p-5 shadow-inner flex flex-col items-center">
+            
+            {/* The Acrylic Standee Card */}
+            <div
+              className="w-full max-w-[220px] aspect-square rounded-2xl p-3 flex items-center justify-center shadow-md border border-slate-200/60 transition-transform duration-300 hover:scale-[1.02]"
+              style={{ backgroundColor: selectedFinish.bg }}
+            >
               <div
-                className="w-full max-w-[240px] aspect-square rounded-2xl p-3 flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-[1.02]"
-                style={{ backgroundColor: bgColor }}
-              >
-                <div
-                  className="w-full h-full flex items-center justify-center"
-                  dangerouslySetInnerHTML={{ __html: qrSvg }}
-                />
-              </div>
+                className="w-full h-full flex items-center justify-center"
+                dangerouslySetInnerHTML={{ __html: qrSvg }}
+              />
+            </div>
 
-              {/* Scannability Beacon */}
-              <div className="mt-4 flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <ShieldCheck size={13} />
-                <span>ISO/IEC 18004 Verified Scannable</span>
-              </div>
+            <div className="mt-3 text-center">
+              <span className="text-[11px] font-semibold text-slate-500">
+                Point iPhone or Android camera to scan
+              </span>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="w-full space-y-2">
+          {/* Quick Destination Pill */}
+          <div className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs">
+            <span className="text-[11px] font-mono text-slate-600 truncate flex-1 min-w-0 select-all">
+              {activeUrl}
+            </span>
             <button
-              onClick={handleDownloadPng}
-              disabled={isExporting}
-              className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-white bg-violet-600 hover:bg-violet-500 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-violet-600/25 disabled:opacity-50"
+              onClick={handleCopyLink}
+              className="apple-touch px-2 py-1 rounded-lg text-[11px] font-bold text-violet-700 hover:bg-violet-100 transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
+              title="Copy link"
             >
-              <Download size={15} />
-              <span>{isExporting ? 'Exporting 1200px PNG...' : 'Download High-Res PNG (Print)'}</span>
+              {copiedLink ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+              <span>{copiedLink ? 'Copied' : 'Copy'}</span>
             </button>
-
-            <div className="grid grid-cols-2 gap-2 w-full">
-              <button
-                onClick={handleDownloadSvg}
-                className="py-2 px-3 rounded-xl text-xs font-medium text-zinc-200 bg-white/5 hover:bg-white/10 border border-white/10 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
-              >
-                <Layers size={13} className="text-zinc-400" />
-                <span>Download SVG</span>
-              </button>
-
-              <button
-                onClick={handleCopyImage}
-                className="py-2 px-3 rounded-xl text-xs font-medium text-zinc-200 bg-white/5 hover:bg-white/10 border border-white/10 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
-              >
-                {copiedImage ? (
-                  <>
-                    <Check size={13} className="text-emerald-400" />
-                    <span className="text-emerald-400">Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={13} className="text-zinc-400" />
-                    <span>Copy Image</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Acrylic Standee Print Presets */}
-            <div className="w-full pt-2 border-t border-white/5 space-y-1.5">
-              <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block text-left">
-                Print Acrylic Standee
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handlePrintStandee('4x6')}
-                  className="py-2 px-2.5 rounded-xl text-xs font-semibold text-violet-300 bg-violet-950/40 hover:bg-violet-900/50 border border-violet-700/40 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  title="Print formatted 4x6 inch acrylic table tent"
-                >
-                  <Printer size={13} className="text-violet-400" />
-                  <span>4" × 6" Table Tent</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePrintStandee('5x7')}
-                  className="py-2 px-2.5 rounded-xl text-xs font-semibold text-violet-300 bg-violet-950/40 hover:bg-violet-900/50 border border-violet-700/40 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  title="Print formatted 5x7 inch acrylic countertop stand"
-                >
-                  <Printer size={13} className="text-violet-400" />
-                  <span>5" × 7" Counter</span>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Right Stage: Customization & Controls (Cols 6-12) */}
-        <div className="lg:col-span-7 space-y-4 min-w-0">
-          {/* 1. Destination URL Row (Guaranteed no overflow) */}
+        {/* Right: Clean Apple Customization Controls */}
+        <div className="md:col-span-7 space-y-4">
+          
+          {/* 1. Apple Finish Colors */}
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
-              <LinkIcon size={12} className="text-violet-400" />
-              Destination Link
+            <label className="text-xs font-bold text-slate-800">
+              Finish Color
             </label>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 min-w-0">
-              <span className="text-xs text-zinc-300 font-mono truncate flex-1 min-w-0">
-                {activeUrl}
-              </span>
-              <button
-                onClick={handleCopyLink}
-                className="shrink-0 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1 text-xs"
-                title="Copy destination link"
-              >
-                {copiedLink ? (
-                  <Check size={14} className="text-emerald-400" />
-                ) : (
-                  <Copy size={14} />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* 2. Module Geometry (Style) */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
-              <Sparkles size={12} className="text-violet-400" />
-              Module Geometry
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => setQrStyle('rounded')}
-                className={`py-2 px-3 rounded-xl text-xs font-medium border text-center transition-all ${
-                  qrStyle === 'rounded'
-                    ? 'border-violet-500 bg-violet-500/15 text-violet-200'
-                    : 'border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-                }`}
-              >
-                ● Rounded
-              </button>
-              <button
-                type="button"
-                onClick={() => setQrStyle('dots')}
-                className={`py-2 px-3 rounded-xl text-xs font-medium border text-center transition-all ${
-                  qrStyle === 'dots'
-                    ? 'border-violet-500 bg-violet-500/15 text-violet-200'
-                    : 'border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-                }`}
-              >
-                ○ Dots
-              </button>
-              <button
-                type="button"
-                onClick={() => setQrStyle('classic')}
-                className={`py-2 px-3 rounded-xl text-xs font-medium border text-center transition-all ${
-                  qrStyle === 'classic'
-                    ? 'border-violet-500 bg-violet-500/15 text-violet-200'
-                    : 'border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
-                }`}
-              >
-                ■ Classic
-              </button>
-            </div>
-          </div>
-
-          {/* 3. Color Presets */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
-              <Palette size={12} className="text-violet-400" />
-              Apple Color Finishes
-            </label>
-            <div className="grid grid-cols-4 sm:grid-cols-4 gap-2">
-              {COLOR_PRESETS.map((preset) => {
-                const isSelected = fgColor.toUpperCase() === preset.fg.toUpperCase() && bgColor.toUpperCase() === preset.bg.toUpperCase();
+            <div className="grid grid-cols-5 gap-2">
+              {APPLE_FINISHES.map((finish) => {
+                const isSelected = selectedFinish.name === finish.name;
                 return (
                   <button
-                    key={preset.name}
+                    key={finish.name}
                     type="button"
-                    onClick={() => {
-                      setFgColor(preset.fg);
-                      setBgColor(preset.bg);
-                    }}
-                    className={`p-2 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
+                    onClick={() => setSelectedFinish(finish)}
+                    className={`apple-touch p-2 rounded-2xl border text-center transition-all flex flex-col items-center gap-1.5 cursor-pointer ${
                       isSelected
-                        ? 'border-violet-500 bg-violet-500/15 shadow-sm'
-                        : 'border-zinc-800 bg-zinc-900/60 hover:border-zinc-700'
+                        ? 'border-violet-600 bg-violet-50/50 shadow-xs ring-2 ring-violet-600/20'
+                        : 'border-slate-200/80 bg-white hover:border-slate-300'
                     }`}
                   >
                     <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center shadow-inner border border-black/10"
-                      style={{ backgroundColor: preset.bg }}
+                      className="w-6 h-6 rounded-full flex items-center justify-center shadow-xs border border-black/10"
+                      style={{ backgroundColor: finish.fg }}
                     >
-                      <div className="w-3.5 h-3.5 rounded-sm" style={{ backgroundColor: preset.fg }} />
+                      {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
                     </div>
-                    <span className="text-[10px] font-medium text-zinc-300 truncate w-full">
-                      {preset.name}
+                    <span className="text-[10px] font-semibold text-slate-700 truncate w-full">
+                      {finish.name}
                     </span>
                   </button>
                 );
@@ -630,61 +481,62 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
             </div>
           </div>
 
-          {/* 4. Fine-Tuned Colors (Distinct Grid, NO Overlapping Elements) */}
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-1.5">
-              <span className="text-[11px] font-medium text-zinc-400 block">Foreground</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={fgColor}
-                  onChange={(e) => setFgColor(e.target.value)}
-                  className="w-7 h-7 rounded-lg border border-white/20 cursor-pointer bg-transparent p-0 shrink-0"
-                />
-                <input
-                  type="text"
-                  value={fgColor}
-                  onChange={(e) => setFgColor(e.target.value)}
-                  className="flex-1 min-w-0 px-2.5 py-1 text-xs font-mono rounded-lg bg-black/40 border border-zinc-700 text-zinc-200 uppercase"
-                />
-              </div>
-            </div>
-
-            <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-1.5">
-              <span className="text-[11px] font-medium text-zinc-400 block">Background</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={bgColor}
-                  onChange={(e) => setBgColor(e.target.value)}
-                  className="w-7 h-7 rounded-lg border border-white/20 cursor-pointer bg-transparent p-0 shrink-0"
-                />
-                <input
-                  type="text"
-                  value={bgColor}
-                  onChange={(e) => setBgColor(e.target.value)}
-                  className="flex-1 min-w-0 px-2.5 py-1 text-xs font-mono rounded-lg bg-black/40 border border-zinc-700 text-zinc-200 uppercase"
-                />
-              </div>
+          {/* 2. Shape Geometry */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-800">
+              Corner Geometry
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setQrStyle('rounded')}
+                className={`apple-touch py-2 px-3 rounded-xl text-xs font-semibold border text-center transition-all cursor-pointer ${
+                  qrStyle === 'rounded'
+                    ? 'border-violet-600 bg-violet-600 text-white shadow-xs'
+                    : 'border-slate-200/80 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                ● Squircle
+              </button>
+              <button
+                type="button"
+                onClick={() => setQrStyle('dots')}
+                className={`apple-touch py-2 px-3 rounded-xl text-xs font-semibold border text-center transition-all cursor-pointer ${
+                  qrStyle === 'dots'
+                    ? 'border-violet-600 bg-violet-600 text-white shadow-xs'
+                    : 'border-slate-200/80 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                ○ Dots
+              </button>
+              <button
+                type="button"
+                onClick={() => setQrStyle('classic')}
+                className={`apple-touch py-2 px-3 rounded-xl text-xs font-semibold border text-center transition-all cursor-pointer ${
+                  qrStyle === 'classic'
+                    ? 'border-violet-600 bg-violet-600 text-white shadow-xs'
+                    : 'border-slate-200/80 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                ■ Classic
+              </button>
             </div>
           </div>
 
-          {/* 5. Center Brand Emblem Toggle */}
-          <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-3">
+          {/* 3. Center Brand Emblem Switch */}
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3 shadow-2xs">
             <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center text-xs">
-                🐼
-              </div>
+              <span className="text-base">🐼</span>
               <div>
-                <span className="text-xs font-medium text-zinc-200 block">Panda Center Emblem</span>
-                <span className="text-[11px] text-zinc-400">Embed verified brand icon in center</span>
+                <span className="text-xs font-bold text-slate-900 block">Panda Center Icon</span>
+                <span className="text-[11px] text-slate-500">Show verified brand icon in center</span>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setIncludeEmblem(!includeEmblem)}
-              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
-                includeEmblem ? 'bg-violet-600' : 'bg-zinc-700'
+              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
+                includeEmblem ? 'bg-violet-600' : 'bg-slate-300'
               }`}
             >
               <div
@@ -695,21 +547,79 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
             </button>
           </div>
 
-          {/* 6. Physical Placement Guidance (Crisp & Readable) */}
-          <div className="p-3.5 rounded-xl bg-violet-950/30 border border-violet-800/30 flex items-start gap-3">
-            <Smartphone size={16} className="text-violet-400 shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
-              <p className="text-xs font-medium text-violet-200">
-                Point-of-Sale Deployment
-              </p>
-              <p className="text-[11px] text-zinc-400 leading-relaxed">
-                Print on table tents, packaging inserts, receipts, or storefront decals. Customers simply aim their native iOS or Android camera to leave feedback in seconds.
-              </p>
+          {/* 4. Apple Action Buttons */}
+          <div className="space-y-2 pt-1">
+            <button
+              onClick={handleDownloadPng}
+              disabled={isExporting}
+              className="apple-touch apple-btn-primary w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>{isExporting ? 'Exporting High-Res PNG...' : 'Download QR Code (PNG)'}</span>
+            </button>
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={handleDownloadSvg}
+                className="apple-touch apple-btn-secondary py-2 px-3 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Layers className="w-3.5 h-3.5 text-slate-500" />
+                <span>Save Vector (SVG)</span>
+              </button>
+
+              <button
+                onClick={handleCopyImage}
+                className="apple-touch apple-btn-secondary py-2 px-3 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {copiedImage ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="text-emerald-700">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Copy Image</span>
+                  </>
+                )}
+              </button>
             </div>
+
+            {/* Acrylic Standee Print Options */}
+            <div className="pt-2 border-t border-slate-200/80">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                Print Acrylic Standee
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handlePrintStandee('4x6')}
+                  className="apple-touch py-2 px-2.5 rounded-xl text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  title="Print formatted 4x6 inch acrylic table tent"
+                >
+                  <Printer className="w-3.5 h-3.5 text-violet-600" />
+                  <span>4" × 6" Table Tent</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePrintStandee('5x7')}
+                  className="apple-touch py-2 px-2.5 rounded-xl text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  title="Print formatted 5x7 inch acrylic countertop stand"
+                >
+                  <Printer className="w-3.5 h-3.5 text-violet-600" />
+                  <span>5" × 7" Countertop</span>
+                </button>
+              </div>
+            </div>
+
           </div>
+
         </div>
+
       </div>
+
     </div>
   );
 };
 
+export default QrCodeGenerator;

@@ -652,7 +652,7 @@ export const LandingPage: React.FC = () => {
 
                     <div>
                       <p className="text-[10px] font-bold tracking-wider text-gray-600 uppercase">SHARE</p>
-                      <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Studio</p>
+                      <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Embeds</p>
                       <p className="mt-1 text-gray-600 hover:text-gray-900 cursor-pointer">Thank Yous</p>
                     </div>
                   </div>
@@ -1316,7 +1316,7 @@ export const LandingPage: React.FC = () => {
                 <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Overview</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Why Panda Praise</button></li>
-                  <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Customer Proof Studio</button></li>
+                  <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Customer Proof & Wall of Love</button></li>
                 </ul>
               </div>
 

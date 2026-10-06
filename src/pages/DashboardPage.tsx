@@ -6,7 +6,6 @@ import { ReviewCard } from '../components/dashboard/ReviewCard';
 import { ReviewTable } from '../components/dashboard/ReviewTable';
 import { ReviewDetailModal } from '../components/dashboard/ReviewDetailModal';
 import { SocialCardModal } from '../components/dashboard/SocialCardModal';
-import { CarouselStudioModal } from '../components/dashboard/CarouselStudioModal';
 import { DatabaseConfigModal } from '../components/dashboard/DatabaseConfigModal';
 import { CollectionConfigModal } from '../components/dashboard/CollectionConfigModal';
 import { ConnectedAccountsModal } from '../components/dashboard/ConnectedAccountsModal';
@@ -18,8 +17,6 @@ import { WelcomeView } from '../components/dashboard/views/WelcomeView';
 import { FormsView } from '../components/dashboard/views/FormsView';
 import { FeedbackView } from '../components/dashboard/views/FeedbackView';
 import { TagsView } from '../components/dashboard/views/TagsView';
-import { StudioView } from '../components/dashboard/views/StudioView';
-import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { RichSnippetView } from '../components/dashboard/views/RichSnippetView';
 import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
@@ -30,17 +27,11 @@ import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { EmailVerificationBanner } from '../components/auth/EmailVerificationBanner';
 import { 
-  Sparkles, 
   Send, 
   Settings, 
   Clock, 
   Link as LinkIcon, 
-  History, 
-  Layers, 
-  Star, 
-  LayoutGrid, 
-  ChevronDown,
-  ChevronUp
+  History
 } from 'lucide-react';
 
 export const DashboardPage = () => {
@@ -79,7 +70,6 @@ export const DashboardPage = () => {
   // Modals
   const [inspectingReview, setInspectingReview] = useState<Review | null>(null);
   const [socialCardReview, setSocialCardReview] = useState<Review | null>(null);
-  const [showCarouselModal, setShowCarouselModal] = useState(false);
   const [showDatabaseModal, setShowDatabaseModal] = useState(false);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [showAccountsModal, setShowAccountsModal] = useState(false);
@@ -87,9 +77,7 @@ export const DashboardPage = () => {
   const [socialNotification, setSocialNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [currentCollectionForm, setCurrentCollectionForm] = useState<CollectionForm | null>(collectionForm);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [studioSubView, setStudioSubView] = useState<'overview' | 'widget'>('overview');
   const [publishComplete, setPublishComplete] = useState(false);
-  const [showWidgetsDrawer, setShowWidgetsDrawer] = useState(false);
   const activeProjectId = project?.id;
 
   useEffect(() => {
@@ -353,7 +341,8 @@ export const DashboardPage = () => {
               onCollect={() => setActiveTab('forms')}
               onImport={() => setActiveTab('import')}
               onProof={() => setActiveTab('proof')}
-              onStudio={() => setActiveTab('studio')}
+              onOpenWall={() => window.open(`${window.location.origin}/love/${project?.slug || 'feedback'}`, '_blank')}
+              onRichSnippet={() => setActiveTab('rich-snippet')}
               reviews={reviews}
               publishComplete={publishComplete}
             />
@@ -391,29 +380,6 @@ export const DashboardPage = () => {
               tags={availableTags}
               onAddTag={(t) => handleSaveTags(reviews[0]?.id || '', [...availableTags, t])}
             />
-          )}
-
-          {/* Social Proof Studio */}
-          {activeTab === 'studio' && (
-            studioSubView === 'widget' ? (
-              <WidgetStudio
-                reviews={reviews}
-                onBack={() => setStudioSubView('overview')}
-                onOpenProof={() => {
-                  setStudioSubView('overview');
-                  setActiveTab('proof');
-                }}
-              />
-            ) : (
-              <StudioView
-                onOpenWidgetCreator={() => setStudioSubView('widget')}
-                onOpenSocialCard={() => setShowCarouselModal(true)}
-                onOpenWallOfLove={() => setStudioSubView('widget')}
-                approvedCount={reviews.filter(r => r.status === 'approved').length}
-                onOpenProof={() => setActiveTab('proof')}
-                onCollect={() => setActiveTab('forms')}
-              />
-            )
           )}
 
           {/* Rich Snippet (SEO Schema) */}
@@ -478,30 +444,6 @@ export const DashboardPage = () => {
                     </button>
 
                     <button
-                      onClick={() => setShowWidgetsDrawer(!showWidgetsDrawer)}
-                      className={`apple-touch apple-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer ${
-                        showWidgetsDrawer ? 'bg-violet-50 text-violet-800 border-violet-300' : ''
-                      }`}
-                      title="Toggle Widget & Embed Presets"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-violet-600" />
-                      <span>Widgets & Embeds</span>
-                      {showWidgetsDrawer ? (
-                        <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
-                      ) : (
-                        <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                      )}
-                    </button>
-
-                    <button
-                      onClick={() => setShowCarouselModal(true)}
-                      className="apple-touch apple-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Layers className="w-3.5 h-3.5 text-slate-500" />
-                      <span>Studio</span>
-                    </button>
-
-                    <button
                       onClick={() => setShowCollectionModal(true)}
                       className="apple-touch apple-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                     >
@@ -526,95 +468,6 @@ export const DashboardPage = () => {
                     </button>
                   </div>
                 </div>
-
-                {/* Collapsible/Expandable Studio Shelf (Clever Apple space management) */}
-                {showWidgetsDrawer && (
-                  <div className="mt-6 pt-5 border-t border-black/[0.05] animate-fade-in space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-xs font-bold text-zinc-900 tracking-tight flex items-center gap-1.5">
-                          <LayoutGrid className="w-3.5 h-3.5 text-violet-600" />
-                          One-Click Embeddable Widgets
-                        </h4>
-                        <p className="text-[11px] text-zinc-500">
-                          Select a widget architecture to customize and embed directly into your website.
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setActiveTab('studio')}
-                        className="text-xs font-semibold text-violet-600 hover:text-violet-700 hover:underline cursor-pointer"
-                      >
-                        Open Studio Customizer →
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
-                      {/* Widget 1: Testimonial Card */}
-                      <div
-                        onClick={() => setActiveTab('studio')}
-                        className="apple-touch-subtle p-3.5 rounded-2xl bg-black/[0.02] hover:bg-violet-500/[0.04] border border-black/[0.05] hover:border-violet-500/30 transition-all cursor-pointer group shadow-2xs"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Card</span>
-                          <LayoutGrid className="w-3.5 h-3.5 text-zinc-400 group-hover:text-violet-600 transition-colors" />
-                        </div>
-                        <div className="bg-white/90 p-2.5 rounded-xl border border-black/[0.05] text-[10px] text-zinc-600 line-clamp-2 italic shadow-2xs">
-                          "Panda Praise is hands down the easiest tool for social proof."
-                        </div>
-                        <span className="block mt-2.5 text-xs font-bold text-zinc-900 group-hover:text-violet-600 transition-colors">Testimonial Card</span>
-                      </div>
-
-                      {/* Widget 2: Star Badge */}
-                      <div
-                        onClick={() => setActiveTab('studio')}
-                        className="apple-touch-subtle p-3.5 rounded-2xl bg-black/[0.02] hover:bg-violet-500/[0.04] border border-black/[0.05] hover:border-violet-500/30 transition-all cursor-pointer group shadow-2xs"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-bold text-amber-700 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">Badge</span>
-                          <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
-                        </div>
-                        <div className="bg-white/90 p-2.5 rounded-xl border border-black/[0.05] flex items-center justify-between shadow-2xs">
-                          <span className="text-xs font-bold text-zinc-900">5.0 ★</span>
-                          <span className="text-[10px] text-zinc-400">from {reviews.length || 154} reviews</span>
-                        </div>
-                        <span className="block mt-2.5 text-xs font-bold text-zinc-900 group-hover:text-violet-600 transition-colors">Star Rating Badge</span>
-                      </div>
-
-                      {/* Widget 3: Wall of Love */}
-                      <div
-                        onClick={() => {
-                          setActiveTab('studio');
-                          setStudioSubView('widget');
-                        }}
-                        className="apple-touch-subtle p-3.5 rounded-2xl bg-black/[0.02] hover:bg-violet-500/[0.04] border border-black/[0.05] hover:border-violet-500/30 transition-all cursor-pointer group shadow-2xs"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-bold text-violet-700 bg-violet-500/10 px-2 py-0.5 rounded-full border border-violet-500/20">Masonry</span>
-                          <Sparkles className="w-3.5 h-3.5 text-zinc-400 group-hover:text-violet-600 transition-colors" />
-                        </div>
-                        <div className="bg-white/90 p-2.5 rounded-xl border border-black/[0.05] text-[10px] text-zinc-600 line-clamp-2 shadow-2xs">
-                          Interactive responsive grid of live testimonials
-                        </div>
-                        <span className="block mt-2.5 text-xs font-bold text-zinc-900 group-hover:text-violet-600 transition-colors">Wall of Love</span>
-                      </div>
-
-                      {/* Widget 4: Carousel */}
-                      <div
-                        onClick={() => setShowCarouselModal(true)}
-                        className="apple-touch-subtle p-3.5 rounded-2xl bg-black/[0.02] hover:bg-violet-500/[0.04] border border-black/[0.05] hover:border-violet-500/30 transition-all cursor-pointer group shadow-2xs"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-bold text-blue-700 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">Carousel</span>
-                          <Layers className="w-3.5 h-3.5 text-zinc-400 group-hover:text-violet-600 transition-colors" />
-                        </div>
-                        <div className="bg-white/90 p-2.5 rounded-xl border border-black/[0.05] text-[10px] text-zinc-600 line-clamp-2 shadow-2xs">
-                          Auto-sliding touch-optimized carousel
-                        </div>
-                        <span className="block mt-2.5 text-xs font-bold text-zinc-900 group-hover:text-violet-600 transition-colors">Carousel Studio</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Moderation Guidance Banner */}
@@ -729,15 +582,6 @@ export const DashboardPage = () => {
         <SocialCardModal
           review={socialCardReview}
           onClose={() => setSocialCardReview(null)}
-        />
-      )}
-
-      {showCarouselModal && (
-        <CarouselStudioModal
-          approvedReviews={reviews.filter(r => r.status === 'approved')}
-          projectName={project?.name}
-          websiteUrl={project?.websiteUrl}
-          onClose={() => setShowCarouselModal(false)}
         />
       )}
 
