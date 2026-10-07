@@ -33,7 +33,7 @@ const FAQ_ITEMS = [
 export const PricingPage = () => {
   usePageSeo({
     title: 'Pricing — Panda Praise (India Edition)',
-    description: 'Lifetime access for ₹4,999 — pay once, use forever. Or subscribe at ₹399/month (billed annually). Built for Indian businesses.',
+    description: 'Simple, transparent pricing. Flexible subscriptions from ₹399/mo or lifetime Founding Member access for ₹4,999. Built for Indian businesses.',
   });
 
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -84,13 +84,13 @@ export const PricingPage = () => {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900 border border-white/10 text-zinc-300 text-xs font-medium mb-5 shadow-xs">
             <span className="text-sm leading-none">🇮🇳</span>
-            <span>Built for Indians</span>
+            <span>Built for Indian Businesses</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-3">
-            Pay once. Use forever.
+            Simple, transparent pricing.
           </h1>
-          <p className="text-base sm:text-lg text-zinc-400 max-w-xl mx-auto font-normal">
-            Founding members lock in lifetime access.
+          <p className="text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto font-normal">
+            Flexible monthly and annual plans for growing teams — or lock in lifetime access with our Founding Member pass.
           </p>
           <div className="flex items-center justify-center gap-2 sm:gap-2.5 mt-2.5 text-xs text-zinc-500 font-medium tracking-wide">
             <span>UPI</span>
