@@ -19,12 +19,19 @@ import {
   Sun,
   ShieldCheck,
   Globe,
-  Heart
+  Heart,
+  Video,
+  Play,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  Monitor,
+  MousePointer
 } from 'lucide-react';
 import { Review, WidgetType, WidgetSettings } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 
-export type CmsPlatform = 'script' | 'wordpress' | 'webflow' | 'framer' | 'shopify' | 'squarespace' | 'wix' | 'react' | 'nextjs' | 'html' | 'iframe';
+export type CmsPlatform = 'wordpress' | 'webflow' | 'wix' | 'shopify' | 'squarespace' | 'framer' | 'react' | 'nextjs' | 'html' | 'other' | 'iframe';
 export type WallTheme = 'light_gradient' | 'dark' | 'minimalist';
 
 // Custom Brand Icons
@@ -100,7 +107,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
     'direct',
   ]);
 
-  const [cmsPlatform, setCmsPlatform] = useState<CmsPlatform>('script');
+  const [cmsPlatform, setCmsPlatform] = useState<CmsPlatform>('wordpress');
+  const [showVideoStoryboard, setShowVideoStoryboard] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // All approved reviews from project or fallback demo reviews
@@ -143,19 +151,14 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
     const sourcesStr = selectedSources.join(',');
 
     switch (cmsPlatform) {
-      case 'script':
-      case 'html':
-      default:
-        return `<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
-
       case 'wordpress':
         return `<!-- WordPress: Add a Custom HTML block and paste this code -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
 
       case 'webflow':
-        return `<!-- Webflow: Add an Embed component (shortcut E) and paste this code -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+        return `<!-- Webflow: Add a Code Embed element (shortcut A or Cmd+E) and paste this code -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
 
-      case 'framer':
-        return `<!-- Framer: Insert > Utility > Embed > HTML -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+      case 'wix':
+        return `<!-- Wix: Add Elements (+) > Embed Code > Embed HTML -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
 
       case 'shopify':
         return `<!-- Shopify: Theme Editor > Add section > Custom Liquid -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
@@ -163,8 +166,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
       case 'squarespace':
         return `<!-- Squarespace: Add a Code Block (set mode to HTML) and paste this code -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
 
-      case 'wix':
-        return `<!-- Wix: Add Elements (+) > Embed Code > Embed HTML -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+      case 'framer':
+        return `<!-- Framer: Insert > Utility > Embed > HTML -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
 
       case 'react':
         return `// In your React component:\nimport { useEffect } from 'react';\n\nexport function WallOfLove() {\n  useEffect(() => {\n    const script = document.createElement('script');\n    script.src = '${runtimeScriptUrl}';\n    script.async = true;\n    document.body.appendChild(script);\n    return () => { script.remove(); };\n  }, []);\n\n  return (\n    <div\n      id="panda-praise-wall"\n      data-project-id="${projId}"\n      data-theme="${wallTheme}"\n      data-min-rating="${minRating}"\n      data-sources="${sourcesStr}"\n    />\n  );\n}`;
@@ -172,81 +175,272 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
       case 'nextjs':
         return `// In your Next.js component (App Router or Pages):\n'use client';\nimport Script from 'next/script';\n\nexport function WallOfLove() {\n  return (\n    <section>\n      <div\n        id="panda-praise-wall"\n        data-project-id="${projId}"\n        data-theme="${wallTheme}"\n        data-min-rating="${minRating}"\n        data-sources="${sourcesStr}"\n      />\n      <Script src="${runtimeScriptUrl}" strategy="lazyOnload" />\n    </section>\n  );\n}`;
 
+      case 'html':
+      case 'other':
+      default:
+        return `<!-- Panda Praise Embed: Works on any static HTML or website builder -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+
       case 'iframe':
         return `<iframe src="https://pandapraise.com/w/${projId}?theme=${wallTheme === 'dark' ? 'dark' : 'light'}" width="100%" height="600" frameborder="0" style="border:none;border-radius:16px;width:100%;min-height:600px;"></iframe>`;
     }
   };
 
-  const getCmsGuide = () => {
-    switch (cmsPlatform) {
-      case 'script':
-      default:
-        return {
-          title: 'Universal Script Tag (Recommended)',
-          step1: 'Copy the code. You don\'t need to change anything.',
-          step2: 'Paste into a Custom HTML block and publish. Works on any website.',
-        };
-      case 'wordpress':
-        return {
-          title: 'WordPress Installation',
-          step1: 'Add a Custom HTML block where you want the widget.',
-          step2: 'Paste the Panda Praise code and update your page.',
-        };
-      case 'webflow':
-        return {
-          title: 'Webflow Installation',
-          step1: 'Add an Embed element from the Add panel where you want the widget.',
-          step2: 'Paste the snippet above, click "Save & Close", and publish.',
-        };
-      case 'framer':
-        return {
-          title: 'Framer Installation',
-          step1: 'Open the Insert menu (shortcut I), choose Utility → "Embed" (HTML mode).',
-          step2: 'Paste the snippet above and set width to 100%.',
-        };
-      case 'shopify':
-        return {
-          title: 'Shopify Installation',
-          step1: 'In Shopify Theme Editor, click "Add section" → "Custom Liquid" or "Custom HTML".',
-          step2: 'Paste the code snippet above and click "Save".',
-        };
-      case 'squarespace':
-        return {
-          title: 'Squarespace Installation',
-          step1: 'Add a Code block where you want the widget and set mode to HTML.',
-          step2: 'Paste the code snippet above and click "Save".',
-        };
-      case 'wix':
-        return {
-          title: 'Wix Installation',
-          step1: 'Click Add Elements (+) → Embed Code → Embed HTML.',
-          step2: 'Paste the code snippet into the HTML box and resize to fit your section.',
-        };
-      case 'react':
-        return {
-          title: 'React Installation',
-          step1: 'Drop this React component into your page or testimonials section.',
-          step2: 'Renders dynamically on the client with zero build overhead.',
-        };
-      case 'nextjs':
-        return {
-          title: 'Next.js Installation (App Router / Pages)',
-          step1: 'Use next/script with lazyOnload strategy as shown above.',
-          step2: 'Prevents SSR hydration mismatch and optimizes script loading.',
-        };
-      case 'html':
-        return {
-          title: 'Custom HTML Installation (e.g. papasystem.in)',
-          step1: 'Paste the <div> container and <script> tag into your HTML document.',
-          step2: 'Zero frameworks required. Renders instantly on any static or dynamic page.',
-        };
-      case 'iframe':
-        return {
-          title: 'Universal iframe Embed',
-          step1: 'Paste the <iframe> tag into any CMS that restricts custom JavaScript.',
-          step2: 'Isolated, responsive container rendered directly by Panda Praise.',
-        };
-    }
+  const PLATFORM_GUIDES: Record<CmsPlatform, {
+    id: CmsPlatform;
+    label: string;
+    badge: string;
+    badgeColor: string;
+    whatToOpen: string;
+    targetPage: string;
+    embedElement: string;
+    afterPasting: string;
+    howToPublish: string;
+    howToVerify: string;
+    steps: string[];
+    note?: string;
+  }> = {
+    wordpress: {
+      id: 'wordpress',
+      label: 'WordPress',
+      badge: 'Verified Compatible',
+      badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+      whatToOpen: 'Log in to your WordPress admin dashboard (e.g. yourdomain.com/wp-admin).',
+      targetPage: 'Go to Pages (or Posts) in the left sidebar and click "Edit" on the specific page where testimonials should appear.',
+      embedElement: 'In Gutenberg, click the "+" (Add block) button and search for "Custom HTML". In Elementor, drag in the "HTML" widget.',
+      afterPasting: 'You will see the raw embed code inside the block. Click the "Preview" tab on the block to see the live widget container.',
+      howToPublish: 'Click the blue "Update" (or "Publish") button in the top-right corner of the editor.',
+      howToVerify: 'Open your live page as a visitor in a new incognito window and verify the testimonials wall appears.',
+      steps: [
+        'Log in to your WordPress admin dashboard (yourdomain.com/wp-admin).',
+        'Open Pages and edit the page where you want testimonials.',
+        'Click the + button and search for "Custom HTML".',
+        'Add the Custom HTML block into your page layout.',
+        'Paste the Panda Praise code into that block.',
+        'Click Preview above the block to verify rendering.',
+        'Click Update or Publish in the top right.',
+        'Open the live page in a browser and confirm testimonials appear.',
+      ],
+    },
+    webflow: {
+      id: 'webflow',
+      label: 'Webflow',
+      badge: 'Verified Compatible',
+      badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+      whatToOpen: 'Open Webflow Dashboard and launch your site in Webflow Designer.',
+      targetPage: 'Navigate to the page and section where you want customer testimonials.',
+      embedElement: 'Open the Add panel (shortcut A or Cmd+E) → scroll to Advanced / Components → drag "Code Embed" onto your canvas.',
+      afterPasting: 'Paste the snippet inside the HTML Embed Code Editor modal. (Webflow displays an "HTML Embed" placeholder in Designer because custom scripts run on published pages).',
+      howToPublish: 'Click "Save & Close" on the embed modal, then click "Publish" (top right) → "Publish to Selected Domains".',
+      howToVerify: 'Open your published Webflow domain in a browser and confirm the widget renders.',
+      steps: [
+        'Open your site in Webflow Designer.',
+        'Open the page where testimonials should appear.',
+        'Open the Add panel (shortcut A or Cmd+E).',
+        'Add a Code Embed element to your section.',
+        'Paste the Panda Praise code into the modal.',
+        'Save and close the code editor.',
+        'Publish the site to your custom domain.',
+        'Open the live page and confirm the widget appears.',
+      ],
+    },
+    wix: {
+      id: 'wix',
+      label: 'Wix',
+      badge: 'Verified (Iframe Sandbox)',
+      badgeColor: 'text-blue-700 bg-blue-50 border-blue-200',
+      whatToOpen: 'Log in to Wix and click "Edit Site" to launch the Wix Editor or Wix Studio.',
+      targetPage: 'Navigate to the target page and section where you want testimonials.',
+      embedElement: 'Click "Add Elements (+)" on the left toolbar → select "Embed Code" → click "Embed HTML".',
+      afterPasting: 'In the HTML Settings panel, keep "Code" selected, paste your snippet, and click "Update". Drag the box corners to 100% width and min. 600px height.',
+      howToPublish: 'Click the blue "Publish" button in the top right header.',
+      howToVerify: 'Click "View Site" in a new browser window and confirm the testimonials wall renders.',
+      note: 'Wix executes custom code in an isolated sandbox iframe. Ensure you stretch the HTML box frame to full width (100%) and at least 600px height so the testimonials have room to display without internal scrollbars.',
+      steps: [
+        'Open your site in the Wix Editor.',
+        'Navigate to the target page and section.',
+        'Click Add Elements (+) on the left toolbar.',
+        'Select Embed Code → click Embed HTML.',
+        'Select "Code", paste the Panda Praise code, and click Update.',
+        'Resize the HTML box to full width and min. 600px height.',
+        'Click Publish in the top right header.',
+        'Open the live site URL and confirm the widget appears.',
+      ],
+    },
+    shopify: {
+      id: 'shopify',
+      label: 'Shopify',
+      badge: 'Verified Compatible',
+      badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+      whatToOpen: 'Log in to Shopify Admin (admin.shopify.com) and go to Online Store → Themes.',
+      targetPage: 'Click "Customize" on your active theme, then select your target page from the top dropdown.',
+      embedElement: 'In the left template sidebar, click "Add section" and choose "Custom Liquid" (or "Custom HTML").',
+      afterPasting: 'Paste the snippet into the Custom Liquid code field in the sidebar. The center canvas will preview the layout.',
+      howToPublish: 'Click the green "Save" button in the top right corner.',
+      howToVerify: 'Click the three dots (...) → "View" to open your live storefront and confirm testimonials appear.',
+      steps: [
+        'Log in to Shopify Admin → Online Store → Themes.',
+        'Click Customize on your active theme.',
+        'Select the target page from the top dropdown.',
+        'Click Add section in the sidebar and choose Custom Liquid.',
+        'Paste the Panda Praise code into the code field.',
+        'Adjust section padding if needed.',
+        'Click Save in the top right.',
+        'View your live storefront and verify the testimonials appear.',
+      ],
+    },
+    squarespace: {
+      id: 'squarespace',
+      label: 'Squarespace',
+      badge: 'Verified (Business+ / iFrame for Personal)',
+      badgeColor: 'text-amber-700 bg-amber-50 border-amber-200',
+      whatToOpen: 'Log in to Squarespace and open your website editor.',
+      targetPage: 'Navigate to the target page and click "EDIT" in the top-left corner.',
+      embedElement: 'Hover over the section and click "Add Block" → choose "Code Block" (icon looks like </>).',
+      afterPasting: 'Set Format to "HTML" and turn OFF "Display Source". (Squarespace displays "Script Disabled" in edit mode for security).',
+      howToPublish: 'Click "SAVE" in the top-left corner and exit editor mode.',
+      howToVerify: 'Open your live site in a new browser window as a visitor and verify testimonials appear.',
+      note: 'Squarespace Personal Plan restricts custom JavaScript execution. If you are on a Personal plan, switch to our iFrame fallback snippet, which works on all Squarespace tiers.',
+      steps: [
+        'Log in to Squarespace and open your site editor.',
+        'Click EDIT in the top left on the target page.',
+        'Click Add Block and select Code Block (</>).',
+        'Set Format to HTML and ensure Display Source is off.',
+        'Paste the Panda Praise embed code into the block.',
+        'Click SAVE in the top left and exit edit mode.',
+        'Open the live page to verify the testimonials appear.',
+        '(Personal Plan: Use iFrame snippet if JS is blocked).',
+      ],
+    },
+    framer: {
+      id: 'framer',
+      label: 'Framer',
+      badge: 'Verified Compatible',
+      badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+      whatToOpen: 'Open your project in Framer web app or desktop app.',
+      targetPage: 'Navigate to the canvas frame and section where you want customer reviews.',
+      embedElement: 'Press I (Insert menu) → navigate to "Utility" → drag the "Embed" component onto your canvas.',
+      afterPasting: 'In the right properties panel, change Type from "URL" to "HTML", and paste the snippet into the code input.',
+      howToPublish: 'Set the Embed layer width to "Fill" (100%) and height to fit content. Then click "Publish" in the top right.',
+      howToVerify: 'Visit your published Framer site URL and confirm the testimonials wall displays.',
+      steps: [
+        'Open your site in Framer.',
+        'Open the page and frame where testimonials belong.',
+        'Press I (or click Insert) and go to Utility.',
+        'Drag the Embed component onto your canvas.',
+        'In the right inspector, switch Type to HTML.',
+        'Paste the Panda Praise embed code.',
+        'Set width to Fill (100%) and height to Fit content.',
+        'Click Publish and verify on your live site.',
+      ],
+    },
+    react: {
+      id: 'react',
+      label: 'React',
+      badge: 'Verified Compatible',
+      badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+      whatToOpen: 'Open your React project repository in your IDE (VS Code, WebStorm, etc.).',
+      targetPage: 'Navigate to the components or sections folder where your testimonials section lives.',
+      embedElement: 'Create a WallOfLove.tsx (or .jsx) component that loads the script dynamically via useEffect.',
+      afterPasting: 'Paste the component code below. It renders the #panda-praise-wall container and cleans up on unmount.',
+      howToPublish: 'Import <WallOfLove /> into your page, run npm run build, and deploy your frontend.',
+      howToVerify: 'Run npm run dev or view your production deployment URL in a browser.',
+      steps: [
+        'Open your React project in your IDE.',
+        'Create a component file: WallOfLove.tsx.',
+        'Paste the React snippet provided below.',
+        'Import WallOfLove into your target page.',
+        'Run npm run dev to verify locally.',
+        'Deploy your app to production.',
+        'Open live URL and confirm testimonials appear.',
+      ],
+    },
+    nextjs: {
+      id: 'nextjs',
+      label: 'Next.js',
+      badge: 'Verified Compatible',
+      badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+      whatToOpen: 'Open your Next.js project repository in your IDE.',
+      targetPage: 'Open your App Router (app/page.tsx) or Pages Router route.',
+      embedElement: 'Create a client component with next/script and strategy="lazyOnload".',
+      afterPasting: 'Paste the component snippet below. The "use client" directive and lazyOnload strategy ensure zero hydration mismatch.',
+      howToPublish: 'Import the component into your page, build (npm run build), and deploy to Vercel/host.',
+      howToVerify: 'Open the deployed Next.js site in your browser to verify testimonials render.',
+      steps: [
+        'Open your Next.js project in your code editor.',
+        'Create a client component, e.g. components/WallOfLove.tsx.',
+        'Add "use client" at the top of the file.',
+        'Paste the Next.js snippet using next/script.',
+        'Import WallOfLove into your page route.',
+        'Build and deploy to Vercel or your hosting provider.',
+        'Open live website and confirm testimonials load.',
+      ],
+    },
+    html: {
+      id: 'html',
+      label: 'Custom HTML',
+      badge: 'Verified in Production (Tested Live on papasystem.in)',
+      badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+      whatToOpen: 'Open your website source files in your code editor (e.g. VS Code) or web hosting File Manager / cPanel.',
+      targetPage: 'Open the specific HTML file (e.g. index.html) where reviews should be displayed.',
+      embedElement: 'Locate the target section in your HTML markup (e.g. <section id="testimonials"> or right before <footer>).',
+      afterPasting: 'Paste the <div id="panda-praise-wall"> container and <script src="https://pandapraise.com/embed.js" async></script> snippet.',
+      howToPublish: 'Save the HTML file and upload/deploy it to your web server (via Git, FTP, cPanel, or host).',
+      howToVerify: 'Open https://papasystem.in/ (or your domain) in your browser as a visitor and verify testimonials appear.',
+      steps: [
+        'Open your project in your code editor or hosting file manager.',
+        'Open the specific HTML file (e.g. index.html).',
+        'Locate the section where testimonials belong (e.g. above footer).',
+        'Paste the div container and script tag into your markup.',
+        'Save the file.',
+        'Upload or push changes to your web server.',
+        'Open https://papasystem.in/ in a fresh browser tab.',
+        'Confirm the Wall of Love renders cleanly with zero console errors.',
+      ],
+    },
+    other: {
+      id: 'other',
+      label: 'Other',
+      badge: 'Universal Compatibility',
+      badgeColor: 'text-purple-700 bg-purple-50 border-purple-200',
+      whatToOpen: 'Log in to your website builder or CMS admin interface.',
+      targetPage: 'Open the specific page where you want testimonials to appear.',
+      embedElement: 'Search for an element named: Custom HTML, Embed Code, Code Block, or Raw HTML.',
+      afterPasting: 'Paste the universal Panda Praise embed code into that element. Adjust width to 100%.',
+      howToPublish: 'Click Save or Publish in your builder.',
+      howToVerify: 'Open the live URL in an incognito window as a visitor and confirm testimonials display.',
+      note: 'If your website builder prohibits custom <script> tags for security, switch to our universal iFrame Fallback snippet below.',
+      steps: [
+        'Log in to your website builder or CMS admin.',
+        'Open the specific page where testimonials should appear.',
+        'Add a Custom HTML, Embed, or Code element.',
+        'Paste the Panda Praise snippet into the element.',
+        'Set element width to 100%.',
+        'Save and publish your website.',
+        'Open the live page in a browser and verify testimonials.',
+        '(If script is blocked, use iFrame fallback snippet).',
+      ],
+    },
+    iframe: {
+      id: 'iframe',
+      label: 'iFrame Fallback',
+      badge: 'Universal Sandbox',
+      badgeColor: 'text-gray-700 bg-gray-100 border-gray-300',
+      whatToOpen: 'Use this if your CMS or security policy restricts third-party JavaScript.',
+      targetPage: 'Open the page where testimonials belong.',
+      embedElement: 'Add an Embed (URL or iframe) or HTML element.',
+      afterPasting: 'Paste the <iframe> tag. It runs in an isolated frame hosted directly by Panda Praise.',
+      howToPublish: 'Save and publish your page.',
+      howToVerify: 'Open the live page to confirm the iframe loads testimonials.',
+      steps: [
+        'Copy the iframe embed code below.',
+        'Open your website builder and target page.',
+        'Add an Embed or HTML block.',
+        'Paste the <iframe> snippet.',
+        'Set iframe width to 100% and height to min. 600px.',
+        'Save and publish your page.',
+        'Confirm testimonials render in your browser.',
+      ],
+    },
   };
 
   const handlePublishSetup = () => {
@@ -267,7 +461,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
     }
   };
 
-  const guide = getCmsGuide();
+  const guide = PLATFORM_GUIDES[cmsPlatform] || PLATFORM_GUIDES.wordpress;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto font-sans">
@@ -327,45 +521,48 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
         </div>
       </div>
 
-      {/* 3 Universal Steps to Add to Any Website */}
+      {/* Universal 3-Step Installation Journey */}
       <div className="bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 p-5 rounded-2xl border border-purple-200/80 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
             <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#6701e6] text-white text-xs font-black">
               ✓
             </span>
-            Add Panda Praise to Your Website (3 Universal Steps)
+            How to Add Panda Praise to Your Website (3 Universal Steps)
           </h2>
           <span className="text-[11px] font-semibold text-purple-700 bg-white/80 px-2.5 py-1 rounded-full border border-purple-200">
-            Works with any website builder & custom HTML
+            Tailored platform instructions provided below
           </span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="bg-white/90 backdrop-blur-xs p-3.5 rounded-xl border border-purple-100 shadow-2xs">
-            <div className="flex items-center gap-2 mb-1">
+          <div className="bg-white/95 backdrop-blur-xs p-4 rounded-xl border border-purple-100 shadow-2xs space-y-1.5">
+            <div className="flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-purple-100 text-[#6701e6] font-black text-xs flex items-center justify-center">1</span>
-              <p className="text-xs font-bold text-gray-800">Copy your widget code</p>
+              <p className="text-xs font-bold text-gray-900 uppercase tracking-wide">COPY</p>
             </div>
+            <p className="text-xs font-bold text-[#6701e6]">Copy your embed code</p>
             <p className="text-[11px] text-gray-600 leading-relaxed">
-              Select your platform below and click <strong>Copy Embed Code</strong>. You do not need to configure any code.
+              Select your website builder below and click <strong>Copy Embed Code</strong>. Your snippet already includes your project ID and display rules.
             </p>
           </div>
-          <div className="bg-white/90 backdrop-blur-xs p-3.5 rounded-xl border border-purple-100 shadow-2xs">
-            <div className="flex items-center gap-2 mb-1">
+          <div className="bg-white/95 backdrop-blur-xs p-4 rounded-xl border border-purple-100 shadow-2xs space-y-1.5">
+            <div className="flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-purple-100 text-[#6701e6] font-black text-xs flex items-center justify-center">2</span>
-              <p className="text-xs font-bold text-gray-800">Paste where you want reviews</p>
+              <p className="text-xs font-bold text-gray-900 uppercase tracking-wide">OPEN & ADD ELEMENT</p>
             </div>
+            <p className="text-xs font-bold text-[#6701e6]">Open builder & add code element</p>
             <p className="text-[11px] text-gray-600 leading-relaxed">
-              Add a <strong>Custom HTML / Embed block</strong> in your website editor (e.g. WordPress, Webflow, Shopify, or your HTML file).
+              Open the website builder used to build your site, open the specific page where reviews should appear, and add your builder's <strong>Custom HTML / Embed element</strong>.
             </p>
           </div>
-          <div className="bg-white/90 backdrop-blur-xs p-3.5 rounded-xl border border-purple-100 shadow-2xs">
-            <div className="flex items-center gap-2 mb-1">
+          <div className="bg-white/95 backdrop-blur-xs p-4 rounded-xl border border-purple-100 shadow-2xs space-y-1.5">
+            <div className="flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-purple-100 text-[#6701e6] font-black text-xs flex items-center justify-center">3</span>
-              <p className="text-xs font-bold text-gray-800">Publish your website</p>
+              <p className="text-xs font-bold text-gray-900 uppercase tracking-wide">PASTE, PUBLISH & CHECK</p>
             </div>
+            <p className="text-xs font-bold text-[#6701e6]">Paste snippet, publish & verify</p>
             <p className="text-[11px] text-gray-600 leading-relaxed">
-              Save and hit <strong>Publish</strong>. When you approve new testimonials in Panda Praise, your live site updates automatically.
+              Paste the code into that element and hit <strong>Publish</strong>. Then open your live website in a new incognito window as a visitor to confirm testimonials appear.
             </p>
           </div>
         </div>
@@ -518,59 +715,139 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
             </div>
           </div>
 
-          {/* 3. Embed Code Generator */}
-          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-3.5">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-2">
-                <Code2 className="w-4 h-4 text-[#6701e6]" />
-                3. One-Click Embed Snippet
-              </h3>
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                Zero Layout Shift
-              </span>
+          {/* 3. Embed Code & Platform-Specific Guide */}
+          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-4">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-2">
+                  <Code2 className="w-4 h-4 text-[#6701e6]" />
+                  3. Install on Your Website
+                </h3>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  Zero Layout Shift
+                </span>
+              </div>
+              <p className="text-xs font-semibold text-gray-900">
+                What website builder are you using?
+              </p>
             </div>
 
-            {/* Platform Selector Tabs */}
-            <div className="flex flex-wrap gap-1 p-1 bg-gray-100 rounded-xl text-[11px] font-semibold">
+            {/* Platform Selector Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 p-1.5 bg-gray-100 rounded-xl text-xs font-semibold">
               {[
-                { id: 'script', label: 'Script Tag' },
                 { id: 'wordpress', label: 'WordPress' },
                 { id: 'webflow', label: 'Webflow' },
-                { id: 'framer', label: 'Framer' },
+                { id: 'wix', label: 'Wix' },
                 { id: 'shopify', label: 'Shopify' },
                 { id: 'squarespace', label: 'Squarespace' },
-                { id: 'wix', label: 'Wix' },
+                { id: 'framer', label: 'Framer' },
                 { id: 'react', label: 'React' },
                 { id: 'nextjs', label: 'Next.js' },
-                { id: 'html', label: 'Custom HTML (papasystem.in)' },
-                { id: 'iframe', label: 'iFrame Fallback' },
-              ].map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setCmsPlatform(p.id as CmsPlatform)}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                    cmsPlatform === p.id
-                      ? 'bg-white text-[#6701e6] font-bold shadow-xs'
-                      : 'text-gray-500 hover:text-gray-900'
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
+                { id: 'html', label: 'Custom HTML' },
+                { id: 'other', label: 'Other' },
+              ].map((p) => {
+                const isSelected = cmsPlatform === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setCmsPlatform(p.id as CmsPlatform)}
+                    className={`px-2 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#6701e6] text-white font-bold shadow-xs'
+                        : 'bg-white/70 text-gray-700 hover:bg-white hover:text-gray-900'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Guidance */}
-            <div className="p-3 rounded-xl bg-purple-50/60 border border-purple-200/80 text-xs text-gray-700 space-y-1">
-              <p className="font-bold text-[#6701e6]">{guide.title}</p>
-              <p className="text-[11px] text-gray-600">1. {guide.step1}</p>
-              <p className="text-[11px] text-gray-600">2. {guide.step2}</p>
+            {/* iFrame Fallback link */}
+            <div className="flex items-center justify-between text-[11px] text-gray-500 pt-0.5">
+              <span>Need an isolated container or CMS blocks custom JS?</span>
+              <button
+                onClick={() => setCmsPlatform('iframe')}
+                className={`font-semibold cursor-pointer underline hover:text-[#6701e6] ${
+                  cmsPlatform === 'iframe' ? 'text-[#6701e6] font-bold' : ''
+                }`}
+              >
+                Use Universal iFrame
+              </button>
+            </div>
+
+            {/* Platform Specific Instruction Card */}
+            <div className="p-4 rounded-xl bg-purple-50/50 border border-purple-200/90 space-y-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-purple-100 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <Monitor className="w-4 h-4 text-[#6701e6]" />
+                  <span className="text-xs font-bold text-gray-900">
+                    {guide.label} Installation Guide
+                  </span>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${guide.badgeColor}`}>
+                  {guide.badge}
+                </span>
+              </div>
+
+              {/* Customer Journey Quick Reference */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
+                  <span className="font-bold text-gray-500 uppercase text-[9px] block">What to open:</span>
+                  <p className="text-gray-800">{guide.whatToOpen}</p>
+                </div>
+                <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
+                  <span className="font-bold text-gray-500 uppercase text-[9px] block">Target Page:</span>
+                  <p className="text-gray-800">{guide.targetPage}</p>
+                </div>
+                <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
+                  <span className="font-bold text-gray-500 uppercase text-[9px] block">Element to Add:</span>
+                  <p className="text-[#6701e6] font-bold">{guide.embedElement}</p>
+                </div>
+                <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
+                  <span className="font-bold text-gray-500 uppercase text-[9px] block">After Pasting:</span>
+                  <p className="text-gray-800">{guide.afterPasting}</p>
+                </div>
+              </div>
+
+              {/* Numbered Step-by-Step Flow */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[11px] font-bold text-gray-700 block uppercase tracking-wider">
+                  Step-by-Step Clicks:
+                </span>
+                <ol className="space-y-1 text-xs text-gray-700">
+                  {guide.steps.map((st, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-purple-200 text-[#6701e6] font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                        {idx + 1}
+                      </span>
+                      <span className="leading-relaxed">{st}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              {/* Special Platform Note */}
+              {guide.note && (
+                <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="leading-relaxed">{guide.note}</p>
+                </div>
+              )}
             </div>
 
             {/* Code Box */}
-            <div className="p-3.5 rounded-xl bg-gray-950 font-mono text-[11px] text-emerald-400 border border-gray-800 overflow-x-auto select-all max-h-36 scrollbar-thin">
-              <pre className="whitespace-pre-wrap">{getEmbedSnippet()}</pre>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-gray-700">Generated Code Snippet</span>
+                <span className="text-[10px] font-mono text-gray-400">Auto-configured</span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-gray-950 font-mono text-[11px] text-emerald-400 border border-gray-800 overflow-x-auto select-all max-h-36 scrollbar-thin">
+                <pre className="whitespace-pre-wrap">{getEmbedSnippet()}</pre>
+              </div>
             </div>
 
+            {/* Copy Button */}
             <button
               onClick={handleCopyCode}
               className="w-full py-3 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-[0.99]"
@@ -578,6 +855,86 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
               <span>{copied ? '✓ Snippet Copied to Clipboard!' : 'Copy Embed Code'}</span>
             </button>
+
+            {/* Video Walkthrough Storyboard Toggle Button */}
+            <button
+              onClick={() => setShowVideoStoryboard((prev) => !prev)}
+              className="w-full py-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-xs font-bold text-[#6701e6] flex items-center justify-center gap-2 transition-all cursor-pointer"
+            >
+              <Video className="w-4 h-4" />
+              <span>
+                {showVideoStoryboard ? 'Hide Video Walkthrough Storyboard' : '🎬 View 60-Second Video Walkthrough (Actual Screen & Cursor)'}
+              </span>
+              {showVideoStoryboard ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+
+            {/* Expandable Video Walkthrough Storyboard */}
+            {showVideoStoryboard && (
+              <div className="p-4 rounded-xl bg-gray-900 text-white border border-gray-800 space-y-3 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Play className="w-4 h-4 text-purple-400" />
+                    <span className="text-xs font-bold">Instructional Video Storyboard (60s Walkthrough)</span>
+                  </div>
+                  <span className="text-[10px] text-purple-300 font-mono bg-purple-900/60 px-2 py-0.5 rounded-full">
+                    Target: 30–90s
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  {[
+                    {
+                      time: '0:00 - 0:10',
+                      action: 'Panda Praise Studio',
+                      cursor: 'Cursor clicks "Copy Embed Code"',
+                      desc: 'User customizes theme (e.g. Light Gradient), clicks purple button. Green toast confirms "Snippet Copied to Clipboard!".',
+                    },
+                    {
+                      time: '0:10 - 0:25',
+                      action: 'Open Website Builder',
+                      cursor: 'Cursor switches to builder tab & opens target page',
+                      desc: 'Opens builder (e.g. WordPress Admin, Webflow Designer, or HTML editor). Clicks edit on the exact page where reviews belong.',
+                    },
+                    {
+                      time: '0:25 - 0:40',
+                      action: 'Add Embed / Code Element',
+                      cursor: 'Cursor clicks Add (+), searches for code element',
+                      desc: 'Searches for "Custom HTML" (WordPress), "Code Embed" (Webflow), or "Custom Liquid" (Shopify) and drags into the section.',
+                    },
+                    {
+                      time: '0:40 - 0:50',
+                      action: 'Paste Code & Close Editor',
+                      cursor: 'Cursor clicks inside block & pastes code',
+                      desc: 'Pastes embed code snippet (Cmd/Ctrl + V). Verifies snippet is inserted. Clicks "Preview" or "Save & Close".',
+                    },
+                    {
+                      time: '0:50 - 0:65',
+                      action: 'Save & Publish',
+                      cursor: 'Cursor clicks "Publish" / "Update"',
+                      desc: 'Clicks the top-right Publish button. Builder compiles and updates the live production site.',
+                    },
+                    {
+                      time: '0:65 - 0:80',
+                      action: 'Verify as Live Visitor',
+                      cursor: 'Cursor opens fresh incognito browser tab',
+                      desc: 'Navigates to live website URL (e.g. https://papasystem.in/), scrolls down to testimonials section: Panda Praise Wall of Love renders cards smoothly with 0 layout shift!',
+                    },
+                  ].map((sc, i) => (
+                    <div key={i} className="p-2.5 rounded-lg bg-gray-800/80 border border-gray-700/60 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-purple-300 font-bold text-[11px]">{sc.time}</span>
+                        <span className="text-[10px] text-gray-400 font-medium">{sc.action}</span>
+                      </div>
+                      <p className="text-[11px] text-emerald-400 flex items-center gap-1.5 font-medium">
+                        <MousePointer className="w-3 h-3 text-emerald-400" />
+                        {sc.cursor}
+                      </p>
+                      <p className="text-[11px] text-gray-300 leading-relaxed">{sc.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

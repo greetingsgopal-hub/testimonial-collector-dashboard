@@ -39,7 +39,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How does Panda Praise integrate with my website?',
-    a: 'Panda Praise works with any website builder including WordPress, Webflow, Framer, Shopify, Squarespace, Wix, React, Next.js, and custom HTML.',
+    a: 'Panda Praise embeds seamlessly using a lightweight HTML code snippet or universal iframe. Verified on custom HTML, WordPress, Webflow, Framer, Shopify, Squarespace, Wix, React, and Next.js, with platform-specific setup guides in your dashboard.',
   },
   {
     q: 'Can I import my existing reviews from other platforms?',
