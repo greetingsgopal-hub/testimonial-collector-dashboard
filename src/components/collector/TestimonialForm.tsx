@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, ArrowRight, Sparkles, User, Briefcase } from 'lucide-react';
+import { Star, ArrowRight, Sparkles } from 'lucide-react';
 import { ReviewInput } from '../../types';
 import { validateReviewInput, sanitizeText } from '../../lib/security';
 import { CollectorLang, COLLECTOR_TRANSLATIONS } from '../../lib/collectorI18n';
@@ -154,17 +154,14 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
             Name <span className="text-violet-600">*</span>
           </label>
-          <div className="relative">
-            <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="e.g. Alex Rivera"
-              value={formData.name}
-              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              className="w-full pl-8.5 pr-3 py-2 rounded-xl text-xs sm:text-sm bg-slate-50/80 border border-slate-200/90 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-500/10 transition-all shadow-2xs"
-              required
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="e.g. Alex Rivera"
+            value={formData.name}
+            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+            className="w-full px-3.5 py-2 rounded-xl text-xs sm:text-sm bg-slate-50/80 border border-slate-200/90 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-500/10 transition-all shadow-2xs"
+            required
+          />
         </div>
 
         {/* Role / Position */}
@@ -172,17 +169,14 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
           <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
             Role / Position <span className="text-violet-600">*</span>
           </label>
-          <div className="relative">
-            <Briefcase className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="e.g. Product Lead or Buyer"
-              value={formData.role}
-              onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
-              className="w-full pl-8.5 pr-3 py-2 rounded-xl text-xs sm:text-sm bg-slate-50/80 border border-slate-200/90 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-500/10 transition-all shadow-2xs"
-              required
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="e.g. Product Lead or Buyer"
+            value={formData.role}
+            onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
+            className="w-full px-3.5 py-2 rounded-xl text-xs sm:text-sm bg-slate-50/80 border border-slate-200/90 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-500/10 transition-all shadow-2xs"
+            required
+          />
         </div>
       </div>
 
