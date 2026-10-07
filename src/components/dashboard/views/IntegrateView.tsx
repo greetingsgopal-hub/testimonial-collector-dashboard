@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { socialClient, SocialStatusResponse } from '../../../lib/socialClient';
 import { ConnectSourceModal } from './ConnectSourceModal';
+import { WebhookConfigModal } from '../WebhookConfigModal';
 
 // Custom Brand Icons
 const LinkedInIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
@@ -133,6 +134,7 @@ export const IntegrateView: React.FC = () => {
   const [facebookOutcomeError, setFacebookOutcomeError] = useState<string | null>(null);
   const [showConnectModal, setShowConnectModal] = useState<boolean>(false);
   const [connectModalPlatform, setConnectModalPlatform] = useState<string>('facebook');
+  const [showWebhookModal, setShowWebhookModal] = useState<boolean>(false);
 
   // Instagram Integration State
   const [isInstagramConnected, setIsInstagramConnected] = useState<boolean>(() => {
@@ -608,12 +610,12 @@ export const IntegrateView: React.FC = () => {
       items: [
         {
           id: 'webhooks',
-          name: 'Webhooks',
+          name: 'Review Collection Webhooks',
           icon: <WebhookIcon className="w-6 h-6" />,
-          description: 'Connect custom apps via developer tokens. Receive instant JSON HTTP POST payloads on review submission and status moderation.',
-          badgeType: 'coming_soon',
-          badgeLabel: 'Coming Soon',
-          canJoinWaitlist: true,
+          description: 'Automated review requests. Trigger personalized customer review links directly from Stripe checkout, Shopify, Zapier, or your backend.',
+          badgeType: 'active',
+          badgeLabel: 'Active & Ready',
+          isWebhookLive: true,
         },
         {
           id: 'rest-api',
@@ -1157,13 +1159,26 @@ export const IntegrateView: React.FC = () => {
                         )
                       )}
 
+                      {/* Webhooks Card Action */}
+                      {item.id === 'webhooks' && (
+                        <button
+                          type="button"
+                          onClick={() => setShowWebhookModal(true)}
+                          className="apple-touch w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Zap className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Configure Webhook Triggers</span>
+                        </button>
+                      )}
+
                       {/* Other Waitlist Cards */}
                       {item.id !== 'linkedin' &&
                         item.id !== 'stripe' &&
                         item.id !== 'facebook' &&
                         item.id !== 'instagram' &&
                         item.id !== 'google-reviews' &&
-                        item.id !== 'trustpilot' && (
+                        item.id !== 'trustpilot' &&
+                        item.id !== 'webhooks' && (
                         <button
                           type="button"
                           onClick={() => handleJoinWaitlist(item.id, item.name)}
@@ -1288,6 +1303,12 @@ export const IntegrateView: React.FC = () => {
           fetchStatus();
         }}
         initialPlatform={connectModalPlatform}
+      />
+
+      {/* Automated Review Collection Inbound Webhook Modal */}
+      <WebhookConfigModal
+        isOpen={showWebhookModal}
+        onClose={() => setShowWebhookModal(false)}
       />
     </div>
   );

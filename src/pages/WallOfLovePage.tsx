@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Star, Quote, ExternalLink, Filter, AlertCircle, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Star, Quote, ExternalLink, Filter, AlertCircle, RefreshCw, ShieldCheck, Video } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { Review, WallOfLoveTheme } from '../types';
 import { usePageSeo } from '../lib/seo';
@@ -198,6 +198,16 @@ export const WallOfLovePage = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Verified Trust Badge */}
+            <div className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
+              activeTheme === 'pastel' || activeTheme === 'whimsical'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+            }`}>
+              <ShieldCheck size={13} className={activeTheme === 'pastel' || activeTheme === 'whimsical' ? 'text-emerald-600' : 'text-emerald-400'} />
+              <span>100% Verified Proof</span>
+            </div>
+
             {/* Theme Switcher */}
             <div className="relative">
               <button
@@ -379,10 +389,52 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ review, theme, active
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <p className={`text-sm font-medium ${theme.text}`}>{review.name}</p>
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
-              <ShieldCheck size={10} className="text-emerald-400" />
-              {review.source ? `Verified ${review.source}` : 'Verified Customer'}
-            </span>
+            {review.type === 'video' ? (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 transition-all ${
+                isLight
+                  ? 'bg-purple-50 text-purple-700 border-purple-200 shadow-2xs'
+                  : 'bg-purple-500/15 text-purple-300 border-purple-500/30'
+              }`}>
+                <Video size={10} className={isLight ? 'text-purple-600' : 'text-purple-300'} />
+                <span>Verified Video</span>
+              </span>
+            ) : (review.source || '').toLowerCase().includes('google') ? (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 transition-all ${
+                isLight
+                  ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-2xs'
+                  : 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+              }`}>
+                <span className="font-extrabold text-[10px] leading-none text-blue-600">G</span>
+                <span>Google Review</span>
+              </span>
+            ) : (review.source || '').toLowerCase().includes('twitter') || (review.source || '').toLowerCase().includes('x') ? (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 transition-all ${
+                isLight
+                  ? 'bg-slate-100 text-slate-800 border-slate-300 shadow-2xs'
+                  : 'bg-white/10 text-slate-200 border-white/20'
+              }`}>
+                <span className="font-bold text-[10px]">𝕏</span>
+                <span>Verified on X</span>
+              </span>
+            ) : (review.source || '').toLowerCase().includes('linkedin') ? (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 transition-all ${
+                isLight
+                  ? 'bg-sky-50 text-sky-800 border-sky-200 shadow-2xs'
+                  : 'bg-sky-500/15 text-sky-300 border-sky-500/30'
+              }`}>
+                <span className="font-bold text-[10px] text-sky-600">in</span>
+                <span>Verified LinkedIn</span>
+              </span>
+            ) : (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 transition-all ${
+                isLight
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200 shadow-2xs'
+                  : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+              }`}>
+                <ShieldCheck size={10} className={isLight ? 'text-emerald-600' : 'text-emerald-400'} />
+                <span>Verified Customer</span>
+              </span>
+            )}
           </div>
           {(review.role || review.company) && (
             <p className={`text-xs ${theme.textSecondary}`}>

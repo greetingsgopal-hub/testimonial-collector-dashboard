@@ -20,6 +20,7 @@ import { handleFacebookAuthCallback } from './handlers/facebookAuthCallback';
 import { handleFacebookPageSelection } from './handlers/facebookPageSelection';
 import { handleFacebookWebhook } from './handlers/facebookWebhook';
 import { handleStripeWebhook } from './handlers/stripeWebhook';
+import { handleReviewInviteWebhook } from './handlers/reviewInviteWebhook';
 import { handleCreateCheckoutSession, handleBillingPortal, handleGetSubscription } from './handlers/stripeCheckout';
 import { handleSocialPublish } from './handlers/socialPublish';
 import { handleSocialStatus } from './handlers/socialStatus';
@@ -82,6 +83,12 @@ export default {
         case 'webhook/facebook':
         case 'facebook-webhook':
           return await handleFacebookWebhook(request, env);
+
+        // Automated Review Collection Inbound Webhook
+        case 'webhook/review-invite':
+        case 'review-invite':
+        case 'trigger-review':
+          return await handleReviewInviteWebhook(request, env);
 
         // Stripe subscription billing
         case 'webhooks/stripe':
