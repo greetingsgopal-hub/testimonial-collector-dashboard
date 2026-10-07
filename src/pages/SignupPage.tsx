@@ -30,7 +30,6 @@ export const SignupPage: React.FC = () => {
     signUp, 
     signInWithGoogle, 
     signOut,
-    enableDemoMode, 
     updateProjectDetails, 
     updateCollectionFormDetails, 
     project, 
@@ -140,11 +139,6 @@ export const SignupPage: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleDemoSignup = async () => {
-    enableDemoMode();
-      await handlePostSignupRedirect('demo@pandapraise.com');
   };
 
   const handleGoogleSignup = async () => {
@@ -320,15 +314,6 @@ export const SignupPage: React.FC = () => {
             >
               <GoogleIcon className="w-4 h-4 shrink-0" />
               <span>{isGoogleSubmitting ? 'Connecting...' : 'Sign up with Google'}</span>
-            </button>
-
-            {/* Instant Demo Sandbox Option */}
-            <button
-              type="button"
-              onClick={handleDemoSignup}
-              className="w-full py-2 px-4 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <span>⚡ Explore with Instant Demo Account</span>
             </button>
           </form>
 
