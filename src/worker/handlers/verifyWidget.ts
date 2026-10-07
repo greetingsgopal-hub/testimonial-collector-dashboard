@@ -108,9 +108,9 @@ export async function handleVerifyWidget(request: Request, _env: WorkerEnv): Pro
     projectId = requestUrl.searchParams.get('projectId') || requestUrl.searchParams.get('project') || '';
   } else if (request.method === 'POST') {
     try {
-      const body = (await request.json()) as { url?: string; projectId?: string };
-      rawUrl = body.url || '';
-      projectId = body.projectId || '';
+      const body = (await request.json()) as { url?: string; targetUrl?: string; projectId?: string; project?: string };
+      rawUrl = body.url || body.targetUrl || '';
+      projectId = body.projectId || body.project || '';
     } catch {
       rawUrl = requestUrl.searchParams.get('url') || '';
       projectId = requestUrl.searchParams.get('projectId') || '';
