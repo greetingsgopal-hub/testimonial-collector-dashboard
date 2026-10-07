@@ -52,23 +52,8 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({ data, lang = '
         </p>
 
         {/* User Bio Footer */}
-        <div className="pt-3 border-t border-slate-100 flex items-center gap-3">
-          {data.avatarUrl ? (
-            <img
-              src={data.avatarUrl}
-              alt={data.name ? `${data.name}'s profile avatar` : 'Customer avatar preview'}
-              className="w-9 h-9 rounded-full object-cover ring-2 ring-violet-100 shadow-2xs"
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = 'none';
-              }}
-            />
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-slate-950 flex items-center justify-center font-bold text-white text-xs shadow-2xs shrink-0">
-              {data.name ? data.name.charAt(0).toUpperCase() : '?'}
-            </div>
-          )}
-
-          <div className="flex-1 min-w-0">
+        <div className="pt-3 border-t border-slate-100">
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <h5 className="text-xs sm:text-sm font-bold text-slate-950 truncate">
                 {data.name.trim() || 'Your Full Name'}
