@@ -26,7 +26,11 @@ import {
   ChevronDown,
   ChevronUp,
   Monitor,
-  MousePointer
+  MousePointer,
+  Share2,
+  Link2,
+  X,
+  ExternalLink
 } from 'lucide-react';
 import { Review, WidgetType, WidgetSettings } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -110,6 +114,23 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
   const [cmsPlatform, setCmsPlatform] = useState<CmsPlatform>('wordpress');
   const [showVideoStoryboard, setShowVideoStoryboard] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareTab, setShareTab] = useState<'embed' | 'link'>('embed');
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const publicWallUrl = project?.slug
+    ? `https://pandapraise.com/wall/${project.slug}`
+    : `https://pandapraise.com/w/${projectWidgetId || ''}`;
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(publicWallUrl);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      setLinkCopied(false);
+    }
+  };
 
   // All approved reviews from project or fallback demo reviews
   const approvedReviews = useMemo(
@@ -491,33 +512,44 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
           </p>
         </div>
 
-        {/* Widget Format Selector */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-gray-100 rounded-xl border border-gray-200 self-start md:self-auto">
-          {[
-            { id: 'wall', label: 'Wall of Love', icon: Layers },
-            { id: 'carousel', label: 'Carousel', icon: Maximize2 },
-            { id: 'spotlight', label: 'Single Card', icon: Sparkles },
-            { id: 'badge', label: 'Trust Badge', icon: Award },
-            { id: 'floating_tab', label: 'Floating Tab', icon: MessageSquarePlus },
-            { id: 'social_toast', label: 'Social Toast', icon: Bell },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isSelected = settings.type === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setSettings((prev) => ({ ...prev, type: item.id as WidgetType }))}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-[#6701e6] text-white shadow-xs'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 self-start md:self-auto">
+          {/* Widget Format Selector */}
+          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-gray-100 rounded-xl border border-gray-200">
+            {[
+              { id: 'wall', label: 'Wall of Love', icon: Layers },
+              { id: 'carousel', label: 'Carousel', icon: Maximize2 },
+              { id: 'spotlight', label: 'Single Card', icon: Sparkles },
+              { id: 'badge', label: 'Trust Badge', icon: Award },
+              { id: 'floating_tab', label: 'Floating Tab', icon: MessageSquarePlus },
+              { id: 'social_toast', label: 'Social Toast', icon: Bell },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isSelected = settings.type === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setSettings((prev) => ({ ...prev, type: item.id as WidgetType }))}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#6701e6] text-white shadow-xs'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Senja-Style Share & Embed CTA */}
+          <button
+            onClick={() => setIsShareModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95 shrink-0"
+          >
+            <Share2 className="w-4 h-4" />
+            <span>Share & Embed</span>
+          </button>
         </div>
       </div>
 
@@ -1137,6 +1169,294 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
           </div>
         </div>
       </div>
+
+      {/* Senja-Style Share & Embed Modal */}
+      {isShareModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl border border-gray-200 shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/70">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-purple-100 text-[#6701e6] flex items-center justify-center">
+                  <Share2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-950">
+                    Share & Embed {settings.type === 'wall' ? 'Wall of Love' : settings.type === 'carousel' ? 'Carousel' : 'Widget'}
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Add to your website or share as a standalone hosted link.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsShareModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-200/60 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Tabs: Embed on Website vs Share Public Link */}
+            <div className="flex border-b border-gray-100 px-5 pt-3 bg-white gap-4">
+              <button
+                onClick={() => setShareTab('embed')}
+                className={`pb-3 text-xs font-bold border-b-2 flex items-center gap-2 cursor-pointer transition-colors ${
+                  shareTab === 'embed'
+                    ? 'border-[#6701e6] text-[#6701e6]'
+                    : 'border-transparent text-gray-500 hover:text-gray-900'
+                }`}
+              >
+                <Code2 className="w-4 h-4" />
+                <span>Embed on Website</span>
+              </button>
+              <button
+                onClick={() => setShareTab('link')}
+                className={`pb-3 text-xs font-bold border-b-2 flex items-center gap-2 cursor-pointer transition-colors ${
+                  shareTab === 'link'
+                    ? 'border-[#6701e6] text-[#6701e6]'
+                    : 'border-transparent text-gray-500 hover:text-gray-900'
+                }`}
+              >
+                <Link2 className="w-4 h-4" />
+                <span>Share Public Link</span>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-5 scrollbar-thin">
+              {shareTab === 'link' ? (
+                /* Tab 2: Standalone Public Hosted Link */
+                <div className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-100 space-y-2">
+                    <span className="text-xs font-bold text-[#6701e6] uppercase tracking-wider block">
+                      Standalone Hosted Wall of Love
+                    </span>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Don't have a website or want to share directly with clients? Use this permanent public link to showcase all your approved testimonials.
+                    </p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-700 block">Public URL</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={publicWallUrl}
+                        className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-mono text-gray-700 select-all"
+                      />
+                      <button
+                        onClick={handleCopyLink}
+                        className="px-4 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                      >
+                        {linkCopied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                        <span>{linkCopied ? 'Copied!' : 'Copy Link'}</span>
+                      </button>
+                      <a
+                        href={publicWallUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-colors"
+                        title="Open in new tab"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Tab 1: Embed on Website (Senja Journey) */
+                <div className="space-y-5">
+                  {/* Top One-Click Embed Bar */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 border border-purple-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-bold text-gray-900">
+                        Ready to add to your website?
+                      </p>
+                      <p className="text-[11px] text-gray-600">
+                        1-click copy your pre-configured snippet for {guide.label}.
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleCopyCode}
+                      className="px-5 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95 shrink-0"
+                    >
+                      {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                      <span>{copied ? '✓ Copied to Clipboard!' : 'Copy Embed Code'}</span>
+                    </button>
+                  </div>
+
+                  {/* Builder Selector */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-gray-800">
+                        What website builder are you using?
+                      </label>
+                      <span className="text-[10px] text-gray-500 font-medium">Select to view exact clicks</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 p-1.5 bg-gray-100 rounded-xl text-xs font-semibold">
+                      {[
+                        { id: 'wordpress', label: 'WordPress' },
+                        { id: 'webflow', label: 'Webflow' },
+                        { id: 'wix', label: 'Wix' },
+                        { id: 'shopify', label: 'Shopify' },
+                        { id: 'squarespace', label: 'Squarespace' },
+                        { id: 'framer', label: 'Framer' },
+                        { id: 'react', label: 'React' },
+                        { id: 'nextjs', label: 'Next.js' },
+                        { id: 'html', label: 'Custom HTML' },
+                        { id: 'other', label: 'Other' },
+                      ].map((p) => {
+                        const isSelected = cmsPlatform === p.id;
+                        return (
+                          <button
+                            key={p.id}
+                            onClick={() => setCmsPlatform(p.id as CmsPlatform)}
+                            className={`px-2 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-[#6701e6] text-white font-bold shadow-xs'
+                                : 'bg-white/70 text-gray-700 hover:bg-white hover:text-gray-900'
+                            }`}
+                          >
+                            {p.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Platform Detailed Guide */}
+                  <div className="p-4 rounded-2xl bg-purple-50/50 border border-purple-200/90 space-y-3.5">
+                    <div className="flex items-center justify-between border-b border-purple-100 pb-2">
+                      <div className="flex items-center gap-2">
+                        <Monitor className="w-4 h-4 text-[#6701e6]" />
+                        <span className="text-xs font-bold text-gray-900">
+                          {guide.label} Step-by-Step Clicks
+                        </span>
+                      </div>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${guide.badgeColor}`}>
+                        {guide.badge}
+                      </span>
+                    </div>
+
+                    {/* Customer Journey Quick Reference Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                      <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
+                        <span className="font-bold text-gray-500 uppercase text-[9px] block">1. What to open:</span>
+                        <p className="text-gray-800">{guide.whatToOpen}</p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
+                        <span className="font-bold text-gray-500 uppercase text-[9px] block">2. Target Page:</span>
+                        <p className="text-gray-800">{guide.targetPage}</p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
+                        <span className="font-bold text-gray-500 uppercase text-[9px] block">3. Element to Add:</span>
+                        <p className="text-[#6701e6] font-bold">{guide.embedElement}</p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
+                        <span className="font-bold text-gray-500 uppercase text-[9px] block">4. After Pasting:</span>
+                        <p className="text-gray-800">{guide.afterPasting}</p>
+                      </div>
+                    </div>
+
+                    {/* Step-by-Step List */}
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[11px] font-bold text-gray-700 block uppercase tracking-wider">
+                        Detailed Walkthrough:
+                      </span>
+                      <ol className="space-y-1 text-xs text-gray-700">
+                        {guide.steps.map((st, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="w-4 h-4 rounded-full bg-purple-200 text-[#6701e6] font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                              {idx + 1}
+                            </span>
+                            <span className="leading-relaxed">{st}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+
+                    {/* Caution note if applicable */}
+                    {guide.note && (
+                      <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                        <p className="leading-relaxed">{guide.note}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Code Snippet Box */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-gray-700">Embed Code Snippet</span>
+                      <button
+                        onClick={() => setCmsPlatform('iframe')}
+                        className="text-[11px] text-purple-700 underline font-semibold hover:text-[#6701e6] cursor-pointer"
+                      >
+                        Switch to Universal iFrame
+                      </button>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-gray-950 font-mono text-[11px] text-emerald-400 border border-gray-800 overflow-x-auto select-all max-h-36 scrollbar-thin">
+                      <pre className="whitespace-pre-wrap">{getEmbedSnippet()}</pre>
+                    </div>
+                  </div>
+
+                  {/* Video Walkthrough Accordion */}
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => setShowVideoStoryboard((prev) => !prev)}
+                      className="w-full p-3 bg-gray-50 hover:bg-gray-100 flex items-center justify-between text-xs font-bold text-gray-800 cursor-pointer transition-colors"
+                    >
+                      <div className="flex items-center gap-2 text-[#6701e6]">
+                        <Video className="w-4 h-4" />
+                        <span>🎬 View 60-Second Video Walkthrough (Actual Screen & Cursor)</span>
+                      </div>
+                      {showVideoStoryboard ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                    </button>
+                    {showVideoStoryboard && (
+                      <div className="p-4 bg-gray-900 text-white space-y-2 text-xs">
+                        {[
+                          { time: '0:00 - 0:10', action: 'Panda Praise Studio', cursor: 'Cursor clicks "Copy Embed Code"', desc: 'Customizes theme and clicks Copy button.' },
+                          { time: '0:10 - 0:25', action: 'Open Website Builder', cursor: 'Cursor switches to builder tab & opens page', desc: 'Opens builder and navigates to target page.' },
+                          { time: '0:25 - 0:40', action: 'Add Embed / Code Element', cursor: 'Cursor clicks Add (+), searches for code element', desc: 'Adds Custom HTML / Code Embed element into section.' },
+                          { time: '0:40 - 0:50', action: 'Paste Code', cursor: 'Cursor clicks inside block & pastes snippet', desc: 'Pastes code snippet (Cmd+V).' },
+                          { time: '0:50 - 0:65', action: 'Save & Publish', cursor: 'Cursor clicks "Publish" / "Update"', desc: 'Pushes changes live.' },
+                          { time: '0:65 - 0:80', action: 'Live Verification', cursor: 'Cursor opens new incognito tab', desc: 'Verifies testimonials render live with zero layout shift.' },
+                        ].map((sc, i) => (
+                          <div key={i} className="p-2 rounded-lg bg-gray-800/80 border border-gray-700/60 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono text-purple-300 font-bold text-[11px]">{sc.time}</span>
+                              <span className="text-[10px] text-gray-400 font-medium">{sc.action}</span>
+                            </div>
+                            <p className="text-[11px] text-emerald-400 flex items-center gap-1.5 font-medium">
+                              <MousePointer className="w-3 h-3 text-emerald-400" />
+                              {sc.cursor}
+                            </p>
+                            <p className="text-[11px] text-gray-300 leading-relaxed">{sc.desc}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between text-xs text-gray-500">
+              <span>Approved reviews update dynamically with zero code changes.</span>
+              <button
+                onClick={() => setIsShareModalOpen(false)}
+                className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold transition-colors cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
