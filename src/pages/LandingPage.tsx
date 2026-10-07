@@ -240,7 +240,7 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* ── 3. Hero Section (Centered Screen Frame Architecture) ── */}
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-10 sm:pb-12 text-center relative z-10 flex flex-col items-center justify-center">
+      <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-12 sm:pb-16 text-center relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-11.5rem)]">
         
         {/* Floating purple sparkle doodle */}
         <div className="absolute left-2 sm:-left-6 top-12 hidden sm:block text-[#6701e6] opacity-75 animate-pulse" aria-hidden="true">
@@ -264,8 +264,8 @@ export const LandingPage: React.FC = () => {
         </h1>
 
         {/* Subheadline directly below H1 */}
-        <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-lg mx-auto leading-relaxed font-normal">
-          <span className="font-semibold text-gray-900">Stop paying monthly hostage fees.</span> Import raw chat screenshots, collect verified reviews, and embed an always-on Wall of Love that never shuts down.
+        <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-xl mx-auto leading-relaxed font-normal text-balance">
+          <span className="font-semibold text-gray-900">Stop paying monthly hostage fees.</span> Import raw chat screenshots, collect verified reviews, and keep your Wall of Love active forever.
         </p>
 
         {/* Hero CTA & Reassurance */}
