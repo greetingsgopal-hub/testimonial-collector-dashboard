@@ -239,54 +239,38 @@ export const LandingPage: React.FC = () => {
         )}
       </header>
 
-      {/* ── 3. Hero Section (Reconstructed SaaS Architecture) ── */}
-      <section className="max-w-4xl mx-auto px-6 pt-14 sm:pt-18 pb-14 text-center relative z-10">
+      {/* ── 3. Hero Section (Centered Screen Frame Architecture) ── */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-10 sm:pb-12 text-center relative z-10 flex flex-col items-center justify-center">
         
         {/* Floating purple sparkle doodle */}
-        <div className="absolute left-2 sm:-left-6 top-20 hidden sm:block text-[#6701e6] opacity-75 animate-pulse" aria-hidden="true">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+        <div className="absolute left-2 sm:-left-6 top-12 hidden sm:block text-[#6701e6] opacity-75 animate-pulse" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0 L14.6 9.4 L24 12 L14.6 14.6 L12 24 L9.4 14.6 L0 12 L9.4 9.4 Z" />
           </svg>
         </div>
 
         {/* Top Eyebrow Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50/80 border border-purple-200/60 mb-5 shadow-xs">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 border border-purple-200/80 mb-3 shadow-xs">
           <span className="flex h-2 w-2 rounded-full bg-[#6701e6] animate-pulse" />
-          <span className="text-xs font-semibold text-[#6701e6]">The Anti-Subscription Social Proof Engine — Built for Creators & Independent Businesses</span>
+          <span className="text-xs font-semibold text-[#6701e6]">The Anti-Subscription Social Proof Engine</span>
         </div>
 
-        {/* Primary H1: Cleanly balanced, flawless wrapping on all screen sizes */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-950 tracking-tight leading-[1.14] max-w-4xl mx-auto text-center">
-          <span className="block">Turn WhatsApp & DM Screenshots</span>
-          <span className="block mt-1 sm:mt-2 text-[#6701e6]">
-            Into High-Converting Social Proof
+        {/* Primary H1: Tightly balanced two-line punchline that never breaks awkwardly */}
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-950 tracking-tight leading-[1.18] max-w-2xl mx-auto text-center">
+          <span className="block">Turn WhatsApp & DMs Into</span>
+          <span className="block mt-1 sm:mt-1.5 text-[#6701e6]">
+            High-Converting Social Proof
           </span>
         </h1>
 
         {/* Subheadline directly below H1 */}
-        <p className="mt-5 text-base sm:text-lg text-gray-600 max-w-xl mx-auto leading-relaxed font-normal">
-          <span className="font-semibold text-gray-900">Stop paying monthly hostage fees</span> for website widgets. Drop in raw chat screenshots, collect verified reviews, and embed an always-on Wall of Love that never goes blank.
+        <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-lg mx-auto leading-relaxed font-normal">
+          <span className="font-semibold text-gray-900">Stop paying monthly hostage fees.</span> Import raw chat screenshots, collect verified reviews, and embed an always-on Wall of Love that never shuts down.
         </p>
 
-        {/* 3 Green Checkmark Reassurance Bullets */}
-        <div className="mt-5 max-w-2xl mx-auto flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-gray-600 font-medium">
-          <div className="flex items-center gap-1.5">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Drop WhatsApp, Slack & DM screenshots</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Forever active with Founding Lifetime Pass</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>1-line embed that never shuts down</span>
-          </div>
-        </div>
-
-        {/* Hero CTA */}
-        <div className="mt-8 flex items-center justify-center">
-          <div className="senja-hero-cta flex items-center">
+        {/* Hero CTA & Reassurance */}
+        <div className="mt-6 flex flex-col items-center justify-center gap-3 w-full">
+          <div className="senja-hero-cta flex items-center justify-center">
             <div className="senja-cta-ring">
               <Link
                 to="/signup"
@@ -294,26 +278,19 @@ export const LandingPage: React.FC = () => {
                   analytics.ctaClicked('hero_primary', '/signup');
                   analytics.signupStarted('hero_primary');
                 }}
-                className="senja-btn-primary px-8 py-3.5 sm:py-4 text-base sm:text-lg shadow-xl hover:scale-105 transition-all inline-flex items-center gap-2 font-bold"
+                className="senja-btn-primary px-8 py-3.5 text-base sm:text-lg shadow-xl hover:scale-105 transition-all inline-flex items-center gap-2 font-bold cursor-pointer"
               >
                 <span>Start for free today</span>
                 <ArrowRight className="w-5 h-5 text-white" aria-hidden="true" />
               </Link>
             </div>
           </div>
-        </div>
 
-        {/* Microcopy reassurance */}
-        <p className="mt-3 text-xs text-gray-600 font-medium">
-          Free forever • No credit card required • 2-minute setup
-        </p>
-
-        {/* Free-plan reassurance (replaces fabricated customer-count proof) */}
-        <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2.5">
-          <div className="flex items-center gap-3 text-xs font-semibold text-gray-700">
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600" /> Free forever plan</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600" /> No credit card required</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600" /> Cancel anytime</span>
+          {/* Microcopy reassurance */}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-gray-500 font-medium pt-1">
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Free forever</span>
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> No credit card required</span>
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> 2-minute setup</span>
           </div>
         </div>
 
