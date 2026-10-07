@@ -416,10 +416,10 @@ export const DashboardPage = () => {
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
                   <div>
                     <div className="flex items-center gap-2.5">
-                      <h1 className="text-xl sm:text-2xl font-extrabold font-display text-slate-950 tracking-tight">
+                      <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                         Your Proof
                       </h1>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-500/10 text-violet-700 border border-violet-500/20 shadow-2xs">
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-500/10 text-violet-700 border border-violet-500/20 shadow-2xs">
                         {reviews.length} {reviews.length === 1 ? 'Entry' : 'Entries'}
                       </span>
                       <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
@@ -427,7 +427,7 @@ export const DashboardPage = () => {
                         {project?.name || 'Primary Project'}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1 font-medium">
+                    <p className="text-xs text-slate-500 mt-1 font-normal">
                       Collect, approve, and showcase customer testimonials.
                     </p>
                   </div>

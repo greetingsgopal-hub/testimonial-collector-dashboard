@@ -47,11 +47,17 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['"DM Sans"', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Inter', 'sans-serif'],
-        display: ['"Bricolage Grotesque"', '"DM Sans"', 'sans-serif'],
-        bricolage: ['"Bricolage Grotesque"', 'sans-serif'],
-        caveat: ['Caveat', 'cursive'],
-        dmsans: ['"DM Sans"', 'sans-serif'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'Inter', 'system-ui', 'sans-serif'],
+        bricolage: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'Inter', 'system-ui', 'sans-serif'],
+        dmsans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'Inter', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+      },
+      letterSpacing: {
+        'apple-hero': '-0.03em',
+        'apple-title': '-0.02em',
+        'apple-subhead': '-0.01em',
+        'apple-badge': '0.035em',
       },
       boxShadow: {
         'glow': '0 0 35px -5px rgba(79, 70, 229, 0.35)',

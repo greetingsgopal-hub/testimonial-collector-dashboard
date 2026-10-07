@@ -67,7 +67,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand & Project Switcher */}
         <div className="flex items-center gap-3 shrink-0">
           <Link to="/dashboard" className="flex items-center gap-1.5 focus:outline-none whitespace-nowrap">
-            <span className="font-display font-black text-xl text-[#6701e6] tracking-tight hover:opacity-95 transition-opacity whitespace-nowrap">
+            <span className="font-bold text-lg text-brand-600 tracking-tight hover:opacity-90 transition-opacity whitespace-nowrap">
               Panda Praise
             </span>
           </Link>

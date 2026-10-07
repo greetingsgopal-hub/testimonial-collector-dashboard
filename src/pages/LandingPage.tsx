@@ -134,7 +134,7 @@ export const LandingPage: React.FC = () => {
           
           {/* Logo strictly clean text "Panda Praise" */}
           <Link to="/" className="flex items-center gap-2 group">
-            <span className="font-display font-extrabold text-2xl tracking-tight text-gray-950 group-hover:text-brand-700 transition-colors">
+            <span className="font-bold text-xl sm:text-2xl tracking-tight text-slate-900 group-hover:text-brand-700 transition-colors">
               Panda <span className="text-brand-600">Praise</span>
             </span>
           </Link>
@@ -270,7 +270,7 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Primary H1: Exactly two centered lines with highlighted treatment */}
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight leading-[1.18] max-w-3xl mx-auto text-center">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-950 tracking-tight leading-[1.14] max-w-3xl mx-auto text-center">
           <span className="block">Turn Customer Praise Into</span>
           <span className="senja-purple-mark mt-1 sm:mt-2 inline-block">
             Your #1 Growth Engine
@@ -369,10 +369,10 @@ export const LandingPage: React.FC = () => {
       {/* ── 5. Before / After Comparison Cards ("The Proof Advantage") ── */}
       <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 px-2">
-          <p className="font-caveat text-2xl sm:text-3xl text-brand-600 -rotate-1 mb-2 font-medium">
+          <p className="text-xs font-semibold tracking-wider uppercase text-brand-600 mb-2">
             The Proof Advantage
           </p>
-          <h2 id="comparison-heading" className="text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight max-w-xl mx-auto text-balance leading-tight">
+          <h2 id="comparison-heading" className="text-3xl sm:text-4xl font-bold text-slate-950 tracking-tight max-w-xl mx-auto text-balance leading-tight">
             Why Winning Brands Rely on Social Proof
           </h2>
           <p className="text-sm sm:text-base text-gray-600 mt-3 sm:mt-4 max-w-xl mx-auto text-balance leading-relaxed">
@@ -395,7 +395,7 @@ export const LandingPage: React.FC = () => {
                 />
               </div>
 
-              <h3 className="text-xl font-bold font-display text-gray-900 text-center mb-6">
+              <h3 className="text-xl font-semibold text-slate-900 text-center mb-6">
                 You Without Social Proof
               </h3>
               <ul className="space-y-3.5 text-xs sm:text-sm text-gray-600 max-w-sm mx-auto">
@@ -446,7 +446,7 @@ export const LandingPage: React.FC = () => {
                 />
               </div>
 
-              <h3 className="text-xl font-bold font-display text-gray-900 text-center mb-6">
+              <h3 className="text-xl font-semibold text-slate-900 text-center mb-6">
                 You With Social Proof
               </h3>
               <ul className="space-y-3.5 text-xs sm:text-sm text-gray-800 max-w-sm mx-auto font-medium">
@@ -499,7 +499,7 @@ export const LandingPage: React.FC = () => {
                 <span>01 / Collect Testimonials</span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold font-display text-gray-950 tracking-tight leading-[1.15]">
+              <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-bold text-slate-950 tracking-tight leading-[1.16]">
                 Collect Authentic Reviews & Praise on Autopilot
               </h2>
 
@@ -736,7 +736,7 @@ export const LandingPage: React.FC = () => {
                 <span>02 / Organize & Search</span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold font-display text-gray-950 tracking-tight leading-[1.15]">
+              <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-bold text-slate-950 tracking-tight leading-[1.16]">
                 Every Testimonial, Instantly at Your Fingertips
               </h2>
 
@@ -794,7 +794,7 @@ export const LandingPage: React.FC = () => {
             <span>03 / Publish Everywhere</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-gray-950 tracking-tight max-w-3xl mx-auto leading-tight text-balance">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-950 tracking-tight max-w-3xl mx-auto leading-tight text-balance">
             One Testimonial, 12 Ways to Share It
           </h2>
 
@@ -1056,7 +1056,7 @@ export const LandingPage: React.FC = () => {
                 <span>04 / Delight & Reward</span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold font-display text-gray-950 tracking-tight leading-[1.15]">
+              <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-bold text-slate-950 tracking-tight leading-[1.16]">
                 Thank Every Customer Like It's Still Day One
               </h2>
 
@@ -1103,10 +1103,10 @@ export const LandingPage: React.FC = () => {
 
       {/* ── 10. "Built for you" Personas Section ── */}
       <section className="max-w-5xl mx-auto px-6 py-20 text-center border-t border-gray-200/80">
-        <p className="font-caveat text-3xl text-[#6701e6] -rotate-1">
+        <p className="text-xs font-semibold tracking-wider uppercase text-brand-600 mb-2">
           Built for you
         </p>
-        <h2 className="mt-2 font-display text-3xl sm:text-4xl font-extrabold text-gray-950 max-w-3xl mx-auto">
+        <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-950 tracking-tight max-w-3xl mx-auto">
           Whatever You Make, Panda Praise Fits How You Work
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-gray-600 leading-relaxed">
@@ -1144,8 +1144,8 @@ export const LandingPage: React.FC = () => {
       {/* ── 11. Frequently Asked Questions Section ── */}
       <section id="faq" className="max-w-4xl mx-auto px-6 py-20 relative z-10 border-t border-gray-200">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <p className="font-caveat text-3xl text-[#6701e6]">Got questions?</p>
-          <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-gray-950 tracking-tight mt-1">
+          <p className="text-xs font-semibold tracking-wider uppercase text-brand-600 mb-2">Got questions?</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-950 tracking-tight mt-1">
             Frequently Asked Questions
           </h2>
           <p className="text-sm sm:text-base text-gray-600 mt-2">
@@ -1217,8 +1217,8 @@ export const LandingPage: React.FC = () => {
         </div>
 
         <div className="relative mx-auto max-w-3xl px-6">
-          <p className="font-caveat text-3xl text-purple-200">Start in 2 minutes</p>
-          <h2 className="mt-2 font-display text-3xl sm:text-5xl font-extrabold tracking-tight max-w-3xl mx-auto">
+          <p className="text-xs font-semibold tracking-wider uppercase text-purple-200 mb-2">Start in 2 minutes</p>
+          <h2 className="mt-2 text-3xl sm:text-5xl font-bold text-white tracking-tight max-w-3xl mx-auto">
             Ready to boost your business with social proof?
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-white/90 leading-relaxed">
@@ -1278,7 +1278,7 @@ export const LandingPage: React.FC = () => {
             {/* Column 0: Brand Info */}
             <div className="text-left">
               <Link to="/" className="inline-flex items-center">
-                <span className="font-display font-extrabold text-2xl tracking-tight text-gray-950">
+                <span className="font-bold text-xl sm:text-2xl tracking-tight text-slate-950">
                   Panda <span className="text-[#6701e6]">Praise</span>
                 </span>
               </Link>
