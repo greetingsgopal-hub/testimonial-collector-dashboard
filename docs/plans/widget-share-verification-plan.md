@@ -281,6 +281,7 @@ Recommendation: resolve SSRF redirect paths.
 | **CEO Review** | `/plan-ceo-review` | Validate founder-mode product wedge & user journey | 1 | APPROVED | 0 blocking |
 | **Engineering Review** | `/plan-eng-review` | Audit architecture, streaming memory cap, SSRF & test coverage | 1 | APPROVED | 0 blocking |
 | **Outside Voice** | Codex (`gpt-6-luna`) | Independent architecture and security critique | 1 | COMPLETED | R1 (SSRF redirect bypass — fixed) |
+| **Design Review** | `/plan-design-review` | 7 passes: hierarchy, state coverage, emotional arc, AI slop, a11y | 1 | APPROVED | 0 blocking (D4: Enter key & pulse added) |
 | **VERDICT** | — | Production ready with zero regressions | — | READY TO SHIP | 0 blocking findings |
 
 **OUTSIDE COVERAGE:** completed (provider=codex, model=gpt-6-luna)
