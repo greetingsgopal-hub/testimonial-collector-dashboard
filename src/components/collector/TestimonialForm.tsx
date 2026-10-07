@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, ArrowRight, Sparkles, User, Briefcase, CheckCircle2 } from 'lucide-react';
+import { Star, ArrowRight, Sparkles, User, Briefcase } from 'lucide-react';
 import { ReviewInput } from '../../types';
 import { validateReviewInput, sanitizeText } from '../../lib/security';
 import { CollectorLang, COLLECTOR_TRANSLATIONS } from '../../lib/collectorI18n';
