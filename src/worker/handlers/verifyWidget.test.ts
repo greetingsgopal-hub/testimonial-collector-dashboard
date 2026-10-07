@@ -199,5 +199,51 @@ describe('verifyWidget Handler & SSRF Protections', () => {
       expect(json.verified).toBe(false);
       expect(json.code).toBe('UNREACHABLE');
     });
+
+    it('blocks redirects to internal/private addresses (SSRF redirect protection)', async () => {
+      // Mock initial response as 302 redirecting to AWS IMDS metadata IP
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+        new Response(null, {
+          status: 302,
+          headers: { Location: 'http://169.254.169.254/latest/meta-data/' },
+        })
+      );
+
+      const req = new Request('https://pandapraise.com/api/verify-widget?url=https://attacker-redirect.com', {
+        method: 'GET',
+      });
+      const res = await handleVerifyWidget(req, mockEnv);
+      expect(res.status).toBe(403);
+      const json = await res.json();
+      expect(json.code).toBe('FORBIDDEN_HOST');
+      expect(json.verified).toBe(false);
+    });
+
+    it('safely follows legitimate redirects to public targets', async () => {
+      // Mock initial response as 301 redirecting to secure https
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(null, {
+            status: 301,
+            headers: { Location: 'https://papasystem.in' },
+          })
+        )
+        .mockResolvedValueOnce(
+          new Response(
+            '<div id="panda-praise-wall"></div><script src="https://pandapraise.com/widget.js" async></script>',
+            { status: 200 }
+          )
+        );
+
+      const req = new Request('https://pandapraise.com/api/verify-widget?url=http://papasystem.in', {
+        method: 'GET',
+      });
+      const res = await handleVerifyWidget(req, mockEnv);
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.verified).toBe(true);
+      expect(json.code).toBe('DETECTED_ACTIVE');
+    });
   });
 });
+

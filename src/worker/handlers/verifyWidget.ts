@@ -178,24 +178,74 @@ export async function handleVerifyWidget(request: Request, _env: WorkerEnv): Pro
     );
   }
 
-  // Fetch the page with 5-second timeout and 512KB cap
+  // Fetch the page with 5-second timeout, 512KB cap, and safe redirect validation
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   let html = '';
   try {
-    const upstreamRes = await fetch(parsed.toString(), {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'PandaPraise-WidgetBot/1.0 (+https://pandapraise.com/widget-verification)',
-        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-      redirect: 'follow',
-    });
+    let currentTargetUrl = parsed.toString();
+    let upstreamRes: Response | null = null;
+    const MAX_REDIRECTS = 3;
+
+    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+      upstreamRes = await fetch(currentTargetUrl, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'PandaPraise-WidgetBot/1.0 (+https://pandapraise.com/widget-verification)',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+        redirect: 'manual',
+      });
+
+      // If redirect response, validate target host to prevent SSRF bypass
+      if ([301, 302, 303, 307, 308].includes(upstreamRes.status)) {
+        const location = upstreamRes.headers.get('Location');
+        if (!location || hop === MAX_REDIRECTS) {
+          break;
+        }
+
+        const nextUrl = new URL(location, currentTargetUrl);
+        if (nextUrl.protocol !== 'http:' && nextUrl.protocol !== 'https:') {
+          clearTimeout(timeoutId);
+          return new Response(
+            JSON.stringify({
+              verified: false,
+              code: 'FORBIDDEN_HOST',
+              url: normalizedUrl,
+              details: 'Website redirected to an unsupported or unsafe protocol.',
+              hint: 'Verification only follows standard HTTP/HTTPS links.',
+            }),
+            { status: 403, headers: CORS_HEADERS }
+          );
+        }
+
+        if (isPrivateOrBlockedHost(nextUrl.hostname)) {
+          clearTimeout(timeoutId);
+          return new Response(
+            JSON.stringify({
+              verified: false,
+              code: 'FORBIDDEN_HOST',
+              url: normalizedUrl,
+              details: 'Website redirected to a private, internal, or loopback network address.',
+              hint: 'Redirection to internal resources is blocked for security.',
+            }),
+            { status: 403, headers: CORS_HEADERS }
+          );
+        }
+
+        currentTargetUrl = nextUrl.toString();
+        continue;
+      }
+
+      break;
+    }
 
     clearTimeout(timeoutId);
 
-    if (!upstreamRes.ok) {
+    if (!upstreamRes || !upstreamRes.ok) {
+      const status = upstreamRes ? upstreamRes.status : 500;
+      const statusText = upstreamRes ? upstreamRes.statusText : 'Unknown';
       return new Response(
         JSON.stringify({
           verified: false,
@@ -204,7 +254,7 @@ export async function handleVerifyWidget(request: Request, _env: WorkerEnv): Pro
           hasScript: false,
           hasContainer: false,
           hasMatchingProject: false,
-          details: `Target website responded with HTTP ${upstreamRes.status} (${upstreamRes.statusText}).`,
+          details: `Target website responded with HTTP ${status} (${statusText}).`,
           hint: 'Ensure your website is published, live, and publicly accessible.',
         }),
         { status: 200, headers: CORS_HEADERS }
