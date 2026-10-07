@@ -5,7 +5,7 @@ import {
   FileText,
   Download,
   CheckCircle2,
-  Search,
+  Globe,
   Puzzle,
   Settings,
   ChevronDown,
@@ -79,115 +79,108 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         </div>
       </div>
 
-      {/* Navigation Sections */}
-      <div className="flex-1 overflow-y-auto px-3.5 pt-3 pb-24 space-y-4 scrollbar-thin">
+      {/* Navigation Items (Apple HIG Simple Stack — No Category Noise) */}
+      <div className="flex-1 overflow-y-auto px-3.5 pt-3 pb-24 space-y-1 scrollbar-thin">
         
-        {/* Top Welcome Quick Access */}
-        <div>
-          <button
-            onClick={() => setActiveTab('welcome')}
-            className={`apple-touch w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'welcome'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
-            }`}
-          >
-            <Star className={`w-4 h-4 ${activeTab === 'welcome' ? 'text-amber-400 fill-amber-400' : 'text-slate-400'}`} />
-            <span>Welcome Hub</span>
-          </button>
+        {/* Welcome Hub */}
+        <button
+          onClick={() => setActiveTab('welcome')}
+          className={`apple-touch group w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === 'welcome'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+          }`}
+        >
+          <Star className={`w-4 h-4 transition-colors ${activeTab === 'welcome' ? 'text-amber-400 fill-amber-400' : 'text-slate-400 group-hover:text-slate-600'}`} />
+          <span>Welcome Hub</span>
+        </button>
+
+        {/* 1. Collect */}
+        <button
+          onClick={() => setActiveTab('forms')}
+          className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === 'forms'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <FileText className={`w-4 h-4 transition-colors ${activeTab === 'forms' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+            <span>Collect</span>
+          </div>
+        </button>
+
+        {/* 2. Import */}
+        <button
+          onClick={() => setActiveTab('import')}
+          className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === 'import'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <Download className={`w-4 h-4 transition-colors ${activeTab === 'import' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+            <span>Import</span>
+          </div>
+        </button>
+
+        {/* 3. Customize */}
+        <button
+          onClick={() => setActiveTab('proof')}
+          className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === 'proof'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className={`w-4 h-4 transition-colors ${activeTab === 'proof' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+            <span>Customize</span>
+          </div>
+          {proofCount > 0 ? (
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              activeTab === 'proof' ? 'bg-white/20 text-white' : 'bg-violet-500/10 text-violet-700'
+            }`}>
+              {proofCount}
+            </span>
+          ) : null}
+        </button>
+
+        {/* 4. Post Online */}
+        <button
+          onClick={() => setActiveTab('rich-snippet')}
+          className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === 'rich-snippet'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <Globe className={`w-4 h-4 transition-colors ${activeTab === 'rich-snippet' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+            <span>Post Online</span>
+          </div>
+        </button>
+
+        {/* Subtle Separator */}
+        <div className="pt-2 pb-1">
+          <div className="h-px bg-slate-200/70" />
         </div>
 
-        {/* Section: COLLECT */}
-        <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Collect</p>
-          <button
-            onClick={() => setActiveTab('forms')}
-            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'forms'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <FileText className="w-4 h-4 text-slate-400" />
-              <span>Forms & Capture</span>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('import')}
-            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'import'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Download className="w-4 h-4 text-slate-400" />
-              <span>Import Sources</span>
-            </div>
-          </button>
-        </div>
-
-        {/* Section: MANAGE */}
-        <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Manage Proof</p>
-          <button
-            onClick={() => setActiveTab('proof')}
-            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'proof'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-slate-400" />
-              <span>Testimonials</span>
-            </div>
-            {proofCount > 0 ? (
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                activeTab === 'proof' ? 'bg-white/20 text-white' : 'bg-violet-500/10 text-violet-700'
-              }`}>
-                {proofCount}
-              </span>
-            ) : null}
-          </button>
-        </div>
-
-        {/* Section: EMBEDS & SEO */}
-        <div className="space-y-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Embeds & SEO</p>
-          <button
-            onClick={() => setActiveTab('rich-snippet')}
-            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'rich-snippet'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Search className="w-4 h-4 text-slate-400" />
-              <span>Rich Snippets</span>
-            </div>
-          </button>
-        </div>
-
-        {/* Utility Section */}
-        <div className="space-y-1 pt-2 border-t border-slate-200/60">
-          <button
-            onClick={() => setActiveTab('integrate')}
-            className={`apple-touch w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'integrate'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Puzzle className="w-4 h-4 text-slate-400" />
-              <span>Integrations</span>
-            </div>
-          </button>
-        </div>
+        {/* Integrations */}
+        <button
+          onClick={() => setActiveTab('integrate')}
+          className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === 'integrate'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <Puzzle className={`w-4 h-4 transition-colors ${activeTab === 'integrate' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+            <span>Integrations</span>
+          </div>
+        </button>
       </div>
 
       {/* Bottom Project Switcher & Workspace Bar */}

@@ -33,6 +33,18 @@ import {
   Link as LinkIcon, 
   History
 } from 'lucide-react';
+const TAB_LABEL_MAP: Record<string, string> = {
+  welcome: 'Welcome Hub',
+  forms: 'Collect',
+  import: 'Import',
+  proof: 'Customize',
+  'rich-snippet': 'Post Online',
+  integrate: 'Integrations',
+  settings: 'Settings',
+  feedback: 'Feedback',
+  tags: 'Tags',
+  analyze: 'Analytics',
+};
 
 export const DashboardPage = () => {
   usePageSeo({
@@ -310,7 +322,7 @@ export const DashboardPage = () => {
         {/* Top Slim Header Bar */}
         <header className="h-12 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-2.5">
-            <span className="text-xs font-bold text-slate-900 capitalize tracking-tight">{activeTab}</span>
+            <span className="text-xs font-bold text-slate-900 tracking-tight">{TAB_LABEL_MAP[activeTab] || activeTab}</span>
             <span className="text-slate-300">•</span>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate max-w-[240px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
