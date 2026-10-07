@@ -10,6 +10,7 @@ import {
   Settings,
   ChevronDown,
   LogOut,
+  Layers,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Project } from '../../types';
@@ -19,6 +20,7 @@ export type DashboardTab =
   | 'forms'
   | 'import'
   | 'proof'
+  | 'widgets'
   | 'feedback'
   | 'tags'
   | 'rich-snippet'
@@ -145,6 +147,21 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               {proofCount}
             </span>
           ) : null}
+        </button>
+
+        {/* 4. Widgets */}
+        <button
+          onClick={() => setActiveTab('widgets')}
+          className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === 'widgets'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <Layers className={`w-4 h-4 transition-colors ${activeTab === 'widgets' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+            <span>Widgets</span>
+          </div>
         </button>
 
         {/* 4. Post Online */}

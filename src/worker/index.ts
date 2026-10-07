@@ -37,7 +37,12 @@ export default {
     const pathname = url.pathname;
 
     // Public Static Client-Side JavaScript Runtime for Wall of Love Embed
-    if (pathname === '/embed.js' || pathname === '/embed.min.js') {
+    if (
+      pathname === '/embed.js' ||
+      pathname === '/embed.min.js' ||
+      pathname === '/widget.js' ||
+      pathname === '/widget.min.js'
+    ) {
       return handleEmbedScript(request, env);
     }
 

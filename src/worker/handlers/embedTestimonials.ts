@@ -58,6 +58,12 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
 
     let reviews: PublicEmbedReview[] = [];
 
+    // Resolve whether identifier is a projectSlug (contains hyphens or passed as slug) or projectId
+    const explicitSlug = url.searchParams.get('projectSlug') || url.searchParams.get('slug');
+    const isSlug = Boolean(explicitSlug || projectId.includes('-'));
+    const targetField = isSlug ? 'projectSlug' : 'projectId';
+    const targetValue = explicitSlug || projectId;
+
     // Attempt to query Firestore testimonials if project ID is provided
     const fbProjectId = env.FIREBASE_PROJECT_ID || env.VITE_FIREBASE_PROJECT_ID || 'testimonialcollectordashboard';
     const queryUrl = `https://firestore.googleapis.com/v1/projects/${fbProjectId}/databases/(default)/documents:runQuery`;
@@ -78,9 +84,9 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
               },
               {
                 fieldFilter: {
-                  field: { fieldPath: 'projectId' },
+                  field: { fieldPath: targetField },
                   op: 'EQUAL',
-                  value: { stringValue: projectId },
+                  value: { stringValue: targetValue },
                 },
               },
             ],
@@ -105,8 +111,9 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
         if (item.document?.fields) {
           const f = item.document.fields;
           const reviewProjId = f.projectId?.stringValue || '';
-          // Strict tenant isolation: only return approved reviews for this project.
-          if (reviewProjId === projectId) {
+          const reviewSlug = f.projectSlug?.stringValue || '';
+          // Strict tenant isolation: only return approved reviews for this project/slug.
+          if (reviewProjId === targetValue || reviewSlug === targetValue) {
             const rawSource = (f.source?.stringValue || f.platform?.stringValue || 'direct').toLowerCase();
             const source: 'google' | 'linkedin' | 'instagram' | 'facebook' | 'direct' =
               rawSource.includes('google') ? 'google' :
@@ -117,7 +124,7 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
             reviews.push({
               id: item.document.name.split('/').pop() || Math.random().toString(),
               authorName: f.authorName?.stringValue || f.name?.stringValue || 'Verified Customer',
-              authorTitle: f.authorTitle?.stringValue || f.title?.stringValue || '',
+              authorTitle: f.role?.stringValue || f.authorTitle?.stringValue || f.title?.stringValue || '',
               authorCompany: f.authorCompany?.stringValue || f.company?.stringValue || '',
               authorAvatar: f.authorAvatar?.stringValue || f.avatarUrl?.stringValue || '',
               rating: parseInt(f.rating?.integerValue || f.rating?.doubleValue || '5', 10),

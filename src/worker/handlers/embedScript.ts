@@ -408,12 +408,22 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
   function initContainers() {
     injectStyles();
 
+    var scriptEl = document.currentScript;
+    var scriptProj = scriptEl ? (scriptEl.getAttribute('data-project-id') || scriptEl.getAttribute('data-project')) : null;
+
     var targets = document.querySelectorAll('#panda-praise-wall, [data-panda-praise], .panda-praise-wall');
+    if (!targets.length && scriptEl && scriptEl.parentNode) {
+      var autoDiv = document.createElement('div');
+      autoDiv.id = 'panda-praise-wall';
+      if (scriptProj) autoDiv.setAttribute('data-project-id', scriptProj);
+      scriptEl.parentNode.insertBefore(autoDiv, scriptEl);
+      targets = [autoDiv];
+    }
     if (!targets.length) return;
 
     for (var i = 0; i < targets.length; i++) {
       (function (container) {
-        var projectId = container.getAttribute('data-project-id') || container.getAttribute('data-project') || 'default';
+        var projectId = container.getAttribute('data-project-id') || container.getAttribute('data-project') || scriptProj || 'default';
         var theme = container.getAttribute('data-theme') || 'light_gradient';
         var minRating = container.getAttribute('data-min-rating') || '0';
         var sources = container.getAttribute('data-sources') || 'google,linkedin,instagram,facebook,direct';

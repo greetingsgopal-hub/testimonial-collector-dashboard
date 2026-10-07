@@ -20,6 +20,7 @@ import { TagsView } from '../components/dashboard/views/TagsView';
 import { RichSnippetView } from '../components/dashboard/views/RichSnippetView';
 import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
+import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { storage } from '../lib/storage';
 import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
@@ -38,6 +39,7 @@ const TAB_LABEL_MAP: Record<string, string> = {
   forms: 'Collect',
   import: 'Import',
   proof: 'Customize',
+  widgets: 'Widgets',
   'rich-snippet': 'Post Online',
   integrate: 'Integrations',
   settings: 'Settings',
@@ -413,6 +415,17 @@ export const DashboardPage = () => {
           {activeTab === 'settings' && (
             <div className="max-w-6xl mx-auto">
               <WorkspaceSettings />
+            </div>
+          )}
+
+          {/* Website Widgets Studio */}
+          {activeTab === 'widgets' && (
+            <div className="max-w-7xl mx-auto">
+              <WidgetStudio
+                reviews={reviews}
+                onBack={() => setActiveTab('proof')}
+                onOpenProof={() => setActiveTab('proof')}
+              />
             </div>
           )}
 

@@ -24,7 +24,7 @@ import {
 import { Review, WidgetType, WidgetSettings } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 
-export type CmsPlatform = 'script' | 'html' | 'react' | 'webflow' | 'wordpress' | 'shopify' | 'framer';
+export type CmsPlatform = 'script' | 'wordpress' | 'webflow' | 'framer' | 'shopify' | 'squarespace' | 'wix' | 'react' | 'nextjs' | 'html' | 'iframe';
 export type WallTheme = 'light_gradient' | 'dark' | 'minimalist';
 
 // Custom Brand Icons
@@ -144,26 +144,36 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
     switch (cmsPlatform) {
       case 'script':
+      case 'html':
       default:
         return `<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
 
-      case 'html':
-        return `<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
-
-      case 'react':
-        return `// In your React / Next.js component:\nimport { useEffect } from 'react';\n\nexport function WallOfLove() {\n  useEffect(() => {\n    const script = document.createElement('script');\n    script.src = '${runtimeScriptUrl}';\n    script.async = true;\n    document.body.appendChild(script);\n    return () => { script.remove(); };\n  }, []);\n\n  return (\n    <div\n      id="panda-praise-wall"\n      data-project-id="${projId}"\n      data-theme="${wallTheme}"\n      data-min-rating="${minRating}"\n      data-sources="${sourcesStr}"\n    />\n  );\n}`;
+      case 'wordpress':
+        return `<!-- WordPress: Add a Custom HTML block and paste this code -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
 
       case 'webflow':
-        return `<!-- Webflow Custom Embed -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
-
-      case 'wordpress':
-        return `<!-- WordPress Custom HTML Block -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
-
-      case 'shopify':
-        return `<!-- Shopify Custom Liquid Section -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+        return `<!-- Webflow: Add an Embed component (shortcut E) and paste this code -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
 
       case 'framer':
-        return `<!-- Framer HTML Embed Component -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+        return `<!-- Framer: Insert > Utility > Embed > HTML -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+
+      case 'shopify':
+        return `<!-- Shopify: Theme Editor > Add section > Custom Liquid -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+
+      case 'squarespace':
+        return `<!-- Squarespace: Add a Code Block (set mode to HTML) and paste this code -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+
+      case 'wix':
+        return `<!-- Wix: Add Elements (+) > Embed Code > Embed HTML -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+
+      case 'react':
+        return `// In your React component:\nimport { useEffect } from 'react';\n\nexport function WallOfLove() {\n  useEffect(() => {\n    const script = document.createElement('script');\n    script.src = '${runtimeScriptUrl}';\n    script.async = true;\n    document.body.appendChild(script);\n    return () => { script.remove(); };\n  }, []);\n\n  return (\n    <div\n      id="panda-praise-wall"\n      data-project-id="${projId}"\n      data-theme="${wallTheme}"\n      data-min-rating="${minRating}"\n      data-sources="${sourcesStr}"\n    />\n  );\n}`;
+
+      case 'nextjs':
+        return `// In your Next.js component (App Router or Pages):\n'use client';\nimport Script from 'next/script';\n\nexport function WallOfLove() {\n  return (\n    <section>\n      <div\n        id="panda-praise-wall"\n        data-project-id="${projId}"\n        data-theme="${wallTheme}"\n        data-min-rating="${minRating}"\n        data-sources="${sourcesStr}"\n      />\n      <Script src="${runtimeScriptUrl}" strategy="lazyOnload" />\n    </section>\n  );\n}`;
+
+      case 'iframe':
+        return `<iframe src="https://pandapraise.com/w/${projId}?theme=${wallTheme === 'dark' ? 'dark' : 'light'}" width="100%" height="600" frameborder="0" style="border:none;border-radius:16px;width:100%;min-height:600px;"></iframe>`;
     }
   };
 
@@ -172,45 +182,69 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
       case 'script':
       default:
         return {
-          title: 'Client-Side JavaScript Runtime (Recommended)',
-          step1: 'Copy and paste the snippet anywhere in your HTML <body> or landing page section.',
-          step2: 'The high-speed script automatically injects your Wall of Love with zero layout shifts and instant updates.',
-        };
-      case 'webflow':
-        return {
-          title: 'Webflow Integration',
-          step1: 'In Webflow Designer, add an "Embed" component from the Add Elements panel.',
-          step2: 'Paste the snippet above and click "Save & Close". Publish your site.',
+          title: 'Universal Script Tag (Recommended)',
+          step1: 'Copy the code. You don\'t need to change anything.',
+          step2: 'Paste into a Custom HTML block and publish. Works on any website.',
         };
       case 'wordpress':
         return {
-          title: 'WordPress Integration',
-          step1: 'In Gutenberg or Elementor, add a "Custom HTML" block on your target page.',
-          step2: 'Paste the snippet above and click "Update" or "Publish".',
+          title: 'WordPress Installation',
+          step1: 'Add a Custom HTML block where you want the widget.',
+          step2: 'Paste the Panda Praise code and update your page.',
         };
-      case 'shopify':
+      case 'webflow':
         return {
-          title: 'Shopify Integration',
-          step1: 'In Shopify Theme Editor, click "Add section" → "Custom Liquid" or "Custom HTML".',
-          step2: 'Paste the code snippet above and click "Save".',
+          title: 'Webflow Installation',
+          step1: 'Add an Embed element from the Add panel where you want the widget.',
+          step2: 'Paste the snippet above, click "Save & Close", and publish.',
         };
       case 'framer':
         return {
-          title: 'Framer Integration',
-          step1: 'In Framer, open the Insert menu (shortcut I), choose Utility → "Embed".',
-          step2: 'Set embed type to "HTML", paste the snippet above, and set width to 100%.',
+          title: 'Framer Installation',
+          step1: 'Open the Insert menu (shortcut I), choose Utility → "Embed" (HTML mode).',
+          step2: 'Paste the snippet above and set width to 100%.',
+        };
+      case 'shopify':
+        return {
+          title: 'Shopify Installation',
+          step1: 'In Shopify Theme Editor, click "Add section" → "Custom Liquid" or "Custom HTML".',
+          step2: 'Paste the code snippet above and click "Save".',
+        };
+      case 'squarespace':
+        return {
+          title: 'Squarespace Installation',
+          step1: 'Add a Code block where you want the widget and set mode to HTML.',
+          step2: 'Paste the code snippet above and click "Save".',
+        };
+      case 'wix':
+        return {
+          title: 'Wix Installation',
+          step1: 'Click Add Elements (+) → Embed Code → Embed HTML.',
+          step2: 'Paste the code snippet into the HTML box and resize to fit your section.',
         };
       case 'react':
         return {
-          title: 'React / Next.js Integration',
+          title: 'React Installation',
           step1: 'Drop this React component into your page or testimonials section.',
-          step2: 'It runs dynamically on the client with zero build-time bundling overhead.',
+          step2: 'Renders dynamically on the client with zero build overhead.',
+        };
+      case 'nextjs':
+        return {
+          title: 'Next.js Installation (App Router / Pages)',
+          step1: 'Use next/script with lazyOnload strategy as shown above.',
+          step2: 'Prevents SSR hydration mismatch and optimizes script loading.',
         };
       case 'html':
         return {
-          title: 'Universal HTML Embed',
+          title: 'Custom HTML Installation (e.g. papasystem.in)',
           step1: 'Paste the <div> container and <script> tag into your HTML document.',
-          step2: 'It runs seamlessly on any CMS, static site, or web framework.',
+          step2: 'Zero frameworks required. Renders instantly on any static or dynamic page.',
+        };
+      case 'iframe':
+        return {
+          title: 'Universal iframe Embed',
+          step1: 'Paste the <iframe> tag into any CMS that restricts custom JavaScript.',
+          step2: 'Isolated, responsive container rendered directly by Panda Praise.',
         };
     }
   };
@@ -290,6 +324,50 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* 3 Universal Steps to Add to Any Website */}
+      <div className="bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 p-5 rounded-2xl border border-purple-200/80 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#6701e6] text-white text-xs font-black">
+              ✓
+            </span>
+            Add Panda Praise to Your Website (3 Universal Steps)
+          </h2>
+          <span className="text-[11px] font-semibold text-purple-700 bg-white/80 px-2.5 py-1 rounded-full border border-purple-200">
+            Works with any website builder & custom HTML
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="bg-white/90 backdrop-blur-xs p-3.5 rounded-xl border border-purple-100 shadow-2xs">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-5 h-5 rounded-full bg-purple-100 text-[#6701e6] font-black text-xs flex items-center justify-center">1</span>
+              <p className="text-xs font-bold text-gray-800">Copy your widget code</p>
+            </div>
+            <p className="text-[11px] text-gray-600 leading-relaxed">
+              Select your platform below and click <strong>Copy Embed Code</strong>. You do not need to configure any code.
+            </p>
+          </div>
+          <div className="bg-white/90 backdrop-blur-xs p-3.5 rounded-xl border border-purple-100 shadow-2xs">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-5 h-5 rounded-full bg-purple-100 text-[#6701e6] font-black text-xs flex items-center justify-center">2</span>
+              <p className="text-xs font-bold text-gray-800">Paste where you want reviews</p>
+            </div>
+            <p className="text-[11px] text-gray-600 leading-relaxed">
+              Add a <strong>Custom HTML / Embed block</strong> in your website editor (e.g. WordPress, Webflow, Shopify, or your HTML file).
+            </p>
+          </div>
+          <div className="bg-white/90 backdrop-blur-xs p-3.5 rounded-xl border border-purple-100 shadow-2xs">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-5 h-5 rounded-full bg-purple-100 text-[#6701e6] font-black text-xs flex items-center justify-center">3</span>
+              <p className="text-xs font-bold text-gray-800">Publish your website</p>
+            </div>
+            <p className="text-[11px] text-gray-600 leading-relaxed">
+              Save and hit <strong>Publish</strong>. When you approve new testimonials in Panda Praise, your live site updates automatically.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -456,12 +534,16 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
             <div className="flex flex-wrap gap-1 p-1 bg-gray-100 rounded-xl text-[11px] font-semibold">
               {[
                 { id: 'script', label: 'Script Tag' },
-                { id: 'react', label: 'React / Next.js' },
-                { id: 'webflow', label: 'Webflow' },
                 { id: 'wordpress', label: 'WordPress' },
-                { id: 'shopify', label: 'Shopify' },
+                { id: 'webflow', label: 'Webflow' },
                 { id: 'framer', label: 'Framer' },
-                { id: 'html', label: 'HTML' },
+                { id: 'shopify', label: 'Shopify' },
+                { id: 'squarespace', label: 'Squarespace' },
+                { id: 'wix', label: 'Wix' },
+                { id: 'react', label: 'React' },
+                { id: 'nextjs', label: 'Next.js' },
+                { id: 'html', label: 'Custom HTML (papasystem.in)' },
+                { id: 'iframe', label: 'iFrame Fallback' },
               ].map((p) => (
                 <button
                   key={p.id}
