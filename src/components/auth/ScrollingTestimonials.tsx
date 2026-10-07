@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Star, Video, Globe, ShieldCheck, Sparkles, Share2, QrCode } from 'lucide-react';
+import { BookOpen, Star, Camera, Globe, ShieldCheck, Sparkles, Share2, QrCode } from 'lucide-react';
 
 export interface FeatureCardItem {
   icon: React.ReactNode;
@@ -13,7 +13,7 @@ export interface FeatureCardItem {
 const FEATURES_LIST: FeatureCardItem[] = [
   {
     icon: <Star className="w-6 h-6 text-amber-400" />,
-    title: 'Collect text & video testimonials',
+    title: 'Collect text & screenshot testimonials',
     text: 'A public link, QR code or embeddable widget your customers can use in under a minute.',
   },
   {
@@ -32,9 +32,9 @@ const FEATURES_LIST: FeatureCardItem[] = [
     text: 'Walls of Love, embeddable widgets, popups and shareable images for your socials.',
   },
   {
-    icon: <Video className="w-6 h-6 text-indigo-400" />,
-    title: 'Ad-free video hosting',
-    text: 'Your video testimonials hosted on dedicated, ad-free hosting — no Wistia or YouTube branding.',
+    icon: <Camera className="w-6 h-6 text-indigo-400" />,
+    title: 'Chat screenshot proof',
+    text: 'Drop in WhatsApp, Slack, Stripe, and DM screenshots with auto-compression.',
   },
   {
     icon: <QrCode className="w-6 h-6 text-teal-400" />,
