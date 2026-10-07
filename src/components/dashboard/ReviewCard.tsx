@@ -97,6 +97,11 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
               </span>
             )}
             {getSourceIcon(review.source)}
+            {review.screenshotPlatform && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-700 border border-indigo-500/20 capitalize">
+                {review.screenshotPlatform}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-1">
@@ -187,6 +192,21 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
               <span>Watch Video Testimonial</span>
               <ExternalLink className="w-3 h-3 ml-0.5" />
             </a>
+          </div>
+        )}
+
+        {/* Screenshot Proof Preview if screenshot */}
+        {review.screenshotUrl && (
+          <div className="mb-3 rounded-xl overflow-hidden border border-zinc-200/80 bg-zinc-50 relative group/img">
+            <img
+              src={review.screenshotUrl}
+              alt={review.title || 'Screenshot Proof'}
+              className="w-full max-h-48 object-contain object-top rounded-xl transition-transform duration-300 group-hover/img:scale-[1.02]"
+              loading="lazy"
+            />
+            <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-xs text-white text-[10px] font-semibold tracking-wide shadow-xs">
+              {review.screenshotPlatform ? `${review.screenshotPlatform.toUpperCase()} PROOF` : 'CHAT PROOF'}
+            </div>
           </div>
         )}
 

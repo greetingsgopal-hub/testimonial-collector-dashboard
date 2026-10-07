@@ -30,6 +30,7 @@ import { storage } from '../lib/storage';
 import { getFirebaseAuth } from '../lib/firebase';
 import { socialClient } from '../lib/socialClient';
 import { ConnectSourceModal } from '../components/dashboard/views/ConnectSourceModal';
+import { compressScreenshot, detectChatPlatform, ScreenshotPlatform } from '../lib/screenshotUtils';
 
 export type SourceStatus = 'available' | 'coming_soon';
 
@@ -42,7 +43,7 @@ export interface SourceDefinition {
   unsupportedReason?: string;
   keywords: string[];
   icon: React.ReactNode;
-  actionType: 'google' | 'facebook' | 'url' | 'csv' | 'manual' | 'unsupported';
+  actionType: 'google' | 'facebook' | 'url' | 'csv' | 'manual' | 'screenshot' | 'unsupported';
 }
 
 const IMPORT_SOURCES: SourceDefinition[] = [
@@ -270,8 +271,8 @@ const IMPORT_SOURCES: SourceDefinition[] = [
     id: 'screenshot',
     name: 'Screenshot / Chat Proof',
     status: 'available',
-    description: 'Upload WhatsApp, Slack, Stripe, or email screenshot testimonials.',
-    keywords: ['screenshot', 'image', 'chat', 'whatsapp', 'slack', 'dm', 'stripe', 'email'],
+    description: 'Upload WhatsApp, iMessage, Slack, Stripe, or DM screenshots with instant canvas compression.',
+    keywords: ['screenshot', 'image', 'chat', 'whatsapp', 'slack', 'dm', 'stripe', 'email', 'imessage', 'twitter'],
     icon: (
       <svg className="w-5 h-5 text-indigo-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
@@ -279,7 +280,7 @@ const IMPORT_SOURCES: SourceDefinition[] = [
         <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
       </svg>
     ),
-    actionType: 'manual',
+    actionType: 'screenshot',
   },
   {
     id: 'manual',
@@ -387,6 +388,17 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
   const [manualCompany, setManualCompany] = useState('');
   const [manualRole, setManualRole] = useState('');
   const [manualScreenshot, setManualScreenshot] = useState<string | null>(null);
+
+  // Dedicated Screenshot / Chat Proof state
+  const [screenshotDataUrl, setScreenshotDataUrl] = useState<string | null>(null);
+  const [screenshotPlatformType, setScreenshotPlatformType] = useState<ScreenshotPlatform>('whatsapp');
+  const [screenshotName, setScreenshotName] = useState('');
+  const [screenshotCompany, setScreenshotCompany] = useState('');
+  const [screenshotRole, setScreenshotRole] = useState('');
+  const [screenshotKeyQuote, setScreenshotKeyQuote] = useState('');
+  const [screenshotRating, setScreenshotRating] = useState(5);
+  const [isProcessingScreenshot, setIsProcessingScreenshot] = useState(false);
+  const [screenshotFileSize, setScreenshotFileSize] = useState<number | null>(null);
 
   const filteredSources = IMPORT_SOURCES.filter((s) => {
     if (!searchQuery.trim()) return true;
@@ -975,6 +987,79 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
     setIsImporting(false);
   }, [project, workspace, manualName, manualEmail, manualContent, manualRating, manualCompany, manualRole]);
 
+  const handleScreenshotFile = async (file: File) => {
+    setIsProcessingScreenshot(true);
+    try {
+      const { dataUrl } = await compressScreenshot(file);
+      setScreenshotDataUrl(dataUrl);
+      setScreenshotFileSize(Math.round((dataUrl.length * 3) / 4));
+      const detected = detectChatPlatform(file.name);
+      if (detected !== 'other') {
+        setScreenshotPlatformType(detected);
+      }
+    } catch (err: any) {
+      setImportResult({
+        success: false,
+        count: 0,
+        errors: [err.message || 'Failed to process and compress screenshot.'],
+      });
+    } finally {
+      setIsProcessingScreenshot(false);
+    }
+  };
+
+  const handleScreenshotImport = async () => {
+    if (!project || !screenshotDataUrl) return;
+    setIsImporting(true);
+
+    try {
+      const maxTestimonials = workspace ? PLAN_LIMITS[workspace.plan].maxTestimonials : -1;
+      if (maxTestimonials !== -1) {
+        const existing = await storage.getReviews(project.id);
+        if (existing.length >= maxTestimonials) {
+          setImportResult({
+            success: false,
+            count: 0,
+            errors: [`Free plan is limited to ${maxTestimonials} testimonials. Upgrade to add more.`],
+          });
+          setIsImporting(false);
+          return;
+        }
+      }
+
+      await storage.createReview({
+        projectId: project.id,
+        name: screenshotName.trim() || 'Verified Customer',
+        email: 'screenshot@verified.proof',
+        rating: screenshotRating,
+        content: screenshotKeyQuote.trim() || 'Verified chat screenshot testimonial.',
+        company: screenshotCompany.trim() || undefined,
+        role: screenshotRole.trim() || '',
+        avatarUrl: undefined,
+        screenshotUrl: screenshotDataUrl,
+        screenshotPlatform: screenshotPlatformType,
+        tags: ['screenshot', 'chat-proof', screenshotPlatformType],
+        source: 'screenshot',
+        type: 'screenshot',
+        consent: true,
+        status: 'approved',
+      });
+
+      setImportResult({ success: true, count: 1 });
+      setScreenshotDataUrl(null);
+      setScreenshotName('');
+      setScreenshotCompany('');
+      setScreenshotRole('');
+      setScreenshotKeyQuote('');
+      setScreenshotRating(5);
+      setScreenshotFileSize(null);
+    } catch (err: any) {
+      setImportResult({ success: false, count: 0, errors: [err.message] });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   const resetImport = () => {
     setSelectedPlatform(null);
     setCsvFile(null);
@@ -984,6 +1069,13 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
     setCsvStep('upload');
     setImportResult(null);
     setUnsupportedModalSource(null);
+    setScreenshotDataUrl(null);
+    setScreenshotName('');
+    setScreenshotCompany('');
+    setScreenshotRole('');
+    setScreenshotKeyQuote('');
+    setScreenshotRating(5);
+    setScreenshotFileSize(null);
     resetGoogleFlow();
   };
 
@@ -1003,6 +1095,8 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
       setSelectedPlatform('csv');
     } else if (source.actionType === 'manual') {
       setSelectedPlatform('manual');
+    } else if (source.actionType === 'screenshot' || source.id === 'screenshot') {
+      setSelectedPlatform('screenshot');
     }
   };
 
@@ -2645,6 +2739,228 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DEDICATED SCREENSHOT / CHAT PROOF FLOW ── */}
+      {selectedPlatform === 'screenshot' && (
+        <div className="max-w-2xl mx-auto space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={resetImport}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors"
+              >
+                <ArrowLeft size={16} /> Back to sources
+              </button>
+              <span className="text-gray-300 dark:text-gray-700">•</span>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">Screenshot / Chat Proof</span>
+            </div>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              <Sparkles size={11} /> Auto-Compressed WebP
+            </span>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm space-y-5">
+            {/* Screenshot Dropzone */}
+            {!screenshotDataUrl ? (
+              <label
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragOver(true);
+                }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragOver(false);
+                  const file = e.dataTransfer.files[0];
+                  if (file) handleScreenshotFile(file);
+                }}
+                className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${
+                  isDragOver
+                    ? 'border-[#6701e6] bg-purple-50/50 dark:bg-purple-950/20'
+                    : 'border-gray-300 dark:border-gray-700 hover:border-[#6701e6] hover:bg-purple-50/20'
+                }`}
+              >
+                <div className="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-900/40 text-[#6701e6] flex items-center justify-center mb-3">
+                  <Upload size={22} />
+                </div>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">
+                  {isProcessingScreenshot ? 'Compressing & Optimizing...' : 'Upload or Drag Screenshot Here'}
+                </h4>
+                <p className="text-xs text-gray-500 text-center max-w-sm mb-3">
+                  WhatsApp, iMessage, Slack, Stripe notifications, or Instagram DMs. Auto-downscaled client-side under 250KB.
+                </p>
+                <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                  Select PNG, JPG, or WebP
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  disabled={isProcessingScreenshot}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleScreenshotFile(file);
+                  }}
+                />
+              </label>
+            ) : (
+              <div className="space-y-4">
+                {/* Screenshot Preview Card */}
+                <div className="relative p-3 rounded-2xl border border-purple-200 dark:border-purple-800 bg-purple-50/30 dark:bg-purple-950/20 flex flex-col sm:flex-row items-center gap-4">
+                  <div className="relative max-h-48 max-w-[200px] overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 shadow-xs bg-black/5">
+                    <img
+                      src={screenshotDataUrl}
+                      alt="Uploaded Proof"
+                      className="object-contain max-h-48 w-auto mx-auto"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1 text-center sm:text-left">
+                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                      <span className="text-xs font-bold text-gray-900 dark:text-white">Screenshot Loaded</span>
+                      {screenshotFileSize && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+                          {Math.round(screenshotFileSize / 1024)} KB WebP
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Optimized for instant page loads and widgets.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setScreenshotDataUrl(null);
+                        setScreenshotFileSize(null);
+                      }}
+                      className="text-xs font-semibold text-rose-600 hover:text-rose-700 cursor-pointer pt-1"
+                    >
+                      Replace Screenshot
+                    </button>
+                  </div>
+                </div>
+
+                {/* Platform Selection Pills */}
+                <div>
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    Detected Source Platform
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {(
+                      [
+                        { id: 'whatsapp', label: 'WhatsApp', color: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30' },
+                        { id: 'imessage', label: 'iMessage', color: 'bg-blue-500/10 text-blue-700 border-blue-500/30' },
+                        { id: 'slack', label: 'Slack', color: 'bg-purple-500/10 text-purple-700 border-purple-500/30' },
+                        { id: 'instagram', label: 'Instagram', color: 'bg-pink-500/10 text-pink-700 border-pink-500/30' },
+                        { id: 'stripe', label: 'Stripe', color: 'bg-indigo-500/10 text-indigo-700 border-indigo-500/30' },
+                        { id: 'twitter', label: 'Twitter / X', color: 'bg-gray-500/10 text-gray-800 border-gray-500/30' },
+                        { id: 'other', label: 'Direct Chat', color: 'bg-zinc-500/10 text-zinc-700 border-zinc-500/30' },
+                      ] as const
+                    ).map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setScreenshotPlatformType(p.id)}
+                        className={`px-3 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                          screenshotPlatformType === p.id
+                            ? `${p.color} ring-2 ring-[#6701e6]/40 shadow-xs`
+                            : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Metadata Fields */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 block">
+                      Customer / Client Name
+                    </label>
+                    <input
+                      type="text"
+                      value={screenshotName}
+                      onChange={(e) => setScreenshotName(e.target.value)}
+                      placeholder="e.g. Alex Rivera (or leave blank)"
+                      className="w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 block">
+                      Company / Role / Handle
+                    </label>
+                    <input
+                      type="text"
+                      value={screenshotCompany}
+                      onChange={(e) => setScreenshotCompany(e.target.value)}
+                      placeholder="e.g. Growth Lead / @alex"
+                      className="w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                    />
+                  </div>
+                </div>
+
+                {/* Key Quote / Headline Highlight */}
+                <div>
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 block">
+                    Key Quote / Highlight Text
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={screenshotKeyQuote}
+                    onChange={(e) => setScreenshotKeyQuote(e.target.value)}
+                    placeholder='e.g. "Just hit $14,200 this week from your system!" (appears as quote next to screenshot)'
+                    className="w-full px-3.5 py-2 text-sm rounded-xl resize-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                  />
+                </div>
+
+                {/* Rating */}
+                <div>
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 block">Rating</label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setScreenshotRating(r)}
+                        className={`p-1 rounded cursor-pointer transition-colors ${
+                          r <= screenshotRating ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600'
+                        }`}
+                      >
+                        <Star size={18} className={r <= screenshotRating ? 'fill-amber-400' : ''} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Submit Action */}
+                <div className="flex justify-end items-center gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+                  <button
+                    type="button"
+                    onClick={resetImport}
+                    className="px-4 py-2 text-xs font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleScreenshotImport}
+                    disabled={isImporting}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold bg-[#6701e6] hover:bg-[#5200bd] text-white disabled:opacity-50 cursor-pointer shadow-xs transition-colors"
+                  >
+                    {isImporting ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Check size={16} />
+                    )}
+                    Save Screenshot Proof
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

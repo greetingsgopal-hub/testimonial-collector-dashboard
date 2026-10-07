@@ -4,7 +4,7 @@
 
 // ── Core enums ──────────────────────────────────────────────
 export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'archived';
-export type ReviewType = 'text' | 'video';
+export type ReviewType = 'text' | 'video' | 'screenshot';
 export type PlanTier = 'free' | 'starter' | 'pro';
 export type TeamRole = 'owner' | 'admin' | 'editor' | 'viewer';
 export type BillingCycle = 'monthly' | 'annual';
@@ -169,7 +169,11 @@ export type ImportSource =
   | 'chrome_extension'
   | 'zapier'
   | 'manual'
-  | 'import';
+  | 'import'
+  | 'screenshot'
+  | 'whatsapp'
+  | 'slack'
+  | 'instagram';
 
 export interface Review {
   id: string;
@@ -191,6 +195,8 @@ export interface Review {
   videoThumbnailUrl?: string;
   videoTranscript?: string;
   videoDurationSeconds?: number;
+  screenshotUrl?: string;
+  screenshotPlatform?: string;
   tags: string[];
   source: ImportSource;
   sourceUrl?: string;          // Original URL of imported review
@@ -265,7 +271,8 @@ export type ImportPlatform =
   | 'reddit'
   | 'csv'
   | 'web'
-  | 'manual';
+  | 'manual'
+  | 'screenshot';
 
 export interface ImportJob {
   id: string;

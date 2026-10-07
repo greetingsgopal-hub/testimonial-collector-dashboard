@@ -376,6 +376,22 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ review, theme, active
         </div>
       )}
 
+      {/* Screenshot Proof */}
+      {review.screenshotUrl && (
+        <div className="mt-3 rounded-xl overflow-hidden border border-current/10 bg-black/5 relative group cursor-pointer">
+          <img
+            src={review.screenshotUrl}
+            alt={review.title || 'Verified Chat Proof'}
+            className="w-full max-h-72 object-contain rounded-xl transition-transform duration-300 group-hover:scale-[1.01]"
+            loading="lazy"
+            onClick={() => window.open(review.screenshotUrl, '_blank')}
+          />
+          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-xs text-white text-[10px] font-semibold tracking-wide">
+            {review.screenshotPlatform ? `${review.screenshotPlatform.toUpperCase()} PROOF` : 'CHAT PROOF'}
+          </div>
+        </div>
+      )}
+
       {/* Author */}
       <div className="flex items-center gap-3 mt-4 pt-3 border-t border-current/5">
         <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold
@@ -389,7 +405,16 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ review, theme, active
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <p className={`text-sm font-medium ${theme.text}`}>{review.name}</p>
-            {review.type === 'video' ? (
+            {review.screenshotPlatform || review.type === 'screenshot' ? (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 transition-all ${
+                isLight
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200 shadow-2xs'
+                  : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+              }`}>
+                <ShieldCheck size={10} className={isLight ? 'text-emerald-600' : 'text-emerald-400'} />
+                <span className="capitalize">{review.screenshotPlatform || 'Chat'} Proof</span>
+              </span>
+            ) : review.type === 'video' ? (
               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 transition-all ${
                 isLight
                   ? 'bg-purple-50 text-purple-700 border-purple-200 shadow-2xs'

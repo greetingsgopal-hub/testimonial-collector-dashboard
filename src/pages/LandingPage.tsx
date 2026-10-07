@@ -266,35 +266,35 @@ export const LandingPage: React.FC = () => {
         {/* Top Eyebrow Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50/80 border border-purple-200/60 mb-5 shadow-xs">
           <span className="flex h-2 w-2 rounded-full bg-[#6701e6] animate-pulse" />
-          <span className="text-xs font-semibold text-[#6701e6]">Collect. Moderate. Publish. — Social Proof for Growing Businesses</span>
+          <span className="text-xs font-semibold text-[#6701e6]">The Anti-Subscription Social Proof Engine — Built for Creators & Independent Businesses</span>
         </div>
 
         {/* Primary H1: Exactly two centered lines with highlighted treatment */}
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-950 tracking-tight leading-[1.14] max-w-3xl mx-auto text-center">
-          <span className="block">Turn Customer Praise Into</span>
+          <span className="block">Turn WhatsApp & DM Screenshots Into</span>
           <span className="senja-purple-mark mt-1 sm:mt-2 inline-block">
-            Your #1 Growth Engine
+            High-Converting Social Proof — Forever
           </span>
         </h1>
 
         {/* Subheadline directly below H1 */}
         <p className="mt-5 text-base sm:text-lg text-gray-600 max-w-xl mx-auto leading-relaxed font-normal">
-          <span className="font-semibold text-gray-900">Meet Panda Praise</span> — the easiest way to collect, organize, and showcase verified customer proof.
+          <span className="font-semibold text-gray-900">Stop paying monthly hostage fees</span> for website widgets. Drop in raw chat screenshots, collect verified reviews, and embed an always-on Wall of Love that never goes blank.
         </p>
 
         {/* 3 Green Checkmark Reassurance Bullets */}
         <div className="mt-5 max-w-2xl mx-auto flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-gray-600 font-medium">
           <div className="flex items-center gap-1.5">
             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Automate customer review collection</span>
+            <span>Drop WhatsApp, Slack & DM screenshots</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Import existing reviews from CSV</span>
+            <span>Forever active with Founding Lifetime Pass</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Embed widgets, popups & Walls of Love</span>
+            <span>1-line embed that never shuts down</span>
           </div>
         </div>
 
