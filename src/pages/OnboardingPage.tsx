@@ -227,38 +227,38 @@ export const OnboardingPage: React.FC = () => {
   }, [step, isSetupComplete, navigate]);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col font-sans selection:bg-purple-500/20 selection:text-purple-900 pb-16">
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col font-sans selection:bg-purple-500/20 selection:text-purple-900 pb-2">
       
       {/* ── 1. Top Colorful Mesh Gradient Banner (Screenshots 2-5 Exact) ── */}
-      <div className="h-28 sm:h-32 w-full bg-gradient-to-r from-[#e11d48] via-[#a855f7] to-[#6701e6] relative">
+      <div className="h-14 sm:h-16 w-full bg-gradient-to-r from-[#e11d48] via-[#a855f7] to-[#6701e6] relative shrink-0">
         
         {/* Top-left Sign out Link */}
         <button
           type="button"
           onClick={handleSignOut}
-          className="absolute top-5 left-6 text-white/85 hover:text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+          className="absolute top-2.5 left-5 text-white/85 hover:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
         >
           <span>Sign out</span>
-          <span className="text-sm">→</span>
+          <span className="text-xs">→</span>
         </button>
 
         {/* Center Intersecting Avatar Badge */}
-        <div className="absolute left-1/2 -bottom-9 -translate-x-1/2 flex items-center justify-center">
+        <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 flex items-center justify-center">
           <div
             className="relative cursor-pointer group"
             onClick={fireCelebrationBomb}
             title="Click for celebration bomb!"
           >
             {/* Gray avatar silhouette circle */}
-            <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gray-200 border-4 border-white shadow-md flex items-center justify-center text-gray-400 group-hover:scale-105 transition-transform">
-              <svg className="w-9 h-9 sm:w-10 sm:h-10 fill-gray-400" viewBox="0 0 24 24">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gray-200 border-2 border-white shadow-sm flex items-center justify-center text-gray-400 group-hover:scale-105 transition-transform">
+              <svg className="w-6 h-6 fill-gray-400" viewBox="0 0 24 24">
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
               </svg>
             </div>
 
             {/* Overlapping white circle with purple heart */}
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white border-2 border-gray-100 shadow-lg absolute -bottom-1 -right-1 flex items-center justify-center text-[#6701e6] group-hover:scale-115 transition-transform">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="#6701e6">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white border border-gray-100 shadow-sm absolute -bottom-0.5 -right-0.5 flex items-center justify-center text-[#6701e6] group-hover:scale-115 transition-transform">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="#6701e6">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
               </svg>
             </div>
@@ -267,7 +267,7 @@ export const OnboardingPage: React.FC = () => {
       </div>
 
       {/* ── 2. Onboarding Steps Container ── */}
-      <div className="flex-1 flex flex-col justify-start pt-14 sm:pt-16 px-4 sm:px-6 max-w-3xl mx-auto w-full">
+      <div className="flex-1 flex flex-col justify-start pt-7 sm:pt-8 px-4 max-w-5xl mx-auto w-full">
         
         {/* ── STEP 1: First Name (Screenshot 2 Exact) ── */}
         {step === 1 && (
@@ -388,14 +388,14 @@ export const OnboardingPage: React.FC = () => {
         {/* ── STEP 4: Setting up your account Animation & Ready State ── */}
         {step === 4 && (
           <div className="text-center animate-fade-in w-full">
-            <h1 className="text-2xl sm:text-3xl font-extrabold font-display text-gray-900 tracking-tight max-w-xl mx-auto leading-snug">
+            <h1 className="text-xl sm:text-2xl font-extrabold font-display text-gray-900 tracking-tight max-w-xl mx-auto leading-tight">
               {isSetupComplete ? (
                 <span>Your workspace is ready, {firstName || 'there'}! 🎉</span>
               ) : (
                 <span>Setting up your workspace for {websiteUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '') || 'your business'}...</span>
               )}
             </h1>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 mt-1">
               {isSetupComplete ? (
                 <span>Your project, collection form, and Wall of Love have been successfully generated.</span>
               ) : (
@@ -404,38 +404,38 @@ export const OnboardingPage: React.FC = () => {
             </p>
 
             {/* Setup Progress & Action Card */}
-            <div className="max-w-md mx-auto mt-8 p-5 sm:p-6 rounded-2xl bg-gray-50/95 border border-gray-200/90 text-left shadow-sm">
-              <div className="flex items-center gap-4">
+            <div className="max-w-md mx-auto mt-4 p-4 rounded-2xl bg-gray-50/95 border border-gray-200/90 text-left shadow-2xs">
+              <div className="flex items-center gap-3">
                 <div
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md shrink-0 transition-all ${
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-xs shrink-0 transition-all ${
                     isSetupComplete ? 'bg-emerald-600' : 'bg-[#6701e6] animate-pulse'
                   }`}
                 >
                   {isSetupComplete ? (
-                    <Check className="w-6 h-6 text-white stroke-[2.5]" />
+                    <Check className="w-5 h-5 text-white stroke-[2.5]" />
                   ) : (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                     </svg>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <p className="font-bold text-gray-900 text-sm">
+                    <p className="font-bold text-gray-900 text-xs sm:text-sm">
                       {isSetupComplete ? 'Account & Project Ready' : 'Setting up your account'}
                     </p>
                     <span className="text-xs font-semibold text-gray-500 font-mono">
                       {setupProgress}%
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 truncate mt-0.5">
+                  <p className="text-[11px] text-gray-500 truncate mt-0.5">
                     {setupStatusText}
                   </p>
                 </div>
               </div>
 
               {/* Progress bar */}
-              <div className="w-full bg-gray-200 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div className="w-full bg-gray-200 h-1.5 rounded-full mt-2.5 overflow-hidden">
                 <div
                   className={`h-full transition-all duration-500 rounded-full ${
                     isSetupComplete ? 'bg-emerald-500' : 'bg-[#6701e6]'
@@ -446,37 +446,37 @@ export const OnboardingPage: React.FC = () => {
 
               {/* Ready Checklist */}
               {isSetupComplete && (
-                <div className="mt-4 pt-3 border-t border-gray-200/80 space-y-1.5 text-xs text-gray-600 animate-fade-in">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <div className="mt-2.5 pt-2 border-t border-gray-200/80 space-y-1 text-[11px] text-gray-600 animate-fade-in">
+                  <div className="flex items-center gap-1.5">
+                    <Check className="w-3 h-3 text-emerald-600 shrink-0" />
                     <span>Workspace initialized for {websiteUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '') || 'your brand'}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Public testimonial collection form created</span>
+                  <div className="flex items-center gap-1.5">
+                    <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                    <span>Public collection form created</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <div className="flex items-center gap-1.5">
+                    <Check className="w-3 h-3 text-emerald-600 shrink-0" />
                     <span>Wall of Love publishing live</span>
                   </div>
                 </div>
               )}
 
-              {/* Direct Action Button: Always available so user can proceed without waiting or getting stuck */}
-              <div className="mt-5 space-y-2.5">
+              {/* Direct Action Button */}
+              <div className="mt-3 space-y-1.5">
                 <button
                   type="button"
                   onClick={() => {
                     analytics.signupCompleted();
                     navigate('/dashboard');
                   }}
-                  className="w-full py-3.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white font-bold text-sm shadow-md transition-all hover:scale-[1.01] cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white font-bold text-xs sm:text-sm shadow-sm transition-all hover:scale-[1.005] cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>{isSetupComplete ? 'Go to My Dashboard' : 'Proceed to Dashboard'}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
 
-                <div className="flex items-center justify-between text-[11px] text-gray-500 px-1 pt-0.5">
+                <div className="flex items-center justify-between text-[10px] text-gray-500 px-1 pt-0.5">
                   <span>
                     {isSetupComplete
                       ? `Continuing automatically in ${countdown}s...`
@@ -493,23 +493,23 @@ export const OnboardingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* What happens next (honest onboarding education) */}
-            <div className="mt-14 w-full">
-              <h3 className="text-sm font-bold text-gray-900 mb-5">
+            {/* What happens next */}
+            <div className="mt-4 sm:mt-5 w-full">
+              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-2">
                 What happens next
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left max-w-5xl mx-auto px-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-left max-w-5xl mx-auto px-1">
                 {ONBOARDING_NEXT_STEPS.map((s, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-2xl border border-gray-200 bg-white shadow-xs flex flex-col justify-between"
+                    className="p-3 rounded-xl border border-gray-200/90 bg-white shadow-2xs flex flex-col justify-between"
                   >
                     <div>
-                      <p className="font-bold text-xs text-gray-900 mb-1.5">
+                      <p className="font-bold text-xs text-gray-900 mb-0.5">
                         <span className="text-[#6701e6] mr-1">{idx + 1}.</span>{s.title}
                       </p>
-                      <p className="text-xs text-gray-700 leading-relaxed">{s.text}</p>
+                      <p className="text-[11px] text-gray-600 leading-snug">{s.text}</p>
                     </div>
                   </div>
                 ))}
