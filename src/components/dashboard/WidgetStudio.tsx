@@ -30,7 +30,10 @@ import {
   Share2,
   Link2,
   X,
-  ExternalLink
+  ExternalLink,
+  Loader2,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { Review, WidgetType, WidgetSettings } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -76,6 +79,26 @@ const FacebookIcon = ({ className = 'w-3.5 h-3.5' }: { className?: string }) => 
   </svg>
 );
 
+interface VerifyWidgetResult {
+  verified: boolean;
+  code:
+    | 'DETECTED_ACTIVE'
+    | 'SCRIPT_FOUND_CONTAINER_MISSING'
+    | 'CONTAINER_FOUND_SCRIPT_MISSING'
+    | 'NOT_FOUND'
+    | 'INVALID_URL'
+    | 'FORBIDDEN_HOST'
+    | 'TIMEOUT'
+    | 'UNREACHABLE'
+    | 'ERROR';
+  url: string;
+  hasScript: boolean;
+  hasContainer: boolean;
+  hasMatchingProject: boolean;
+  details: string;
+  hint: string;
+}
+
 interface WidgetStudioProps {
   reviews: Review[];
   onBack?: () => void;
@@ -117,6 +140,43 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareTab, setShareTab] = useState<'embed' | 'link'>('embed');
   const [linkCopied, setLinkCopied] = useState(false);
+
+  // Automated Live Website Verification State (Step 4 & Share Modal)
+  const [verifyUrl, setVerifyUrl] = useState('https://papasystem.in');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<VerifyWidgetResult | null>(null);
+
+  const handleVerifyWebsite = async (overrideUrl?: string) => {
+    const target = (overrideUrl || verifyUrl || 'https://papasystem.in').trim();
+    if (!target) return;
+    setIsVerifying(true);
+    setVerifyResult(null);
+    try {
+      const res = await fetch('/api/verify-widget', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: target,
+          projectId: projectWidgetId,
+        }),
+      });
+      const data = (await res.json()) as VerifyWidgetResult;
+      setVerifyResult(data);
+    } catch {
+      setVerifyResult({
+        verified: false,
+        code: 'ERROR',
+        url: target,
+        hasScript: false,
+        hasContainer: false,
+        hasMatchingProject: false,
+        details: 'Failed to contact verification service.',
+        hint: 'Please check your connection and retry.',
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const publicWallUrl = project?.slug
     ? `https://pandapraise.com/wall/${project.slug}`
@@ -553,20 +613,20 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
         </div>
       </div>
 
-      {/* Universal 3-Step Installation Journey */}
+      {/* Universal 4-Step Installation Journey */}
       <div className="bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 p-5 rounded-2xl border border-purple-200/80 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
             <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#6701e6] text-white text-xs font-black">
               ✓
             </span>
-            How to Add Panda Praise to Your Website (3 Universal Steps)
+            How to Add Panda Praise to Your Website (4 Universal Steps)
           </h2>
           <span className="text-[11px] font-semibold text-purple-700 bg-white/80 px-2.5 py-1 rounded-full border border-purple-200">
             Tailored platform instructions provided below
           </span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="bg-white/95 backdrop-blur-xs p-4 rounded-xl border border-purple-100 shadow-2xs space-y-1.5">
             <div className="flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-purple-100 text-[#6701e6] font-black text-xs flex items-center justify-center">1</span>
@@ -590,11 +650,21 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
           <div className="bg-white/95 backdrop-blur-xs p-4 rounded-xl border border-purple-100 shadow-2xs space-y-1.5">
             <div className="flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-purple-100 text-[#6701e6] font-black text-xs flex items-center justify-center">3</span>
-              <p className="text-xs font-bold text-gray-900 uppercase tracking-wide">PASTE, PUBLISH & CHECK</p>
+              <p className="text-xs font-bold text-gray-900 uppercase tracking-wide">PASTE & PUBLISH</p>
             </div>
-            <p className="text-xs font-bold text-[#6701e6]">Paste snippet, publish & verify</p>
+            <p className="text-xs font-bold text-[#6701e6]">Paste snippet & publish</p>
             <p className="text-[11px] text-gray-600 leading-relaxed">
-              Paste the code into that element and hit <strong>Publish</strong>. Then open your live website in a new incognito window as a visitor to confirm testimonials appear.
+              Paste the code into that element and hit <strong>Publish</strong> or <strong>Update</strong> to deploy your live changes.
+            </p>
+          </div>
+          <div className="bg-white/95 backdrop-blur-xs p-4 rounded-xl border border-purple-100 shadow-2xs space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-black text-xs flex items-center justify-center">4</span>
+              <p className="text-xs font-bold text-gray-900 uppercase tracking-wide">LIVE VERIFICATION</p>
+            </div>
+            <p className="text-xs font-bold text-emerald-700">Check your live website</p>
+            <p className="text-[11px] text-gray-600 leading-relaxed">
+              Click <strong>Share & Embed</strong> below and test your live URL (e.g. <code>papasystem.in</code>) with our automated verification bot.
             </p>
           </div>
         </div>
@@ -1401,6 +1471,107 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                     <div className="p-3.5 rounded-xl bg-gray-950 font-mono text-[11px] text-emerald-400 border border-gray-800 overflow-x-auto select-all max-h-36 scrollbar-thin">
                       <pre className="whitespace-pre-wrap">{getEmbedSnippet()}</pre>
                     </div>
+                  </div>
+
+                  {/* Step 4: Automated Live Website Verifier */}
+                  <div className="p-4 rounded-2xl bg-white border border-purple-200/90 shadow-xs space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black">
+                          4
+                        </span>
+                        <span className="text-xs font-bold text-gray-900">
+                          Automated Live Website Verifier
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-semibold text-gray-500">
+                        Zero-guesswork installation check
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-gray-600 leading-relaxed">
+                      Enter your live page URL where you pasted the code (e.g. <span className="font-semibold text-gray-800">https://papasystem.in</span>). Our bot checks whether your script and container are successfully published.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                      <div className="relative flex-1">
+                        <Globe className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="url"
+                          value={verifyUrl}
+                          onChange={(e) => setVerifyUrl(e.target.value)}
+                          placeholder="https://papasystem.in"
+                          className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6701e6]/30 focus:border-[#6701e6] bg-gray-50/50 text-gray-900 font-medium"
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleVerifyWebsite()}
+                        disabled={isVerifying}
+                        className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs shrink-0"
+                      >
+                        {isVerifying ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-300" />
+                            <span>Verifying...</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Verify My Website</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Quick Pre-fill / Testing Button */}
+                    <div className="flex items-center gap-2 pt-0.5">
+                      <span className="text-[10px] text-gray-500 font-medium">Quick Test:</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setVerifyUrl('https://papasystem.in');
+                          handleVerifyWebsite('https://papasystem.in');
+                        }}
+                        className="text-[10px] font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200 transition-colors cursor-pointer"
+                      >
+                        ⚡ Test papasystem.in
+                      </button>
+                    </div>
+
+                    {/* Verification Result Feedback */}
+                    {verifyResult && (
+                      <div
+                        className={`p-3.5 rounded-xl border text-xs animate-fade-in ${
+                          verifyResult.verified && verifyResult.code === 'DETECTED_ACTIVE'
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+                            : verifyResult.verified
+                            ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900'
+                            : verifyResult.code === 'CONTAINER_FOUND_SCRIPT_MISSING'
+                            ? 'bg-amber-50 border-amber-300 text-amber-950'
+                            : 'bg-rose-50 border-rose-200 text-rose-950'
+                        }`}
+                      >
+                        <div className="flex items-start gap-2.5">
+                          {verifyResult.verified ? (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          ) : verifyResult.code === 'CONTAINER_FOUND_SCRIPT_MISSING' ? (
+                            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                          ) : (
+                            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                          )}
+                          <div className="space-y-1 flex-1">
+                            <p className="font-bold text-[12px]">{verifyResult.details}</p>
+                            <p className="text-[11px] opacity-90 leading-relaxed">{verifyResult.hint}</p>
+                            {verifyResult.verified && (
+                              <div className="pt-1.5 flex items-center gap-3 text-[10px] font-semibold text-emerald-800">
+                                <span>✓ Script Tag: {verifyResult.hasScript ? 'Active' : 'Not Found'}</span>
+                                <span>✓ Container: {verifyResult.hasContainer ? 'Found' : 'Auto-Mounting'}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Video Walkthrough Accordion */}

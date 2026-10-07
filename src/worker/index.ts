@@ -29,6 +29,7 @@ import { handleEmbedScript } from './handlers/embedScript';
 import { handleEmbedTestimonials } from './handlers/embedTestimonials';
 import { handleImportProvider } from './handlers/importProviderHandler';
 import { handleUniversalUrlResolve, handleUniversalReviewsCommit } from './handlers/universalImportHandler';
+import { handleVerifyWidget } from './handlers/verifyWidget';
 import { executeAutomatedBackgroundSync } from './lib/backgroundSync';
 
 export default {
@@ -179,6 +180,11 @@ export default {
         case 'embed-testimonials':
         case 'testimonials/embed':
           return await handleEmbedTestimonials(request, env);
+
+        case 'verify-widget':
+        case 'public/verify-widget':
+        case 'widget/verify':
+          return await handleVerifyWidget(request, env);
 
         case 'import':
         case 'import-reviews':
