@@ -73,18 +73,18 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-1.5 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-600/10 border border-violet-600/20 text-violet-700 text-xs font-bold tracking-tight">
-              <span>🚀</span>
-              <span>Quick Start Guide</span>
+              <span>✦</span>
+              <span>Social Proof Engine</span>
               <span className="text-violet-300">•</span>
               <span className="text-slate-700 font-semibold">{project?.name || 'My Business'}</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight font-display">
-              Get happy reviews in 3 easy steps
+              Turn buyer trust into automated sales.
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-              Share your link with customers, pick your favorite reviews, and show them on your website.
+              Gather verified reviews effortlessly, style your collections, and put irresistible proof in front of every prospective customer.
             </p>
           </div>
 
