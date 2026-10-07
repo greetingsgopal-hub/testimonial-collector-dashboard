@@ -1500,6 +1500,12 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                           type="url"
                           value={verifyUrl}
                           onChange={(e) => setVerifyUrl(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !isVerifying) {
+                              e.preventDefault();
+                              handleVerifyWebsite();
+                            }
+                          }}
                           placeholder="https://papasystem.in"
                           className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6701e6]/30 focus:border-[#6701e6] bg-gray-50/50 text-gray-900 font-medium"
                         />
@@ -1543,9 +1549,9 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                       <div
                         className={`p-3.5 rounded-xl border text-xs animate-fade-in ${
                           verifyResult.verified && verifyResult.code === 'DETECTED_ACTIVE'
-                            ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-950 ring-2 ring-emerald-500/20 shadow-xs'
                             : verifyResult.verified
-                            ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900'
+                            ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900 ring-2 ring-emerald-400/20 shadow-xs'
                             : verifyResult.code === 'CONTAINER_FOUND_SCRIPT_MISSING'
                             ? 'bg-amber-50 border-amber-300 text-amber-950'
                             : 'bg-rose-50 border-rose-200 text-rose-950'
