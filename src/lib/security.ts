@@ -61,15 +61,17 @@ export function validateReviewInput(data: ReviewInput): { valid: boolean; error?
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!data.email || typeof data.email !== 'string' || !emailRegex.test(data.email.trim())) {
-    return { valid: false, error: 'Please provide a valid email address.' };
-  }
-  if (data.email.trim().length > 150) {
-    return { valid: false, error: 'Email must be 150 characters or fewer.' };
+  if (data.email && typeof data.email === 'string' && data.email.trim()) {
+    if (!emailRegex.test(data.email.trim())) {
+      return { valid: false, error: 'Please provide a valid email address.' };
+    }
+    if (data.email.trim().length > 150) {
+      return { valid: false, error: 'Email must be 150 characters or fewer.' };
+    }
   }
 
   if (!data.role || typeof data.role !== 'string' || !data.role.trim()) {
-    return { valid: false, error: 'Please specify your role or job title.' };
+    return { valid: false, error: 'Please specify your role or position.' };
   }
   if (data.role.trim().length > 100) {
     return { valid: false, error: 'Role must be 100 characters or fewer.' };
@@ -83,8 +85,8 @@ export function validateReviewInput(data: ReviewInput): { valid: boolean; error?
     return { valid: false, error: 'Headline must be 150 characters or fewer.' };
   }
 
-  if (!data.content || typeof data.content !== 'string' || data.content.trim().length < 10) {
-    return { valid: false, error: 'Please write a testimonial of at least 10 characters.' };
+  if (!data.content || typeof data.content !== 'string' || !data.content.trim()) {
+    return { valid: false, error: 'Please write your testimonial.' };
   }
   if (data.content.trim().length > 2500) {
     return { valid: false, error: 'Testimonial exceeds maximum permitted length of 2,500 characters.' };
@@ -95,8 +97,8 @@ export function validateReviewInput(data: ReviewInput): { valid: boolean; error?
     return { valid: false, error: 'Rating must be between 1 and 5 stars.' };
   }
 
-  if (!data.consent) {
-    return { valid: false, error: 'Please check the permission box to allow featuring your review.' };
+  if (data.consent === false) {
+    return { valid: false, error: 'Please grant permission to share your review.' };
   }
 
   if (data.type === 'video' && data.videoUrl) {

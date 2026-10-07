@@ -16,12 +16,12 @@ const INITIAL_FORM_STATE: ReviewInput = {
   email: '',
   role: '',
   company: '',
-  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  avatarUrl: '',
   rating: 5,
   title: '',
   content: '',
   type: 'text',
-  tags: ['Quality', 'Recommended'],
+  tags: ['Verified'],
   consent: true,
 };
 
