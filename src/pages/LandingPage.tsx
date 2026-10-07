@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { 
   ArrowRight, 
   ChevronDown, 
   Check, 
   Clock,
   X as XIcon, 
-  Play, 
   Search, 
   MessageSquare,
   Gift,
@@ -67,8 +66,7 @@ export const LandingPage: React.FC = () => {
     canonical: `${window.location.origin}/`,
   });
 
-  const navigate = useNavigate();
-  const { user, enableDemoMode } = useAuth();
+  const { user } = useAuth();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [activeShareTab, setActiveShareTab] = useState<'widgets' | 'walls' | 'popups' | 'images'>('widgets');
   const [selectedWidgetTag, setSelectedWidgetTag] = useState('Testimonial Image Gallery');
@@ -87,18 +85,6 @@ export const LandingPage: React.FC = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const handleLaunchDemo = () => {
-    analytics.ctaClicked('demo_mode', user ? '/dashboard' : '/dashboard');
-    if (user) {
-      navigate('/dashboard');
-    } else {
-      // Launch the real sample-data demo instead of routing to signup —
-      // the button says "Try Interactive Demo" and must deliver one.
-      enableDemoMode();
-      navigate('/dashboard');
-    }
- };
 
   const toggleFaq = (idx: number) => {
     setOpenFaqIndex(openFaqIndex === idx ? null : idx);
@@ -269,11 +255,11 @@ export const LandingPage: React.FC = () => {
           <span className="text-xs font-semibold text-[#6701e6]">The Anti-Subscription Social Proof Engine — Built for Creators & Independent Businesses</span>
         </div>
 
-        {/* Primary H1: Exactly two centered lines with highlighted treatment */}
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-950 tracking-tight leading-[1.14] max-w-3xl mx-auto text-center">
-          <span className="block">Turn WhatsApp & DM Screenshots Into</span>
-          <span className="senja-purple-mark mt-1 sm:mt-2 inline-block">
-            High-Converting Social Proof — Forever
+        {/* Primary H1: Cleanly balanced, flawless wrapping on all screen sizes */}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-950 tracking-tight leading-[1.14] max-w-4xl mx-auto text-center">
+          <span className="block">Turn WhatsApp & DM Screenshots</span>
+          <span className="block mt-1 sm:mt-2 text-[#6701e6]">
+            Into High-Converting Social Proof
           </span>
         </h1>
 
@@ -298,8 +284,8 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Hero CTA Cluster */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+        {/* Hero CTA */}
+        <div className="mt-8 flex items-center justify-center">
           <div className="senja-hero-cta flex items-center">
             <div className="senja-cta-ring">
               <Link
@@ -315,13 +301,6 @@ export const LandingPage: React.FC = () => {
               </Link>
             </div>
           </div>
-          <button
-            onClick={handleLaunchDemo}
-            className="px-6 py-3.5 sm:py-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-sm transition-all shadow-xs flex items-center gap-2 cursor-pointer self-center"
-          >
-            <Play className="w-4 h-4 text-[#6701e6]" />
-            <span>Try Interactive Demo</span>
-          </button>
         </div>
 
         {/* Microcopy reassurance */}
@@ -1240,7 +1219,7 @@ export const LandingPage: React.FC = () => {
             </li>
           </ul>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="mt-8 flex items-center justify-center">
             <Link
               to="/signup"
               onClick={() => {
@@ -1252,13 +1231,6 @@ export const LandingPage: React.FC = () => {
               <span>Start for free today</span>
               <ArrowRight className="w-5 h-5 text-gray-950" aria-hidden="true" />
             </Link>
-            <button
-              onClick={handleLaunchDemo}
-              className="px-6 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/20 transition-colors flex items-center gap-2 cursor-pointer"
-            >
-              <Play className="w-4 h-4 text-white" />
-              <span>Try Interactive Demo</span>
-            </button>
           </div>
         </div>
       </section>
