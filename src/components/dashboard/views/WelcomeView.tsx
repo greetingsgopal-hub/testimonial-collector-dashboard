@@ -115,14 +115,14 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
       {/* ── 3 Big, Crystal-Clear Cards (Simple Enough for a 12-Year-Old) ── */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
-        {/* STEP 1: Ask for Reviews */}
+        {/* STEP 1: Collect reviews from buyers */}
         <div className={`apple-glass-card p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden transition-all ${
           hasProof ? 'border-emerald-500/40 bg-emerald-50/20' : 'border-violet-500/30'
         }`}>
           <div>
             <div className="flex items-center justify-between gap-2 mb-3">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-violet-100 text-violet-800">
-                Step 1 · Start Here
+                Step 1 · Collect
               </span>
               {hasProof ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
@@ -142,11 +142,11 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
             </div>
 
             <h3 className="text-base font-bold text-slate-950 tracking-tight">
-              1. Ask for reviews
+              1. Collect reviews from buyers
             </h3>
 
             <p className="text-xs text-slate-600 leading-relaxed mt-1.5 mb-3.5 font-normal">
-              Send this link to anyone who bought from you. They click it and type why they love your product.
+              Send your link to customers, print an in-person QR stand, or sync existing Google reviews.
             </p>
 
             {/* Direct Form Link Capsule with 1-click Copy & QR code */}
@@ -198,7 +198,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
           </div>
         </div>
 
-        {/* STEP 2: Pick Your Favorites */}
+        {/* STEP 2: Customize your collections */}
         <div className={`apple-glass-card p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden transition-all ${
           hasApprovedProof
             ? 'border-emerald-500/40 bg-emerald-50/20'
@@ -209,7 +209,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
           <div>
             <div className="flex items-center justify-between gap-2 mb-3">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
-                Step 2 · Moderate
+                Step 2 · Customize
               </span>
               {hasApprovedProof ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
@@ -233,11 +233,11 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
             </div>
 
             <h3 className="text-base font-bold text-slate-950 tracking-tight">
-              2. Pick your favorites
+              2. Customize your collections
             </h3>
 
             <p className="text-xs text-slate-600 leading-relaxed mt-1.5 mb-4 font-normal">
-              Read what people wrote. Click approve on the best reviews so they can be shown on your website.
+              Approve customer praise, select Wall of Love themes, and curate the stories you showcase.
             </p>
 
             {/* Simple Stats Pill */}
@@ -265,14 +265,14 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
             >
               <div className="flex items-center gap-2">
                 <span>⭐</span>
-                <span>Review Testimonials ({reviews.length})</span>
+                <span>Curate & Style Collection ({reviews.length})</span>
               </div>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
-        {/* STEP 3: Share Your Proof */}
+        {/* STEP 3: Post them on the internet */}
         <div className={`apple-glass-card p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden transition-all ${
           publishComplete
             ? 'border-emerald-500/40 bg-emerald-50/20'
@@ -283,7 +283,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
           <div>
             <div className="flex items-center justify-between gap-2 mb-3">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
-                Step 3 · Share Proof
+                Step 3 · Post Online
               </span>
               {publishComplete ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
@@ -293,7 +293,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
               ) : hasApprovedProof ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-800">
                   <Sparkles className="w-3.5 h-3.5 text-violet-600" />
-                  Ready to share!
+                  Ready to post!
                 </span>
               ) : (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500">
@@ -307,26 +307,14 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
             </div>
 
             <h3 className="text-base font-bold text-slate-950 tracking-tight">
-              3. Share your proof
+              3. Post them on the internet
             </h3>
 
             <p className="text-xs text-slate-600 leading-relaxed mt-1.5 mb-4 font-normal">
-              Show off verified customer reviews with your public Wall of Love or rank on Google with SEO rich snippets.
+              Showcase verified reviews with your live Wall of Love or rank on Google with SEO rich snippets.
             </p>
 
-            <div className="space-y-2 mb-4">
-              <button
-                type="button"
-                onClick={onOpenWall}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 text-xs font-semibold text-slate-800 flex items-center justify-between transition-colors cursor-pointer group"
-              >
-                <div className="flex items-center gap-2">
-                  <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-                  <span>Public Wall of Love</span>
-                </div>
-                <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-slate-600 transition-colors" />
-              </button>
-
+            <div className="mb-4">
               <button
                 type="button"
                 onClick={onRichSnippet}
@@ -351,10 +339,10 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
               }`}
             >
               <div className="flex items-center gap-2">
-                <Heart className="w-3.5 h-3.5 fill-current" />
-                <span>Open Wall of Love</span>
+                <Heart className="w-3.5 h-3.5 fill-current text-rose-400" />
+                <span>Open Live Wall of Love</span>
               </div>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ExternalLink className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
