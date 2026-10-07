@@ -233,25 +233,56 @@ The verifier accepts arbitrary customer URLs to crawl. To prevent attackers usin
 
 ---
 
-## GSTACK REVIEW REPORT
+## 13. Section 12: Engineering Review & Decision Ledger
+
+### Decision Ledger
+
+#### D1: gstack upgrade
+- **State**: approved
+- **Actual answer**: Not now (proceed with plan-eng-review)
+- **Accepted scope**: Continue with plan review
+
+#### D2: gstack telemetry
+- **State**: approved
+- **Actual answer**: Help gstack get better!
+- **Accepted scope**: Configured telemetry community
+
+#### D3: SSRF redirect bypass hardening (R1)
+- **State**: approved
+- **Finding**: [P2] (confidence: 8/10) `src/worker/handlers/verifyWidget.ts:193` — `fetch` redirect was previously set to `follow`, allowing attackers to construct a public URL redirecting to private AWS/cloud IMDS `169.254.169.254` or internal loopbacks.
+- **Actual answer**: Validate redirect Location headers up to 3 hops and block private targets
+- **Accepted scope**: Implemented `manual` redirect loop in `src/worker/handlers/verifyWidget.ts` with protocol and `isPrivateOrBlockedHost` checks on each hop; added unit tests in `src/worker/handlers/verifyWidget.test.ts`.
+
+#### Approval readiness: PASS
+- Checked IDs: D1, D2, D3
+- All decisions resolved and verified.
+
+---
+
+## 14. Outside Voice Review (Codex gpt-6-luna)
 
 ```text
-STATUS: APPROVED
-MODE: SELECTIVE EXPANSION
-QUALITY SCORE: 9.8/10
-DESIGN DOC: docs/designs/widget-share-experience.md
-PLAN FILE: docs/plans/widget-share-verification-plan.md
-BLOCKING FINDINGS: 0
-REMAINING GAPS: 0
-
-SCOPE DISPOSITION:
-- Accepted: Dual-flow share modal (Public link vs Embed)
-- Accepted: 4-step guided builder journeys (WordPress, Shopify, Webflow, Framer, Wix, HTML)
-- Accepted (Cherry-Pick 1): Automated Live URL Verifier via Cloudflare Worker proxy with SSRF defense
-- Deferred: Dedicated WordPress/Shopify app marketplace packages (App Store Phase 2)
-
-VERIFICATION EVIDENCE:
-- Unit tests planned for SSRF protection (localhost/private IP blacklist)
-- Live test target specified: papasystem.in
-- Zero silent failure contracts enforced across all 4 data flow paths
+CODEX SAYS (plan review — outside voice):
+════════════════════════════════════════════════════════════
+Findings from the plan:
+- The verifier’s container check conflicts with the embed runtime. (Verified: handled via SCRIPT_FOUND_CONTAINER_MISSING auto-mount).
+- The SSRF protection is underspecified. Blocking private hostnames does not address redirects. (Resolved: manual redirect loop with hostname validation up to 3 hops implemented and tested).
+- The verification result proves installation text, not a working widget. (Verified: UI clearly labeled as "installation check").
+Recommendation: resolve SSRF redirect paths.
+════════════════════════════════════════════════════════════
 ```
+
+---
+
+## GSTACK REVIEW REPORT
+
+| Review | Trigger | Why | Runs | Status | Findings |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **CEO Review** | `/plan-ceo-review` | Validate founder-mode product wedge & user journey | 1 | APPROVED | 0 blocking |
+| **Engineering Review** | `/plan-eng-review` | Audit architecture, streaming memory cap, SSRF & test coverage | 1 | APPROVED | 0 blocking |
+| **Outside Voice** | Codex (`gpt-6-luna`) | Independent architecture and security critique | 1 | COMPLETED | R1 (SSRF redirect bypass — fixed) |
+| **VERDICT** | — | Production ready with zero regressions | — | READY TO SHIP | 0 blocking findings |
+
+**OUTSIDE COVERAGE:** completed (provider=codex, model=gpt-6-luna)
+
+NO UNRESOLVED DECISIONS
