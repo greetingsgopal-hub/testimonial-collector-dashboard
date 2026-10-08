@@ -5,7 +5,7 @@ import { LivePreviewCard } from '../components/collector/LivePreviewCard';
 import { SuccessModal } from '../components/collector/SuccessModal';
 import { Review, ReviewInput, CollectionForm, Project } from '../types';
 import { storage, getActiveBackendInfo } from '../lib/storage';
-import { AlertCircle, ArrowLeft, Building2, Clock, Star, CheckCircle2, ShieldCheck, Lock } from 'lucide-react';
+import { AlertCircle, Building2, Clock, ShieldCheck } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
 import { cleanBrandOrProductName, deduplicateRepeatedString } from '../lib/security';
@@ -24,8 +24,6 @@ const INITIAL_FORM_STATE: ReviewInput = {
   tags: ['Verified'],
   consent: true,
 };
-
-type CollectionStep = 'rating' | 'negative-feedback' | 'positive-form';
 
 export const PublicCollectorPage = () => {
   const { collectionSlug } = useParams<{ collectionSlug: string }>();
@@ -65,19 +63,12 @@ export const PublicCollectorPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isClosed, setIsClosed] = useState(false);
 
-  // 2-Branch Senja Step Flow (Matches 02:33 - 02:44 in video)
-  const [step, setStep] = useState<CollectionStep>('rating');
-  const [selectedRating, setSelectedRating] = useState<number>(5);
-  const [hoverRating, setHoverRating] = useState<number>(0);
-  const [negativeFeedback, setNegativeFeedback] = useState<string>('');
-  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
-
+  // Single-Step Seamless Form State
   const [formData, setFormData] = useState<ReviewInput>(INITIAL_FORM_STATE);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedReview, setSubmittedReview] = useState<Review | null>(null);
 
   const displayBrand = cleanBrandOrProductName(formConfig?.settings?.brandName) || cleanBrandOrProductName(project?.name);
-  const displayProductName = displayBrand || 'our business';
   const cleanedTitle = deduplicateRepeatedString(formConfig?.title) || 'Share Your Experience';
 
   const pageTitle = displayBrand && displayBrand.toLowerCase() !== 'panda praise'
@@ -138,51 +129,6 @@ export const PublicCollectorPage = () => {
     loadPublicForm();
   }, [collectionSlug]);
 
-  const handleRatingContinue = () => {
-    if (selectedRating <= 3) {
-      setStep('negative-feedback');
-    } else {
-      setFormData(prev => ({ ...prev, rating: selectedRating }));
-      setStep('positive-form');
-    }
-  };
-
-  const handleNegativeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const feedbackText = negativeFeedback.trim();
-    if (!feedbackText) return;
-    if (feedbackText.length < 10) {
-      alert(t.negativeStep.charAlert);
-      return;
-    }
-    setIsSubmitting(true);
-
-    try {
-      await storage.createReview(
-        {
-          name: 'Private Customer',
-          email: '',
-          role: 'Customer',
-          rating: selectedRating,
-          content: feedbackText,
-          type: 'text',
-          tags: ['private-feedback'],
-          projectId: formConfig?.projectId,
-          collectionFormId: formConfig?.id,
-          status: 'pending', // Valid pending status for submission (never public)
-          consent: true, // User consents to share private feedback directly with business owner
-          source: 'form',
-        },
-        formConfig?.projectId
-      );
-      setFeedbackSubmitted(true);
-    } catch (err) {
-      console.error('Failed to submit private feedback:', err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const handleSubmit = async (data: ReviewInput) => {
     setIsSubmitting(true);
     try {
@@ -194,7 +140,12 @@ export const PublicCollectorPage = () => {
             .map(t => t.trim().replace(/^#/, ''))
             .filter(Boolean);
 
-      const combinedTags = Array.from(new Set([...(data.tags || []), ...autoTags]));
+      const isPrivate = (data.rating || 5) <= 3;
+      const combinedTags = Array.from(new Set([
+        ...(data.tags || []),
+        ...autoTags,
+        ...(isPrivate ? ['private-feedback'] : ['Verified']),
+      ]));
 
       // PRIORITY 1: Anonymous submissions are ALWAYS pending initially.
       // The anonymous client must NEVER directly create an approved public testimonial.
@@ -346,255 +297,61 @@ export const PublicCollectorPage = () => {
               </button>
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full shrink-0 shadow-2xs">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="hidden sm:inline">{t.header.verifiedForm}</span>
-              <span className="sm:hidden">{t.header.verifiedShort}</span>
+              <span className="hidden sm:inline">Verified Secure Feedback</span>
+              <span className="sm:hidden">Verified</span>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Safety Reassurance Top Ribbon (Only on initial rating step) */}
-      {step === 'rating' && (
-        <div className="w-full bg-emerald-500/10 border-b border-emerald-500/20 py-1.5 px-4 text-center">
-          <div className="max-w-4xl mx-auto flex items-center justify-center gap-2 text-[11px] font-medium text-emerald-900">
-            <Lock className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-            <span><strong>{t.ribbon.safeLink}</strong> • {t.ribbon.bullets}</span>
+      {/* Reassurance Ribbon: Punchy & Clear */}
+      <div className="w-full bg-emerald-50/60 border-b border-emerald-100/70 py-1.5 px-4 text-center">
+        <div className="max-w-4xl mx-auto flex items-center justify-center gap-2 text-xs font-medium text-emerald-900">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span>Takes less than 30 seconds. No login required.</span>
+        </div>
+      </div>
+
+      {/* Main Experience: Unified Single-Step CRO Flow */}
+      <main className="flex-1 max-w-4xl mx-auto w-full p-4 sm:p-6 lg:p-8 animate-fade-in space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-7">
+            <TestimonialForm
+              formData={formData}
+              setFormData={setFormData}
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+              lang={lang}
+            />
+          </div>
+
+          <div className="lg:col-span-5 space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                {t.livePreview.badge}
+              </p>
+              <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                Real-time
+              </span>
+            </div>
+            <LivePreviewCard data={formData} lang={lang} />
           </div>
         </div>
-      )}
 
-      {/* Main Experience */}
-      <main className="flex-1 flex items-center justify-center p-2 sm:p-4">
-        
-        {/* ── STEP 1: INITIAL 5-STAR RATING CARD ── */}
-        {step === 'rating' && (
-          <div className="w-full max-w-lg bg-white rounded-3xl border border-emerald-100 shadow-xl shadow-emerald-950/5 p-7 sm:p-10 text-center space-y-6 animate-scale-in">
-            
-            {/* Safe Feedback Guarantee Badge */}
-            <div className="mx-auto max-w-sm bg-gradient-to-r from-emerald-50 to-teal-50/70 border border-emerald-200/80 rounded-2xl p-3 flex items-center gap-3 text-left">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <ShieldCheck className="w-4.5 h-4.5" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-[11px] font-bold text-emerald-950 flex items-center gap-1.5">
-                  <span>{t.guaranteeCard.title}</span>
-                  <span className="text-[9px] font-extrabold bg-emerald-200/70 text-emerald-800 px-1.5 py-0.2 rounded-full">{t.guaranteeCard.badge}</span>
-                </div>
-                <p className="text-[10px] text-emerald-800/90 leading-tight mt-0.5">
-                  {t.guaranteeCard.desc(displayBrand || 'the business')}
-                </p>
-              </div>
-            </div>
-
-            {/* Brand Logo & Question */}
-            <div className="space-y-1 pt-1">
-              <span className="font-black text-xl text-[#6701e6] font-display">
-                Panda Praise
-              </span>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 font-display break-words">
-                {t.ratingStep.question(displayProductName)}
-              </h2>
-              <p className="text-xs text-gray-500">
-                {t.ratingStep.subtitle}
-              </p>
-            </div>
-
-            {/* 5 Interactive Stars */}
-            <div className="flex items-center justify-center gap-2 py-2">
-              {[1, 2, 3, 4, 5].map((star) => {
-                const isActive = (hoverRating || selectedRating) >= star;
-                return (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setSelectedRating(star)}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    className="p-1 text-gray-200 hover:scale-110 transition-transform cursor-pointer"
-                  >
-                    <Star
-                      className={`w-9 h-9 sm:w-11 sm:h-11 transition-colors ${
-                        isActive ? 'text-amber-400 fill-amber-400' : 'text-gray-200'
-                      }`}
-                    />
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Continue Button */}
-            <button
-              onClick={handleRatingContinue}
-              className="w-full py-3.5 px-6 rounded-2xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-sm transition-all shadow-xs hover:shadow cursor-pointer"
-            >
-              {t.ratingStep.continueBtn}
-            </button>
-
-            {/* 3-Pillar Security Seal */}
-            <div className="pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-[10px] text-slate-500 font-medium">
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-                  <Lock className="w-3 h-3" />
-                </div>
-                <span>{t.ratingStep.seals.ssl}</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-                  <CheckCircle2 className="w-3 h-3" />
-                </div>
-                <span>{t.ratingStep.seals.noLogin}</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-                  <ShieldCheck className="w-3 h-3" />
-                </div>
-                <span>{t.ratingStep.seals.noFinancial}</span>
-              </div>
-            </div>
-
-            {/* Viral Growth Referral Link */}
-            <div className="pt-1 text-center">
-              <a
-                href="/?ref=collector_badge"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-700 transition-colors group cursor-pointer"
-              >
-                <span>{t.ratingStep.referralPrompt}</span>
-                <span className="text-[#6701e6] font-semibold group-hover:underline">Panda Praise ↗</span>
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 2A: NEGATIVE FEEDBACK INBOX (1-3 STARS) (Matches Senja 02:38 in video) ── */}
-        {step === 'negative-feedback' && (
-          <div className="w-full max-w-lg bg-white rounded-3xl border border-gray-200/80 shadow-xl p-8 sm:p-12 text-center space-y-6 animate-fade-in relative">
-            
-            {/* Back Button */}
-            <button
-              onClick={() => setStep('rating')}
-              className="absolute top-6 left-6 p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
-              title={t.negativeStep.backBtn}
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-
-            {feedbackSubmitted ? (
-              <div className="space-y-4 py-8">
-                <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="w-7 h-7" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 font-display">
-                  {t.negativeStep.thankYouTitle}
-                </h3>
-                <p className="text-xs text-gray-600 max-w-xs mx-auto leading-relaxed">
-                  {t.negativeStep.thankYouDesc(displayProductName)}
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleNegativeSubmit} className="space-y-5">
-                <div className="space-y-1">
-                  <span className="font-black text-xl text-[#6701e6] font-display">
-                    Panda Praise
-                  </span>
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 font-display">
-                    {t.negativeStep.title}
-                  </h2>
-                  <p className="text-xs text-gray-500">
-                    {t.negativeStep.subtitle}
-                  </p>
-                </div>
-
-                <textarea
-                  rows={4}
-                  required
-                  value={negativeFeedback}
-                  onChange={(e) => setNegativeFeedback(e.target.value)}
-                  placeholder={t.negativeStep.placeholder}
-                  className="w-full p-4 rounded-2xl bg-gray-50 border border-gray-200 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6] resize-none"
-                />
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !negativeFeedback.trim()}
-                  className="w-full py-3.5 px-6 rounded-2xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-sm transition-all shadow-xs hover:shadow cursor-pointer disabled:opacity-50"
-                >
-                  {isSubmitting ? t.negativeStep.submittingBtn : t.negativeStep.submitBtn}
-                </button>
-              </form>
-            )}
-
-            {/* Viral Growth Referral Link */}
-            <div className="pt-2 text-center">
-              <a
-                href="/?ref=collector_badge"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-700 transition-colors group cursor-pointer"
-              >
-                <span>{t.ratingStep.referralPrompt}</span>
-                <span className="text-[#6701e6] font-semibold group-hover:underline">Panda Praise ↗</span>
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 2B: POSITIVE TESTIMONIAL FORM (4-5 STARS) ── */}
-        {step === 'positive-form' && (
-          <div className="w-full max-w-4xl mx-auto py-1 animate-fade-in space-y-2.5">
-            
-            <div className="flex items-center justify-between px-1">
-              <button
-                onClick={() => setStep('rating')}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>{t.positiveForm.changeRating}</span>
-              </button>
-
-              <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Verified Feedback</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-              <div className="lg:col-span-7">
-                <TestimonialForm
-                  formData={formData}
-                  setFormData={setFormData}
-                  onSubmit={handleSubmit}
-                  isSubmitting={isSubmitting}
-                  lang={lang}
-                />
-              </div>
-
-              <div className="lg:col-span-5 space-y-1.5">
-                <p className="px-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Live Preview
-                </p>
-                <LivePreviewCard data={formData} lang={lang} />
-              </div>
-            </div>
-
-            {/* Discreet Referral Link */}
-            <div className="text-center pt-1">
-              <a
-                href="/?ref=collector_badge"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-600 transition-colors group cursor-pointer"
-              >
-                <span>Powered by</span>
-                <span className="text-violet-600 font-semibold group-hover:underline">Panda Praise ↗</span>
-              </a>
-            </div>
-          </div>
-        )}
-
+        {/* Discreet Referral Link */}
+        <div className="text-center pt-4">
+          <a
+            href="/?ref=collector_badge"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-600 transition-colors group cursor-pointer"
+          >
+            <span>Powered by</span>
+            <span className="text-violet-600 font-semibold group-hover:underline">Panda Praise ↗</span>
+          </a>
+        </div>
       </main>
 
       {/* Success Celebration Modal */}
@@ -609,7 +366,6 @@ export const PublicCollectorPage = () => {
           onClose={() => setSubmittedReview(null)}
           onResetForm={() => {
             setFormData(INITIAL_FORM_STATE);
-            setStep('rating');
           }}
         />
       )}
