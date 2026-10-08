@@ -4,7 +4,7 @@ import confetti from 'canvas-confetti';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
-import { Check, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight, Sparkles } from 'lucide-react';
 
 const SELLING_OPTIONS = [
   'Courses',
@@ -13,27 +13,6 @@ const SELLING_OPTIONS = [
   'Coaching calls',
   'Digital products',
   'Live events',
-];
-
-// Honest "what happens next" cards replace fabricated customer testimonials.
-// When real testimonials exist, they can be swapped back in here.
-const ONBOARDING_NEXT_STEPS = [
-  {
-    title: 'Share your collection link',
-    text: 'Send your public testimonial link or QR code to customers. They can submit authentic praise in under 2 seconds.',
-  },
-  {
-    title: 'Approve in your inbox',
-    text: 'Every submission lands in your moderation inbox first. Nothing goes live until you approve it.',
-  },
-  {
-    title: 'Publish anywhere',
-    text: 'Add approved testimonials to your website with embeddable Walls of Love, widgets, or shareable images.',
-  },
-  {
-    title: 'Import what you already have',
-    text: 'Upload a CSV of existing reviews, or connect Google, LinkedIn, Instagram or Facebook to pull them in.',
-  },
 ];
 
 export const OnboardingPage: React.FC = () => {
@@ -131,7 +110,6 @@ export const OnboardingPage: React.FC = () => {
   const [setupProgress, setSetupProgress] = useState(25);
   const [setupStatusText, setSetupStatusText] = useState('Initializing project workspace...');
   const [isSetupComplete, setIsSetupComplete] = useState(false);
-  const [countdown, setCountdown] = useState(4);
 
   const handleStep3Submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,7 +124,7 @@ export const OnboardingPage: React.FC = () => {
 
   const setupRanRef = useRef(false);
 
-  // Step 4: Multi-stage setup pipeline with tangible feedback
+  // Step 4: Streamlined setup pipeline with instantaneous feedback
   useEffect(() => {
     if (step === 4 && !setupRanRef.current) {
       setupRanRef.current = true;
@@ -156,14 +134,14 @@ export const OnboardingPage: React.FC = () => {
         try {
           // Stage 1: Workspace Initialization
           if (isMounted) {
-            setSetupProgress(35);
+            setSetupProgress(45);
             setSetupStatusText('Configuring workspace & permissions...');
           }
-          await new Promise((r) => setTimeout(r, 450));
+          await new Promise((r) => setTimeout(r, 120));
 
           // Stage 2: Project persistence
           if (isMounted) {
-            setSetupProgress(70);
+            setSetupProgress(85);
             setSetupStatusText('Generating testimonial collection form & Wall of Love...');
           }
           if (project?.id) {
@@ -174,13 +152,13 @@ export const OnboardingPage: React.FC = () => {
                   name: domainName ? domainName.split('.')[0] : (firstName ? `${firstName}'s Project` : project.name),
                   websiteUrl: websiteUrl.trim(),
                 }),
-                new Promise((resolve) => setTimeout(resolve, 800)),
+                new Promise((resolve) => setTimeout(resolve, 350)),
               ]);
             } catch (err) {
               console.warn('[Onboarding] Non-blocking project update error:', err);
             }
           }
-          await new Promise((r) => setTimeout(r, 450));
+          await new Promise((r) => setTimeout(r, 120));
 
           // Stage 3: Ready
           if (isMounted) {
@@ -208,26 +186,19 @@ export const OnboardingPage: React.FC = () => {
     }
   }, [step, project?.id, websiteUrl, firstName, updateProjectDetails, fireCelebrationBomb]);
 
-  // Step 4: Transparent, user-controlled countdown once setup completes
+  // Step 4: Instantaneous auto-redirect within 1.2 seconds once setup completes
   useEffect(() => {
     if (step === 4 && isSetupComplete) {
-      const interval = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            navigate('/dashboard');
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+      const redirectTimer = setTimeout(() => {
+        navigate('/dashboard');
+      }, 1200);
 
-      return () => clearInterval(interval);
+      return () => clearTimeout(redirectTimer);
     }
   }, [step, isSetupComplete, navigate]);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col font-sans selection:bg-purple-500/20 selection:text-purple-900 pb-2">
+    <div className="min-h-screen bg-gradient-to-b from-white via-purple-50/20 to-white text-gray-900 flex flex-col font-sans selection:bg-purple-500/20 selection:text-purple-900 pb-4">
       
       {/* ── 1. Top Colorful Mesh Gradient Banner (Screenshots 2-5 Exact) ── */}
       <div className="h-14 sm:h-16 w-full bg-gradient-to-r from-[#e11d48] via-[#a855f7] to-[#6701e6] relative shrink-0">
@@ -386,9 +357,10 @@ export const OnboardingPage: React.FC = () => {
         )}
 
         {/* ── STEP 4: Setting up your account Animation & Ready State ── */}
+        {/* ── STEP 4: Setting up your account Animation & Ready State ── */}
         {step === 4 && (
-          <div className="text-center animate-fade-in w-full">
-            <h1 className="text-xl sm:text-2xl font-extrabold font-display text-gray-900 tracking-tight max-w-xl mx-auto leading-tight">
+          <div className="text-center animate-fade-in w-full max-w-xl mx-auto my-auto py-2 sm:py-4">
+            <h1 className="text-xl sm:text-2xl font-extrabold font-display text-gray-900 tracking-tight leading-tight">
               {isSetupComplete ? (
                 <span>Your workspace is ready, {firstName || 'there'}! 🎉</span>
               ) : (
@@ -397,24 +369,24 @@ export const OnboardingPage: React.FC = () => {
             </h1>
             <p className="text-xs text-gray-500 mt-1">
               {isSetupComplete ? (
-                <span>Your project, collection form, and Wall of Love have been successfully generated.</span>
+                <span>Your project, collection form, and Wall of Love are live. Launching your dashboard...</span>
               ) : (
                 <span>We're preparing your collection form, embed widgets, and Wall of Love.</span>
               )}
             </p>
 
-            {/* Setup Progress & Action Card */}
-            <div className="max-w-md mx-auto mt-4 p-4 rounded-2xl bg-gray-50/95 border border-gray-200/90 text-left shadow-2xs">
+            {/* Setup Progress & Dominant Action Card */}
+            <div className="max-w-md mx-auto mt-4 sm:mt-5 p-5 rounded-3xl bg-white border border-gray-200/90 text-left shadow-xl shadow-purple-950/5 space-y-4">
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-xs shrink-0 transition-all ${
+                  className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-xs shrink-0 transition-all ${
                     isSetupComplete ? 'bg-emerald-600' : 'bg-[#6701e6] animate-pulse'
                   }`}
                 >
                   {isSetupComplete ? (
                     <Check className="w-5 h-5 text-white stroke-[2.5]" />
                   ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                     </svg>
                   )}
@@ -435,9 +407,9 @@ export const OnboardingPage: React.FC = () => {
               </div>
 
               {/* Progress bar */}
-              <div className="w-full bg-gray-200 h-1.5 rounded-full mt-2.5 overflow-hidden">
+              <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-500 rounded-full ${
+                  className={`h-full transition-all duration-300 rounded-full ${
                     isSetupComplete ? 'bg-emerald-500' : 'bg-[#6701e6]'
                   }`}
                   style={{ width: `${setupProgress}%` }}
@@ -446,73 +418,62 @@ export const OnboardingPage: React.FC = () => {
 
               {/* Ready Checklist */}
               {isSetupComplete && (
-                <div className="mt-2.5 pt-2 border-t border-gray-200/80 space-y-1 text-[11px] text-gray-600 animate-fade-in">
-                  <div className="flex items-center gap-1.5">
-                    <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                <div className="pt-2 border-t border-gray-100 space-y-1.5 text-xs text-gray-600 animate-fade-in">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[2.5]" />
                     <span>Workspace initialized for {websiteUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '') || 'your brand'}</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Check className="w-3 h-3 text-emerald-600 shrink-0" />
-                    <span>Public collection form created</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[2.5]" />
+                    <span>Public collection form live</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Check className="w-3 h-3 text-emerald-600 shrink-0" />
-                    <span>Wall of Love publishing live</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[2.5]" />
+                    <span>Wall of Love publishing enabled</span>
                   </div>
                 </div>
               )}
 
-              {/* Direct Action Button */}
-              <div className="mt-3 space-y-1.5">
+              {/* Dominant Primary Action Button */}
+              <div className="pt-1 space-y-2">
                 <button
                   type="button"
+                  id="onboarding-dashboard-cta"
                   onClick={() => {
                     analytics.signupCompleted();
                     navigate('/dashboard');
                   }}
-                  className="w-full py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5400bd] text-white font-bold text-xs sm:text-sm shadow-sm transition-all hover:scale-[1.005] cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-3.5 px-6 rounded-2xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-sm sm:text-base shadow-lg shadow-purple-900/20 hover:shadow-purple-900/30 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2 group ring-2 ring-[#6701e6]/30"
                 >
-                  <span>{isSetupComplete ? 'Go to My Dashboard' : 'Proceed to Dashboard'}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>{isSetupComplete ? 'Go to My Dashboard 🚀' : 'Proceed to Dashboard'}</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
 
-                <div className="flex items-center justify-between text-[10px] text-gray-500 px-1 pt-0.5">
-                  <span>
-                    {isSetupComplete
-                      ? `Continuing automatically in ${countdown}s...`
-                      : 'Setting up your workspace...'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/onboarding/upgrade')}
-                    className="text-[#6701e6] hover:underline font-semibold cursor-pointer"
-                  >
-                    See Formats & Plans →
-                  </button>
+                <div className="text-center text-[11px] text-gray-500">
+                  {isSetupComplete ? (
+                    <span className="inline-flex items-center gap-1.5 text-emerald-700 font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                      Redirecting to dashboard automatically...
+                    </span>
+                  ) : (
+                    <span>Finishing background setup...</span>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* What happens next */}
-            <div className="mt-4 sm:mt-5 w-full">
-              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-2">
-                What happens next
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-left max-w-5xl mx-auto px-1">
-                {ONBOARDING_NEXT_STEPS.map((s, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 rounded-xl border border-gray-200/90 bg-white shadow-2xs flex flex-col justify-between"
-                  >
-                    <div>
-                      <p className="font-bold text-xs text-gray-900 mb-0.5">
-                        <span className="text-[#6701e6] mr-1">{idx + 1}.</span>{s.title}
-                      </p>
-                      <p className="text-[11px] text-gray-600 leading-snug">{s.text}</p>
-                    </div>
-                  </div>
-                ))}
+            {/* Welcome Hub Quick-Start Tip (Replaces the 4 redundant cards) */}
+            <div className="mt-4 sm:mt-5 max-w-md mx-auto p-3.5 rounded-2xl bg-purple-50/80 border border-purple-100/90 shadow-2xs flex items-center gap-3 text-left animate-fade-in">
+              <div className="w-8 h-8 rounded-xl bg-purple-100 text-[#6701e6] flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-purple-950 leading-tight">
+                  Interactive Welcome Hub Ready
+                </p>
+                <p className="text-[11px] text-purple-900/80 leading-tight mt-0.5">
+                  Your collection link, review importer, and embed widgets are waiting inside your dashboard.
+                </p>
               </div>
             </div>
           </div>
