@@ -21,6 +21,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
   onFilterByStatus,
   onFilterByRating,
 }) => {
+  const isAwaitingFirstApproval = stats.total > 0 && stats.approvedCount === 0 && stats.pendingCount > 0;
   const approvalRate = stats.total > 0 
     ? Math.round((stats.approvedCount / stats.total) * 100) 
     : 100;
@@ -132,27 +133,50 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
           </div>
         </div>
 
-        {/* Approval Rate */}
+        {/* Live Broadcast Rate */}
         <div 
-          onClick={() => onFilterByStatus?.('approved')}
+          onClick={() => onFilterByStatus?.(isAwaitingFirstApproval ? 'pending' : 'approved')}
           className="apple-glass-card p-5 relative overflow-hidden group cursor-pointer apple-touch"
         >
           <div className="flex items-center justify-between relative z-10">
             <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">
               Live Broadcast Rate
             </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center border border-emerald-500/20 group-hover:scale-105 transition-transform">
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center border transition-transform group-hover:scale-105 ${
+              isAwaitingFirstApproval
+                ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+            }`}>
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2 relative z-10">
-            <span className="text-3xl font-extrabold font-display text-slate-900 tracking-tight">{approvalRate}%</span>
-            <span className="text-xs text-emerald-600 font-semibold flex items-center gap-0.5">
-              <CheckCircle2 className="w-3.5 h-3.5" /> {stats.approvedCount} live
+            {isAwaitingFirstApproval ? (
+              <span className="text-xl sm:text-2xl font-extrabold font-display text-amber-600 tracking-tight">
+                Awaiting Approval
+              </span>
+            ) : (
+              <span className="text-3xl font-extrabold font-display text-slate-900 tracking-tight">
+                {approvalRate}%
+              </span>
+            )}
+            <span className={`text-xs font-semibold flex items-center gap-0.5 ${
+              isAwaitingFirstApproval ? 'text-amber-700' : 'text-emerald-600'
+            }`}>
+              {isAwaitingFirstApproval ? (
+                <Clock className="w-3.5 h-3.5 text-amber-600" />
+              ) : (
+                <CheckCircle2 className="w-3.5 h-3.5" />
+              )}
+              {isAwaitingFirstApproval ? `${stats.pendingCount} pending` : `${stats.approvedCount} live`}
             </span>
           </div>
-          <div className="mt-2 text-xs text-slate-400 relative z-10 font-medium">
-            {stats.rejectedCount} archived / filtered
+          <div className="mt-2 text-xs text-slate-500 relative z-10 font-medium">
+            {isAwaitingFirstApproval ? (
+              <span className="text-amber-800/80">Ready to broadcast once approved</span>
+            ) : (
+              <span>{stats.rejectedCount} archived / filtered</span>
+            )}
           </div>
         </div>
       </div>

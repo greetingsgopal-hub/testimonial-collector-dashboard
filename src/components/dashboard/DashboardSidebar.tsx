@@ -127,7 +127,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           </div>
         </button>
 
-        {/* 3. Customize */}
+        {/* 3. Moderation Queue */}
         <button
           onClick={() => setActiveTab('proof')}
           className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
@@ -138,7 +138,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         >
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className={`w-4 h-4 transition-colors ${activeTab === 'proof' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
-            <span>Customize</span>
+            <span>Moderation Queue</span>
           </div>
           {proofCount > 0 ? (
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${

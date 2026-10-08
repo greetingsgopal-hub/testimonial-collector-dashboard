@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DashboardSidebar, DashboardTab } from '../components/dashboard/DashboardSidebar';
 import { MetricsCards } from '../components/dashboard/MetricsCards';
 import { ReviewFilters } from '../components/dashboard/ReviewFilters';
@@ -33,13 +34,19 @@ import {
   Settings, 
   Clock, 
   Link as LinkIcon, 
-  History
+  History,
+  CheckCircle2,
+  Layers,
+  ArrowRight,
+  Check,
+  X,
+  Trash2
 } from 'lucide-react';
 const TAB_LABEL_MAP: Record<string, string> = {
   welcome: 'Welcome Hub',
   forms: 'Collect',
   import: 'Import',
-  proof: 'Customize',
+  proof: 'Moderation Queue',
   widgets: 'Widgets',
   'rich-snippet': 'Post Online',
   integrate: 'Integrations',
@@ -56,12 +63,23 @@ export const DashboardPage = () => {
   });
 
   const { project, collectionForm } = useAuth();
-  const [activeTab, setActiveTab] = useState<DashboardTab>(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab') as DashboardTab;
-    if (tab) return tab;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTabState] = useState<DashboardTab>(() => {
+    const paramTab = searchParams.get('tab') as DashboardTab;
+    if (paramTab) return paramTab;
+    const windowTab = new URLSearchParams(window.location.search).get('tab') as DashboardTab;
+    if (windowTab) return windowTab;
     return 'welcome';
   });
+
+  const setActiveTab = useCallback((tab: DashboardTab) => {
+    setActiveTabState(tab);
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.set('tab', tab);
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<ReviewStats>({
@@ -349,6 +367,54 @@ export const DashboardPage = () => {
     });
   }, [effectiveReviews, filters]);
 
+  // Bulk Selection for fast one-click moderation
+  const [selectedReviewIds, setSelectedReviewIds] = useState<Set<string>>(new Set());
+
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedReviewIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    if (selectedReviewIds.size === filteredReviews.length && filteredReviews.length > 0) {
+      setSelectedReviewIds(new Set());
+    } else {
+      setSelectedReviewIds(new Set(filteredReviews.map(r => r.id)));
+    }
+  }, [selectedReviewIds, filteredReviews]);
+
+  const handleBulkApprove = async () => {
+    const ids = Array.from(selectedReviewIds);
+    await Promise.all(ids.map(id => storage.updateReview(id, { status: 'approved', projectId: activeProjectId })));
+    setSelectedReviewIds(new Set());
+    await refreshReviews();
+  };
+
+  const handleBulkReject = async () => {
+    const ids = Array.from(selectedReviewIds);
+    await Promise.all(ids.map(id => storage.updateReview(id, { status: 'rejected', isFeatured: false, projectId: activeProjectId })));
+    setSelectedReviewIds(new Set());
+    await refreshReviews();
+  };
+
+  const handleBulkArchive = async () => {
+    const ids = Array.from(selectedReviewIds);
+    await Promise.all(ids.map(id => storage.updateReview(id, { status: 'archived', isFeatured: false, projectId: activeProjectId })));
+    setSelectedReviewIds(new Set());
+    await refreshReviews();
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedReviewIds);
+    await Promise.all(ids.map(id => storage.deleteReview(id)));
+    setSelectedReviewIds(new Set());
+    await refreshReviews();
+  };
+
   const feedbackList = useMemo(() => {
     return effectiveReviews.filter(r => r.rating <= 3);
   }, [effectiveReviews]);
@@ -490,7 +556,7 @@ export const DashboardPage = () => {
             </div>
           )}
 
-          {/* MAIN PROOF DASHBOARD VIEW */}
+          {/* MAIN MODERATION QUEUE & PROOF DASHBOARD VIEW */}
           {activeTab === 'proof' && (
             <div className="space-y-4 max-w-7xl mx-auto">
               
@@ -503,7 +569,7 @@ export const DashboardPage = () => {
                   <div>
                     <div className="flex items-center gap-2.5">
                       <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                        Your Proof
+                        Moderation Queue
                       </h1>
                       <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-500/10 text-violet-700 border border-violet-500/20 shadow-2xs">
                         {effectiveReviews.length} {effectiveReviews.length === 1 ? 'Entry' : 'Entries'}
@@ -514,7 +580,7 @@ export const DashboardPage = () => {
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 mt-1 font-normal">
-                      Collect, approve, and showcase customer testimonials.
+                      Manage incoming testimonials, approve live proofs, and broadcast verified praise.
                     </p>
                   </div>
 
@@ -554,6 +620,29 @@ export const DashboardPage = () => {
                     </button>
                   </div>
                 </div>
+
+                {/* Sub-Tabs: Moderation Queue vs Widget Styles */}
+                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-200/60 relative z-10">
+                  <button
+                    className="apple-touch px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-2xs cursor-pointer flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Moderation Queue</span>
+                    {effectiveStats.pendingCount > 0 && (
+                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-950">
+                        {effectiveStats.pendingCount}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab('widgets')}
+                    className="apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Layers className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Widget Styles & Embeds →</span>
+                  </button>
+                </div>
               </div>
 
               {/* Sample Reviews Notice for New Accounts */}
@@ -579,38 +668,36 @@ export const DashboardPage = () => {
                 </div>
               )}
 
-              {/* Moderation Guidance Banner */}
-              {effectiveReviews.length > 0 && effectiveStats.approvedCount === 0 && (
-                <div className="apple-glass-card border-violet-500/20 bg-violet-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-bold text-zinc-900 tracking-tight">Your proof is waiting for approval</p>
-                    <p className="text-xs text-zinc-500 mt-0.5">Approve at least one testimonial before broadcasting it to widgets or publishing publicly.</p>
-                  </div>
-                  <button
-                    onClick={() => setFilters(prev => ({ ...prev, status: 'pending' }))}
-                    className="apple-touch apple-btn-primary shrink-0 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer"
-                  >
-                    Review testimonials
-                  </button>
-                </div>
-              )}
-
-              {/* Priority Pending Moderation Alert */}
+              {/* Single Consolidated Priority Moderation Action Bar */}
               {effectiveStats.pendingCount > 0 && (
-                <div className="apple-glass-card p-3 border-amber-400/50 bg-amber-50/80 flex items-center justify-between text-xs text-amber-900 animate-fade-in shadow-2xs">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                    <Clock className="w-4 h-4 text-amber-600" />
-                    <span className="font-medium">
-                      <strong>{effectiveStats.pendingCount}</strong> testimonial{effectiveStats.pendingCount === 1 ? '' : 's'} awaiting your review.
-                    </span>
+                <div className="apple-glass-card p-4 border-amber-300/70 bg-gradient-to-r from-amber-50/90 via-orange-50/40 to-amber-50/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-950 animate-fade-in shadow-xs rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-800 flex items-center justify-center shrink-0 border border-amber-500/30">
+                      <Clock className="w-5 h-5 text-amber-700 animate-pulse" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-xs sm:text-sm text-amber-950">
+                          {effectiveStats.pendingCount} testimonial{effectiveStats.pendingCount === 1 ? '' : 's'} awaiting your review
+                        </span>
+                        <span className="px-2 py-0.2 rounded-full text-[10px] font-extrabold bg-amber-200/80 text-amber-900">
+                          Action Required
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-amber-800/90 mt-0.5 leading-snug">
+                        Approve testimonials to broadcast them live to your Wall of Love and website widgets.
+                      </p>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => setFilters(prev => ({ ...prev, status: 'pending' }))}
-                    className="apple-touch px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-950 font-bold transition-all cursor-pointer"
-                  >
-                    Review Queue
-                  </button>
+                  <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                    <button
+                      onClick={() => setFilters(prev => ({ ...prev, status: 'pending' }))}
+                      className="apple-touch px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>Review Queue</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -626,7 +713,7 @@ export const DashboardPage = () => {
                 <SentimentDashboard reviews={effectiveReviews} />
               )}
 
-      {/* Filters, View Switcher & Export */}
+              {/* Filters, View Switcher & Export */}
               <ReviewFilters
                 filters={filters}
                 setFilters={setFilters}
@@ -638,6 +725,66 @@ export const DashboardPage = () => {
                 onResetSeedData={handleSeedDemoData}
                 availableTags={availableTags}
               />
+
+              {/* Bulk Selection Header Toolbar */}
+              {filteredReviews.length > 0 && (
+                <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-100/80 rounded-xl border border-slate-200/70 text-xs">
+                  <label className="flex items-center gap-2 font-medium text-slate-700 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      id="bulk-select-all"
+                      checked={selectedReviewIds.size > 0 && selectedReviewIds.size === filteredReviews.length}
+                      onChange={handleSelectAll}
+                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 border-slate-300 cursor-pointer"
+                    />
+                    <span>
+                      {selectedReviewIds.size > 0
+                        ? `${selectedReviewIds.size} of ${filteredReviews.length} selected`
+                        : `Select all (${filteredReviews.length}) for bulk moderation`}
+                    </span>
+                  </label>
+
+                  {selectedReviewIds.size > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        id="bulk-approve-btn"
+                        onClick={handleBulkApprove}
+                        className="apple-touch px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer shadow-2xs"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Approve ({selectedReviewIds.size})</span>
+                      </button>
+                      <button
+                        type="button"
+                        id="bulk-reject-btn"
+                        onClick={handleBulkReject}
+                        className="apple-touch px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs flex items-center gap-1 cursor-pointer shadow-2xs"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        <span>Reject</span>
+                      </button>
+                      <button
+                        type="button"
+                        id="bulk-archive-btn"
+                        onClick={handleBulkArchive}
+                        className="apple-touch px-2.5 py-1 rounded-lg bg-slate-600 hover:bg-slate-700 text-white font-semibold text-xs cursor-pointer"
+                      >
+                        Archive
+                      </button>
+                      <button
+                        type="button"
+                        id="bulk-delete-btn"
+                        onClick={handleBulkDelete}
+                        className="apple-touch p-1 rounded-lg text-rose-600 hover:bg-rose-100 cursor-pointer"
+                        title="Delete Selected"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Content Display */}
               {isLoading ? (
@@ -651,6 +798,8 @@ export const DashboardPage = () => {
                     <ReviewCard
                       key={review.id}
                       review={review}
+                      isSelected={selectedReviewIds.has(review.id)}
+                      onToggleSelect={() => handleToggleSelect(review.id)}
                       onUpdateStatus={handleUpdateStatus}
                       onToggleFeatured={handleToggleFeatured}
                       onDelete={handleDeleteReview}
@@ -662,6 +811,8 @@ export const DashboardPage = () => {
               ) : (
                 <ReviewTable
                   reviews={filteredReviews}
+                  selectedIds={selectedReviewIds}
+                  onToggleSelect={handleToggleSelect}
                   onUpdateStatus={handleUpdateStatus}
                   onToggleFeatured={handleToggleFeatured}
                   onDelete={handleDeleteReview}

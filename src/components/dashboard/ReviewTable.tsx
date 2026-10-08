@@ -12,6 +12,8 @@ import { Review, ReviewStatus } from '../../types';
 
 interface ReviewTableProps {
   reviews: Review[];
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
   onUpdateStatus: (id: string, status: ReviewStatus) => void;
   onToggleFeatured: (id: string, current: boolean) => void;
   onDelete: (id: string) => void;
@@ -21,6 +23,8 @@ interface ReviewTableProps {
 
 export const ReviewTable: React.FC<ReviewTableProps> = ({
   reviews,
+  selectedIds,
+  onToggleSelect,
   onUpdateStatus,
   onToggleFeatured,
   onDelete,
@@ -62,6 +66,7 @@ export const ReviewTable: React.FC<ReviewTableProps> = ({
         <table className="w-full text-left text-xs sm:text-sm">
           <thead className="bg-gray-50/80 text-gray-500 border-b border-gray-200 text-[11px] uppercase tracking-wider font-semibold">
             <tr>
+              {onToggleSelect && <th className="w-10 py-3.5 px-3 text-center"></th>}
               <th className="py-3.5 px-4">Reviewer</th>
               <th className="py-3.5 px-4">Rating</th>
               <th className="py-3.5 px-4">Feedback Content</th>
@@ -71,14 +76,30 @@ export const ReviewTable: React.FC<ReviewTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {reviews.map((review) => (
-              <tr 
-                key={review.id}
-                className="hover:bg-purple-50/20 transition-colors cursor-pointer group"
-                onClick={() => onOpenDetails(review)}
-              >
-                {/* Reviewer Column */}
-                <td className="py-3.5 px-4 whitespace-nowrap">
+            {reviews.map((review) => {
+              const isSelected = selectedIds?.has(review.id);
+              return (
+                <tr 
+                  key={review.id}
+                  className={`hover:bg-purple-50/20 transition-colors cursor-pointer group ${isSelected ? 'bg-violet-50/40' : ''}`}
+                  onClick={() => onOpenDetails(review)}
+                >
+                  {onToggleSelect && (
+                    <td 
+                      className="py-3.5 px-3 text-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        type="checkbox"
+                        aria-label={`Select row for ${review.name}`}
+                        checked={!!isSelected}
+                        onChange={() => onToggleSelect(review.id)}
+                        className="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 border-slate-300 cursor-pointer"
+                      />
+                    </td>
+                  )}
+                  {/* Reviewer Column */}
+                  <td className="py-3.5 px-4 whitespace-nowrap">
                   <div className="flex items-center gap-3">
                     {review.avatarUrl ? (
                       <img
@@ -231,7 +252,8 @@ export const ReviewTable: React.FC<ReviewTableProps> = ({
                   </div>
                 </td>
               </tr>
-            ))}
+            );
+          })}
           </tbody>
         </table>
       </div>

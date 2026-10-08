@@ -17,6 +17,8 @@ import { sanitizeUrl } from '../../lib/security';
 
 interface ReviewCardProps {
   review: Review;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
   onUpdateStatus: (id: string, status: ReviewStatus) => void;
   onToggleFeatured: (id: string, current: boolean) => void;
   onDelete: (id: string) => void;
@@ -26,6 +28,8 @@ interface ReviewCardProps {
 
 export const ReviewCard: React.FC<ReviewCardProps> = ({
   review,
+  isSelected,
+  onToggleSelect,
   onUpdateStatus,
   onToggleFeatured,
   onDelete,
@@ -79,12 +83,21 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   };
 
   return (
-    <div className="apple-glass-card p-5 sm:p-6 flex flex-col justify-between relative group font-sans text-zinc-900 apple-touch-subtle">
+    <div className={`apple-glass-card p-5 sm:p-6 flex flex-col justify-between relative group font-sans text-zinc-900 apple-touch-subtle transition-all ${isSelected ? 'ring-2 ring-violet-500/60 bg-violet-50/20' : ''}`}>
       
       {/* Top row: Status, Badges, and Quick Actions */}
       <div>
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-1.5 flex-wrap">
+            {onToggleSelect && (
+              <input
+                type="checkbox"
+                aria-label={`Select review by ${review.name}`}
+                checked={!!isSelected}
+                onChange={() => onToggleSelect(review.id)}
+                className="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 border-slate-300 cursor-pointer mr-1"
+              />
+            )}
             {getStatusBadge(review.status)}
             {review.status === 'approved' && (
               <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/20" title="Live on website widget">

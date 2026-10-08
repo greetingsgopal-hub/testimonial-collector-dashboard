@@ -36,12 +36,24 @@ const EMOTION_COLORS: Record<string, string> = {
 };
 
 export const SentimentDashboard: React.FC<SentimentDashboardProps> = ({ reviews }) => {
-  const stats = useMemo(() => {
-    const approvedReviews = reviews.filter(r => r.status === 'approved');
-    const results = analyzeReviewBatch(approvedReviews);
-    const s = computeSentimentStats(results);
-    return s;
+  const { analyzedReviews, isPreviewMode } = useMemo(() => {
+    const approved = reviews.filter(r => r.status === 'approved');
+    if (approved.length > 0) {
+      return { analyzedReviews: approved, isPreviewMode: false };
+    }
+    // If no approved reviews yet, analyze pending submissions as an early sentiment preview
+    const pending = reviews.filter(r => r.status === 'pending');
+    if (pending.length > 0) {
+      return { analyzedReviews: pending, isPreviewMode: true };
+    }
+    const nonRejected = reviews.filter(r => r.status !== 'rejected');
+    return { analyzedReviews: nonRejected.length > 0 ? nonRejected : reviews, isPreviewMode: true };
   }, [reviews]);
+
+  const stats = useMemo(() => {
+    const results = analyzeReviewBatch(analyzedReviews);
+    return computeSentimentStats(results);
+  }, [analyzedReviews]);
 
   if (reviews.length === 0) {
     return (
@@ -63,7 +75,14 @@ export const SentimentDashboard: React.FC<SentimentDashboardProps> = ({ reviews 
           <Sparkles size={16} className="text-[#6701e6]" />
           AI Sentiment Analysis
         </h3>
-        <span className="text-xs text-gray-500">{reviews.filter(r => r.status === 'approved').length} reviews analyzed</span>
+        <div className="flex items-center gap-2">
+          {isPreviewMode && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+              Pending Preview
+            </span>
+          )}
+          <span className="text-xs text-gray-500">{analyzedReviews.length} {analyzedReviews.length === 1 ? 'review' : 'reviews'} analyzed</span>
+        </div>
       </div>
 
       {/* Score + Trend */}
