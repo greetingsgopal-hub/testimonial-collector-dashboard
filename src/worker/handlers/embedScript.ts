@@ -315,6 +315,132 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
       }
+
+      /* ── LAYOUT: SPOTLIGHT (single card) ── */
+      .pp-spotlight {
+        max-width: 560px;
+        margin: 0 auto;
+      }
+
+      /* ── LAYOUT: CAROUSEL ── */
+      .pp-carousel {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .pp-carousel-slide {
+        display: none;
+      }
+      .pp-carousel-slide.pp-active {
+        display: block;
+        animation: pp-fade 0.4s ease;
+      }
+      @keyframes pp-fade {
+        from { opacity: 0; transform: translateX(10px); }
+        to { opacity: 1; transform: none; }
+      }
+      .pp-carousel-nav {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .pp-carousel-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 9999px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: #ffffff;
+        cursor: pointer;
+        font-size: 15px;
+        line-height: 1;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+      .pp-carousel-btn:hover {
+        border-color: #6701e6;
+        color: #6701e6;
+      }
+      .pp-theme-dark .pp-carousel-btn {
+        background: #1e293b;
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #cbd5e1;
+      }
+      .pp-theme-dark .pp-carousel-btn:hover {
+        border-color: #a855f7;
+        color: #d8b4fe;
+      }
+      .pp-carousel-dots {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .pp-carousel-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 9999px;
+        background: rgba(100, 116, 139, 0.3);
+        cursor: pointer;
+        border: none;
+        padding: 0;
+        transition: all 0.2s ease;
+      }
+      .pp-carousel-dot.pp-active {
+        background: #6701e6;
+      }
+      .pp-theme-dark .pp-carousel-dot.pp-active {
+        background: #a855f7;
+      }
+
+      /* ── LAYOUT: TRUST BADGE ── */
+      .pp-badge {
+        display: block;
+        max-width: 320px;
+        margin: 0 auto;
+        text-align: center;
+        text-decoration: none;
+        padding: 24px 20px;
+        cursor: pointer;
+      }
+      .pp-badge-stars {
+        display: flex;
+        justify-content: center;
+        gap: 3px;
+        margin-bottom: 10px;
+      }
+      .pp-badge-stars .pp-star {
+        width: 20px;
+        height: 20px;
+      }
+      .pp-badge-rating {
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 3px;
+      }
+      .pp-badge-count {
+        font-size: 12px;
+        opacity: 0.65;
+        margin-bottom: 12px;
+      }
+      .pp-badge-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #6701e6;
+      }
+      .pp-theme-dark .pp-badge-brand {
+        color: #c084fc;
+      }
+      .pp-badge-brand .pp-heart {
+        width: 12px;
+        height: 12px;
+      }
     \`;
     document.head.appendChild(style);
   }
@@ -349,60 +475,201 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
     return '';
   }
 
+  function renderEmpty(container) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">No testimonials approved yet.</div>';
+  }
+
+  function renderCard(r) {
+    var safeAvatar = sanitizeAvatarUrl(r.authorAvatar);
+    var avatarHtml = '';
+    if (safeAvatar) {
+      avatarHtml = '<img src="' + safeAvatar + '" alt="' + escapeHtml(r.authorName || 'Avatar') + '" class="pp-avatar" onerror="this.remove()" />';
+    } else {
+      avatarHtml = '<div class="pp-avatar-fallback">' + escapeHtml(getInitials(r.authorName)) + '</div>';
+    }
+
+    var subtext = [r.authorTitle, r.authorCompany].filter(Boolean).map(escapeHtml).join(' • ');
+
+    var html = '<div class="pp-card">';
+    html += '  <div class="pp-top-row">';
+    html += '    <div class="pp-stars">' + renderStars(r.rating) + '</div>';
+    html += '    ' + renderSourceBadge(r.source);
+    html += '  </div>';
+    html += '  <p class="pp-text">"' + escapeHtml(r.text || '') + '"</p>';
+    html += '  <div class="pp-author-row">';
+    html += '    ' + avatarHtml;
+    html += '    <div class="pp-author-meta">';
+    html += '      <div class="pp-author-name-line">';
+    html += '        <span class="pp-author-name">' + escapeHtml(r.authorName || 'Anonymous') + '</span>';
+    if (r.verified) {
+      html += ICONS.verified;
+    }
+    html += '      </div>';
+    if (subtext) {
+      html += '      <span class="pp-author-sub">' + subtext + '</span>';
+    }
+    html += '    </div>';
+    html += '  </div>';
+    html += '</div>';
+    return html;
+  }
+
+  function renderFooterBadge() {
+    var html = '<div class="pp-footer-badge">';
+    html += '  <a href="https://pandapraise.com" target="_blank" rel="noopener" class="pp-footer-link">';
+    html += '    ' + ICONS.heart + ' Verified with Panda Praise';
+    html += '  </a>';
+    html += '</div>';
+    return html;
+  }
+
   function renderWall(container, data, theme) {
     var reviews = data.testimonials || [];
     if (reviews.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">No testimonials approved yet.</div>';
+      renderEmpty(container);
       return;
     }
 
     var html = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '">';
     html += '<div class="pp-wall-masonry">';
-
     for (var i = 0; i < reviews.length; i++) {
-      var r = reviews[i];
-      var safeAvatar = sanitizeAvatarUrl(r.authorAvatar);
-      var avatarHtml = '';
-      if (safeAvatar) {
-        avatarHtml = '<img src="' + safeAvatar + '" alt="' + escapeHtml(r.authorName || 'Avatar') + '" class="pp-avatar" onerror="this.remove()" />';
-      } else {
-        avatarHtml = '<div class="pp-avatar-fallback">' + escapeHtml(getInitials(r.authorName)) + '</div>';
-      }
-
-      var subtext = [r.authorTitle, r.authorCompany].filter(Boolean).map(escapeHtml).join(' • ');
-
-      html += '<div class="pp-card">';
-      html += '  <div class="pp-top-row">';
-      html += '    <div class="pp-stars">' + renderStars(r.rating) + '</div>';
-      html += '    ' + renderSourceBadge(r.source);
-      html += '  </div>';
-      html += '  <p class="pp-text">"' + escapeHtml(r.text || '') + '"</p>';
-      html += '  <div class="pp-author-row">';
-      html += '    ' + avatarHtml;
-      html += '    <div class="pp-author-meta">';
-      html += '      <div class="pp-author-name-line">';
-      html += '        <span class="pp-author-name">' + escapeHtml(r.authorName || 'Anonymous') + '</span>';
-      if (r.verified) {
-        html += ICONS.verified;
-      }
-      html += '      </div>';
-      if (subtext) {
-        html += '      <span class="pp-author-sub">' + subtext + '</span>';
-      }
-      html += '    </div>';
-      html += '  </div>';
-      html += '</div>';
+      html += renderCard(reviews[i]);
     }
-
     html += '</div>';
-    html += '<div class="pp-footer-badge">';
-  html += '  <a href="https://pandapraise.com" target="_blank" rel="noopener" class="pp-footer-link">';
-    html += '    ' + ICONS.heart + ' Verified with Panda Praise';
-    html += '  </a>';
-    html += '</div>';
+    html += renderFooterBadge();
     html += '</div>';
 
     container.innerHTML = html;
+  }
+
+  function renderSpotlight(container, data, theme) {
+    var reviews = data.testimonials || [];
+    if (reviews.length === 0) {
+      renderEmpty(container);
+      return;
+    }
+
+    var html = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '">';
+    html += '<div class="pp-spotlight">' + renderCard(reviews[0]) + '</div>';
+    html += renderFooterBadge();
+    html += '</div>';
+
+    container.innerHTML = html;
+  }
+
+  function renderCarousel(container, data, theme) {
+    var reviews = data.testimonials || [];
+    if (reviews.length === 0) {
+      renderEmpty(container);
+      return;
+    }
+
+    var html = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '">';
+    html += '<div class="pp-carousel">';
+    for (var i = 0; i < reviews.length; i++) {
+      html += '<div class="pp-carousel-slide' + (i === 0 ? ' pp-active' : '') + '">' + renderCard(reviews[i]) + '</div>';
+    }
+    if (reviews.length > 1) {
+      html += '<div class="pp-carousel-nav">';
+      html += '<button type="button" class="pp-carousel-btn pp-prev" aria-label="Previous review">&#8249;</button>';
+      html += '<div class="pp-carousel-dots">';
+      for (var d = 0; d < reviews.length; d++) {
+        html += '<button type="button" class="pp-carousel-dot' + (d === 0 ? ' pp-active' : '') + '" aria-label="Go to review ' + (d + 1) + '"></button>';
+      }
+      html += '</div>';
+      html += '<button type="button" class="pp-carousel-btn pp-next" aria-label="Next review">&#8250;</button>';
+      html += '</div>';
+    }
+    html += '</div>';
+    html += renderFooterBadge();
+    html += '</div>';
+
+    container.innerHTML = html;
+
+    if (reviews.length <= 1) return;
+
+    var idx = 0;
+    var slides = container.querySelectorAll('.pp-carousel-slide');
+    var dots = container.querySelectorAll('.pp-carousel-dot');
+
+    function show(n) {
+      idx = ((n % reviews.length) + reviews.length) % reviews.length;
+      for (var s = 0; s < slides.length; s++) {
+        slides[s].className = 'pp-carousel-slide' + (s === idx ? ' pp-active' : '');
+        if (dots[s]) {
+          dots[s].className = 'pp-carousel-dot' + (s === idx ? ' pp-active' : '');
+        }
+      }
+    }
+
+    var timer = null;
+    function start() {
+      stop();
+      timer = setInterval(function () { show(idx + 1); }, 5000);
+    }
+    function stop() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    var prev = container.querySelector('.pp-prev');
+    var next = container.querySelector('.pp-next');
+    if (prev) prev.addEventListener('click', function () { show(idx - 1); start(); });
+    if (next) next.addEventListener('click', function () { show(idx + 1); start(); });
+    for (var d2 = 0; d2 < dots.length; d2++) {
+      (function (n) {
+        dots[n].addEventListener('click', function () { show(n); start(); });
+      })(d2);
+    }
+    container.addEventListener('mouseenter', stop);
+    container.addEventListener('mouseleave', start);
+    start();
+  }
+
+  function renderBadge(container, data, theme) {
+    var total = typeof data.totalCount === 'number' ? data.totalCount : (data.testimonials || []).length;
+    if (!total) {
+      renderEmpty(container);
+      return;
+    }
+
+    var avg = parseFloat(data.averageRating || '0') || 0;
+    var projectId = container.getAttribute('data-project-id') || container.getAttribute('data-project') || '';
+    var href = projectId
+      ? 'https://pandapraise.com/w/' + encodeURIComponent(projectId)
+      : 'https://pandapraise.com';
+
+    var html = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '">';
+    html += '<a class="pp-card pp-badge" href="' + href + '" target="_blank" rel="noopener">';
+    html += '  <div class="pp-badge-stars">' + renderStars(Math.round(avg)) + '</div>';
+    html += '  <div class="pp-badge-rating">' + escapeHtml(avg.toFixed(1)) + ' out of 5</div>';
+    html += '  <div class="pp-badge-count">Based on ' + total + ' verified review' + (total === 1 ? '' : 's') + '</div>';
+    html += '  <div class="pp-badge-brand">' + ICONS.heart + ' Panda Praise</div>';
+    html += '</a>';
+    html += '</div>';
+
+    container.innerHTML = html;
+  }
+
+  var ALLOWED_LAYOUTS = { wall: true, carousel: true, spotlight: true, badge: true };
+
+  function sanitizeLayout(layout) {
+    return ALLOWED_LAYOUTS[layout] ? layout : 'wall';
+  }
+
+  function renderWidget(container, data, theme, layout) {
+    switch (sanitizeLayout(layout)) {
+      case 'carousel':
+        return renderCarousel(container, data, theme);
+      case 'spotlight':
+        return renderSpotlight(container, data, theme);
+      case 'badge':
+        return renderBadge(container, data, theme);
+      default:
+        return renderWall(container, data, theme);
+    }
   }
 
   function initContainers() {
@@ -428,6 +695,7 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
         var minRating = container.getAttribute('data-min-rating') || '0';
         var sources = container.getAttribute('data-sources') || 'google,linkedin,instagram,facebook,direct';
         var limit = container.getAttribute('data-max-count') || '18';
+        var widgetType = sanitizeLayout(container.getAttribute('data-widget-type') || 'wall');
 
         // Skeleton loading state
         container.innerHTML = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '"><div class="pp-wall-masonry"><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div></div></div>';
@@ -440,12 +708,12 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
         fetch(API_BASE + '/api/embed/testimonials' + query)
           .then(function (res) { return res.json(); })
           .then(function (data) {
-            renderWall(container, data, theme);
+            renderWidget(container, data, theme, widgetType);
           })
           .catch(function (err) {
             console.warn('[PandaPraise] Failed to load testimonials:', err);
             // Fallback rendering
-            renderWall(container, { testimonials: [] }, theme);
+            renderWidget(container, { testimonials: [] }, theme, widgetType);
           });
       })(targets[i]);
     }

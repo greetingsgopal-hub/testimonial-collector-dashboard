@@ -101,3 +101,120 @@ describe('C1: embed script XSS', () => {
     expect(wall!.className).toBe('pp-wall-container pp-theme-light_gradient');
   });
 });
+
+/**
+ * Widget layout selection — the embed snippet's data-widget-type must render
+ * the same layout the user configured in the Widget Studio. What the user
+ * sees in the studio is what renders on their website.
+ */
+
+const TWO_REVIEWS = {
+  projectId: 'proj-abc',
+  totalCount: 2,
+  averageRating: '4.5',
+  testimonials: [
+    {
+      id: 't1',
+      text: 'Panda Praise made collecting reviews effortless.',
+      authorName: 'Asha Verma',
+      authorTitle: 'Owner',
+      authorCompany: 'Verma Bakery',
+      rating: 5,
+      source: 'google',
+      verified: true,
+    },
+    {
+      id: 't2',
+      text: 'Setup took five minutes and the wall looks great.',
+      authorName: 'Rohit Sharma',
+      rating: 4,
+      source: 'direct',
+      verified: false,
+    },
+  ],
+};
+
+async function renderWithType(widgetType: string | null, payload: any = TWO_REVIEWS) {
+  document.body.innerHTML = '';
+  const container = document.createElement('div');
+  container.id = 'panda-praise-wall';
+  container.setAttribute('data-project-id', 'proj-abc');
+  if (widgetType !== null) {
+    container.setAttribute('data-widget-type', widgetType);
+  }
+  document.body.appendChild(container);
+
+  (window as any).__xssHit = 0;
+
+  const fetchMock = vi.fn().mockResolvedValue({
+    json: async () => payload,
+  });
+  (globalThis as any).fetch = fetchMock;
+
+  const response = handleEmbedScript(new Request('https://worker.dev/embed.js'), {} as any);
+  const scriptText = await (response as any).text();
+  eval(scriptText);
+  await new Promise((r) => setTimeout(r, 50));
+
+  return container;
+}
+
+describe('embed script layouts (data-widget-type)', () => {
+  it('renders the wall masonry by default when no type is set', async () => {
+    const container = await renderWithType(null);
+    expect(container.querySelector('.pp-wall-masonry')).not.toBeNull();
+    expect(container.querySelectorAll('.pp-card').length).toBe(2);
+  });
+
+  it('renders the carousel layout with navigation when data-widget-type="carousel"', async () => {
+    const container = await renderWithType('carousel');
+    expect(container.querySelector('.pp-carousel')).not.toBeNull();
+    expect(container.querySelectorAll('.pp-carousel-slide').length).toBe(2);
+    expect(container.querySelectorAll('.pp-carousel-slide.pp-active').length).toBe(1);
+    expect(container.querySelector('.pp-prev')).not.toBeNull();
+    expect(container.querySelector('.pp-next')).not.toBeNull();
+    expect(container.querySelectorAll('.pp-carousel-dot').length).toBe(2);
+  });
+
+  it('renders exactly one card in the spotlight layout', async () => {
+    const container = await renderWithType('spotlight');
+    expect(container.querySelector('.pp-spotlight')).not.toBeNull();
+    expect(container.querySelectorAll('.pp-card').length).toBe(1);
+    expect(container.textContent).toContain('Asha Verma');
+  });
+
+  it('renders the trust badge with aggregate rating and a link to the public wall', async () => {
+    const container = await renderWithType('badge');
+    const badge = container.querySelector('a.pp-badge');
+    expect(badge).not.toBeNull();
+    expect(badge!.getAttribute('href')).toBe('https://pandapraise.com/w/proj-abc');
+    expect(container.textContent).toContain('4.5 out of 5');
+    expect(container.textContent).toContain('Based on 2 verified reviews');
+  });
+
+  it('falls back to the wall layout for an unknown or attacker-controlled type', async () => {
+    const container = await renderWithType('carousel"><script>window.__xssHit=1</script>');
+    expect(container.querySelector('.pp-wall-masonry')).not.toBeNull();
+    expect(container.querySelector('.pp-carousel')).toBeNull();
+    expect((window as any).__xssHit).toBe(0);
+  });
+
+  it('shows the friendly empty state in every layout when no reviews exist', async () => {
+    for (const type of ['wall', 'carousel', 'spotlight', 'badge']) {
+      const container = await renderWithType(type, {
+        projectId: 'proj-abc',
+        totalCount: 0,
+        averageRating: '0.0',
+        testimonials: [],
+      });
+      expect(container.textContent).toContain('No testimonials approved yet.');
+    }
+  });
+
+  it('keeps attacker-controlled review fields inert in the carousel layout', async () => {
+    const container = await renderWithType('carousel', XSS_PAYLOAD);
+    expect((window as any).__xssHit).toBe(0);
+    expect(container.querySelectorAll('script').length).toBe(0);
+    expect(container.innerHTML).toContain('&lt;img src=x onerror=');
+  });
+});

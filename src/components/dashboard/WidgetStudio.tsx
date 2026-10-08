@@ -39,6 +39,16 @@ import { Review, WidgetType, WidgetSettings } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 
 export type CmsPlatform = 'wordpress' | 'webflow' | 'wix' | 'shopify' | 'squarespace' | 'framer' | 'react' | 'nextjs' | 'html' | 'other' | 'iframe';
+
+/**
+ * Widget layouts the public /embed.js runtime can actually render on a
+ * customer website. The studio preview supports more formats, but an embed
+ * snippet must never promise a layout the runtime cannot deliver.
+ */
+type EmbeddableWidgetType = 'wall' | 'carousel' | 'spotlight' | 'badge';
+const EMBEDDABLE_TYPES: EmbeddableWidgetType[] = ['wall', 'carousel', 'spotlight', 'badge'];
+const isEmbeddableType = (t: string): t is EmbeddableWidgetType =>
+  (EMBEDDABLE_TYPES as string[]).includes(t);
 export type WallTheme = 'light_gradient' | 'dark' | 'minimalist';
 
 // Custom Brand Icons
@@ -179,7 +189,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
   };
 
   const publicWallUrl = project?.slug
-    ? `https://pandapraise.com/wall/${project.slug}`
+    ? `https://pandapraise.com/love/${project.slug}`
     : `https://pandapraise.com/w/${projectWidgetId || ''}`;
 
   const handleCopyLink = async () => {
@@ -230,36 +240,42 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
   const getEmbedSnippet = () => {
     const projId = projectWidgetId || '';
     const sourcesStr = selectedSources.join(',');
+    // The embed runtime renders exactly these layouts. Types that the runtime
+    // does not support yet must never reach the snippet (honesty: what the
+    // user configures is what renders on their website).
+    const embedType: EmbeddableWidgetType = isEmbeddableType(settings.type) ? settings.type : 'wall';
+    const containerAttrs = `data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}" data-widget-type="${embedType}" data-max-count="${settings.maxCount}"`;
+    const htmlSnippet = `<div id="panda-praise-wall" ${containerAttrs}></div>\n<script src="${runtimeScriptUrl}" async></script>`;
 
     switch (cmsPlatform) {
       case 'wordpress':
-        return `<!-- WordPress: Add a Custom HTML block and paste this code -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+        return `<!-- WordPress: Add a Custom HTML block and paste this code -->\n${htmlSnippet}`;
 
       case 'webflow':
-        return `<!-- Webflow: Add a Code Embed element (shortcut A or Cmd+E) and paste this code -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+        return `<!-- Webflow: Add a Code Embed element (shortcut A or Cmd+E) and paste this code -->\n${htmlSnippet}`;
 
       case 'wix':
-        return `<!-- Wix: Add Elements (+) > Embed Code > Embed HTML -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+        return `<!-- Wix: Add Elements (+) > Embed Code > Embed HTML -->\n${htmlSnippet}`;
 
       case 'shopify':
-        return `<!-- Shopify: Theme Editor > Add section > Custom Liquid -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+        return `<!-- Shopify: Theme Editor > Add section > Custom Liquid -->\n${htmlSnippet}`;
 
       case 'squarespace':
-        return `<!-- Squarespace: Add a Code Block (set mode to HTML) and paste this code -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+        return `<!-- Squarespace: Add a Code Block (set mode to HTML) and paste this code -->\n${htmlSnippet}`;
 
       case 'framer':
-        return `<!-- Framer: Insert > Utility > Embed > HTML -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+        return `<!-- Framer: Insert > Utility > Embed > HTML -->\n${htmlSnippet}`;
 
       case 'react':
-        return `// In your React component:\nimport { useEffect } from 'react';\n\nexport function WallOfLove() {\n  useEffect(() => {\n    const script = document.createElement('script');\n    script.src = '${runtimeScriptUrl}';\n    script.async = true;\n    document.body.appendChild(script);\n    return () => { script.remove(); };\n  }, []);\n\n  return (\n    <div\n      id="panda-praise-wall"\n      data-project-id="${projId}"\n      data-theme="${wallTheme}"\n      data-min-rating="${minRating}"\n      data-sources="${sourcesStr}"\n    />\n  );\n}`;
+        return `// In your React component:\nimport { useEffect } from 'react';\n\nexport function WallOfLove() {\n  useEffect(() => {\n    const script = document.createElement('script');\n    script.src = '${runtimeScriptUrl}';\n    script.async = true;\n    document.body.appendChild(script);\n    return () => { script.remove(); };\n  }, []);\n\n  return (\n    <div\n      id="panda-praise-wall"\n      data-project-id="${projId}"\n      data-theme="${wallTheme}"\n      data-min-rating="${minRating}"\n      data-sources="${sourcesStr}"\n      data-widget-type="${embedType}"\n      data-max-count="${settings.maxCount}"\n    />\n  );\n}`;
 
       case 'nextjs':
-        return `// In your Next.js component (App Router or Pages):\n'use client';\nimport Script from 'next/script';\n\nexport function WallOfLove() {\n  return (\n    <section>\n      <div\n        id="panda-praise-wall"\n        data-project-id="${projId}"\n        data-theme="${wallTheme}"\n        data-min-rating="${minRating}"\n        data-sources="${sourcesStr}"\n      />\n      <Script src="${runtimeScriptUrl}" strategy="lazyOnload" />\n    </section>\n  );\n}`;
+        return `// In your Next.js component (App Router or Pages):\n'use client';\nimport Script from 'next/script';\n\nexport function WallOfLove() {\n  return (\n    <section>\n      <div\n        id="panda-praise-wall"\n        data-project-id="${projId}"\n        data-theme="${wallTheme}"\n        data-min-rating="${minRating}"\n        data-sources="${sourcesStr}"\n        data-widget-type="${embedType}"\n        data-max-count="${settings.maxCount}"\n      />\n      <Script src="${runtimeScriptUrl}" strategy="lazyOnload" />\n    </section>\n  );\n}`;
 
       case 'html':
       case 'other':
       default:
-        return `<!-- Panda Praise Embed: Works on any static HTML or website builder -->\n<div id="panda-praise-wall" data-project-id="${projId}" data-theme="${wallTheme}" data-min-rating="${minRating}" data-sources="${sourcesStr}"></div>\n<script src="${runtimeScriptUrl}" async></script>`;
+        return `<!-- Panda Praise Embed: Works on any static HTML or website builder -->\n${htmlSnippet}`;
 
       case 'iframe':
         return `<iframe src="https://pandapraise.com/w/${projId}?theme=${wallTheme === 'dark' ? 'dark' : 'light'}" width="100%" height="600" frameborder="0" style="border:none;border-radius:16px;width:100%;min-height:600px;"></iframe>`;
@@ -512,6 +528,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
       afterPasting: 'Paste the <iframe> tag. It runs in an isolated frame hosted directly by Panda Praise.',
       howToPublish: 'Save and publish your page.',
       howToVerify: 'Open the live page to confirm the iframe loads testimonials.',
+      note: 'The hosted iFrame renders the Wall of Love layout. For Carousel, Single Card, or Trust Badge layouts, use the script embed for your platform instead.',
       steps: [
         'Copy the iframe embed code below.',
         'Open your website builder and target page.',
@@ -580,14 +597,32 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               { id: 'carousel', label: 'Carousel', icon: Maximize2 },
               { id: 'spotlight', label: 'Single Card', icon: Sparkles },
               { id: 'badge', label: 'Trust Badge', icon: Award },
-              { id: 'floating_tab', label: 'Floating Tab', icon: MessageSquarePlus },
-              { id: 'social_toast', label: 'Social Toast', icon: Bell },
+              { id: 'floating_tab', label: 'Floating Tab', icon: MessageSquarePlus, soon: true },
+              { id: 'social_toast', label: 'Social Toast', icon: Bell, soon: true },
             ].map((item) => {
               const Icon = item.icon;
               const isSelected = settings.type === item.id;
+              if (item.soon) {
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    disabled
+                    title="Coming soon — not yet available for website embed"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 bg-gray-100/60 cursor-not-allowed opacity-70"
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{item.label}</span>
+                    <span className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">
+                      Soon
+                    </span>
+                  </button>
+                );
+              }
               return (
                 <button
                   key={item.id}
+                  type="button"
                   onClick={() => setSettings((prev) => ({ ...prev, type: item.id as WidgetType }))}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     isSelected
@@ -1252,7 +1287,15 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-gray-950">
-                    Share & Embed {settings.type === 'wall' ? 'Wall of Love' : settings.type === 'carousel' ? 'Carousel' : 'Widget'}
+                    Share & Embed {settings.type === 'wall'
+                      ? 'Wall of Love'
+                      : settings.type === 'carousel'
+                        ? 'Carousel'
+                        : settings.type === 'spotlight'
+                          ? 'Single Card Spotlight'
+                          : settings.type === 'badge'
+                            ? 'Trust Badge'
+                            : 'Widget'}
                   </h3>
                   <p className="text-xs text-gray-500">
                     Add to your website or share as a standalone hosted link.
