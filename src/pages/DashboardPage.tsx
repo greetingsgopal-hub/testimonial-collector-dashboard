@@ -353,6 +353,18 @@ export const DashboardPage = () => {
     return effectiveReviews.filter(r => r.rating <= 3);
   }, [effectiveReviews]);
 
+  const handleUpdateCollectionForm = async (updates: Partial<CollectionForm>) => {
+    try {
+      const targetForm = currentCollectionForm || (activeProjectId ? await storage.getCollectionForm(activeProjectId) : null);
+      if (targetForm) {
+        const updated = await storage.updateCollectionForm(targetForm.id, updates);
+        setCurrentCollectionForm(updated);
+      }
+    } catch (err) {
+      console.error('Failed to update collection form:', err);
+    }
+  };
+
   return (
     <div className="min-h-screen flex apple-canvas text-zinc-900 font-sans selection:bg-violet-100 selection:text-violet-900">
       
@@ -416,6 +428,7 @@ export const DashboardPage = () => {
               onConfigureForm={() => setShowCollectionModal(true)}
               onSendInvites={handleCopyLink}
               onViewProof={() => setActiveTab('proof')}
+              onUpdateForm={handleUpdateCollectionForm}
               reviews={effectiveReviews}
               stats={effectiveStats}
             />
