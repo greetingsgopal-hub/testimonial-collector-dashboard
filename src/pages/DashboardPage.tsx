@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { DashboardSidebar, DashboardTab } from '../components/dashboard/DashboardSidebar';
 import { MetricsCards } from '../components/dashboard/MetricsCards';
 import { ReviewFilters } from '../components/dashboard/ReviewFilters';
@@ -24,6 +24,7 @@ import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { storage } from '../lib/storage';
 import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
+import { getSampleReviews, isSampleDataCleared, setSampleDataCleared } from '../lib/mockData';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { EmailVerificationBanner } from '../components/auth/EmailVerificationBanner';
@@ -55,7 +56,12 @@ export const DashboardPage = () => {
   });
 
   const { project, collectionForm } = useAuth();
-  const [activeTab, setActiveTab] = useState<DashboardTab>('proof');
+  const [activeTab, setActiveTab] = useState<DashboardTab>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab') as DashboardTab;
+    if (tab) return tab;
+    return 'welcome';
+  });
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<ReviewStats>({
@@ -192,11 +198,50 @@ export const DashboardPage = () => {
     refreshReviews();
   }, [activeProjectId]);
 
+  // Sample Data Activation for Brand New Accounts (0 real reviews)
+  const [sampleDataCleared, setSampleDataClearedState] = useState(() =>
+    isSampleDataCleared(activeProjectId)
+  );
+
+  useEffect(() => {
+    setSampleDataClearedState(isSampleDataCleared(activeProjectId));
+  }, [activeProjectId]);
+
+  const handleClearSampleData = useCallback(() => {
+    if (activeProjectId) {
+      setSampleDataCleared(activeProjectId, true);
+      setSampleDataClearedState(true);
+    }
+  }, [activeProjectId]);
+
+  const isViewingSampleData = reviews.length === 0 && !sampleDataCleared;
+  const sampleReviews = useMemo(
+    () => (isViewingSampleData ? getSampleReviews(activeProjectId) : []),
+    [isViewingSampleData, activeProjectId]
+  );
+  const effectiveReviews = isViewingSampleData ? sampleReviews : reviews;
+
+  const effectiveStats = useMemo(() => {
+    if (isViewingSampleData) {
+      return {
+        total: sampleReviews.length,
+        averageRating: 5.0,
+        approvedCount: sampleReviews.length,
+        pendingCount: 0,
+        rejectedCount: 0,
+        archivedCount: 0,
+        featuredCount: sampleReviews.filter((r) => r.isFeatured).length,
+        ratingBreakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: sampleReviews.length },
+      };
+    }
+    return stats;
+  }, [isViewingSampleData, sampleReviews, stats]);
+
   const availableTags = useMemo(() => {
     const set = new Set<string>();
-    reviews.forEach(r => r.tags?.forEach(t => set.add(t)));
+    effectiveReviews.forEach(r => r.tags?.forEach(t => set.add(t)));
     return Array.from(set);
-  }, [reviews]);
+  }, [effectiveReviews]);
 
   // Moderation handlers
   const handleUpdateStatus = async (id: string, status: ReviewStatus) => {
@@ -267,7 +312,7 @@ export const DashboardPage = () => {
 
   // Filtered & Sorted reviews
   const filteredReviews = useMemo(() => {
-    return reviews.filter(r => {
+    return effectiveReviews.filter(r => {
       if (filters.status !== 'all' && r.status !== filters.status) return false;
       if (filters.rating !== 'all' && r.rating !== filters.rating) return false;
       if (filters.tag !== 'all' && (!r.tags || !r.tags.includes(filters.tag))) return false;
@@ -302,11 +347,11 @@ export const DashboardPage = () => {
       }
       return 0;
     });
-  }, [reviews, filters]);
+  }, [effectiveReviews, filters]);
 
   const feedbackList = useMemo(() => {
-    return reviews.filter(r => r.rating <= 3);
-  }, [reviews]);
+    return effectiveReviews.filter(r => r.rating <= 3);
+  }, [effectiveReviews]);
 
   return (
     <div className="min-h-screen flex apple-canvas text-zinc-900 font-sans selection:bg-violet-100 selection:text-violet-900">
@@ -315,7 +360,7 @@ export const DashboardPage = () => {
       <DashboardSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        proofCount={reviews.length}
+        proofCount={effectiveReviews.length}
       />
 
       {/* ── Main Content Area ── */}
@@ -357,8 +402,11 @@ export const DashboardPage = () => {
               onProof={() => setActiveTab('proof')}
               onOpenWall={() => window.open(`${window.location.origin}/love/${project?.slug || 'feedback'}`, '_blank')}
               onRichSnippet={() => setActiveTab('rich-snippet')}
-              reviews={reviews}
+              onWidgets={() => setActiveTab('widgets')}
+              reviews={effectiveReviews}
               publishComplete={publishComplete}
+              isViewingSampleData={isViewingSampleData}
+              onClearSampleData={handleClearSampleData}
             />
           )}
 
@@ -368,8 +416,8 @@ export const DashboardPage = () => {
               onConfigureForm={() => setShowCollectionModal(true)}
               onSendInvites={handleCopyLink}
               onViewProof={() => setActiveTab('proof')}
-              reviews={reviews}
-              stats={stats}
+              reviews={effectiveReviews}
+              stats={effectiveStats}
             />
           )}
 
@@ -398,12 +446,12 @@ export const DashboardPage = () => {
 
           {/* Rich Snippet (SEO Schema) */}
           {activeTab === 'rich-snippet' && (
-            <RichSnippetView reviews={reviews} />
+            <RichSnippetView reviews={effectiveReviews} />
           )}
 
           {/* AI Sentiment Analysis */}
           {activeTab === 'analyze' && (
-            <AnalyzeView reviews={reviews} />
+            <AnalyzeView reviews={effectiveReviews} />
           )}
 
           {/* Integrations */}
@@ -422,7 +470,7 @@ export const DashboardPage = () => {
           {activeTab === 'widgets' && (
             <div className="max-w-7xl mx-auto">
               <WidgetStudio
-                reviews={reviews}
+                reviews={effectiveReviews}
                 onBack={() => setActiveTab('proof')}
                 onOpenProof={() => setActiveTab('proof')}
               />
@@ -445,7 +493,7 @@ export const DashboardPage = () => {
                         Your Proof
                       </h1>
                       <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-500/10 text-violet-700 border border-violet-500/20 shadow-2xs">
-                        {reviews.length} {reviews.length === 1 ? 'Entry' : 'Entries'}
+                        {effectiveReviews.length} {effectiveReviews.length === 1 ? 'Entry' : 'Entries'}
                       </span>
                       <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -495,8 +543,31 @@ export const DashboardPage = () => {
                 </div>
               </div>
 
+              {/* Sample Reviews Notice for New Accounts */}
+              {isViewingSampleData && (
+                <div className="apple-glass-card border-violet-500/30 bg-violet-500/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in shadow-2xs">
+                  <div className="flex items-center gap-3">
+                    <span className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse shrink-0" />
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 tracking-tight">
+                        You are viewing sample reviews
+                      </p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Real customer reviews will appear here automatically as they come in.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleClearSampleData}
+                    className="apple-touch px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-all cursor-pointer self-start sm:self-auto shrink-0 shadow-2xs"
+                  >
+                    Clear Sample Data
+                  </button>
+                </div>
+              )}
+
               {/* Moderation Guidance Banner */}
-              {reviews.length > 0 && stats.approvedCount === 0 && (
+              {effectiveReviews.length > 0 && effectiveStats.approvedCount === 0 && (
                 <div className="apple-glass-card border-violet-500/20 bg-violet-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <p className="text-sm font-bold text-zinc-900 tracking-tight">Your proof is waiting for approval</p>
@@ -512,13 +583,13 @@ export const DashboardPage = () => {
               )}
 
               {/* Priority Pending Moderation Alert */}
-              {stats.pendingCount > 0 && (
+              {effectiveStats.pendingCount > 0 && (
                 <div className="apple-glass-card p-3 border-amber-400/50 bg-amber-50/80 flex items-center justify-between text-xs text-amber-900 animate-fade-in shadow-2xs">
                   <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                     <Clock className="w-4 h-4 text-amber-600" />
                     <span className="font-medium">
-                      <strong>{stats.pendingCount}</strong> testimonial{stats.pendingCount === 1 ? '' : 's'} awaiting your review.
+                      <strong>{effectiveStats.pendingCount}</strong> testimonial{effectiveStats.pendingCount === 1 ? '' : 's'} awaiting your review.
                     </span>
                   </div>
                   <button
@@ -532,25 +603,25 @@ export const DashboardPage = () => {
 
               {/* Top KPIs & Distribution */}
               <MetricsCards
-                stats={stats}
+                stats={effectiveStats}
                 onFilterByStatus={(status) => setFilters(prev => ({ ...prev, status }))}
                 onFilterByRating={(rating) => setFilters(prev => ({ ...prev, rating }))}
               />
 
               {/* AI Sentiment Analysis */}
-              {reviews.length > 0 && (
-                <SentimentDashboard reviews={reviews} />
+              {effectiveReviews.length > 0 && (
+                <SentimentDashboard reviews={effectiveReviews} />
               )}
 
       {/* Filters, View Switcher & Export */}
               <ReviewFilters
                 filters={filters}
                 setFilters={setFilters}
-                stats={stats}
+                stats={effectiveStats}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
-                onExportJSON={() => exportReviewsToJSON(reviews)}
-                onExportCSV={() => exportReviewsToCSV(reviews)}
+                onExportJSON={() => exportReviewsToJSON(effectiveReviews)}
+                onExportCSV={() => exportReviewsToCSV(effectiveReviews)}
                 onResetSeedData={handleSeedDemoData}
                 availableTags={availableTags}
               />

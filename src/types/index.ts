@@ -173,7 +173,8 @@ export type ImportSource =
   | 'screenshot'
   | 'whatsapp'
   | 'slack'
-  | 'instagram';
+  | 'instagram'
+  | 'sample';
 
 export interface Review {
   id: string;
@@ -213,6 +214,8 @@ export interface Review {
   translatedContent?: string;
   translatedLanguage?: string;
   // Metadata
+  isSample?: boolean;
+  authorName?: string;
   createdAt: string; // ISO string
   updatedAt?: string;
   importedAt?: string;
