@@ -12,6 +12,8 @@ import {
   Search,
   Zap,
   X,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { socialClient, SocialStatusResponse } from '../../../lib/socialClient';
 import { ConnectSourceModal } from './ConnectSourceModal';
@@ -105,6 +107,7 @@ export const IntegrateView: React.FC = () => {
   const [searchFilter, setSearchFilter] = useState('');
   const [waitlistJoined, setWaitlistJoined] = useState<Record<string, boolean>>({});
   const [feedbackToast, setFeedbackToast] = useState<string | null>(null);
+  const [showUpcoming, setShowUpcoming] = useState(false);
 
   // LinkedIn Integration State
   const [statusData, setStatusData] = useState<SocialStatusResponse | null>(null);
@@ -540,13 +543,13 @@ export const IntegrateView: React.FC = () => {
           isLiveOAuth: true,
         },
         {
-          id: 'stripe',
-          name: 'Stripe',
-          icon: <StripeIcon className="w-6 h-6 text-[#635BFF]" />,
-          description: 'Manage your PandaPraise subscription — upgrade, downgrade, or cancel via Stripe.',
-          badgeType: stripeSubscription?.plan && stripeSubscription.plan !== 'free' ? 'connected' : 'active',
-          badgeLabel: stripeSubscription?.plan && stripeSubscription.plan !== 'free' ? 'Subscribed' : 'Free Plan',
-          isStripeDirect: true,
+          id: 'webhooks',
+          name: 'Review Collection Webhooks',
+          icon: <WebhookIcon className="w-6 h-6" />,
+          description: 'Automated review requests. Trigger personalized customer review links directly from Stripe checkout, Shopify, Zapier, or your backend.',
+          badgeType: 'active',
+          badgeLabel: 'Active & Ready',
+          isWebhookLive: true,
         },
       ],
     },
@@ -561,18 +564,18 @@ export const IntegrateView: React.FC = () => {
           name: 'Google Reviews',
           icon: <GoogleIcon className="w-6 h-6" />,
           description: 'Import customer praise instantly. Sync verified Google Business profile reviews and live 5-star ratings to your widgets.',
-          badgeType: 'coming_soon',
-          badgeLabel: 'Coming Soon',
-          canJoinWaitlist: true,
+          badgeType: 'active',
+          badgeLabel: 'Active & Ready',
+          canImportUrl: true,
         },
         {
           id: 'trustpilot',
           name: 'Trustpilot',
           icon: <TrustpilotIcon className="w-6 h-6" />,
           description: 'Import customer praise instantly. Stream authentic Trustpilot feedback and verified reviews into your proof vault.',
-          badgeType: 'coming_soon',
-          badgeLabel: 'Coming Soon',
-          canJoinWaitlist: true,
+          badgeType: 'active',
+          badgeLabel: 'Active & Ready',
+          canImportUrl: true,
         },
       ],
     },
@@ -603,7 +606,7 @@ export const IntegrateView: React.FC = () => {
       ],
     },
     {
-      id: 'developer',
+      id: 'webhooks',
       title: 'Webhooks & REST API',
       icon: <Code2 className="w-4 h-4 text-slate-700" />,
       description: 'Connect custom apps via developer tokens, automated webhooks, and REST endpoints.',
@@ -639,12 +642,57 @@ export const IntegrateView: React.FC = () => {
     },
   ];
 
-  // Filtering
+  // Dedicated Upcoming Integrations List for Collapsible Section
+  const upcomingIntegrations = [
+    {
+      id: 'slack',
+      name: 'Slack',
+      icon: <SlackIcon className="w-6 h-6" />,
+      category: 'Team Notifications',
+      description: "Stream real-time customer reviews and 5-star praise straight into your team's Slack channels the second they drop.",
+    },
+    {
+      id: 'teams',
+      name: 'Microsoft Teams',
+      icon: <TeamsIcon className="w-6 h-6" />,
+      category: 'Team Notifications',
+      description: 'Stream real-time praise notifications into channels. Celebrate 5-star customer feedback across your organization.',
+    },
+    {
+      id: 'rest-api',
+      name: 'REST API',
+      icon: <div className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center font-mono text-[10px] font-bold">API</div>,
+      category: 'Developer Tools',
+      description: 'Connect custom apps via developer tokens. Query testimonials and manage collection forms programmatically.',
+    },
+    {
+      id: 'zapier',
+      name: 'Zapier',
+      icon: <ZapierIcon className="w-6 h-6" />,
+      category: 'Automation',
+      description: 'Connect Panda Praise to 5,000+ apps including HubSpot, Salesforce, Notion, and Airtable without writing code.',
+    },
+  ];
+
+  // Marketplace Category Filter Tabs
+  const filterTabs = [
+    { id: 'all', label: 'All Categories' },
+    { id: 'active', label: 'Active & Connected' },
+    { id: 'reviews', label: 'Review Imports' },
+    { id: 'notifications', label: 'Team Notifications' },
+    { id: 'webhooks', label: 'Webhooks' },
+  ];
+
+  // Filtering Logic
   const filteredCategories = categories.map((cat) => {
     if (selectedCategory !== 'all' && cat.id !== selectedCategory) {
       return null;
     }
     const filteredItems = cat.items.filter((item) => {
+      // In 'all' overview tab, group upcoming items into the dedicated collapsible section at the bottom
+      if (selectedCategory === 'all' && item.badgeType === 'coming_soon') {
+        return false;
+      }
       if (!searchFilter.trim()) return true;
       const query = searchFilter.toLowerCase();
       return item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query);
@@ -654,7 +702,7 @@ export const IntegrateView: React.FC = () => {
   }).filter(Boolean);
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 space-y-8 font-sans">
+    <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6 space-y-6 font-sans">
       
       {/* Toast Notification */}
       {feedbackToast && (
@@ -668,7 +716,7 @@ export const IntegrateView: React.FC = () => {
       {facebookOutcomeError && (
         <div
           id="facebook-outcome-banner"
-          className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-3 animate-fade-in"
+          className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-3 animate-fade-in text-left"
         >
           <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="flex-1 text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
@@ -687,17 +735,129 @@ export const IntegrateView: React.FC = () => {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-gray-200 text-left">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-gray-950 tracking-tight font-display">Integrations</h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-brand-50 text-brand-700 text-xs font-semibold border border-brand-100">
-              8 Available & Upcoming
+            <h1 className="text-2xl font-bold text-gray-950 tracking-tight font-display">Integrations & Apps</h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-purple-50 text-[#6701e6] text-xs font-bold border border-purple-200">
+              Verified Marketplace
             </span>
           </div>
           <p className="text-xs sm:text-sm text-gray-600">
             Connect Panda Praise to your favorite apps, automate review collection, and stream customer praise everywhere.
           </p>
+        </div>
+      </div>
+
+      {/* ── Compact Chrome Extension Anchor (High Visibility, Low Vertical Footprint) ── */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-[#1e1035] via-[#2d1254] to-[#0f0728] text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-purple-500/30">
+        <div className="flex items-center gap-3 text-left">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center shrink-0 text-purple-300">
+            <Sparkles className="w-5 h-5 text-purple-300" />
+          </div>
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-white tracking-tight">
+                PandaPraise 1-Click Clipper (Chrome Extension)
+              </span>
+              <span className="px-2 py-0.2 rounded-full bg-purple-500/30 text-[10px] font-extrabold text-purple-200 border border-purple-400/40">
+                Primary Tool
+              </span>
+            </div>
+            <p className="text-[11px] text-purple-200/80 leading-snug">
+              Clip customer praise from Twitter/X, LinkedIn, WhatsApp Web & Slack directly into your Proof Vault in 1 second.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <a
+            href="https://github.com/greetingsgopal-hub/testimonial-collector-dashboard/tree/main/extension"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 rounded-xl bg-white hover:bg-gray-100 text-gray-950 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+          >
+            <span>Get Extension</span>
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </a>
+        </div>
+      </div>
+
+      {/* ── Dedicated Account & Billing Management Group (Extracted from Social Cards) ── */}
+      <section className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-3 text-left">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-center p-2.5 shrink-0">
+              <StripeIcon className="w-6 h-6 text-[#635BFF]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-gray-950">Account & Billing Management</h3>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                  Stripe Connected
+                </span>
+              </div>
+              <p className="text-xs text-gray-500">
+                Manage your PandaPraise workspace subscription tier, invoices, and payment cards securely via Stripe.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+            <div className="text-right hidden sm:block">
+              <span className="text-xs font-bold text-gray-900 block capitalize">
+                {stripeSubscription?.plan ? `${stripeSubscription.plan} Plan` : 'Free Plan'}
+              </span>
+              <span className="text-[10px] text-gray-500">
+                Status: {stripeSubscription?.subscriptionStatus || 'active'}
+              </span>
+            </div>
+
+            {stripeSubscription?.plan && stripeSubscription.plan !== 'free' ? (
+              <button
+                type="button"
+                onClick={handleBillingPortal}
+                disabled={billingPortalLoading}
+                className="px-4 py-2 rounded-xl bg-gray-950 hover:bg-gray-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <span>{billingPortalLoading ? 'Opening Portal...' : 'Manage Invoices & Plan'}</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => (window.location.href = '/pricing')}
+                className="px-4 py-2 rounded-xl bg-[#635BFF] hover:bg-[#5249e0] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+              >
+                <span>Upgrade Plan</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Category Filter Tabs & Instant Search Toolbar ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+        {/* Functional Filter Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          {filterTabs.map((tab) => {
+            const isSelected = selectedCategory === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setSelectedCategory(tab.id)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-[#6701e6] text-white shadow-xs font-bold'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-950 border border-transparent'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Search input */}
@@ -708,102 +868,26 @@ export const IntegrateView: React.FC = () => {
             placeholder="Search integrations..."
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2 rounded-xl text-xs bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-2xs"
+            className="w-full pl-9 pr-3.5 py-2 rounded-xl text-xs bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all shadow-2xs"
           />
         </div>
       </div>
 
-      {/* Official Chrome Extension Card */}
-      <div className="p-6 rounded-3xl bg-gradient-to-br from-[#1e1035] via-[#2d1254] to-[#0f0728] text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-purple-500/30">
-        <div className="space-y-2 max-w-xl text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-xs font-bold text-purple-300 border border-purple-400/30">
-            <span>✨ New Release</span>
-            <span>•</span>
-            <span>Chrome Extension</span>
-          </div>
-          <h2 className="text-xl font-bold tracking-tight text-white font-display">
-            PandaPraise 1-Click Testimonial & Review Clipper
-          </h2>
-          <p className="text-xs text-purple-200/90 leading-relaxed">
-            Clip customer praise from Twitter/X, LinkedIn, WhatsApp Web, Slack, and any web page straight to your Proof Vault in 1 second. Also includes instant sales pitch search to copy testimonials during prospect calls.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <a
-            href="https://github.com/greetingsgopal-hub/testimonial-collector-dashboard/tree/main/extension"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-5 py-2.5 rounded-xl bg-white hover:bg-gray-100 text-gray-950 text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
-          >
-            <span>Get Chrome Extension</span>
-            <ArrowUpRight className="w-4 h-4" />
-          </a>
-        </div>
-      </div>
-
-      {/* AI Case Study Generator — Coming Soon Banner (no simulated toggle) */}
-      <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-50/60 to-indigo-50/60 border border-purple-100 shadow-xs flex items-center justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <div className="space-y-0.5 text-left">
-            <p className="text-xs sm:text-sm font-bold text-gray-900">
-              Panda Praise AI Case Study Generator — Coming Soon
-            </p>
-            <p className="text-xs text-gray-600 max-w-xl">
-              Automatically transform multi-step customer praise into ready-to-publish case studies and social graphics. This feature is not available yet.
-            </p>
-          </div>
-        </div>
-
-        <span className="px-2.5 py-1 rounded-full bg-white text-gray-500 border border-gray-200 text-[10px] font-bold uppercase tracking-wide shrink-0">
-          Coming Soon
-        </span>
-      </div>
-
-      {/* Category Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <button
-          onClick={() => setSelectedCategory('all')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-            selectedCategory === 'all'
-              ? 'bg-brand-600 text-white shadow-xs'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-950'
-          }`}
-        >
-          All Categories
-        </button>
-        {categories.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-              selectedCategory === cat.id
-                ? 'bg-brand-600 text-white shadow-xs'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-950'
-            }`}
-          >
-            <span>{cat.title}</span>
-          </button>
-        ))}
-      </div>
-
       {/* Error alert if any */}
       {error && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2.5">
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2.5 text-left">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
           <p>{error}</p>
         </div>
       )}
 
-      {/* Categorized Integration Grids */}
-      <div className="space-y-10">
+      {/* ── Active & Categorized Integration Grids ── */}
+      <div className="space-y-8">
         {filteredCategories.map((cat: any) => (
-          <div key={cat.id} className="space-y-4">
+          <div key={cat.id} className="space-y-3.5">
             
             {/* Category Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100 text-left">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-lg bg-gray-100 text-gray-700">
                   {cat.icon}
@@ -825,24 +909,24 @@ export const IntegrateView: React.FC = () => {
                     key={item.id}
                     className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs hover:border-gray-300 transition-all flex flex-col justify-between text-left space-y-4 relative group"
                   >
-                    {/* Top Row: Icon + Status Pill */}
+                    {/* Top Row: Icon + Standardized Status Pill */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="w-11 h-11 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center p-2.5 shadow-2xs shrink-0">
                         {item.icon}
                       </div>
 
-                      {/* Status Badges */}
+                      {/* Standardized Status Badges */}
                       {item.badgeType === 'connected' && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-200">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                           Connected
                         </span>
                       )}
 
                       {item.badgeType === 'active' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 text-brand-700 text-[11px] font-bold border border-indigo-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-brand-600 animate-pulse" />
-                          Active
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 text-[#6701e6] text-[11px] font-bold border border-purple-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#6701e6] animate-pulse" />
+                          Active & Ready
                         </span>
                       )}
 
@@ -855,7 +939,7 @@ export const IntegrateView: React.FC = () => {
 
                     {/* Middle: Title & Description */}
                     <div className="space-y-1.5 flex-1">
-                      <h3 className="text-sm font-bold text-gray-900 group-hover:text-brand-600 transition-colors">
+                      <h3 className="text-sm font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
                         {item.name}
                       </h3>
                       <p className="text-xs text-gray-600 leading-relaxed">
@@ -938,30 +1022,9 @@ export const IntegrateView: React.FC = () => {
                         </div>
                       )}
 
-                      {/* Special Stripe Subscription Info */}
-                      {item.id === 'stripe' && stripeSubscription?.plan && stripeSubscription.plan !== 'free' && (
-                        <div className="mt-3 p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 flex items-center justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <span className="text-[11px] font-bold text-emerald-950 block capitalize">
-                              {stripeSubscription.plan} Plan
-                            </span>
-                            <span className="text-[10px] text-emerald-700">
-                              Status: {stripeSubscription.subscriptionStatus || 'active'}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={handleBillingPortal}
-                            className="text-[10px] font-bold text-brand-600 hover:underline cursor-pointer"
-                          >
-                            Manage
-                          </button>
-                        </div>
-                      )}
-
                     </div>
 
-                    {/* Bottom: Action Trigger */}
+                    {/* Bottom: Standardized Action Triggers */}
                     <div className="pt-2 border-t border-gray-100">
                       {/* LinkedIn Card Actions */}
                       {item.id === 'linkedin' && (
@@ -986,7 +1049,7 @@ export const IntegrateView: React.FC = () => {
                             id="connect-linkedin-btn"
                             onClick={handleConnectLinkedIn}
                             disabled={connecting || loadingStatus}
-                            className="w-full py-2 px-3 rounded-xl bg-[#0a66c2] hover:bg-[#004182] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                            className="w-full py-2 px-3 rounded-xl border-2 border-[#0a66c2] text-[#0a66c2] hover:bg-[#0a66c2]/5 text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
                           >
                             {connecting ? (
                               <>
@@ -1040,7 +1103,7 @@ export const IntegrateView: React.FC = () => {
                               type="button"
                               onClick={handleConnectFacebook}
                               disabled={connectingFacebook}
-                              className="w-full py-1.5 px-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-[11px] font-semibold transition-all shadow-2xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                              className="w-full py-1.5 px-3 rounded-xl border border-gray-300 hover:bg-gray-50 text-gray-700 text-[11px] font-semibold transition-all shadow-2xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
                             >
                               {connectingFacebook ? (
                                 <>
@@ -1083,7 +1146,7 @@ export const IntegrateView: React.FC = () => {
                             type="button"
                             onClick={handleConnectInstagram}
                             disabled={connectingInstagram}
-                            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-90 text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                            className="w-full py-2 px-3 rounded-xl border-2 border-purple-400 text-purple-700 hover:bg-purple-50 text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
                           >
                             {connectingInstagram ? (
                               <>
@@ -1130,41 +1193,12 @@ export const IntegrateView: React.FC = () => {
                         </button>
                       )}
 
-                      {/* Stripe Card Actions */}
-                      {item.id === 'stripe' && (
-                        stripeSubscription?.plan && stripeSubscription.plan !== 'free' ? (
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold text-center flex items-center justify-center gap-1.5 shadow-2xs">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                              <span className="capitalize">{stripeSubscription.plan} Plan</span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={handleBillingPortal}
-                              disabled={billingPortalLoading}
-                              className="flex-1 py-2 px-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-bold transition-all shadow-2xs text-center cursor-pointer disabled:opacity-50"
-                            >
-                              {billingPortalLoading ? 'Loading...' : 'Manage'}
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => window.location.href = '/pricing'}
-                            className="w-full py-2 px-3 rounded-xl bg-[#635BFF] hover:bg-[#5249e0] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
-                          >
-                            <span>Upgrade Plan</span>
-                            <ArrowUpRight className="w-3.5 h-3.5" />
-                          </button>
-                        )
-                      )}
-
                       {/* Webhooks Card Action */}
                       {item.id === 'webhooks' && (
                         <button
                           type="button"
                           onClick={() => setShowWebhookModal(true)}
-                          className="apple-touch w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                          className="apple-touch w-full py-2 px-3 rounded-xl bg-gray-950 hover:bg-gray-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                         >
                           <Zap className="w-3.5 h-3.5 text-amber-400" />
                           <span>Configure Webhook Triggers</span>
@@ -1173,7 +1207,6 @@ export const IntegrateView: React.FC = () => {
 
                       {/* Other Waitlist Cards */}
                       {item.id !== 'linkedin' &&
-                        item.id !== 'stripe' &&
                         item.id !== 'facebook' &&
                         item.id !== 'instagram' &&
                         item.id !== 'google-reviews' &&
@@ -1186,7 +1219,7 @@ export const IntegrateView: React.FC = () => {
                           className={`w-full py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                             isWaitlisted
                               ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default'
-                              : 'bg-gray-50 hover:bg-brand-50 hover:text-brand-700 text-gray-700 border border-gray-200 shadow-2xs'
+                              : 'bg-gray-50 hover:bg-purple-50 hover:text-purple-700 text-gray-700 border border-gray-200 shadow-2xs'
                           }`}
                         >
                           {isWaitlisted ? (
@@ -1212,6 +1245,89 @@ export const IntegrateView: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* ── Collapsible "Upcoming Integrations & Waitlist" Section (cleanly grouped in 'all' view) ── */}
+      {selectedCategory === 'all' && (
+        <section className="border border-dashed border-gray-200 rounded-2xl p-5 bg-gray-50/60 text-left space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-purple-100/70 border border-purple-200 flex items-center justify-center text-[#6701e6] shrink-0">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-800">
+                  Upcoming Integrations & Waitlist ({upcomingIntegrations.length} Tools)
+                </h3>
+                <p className="text-[11px] text-gray-500">
+                  Upcoming tools under active development. Click "Join Waitlist" to vote on roadmap priority.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowUpcoming(!showUpcoming)}
+              className="px-3.5 py-2 rounded-xl bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs self-start sm:self-center"
+            >
+              <span>{showUpcoming ? 'Hide Upcoming Tools' : `Show Upcoming Tools (${upcomingIntegrations.length})`}</span>
+              {showUpcoming ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+
+          {showUpcoming && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 animate-in fade-in duration-200">
+              {upcomingIntegrations.map((item) => {
+                const isWaitlisted = waitlistJoined[item.id];
+                return (
+                  <div
+                    key={item.id}
+                    className="p-4 rounded-xl bg-white border border-gray-200 shadow-2xs flex flex-col justify-between space-y-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shrink-0">
+                        {item.icon}
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[10px] font-semibold border border-gray-200">
+                        Coming Soon
+                      </span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-bold text-gray-900">{item.name}</h4>
+                      <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleJoinWaitlist(item.id, item.name)}
+                      disabled={isWaitlisted}
+                      className={`w-full py-1.5 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        isWaitlisted
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default'
+                          : 'bg-gray-50 hover:bg-purple-50 hover:text-purple-700 text-gray-700 border border-gray-200'
+                      }`}
+                    >
+                      {isWaitlisted ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-600" />
+                          <span>Joined Waitlist</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Join Waitlist</span>
+                          <ArrowUpRight className="w-3 h-3 text-gray-400" />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ── Facebook Page Selection Modal (explicit selection, no IDs shown) ── */}
       {showFbPagePicker && (
