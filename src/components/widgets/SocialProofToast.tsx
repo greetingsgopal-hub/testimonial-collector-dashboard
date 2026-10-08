@@ -10,6 +10,8 @@ interface SocialProofToastProps {
   onOpenWallOfLove?: () => void;
   /** When set, reviews are sample data and this label is shown on each toast. */
   sampleLabel?: string;
+  /** Smart boundary check: hides the toast when user scrolls into footer or blocked regions */
+  hideWhenBlocked?: boolean;
 }
 
 interface CuratedToast {
@@ -22,9 +24,7 @@ interface CuratedToast {
   platformIcon?: 'x' | 'facebook' | 'producthunt' | 'google';
 }
 
-// Toasts now render the REAL reviews passed in via props — the previous
-// hardcoded fake-person toasts (attributed to invented customers) were removed.
-
+// Toasts render real approved reviews passed in via props
 export const SocialProofToast: React.FC<SocialProofToastProps> = ({
   reviews: _reviews = [],
   position = 'bottom-left',
@@ -32,10 +32,17 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
   interval = 4000,
   onOpenWallOfLove,
   sampleLabel,
+  hideWhenBlocked = false,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    try {
+      return typeof window !== 'undefined' && sessionStorage.getItem('panda_toast_dismissed') === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   // Only real, approved reviews passed via props are shown. No fake fallbacks.
   const toasts: CuratedToast[] = React.useMemo(() => {
@@ -51,7 +58,7 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
   }, [_reviews]);
 
   useEffect(() => {
-    if (isDismissed) return;
+    if (isDismissed || hideWhenBlocked) return;
 
     // Show initial toast after 1.8 seconds
     const initialTimer = setTimeout(() => {
@@ -59,26 +66,26 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
     }, 1800);
 
     return () => clearTimeout(initialTimer);
-  }, [isDismissed]);
+  }, [isDismissed, hideWhenBlocked]);
 
   useEffect(() => {
-    if (!isVisible || isDismissed) return;
+    if (!isVisible || isDismissed || hideWhenBlocked) return;
 
     const hideTimer = setTimeout(() => {
       setIsVisible(false);
 
-        setTimeout(() => {
-          if (!isDismissed && toasts.length > 0) {
-            setCurrentIndex((prev) => (prev + 1) % toasts.length);
-            setIsVisible(true);
-          }
-        }, interval);
+      setTimeout(() => {
+        if (!isDismissed && !hideWhenBlocked && toasts.length > 0) {
+          setCurrentIndex((prev) => (prev + 1) % toasts.length);
+          setIsVisible(true);
+        }
+      }, interval);
     }, displayDuration);
 
     return () => clearTimeout(hideTimer);
-  }, [isVisible, isDismissed, displayDuration, interval]);
+  }, [isVisible, isDismissed, hideWhenBlocked, displayDuration, interval, toasts.length]);
 
-  if (isDismissed || !isVisible || toasts.length === 0) return null;
+  if (isDismissed || !isVisible || toasts.length === 0 || hideWhenBlocked) return null;
 
   const current = toasts[currentIndex % toasts.length];
   if (!current) return null;
@@ -92,6 +99,8 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
 
   return (
     <div
+      id="social-proof-toast"
+      data-testid="social-proof-toast"
       onClick={onOpenWallOfLove}
       className={`fixed ${positionClasses} z-40 hidden md:block max-w-[310px] w-full transition-all duration-300 transform translate-y-0 cursor-pointer animate-fade-in`}
     >
@@ -103,6 +112,9 @@ export const SocialProofToast: React.FC<SocialProofToastProps> = ({
           onClick={(e) => {
             e.stopPropagation();
             setIsDismissed(true);
+            try {
+              sessionStorage.setItem('panda_toast_dismissed', 'true');
+            } catch {}
           }}
           className="absolute top-2.5 right-2.5 p-1 text-gray-400 hover:text-gray-700 rounded-md transition-colors"
           title="Dismiss"

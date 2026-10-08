@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ArrowRight, 
@@ -69,20 +69,30 @@ export const LandingPage: React.FC = () => {
   const { user } = useAuth();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [activeShareTab, setActiveShareTab] = useState<'widgets' | 'walls' | 'popups' | 'images'>('widgets');
-  const [selectedWidgetTag, setSelectedWidgetTag] = useState('Testimonial Image Gallery');
+  const [interactiveWidgetTab, setInteractiveWidgetTab] = useState<'wall' | 'ticker' | 'badge' | 'card'>('wall');
   const [showHeartTab, setShowHeartTab] = useState(false);
   const [showSocialToast, setShowSocialToast] = useState(false);
   const [searchQueryMock, setSearchQueryMock] = useState('do the techs actually use it');
   const [isWallModalOpen, setIsWallModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Smart boundary check to prevent toast colliding with footer or CTAs
+  const footerRef = useRef<HTMLElement>(null);
+  const [isNearFooter, setIsNearFooter] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       const y = window.scrollY;
       setShowHeartTab(y > 500);
       setShowSocialToast(y > 1650);
+
+      if (footerRef.current) {
+        const footerRect = footerRef.current.getBoundingClientRect();
+        setIsNearFooter(footerRect.top < window.innerHeight + 120);
+      }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -444,7 +454,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── 6. FEATURE 1: "COLLECT" (Two-Column Alternating: Text LEFT, Visual RIGHT) ── */}
-      <section id="collect-section" className="border-t border-gray-200/80 bg-white py-20 sm:py-24">
+      <section id="collect-section" className="border-t border-gray-200/80 bg-gradient-to-b from-white via-amber-50/20 to-white py-20 sm:py-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             
@@ -564,7 +574,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── 7. FEATURE 2: "ORGANIZE" (Two-Column Alternating: Visual LEFT, Text RIGHT) ── */}
-      <section id="find-section" className="border-t border-gray-200/80 bg-gray-50/70 py-20 sm:py-24">
+      <section id="find-section" className="border-t border-gray-200/80 bg-gradient-to-b from-slate-50 via-purple-50/20 to-slate-50 py-20 sm:py-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             
@@ -822,57 +832,148 @@ export const LandingPage: React.FC = () => {
                     Showcase Your Proof Anywhere
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-                    More attention-grabbing widgets than anywhere else. Install once with copy-paste code, and watch approved testimonials update live.
+                    Interactive, attention-grabbing widgets designed to convert. Click below to preview each widget format live:
                   </p>
 
-                  {/* Streamlined Curated Primary Widget Categories */}
+                  {/* Interactive Widget Format Switcher */}
                   <div className="mt-6 flex flex-wrap items-center justify-center gap-2 max-w-3xl mx-auto">
                     {[
-                      'Image Gallery',
-                      'Masonry Grid',
-                      'Marquee Ticker',
-                      'Carousel Slider',
-                      'Rating Badge',
-                      'Social Cards',
-                      'Avatars Pro',
-                      'Minimalist List',
-                      'Quote Grid',
+                      { id: 'wall', label: 'Wall of Love', icon: '✨' },
+                      { id: 'ticker', label: 'Marquee Ticker', icon: '⚡' },
+                      { id: 'badge', label: 'Rating Badge', icon: '⭐' },
+                      { id: 'card', label: 'Social Proof Card', icon: '💬' },
                     ].map((w) => {
-                      const isSelected = selectedWidgetTag === w || (selectedWidgetTag === 'Testimonial Image Gallery' && w === 'Image Gallery');
+                      const isSelected = interactiveWidgetTab === w.id;
                       return (
                         <button
-                          key={w}
+                          key={w.id}
                           type="button"
-                          onClick={() => setSelectedWidgetTag(w)}
-                          className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer ${
+                          id={`interactive-widget-tab-${w.id}`}
+                          onClick={() => setInteractiveWidgetTab(w.id as any)}
+                          className={`rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                             isSelected
-                              ? 'bg-brand-600 text-white shadow-xs'
+                              ? 'bg-brand-600 text-white shadow-md scale-105'
                               : 'border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-950'
                           }`}
                         >
-                          {w}
+                          <span>{w.icon}</span>
+                          <span>{w.label}</span>
                         </button>
                       );
                     })}
                   </div>
 
-                  {/* Live Widget Cards Preview (sample data) */}
-                  <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left max-w-4xl mx-auto">
-                    {INITIAL_REVIEWS.slice(0, 3).map((r, i) => (
-                      <div key={i} className="p-4 rounded-xl border border-gray-200 bg-white shadow-xs hover:border-indigo-200 transition-colors">
-                        <div role="img" aria-label="5 out of 5 stars" className="flex text-amber-500 text-xs mb-2"><span aria-hidden="true">★★★★★</span></div>
-                        <p className="text-xs text-gray-800 italic line-clamp-3 mb-3">"{r.content}"</p>
-                        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                          <img src={r.avatarUrl} alt={r.name} className="w-6 h-6 rounded-full object-cover" />
-                          <div className="text-[11px] truncate">
-                            <span className="font-bold text-gray-900 block">{r.name}</span>
-                            <span className="text-gray-600 truncate">{r.company}</span>
+                  {/* Dynamic Interactive Mock Widget Canvas */}
+                  <div className="mt-8 max-w-4xl mx-auto" id="interactive-widget-preview-canvas">
+                    {/* Format A: Wall of Love Masonry Grid */}
+                    {interactiveWidgetTab === 'wall' && (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left animate-in fade-in duration-200">
+                        {INITIAL_REVIEWS.slice(0, 3).map((r, i) => (
+                          <div
+                            key={i}
+                            className="p-4 rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md hover:border-violet-300 transition-all group"
+                          >
+                            <div role="img" aria-label="5 out of 5 stars" className="flex text-amber-500 text-xs mb-2">
+                              <span>★★★★★</span>
+                            </div>
+                            <p className="text-xs text-gray-800 leading-relaxed line-clamp-3 mb-3">
+                              "{r.content}"
+                            </p>
+                            <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                              <img src={r.avatarUrl} alt={r.name} className="w-7 h-7 rounded-full object-cover ring-1 ring-violet-200" />
+                              <div className="text-[11px] truncate">
+                                <span className="font-bold text-gray-900 block truncate">{r.name}</span>
+                                <span className="text-gray-500 truncate">{r.company || 'Verified Customer'}</span>
+                              </div>
+                            </div>
                           </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Format B: Marquee Ticker */}
+                    {interactiveWidgetTab === 'ticker' && (
+                      <div className="rounded-2xl border border-gray-200 bg-slate-900 text-white p-5 shadow-lg overflow-hidden animate-in fade-in duration-200">
+                        <div className="flex items-center justify-between mb-3 text-xs text-slate-400">
+                          <span className="font-semibold text-emerald-400 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                            Live Testimonial Marquee (Auto-scrolling)
+                          </span>
+                          <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-300">Infinite Carousel</span>
+                        </div>
+                        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+                          {INITIAL_REVIEWS.slice(0, 4).map((r, i) => (
+                            <div key={i} className="min-w-[260px] bg-slate-800/80 rounded-xl p-3 border border-slate-700/60 shrink-0 text-left">
+                              <div className="flex items-center gap-1 text-amber-400 text-xs mb-1">
+                                ★★★★★
+                              </div>
+                              <p className="text-xs text-slate-200 line-clamp-2 leading-relaxed">
+                                "{r.content}"
+                              </p>
+                              <div className="mt-2 text-[10px] text-slate-400 flex items-center gap-1.5">
+                                <span className="font-bold text-white">{r.name}</span>
+                                <span>•</span>
+                                <span>{r.company}</span>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    ))}
+                    )}
+
+                    {/* Format C: Rating Badge */}
+                    {interactiveWidgetTab === 'badge' && (
+                      <div className="flex flex-wrap items-center justify-center gap-6 p-8 rounded-2xl border border-gray-200 bg-gradient-to-r from-violet-50/50 via-white to-amber-50/50 shadow-sm animate-in fade-in duration-200">
+                        {/* Big Google-style Badge */}
+                        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white border border-gray-200 shadow-md">
+                          <div className="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center font-bold text-sm">
+                            ★ 4.9
+                          </div>
+                          <div className="text-left">
+                            <div className="flex items-center gap-0.5 text-amber-500 text-xs">
+                              ★★★★★
+                            </div>
+                            <p className="text-xs font-bold text-gray-900 mt-0.5">1,280+ 5-Star Reviews</p>
+                            <p className="text-[10px] text-gray-500">Verified by Panda Praise</p>
+                          </div>
+                        </div>
+
+                        {/* Floating trust pill */}
+                        <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span>99.4% Customer Satisfaction</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Format D: Social Proof Card */}
+                    {interactiveWidgetTab === 'card' && (
+                      <div className="max-w-md mx-auto p-6 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-700 text-white shadow-xl text-left animate-in fade-in duration-200 relative overflow-hidden">
+                        <div className="absolute top-2 right-4 text-white/10 text-6xl font-serif font-black select-none pointer-events-none">
+                          “
+                        </div>
+                        <div className="flex items-center gap-1 text-amber-300 text-sm mb-3">
+                          ★★★★★
+                        </div>
+                        <p className="text-sm sm:text-base font-semibold leading-relaxed mb-4 text-white">
+                          "Panda Praise helped us collect 42 verified testimonials in our first week. Our conversion rate jumped by 34%!"
+                        </p>
+                        <div className="flex items-center justify-between pt-3 border-t border-white/20">
+                          <div>
+                            <p className="text-xs font-bold text-white">Sarah Jenkins</p>
+                            <p className="text-[11px] text-violet-200">Founder, GrowthStack</p>
+                          </div>
+                          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">
+                            Verified Review
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <p className="mt-3 text-[11px] text-gray-400">Sample preview — your own approved testimonials appear here.</p>
+
+                  <p className="mt-4 text-[11px] text-gray-400">
+                    Live interactive preview — easily embedded with a 1-line copy-paste code snippet.
+                  </p>
                 </div>
               )}
 
@@ -967,7 +1068,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── 9. FEATURE 4: "THANK & DELIGHT" (Two-Column Alternating: Visual LEFT, Text RIGHT) ── */}
-      <section className="border-t border-gray-200/80 bg-gray-50/70 py-20 sm:py-24">
+      <section id="delight-section" className="border-t border-gray-200/80 bg-gradient-to-b from-purple-50/30 via-pink-50/20 to-white py-20 sm:py-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             
@@ -1212,8 +1313,8 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 13. Comprehensive SaaS Footer (Senja Exact Multi-Column Structure) ── */}
-      <footer className="bg-gray-50 border-t border-gray-200">
+      {/* ── 13. Comprehensive SaaS Footer (Clean Deduplicated 4-Column Structure) ── */}
+      <footer ref={footerRef} id="landing-footer" className="bg-gray-50 border-t border-gray-200">
         {/* Wavy Senja divider SVG line */}
         <div className="flex justify-center pt-10 text-[#6701e6]">
           <svg width="220" height="22" viewBox="0 0 220 22" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" aria-hidden="true">
@@ -1234,50 +1335,62 @@ export const LandingPage: React.FC = () => {
               <p className="mt-4 max-w-[14rem] text-sm leading-relaxed text-gray-600">
                 Collect, manage and share testimonials in minutes.
               </p>
+              <div className="mt-4">
+                <Link
+                  to="/signup"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6701e6] text-white text-xs font-bold hover:bg-[#5400bd] transition-colors shadow-2xs"
+                >
+                  <span>Start for Free</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
 
-            {/* 4 Multi-Columns */}
+            {/* 4 Clean Deduplicated Columns */}
             <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 text-left">
               
               {/* Product */}
               <div>
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Product</h3>
+                <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-900">Product</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Collect Testimonials</button></li>
-                  <li><button onClick={() => scrollToSection('find-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Import Testimonials</button></li>
-                  <li><Link to="/c/feedback" className="hover:text-gray-900 transition-colors">Collector Forms</Link></li>
+                  <li><button onClick={() => scrollToSection('find-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Search & Proof Vault</button></li>
                   <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Testimonial Widgets</button></li>
                   <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Wall of Love</button></li>
+                  <li><Link to="/c/feedback" className="hover:text-gray-900 transition-colors">Live Collector Form</Link></li>
                 </ul>
               </div>
 
               {/* Resources */}
               <div>
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Resources</h3>
+                <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-900">Resources</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing & Plans</Link></li>
+                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Social Proof Score Quiz</Link></li>
+                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Why Panda Praise</button></li>
                   <li><button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Frequently Asked Questions</button></li>
                 </ul>
               </div>
 
-              {/* Overview */}
+              {/* Integrations */}
               <div>
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Overview</h3>
+                <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-900">Integrations</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
-                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Why Panda Praise</button></li>
-                  <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Customer Proof & Wall of Love</button></li>
+                  <li><button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Google & Meta Reviews</button></li>
+                  <li><button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">LinkedIn & 𝕏 Importer</button></li>
+                  <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Shopify & Webflow Sync</button></li>
+                  <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">REST API & Webhooks</button></li>
                 </ul>
               </div>
 
-              {/* Platform */}
+              {/* Account & Legal */}
               <div>
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-600">Platform</h3>
+                <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-900">Account & Legal</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
-                  <li><Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link></li>
-                  <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Our Wall of Love 💖</button></li>
-                  <li><Link to="/c/feedback" className="hover:text-gray-900 transition-colors">Leave a Review</Link></li>
                   <li><Link to="/login" className="hover:text-gray-900 transition-colors">Login</Link></li>
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors font-semibold text-[#6701e6]">Start Free</Link></li>
+                  <li><Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link></li>
+                  <li><Link to="/privacy-policy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link></li>
                 </ul>
               </div>
 
@@ -1311,6 +1424,7 @@ export const LandingPage: React.FC = () => {
           position="bottom-left"
           onOpenWallOfLove={() => setIsWallModalOpen(true)}
           sampleLabel="Sample"
+          hideWhenBlocked={isNearFooter}
         />
       )}
     </div>
