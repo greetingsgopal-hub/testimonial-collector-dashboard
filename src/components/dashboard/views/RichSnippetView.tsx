@@ -10,6 +10,8 @@ import {
   Search,
   ChevronDown,
   ChevronUp,
+  Sparkles,
+  Globe,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { Review } from '../../../types';
@@ -18,7 +20,7 @@ interface RichSnippetViewProps {
   reviews?: Review[];
 }
 
-type PlatformTab = 'wordpress' | 'shopify' | 'webflow' | 'framer' | 'html';
+export type PlatformTab = 'wordpress' | 'shopify' | 'webflow' | 'framer' | 'html';
 
 export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }) => {
   const { project, workspace } = useAuth();
@@ -32,7 +34,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
   const [businessName, setBusinessName] = useState(project?.name || workspace?.name || 'Panda Praise');
   const [websiteUrl, setWebsiteUrl] = useState(project?.websiteUrl || 'https://pandapraise.com');
 
-  const approvedReviews = reviews.filter(r => r.status === 'approved');
+  const approvedReviews = reviews.filter((r) => r.status === 'approved');
   const calculatedRating = approvedReviews.length
     ? (approvedReviews.reduce((sum, r) => sum + r.rating, 0) / approvedReviews.length).toFixed(1)
     : reviews.length
@@ -70,42 +72,97 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(jsonLdCode);
-    setCopied(true);
-    showToast('✓ Google Schema script copied to clipboard!');
-    setTimeout(() => setCopied(false), 2200);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(jsonLdCode);
+      setCopied(true);
+      showToast('✓ Copied! Paste into your site header to activate search stars.');
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      setCopied(false);
+    }
   };
 
-  const platformGuides: Record<PlatformTab, { name: string; steps: string }> = {
+  const googleTestUrl = `https://search.google.com/test/rich-results?url=${encodeURIComponent(
+    websiteUrl.trim() || 'https://pandapraise.com'
+  )}`;
+
+  const platformGuides: Record<
+    PlatformTab,
+    {
+      name: string;
+      quickLocation: string;
+      steps: string[];
+      tip?: string;
+    }
+  > = {
     wordpress: {
       name: 'WordPress',
-      steps: 'Go to Settings → Insert Headers and Footers (or your SEO plugin like Yoast / RankMath) and paste the code into the Header Scripts box.',
+      quickLocation: 'RankMath, Yoast SEO, or Header & Footer Scripts Plugin',
+      steps: [
+        'Open your WordPress Admin dashboard (yourdomain.com/wp-admin).',
+        'Option A (RankMath / Yoast): Open plugin settings → Schema or Custom Scripts box.',
+        'Option B (WPCode / Header plugin): Go to Settings → WPCode / Insert Headers & Footers.',
+        'Paste your Panda Praise Golden Stars code into the Header Scripts (Header) box.',
+        'Click "Save Changes". Google will detect the stars on its next crawl.',
+      ],
+      tip: 'If using caching plugins (WP Rocket, LiteSpeed), purge your cache after saving.',
     },
     shopify: {
       name: 'Shopify',
-      steps: 'Go to Online Store → Themes → Edit code → open theme.liquid and paste the code right before the closing </head> tag.',
+      quickLocation: 'Online Store → Themes → Edit code → theme.liquid',
+      steps: [
+        'Log in to Shopify Admin (admin.shopify.com) and go to Online Store → Themes.',
+        'Click the "..." (Actions) button next to your active theme and select "Edit code".',
+        'In the Layout folder in the left sidebar, click to open theme.liquid.',
+        'Scroll down or search for the closing </head> tag.',
+        'Paste your Panda Praise code on a new line directly BEFORE </head>.',
+        'Click the green "Save" button in the top right.',
+      ],
+      tip: 'Adding before </head> ensures Google indexes the review schema on all storefront pages.',
     },
     webflow: {
       name: 'Webflow',
-      steps: 'Go to Project Settings → Custom Code → Head Code box. Paste the code and click Save & Publish.',
+      quickLocation: 'Project Settings → Custom Code → Head Code',
+      steps: [
+        'Open your Webflow Dashboard and select your project.',
+        'Go to Project Settings (or gear icon in Designer) → "Custom Code".',
+        'Locate the "Head Code" box (runs inside <head> across all pages).',
+        'Paste your Panda Praise Golden Stars code into the box.',
+        'Click "Save Changes" and hit "Publish" to selected domains.',
+      ],
+      tip: 'Requires Webflow Basic hosting plan or higher to publish custom code.',
     },
     framer: {
       name: 'Framer',
-      steps: 'Go to Site Settings → General → Custom Code → Head Start. Paste the code and publish your site.',
+      quickLocation: 'Site Settings → General → Custom Code → Head Start',
+      steps: [
+        'Open your project in the Framer editor.',
+        'Click the Framer logo in the top-left → Site Settings → General.',
+        'Scroll down to the "Custom Code" section.',
+        'Paste your code into the "Head Start" (or "End of <head>") input box.',
+        'Close settings and click "Publish" in the top-right corner.',
+      ],
+      tip: 'Framer automatically bundles the structured JSON-LD into your live HTML output.',
     },
     html: {
       name: 'HTML / Next.js',
-      steps: 'Paste the script tag directly inside the <head> of your root index.html or root layout template.',
+      quickLocation: '<head> of index.html or root layout.tsx template',
+      steps: [
+        'Static HTML: Open your root index.html and paste directly between <head> and </head>.',
+        'Next.js (App Router): Open app/layout.tsx and add inside <head> using <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(...) }} />.',
+        'Next.js (Pages Router): Import Head from "next/head" and paste inside <Head> in _document.tsx or _app.tsx.',
+        'Deploy your frontend build to production.',
+      ],
+      tip: 'Verify zero hydration mismatch by ensuring the schema script renders directly in static markup.',
     },
   };
 
   return (
     <div className="max-w-5xl mx-auto py-4 px-2 sm:px-4 space-y-6 animate-fade-in font-sans text-left">
-      
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 animate-bounce-in bg-zinc-950 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs border border-zinc-800">
@@ -114,49 +171,36 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
         </div>
       )}
 
-      {/* ── Apple Executive Hero: At-A-Glance Clarity ── */}
+      {/* ── Value-First Hero Header: At-A-Glance Clarity ── */}
       <section className="apple-glass-card rounded-2xl p-6 sm:p-7 border border-black/[0.06] bg-white/80 backdrop-blur-2xl relative overflow-hidden">
         {/* Subtle Ambient Radial Lighting */}
         <div className="absolute -top-16 -right-16 w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-800 text-[11px] font-bold tracking-tight">
+          <div className="space-y-2.5 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-900 text-[11px] font-bold tracking-tight">
               <Star className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
-              <span>Google Organic SERP Enhancement</span>
+              <span>One-Click Golden Stars</span>
               <span className="text-amber-400">•</span>
-              <span className="text-zinc-600 font-medium">Schema.org Structured Data</span>
+              <span className="text-amber-800 font-semibold">Google Search Star Generator</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight font-display">
-              Get Golden Stars on Google Search Results
+              Google Search Star Generator
             </h1>
 
-            <p className="text-xs sm:text-sm text-zinc-500 leading-relaxed">
-              Showcase star ratings directly under your website link in Google search results. Google Rich Snippets build immediate credibility and increase organic click-through rates by up to 35%.
+            <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
+              Display glowing 5-star ratings directly under your website link in Google search results. Google Rich Snippets build instant credibility, grab attention, and increase organic click-through rates by up to 35%.
             </p>
-          </div>
 
-          {/* Instant Action Button & Google Validator */}
-          <div className="shrink-0 flex flex-col sm:items-end gap-2.5">
-            <button
-              onClick={handleCopy}
-              className="apple-touch inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
-            >
-              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-zinc-300" />}
-              <span>{copied ? 'Copied 1-Click Code!' : 'Copy Google Schema Code'}</span>
-            </button>
-
-            <a
-              href="https://search.google.com/test/rich-results"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="apple-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-50 text-zinc-700 border border-black/[0.08] text-xs font-semibold shadow-2xs transition-all"
-            >
-              <span>Test with Google Rich Results</span>
-              <ExternalLink className="w-3 h-3 text-zinc-400" />
-            </a>
+            <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-zinc-500 font-medium">
+              <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                <Sparkles className="w-3 h-3 text-emerald-600" /> 60-Second Setup
+              </span>
+              <span>• Zero Coding Required</span>
+              <span>• Auto-Syncs with Approved Reviews</span>
+            </div>
           </div>
         </div>
       </section>
@@ -170,7 +214,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
               Live Google Search Appearance
             </h2>
           </div>
-          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
             {isDemoStats ? 'Live Preview with Real-time Sync' : 'Verified Schema Live'}
           </span>
         </div>
@@ -179,10 +223,10 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
         <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50/90 border border-black/[0.06] text-left max-w-2xl space-y-2">
           {/* Favicon & Breadcrumb */}
           <div className="flex items-center gap-2 text-xs text-zinc-600">
-            <div className="w-5 h-5 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs">
+            <div className="w-5 h-5 rounded-full bg-[#6701e6] text-white flex items-center justify-center font-bold text-[10px] shadow-2xs">
               {businessName.charAt(0).toUpperCase()}
             </div>
-            <span className="font-sans text-zinc-800 text-xs font-medium">
+            <span className="font-sans text-zinc-800 text-xs font-medium truncate max-w-[200px] sm:max-w-none">
               {websiteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}
             </span>
             <span className="text-zinc-400 text-xs">› reviews</span>
@@ -218,131 +262,86 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
         </div>
       </section>
 
-      {/* ── How to Use This in 3 Clear Steps (Bento Layout) ── */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Step 1 */}
-        <div className="apple-glass-card rounded-2xl p-5 border border-black/[0.06] bg-white/70 backdrop-blur-xl space-y-2">
-          <div className="w-8 h-8 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-700 font-bold text-xs font-mono mb-2">
-            01
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-            Automatic Sync
-          </span>
-          <h3 className="text-sm font-bold text-zinc-950">
-            Ratings Synchronized
-          </h3>
-          <p className="text-xs text-zinc-500 leading-relaxed">
-            Your real average rating (<strong className="text-zinc-800">{effectiveRating}★</strong>) and review count (<strong className="text-zinc-800">{effectiveCount} reviews</strong>) are automatically embedded into Google Schema.
-          </p>
-        </div>
-
-        {/* Step 2 */}
-        <div className="apple-glass-card rounded-2xl p-5 border border-black/[0.06] bg-white/70 backdrop-blur-xl space-y-2">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-700 font-bold text-xs font-mono mb-2">
-            02
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-            One-Click Snippet
-          </span>
-          <h3 className="text-sm font-bold text-zinc-950">
-            Copy JSON-LD Code
-          </h3>
-          <p className="text-xs text-zinc-500 leading-relaxed">
-            Click the <strong className="text-zinc-800">Copy Google Schema Code</strong> button to copy the pre-formatted structured data snippet for your site.
-          </p>
-        </div>
-
-        {/* Step 3 */}
-        <div className="apple-glass-card rounded-2xl p-5 border border-black/[0.06] bg-white/70 backdrop-blur-xl space-y-2">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 font-bold text-xs font-mono mb-2">
-            03
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-            Paste in &lt;head&gt;
-          </span>
-          <h3 className="text-sm font-bold text-zinc-950">
-            Paste & Let Google Index
-          </h3>
-          <p className="text-xs text-zinc-500 leading-relaxed">
-            Paste the code into your website's header. Google bots will detect it on their next crawl and activate star ratings in search.
-          </p>
-        </div>
-      </section>
-
-      {/* ── Platform-Specific 1-Minute Installation Tabs ── */}
+      {/* ── Unified Action & Code Dock ── */}
       <section className="apple-glass-card rounded-2xl p-5 sm:p-6 border border-black/[0.06] bg-white/80 backdrop-blur-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-black/[0.05]">
-          <div>
-            <h3 className="text-sm font-bold text-zinc-950">
-              Where to Paste the Code (Platform Guides)
-            </h3>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Select your website builder for exact 1-minute paste instructions:
-            </p>
-          </div>
-
-          {/* Platform Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-            {(['wordpress', 'shopify', 'webflow', 'framer', 'html'] as PlatformTab[]).map((p) => (
-              <button
-                key={p}
-                onClick={() => setSelectedPlatform(p)}
-                className={`apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all cursor-pointer ${
-                  selectedPlatform === p
-                    ? 'bg-zinc-950 text-white shadow-xs'
-                    : 'bg-zinc-50 hover:bg-zinc-100 text-zinc-600 border border-black/[0.05]'
-                }`}
-              >
-                {platformGuides[p].name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="p-3.5 rounded-xl bg-violet-50/60 border border-violet-500/15 flex items-start gap-3">
-          <HelpCircle className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" />
-          <div className="text-xs text-violet-950 leading-relaxed">
-            <strong className="font-bold text-violet-900 block mb-0.5">
-              How to install in {platformGuides[selectedPlatform].name}:
-            </strong>
-            {platformGuides[selectedPlatform].steps}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Generated JSON-LD Code Viewer & Optional Customizer ── */}
-      <section className="apple-glass-card rounded-2xl p-5 sm:p-6 border border-black/[0.06] bg-white/80 backdrop-blur-xl space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-black/[0.05]">
+        {/* Header with Title and Description */}
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <Code2 className="w-4 h-4 text-violet-600" />
-            <h3 className="text-sm font-bold text-zinc-950">Generated JSON-LD Script</h3>
+            <Code2 className="w-4 h-4 text-[#6701e6]" />
+            <h3 className="text-sm font-bold text-zinc-950">
+              Your Ready-to-Paste Star Code (Google Schema)
+            </h3>
           </div>
-
-          <button
-            onClick={handleCopy}
-            className="apple-touch flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
-          >
-            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? 'Copied' : 'Copy Snippet'}</span>
-          </button>
+          <p className="text-xs text-zinc-500">
+            Paste this single script tag into your website header to display golden stars in search results.
+          </p>
         </div>
 
-        <pre className="p-4 rounded-xl bg-zinc-950 text-violet-200 text-xs font-mono overflow-x-auto leading-relaxed border border-zinc-800">
-          {jsonLdCode}
-        </pre>
+        {/* Success Status Pill (Visible When Copied) */}
+        {copied && (
+          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 flex items-center justify-between gap-3 text-xs font-semibold animate-in fade-in duration-200">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Copied! Paste into your site header to activate search stars.</span>
+            </div>
+            <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0">
+              Ready to Paste
+            </span>
+          </div>
+        )}
+
+        {/* Integrated Actions Toolbar Dock */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+          <div className="flex items-center gap-2 text-xs text-zinc-500">
+            <span className="font-mono text-[11px] bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200 font-semibold text-zinc-700">
+              JSON-LD • Schema.org
+            </span>
+            <span>Automatically formatted with your live rating ({effectiveRating}★)</span>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Primary Copy Button */}
+            <button
+              onClick={handleCopy}
+              className="apple-touch inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-xs transition-all cursor-pointer active:scale-95"
+            >
+              {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+              <span>{copied ? '✓ Snippet Copied!' : 'Copy Google Schema Code'}</span>
+            </button>
+
+            {/* Interactive Secondary Button: Test with Google Rich Results Tool */}
+            <a
+              href={googleTestUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="apple-touch inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white hover:bg-zinc-50 text-zinc-700 border border-black/[0.1] text-xs font-semibold shadow-2xs transition-all hover:border-zinc-400"
+              title="Test domain in Google official tool"
+            >
+              <span>Test with Google Rich Results</span>
+              <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+            </a>
+          </div>
+        </div>
+
+        {/* Code Snippet Box */}
+        <div className="relative group">
+          <pre className="p-4 rounded-xl bg-zinc-950 text-purple-200 text-xs font-mono overflow-x-auto leading-relaxed border border-zinc-800 scrollbar-thin max-h-56 select-all">
+            {jsonLdCode}
+          </pre>
+        </div>
 
         {/* Collapsible Advanced Schema Settings */}
-        <div className="pt-2">
+        <div className="pt-1 border-t border-black/[0.05]">
           <button
             onClick={() => setShowAdvancedConfig(!showAdvancedConfig)}
-            className="apple-touch text-xs font-semibold text-zinc-600 hover:text-zinc-900 flex items-center gap-1.5 cursor-pointer py-1"
+            className="apple-touch text-xs font-semibold text-zinc-600 hover:text-zinc-900 flex items-center gap-1.5 cursor-pointer py-1.5"
           >
             <span>{showAdvancedConfig ? 'Hide' : 'Customize'} Business Name, URL & Entity Type</span>
             {showAdvancedConfig ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
 
           {showAdvancedConfig && (
-            <div className="mt-3 p-4 rounded-xl bg-zinc-50/80 border border-black/[0.05] space-y-3.5 animate-fade-in">
+            <div className="mt-2 p-4 rounded-xl bg-zinc-50/80 border border-black/[0.05] space-y-3.5 animate-fade-in">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[11px] font-bold text-zinc-700 block">Schema Entity Type</label>
@@ -418,8 +417,129 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
         </div>
       </section>
 
+      {/* ── Interactive Platform-Specific Guide Selector ── */}
+      <section className="apple-glass-card rounded-2xl p-5 sm:p-6 border border-black/[0.06] bg-white/80 backdrop-blur-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.05]">
+          <div>
+            <h3 className="text-sm font-bold text-zinc-950">
+              Where to Paste the Code (Platform Guides)
+            </h3>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              Click your website builder for instant, platform-specific installation instructions:
+            </p>
+          </div>
+
+          {/* Platform Interactive Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+            {(['wordpress', 'shopify', 'webflow', 'framer', 'html'] as PlatformTab[]).map((p) => {
+              const isSelected = selectedPlatform === p;
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setSelectedPlatform(p)}
+                  className={`apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#6701e6] text-white shadow-xs font-bold'
+                      : 'bg-zinc-100 hover:bg-zinc-200/80 text-zinc-700 border border-zinc-200'
+                  }`}
+                >
+                  {platformGuides[p].name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Dynamic Platform Instructions Box */}
+        <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-200 space-y-3 animate-in fade-in duration-200">
+          <div className="flex items-start justify-between gap-2 border-b border-purple-200/60 pb-2">
+            <div className="flex items-center gap-2">
+              <Globe className="w-4 h-4 text-[#6701e6]" />
+              <strong className="text-xs font-bold text-purple-950">
+                {platformGuides[selectedPlatform].name} Installation Instructions
+              </strong>
+            </div>
+            <span className="text-[10px] font-bold text-purple-700 bg-white/90 border border-purple-200 px-2 py-0.5 rounded-full">
+              Target: {platformGuides[selectedPlatform].quickLocation}
+            </span>
+          </div>
+
+          <ol className="space-y-1.5 text-xs text-zinc-700">
+            {platformGuides[selectedPlatform].steps.map((st, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="w-4 h-4 rounded-full bg-purple-200 text-[#6701e6] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                  {i + 1}
+                </span>
+                <span className="leading-relaxed">{st}</span>
+              </li>
+            ))}
+          </ol>
+
+          {platformGuides[selectedPlatform].tip && (
+            <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 text-[11px] text-purple-900 flex items-start gap-2">
+              <HelpCircle className="w-3.5 h-3.5 text-[#6701e6] shrink-0 mt-0.5" />
+              <span className="leading-relaxed">
+                <strong>Pro-Tip:</strong> {platformGuides[selectedPlatform].tip}
+              </span>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── How It Works in 3 Clear Steps (Bento Layout) ── */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Step 1 */}
+        <div className="apple-glass-card rounded-2xl p-5 border border-black/[0.06] bg-white/70 backdrop-blur-xl space-y-2">
+          <div className="w-8 h-8 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-700 font-bold text-xs font-mono mb-2">
+            01
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+            Automatic Sync
+          </span>
+          <h3 className="text-sm font-bold text-zinc-950">
+            Ratings Synchronized
+          </h3>
+          <p className="text-xs text-zinc-500 leading-relaxed">
+            Your real average rating (<strong className="text-zinc-800">{effectiveRating}★</strong>) and review count (<strong className="text-zinc-800">{effectiveCount} reviews</strong>) are automatically embedded into Google Schema.
+          </p>
+        </div>
+
+        {/* Step 2 */}
+        <div className="apple-glass-card rounded-2xl p-5 border border-black/[0.06] bg-white/70 backdrop-blur-xl space-y-2">
+          <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-700 font-bold text-xs font-mono mb-2">
+            02
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+            One-Click Snippet
+          </span>
+          <h3 className="text-sm font-bold text-zinc-950">
+            Copy Schema Code
+          </h3>
+          <p className="text-xs text-zinc-500 leading-relaxed">
+            Click the <strong className="text-zinc-800">Copy Google Schema Code</strong> button in the code dock to copy the pre-formatted structured data snippet.
+          </p>
+        </div>
+
+        {/* Step 3 */}
+        <div className="apple-glass-card rounded-2xl p-5 border border-black/[0.06] bg-white/70 backdrop-blur-xl space-y-2">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 font-bold text-xs font-mono mb-2">
+            03
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+            Paste & Activate
+          </span>
+          <h3 className="text-sm font-bold text-zinc-950">
+            Paste & Let Google Index
+          </h3>
+          <p className="text-xs text-zinc-500 leading-relaxed">
+            Paste the code into your website's header. Google crawlers will detect it on their next pass and activate golden stars in search results.
+          </p>
+        </div>
+      </section>
     </div>
   );
 };
 
 export default RichSnippetView;
+
