@@ -8,7 +8,39 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
 (function () {
   'use strict';
 
+  // Resolve API_BASE dynamically from current script tag or default to production
   var API_BASE = 'https://pandapraise.com';
+
+  function getScriptElement() {
+    if (document.currentScript) return document.currentScript;
+    var scripts = document.getElementsByTagName('script');
+    for (var i = scripts.length - 1; i >= 0; i--) {
+      var s = scripts[i];
+      var src = s.src || '';
+      if (
+        src.indexOf('/widget.js') !== -1 ||
+        src.indexOf('/widget.min.js') !== -1 ||
+        src.indexOf('/embed.js') !== -1 ||
+        src.indexOf('/embed.min.js') !== -1 ||
+        s.hasAttribute('data-project-id') ||
+        s.hasAttribute('data-project')
+      ) {
+        return s;
+      }
+    }
+    return null;
+  }
+
+  var activeScript = getScriptElement();
+  if (activeScript && activeScript.src) {
+    try {
+      var parsedUrl = new URL(activeScript.src);
+      if (parsedUrl.origin && parsedUrl.origin !== 'null') {
+        API_BASE = parsedUrl.origin;
+      }
+    } catch (e) {}
+  }
+
   // Security: HTML escaping to prevent XSS
   function escapeHtml(str) {
     if (!str) return '';
@@ -40,7 +72,6 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
     return trimmed;
   }
 
-
   // Platform Icons SVG Helpers
   var ICONS = {
     star: '<svg class="pp-star" viewBox="0 0 20 20" fill="#f59e0b"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>',
@@ -52,13 +83,12 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
     heart: '<svg class="pp-heart" viewBox="0 0 20 20" fill="#E11D48"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>',
   };
 
-  function injectStyles() {
-    if (document.getElementById('panda-praise-embed-styles')) return;
-
-    var style = document.createElement('style');
-    style.id = 'panda-praise-embed-styles';
-    style.textContent = \`
-      .pp-wall-container {
+  function getStylesCss() {
+    return \`
+      /* ── SCOPED RESET & CONTAINER ISOLATION ── */
+      :host, .pp-wall-container {
+        all: initial;
+        display: block;
         width: 100%;
         max-width: 1280px;
         margin: 0 auto;
@@ -66,6 +96,16 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
         box-sizing: border-box;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-align: left;
+        direction: ltr;
+        line-height: 1.5;
+        contain: content;
+        min-height: 140px;
+        transition: opacity 0.25s ease-out;
+      }
+      .pp-wall-container *, .pp-wall-container *::before, .pp-wall-container *::after {
+        box-sizing: border-box;
       }
       .pp-edited {
         display: inline-block;
@@ -223,9 +263,14 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
       .pp-theme-dark .pp-author-row {
         border-top-color: rgba(255, 255, 255, 0.08);
       }
+
+      /* Core Web Vitals: Zero CLS Explicit Dimension Allocations */
       .pp-avatar {
         width: 40px;
         height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        aspect-ratio: 1 / 1;
         border-radius: 50%;
         object-fit: cover;
         background: #e2e8f0;
@@ -234,6 +279,9 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
       .pp-avatar-fallback {
         width: 40px;
         height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        aspect-ratio: 1 / 1;
         border-radius: 50%;
         background: linear-gradient(135deg, #6701e6, #a855f7);
         color: #ffffff;
@@ -308,6 +356,8 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
         width: 13px;
         height: 13px;
       }
+
+      /* Zero-CLS Skeleton Loader */
       .pp-skeleton {
         height: 140px;
         border-radius: 20px;
@@ -316,9 +366,55 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
         animation: pp-shimmer 1.5s infinite;
         margin-bottom: 20px;
       }
-      .pp-theme-dark .pp-skeleton {
+      .pp-skeleton-card {
+        min-height: 160px;
+        border-radius: 20px;
+        padding: 24px;
+        box-sizing: border-box;
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        margin-bottom: 20px;
+        break-inside: avoid;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .pp-theme-dark .pp-skeleton-card {
+        background: #1e293b;
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+      .pp-skeleton-shimmer {
+        background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+        background-size: 200% 100%;
+        animation: pp-shimmer 1.5s infinite;
+        border-radius: 6px;
+      }
+      .pp-theme-dark .pp-skeleton-shimmer {
         background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
         background-size: 200% 100%;
+      }
+      .pp-skeleton-line {
+        height: 12px;
+        margin-bottom: 8px;
+      }
+      .pp-skeleton-line.pp-w-full { width: 100%; }
+      .pp-skeleton-line.pp-w-80 { width: 80%; }
+      .pp-skeleton-line.pp-w-60 { width: 60%; }
+      .pp-skeleton-line.pp-w-40 { width: 40%; }
+      .pp-skeleton-line.pp-w-20 { width: 20%; }
+      .pp-skeleton-avatar-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+      }
+      .pp-skeleton-avatar {
+        width: 40px;
+        height: 40px;
+        aspect-ratio: 1 / 1;
+        border-radius: 50%;
+        flex-shrink: 0;
       }
       @keyframes pp-shimmer {
         0% { background-position: 200% 0; }
@@ -451,6 +547,13 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
         height: 12px;
       }
     \`;
+  }
+
+  function injectStyles() {
+    if (document.getElementById('panda-praise-embed-styles')) return;
+    var style = document.createElement('style');
+    style.id = 'panda-praise-embed-styles';
+    style.textContent = getStylesCss();
     document.head.appendChild(style);
   }
 
@@ -485,14 +588,15 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
   }
 
   function renderEmpty(container) {
-    container.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">No testimonials approved yet.</div>';
+    var prefix = container.host ? '<style>' + getStylesCss() + '</style>' : '';
+    container.innerHTML = prefix + '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">No testimonials approved yet.</div>';
   }
 
   function renderCard(r) {
     var safeAvatar = sanitizeAvatarUrl(r.authorAvatar);
     var avatarHtml = '';
     if (safeAvatar) {
-      avatarHtml = '<img src="' + safeAvatar + '" alt="' + escapeHtml(r.authorName || 'Avatar') + '" class="pp-avatar" onerror="this.remove()" />';
+      avatarHtml = '<img src="' + safeAvatar + '" alt="' + escapeHtml(r.authorName || 'Avatar') + '" width="40" height="40" loading="lazy" decoding="async" class="pp-avatar" onerror="this.remove()" />';
     } else {
       avatarHtml = '<div class="pp-avatar-fallback">' + escapeHtml(getInitials(r.authorName)) + '</div>';
     }
@@ -526,16 +630,18 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
     return html;
   }
 
-  function renderFooterBadge() {
+  // Viral Growth Loop: "Collected with PandaPraise" footer link
+  function renderFooterBadge(hideBadge) {
+    if (hideBadge) return '';
     var html = '<div class="pp-footer-badge">';
-    html += '  <a href="https://pandapraise.com" target="_blank" rel="noopener" class="pp-footer-link">';
-    html += '    ' + ICONS.heart + ' Verified with Panda Praise';
+    html += '  <a href="https://pandapraise.com?utm_source=widget&utm_medium=referral&utm_campaign=powered_by" target="_blank" rel="noopener" class="pp-footer-link">';
+    html += '    ' + ICONS.heart + ' Collected with PandaPraise';
     html += '  </a>';
     html += '</div>';
     return html;
   }
 
-  function renderWall(container, data, theme) {
+  function renderWall(container, data, theme, hideBadge) {
     var reviews = data.testimonials || [];
     if (reviews.length === 0) {
       renderEmpty(container);
@@ -548,13 +654,14 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
       html += renderCard(reviews[i]);
     }
     html += '</div>';
-    html += renderFooterBadge();
+    html += renderFooterBadge(hideBadge);
     html += '</div>';
 
-    container.innerHTML = html;
+    var prefix = container.host ? '<style>' + getStylesCss() + '</style>' : '';
+    container.innerHTML = prefix + html;
   }
 
-  function renderSpotlight(container, data, theme) {
+  function renderSpotlight(container, data, theme, hideBadge) {
     var reviews = data.testimonials || [];
     if (reviews.length === 0) {
       renderEmpty(container);
@@ -563,13 +670,14 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
 
     var html = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '">';
     html += '<div class="pp-spotlight">' + renderCard(reviews[0]) + '</div>';
-    html += renderFooterBadge();
+    html += renderFooterBadge(hideBadge);
     html += '</div>';
 
-    container.innerHTML = html;
+    var prefix = container.host ? '<style>' + getStylesCss() + '</style>' : '';
+    container.innerHTML = prefix + html;
   }
 
-  function renderCarousel(container, data, theme) {
+  function renderCarousel(container, data, theme, hideBadge) {
     var reviews = data.testimonials || [];
     if (reviews.length === 0) {
       renderEmpty(container);
@@ -593,10 +701,11 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
       html += '</div>';
     }
     html += '</div>';
-    html += renderFooterBadge();
+    html += renderFooterBadge(hideBadge);
     html += '</div>';
 
-    container.innerHTML = html;
+    var prefix = container.host ? '<style>' + getStylesCss() + '</style>' : '';
+    container.innerHTML = prefix + html;
 
     if (reviews.length <= 1) return;
 
@@ -648,7 +757,7 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
     }
 
     var avg = parseFloat(data.averageRating || '0') || 0;
-    var projectId = container.getAttribute('data-project-id') || container.getAttribute('data-project') || '';
+    var projectId = container.getAttribute ? (container.getAttribute('data-project-id') || container.getAttribute('data-project') || '') : '';
     var href = projectId
       ? 'https://pandapraise.com/w/' + encodeURIComponent(projectId)
       : 'https://pandapraise.com';
@@ -662,39 +771,103 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
     html += '</a>';
     html += '</div>';
 
-    container.innerHTML = html;
+    var prefix = container.host ? '<style>' + getStylesCss() + '</style>' : '';
+    container.innerHTML = prefix + html;
   }
 
-  var ALLOWED_LAYOUTS = { wall: true, carousel: true, spotlight: true, badge: true };
+  var ALLOWED_LAYOUTS = { wall: true, masonry: true, grid: true, carousel: true, spotlight: true, badge: true };
 
   function sanitizeLayout(layout) {
-    return ALLOWED_LAYOUTS[layout] ? layout : 'wall';
+    var l = (layout || '').toLowerCase();
+    if (l === 'grid' || l === 'masonry') return 'wall';
+    return ALLOWED_LAYOUTS[l] ? l : 'wall';
   }
 
-  function renderWidget(container, data, theme, layout) {
+  function renderWidget(container, data, theme, layout, hideBadge) {
     switch (sanitizeLayout(layout)) {
       case 'carousel':
-        return renderCarousel(container, data, theme);
+        return renderCarousel(container, data, theme, hideBadge);
       case 'spotlight':
-        return renderSpotlight(container, data, theme);
+        return renderSpotlight(container, data, theme, hideBadge);
       case 'badge':
         return renderBadge(container, data, theme);
       default:
-        return renderWall(container, data, theme);
+        return renderWall(container, data, theme, hideBadge);
     }
   }
 
-  function initContainers() {
-    injectStyles();
+  function renderSkeleton(container, theme, layout) {
+    var l = sanitizeLayout(layout);
+    var html = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '">';
+    if (l === 'carousel' || l === 'spotlight') {
+      html += '<div class="' + (l === 'carousel' ? 'pp-carousel' : 'pp-spotlight') + '">';
+      html += '  <div class="pp-skeleton-card">';
+      html += '    <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-40" style="margin-bottom:14px;"></div>';
+      html += '    <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-full"></div>';
+      html += '    <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-80"></div>';
+      html += '    <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-60" style="margin-bottom:18px;"></div>';
+      html += '    <div class="pp-skeleton-avatar-row">';
+      html += '      <div class="pp-skeleton-shimmer pp-skeleton-avatar"></div>';
+      html += '      <div style="flex:1;">';
+      html += '        <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-40" style="margin-bottom:6px;"></div>';
+      html += '        <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-20"></div>';
+      html += '      </div>';
+      html += '    </div>';
+      html += '  </div>';
+      html += '</div>';
+    } else if (l === 'badge') {
+      html += '<div class="pp-card pp-badge pp-skeleton-card" style="padding:24px 20px;">';
+      html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-40" style="margin:0 auto 10px auto;"></div>';
+      html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-60" style="margin:0 auto 6px auto; height:20px;"></div>';
+      html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-40" style="margin:0 auto 10px auto;"></div>';
+      html += '</div>';
+    } else {
+      html += '<div class="pp-wall-masonry">';
+      for (var s = 0; s < 6; s++) {
+        html += '<div class="pp-skeleton-card">';
+        html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-40" style="margin-bottom:14px;"></div>';
+        html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-full"></div>';
+        html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-80"></div>';
+        html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-60" style="margin-bottom:18px;"></div>';
+        html += '    <div class="pp-skeleton-avatar-row">';
+        html += '    <div class="pp-skeleton-shimmer pp-skeleton-avatar"></div>';
+        html += '    <div style="flex:1;">';
+        html += '      <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-40" style="margin-bottom:6px;"></div>';
+        html += '      <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-20"></div>';
+        html += '    </div>';
+        html += '  </div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+    var prefix = container.host ? '<style>' + getStylesCss() + '</style>' : '';
+    container.innerHTML = prefix + html;
+  }
 
-    var scriptEl = document.currentScript;
+  function initContainers() {
+    var scriptEl = getScriptElement();
     var scriptProj = scriptEl ? (scriptEl.getAttribute('data-project-id') || scriptEl.getAttribute('data-project')) : null;
+    var scriptLayout = scriptEl ? (scriptEl.getAttribute('data-layout') || scriptEl.getAttribute('data-widget-type')) : null;
+    var scriptTheme = scriptEl ? scriptEl.getAttribute('data-theme') : null;
+    var scriptMinRating = scriptEl ? scriptEl.getAttribute('data-min-rating') : null;
+    var scriptSources = scriptEl ? scriptEl.getAttribute('data-sources') : null;
+    var scriptLimit = scriptEl ? (scriptEl.getAttribute('data-max-count') || scriptEl.getAttribute('data-limit')) : null;
+    var scriptHideBadge = scriptEl ? (scriptEl.getAttribute('data-hide-badge') || scriptEl.getAttribute('data-remove-branding')) : null;
+    var scriptShadow = scriptEl ? scriptEl.getAttribute('data-shadow') : null;
 
     var targets = document.querySelectorAll('#panda-praise-wall, [data-panda-praise], .panda-praise-wall');
     if (!targets.length && scriptEl && scriptEl.parentNode) {
       var autoDiv = document.createElement('div');
       autoDiv.id = 'panda-praise-wall';
       if (scriptProj) autoDiv.setAttribute('data-project-id', scriptProj);
+      if (scriptLayout) autoDiv.setAttribute('data-widget-type', scriptLayout);
+      if (scriptTheme) autoDiv.setAttribute('data-theme', scriptTheme);
+      if (scriptMinRating) autoDiv.setAttribute('data-min-rating', scriptMinRating);
+      if (scriptLimit) autoDiv.setAttribute('data-max-count', scriptLimit);
+      if (scriptSources) autoDiv.setAttribute('data-sources', scriptSources);
+      if (scriptHideBadge) autoDiv.setAttribute('data-hide-badge', scriptHideBadge);
+      if (scriptShadow) autoDiv.setAttribute('data-shadow', scriptShadow);
       scriptEl.parentNode.insertBefore(autoDiv, scriptEl);
       targets = [autoDiv];
     }
@@ -703,14 +876,34 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
     for (var i = 0; i < targets.length; i++) {
       (function (container) {
         var projectId = container.getAttribute('data-project-id') || container.getAttribute('data-project') || scriptProj || 'default';
-        var theme = container.getAttribute('data-theme') || 'light_gradient';
-        var minRating = container.getAttribute('data-min-rating') || '0';
-        var sources = container.getAttribute('data-sources') || 'google,linkedin,instagram,facebook,direct';
-        var limit = container.getAttribute('data-max-count') || '18';
-        var widgetType = sanitizeLayout(container.getAttribute('data-widget-type') || 'wall');
+        var theme = sanitizeTheme(container.getAttribute('data-theme') || scriptTheme || 'light_gradient');
+        var minRating = container.getAttribute('data-min-rating') || scriptMinRating || '0';
+        var sources = container.getAttribute('data-sources') || scriptSources || 'google,linkedin,instagram,facebook,direct';
+        var limit = container.getAttribute('data-max-count') || container.getAttribute('data-limit') || scriptLimit || '18';
+        var widgetType = sanitizeLayout(container.getAttribute('data-widget-type') || container.getAttribute('data-layout') || scriptLayout || 'wall');
+        var hideBadgeAttr = container.getAttribute('data-hide-badge') === 'true' ||
+                            container.getAttribute('data-remove-branding') === 'true' ||
+                            scriptHideBadge === 'true';
 
-        // Skeleton loading state
-        container.innerHTML = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '"><div class="pp-wall-masonry"><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div><div class="pp-skeleton"></div></div></div>';
+        var useShadow = container.getAttribute('data-shadow') === 'true' || scriptShadow === 'true';
+
+        // Isolated scope: Shadow DOM or global scoped styles
+        var renderRoot = container;
+        if (useShadow && typeof container.attachShadow === 'function') {
+          if (!container.shadowRoot) {
+            renderRoot = container.attachShadow({ mode: 'open' });
+          } else {
+            renderRoot = container.shadowRoot;
+          }
+          var shadowStyle = document.createElement('style');
+          shadowStyle.textContent = getStylesCss();
+          renderRoot.appendChild(shadowStyle);
+        } else {
+          injectStyles();
+        }
+
+        // Lightweight Zero-CLS Skeleton Loading State
+        renderSkeleton(renderRoot, theme, widgetType);
 
         var query = '?projectId=' + encodeURIComponent(projectId) +
           '&minRating=' + encodeURIComponent(minRating) +
@@ -718,14 +911,18 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
           '&limit=' + encodeURIComponent(limit);
 
         fetch(API_BASE + '/api/embed/testimonials' + query)
-          .then(function (res) { return res.json(); })
+          .then(function (res) {
+            if (typeof res.ok === 'boolean' && !res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
           .then(function (data) {
-            renderWidget(container, data, theme, widgetType);
+            var shouldHide = hideBadgeAttr || (data && (data.hideBranding === true || data.tier === 'pro' || data.tier === 'enterprise' || data.isPro === true));
+            renderWidget(renderRoot, data, theme, widgetType, shouldHide);
           })
           .catch(function (err) {
             console.warn('[PandaPraise] Failed to load testimonials:', err);
-            // Fallback rendering
-            renderWidget(container, { testimonials: [] }, theme, widgetType);
+            // Non-blocking graceful fallback
+            renderWidget(renderRoot, { testimonials: [] }, theme, widgetType, hideBadgeAttr);
           });
       })(targets[i]);
     }

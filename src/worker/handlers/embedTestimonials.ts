@@ -159,6 +159,7 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
         ? (filtered.reduce((acc, r) => acc + r.rating, 0) / filtered.length).toFixed(1)
         : '0.0',
       testimonials: filtered.slice(0, limit),
+      hideBranding: false,
     };
 
     return new Response(JSON.stringify(payload), {

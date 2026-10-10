@@ -248,3 +248,143 @@ describe('edited-by-owner disclosure', () => {
     }
   });
 });
+
+describe('Snippet attribute parsing & auto-mounting', () => {
+  it('reads configuration attributes from the <script> tag and auto-creates container', async () => {
+    document.body.innerHTML = '';
+    const scriptTag = document.createElement('script');
+    scriptTag.src = 'https://pandapraise.com/widget.js';
+    scriptTag.setAttribute('data-project-id', 'proj-snippet-123');
+    scriptTag.setAttribute('data-layout', 'grid');
+    scriptTag.setAttribute('data-theme', 'dark');
+    scriptTag.setAttribute('data-limit', '6');
+    document.body.appendChild(scriptTag);
+
+    let calledUrl = '';
+    const fetchMock = vi.fn().mockImplementation(async (url: string) => {
+      calledUrl = url;
+      return { json: async () => TWO_REVIEWS };
+    });
+    (globalThis as any).fetch = fetchMock;
+
+    const response = handleEmbedScript(new Request('https://worker.dev/widget.js'), {} as any);
+    const scriptText = await (response as any).text();
+    eval(scriptText);
+    await new Promise((r) => setTimeout(r, 50));
+
+    // An auto-created container must exist
+    const autoContainer = document.getElementById('panda-praise-wall');
+    expect(autoContainer).not.toBeNull();
+    expect(autoContainer!.querySelector('.pp-wall-masonry')).not.toBeNull();
+    // Dark theme was inherited from script tag
+    expect(autoContainer!.querySelector('.pp-theme-dark')).not.toBeNull();
+    // Fetch query parameter included the project ID from script tag
+    expect(calledUrl).toContain('projectId=proj-snippet-123');
+    expect(calledUrl).toContain('limit=6');
+  });
+});
+
+describe('Isolated rendering: Shadow DOM & Scoped CSS', () => {
+  it('attaches Shadow DOM and encapsulates styles when data-shadow="true"', async () => {
+    document.body.innerHTML = '';
+    const container = document.createElement('div');
+    container.id = 'panda-praise-wall';
+    container.setAttribute('data-project-id', 'proj-abc');
+    container.setAttribute('data-shadow', 'true');
+    document.body.appendChild(container);
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: async () => TWO_REVIEWS,
+    });
+    (globalThis as any).fetch = fetchMock;
+
+    const response = handleEmbedScript(new Request('https://worker.dev/widget.js'), {} as any);
+    const scriptText = await (response as any).text();
+    eval(scriptText);
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(container.shadowRoot).not.toBeNull();
+    const shadowRoot = container.shadowRoot!;
+    expect(shadowRoot.querySelector('style')).not.toBeNull();
+    expect(shadowRoot.querySelector('.pp-wall-masonry')).not.toBeNull();
+    expect(shadowRoot.querySelectorAll('.pp-card').length).toBe(2);
+  });
+
+  it('includes impenetrable all: initial CSS reset in style rules', async () => {
+    const response = handleEmbedScript(new Request('https://worker.dev/widget.js'), {} as any);
+    const scriptText = await (response as any).text();
+    expect(scriptText).toContain('all: initial');
+    expect(scriptText).toContain('contain: content');
+  });
+});
+
+describe('Core Web Vitals: Zero CLS layout & image attributes', () => {
+  it('renders avatars with explicit width, height, lazy loading, and async decoding', async () => {
+    const AVATAR_REVIEW = {
+      projectId: 'proj-abc',
+      totalCount: 1,
+      averageRating: '5.0',
+      testimonials: [
+        {
+          id: 't-img',
+          text: 'Super fast widget',
+          authorName: 'Tech Lead',
+          authorAvatar: 'https://images.example.com/avatar.jpg',
+          rating: 5,
+          source: 'google',
+          verified: true,
+        },
+      ],
+    };
+
+    const container = await renderWithType(null, AVATAR_REVIEW);
+    const img = container.querySelector('img.pp-avatar');
+    expect(img).not.toBeNull();
+    expect(img!.getAttribute('width')).toBe('40');
+    expect(img!.getAttribute('height')).toBe('40');
+    expect(img!.getAttribute('loading')).toBe('lazy');
+    expect(img!.getAttribute('decoding')).toBe('async');
+  });
+});
+
+describe('Viral Growth Loop: Branding Badge', () => {
+  it('renders "Collected with PandaPraise" with UTM parameters on standard tier', async () => {
+    const container = await renderWithType(null, TWO_REVIEWS);
+    const badgeLink = container.querySelector('.pp-footer-link');
+    expect(badgeLink).not.toBeNull();
+    expect(badgeLink!.textContent).toContain('Collected with PandaPraise');
+    expect(badgeLink!.getAttribute('href')).toContain('https://pandapraise.com');
+    expect(badgeLink!.getAttribute('href')).toContain('utm_source=widget');
+  });
+
+  it('suppresses branding badge when backend payload specifies hideBranding: true', async () => {
+    const PRO_PAYLOAD = {
+      ...TWO_REVIEWS,
+      hideBranding: true,
+    };
+    const container = await renderWithType(null, PRO_PAYLOAD);
+    expect(container.querySelector('.pp-footer-link')).toBeNull();
+    expect(container.textContent).not.toContain('Collected with PandaPraise');
+  });
+
+  it('suppresses branding badge when container has data-hide-badge="true"', async () => {
+    document.body.innerHTML = '';
+    const container = document.createElement('div');
+    container.id = 'panda-praise-wall';
+    container.setAttribute('data-project-id', 'proj-abc');
+    container.setAttribute('data-hide-badge', 'true');
+    document.body.appendChild(container);
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: async () => TWO_REVIEWS,
+    });
+    (globalThis as any).fetch = fetchMock;
+
+    const response = handleEmbedScript(new Request('https://worker.dev/widget.js'), {} as any);
+    const scriptText = await (response as any).text();
+    eval(scriptText);
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(container.querySelector('.pp-footer-link')).toBeNull();
+  });
+});
