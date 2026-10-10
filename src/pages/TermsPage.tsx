@@ -1,37 +1,47 @@
 import { Link } from 'react-router-dom';
-import { Shield, FileCheck, Scale, AlertTriangle, LifeBuoy, Mail, ArrowLeft, CheckCircle, CreditCard } from 'lucide-react';
+import { 
+  Scale, 
+  ArrowLeft, 
+  Shield, 
+  FileCheck, 
+  AlertTriangle, 
+  LifeBuoy, 
+  Mail, 
+  CheckCircle,
+  CreditCard 
+} from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
 
 export const TermsPage = () => {
   usePageSeo({
     title: 'Terms of Service — Panda Praise',
-    description: 'Terms and conditions governing the use of Panda Praise for collecting, moderating, and embedding customer testimonials.',
+    description: 'Terms and conditions governing the use of the Panda Praise testimonial collection and widget display platform.',
     canonical: `${window.location.origin}/terms`,
   });
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-brand-500/30 selection:text-brand-200 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-800 relative selection:bg-purple-100 selection:text-[#6701e6]">
       {/* Ambient background glow */}
-      <div className="ambient-glow" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-100/40 via-slate-50 to-slate-50 pointer-events-none" />
 
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full glass-panel border-b border-zinc-800/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-gray-200/80">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <PandaPraiseIcon size={36} colorMode="gradient" className="shrink-0" />
             <div className="flex items-center gap-1.5">
-              <span className="font-display font-extrabold text-lg text-white tracking-tight">
-                Panda <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Praise</span>
+              <span className="font-display font-extrabold text-lg text-gray-900 tracking-tight">
+                Panda <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Praise</span>
               </span>
             </div>
           </Link>
 
           <Link
             to="/"
-            className="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-900 border border-zinc-800 transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-gray-700 bg-white border border-gray-200 shadow-2xs hover:bg-gray-50 hover:text-gray-900 transition-all flex items-center gap-1.5 cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 text-gray-500" />
             <span>Back to Home</span>
           </Link>
         </div>
@@ -41,33 +51,33 @@ export const TermsPage = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10">
         {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="mb-6">
-          <ol className="flex items-center space-x-2 text-xs text-zinc-400">
+          <ol className="flex items-center space-x-2 text-xs text-gray-500 font-medium">
             <li>
-              <Link to="/" className="hover:text-zinc-200 transition-colors">Panda Praise</Link>
+              <Link to="/" className="hover:text-gray-900 transition-colors">Panda Praise</Link>
             </li>
-            <li className="text-zinc-600" aria-hidden="true">/</li>
-            <li className="text-zinc-200 font-medium" aria-current="page">Terms of Service</li>
+            <li className="text-gray-300" aria-hidden="true">/</li>
+            <li className="text-gray-900 font-semibold" aria-current="page">Terms of Service</li>
           </ol>
         </nav>
 
         <div className="mb-10 text-center sm:text-left">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 text-brand-300 text-xs font-semibold mb-4 border border-brand-500/25">
-            <FileCheck className="w-4 h-4 text-brand-400" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 text-[#6701e6] text-xs font-bold mb-4 border border-purple-200">
+            <FileCheck className="w-3.5 h-3.5 text-[#6701e6]" />
             <span>Legal Agreement</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold font-display text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold font-display text-gray-900 tracking-tight">
             Terms of Service
           </h1>
-          <p className="text-sm text-zinc-400 mt-2">
-            Last updated: September 29, 2026
+          <p className="text-sm text-gray-500 mt-2">
+            Last updated: October 10, 2026
           </p>
         </div>
 
-        <div className="space-y-8 text-sm text-zinc-300 leading-relaxed">
+        <div className="space-y-6 text-sm text-gray-600 leading-relaxed">
           {/* Section 1 */}
-          <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
-            <div className="flex items-center gap-2.5 text-white font-semibold text-base">
-              <Scale className="w-5 h-5 text-brand-400" />
+          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/90 shadow-xs space-y-3">
+            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+              <Scale className="w-5 h-5 text-[#6701e6]" />
               <h2>1. Agreement & Services Provided</h2>
             </div>
             <p>
@@ -79,9 +89,9 @@ export const TermsPage = () => {
           </section>
 
           {/* Section 2 */}
-          <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
-            <div className="flex items-center gap-2.5 text-white font-semibold text-base">
-              <Shield className="w-5 h-5 text-brand-400" />
+          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/90 shadow-xs space-y-3">
+            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+              <Shield className="w-5 h-5 text-[#6701e6]" />
               <h2>2. Account Registration & Security</h2>
             </div>
             <p>
@@ -90,9 +100,9 @@ export const TermsPage = () => {
           </section>
 
           {/* Section 3 */}
-          <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
-            <div className="flex items-center gap-2.5 text-white font-semibold text-base">
-              <CheckCircle className="w-5 h-5 text-brand-400" />
+          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/90 shadow-xs space-y-3">
+            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+              <CheckCircle className="w-5 h-5 text-emerald-600" />
               <h2>3. Testimonial Collection & Submitter Rights</h2>
             </div>
             <p>
@@ -104,9 +114,9 @@ export const TermsPage = () => {
           </section>
 
           {/* Section 4 */}
-          <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
-            <div className="flex items-center gap-2.5 text-white font-semibold text-base">
-              <FileCheck className="w-5 h-5 text-brand-400" />
+          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/90 shadow-xs space-y-3">
+            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+              <FileCheck className="w-5 h-5 text-[#6701e6]" />
               <h2>4. Moderation & Content Ownership</h2>
             </div>
             <p>
@@ -118,27 +128,27 @@ export const TermsPage = () => {
           </section>
 
           {/* Section 5 */}
-          <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
-            <div className="flex items-center gap-2.5 text-white font-semibold text-base">
-              <AlertTriangle className="w-5 h-5 text-amber-400" />
+          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/90 shadow-xs space-y-3">
+            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+              <AlertTriangle className="w-5 h-5 text-amber-600" />
               <h2>5. Acceptable Use Policy</h2>
             </div>
             <p>
               You agree not to use Panda Praise to:
             </p>
-            <ul className="list-disc list-inside space-y-1 text-zinc-400 pl-2">
+            <ul className="list-disc list-inside space-y-1.5 text-gray-500 pl-2">
               <li>Collect, store, or display defamatory, obscene, fraudulent, or unlawful content;</li>
               <li>Impersonate any person or misrepresent affiliations with third parties;</li>
-              <li>Fabricate customer testimonials or engage in deceptive advertising practices;</li>
+              <li>Fabricate fake customer testimonials or engage in deceptive advertising practices;</li>
               <li>Attempt to reverse-engineer, exploit, or disrupt the Service infrastructure;</li>
               <li>Send unsolicited bulk communications (spam) using collection links.</li>
             </ul>
           </section>
 
           {/* Section 6 */}
-          <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
-            <div className="flex items-center gap-2.5 text-white font-semibold text-base">
-              <Scale className="w-5 h-5 text-brand-400" />
+          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/90 shadow-xs space-y-3">
+            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+              <Scale className="w-5 h-5 text-indigo-600" />
               <h2>6. Intellectual Property</h2>
             </div>
             <p>
@@ -147,9 +157,9 @@ export const TermsPage = () => {
           </section>
 
           {/* Section 7 */}
-          <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
-            <div className="flex items-center gap-2.5 text-white font-semibold text-base">
-              <LifeBuoy className="w-5 h-5 text-brand-400" />
+          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/90 shadow-xs space-y-3">
+            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+              <LifeBuoy className="w-5 h-5 text-[#6701e6]" />
               <h2>7. Service Availability & Disclaimers</h2>
             </div>
             <p>
@@ -157,28 +167,30 @@ export const TermsPage = () => {
             </p>
           </section>
 
-          {/* Section 8 — Billing */}
-          <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
-            <div className="flex items-center gap-2.5 text-white font-semibold text-base">
-              <CreditCard className="w-5 h-5 text-brand-400" />
-              <h2>8. Billing & Subscriptions</h2>
+          {/* Section 8 — Billing & 14-Day Refund Policy */}
+          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/90 shadow-xs space-y-3">
+            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+              <CreditCard className="w-5 h-5 text-emerald-600" />
+              <h2>8. Billing, Subscriptions & Refund Terms</h2>
             </div>
             <p>
-              Paid plans are billed in advance on a monthly or annual basis, or as a one-time
-              lifetime purchase, at the prices displayed on our pricing page at the time of
-              purchase. You may cancel a subscription at any time from your billing dashboard;
-              you retain access to your paid plan until the end of the current billing period,
-              after which your account reverts to the Free plan. Fees already paid for the
-              current period are non-refundable except where required by applicable law.
-              One-time lifetime purchases are non-refundable once access has been granted,
-              except where required by applicable law.
+              Paid plans are billed in advance on a monthly or annual basis, or as a one-time lifetime purchase, at the prices displayed on our pricing page at the time of purchase.
+            </p>
+            <p>
+              All paid tiers (including Founding Lifetime Deals and Annual subscriptions) are backed by our <strong className="text-gray-900">14-Day Unconditional Money-Back Guarantee</strong>. You may request a refund within 14 calendar days of your initial purchase in accordance with our{' '}
+              <Link to="/refund-policy" className="text-[#6701e6] hover:underline font-bold">
+                Refund Policy
+              </Link>.
+            </p>
+            <p>
+              You may cancel recurring subscriptions at any time through your Workspace Settings. Upon cancellation, you retain full access until the end of your prepaid billing period.
             </p>
           </section>
 
-          {/* Section 10 */}
-          <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
-            <div className="flex items-center gap-2.5 text-white font-semibold text-base">
-              <Shield className="w-5 h-5 text-brand-400" />
+          {/* Section 9 */}
+          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/90 shadow-xs space-y-3">
+            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+              <Shield className="w-5 h-5 text-gray-900" />
               <h2>9. Limitation of Liability</h2>
             </div>
             <p>
@@ -187,36 +199,32 @@ export const TermsPage = () => {
           </section>
 
           {/* Section 10 */}
-          <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-3">
-            <div className="flex items-center gap-2.5 text-white font-semibold text-base">
-              <Mail className="w-5 h-5 text-brand-400" />
+          <section className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/90 shadow-xs space-y-3">
+            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+              <Mail className="w-5 h-5 text-[#6701e6]" />
               <h2>10. Termination & Contact</h2>
             </div>
             <p>
-              We reserve the right to suspend or terminate accounts that violate these Terms. You may stop using the Service and request deletion of your account and data at any time.
+              We reserve the right to suspend or terminate accounts that violate these Terms. You may stop using the Service and request deletion of your account and data at any time via your dashboard settings.
             </p>
-            <p>
-              For questions regarding these Terms of Service, please contact the platform administrator at{' '}
-          <a href="mailto:support@pandapraise.com" className="text-brand-400 hover:text-brand-300 font-medium underline">
-            support@pandapraise.com
-              </a>.
-            </p>
+            <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-200 text-[#6701e6] font-mono text-xs font-bold flex items-center justify-between">
+              <span>support@pandapraise.com</span>
+              <span className="text-[11px] font-sans text-purple-700 bg-purple-100/80 px-2 py-0.5 rounded-md">Legal inquiries</span>
+            </div>
           </section>
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="border-t border-zinc-800/80 py-8 text-xs text-zinc-500 text-center relative z-10">
-        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span>Panda Praise • Testimonial Collector & Moderation Dashboard</span>
+        {/* Footer */}
+        <div className="mt-12 pt-6 border-t border-gray-200 flex flex-wrap items-center justify-between text-xs text-gray-500 gap-4">
+          <span>© 2026 Panda Praise Ltd. All rights reserved.</span>
           <div className="flex items-center gap-4">
-            <Link to="/" className="hover:text-zinc-300">Home</Link>
-            <Link to="/privacy-policy" className="hover:text-zinc-300">Privacy Policy</Link>
-            <Link to="/login" className="hover:text-zinc-300">Log In</Link>
-            <Link to="/signup" className="hover:text-zinc-300">Sign Up</Link>
+            <Link to="/" className="hover:text-gray-900 transition-colors">Home</Link>
+            <Link to="/privacy-policy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
+            <Link to="/refund-policy" className="hover:text-gray-900 transition-colors">Refund Policy</Link>
+            <Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link>
           </div>
         </div>
-      </footer>
+      </main>
     </div>
   );
 };
