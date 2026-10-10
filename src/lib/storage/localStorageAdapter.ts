@@ -73,6 +73,33 @@ export class LocalStorageAdapter implements StorageAdapter {
     return newReview;
   }
 
+  async bulkCreateReviews(inputs: ReviewInput[], projectId: string): Promise<Review[]> {
+    const targetProject = projectId || 'proj-demo-1';
+    const reviews = this.loadReviews(targetProject);
+    const now = new Date().toISOString();
+    const created: Review[] = [];
+
+    for (let i = 0; i < inputs.length; i++) {
+      const input = inputs[i];
+      const newReview: Review = {
+        ...input,
+        id: 'rev-' + Math.random().toString(36).substring(2, 9) + (Date.now() + i).toString(36),
+        projectId: targetProject,
+        source: input.source || 'csv',
+        status: input.status || 'approved',
+        isFeatured: Boolean(input.isFeatured),
+        helpfulCount: 0,
+        createdAt: now,
+        updatedAt: now,
+      };
+      created.push(newReview);
+      reviews.unshift(newReview);
+    }
+
+    this.saveReviews(reviews, targetProject);
+    return created;
+  }
+
   async evaluateAutoApproval(reviewId: string, projectId?: string): Promise<Review | null> {
     const targetProject = projectId || 'proj-demo-1';
     const reviews = this.loadReviews(targetProject);

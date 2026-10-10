@@ -31,6 +31,7 @@ import { getFirebaseAuth } from '../lib/firebase';
 import { socialClient } from '../lib/socialClient';
 import { ConnectSourceModal } from '../components/dashboard/views/ConnectSourceModal';
 import { compressScreenshot, detectChatPlatform, ScreenshotPlatform } from '../lib/screenshotUtils';
+import { ImportReviewsHub } from '../components/dashboard/ImportReviewsHub';
 
 export type SourceStatus = 'available' | 'coming_soon';
 
@@ -341,6 +342,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [connectPlatform, setConnectPlatform] = useState<string>('google');
   const [unsupportedModalSource, setUnsupportedModalSource] = useState<SourceDefinition | null>(null);
+  const [viewMode, setViewMode] = useState<'hub' | 'directory'>('hub');
   const [importResult, setImportResult] = useState<{ success: boolean; count: number; errors?: string[] } | null>(null);
 
   // ── Google Reviews Flow State ──
@@ -1142,9 +1144,35 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
         </div>
       )}
 
-      {/* ── MAIN SELECTION VIEW (Capability-Driven ASCII Wireframe) ── */}
-      {!selectedPlatform ? (
+      {/* ── MAIN SELECTION VIEW ── */}
+      {!selectedPlatform && viewMode === 'hub' ? (
+        <div className="max-w-4xl mx-auto space-y-4">
+          <div className="flex justify-end">
+            <button
+              onClick={() => setViewMode('directory')}
+              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1.5 transition"
+            >
+              <span>Explore All 30+ Integration Directories & Social Channels</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
+          <ImportReviewsHub
+            projectId={project?.id || 'default-project'}
+            ownerId={project?.ownerId}
+            onViewProof={onViewProof}
+          />
+        </div>
+      ) : !selectedPlatform ? (
         <div className="max-w-xl mx-auto">
+          <div className="flex justify-between items-center mb-4">
+            <button
+              onClick={() => setViewMode('hub')}
+              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1.5 transition"
+            >
+              <ArrowLeft size={14} />
+              <span>Back to Quick Import Hub (CSV, Manual, X, Google)</span>
+            </button>
+          </div>
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white font-display tracking-tight">

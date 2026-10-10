@@ -15,6 +15,7 @@ import {
   where,
   limit,
   Timestamp,
+  writeBatch,
 } from 'firebase/firestore';
 
 export class FirebaseAdapter implements StorageAdapter {
@@ -178,6 +179,74 @@ export class FirebaseAdapter implements StorageAdapter {
     }
 
     return created;
+  }
+
+  async bulkCreateReviews(reviews: ReviewInput[], projectId: string): Promise<Review[]> {
+    const auth = getFirebaseAuth();
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      throw new Error('Authentication required to bulk import reviews.');
+    }
+
+    const db = getFirebaseDb();
+    const targetProjectId = projectId || 'default-project';
+    const targetOwnerId = currentUser.uid;
+    const now = new Date().toISOString();
+    const createdList: Review[] = [];
+
+    // Chunk into atomic batches of 450 items (safely below Firestore's 500 operation limit)
+    const CHUNK_SIZE = 450;
+    for (let i = 0; i < reviews.length; i += CHUNK_SIZE) {
+      const chunk = reviews.slice(i, i + CHUNK_SIZE);
+      const batch = writeBatch(db);
+      const chunkCreated: { id: string; data: any }[] = [];
+
+      for (const review of chunk) {
+        const reviewRef = doc(collection(db, 'reviews'));
+        const reviewData = {
+          projectId: targetProjectId,
+          collectionFormId: review.collectionFormId || null,
+          ownerId: targetOwnerId,
+          name: review.name || 'Anonymous Customer',
+          email: review.email || '',
+          role: review.role || 'Customer',
+          company: review.company || null,
+          avatarUrl: review.avatarUrl || null,
+          rating: Number(review.rating || 5),
+          title: review.title || null,
+          content: review.content,
+          type: review.type || 'text',
+          videoUrl: review.videoUrl || null,
+          tags: Array.isArray(review.tags) ? review.tags : ['imported', 'csv'],
+          source: review.source || 'csv',
+          status: review.status || 'approved',
+          isFeatured: Boolean(review.isFeatured),
+          consent: true,
+          helpfulCount: 0,
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        batch.set(reviewRef, reviewData);
+        chunkCreated.push({ id: reviewRef.id, data: reviewData });
+      }
+
+      await batch.commit();
+
+      for (const item of chunkCreated) {
+        const mapped = this.mapDocToReview(item.id, item.data);
+        createdList.push(mapped);
+        if (mapped.status === 'approved') {
+          try {
+            await this.syncPublicReview(item.id, mapped, targetOwnerId);
+          } catch (syncErr) {
+            console.warn('[FirebaseAdapter] Bulk syncPublicReview warning:', syncErr);
+          }
+        }
+      }
+    }
+
+    return createdList;
   }
 
   async evaluateAutoApproval(reviewId: string, _projectId?: string): Promise<Review | null> {

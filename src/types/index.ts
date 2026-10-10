@@ -181,6 +181,7 @@ export interface Review {
   projectId?: string;
   collectionFormId?: string;
   workspaceId?: string;
+  ownerId?: string;
   name: string;
   email: string;
   role: string;

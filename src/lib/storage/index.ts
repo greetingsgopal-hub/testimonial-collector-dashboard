@@ -24,6 +24,16 @@ class DelegatingStorageAdapter implements StorageAdapter {
   getReviews(projectId?: string) { return this.adapter.getReviews(projectId); }
   getReviewById(id: string) { return this.adapter.getReviewById(id); }
   createReview(review: any, projectId?: string) { return this.adapter.createReview(review, projectId); }
+  async bulkCreateReviews(reviews: any[], projectId: string) {
+    if (this.adapter.bulkCreateReviews) {
+      return this.adapter.bulkCreateReviews(reviews, projectId);
+    }
+    const created: any[] = [];
+    for (const r of reviews) {
+      created.push(await this.adapter.createReview(r, projectId));
+    }
+    return created;
+  }
   updateReview(id: string, updates: any) { return this.adapter.updateReview(id, updates); }
   deleteReview(id: string) { return this.adapter.deleteReview(id); }
   getStats(projectId?: string) { return this.adapter.getStats(projectId); }
