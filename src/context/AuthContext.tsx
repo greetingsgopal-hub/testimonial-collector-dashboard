@@ -36,10 +36,10 @@ function translateFirebaseError(error: any): string {
     'auth/too-many-requests':         'Too many failed attempts. Please wait a moment and try again.',
     'auth/email-already-in-use':      'An account with this email already exists. Please sign in instead.',
     'auth/weak-password':             'Password must be at least 6 characters long.',
-    'auth/network-request-failed':    'Network error. Please check your connection and try again.',
-    'auth/popup-closed-by-user':      'Google sign-in window was closed before completing.',
-    'auth/popup-blocked':             'Sign-in popup was blocked by your browser. Please allow popups for this site.',
-    'auth/cancelled-popup-request':   'Sign-in request was cancelled. Please try again.',
+    'auth/popup-closed-by-user':      'Google sign-in window was closed. If Google displayed Error 500, please open an Incognito window or sign in with email and password.',
+    'auth/popup-blocked':             'Sign-in popup was blocked by your browser. Please allow popups or use Incognito mode.',
+    'auth/popup-timeout':             'Google sign-in timed out. If Google displayed Error 500, please open an Incognito window or sign in with email and password.',
+    'auth/cancelled-popup-request':   'Sign-in request was cancelled. Please try again or sign in with email.',
     'auth/account-exists-with-different-credential': 'An account already exists with the same email using a different sign-in method.',
     'auth/operation-not-allowed':     'Google sign-in is not yet enabled in the Firebase Console. Please enable Google under Authentication > Sign-in method.',
     'auth/unauthorized-domain':       'This domain is not authorized for Firebase Authentication. Please ensure the production hostname is added to Authorized Domains in Firebase Console.',
@@ -716,7 +716,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      const userCredential = await signInWithPopup(auth, provider);
+
+      // Safety timeout: if Google crashes (e.g. 500 on InteractiveLogin) and the popup hangs,
+      // fail gracefully after 60 seconds so the UI does not stay frozen forever.
+      const popupPromise = signInWithPopup(auth, provider);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject({
+              code: 'auth/popup-timeout',
+              message:
+                'Google sign-in timed out. If Google encountered an error (like Error 500), try using an Incognito window or sign in with your email and password.',
+            }),
+          60000
+        )
+      );
+
+      const userCredential = await Promise.race([popupPromise, timeoutPromise]);
       const authUser: AuthUser = {
         id: userCredential.user.uid,
         uid: userCredential.user.uid,

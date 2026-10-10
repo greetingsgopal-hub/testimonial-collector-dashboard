@@ -142,12 +142,16 @@ export const SignupPage: React.FC = () => {
   };
 
   const handleGoogleSignup = async () => {
+    if (isGoogleSubmitting) {
+      setIsGoogleSubmitting(false);
+      return;
+    }
     setLocalError(null);
     setIsGoogleSubmitting(true);
     try {
       const res = await signInWithGoogle();
       if (res.success) {
-    await handlePostSignupRedirect(email || 'user@pandapraise.com');
+        await handlePostSignupRedirect(email || 'user@pandapraise.com');
       } else {
         setLocalError(res.error || 'Failed to sign up with Google.');
       }
@@ -306,12 +310,12 @@ export const SignupPage: React.FC = () => {
             {/* Sign up with Google Button */}
             <button
               type="button"
-              disabled={isSubmitting || isGoogleSubmitting}
+              disabled={isSubmitting}
               onClick={handleGoogleSignup}
               className="w-full py-2 px-4 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-800 font-semibold text-sm flex items-center justify-center gap-2.5 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
             >
               <GoogleIcon className="w-4 h-4 shrink-0" />
-              <span>{isGoogleSubmitting ? 'Connecting...' : 'Sign up with Google'}</span>
+              <span>{isGoogleSubmitting ? 'Connecting... (Click to cancel)' : 'Sign up with Google'}</span>
             </button>
           </form>
 
