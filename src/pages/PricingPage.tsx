@@ -51,18 +51,20 @@ export const PricingPage = () => {
   const [checkoutLoading, setCheckoutLoading] = useState<'founding' | 'annual' | 'monthly' | 'extension' | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
+  const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
+
   const handleCheckout = async (plan: 'founding' | 'annual' | 'monthly' | 'extension') => {
     if (plan !== 'extension') {
       setSelectedPlan(plan);
     }
     setCheckoutError(null);
     if (!user) {
-      window.location.href = `/signup?plan=${plan}`;
+      window.location.href = `/signup?plan=${plan}&currency=${currency}`;
       return;
     }
     setCheckoutLoading(plan);
     try {
-      window.location.href = `/dashboard/settings?plan=${plan}&checkout=true`;
+      window.location.href = `/dashboard/settings?plan=${plan}&currency=${currency}&checkout=true`;
     } catch {
       setCheckoutError('Redirecting to your billing dashboard…');
       window.location.href = '/dashboard/settings';
@@ -90,10 +92,10 @@ export const PricingPage = () => {
 
       <div className="max-w-6xl mx-auto px-6 py-16 sm:py-24">
         {/* Apple Hero Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900 border border-white/10 text-zinc-300 text-xs font-medium mb-5 shadow-xs">
-            <span className="text-sm leading-none">🇮🇳</span>
-            <span>Built for Indian Businesses & Creators</span>
+            <span className="text-sm leading-none">{currency === 'INR' ? '🇮🇳' : '🌐'}</span>
+            <span>{currency === 'INR' ? 'Built for Indian Businesses & Creators' : 'Available Worldwide • Zero Hostage Fees'}</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-3">
             Simple, transparent pricing.
@@ -102,13 +104,57 @@ export const PricingPage = () => {
             Flexible monthly and annual plans for growing teams — or lock in lifetime access with our Founding Member pass.
           </p>
           <div className="flex items-center justify-center gap-2 sm:gap-2.5 mt-2.5 text-xs text-zinc-500 font-medium tracking-wide">
-            <span>UPI</span>
-            <span className="text-zinc-700">•</span>
-            <span>RuPay</span>
-            <span className="text-zinc-700">•</span>
-            <span>Netbanking</span>
-            <span className="text-zinc-700">•</span>
-            <span>Instant GST Invoice</span>
+            {currency === 'INR' ? (
+              <>
+                <span>UPI</span>
+                <span className="text-zinc-700">•</span>
+                <span>RuPay</span>
+                <span className="text-zinc-700">•</span>
+                <span>Netbanking</span>
+                <span className="text-zinc-700">•</span>
+                <span>Instant GST Invoice</span>
+              </>
+            ) : (
+              <>
+                <span>Credit Cards</span>
+                <span className="text-zinc-700">•</span>
+                <span>Apple Pay</span>
+                <span className="text-zinc-700">•</span>
+                <span>Google Pay</span>
+                <span className="text-zinc-700">•</span>
+                <span>Stripe Verified</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Currency Switcher: India (INR) vs Worldwide (USD) */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="inline-flex items-center p-1 rounded-full bg-zinc-900 border border-white/10 text-xs shadow-inner">
+            <button
+              type="button"
+              id="currency-toggle-inr"
+              onClick={() => setCurrency('INR')}
+              className={`px-4 py-1.5 rounded-full font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                currency === 'INR'
+                  ? 'bg-violet-600 text-white shadow-xs'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              <span>🇮🇳 INR (₹)</span>
+            </button>
+            <button
+              type="button"
+              id="currency-toggle-usd"
+              onClick={() => setCurrency('USD')}
+              className={`px-4 py-1.5 rounded-full font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                currency === 'USD'
+                  ? 'bg-violet-600 text-white shadow-xs'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              <span>🌐 USD ($) Worldwide</span>
+            </button>
           </div>
         </div>
 
@@ -190,8 +236,8 @@ export const PricingPage = () => {
               <p className="text-xs text-zinc-400 mb-6">Pay once. Use Panda Praise for life without recurring fees.</p>
 
               <div className="flex items-baseline gap-1.5 mb-6">
-                <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">₹4,999</span>
-                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">One-time payment</span>
+                <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">{currency === 'INR' ? '₹4,999' : '$49'}</span>
+                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{currency === 'INR' ? 'One-time payment' : 'One-time payment • Lifetime'}</span>
               </div>
 
               <div className="space-y-3 py-5 border-t border-white/10 text-xs text-zinc-300">
@@ -213,7 +259,7 @@ export const PricingPage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span><strong className="text-white font-semibold">Instant GST invoice</strong> for full 18% tax credit</span>
+                  <span><strong className="text-white font-semibold">{currency === 'INR' ? 'Instant GST invoice' : 'Instant digital receipt'}</strong> {currency === 'INR' ? 'for full 18% tax credit' : 'with tax deduction'}</span>
                 </div>
               </div>
             </div>
@@ -237,9 +283,9 @@ export const PricingPage = () => {
               <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-zinc-400">
                 <span className="text-emerald-400 font-bold">⚡ Instant Activation</span>
                 <span>•</span>
-                <span>UPI & RuPay</span>
+                <span>{currency === 'INR' ? 'UPI & RuPay' : 'Apple & Google Pay'}</span>
                 <span>•</span>
-                <span>GST Invoice</span>
+                <span>{currency === 'INR' ? 'GST Invoice' : 'Stripe Verified'}</span>
               </div>
             </div>
           </div>
@@ -270,10 +316,12 @@ export const PricingPage = () => {
               <p className="text-xs text-zinc-400 mb-6">Best for growing businesses, startups & agencies.</p>
 
               <div className="flex items-baseline gap-1.5 mb-1">
-                <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">₹399</span>
+                <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">{currency === 'INR' ? '₹399' : '$9'}</span>
                 <span className="text-xs font-semibold text-zinc-400">/month</span>
               </div>
-              <p className="text-[11px] text-emerald-400 font-medium mb-6">₹4,788 billed annually (Save ₹4,800/yr)</p>
+              <p className="text-[11px] text-emerald-400 font-medium mb-6">
+                {currency === 'INR' ? '₹4,788 billed annually (Save ₹4,800/yr)' : '$108 billed annually (Save $120/yr)'}
+              </p>
 
               <div className="space-y-3 py-5 border-t border-white/10 text-xs text-zinc-300">
                 <div className="flex items-center gap-2">
@@ -294,7 +342,7 @@ export const PricingPage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span><strong className="text-white font-semibold">Instant GST invoice</strong> for input credit</span>
+                  <span><strong className="text-white font-semibold">{currency === 'INR' ? 'Instant GST invoice' : 'Instant digital receipt'}</strong></span>
                 </div>
               </div>
             </div>
@@ -321,9 +369,9 @@ export const PricingPage = () => {
               <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-zinc-400">
                 <span className="text-emerald-400 font-bold">⚡ Instant Activation</span>
                 <span>•</span>
-                <span>UPI & RuPay</span>
+                <span>{currency === 'INR' ? 'UPI & RuPay' : 'Apple & Google Pay'}</span>
                 <span>•</span>
-                <span>GST Invoice</span>
+                <span>{currency === 'INR' ? 'GST Invoice' : 'Stripe Verified'}</span>
               </div>
             </div>
           </div>
@@ -354,7 +402,7 @@ export const PricingPage = () => {
               <p className="text-xs text-zinc-400 mb-6">Month-to-month agility with zero long-term commitment.</p>
 
               <div className="flex items-baseline gap-1.5 mb-1">
-                <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">₹799</span>
+                <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">{currency === 'INR' ? '₹799' : '$19'}</span>
                 <span className="text-xs font-semibold text-zinc-400">/month</span>
               </div>
               <p className="text-[11px] text-zinc-400 mb-6">Billed monthly • Cancel anytime in 1 click</p>
@@ -378,7 +426,7 @@ export const PricingPage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span><strong className="text-white font-semibold">Instant GST invoice</strong> for input credit</span>
+                  <span><strong className="text-white font-semibold">{currency === 'INR' ? 'Instant GST invoice' : 'Instant digital receipt'}</strong></span>
                 </div>
               </div>
             </div>
@@ -405,9 +453,9 @@ export const PricingPage = () => {
               <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-zinc-400">
                 <span className="text-emerald-400 font-bold">⚡ Instant Activation</span>
                 <span>•</span>
-                <span>UPI & RuPay</span>
+                <span>{currency === 'INR' ? 'UPI & RuPay' : 'Apple & Google Pay'}</span>
                 <span>•</span>
-                <span>GST Invoice</span>
+                <span>{currency === 'INR' ? 'GST Invoice' : 'Stripe Verified'}</span>
               </div>
             </div>
           </div>

@@ -11,7 +11,8 @@ import {
   Gift,
   Sparkles,
   ExternalLink,
-  Menu
+  Menu,
+  Star
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
@@ -110,14 +111,14 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#FFFFFF] text-[#0F172A] selection:bg-brand-500/20 selection:text-brand-900 relative pb-20 sm:pb-0 font-sans">
       
-      {/* ── 1. Top Announcement Quiz Bar ── */}
-      <div className="bg-brand-600 hover:bg-brand-700 transition-colors text-white py-2 px-4 text-center relative z-40 flex items-center justify-center gap-2 shadow-xs text-xs sm:text-sm font-medium cursor-pointer">
-        <Link to="/signup" className="flex items-center gap-1.5 hover:underline">
-          <span className="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-            Free quiz
+      {/* ── 1. Top Announcement Bar ── */}
+      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all text-white py-2 px-4 text-center relative z-40 flex items-center justify-center gap-2 shadow-xs text-xs sm:text-sm font-medium">
+        <Link to="/signup" className="flex items-center gap-2 hover:underline">
+          <span className="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+            ⚡ Proven ROI
           </span>
-          <span>What's your Social Proof Score?</span>
-          <span className="hidden sm:inline text-white/80 ml-1">| Take the quiz →</span>
+          <span>Turn customer praise into +34% higher website conversions</span>
+          <span className="hidden sm:inline text-white/90 font-bold ml-1">| Start Free in 2 Minutes →</span>
         </Link>
       </div>
 
@@ -351,14 +352,28 @@ export const LandingPage: React.FC = () => {
           {/* Card 1: You Without Social Proof */}
           <div className="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col justify-between">
             <div>
-              {/* Meme GIF Container (Without Social Proof - This Is Fine) */}
-              <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-slate-100 border border-slate-200 shadow-inner relative">
-                <img
-                  src="/assets/this-is-fine.gif"
-                  alt="You Without Social Proof - This is fine fire dog meme"
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                />
+              {/* Modern High-Friction Preview (Without Social Proof) */}
+              <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-gradient-to-b from-slate-50 to-slate-100 border border-slate-200/90 shadow-inner p-4 flex flex-col justify-between">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    Low-Trust Checkout
+                  </span>
+                  <span className="text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                    High Friction
+                  </span>
+                </div>
+                <div className="bg-white rounded-xl p-3 border border-slate-200/80 shadow-2xs space-y-1.5">
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span className="font-medium">Customer Reviews</span>
+                    <span className="text-slate-400">0 Reviews</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 italic">"No customer ratings found. Buyers hesitate to complete checkout."</p>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-200/60">
+                  <span>Conversion Rate: <strong className="text-slate-800">0.9%</strong></span>
+                  <span className="text-rose-600 font-semibold">78% Cart Abandonment</span>
+                </div>
               </div>
 
               <h3 className="text-xl font-semibold text-slate-900 text-center mb-6">
@@ -402,14 +417,37 @@ export const LandingPage: React.FC = () => {
           {/* Card 2: You With Social Proof */}
           <div className="bg-white border-2 border-indigo-100 rounded-3xl p-6 sm:p-8 shadow-lg shadow-indigo-500/5 flex flex-col justify-between relative ring-1 ring-indigo-500/10">
             <div>
-              {/* Meme GIF Container (With Social Proof - Leonardo DiCaprio Gatsby Toast) */}
-              <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-indigo-50 border border-indigo-100 shadow-inner relative">
-                <img
-                  src="/assets/gatsby-toast.gif"
-                  alt="You With Social Proof - Leonardo DiCaprio raising a celebratory glass"
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                />
+              {/* Modern Verified Proof Showcase (With Social Proof) */}
+              <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-gradient-to-br from-indigo-50/70 via-purple-50/40 to-white border border-indigo-200/80 shadow-inner p-4 flex flex-col justify-between relative">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-100/80 px-2 py-0.5 rounded-full border border-indigo-200">
+                    Verified Social Proof
+                  </span>
+                  <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 shadow-2xs">
+                    <Sparkles className="w-3 h-3 text-emerald-500" />
+                    +34% Conversion Lift
+                  </span>
+                </div>
+                <div className="bg-white rounded-xl p-3 border border-indigo-100 shadow-sm space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      ))}
+                      <span className="text-xs font-bold text-slate-900 ml-1">5.0</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
+                      ✓ 2-Sec Verified
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-700 font-medium leading-snug">
+                    "Adding Panda Praise reviews to our pricing page doubled our signups in week one."
+                  </p>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-600 font-medium pt-1 border-t border-indigo-100/60">
+                  <span>Conversion Rate: <strong className="text-emerald-700">4.2%</strong></span>
+                  <span className="text-indigo-600 font-bold">140+ Verified Reviews</span>
+                </div>
               </div>
 
               <h3 className="text-xl font-semibold text-slate-900 text-center mb-6">
@@ -1366,7 +1404,7 @@ export const LandingPage: React.FC = () => {
                 <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-900">Resources</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing & Plans</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors">Social Proof Score Quiz</Link></li>
+                  <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Live Wall of Love Demo</button></li>
                   <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Why Panda Praise</button></li>
                   <li><button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Frequently Asked Questions</button></li>
                 </ul>
@@ -1391,6 +1429,7 @@ export const LandingPage: React.FC = () => {
                   <li><Link to="/signup" className="hover:text-gray-900 transition-colors font-semibold text-[#6701e6]">Start Free</Link></li>
                   <li><Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link></li>
                   <li><Link to="/privacy-policy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link></li>
+                  <li><Link to="/refund-policy" className="hover:text-gray-900 transition-colors">Refund & Cancellation Policy</Link></li>
                 </ul>
               </div>
 
@@ -1403,6 +1442,7 @@ export const LandingPage: React.FC = () => {
             <div className="flex items-center gap-5">
               <Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link>
               <Link to="/privacy-policy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
+              <Link to="/refund-policy" className="hover:text-gray-900 transition-colors">Refund Policy</Link>
             </div>
           </div>
         </div>

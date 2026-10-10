@@ -127,4 +127,41 @@ describe('PricingPage CRO & Monetization Architecture', () => {
     expect(trialBtn).not.toBeNull();
     expect(trialBtn.textContent).toContain('Start 7-Day Free Trial');
   });
+
+  it('5. Switches seamlessly between Indian Rupees (INR) and Worldwide USD pricing', async () => {
+    await act(async () => {
+      root.render(
+        <MemoryRouter>
+          <PricingPage />
+        </MemoryRouter>
+      );
+    });
+
+    const usdToggle = container.querySelector('#currency-toggle-usd') as HTMLButtonElement;
+    const inrToggle = container.querySelector('#currency-toggle-inr') as HTMLButtonElement;
+    expect(usdToggle).not.toBeNull();
+    expect(inrToggle).not.toBeNull();
+
+    // Switch to USD
+    await act(async () => {
+      usdToggle.click();
+    });
+
+    const foundingCard = container.querySelector('#plan-card-founding');
+    const annualCard = container.querySelector('#plan-card-annual');
+    const monthlyCard = container.querySelector('#plan-card-monthly');
+
+    expect(foundingCard?.textContent).toContain('$49');
+    expect(annualCard?.textContent).toContain('$9');
+    expect(monthlyCard?.textContent).toContain('$19');
+    expect(foundingCard?.textContent).toContain('Apple & Google Pay');
+
+    // Switch back to INR
+    await act(async () => {
+      inrToggle.click();
+    });
+    expect(foundingCard?.textContent).toContain('₹4,999');
+    expect(annualCard?.textContent).toContain('₹399');
+    expect(monthlyCard?.textContent).toContain('₹799');
+  });
 });

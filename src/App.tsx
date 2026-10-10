@@ -14,6 +14,7 @@ const PublicWidgetPage = React.lazy(() => import('./pages/PublicWidgetPage').the
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
 const PrivacyPolicyPage = React.lazy(() => import('./pages/PrivacyPolicyPage').then((m) => ({ default: m.PrivacyPolicyPage })));
 const TermsPage = React.lazy(() => import('./pages/TermsPage').then((m) => ({ default: m.TermsPage })));
+const RefundPolicyPage = React.lazy(() => import('./pages/RefundPolicyPage').then((m) => ({ default: m.RefundPolicyPage })));
 const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 const OnboardingPage = React.lazy(() => import('./pages/OnboardingPage').then((m) => ({ default: m.OnboardingPage })));
 const OnboardingUpgradePage = React.lazy(() => import('./pages/OnboardingUpgradePage').then((m) => ({ default: m.OnboardingUpgradePage })));
@@ -68,6 +69,8 @@ export function App() {
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            <Route path="/refunds" element={<RefundPolicyPage />} />
             <Route path="/c/:collectionSlug" element={<PublicCollectorPage />} />
             <Route path="/w/:publicWidgetId" element={<PublicWidgetPage />} />
             <Route path="/love/:slug" element={<WallOfLovePage />} />

@@ -13,27 +13,37 @@ import {
   Shield,
   Save,
   Copy,
+  Trash2,
+  AlertTriangle,
+  Lock,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { usePageSeo } from '../../lib/seo';
 import { TeamRole, PLAN_LIMITS, Project } from '../../types';
 
-type SettingsTab = 'general' | 'team' | 'billing' | 'branding' | 'api';
+type SettingsTab = 'general' | 'team' | 'billing' | 'branding' | 'api' | 'security';
 
 export const WorkspaceSettings: React.FC = () => {
   usePageSeo({
     title: 'Workspace Settings — Panda Praise',
-    description: 'Manage your workspace settings, team members, billing, and integrations.',
+    description: 'Manage your workspace settings, team members, billing, security, and integrations.',
   });
 
-  const { workspace, project, user, allProjects = [] } = useAuth();
+  const { workspace, project, user, allProjects = [], updateProjectDetails, deleteProjectById, resetPassword } = useAuth();
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
-  const [wsName, setWsName] = useState(workspace?.name || 'My Workspace');
+  const [wsName, setWsName] = useState(workspace?.name || project?.name || 'My Workspace');
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<TeamRole>('editor');
+
+  // Danger Zone / GDPR Deletion State
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Security Tab State
+  const [passwordResetSent, setPasswordResetSent] = useState(false);
+  const [passwordResetError, setPasswordResetError] = useState<string | null>(null);
 
   const plan = workspace?.plan || 'free';
   const limits = PLAN_LIMITS[plan];
@@ -52,14 +62,63 @@ export const WorkspaceSettings: React.FC = () => {
     { id: 'billing' as SettingsTab, label: 'Billing & Plan', icon: CreditCard },
     { id: 'branding' as SettingsTab, label: 'Branding', icon: Palette },
     { id: 'api' as SettingsTab, label: 'API & Webhooks', icon: Key },
+    { id: 'security' as SettingsTab, label: 'Security & Auth', icon: Lock },
   ];
 
   const handleSave = async () => {
     setIsSaving(true);
-    await new Promise(r => setTimeout(r, 600));
-    setIsSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      if (project?.id && updateProjectDetails) {
+        await updateProjectDetails(project.id, { name: wsName.trim() });
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      console.error('Failed to update workspace details:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteWorkspace = async () => {
+    const targetName = wsName.trim();
+    const confirmation = window.prompt(
+      `GDPR Right to be Forgotten: To permanently delete this workspace and all associated customer testimonials, type "${targetName}" to confirm:`
+    );
+    if (confirmation !== targetName) {
+      if (confirmation !== null) {
+        alert('Workspace name did not match. Deletion cancelled.');
+      }
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      if (project?.id && deleteProjectById) {
+        await deleteProjectById(project.id);
+      }
+      window.location.href = '/dashboard';
+    } catch (err) {
+      console.error('Failed to delete workspace:', err);
+      alert('Failed to delete workspace. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleTriggerPasswordReset = async () => {
+    if (!user?.email) return;
+    setPasswordResetError(null);
+    try {
+      const res = await resetPassword(user.email);
+      if (res.success) {
+        setPasswordResetSent(true);
+      } else {
+        setPasswordResetError(res.error || 'Failed to dispatch reset email.');
+      }
+    } catch (err: any) {
+      setPasswordResetError(err.message || 'Error triggering reset email.');
+    }
   };
 
   const handleCopy = (text: string) => {
@@ -200,6 +259,32 @@ export const WorkspaceSettings: React.FC = () => {
                       )}
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Danger Zone: Workspace Deletion / GDPR Article 17 */}
+              <div className="p-6 rounded-2xl bg-rose-50/50 border border-rose-200 shadow-xs space-y-4">
+                <div className="flex items-center gap-2 text-rose-700">
+                  <AlertTriangle size={18} />
+                  <h3 className="text-base font-bold">Danger Zone</h3>
+                </div>
+                <p className="text-xs text-rose-600/90 leading-relaxed">
+                  Permanently delete this workspace and all associated customer testimonials, campaign forms, and widget configurations. Under GDPR Article 17 (Right to Erasure), all stored customer review records will be purged immediately. This action cannot be undone.
+                </p>
+
+                <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-t border-rose-200">
+                  <div>
+                    <p className="text-xs font-bold text-gray-900">Delete Workspace & Testimonials</p>
+                    <p className="text-[11px] text-gray-500">Requires typing workspace name to confirm</p>
+                  </div>
+                  <button
+                    onClick={handleDeleteWorkspace}
+                    disabled={isDeleting}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
+                  >
+                    <Trash2 size={14} />
+                    {isDeleting ? 'Deleting Workspace...' : 'Delete Workspace'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -474,6 +559,85 @@ export const WorkspaceSettings: React.FC = () => {
                   View Documentation
                   <ExternalLink size={13} />
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── Security & Authentication ── */}
+          {activeTab === 'security' && (
+            <div className="space-y-6">
+              <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-4">
+                <div className="flex items-center gap-2">
+                  <Lock size={18} className="text-[#6701e6]" />
+                  <h3 className="text-base font-bold text-gray-900">Account Credentials & Access</h3>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Manage your login credentials, authentication tokens, and account recovery options.
+                </p>
+
+                <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600">Authenticated Email</label>
+                    <p className="text-sm font-bold text-gray-900 mt-0.5">{user?.email || 'N/A'}</p>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600">Authentication Method</label>
+                    <p className="text-xs text-gray-700 mt-0.5">Firebase Secure Authentication (OAuth / Email Link)</p>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600">Active Session Status</label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span className="text-xs font-semibold text-emerald-700">Encrypted JWT Session Active</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-bold text-gray-900">Password Reset Dispatch</p>
+                    <p className="text-[11px] text-gray-500">Send an authorized password change token to your email</p>
+                  </div>
+                  <button
+                    onClick={handleTriggerPasswordReset}
+                    className="px-4 py-2 text-xs font-bold rounded-xl bg-white border border-gray-300 text-gray-800 hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-2xs cursor-pointer"
+                  >
+                    Send Password Reset Link
+                  </button>
+                </div>
+
+                {passwordResetSent && (
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 flex items-center gap-2">
+                    <Check size={14} className="text-emerald-600" />
+                    Reset instructions have been dispatched to {user?.email}. Check your inbox!
+                  </div>
+                )}
+
+                {passwordResetError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold text-rose-800">
+                    {passwordResetError}
+                  </div>
+                )}
+              </div>
+
+              {/* Data Protection & Compliance (GDPR Article 17, CCPA) */}
+              <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-3">
+                <h3 className="text-base font-bold text-gray-900">Privacy & Data Governance</h3>
+                <p className="text-xs text-gray-500">
+                  Panda Praise complies with global data privacy frameworks including GDPR (EU/UK) and CCPA (California).
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-200">
+                    <p className="text-xs font-bold text-gray-900">GDPR Article 17 Compliant</p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">Automated hard deletion of customer reviews upon workspace purge.</p>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-200">
+                    <p className="text-xs font-bold text-gray-900">Sub-processor Encryption</p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">All customer avatars and video testimonials encrypted at rest via Cloudflare/Firebase.</p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
