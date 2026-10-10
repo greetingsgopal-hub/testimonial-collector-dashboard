@@ -212,22 +212,22 @@ export const PricingPage = () => {
           <div
             id="plan-card-founding"
             onClick={() => setSelectedPlan('founding')}
-            className={`relative rounded-3xl p-7 sm:p-8 flex flex-col justify-between transition-all duration-300 cursor-pointer ${
+            className={`relative rounded-3xl p-7 sm:p-8 flex flex-col justify-between transition-all duration-300 cursor-pointer overflow-hidden ${
               selectedPlan === 'founding'
                 ? 'bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-amber-400/80 shadow-[0_0_40px_rgba(245,158,11,0.22)] ring-1 ring-amber-400/30 scale-[1.02]'
                 : 'bg-zinc-900/60 border border-amber-400/40 hover:border-amber-400/70 hover:bg-zinc-900/80'
             }`}
           >
-            {/* Glowing top line */}
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 rounded-t-3xl" />
+            {/* Glowing top line - cleanly clipped by overflow-hidden */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500" />
             
             <div>
-              <div className="flex items-center justify-between mb-4 pt-1">
-                <span className="px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
-                  <Crown size={12} className="text-amber-400" />
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pt-1">
+                <span className="px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider inline-flex items-center gap-1.5 shadow-xs whitespace-nowrap">
+                  <Crown size={12} className="text-amber-400 shrink-0" />
                   Most Popular • Lifetime Pass
                 </span>
-                <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-amber-300/90 uppercase tracking-wider bg-amber-400/10 border border-amber-400/20 px-2.5 py-0.5 rounded-full whitespace-nowrap">
                   Limited Deal
                 </span>
               </div>
