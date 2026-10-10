@@ -71,3 +71,41 @@ describe('TASK 4 regression: public submission end-to-end', () => {
     expect(occurrences.length).toBeGreaterThanOrEqual(2);
   });
 });
+
+describe('content integrity: owner-edit guardrails (verbatim sources, disclosed edits)', () => {
+  const reviewsBlock = rules.match(/match \/reviews\/\{reviewId\} \{[\s\S]*?\n    \}/)![0];
+  const publicBlock = rules.match(/match \/public_reviews\/\{reviewId\} \{[\s\S]*?\n    \}/)![0];
+
+  it('rules lock content fields on form-collected and imported reviews', () => {
+    // Only owner-sourced entries may change content fields; everything else
+    // (form, google, facebook, ...) must keep the reviewer's words verbatim.
+    expect(reviewsBlock).toContain("in ['csv', 'manual', 'import']");
+    expect(reviewsBlock).toContain("hasAny(['name', 'role', 'company', 'title', 'rating', 'content'])");
+  });
+
+  it('rules require the editedByOwner disclosure and a faithful first-edit snapshot on content edits', () => {
+    expect(reviewsBlock).toContain('request.resource.data.editedByOwner == true');
+    expect(reviewsBlock).toContain('request.resource.data.originalContent == resource.data.content');
+    expect(reviewsBlock).toContain('request.resource.data.originalRating == resource.data.rating');
+    expect(reviewsBlock).toContain('request.resource.data.originalName == resource.data.name');
+  });
+
+  it('rules make original snapshots and the disclosure flag write-once', () => {
+    expect(reviewsBlock).toContain("!('originalContent' in resource.data)");
+    expect(reviewsBlock).toContain("!('originalRating' in resource.data)");
+    expect(reviewsBlock).toContain("!('originalName' in resource.data)");
+    expect(reviewsBlock).toContain("!('editedByOwner' in resource.data)");
+  });
+
+  it('adapter applies the content-integrity guard before writing updates', () => {
+    const m = adapterSrc.match(/async updateReview[\s\S]*?await updateDoc/);
+    expect(m, 'updateReview must exist').not.toBeNull();
+    expect(m![0]).toContain('buildReviewEditUpdates');
+  });
+
+  it('public_reviews carries the editedByOwner disclosure (create and update lists)', () => {
+    const occurrences = publicBlock.match(/'editedByOwner'/g) ?? [];
+    expect(occurrences.length).toBeGreaterThanOrEqual(2);
+    expect(adapterSrc.match(/private async syncPublicReview[\s\S]*?\n  \}/)![0]).toContain('editedByOwner');
+  });
+});

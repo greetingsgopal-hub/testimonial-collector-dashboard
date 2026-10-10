@@ -12,6 +12,7 @@ export interface PublicEmbedReview {
   text: string;
   source: 'google' | 'linkedin' | 'instagram' | 'facebook' | 'direct';
   verified?: boolean;
+  editedByOwner?: boolean;
   createdAt: string;
 }
 
@@ -131,6 +132,7 @@ export async function handleEmbedTestimonials(request: Request, env: WorkerEnv):
               text: f.text?.stringValue || f.content?.stringValue || '',
               source,
               verified: Boolean(f.verified?.booleanValue ?? false),
+              editedByOwner: f.editedByOwner?.booleanValue === true,
               createdAt: f.createdAt?.timestampValue || f.createdAt?.stringValue || new Date().toISOString(),
             });
           }

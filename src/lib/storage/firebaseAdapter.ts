@@ -2,6 +2,7 @@ import { StorageAdapter } from './adapter';
 import { Review, ReviewInput, ReviewStats, CollectionForm, Project } from '../../types';
 import { getFirebaseDb, getFirebaseAuth } from '../firebase';
 import { cleanBrandOrProductName, deduplicateRepeatedString } from '../security';
+import { buildReviewEditUpdates } from '../contentIntegrity';
 import {
   collection,
   doc,
@@ -43,6 +44,11 @@ export class FirebaseAdapter implements StorageAdapter {
       helpfulCount: data.helpfulCount || 0,
       createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : (data.createdAt || new Date().toISOString()),
       updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate().toISOString() : (data.updatedAt || new Date().toISOString()),
+      originalContent: data.originalContent || undefined,
+      originalRating: data.originalRating !== undefined && data.originalRating !== null ? Number(data.originalRating) : undefined,
+      originalName: data.originalName || undefined,
+      editedByOwner: data.editedByOwner === true,
+      editedAt: data.editedAt || undefined,
     };
   }
 
@@ -262,20 +268,31 @@ export class FirebaseAdapter implements StorageAdapter {
     const currentData = reviewSnap.data();
     const now = new Date().toISOString();
 
+    // Content integrity: form-collected and platform-imported reviews are
+    // verbatim (throws ReviewEditNotAllowedError); owner-sourced reviews get
+    // a one-time original snapshot + public editedByOwner disclosure.
+    const current = this.mapDocToReview(id, currentData);
+    const guarded = buildReviewEditUpdates(current, updates, now);
+
     const updatePayload: any = {
       updatedAt: now,
     };
 
-    if (updates.name !== undefined) updatePayload.name = updates.name;
-    if (updates.role !== undefined) updatePayload.role = updates.role;
-    if (updates.company !== undefined) updatePayload.company = updates.company;
-    if (updates.avatarUrl !== undefined) updatePayload.avatarUrl = updates.avatarUrl;
-    if (updates.rating !== undefined) updatePayload.rating = Number(updates.rating);
-    if (updates.title !== undefined) updatePayload.title = updates.title;
-    if (updates.content !== undefined) updatePayload.content = updates.content;
-    if (updates.status !== undefined) updatePayload.status = updates.status;
-    if (updates.isFeatured !== undefined) updatePayload.isFeatured = updates.isFeatured;
-    if (updates.tags !== undefined) updatePayload.tags = updates.tags;
+    if (guarded.name !== undefined) updatePayload.name = guarded.name;
+    if (guarded.role !== undefined) updatePayload.role = guarded.role;
+    if (guarded.company !== undefined) updatePayload.company = guarded.company;
+    if (guarded.avatarUrl !== undefined) updatePayload.avatarUrl = guarded.avatarUrl;
+    if (guarded.rating !== undefined) updatePayload.rating = Number(guarded.rating);
+    if (guarded.title !== undefined) updatePayload.title = guarded.title;
+    if (guarded.content !== undefined) updatePayload.content = guarded.content;
+    if (guarded.status !== undefined) updatePayload.status = guarded.status;
+    if (guarded.isFeatured !== undefined) updatePayload.isFeatured = guarded.isFeatured;
+    if (guarded.tags !== undefined) updatePayload.tags = guarded.tags;
+    if (guarded.originalContent !== undefined) updatePayload.originalContent = guarded.originalContent;
+    if (guarded.originalRating !== undefined) updatePayload.originalRating = guarded.originalRating;
+    if (guarded.originalName !== undefined) updatePayload.originalName = guarded.originalName;
+    if (guarded.editedByOwner !== undefined) updatePayload.editedByOwner = guarded.editedByOwner;
+    if (guarded.editedAt !== undefined) updatePayload.editedAt = guarded.editedAt;
 
     await updateDoc(reviewRef, updatePayload);
 
@@ -333,6 +350,8 @@ export class FirebaseAdapter implements StorageAdapter {
       tags: review.tags,
       isFeatured: review.isFeatured,
       status: 'approved',
+      editedByOwner: review.editedByOwner === true,
+      editedAt: review.editedAt || null,
       createdAt: review.createdAt,
       updatedAt: review.updatedAt,
     };

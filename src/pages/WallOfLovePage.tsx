@@ -405,6 +405,15 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ review, theme, active
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <p className={`text-sm font-medium ${theme.text}`}>{review.name}</p>
+            {review.editedByOwner && (
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${
+                isLight
+                  ? 'bg-gray-50 text-gray-500 border-gray-200'
+                  : 'bg-white/5 text-gray-400 border-white/10'
+              }`}>
+                Edited by business
+              </span>
+            )}
             {review.screenshotPlatform || review.type === 'screenshot' ? (
               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 transition-all ${
                 isLight

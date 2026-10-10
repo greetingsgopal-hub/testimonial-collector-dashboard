@@ -217,6 +217,15 @@ export interface Review {
   isSample?: boolean;
   authorName?: string;
   createdAt: string; // ISO string
+  // Content integrity (owner-edit guardrails). Owner edits to a reviewer's
+  // words are only permitted for owner-sourced entries (csv/manual/import);
+  // when they happen, the pre-edit values are snapshotted here once and the
+  // review is publicly disclosed as edited. See src/lib/contentIntegrity.ts.
+  originalContent?: string;
+  originalRating?: number;
+  originalName?: string;
+  editedByOwner?: boolean;
+  editedAt?: string; // ISO string
   updatedAt?: string;
   importedAt?: string;
 }

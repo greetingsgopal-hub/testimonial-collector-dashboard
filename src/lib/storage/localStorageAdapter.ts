@@ -2,6 +2,7 @@ import { StorageAdapter } from './adapter';
 import { Review, ReviewInput, ReviewStats, CollectionForm, Project } from '../../types';
 import { INITIAL_REVIEWS } from '../seedData';
 import { cleanBrandOrProductName, deduplicateRepeatedString } from '../security';
+import { buildReviewEditUpdates } from '../contentIntegrity';
 
 const STORAGE_KEY_PREFIX = 'pandapraise_testimonials_project_';
 export class LocalStorageAdapter implements StorageAdapter {
@@ -97,9 +98,14 @@ export class LocalStorageAdapter implements StorageAdapter {
       throw new Error('Review with id ' + id + ' not found in project');
     }
 
+    // Content integrity: same guard as the Firebase adapter — verbatim
+    // sources reject content edits; owner-sourced edits are snapshotted and
+    // disclosed.
+    const guarded = buildReviewEditUpdates(reviews[index], updates);
+
     const updated: Review = {
       ...reviews[index],
-      ...updates,
+      ...guarded,
       updatedAt: new Date().toISOString(),
     };
 

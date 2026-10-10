@@ -14,11 +14,13 @@ import {
   ShieldCheck,
   Globe,
   Share2,
-  Edit3,
-  Save
+ Edit3,
+ Save,
+ Lock
 } from 'lucide-react';
 import { Review, ReviewStatus } from '../../types';
 import { sanitizeUrl } from '../../lib/security';
+import { isOwnerEditableSource } from '../../lib/contentIntegrity';
 
 interface ReviewDetailModalProps {
   review: Review | null;
@@ -54,8 +56,15 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
   const [editTitle, setEditTitle] = useState(review?.title || '');
   const [editContent, setEditContent] = useState(review?.content || '');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   if (!review) return null;
+
+  // Form-collected and platform-imported reviews are verbatim: the owner may
+  // moderate (approve/reject/feature) but never rewrite the reviewer's words.
+  // Only owner-entered reviews (CSV / manual) are editable, and those edits
+  // are snapshotted and publicly disclosed as "Edited by business".
+  const contentEditable = isOwnerEditableSource(review.source);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`"${review.content}"\n— ${review.name}, ${review.role}${review.company ? ` at ${review.company}` : ''}`);
@@ -85,6 +94,7 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
   const handleSaveEdit = async () => {
     if (!onEditReview) return;
     setIsSavingEdit(true);
+    setEditError(null);
     try {
       await onEditReview(review.id, {
         name: editName.trim() || review.name,
@@ -96,7 +106,7 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
       });
       setIsEditing(false);
     } catch (e) {
-      console.error('Failed to save review edits:', e);
+      setEditError(e instanceof Error ? e.message : 'Failed to save review edits.');
     } finally {
       setIsSavingEdit(false);
     }
@@ -282,6 +292,16 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
                     <span>{isSavingEdit ? 'Saving...' : 'Save Changes'}</span>
                   </button>
                 </div>
+
+                <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-3">
+                  Edits are logged, the original text is preserved, and this review is publicly marked
+                  "Edited by business" wherever it is displayed.
+                </p>
+                {editError && (
+                  <p className="text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mt-2">
+                    {editError}
+                  </p>
+                )}
               </div>
             </div>
           ) : (
@@ -310,13 +330,23 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
                     <span>{copiedContent ? 'Copied' : 'Copy Quote'}</span>
                   </button>
 
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#6701e6] font-semibold cursor-pointer px-2 py-1 rounded-lg hover:bg-gray-100"
-                  >
-                    <Edit3 className="w-3 h-3" />
-                    <span>Edit</span>
-                  </button>
+                  {contentEditable ? (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#6701e6] font-semibold cursor-pointer px-2 py-1 rounded-lg hover:bg-gray-100"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      <span>Edit</span>
+                    </button>
+                  ) : (
+                    <span
+                      title="Collected and imported reviews are kept verbatim so visitors always see the reviewer's exact words. You can approve, reject, or feature this review, but not edit it."
+                      className="flex items-center gap-1 text-xs text-gray-400 font-semibold px-2 py-1 cursor-help"
+                    >
+                      <Lock className="w-3 h-3" />
+                      <span>Verbatim</span>
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -329,6 +359,22 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
               <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm leading-relaxed italic">
                 "{review.content}"
               </div>
+
+              {review.editedByOwner && (
+                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 uppercase tracking-wide">
+                    Edited by business
+                  </span>
+                  {review.originalContent && (
+                    <p className="text-[11px] text-amber-900 leading-relaxed">
+                      Original (preserved): "{review.originalContent}"
+                      {review.originalRating !== undefined && review.originalRating !== review.rating && (
+                        <span> — original rating: {review.originalRating}/5</span>
+                      )}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

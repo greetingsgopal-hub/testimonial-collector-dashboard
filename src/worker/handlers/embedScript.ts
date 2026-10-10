@@ -67,6 +67,15 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
       }
+      .pp-edited {
+        display: inline-block;
+        margin-top: 2px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: #94a3b8;
+        text-transform: uppercase;
+      }
       .pp-wall-masonry {
         column-count: 3;
         column-gap: 20px;
@@ -507,6 +516,9 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
     html += '      </div>';
     if (subtext) {
       html += '      <span class="pp-author-sub">' + subtext + '</span>';
+    }
+    if (r.editedByOwner) {
+      html += '      <span class="pp-edited">Edited by business</span>';
     }
     html += '    </div>';
     html += '  </div>';

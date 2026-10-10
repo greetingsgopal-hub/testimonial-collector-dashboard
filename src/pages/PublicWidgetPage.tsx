@@ -157,6 +157,11 @@ export const PublicWidgetPage = () => {
           <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 shrink-0">
             ✓ Verified
           </span>
+          {review.editedByOwner && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold shrink-0 border" style={{ color: foreground, opacity: 0.6 }}>
+              Edited by business
+            </span>
+          )}
         </div>
         {settings.showCompany && (
           <div className="text-[10px] truncate" style={{ color: muted }}>

@@ -218,3 +218,33 @@ describe('embed script layouts (data-widget-type)', () => {
     expect(container.innerHTML).toContain('&lt;img src=x onerror=');
   });
 });
+
+describe('edited-by-owner disclosure', () => {
+  const EDITED_PAYLOAD = {
+    projectId: 'proj-abc',
+    totalCount: 2,
+    averageRating: '4.5',
+    testimonials: [
+      { ...TWO_REVIEWS.testimonials[0], editedByOwner: true },
+      { ...TWO_REVIEWS.testimonials[1], editedByOwner: false },
+    ],
+  };
+
+  it('marks owner-edited reviews and leaves verbatim reviews unmarked', async () => {
+    const container = await renderWithType(null, EDITED_PAYLOAD);
+    const marks = container.querySelectorAll('.pp-edited');
+    expect(marks.length).toBe(1);
+    expect(marks[0].textContent).toBe('Edited by business');
+    // The edited mark must sit on the first (edited) review's card only.
+    const cards = container.querySelectorAll('.pp-card');
+    expect(cards[0].querySelector('.pp-edited')).not.toBeNull();
+    expect(cards[1].querySelector('.pp-edited')).toBeNull();
+  });
+
+  it('renders the disclosure in every layout', async () => {
+    for (const type of ['wall', 'carousel', 'spotlight']) {
+      const container = await renderWithType(type, EDITED_PAYLOAD);
+      expect(container.querySelector('.pp-edited'), `layout ${type}`).not.toBeNull();
+    }
+  });
+});
