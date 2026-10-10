@@ -3,6 +3,7 @@ import {
   CollectionForm, Project, Workspace,
   TeamMember, TeamInvitation, ImportJob,
   WallOfLoveConfig, WebhookConfig, ApiKey,
+  Campaign, CampaignInput, CampaignLog, CampaignLogInput,
 } from '../../types';
 
 export interface StorageAdapter {
@@ -68,4 +69,15 @@ export interface StorageAdapter {
   getApiKeys?(workspaceId: string): Promise<ApiKey[]>;
   createApiKey?(key: Omit<ApiKey, 'id' | 'createdAt'>): Promise<ApiKey & { rawKey: string }>;
   revokeApiKey?(id: string): Promise<boolean>;
+
+  // ── Automated Review Campaigns ───────────────────────────
+  getCampaigns?(projectId?: string): Promise<Campaign[]>;
+  getCampaignById?(id: string): Promise<Campaign | null>;
+  createCampaign?(campaign: CampaignInput, projectId?: string): Promise<Campaign>;
+  updateCampaign?(id: string, updates: Partial<Campaign>): Promise<Campaign>;
+  deleteCampaign?(id: string): Promise<boolean>;
+  getCampaignLogs?(campaignId?: string, projectId?: string): Promise<CampaignLog[]>;
+  createCampaignLog?(log: CampaignLogInput): Promise<CampaignLog>;
+  updateCampaignLog?(id: string, updates: Partial<CampaignLog>): Promise<CampaignLog>;
 }
+

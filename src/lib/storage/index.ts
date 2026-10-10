@@ -49,6 +49,40 @@ class DelegatingStorageAdapter implements StorageAdapter {
     if (!this.adapter.resetToSampleData) return;
     return this.adapter.resetToSampleData(projectId);
   }
+
+  // ── Automated Campaigns ─────────────────────────────────
+  getCampaigns(projectId?: string) {
+    if (this.adapter.getCampaigns) return this.adapter.getCampaigns(projectId);
+    return Promise.resolve([]);
+  }
+  getCampaignById(id: string) {
+    if (this.adapter.getCampaignById) return this.adapter.getCampaignById(id);
+    return Promise.resolve(null);
+  }
+  createCampaign(campaign: any, projectId?: string) {
+    if (this.adapter.createCampaign) return this.adapter.createCampaign(campaign, projectId);
+    throw new Error('createCampaign not supported');
+  }
+  updateCampaign(id: string, updates: any) {
+    if (this.adapter.updateCampaign) return this.adapter.updateCampaign(id, updates);
+    throw new Error('updateCampaign not supported');
+  }
+  deleteCampaign(id: string) {
+    if (this.adapter.deleteCampaign) return this.adapter.deleteCampaign(id);
+    return Promise.resolve(false);
+  }
+  getCampaignLogs(campaignId?: string, projectId?: string) {
+    if (this.adapter.getCampaignLogs) return this.adapter.getCampaignLogs(campaignId, projectId);
+    return Promise.resolve([]);
+  }
+  createCampaignLog(log: any) {
+    if (this.adapter.createCampaignLog) return this.adapter.createCampaignLog(log);
+    throw new Error('createCampaignLog not supported');
+  }
+  updateCampaignLog(id: string, updates: any) {
+    if (this.adapter.updateCampaignLog) return this.adapter.updateCampaignLog(id, updates);
+    throw new Error('updateCampaignLog not supported');
+  }
 }
 
 export const storage: StorageAdapter = new DelegatingStorageAdapter();

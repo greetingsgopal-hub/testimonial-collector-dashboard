@@ -31,6 +31,8 @@ import { handleImportProvider } from './handlers/importProviderHandler';
 import { handleUniversalUrlResolve, handleUniversalReviewsCommit } from './handlers/universalImportHandler';
 import { handleVerifyWidget } from './handlers/verifyWidget';
 import { executeAutomatedBackgroundSync } from './lib/backgroundSync';
+import { handleCampaignTriggerWebhook } from './handlers/campaignTriggerWebhook';
+import { handleCampaignTrackClick, handleCampaignDispatchTrigger } from './handlers/campaignTrackHandler';
 
 export default {
   async fetch(request: Request, env: WorkerEnv, _ctx: ExecutionContext): Promise<Response> {
@@ -95,6 +97,19 @@ export default {
         case 'review-invite':
         case 'trigger-review':
           return await handleReviewInviteWebhook(request, env);
+
+        // Automated Review Drip Campaigns (Stage 5)
+        case 'webhook/campaign-trigger':
+        case 'campaigns/trigger':
+          return await handleCampaignTriggerWebhook(request, env);
+
+        case 'campaigns/track-click':
+        case 'campaign/track':
+          return await handleCampaignTrackClick(request, env);
+
+        case 'campaigns/dispatch':
+        case 'campaign/dispatch':
+          return await handleCampaignDispatchTrigger(request, env);
 
         // Stripe subscription billing
         case 'webhooks/stripe':

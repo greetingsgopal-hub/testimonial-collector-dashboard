@@ -649,3 +649,68 @@ export interface SentimentResult {
   summary: string;       // Human-readable summary
   analyzedAt: string;    // ISO timestamp
 }
+
+// ── Automated Review Request Drip Campaigns ───────────────────
+export type CampaignChannel = 'email' | 'whatsapp';
+export type CampaignStatus = 'active' | 'paused';
+export type CampaignTrigger = 'webhook' | 'manual_csv' | 'api' | 'zapier';
+
+export interface CampaignTemplate {
+  subject?: string;
+  messageBody: string;
+  ctaText?: string;
+  senderName?: string;
+  whatsappTemplateName?: string;
+}
+
+export interface CampaignStats {
+  sent: number;
+  opened: number;
+  clicked: number;
+  converted: number;
+}
+
+export interface Campaign {
+  id: string;
+  projectId: string;
+  ownerId: string;
+  name: string;
+  channel: CampaignChannel;
+  status: CampaignStatus;
+  triggerType: CampaignTrigger;
+  delayDays: number; // 0 = immediate, 1..30 days
+  template: CampaignTemplate;
+  stats: CampaignStats;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CampaignInput = Omit<Campaign, 'id' | 'createdAt' | 'updatedAt' | 'stats'> & {
+  stats?: Partial<CampaignStats>;
+};
+
+export type CampaignLogStatus = 'scheduled' | 'sent' | 'delivered' | 'clicked' | 'converted' | 'failed';
+
+export interface CampaignLog {
+  id: string;
+  campaignId: string;
+  projectId: string;
+  ownerId: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  customerName?: string;
+  productName?: string;
+  orderId?: string;
+  channel: CampaignChannel;
+  status: CampaignLogStatus;
+  scheduledFor: string;
+  sentAt?: string;
+  clickedAt?: string;
+  convertedAt?: string;
+  inviteUrl: string;
+  errorMessage?: string;
+  createdAt: string;
+}
+
+export type CampaignLogInput = Omit<CampaignLog, 'id' | 'createdAt'>;
+

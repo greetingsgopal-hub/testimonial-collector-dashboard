@@ -32,6 +32,12 @@ export interface WorkerEnv {
   STRIPE_PRICE_SUBSCRIPTION_MONTHLY?: string;
   STRIPE_PRICE_SUBSCRIPTION_ANNUAL?: string;
   STRIPE_PRICE_FOUNDING_LIFETIME?: string;
+  // Automated Review Request Drip Campaigns
+  CAMPAIGN_WEBHOOK_SECRET?: string;
+  RESEND_API_KEY?: string;
+  TWILIO_ACCOUNT_SID?: string;
+  TWILIO_AUTH_TOKEN?: string;
+  TWILIO_WHATSAPP_NUMBER?: string;
 }
 
 export interface ScheduledEvent {

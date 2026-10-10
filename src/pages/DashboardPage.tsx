@@ -22,6 +22,7 @@ import { RichSnippetView } from '../components/dashboard/views/RichSnippetView';
 import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { WidgetStudio } from '../components/dashboard/WidgetStudio';
+import { CampaignsHub } from '../components/dashboard/CampaignsHub';
 import { storage } from '../lib/storage';
 import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
@@ -48,6 +49,7 @@ const TAB_LABEL_MAP: Record<string, string> = {
   import: 'Import',
   proof: 'Moderation Queue',
   widgets: 'Widgets',
+  campaigns: 'Campaigns',
   'rich-snippet': 'Post Online',
   integrate: 'Integrations',
   settings: 'Settings',
@@ -554,6 +556,11 @@ export const DashboardPage = () => {
                 onOpenProof={() => setActiveTab('proof')}
               />
             </div>
+          )}
+
+          {/* Automated Review Request Drip Campaigns (Stage 5) */}
+          {activeTab === 'campaigns' && (
+            <CampaignsHub onNavigateToProof={() => setActiveTab('proof')} />
           )}
 
           {/* MAIN MODERATION QUEUE & PROOF DASHBOARD VIEW */}

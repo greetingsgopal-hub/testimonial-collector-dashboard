@@ -86,7 +86,7 @@ interface AuthContextType {
   isNewUser: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const DEMO_USER: AuthUser = {
   id: 'demo-user-001',

@@ -1,5 +1,5 @@
 import { StorageAdapter } from './adapter';
-import { Review, ReviewInput, ReviewStats, CollectionForm, Project } from '../../types';
+import { Review, ReviewInput, ReviewStats, CollectionForm, Project, Campaign, CampaignInput, CampaignLog, CampaignLogInput } from '../../types';
 import { getFirebaseDb, getFirebaseAuth } from '../firebase';
 import { cleanBrandOrProductName, deduplicateRepeatedString } from '../security';
 import { buildReviewEditUpdates } from '../contentIntegrity';
@@ -644,4 +644,188 @@ export class FirebaseAdapter implements StorageAdapter {
       ...data,
     };
   }
+
+  // ── Automated Review Campaigns ───────────────────────────
+  async getCampaigns(projectId?: string): Promise<Campaign[]> {
+    const db = getFirebaseDb();
+    const auth = getFirebaseAuth();
+    const currentUser = auth.currentUser;
+    const campaignsRef = collection(db, 'campaigns');
+
+    let q = query(campaignsRef);
+    if (projectId) {
+      q = query(campaignsRef, where('projectId', '==', projectId));
+    } else if (currentUser) {
+      q = query(campaignsRef, where('ownerId', '==', currentUser.uid));
+    }
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((docSnap) => {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        projectId: data.projectId,
+        ownerId: data.ownerId,
+        name: data.name,
+        channel: data.channel || 'email',
+        status: data.status || 'active',
+        triggerType: data.triggerType || 'webhook',
+        delayDays: Number(data.delayDays ?? 3),
+        template: data.template || { messageBody: '' },
+        stats: data.stats || { sent: 0, opened: 0, clicked: 0, converted: 0 },
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : (data.createdAt || new Date().toISOString()),
+        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate().toISOString() : (data.updatedAt || new Date().toISOString()),
+      };
+    });
+  }
+
+  async getCampaignById(id: string): Promise<Campaign | null> {
+    const db = getFirebaseDb();
+    const docSnap = await getDoc(doc(db, 'campaigns', id));
+    if (!docSnap.exists()) return null;
+    const data = docSnap.data();
+    return {
+      id: docSnap.id,
+      projectId: data.projectId,
+      ownerId: data.ownerId,
+      name: data.name,
+      channel: data.channel || 'email',
+      status: data.status || 'active',
+      triggerType: data.triggerType || 'webhook',
+      delayDays: Number(data.delayDays ?? 3),
+      template: data.template || { messageBody: '' },
+      stats: data.stats || { sent: 0, opened: 0, clicked: 0, converted: 0 },
+      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : (data.createdAt || new Date().toISOString()),
+      updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate().toISOString() : (data.updatedAt || new Date().toISOString()),
+    };
+  }
+
+  async createCampaign(campaign: CampaignInput, projectId?: string): Promise<Campaign> {
+    const db = getFirebaseDb();
+    const auth = getFirebaseAuth();
+    const currentUser = auth.currentUser;
+    const campaignRef = doc(collection(db, 'campaigns'));
+    const now = new Date().toISOString();
+
+    const data: Omit<Campaign, 'id'> = {
+      projectId: projectId || campaign.projectId,
+      ownerId: currentUser?.uid || campaign.ownerId || '',
+      name: campaign.name,
+      channel: campaign.channel,
+      status: campaign.status || 'active',
+      triggerType: campaign.triggerType || 'webhook',
+      delayDays: Number(campaign.delayDays ?? 3),
+      template: campaign.template,
+      stats: { sent: 0, opened: 0, clicked: 0, converted: 0, ...(campaign.stats || {}) },
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await setDoc(campaignRef, data);
+    return { id: campaignRef.id, ...data };
+  }
+
+  async updateCampaign(id: string, updates: Partial<Campaign>): Promise<Campaign> {
+    const db = getFirebaseDb();
+    const campaignRef = doc(db, 'campaigns', id);
+    const updatePayload: Record<string, any> = {
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+    delete updatePayload.id;
+
+    await updateDoc(campaignRef, updatePayload);
+    const updated = await this.getCampaignById(id);
+    if (!updated) throw new Error('Campaign not found after update');
+    return updated;
+  }
+
+  async deleteCampaign(id: string): Promise<boolean> {
+    const db = getFirebaseDb();
+    await deleteDoc(doc(db, 'campaigns', id));
+    return true;
+  }
+
+  async getCampaignLogs(campaignId?: string, projectId?: string): Promise<CampaignLog[]> {
+    const db = getFirebaseDb();
+    const logsRef = collection(db, 'campaign_logs');
+
+    let q = query(logsRef);
+    if (campaignId) {
+      q = query(logsRef, where('campaignId', '==', campaignId));
+    } else if (projectId) {
+      q = query(logsRef, where('projectId', '==', projectId));
+    }
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((docSnap) => {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        campaignId: data.campaignId,
+        projectId: data.projectId,
+        ownerId: data.ownerId,
+        customerEmail: data.customerEmail,
+        customerPhone: data.customerPhone,
+        customerName: data.customerName,
+        productName: data.productName,
+        orderId: data.orderId,
+        channel: data.channel || 'email',
+        status: data.status || 'scheduled',
+        scheduledFor: data.scheduledFor,
+        sentAt: data.sentAt,
+        clickedAt: data.clickedAt,
+        convertedAt: data.convertedAt,
+        inviteUrl: data.inviteUrl,
+        errorMessage: data.errorMessage,
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : (data.createdAt || new Date().toISOString()),
+      };
+    });
+  }
+
+  async createCampaignLog(log: CampaignLogInput): Promise<CampaignLog> {
+    const db = getFirebaseDb();
+    const logRef = doc(collection(db, 'campaign_logs'));
+    const now = new Date().toISOString();
+
+    const data = {
+      ...log,
+      createdAt: now,
+    };
+
+    await setDoc(logRef, data);
+    return { id: logRef.id, ...data };
+  }
+
+  async updateCampaignLog(id: string, updates: Partial<CampaignLog>): Promise<CampaignLog> {
+    const db = getFirebaseDb();
+    const logRef = doc(db, 'campaign_logs', id);
+    const updatePayload: Record<string, any> = { ...updates };
+    delete updatePayload.id;
+
+    await updateDoc(logRef, updatePayload);
+    const snap = await getDoc(logRef);
+    const data = snap.data() || {};
+    return {
+      id,
+      campaignId: data.campaignId,
+      projectId: data.projectId,
+      ownerId: data.ownerId,
+      customerEmail: data.customerEmail,
+      customerPhone: data.customerPhone,
+      customerName: data.customerName,
+      productName: data.productName,
+      orderId: data.orderId,
+      channel: data.channel,
+      status: data.status,
+      scheduledFor: data.scheduledFor,
+      sentAt: data.sentAt,
+      clickedAt: data.clickedAt,
+      convertedAt: data.convertedAt,
+      inviteUrl: data.inviteUrl,
+      errorMessage: data.errorMessage,
+      createdAt: data.createdAt,
+    };
+  }
 }
+

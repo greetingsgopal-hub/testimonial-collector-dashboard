@@ -13,6 +13,7 @@ import {
   Check,
   Plus,
   ChevronsUpDown,
+  Mail,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Project } from '../../types';
@@ -23,6 +24,7 @@ export type DashboardTab =
   | 'import'
   | 'proof'
   | 'widgets'
+  | 'campaigns'
   | 'feedback'
   | 'tags'
   | 'rich-snippet'
@@ -217,6 +219,26 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             <Layers className={`w-4 h-4 transition-colors ${activeTab === 'widgets' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
             <span>Widgets</span>
           </div>
+        </button>
+
+        {/* 5. Automated Review Campaigns */}
+        <button
+          onClick={() => setActiveTab('campaigns')}
+          className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === 'campaigns'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <Mail className={`w-4 h-4 transition-colors ${activeTab === 'campaigns' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+            <span>Campaigns</span>
+          </div>
+          <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-bold ${
+            activeTab === 'campaigns' ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-700'
+          }`}>
+            Auto
+          </span>
         </button>
 
         {/* 5. Post Online */}
