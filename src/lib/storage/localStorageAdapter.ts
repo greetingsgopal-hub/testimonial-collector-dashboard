@@ -355,7 +355,7 @@ export class LocalStorageAdapter implements StorageAdapter {
             id: 'camp-default-whatsapp',
             projectId: projectId || 'proj-demo-1',
             ownerId: 'demo-user',
-            name: 'WhatsApp Fast Feedback',
+            name: 'WhatsApp Instant Feedback',
             channel: 'whatsapp',
             status: 'active',
             triggerType: 'webhook',
