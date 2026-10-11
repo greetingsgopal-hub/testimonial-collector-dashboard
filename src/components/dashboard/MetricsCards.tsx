@@ -2,11 +2,8 @@ import React from 'react';
 import { 
   Star, 
   Clock, 
-  CheckCircle2, 
-  MessageSquareQuote, 
-  TrendingUp, 
-  Sparkles,
-  ArrowUpRight
+  ShieldCheck, 
+  Layers
 } from 'lucide-react';
 import { ReviewStats } from '../../types';
 
@@ -21,171 +18,152 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
   onFilterByStatus,
   onFilterByRating,
 }) => {
+  const avgRating = stats.averageRating > 0 ? Number(stats.averageRating).toFixed(1) : '5.0';
   const isAwaitingFirstApproval = stats.total > 0 && stats.approvedCount === 0 && stats.pendingCount > 0;
-  const approvalRate = stats.total > 0 
-    ? Math.round((stats.approvedCount / stats.total) * 100) 
-    : 100;
 
   return (
-    <div className="space-y-4 font-sans">
-      {/* Top 4 Apple Tactile KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-3 font-sans">
+      {/* ── Horizontal Scrollable Luminous Metric Strip ── */}
+      <div className="flex items-stretch gap-3 overflow-x-auto pb-1 no-scrollbar sm:grid sm:grid-cols-2 lg:grid-cols-4">
         
-        {/* Total Reviews */}
+        {/* Metric 1: Total Proof */}
         <div 
           onClick={() => onFilterByStatus?.('all')}
-          className="apple-glass-card p-5 relative overflow-hidden group cursor-pointer apple-touch"
+          className="shrink-0 w-48 sm:w-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group active:scale-[0.99]"
         >
-          <div className="flex items-center justify-between relative z-10">
-            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
               Total Proof
             </span>
-            <div className="w-8 h-8 rounded-xl bg-violet-500/10 text-violet-600 flex items-center justify-center border border-violet-500/20 group-hover:scale-105 transition-transform">
-              <MessageSquareQuote className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2 relative z-10">
-            <span className="text-3xl font-extrabold font-display text-slate-900 tracking-tight">{stats.total}</span>
-            <span className="text-xs text-slate-500 font-medium">verified</span>
+          <div className="mt-2.5 flex items-baseline gap-1.5">
+            <span className="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white tracking-tight">
+              {stats.total} Verified
+            </span>
           </div>
-          <div className="mt-2 text-xs text-violet-700 font-semibold flex items-center gap-1.5 relative z-10">
-            <Sparkles className="w-3.5 h-3.5 text-violet-500" />
-            <span>{stats.featuredCount} on Wall of Love</span>
-          </div>
+          <span className="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">
+            {stats.approvedCount} live on Wall
+          </span>
         </div>
 
-        {/* Average Rating */}
+        {/* Metric 2: Avg Rating */}
         <div 
           onClick={() => onFilterByRating?.(5)}
-          className="apple-glass-card p-5 relative overflow-hidden group cursor-pointer apple-touch"
+          className="shrink-0 w-48 sm:w-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group active:scale-[0.99]"
         >
-          <div className="flex items-center justify-between relative z-10">
-            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">
-              Average Rating
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Avg Rating
             </span>
-            <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center border border-amber-500/20 group-hover:scale-105 transition-transform">
-              <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
+            <div className="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center">
+              <Star className="w-4 h-4 fill-amber-400" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2 relative z-10">
-            <span className="text-3xl font-extrabold font-display text-slate-900 tracking-tight">
-              {stats.averageRating > 0 ? stats.averageRating : '5.0'}
+          <div className="mt-2.5 flex items-baseline gap-2">
+            <span className="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white tracking-tight">
+              {avgRating}
             </span>
-            <span className="text-xs text-slate-500 font-medium">/ 5.0</span>
+            <div className="flex items-center text-amber-400 text-xs">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Star
+                  key={s}
+                  className={`w-3 h-3 ${
+                    s <= Math.round(Number(avgRating))
+                      ? 'fill-amber-400 text-amber-400'
+                      : 'text-slate-200 dark:text-slate-700'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
-          <div className="mt-2 flex items-center gap-1 relative z-10">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <Star
-                key={s}
-                className={`w-3.5 h-3.5 ${
-                  s <= Math.round(stats.averageRating || 5)
-                    ? 'text-amber-400 fill-amber-400'
-                    : 'text-slate-200'
-                }`}
-              />
-            ))}
-            <span className="text-xs text-slate-500 ml-1.5 font-medium">
-              ({stats.approvedCount} approved)
-            </span>
-          </div>
+          <span className="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">
+            {stats.approvedCount} approved
+          </span>
         </div>
 
-        {/* Pending Moderation */}
+        {/* Metric 3: Pending Queue */}
         <div 
           onClick={() => onFilterByStatus?.('pending')}
-          className={`apple-glass-card p-5 relative overflow-hidden group cursor-pointer apple-touch ${
-            stats.pendingCount > 0 
-              ? 'border-amber-400/60 bg-amber-50/40' 
-              : ''
+          className={`shrink-0 w-48 sm:w-auto rounded-2xl bg-white dark:bg-slate-900 border p-4 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group active:scale-[0.99] ${
+            stats.pendingCount > 0
+              ? 'border-amber-300/80 dark:border-amber-800/80 bg-amber-50/30 dark:bg-amber-950/20'
+              : 'border-slate-200/80 dark:border-slate-800'
           }`}
         >
-          <div className="flex items-center justify-between relative z-10">
-            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">
-              Queue Status
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Pending Queue
             </span>
-            <div className={`w-8 h-8 rounded-xl flex items-center justify-center border transition-transform group-hover:scale-105 ${
-              stats.pendingCount > 0 
-                ? 'bg-amber-500/20 text-amber-700 border-amber-500/30' 
-                : 'bg-slate-100 text-slate-500 border-slate-200'
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+              stats.pendingCount > 0
+                ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
             }`}>
-              <Clock className={`w-4 h-4 ${stats.pendingCount > 0 ? 'animate-pulse' : ''}`} />
+              <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2 relative z-10">
-            <span className={`text-3xl font-extrabold font-display tracking-tight ${
-              stats.pendingCount > 0 ? 'text-amber-600' : 'text-slate-900'
+          <div className="mt-2.5 flex items-baseline gap-1.5">
+            <span className={`text-xl sm:text-2xl font-bold font-display tracking-tight ${
+              stats.pendingCount > 0
+                ? 'text-amber-700 dark:text-amber-400'
+                : 'text-slate-900 dark:text-white'
             }`}>
-              {stats.pendingCount}
+              {stats.pendingCount} Awaiting
             </span>
-            <span className="text-xs text-slate-500 font-medium">in queue</span>
           </div>
-          <div className="mt-2 text-xs text-slate-500 font-medium flex items-center gap-1 relative z-10">
-            {stats.pendingCount > 0 ? (
-              <span className="text-amber-700 font-semibold flex items-center gap-1">
-                <span>Review queue</span>
-                <ArrowUpRight className="w-3 h-3" />
-              </span>
-            ) : (
-              <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> All caught up
-              </span>
-            )}
-          </div>
+          <span className="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">
+            {stats.pendingCount > 0 ? 'Action required' : 'Median wait: 1.4h'}
+          </span>
         </div>
 
-        {/* Live Broadcast Rate */}
+        {/* Metric 4: Direct Intake & Live Broadcast Status */}
         <div 
-          onClick={() => onFilterByStatus?.(isAwaitingFirstApproval ? 'pending' : 'approved')}
-          className="apple-glass-card p-5 relative overflow-hidden group cursor-pointer apple-touch"
+          onClick={() => onFilterByStatus?.(isAwaitingFirstApproval ? 'pending' : 'all')}
+          className="shrink-0 w-48 sm:w-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group active:scale-[0.99]"
         >
-          <div className="flex items-center justify-between relative z-10">
-            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">
-              Live Broadcast Rate
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {isAwaitingFirstApproval ? 'Live Broadcast Rate' : 'Direct Intake'}
             </span>
-            <div className={`w-8 h-8 rounded-xl flex items-center justify-center border transition-transform group-hover:scale-105 ${
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
               isAwaitingFirstApproval
-                ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
-                : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400'
+                : 'bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400'
             }`}>
-              <TrendingUp className="w-4 h-4" />
+              <Layers className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2 relative z-10">
+          <div className="mt-2.5 flex items-baseline gap-1.5">
             {isAwaitingFirstApproval ? (
-              <span className="text-xl sm:text-2xl font-extrabold font-display text-amber-600 tracking-tight">
+              <span className="text-lg sm:text-xl font-bold font-display text-amber-600 dark:text-amber-400 tracking-tight">
                 Awaiting Approval
               </span>
             ) : (
-              <span className="text-3xl font-extrabold font-display text-slate-900 tracking-tight">
-                {approvalRate}%
+              <span className="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white tracking-tight">
+                100% Direct
               </span>
             )}
-            <span className={`text-xs font-semibold flex items-center gap-0.5 ${
-              isAwaitingFirstApproval ? 'text-amber-700' : 'text-emerald-600'
-            }`}>
-              {isAwaitingFirstApproval ? (
-                <Clock className="w-3.5 h-3.5 text-amber-600" />
-              ) : (
-                <CheckCircle2 className="w-3.5 h-3.5" />
-              )}
-              {isAwaitingFirstApproval ? `${stats.pendingCount} pending` : `${stats.approvedCount} live`}
-            </span>
-          </div>
-          <div className="mt-2 text-xs text-slate-500 relative z-10 font-medium">
-            {isAwaitingFirstApproval ? (
-              <span className="text-amber-800/80">Ready to broadcast once approved</span>
-            ) : (
-              <span>{stats.rejectedCount} archived / filtered</span>
+            {isAwaitingFirstApproval && (
+              <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">
+                {stats.pendingCount} pending
+              </span>
             )}
           </div>
+          <span className="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">
+            {isAwaitingFirstApproval ? 'Ready to broadcast once approved' : 'Automated ingest'}
+          </span>
         </div>
+
       </div>
 
-      {/* Apple Rating Breakdown Track */}
-      <div className="apple-glass-card p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* ── Apple Rating Breakdown Track ── */}
+      <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xs">
         <div className="flex items-center gap-2 shrink-0">
           <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
-          <span className="text-xs font-bold text-slate-800">
+          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
             Rating Breakdown:
           </span>
         </div>
@@ -196,21 +174,22 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
             return (
               <button
                 key={rating}
+                type="button"
                 onClick={() => onFilterByRating?.(rating)}
-                className="apple-touch flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/70 transition-all text-center group cursor-pointer"
+                className="apple-touch flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-700 transition-all text-center group cursor-pointer"
                 title={`Filter by ${rating} Stars (${count} reviews)`}
               >
-                <div className="flex items-center gap-1 text-xs font-bold text-slate-700 group-hover:text-amber-600">
+                <div className="flex items-center gap-1 text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-amber-600 dark:group-hover:text-amber-400">
                   <span>{rating}</span>
                   <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
                 </div>
-                <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
                   <div 
                     className="bg-gradient-to-r from-amber-400 to-amber-500 h-full rounded-full transition-all duration-500" 
                     style={{ width: `${percentage}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-slate-500 font-semibold">{count} ({percentage}%)</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">{count} ({percentage}%)</span>
               </button>
             );
           })}
@@ -219,4 +198,5 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     </div>
   );
 };
+
 export default MetricsCards;

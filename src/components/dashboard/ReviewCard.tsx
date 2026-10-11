@@ -9,8 +9,7 @@ import {
   ExternalLink, 
   Video, 
   MoreHorizontal,
-  Globe,
-  Share2
+  BadgeCheck
 } from 'lucide-react';
 import { Review, ReviewStatus } from '../../types';
 import { sanitizeUrl } from '../../lib/security';
@@ -46,88 +45,78 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
     switch (status) {
       case 'approved':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 shadow-xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300/60 dark:border-emerald-800">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
             Approved
           </span>
         );
       case 'pending':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-700 border border-amber-500/20 shadow-xs">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 border border-amber-300/60 dark:border-amber-800">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             Pending
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-700 border border-rose-500/20 shadow-xs">
-            <X className="w-3 h-3" /> Rejected
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 border border-rose-300/60 dark:border-rose-800">
+            <X className="w-3 h-3 text-rose-600" /> Rejected
           </span>
         );
       case 'archived':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-zinc-100 text-zinc-600 border border-zinc-200">
-            <Archive className="w-3 h-3" /> Archived
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300/60 dark:border-slate-700">
+            <Archive className="w-3 h-3 text-slate-500" /> Archived
           </span>
         );
     }
   };
 
-  const getSourceIcon = (source?: string) => {
-    if (!source || source === 'form' || source === 'manual') return null;
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-black/[0.03] text-zinc-600 border border-black/[0.05] capitalize">
-        {source}
-      </span>
-    );
-  };
+  const intakeSourceText = review.source === 'import'
+    ? 'Imported'
+    : review.source === 'manual'
+    ? 'Direct Intake'
+    : 'Form Direct';
 
   return (
-    <div className={`apple-glass-card p-5 sm:p-6 flex flex-col justify-between relative group font-sans text-zinc-900 apple-touch-subtle transition-all ${isSelected ? 'ring-2 ring-violet-500/60 bg-violet-50/20' : ''}`}>
-      
-      {/* Top row: Status, Badges, and Quick Actions */}
+    <article 
+      className={`proof-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between relative group font-sans transition-all duration-200 ${
+        isSelected 
+          ? 'ring-2 ring-indigo-600 dark:ring-indigo-500 bg-indigo-50/30 dark:bg-indigo-950/20' 
+          : 'bg-white dark:bg-slate-900'
+      }`}
+    >
       <div>
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-1.5 flex-wrap">
+        {/* ── Top Meta Row ── */}
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2 flex-wrap">
             {onToggleSelect && (
               <input
                 type="checkbox"
                 aria-label={`Select review by ${review.name}`}
                 checked={!!isSelected}
                 onChange={() => onToggleSelect(review.id)}
-                className="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 border-slate-300 cursor-pointer mr-1"
+                className="w-4 h-4 rounded text-indigo-600 focus:ring-0 accent-indigo-600 cursor-pointer"
               />
             )}
             {getStatusBadge(review.status)}
-            {review.status === 'approved' && (
-              <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/20" title="Live on website widget">
-                <Globe className="w-2.5 h-2.5" /> Widget Live
-              </span>
-            )}
-            {review.isFeatured && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-700 border border-amber-500/20 shadow-xs">
-                <Sparkles className="w-3 h-3 text-amber-500" /> Featured
-              </span>
-            )}
-            {getSourceIcon(review.source)}
-            {review.screenshotPlatform && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-700 border border-indigo-500/20 capitalize">
-                {review.screenshotPlatform}
-              </span>
-            )}
+            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+              {formattedDate}
+            </span>
           </div>
 
           <div className="flex items-center gap-1">
             {/* Quick Star / Feature toggle */}
             <button
+              type="button"
               disabled={review.status !== 'approved'}
               onClick={() => onToggleFeatured(review.id, review.isFeatured)}
-              className={`p-1.5 rounded-lg transition-all apple-touch ${
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                 review.status !== 'approved'
-                  ? 'opacity-25 cursor-not-allowed text-zinc-300'
+                  ? 'opacity-30 cursor-not-allowed text-slate-300 dark:text-slate-600'
                   : review.isFeatured
-                  ? 'text-amber-500 bg-amber-500/10 hover:bg-amber-500/20'
-                  : 'text-zinc-400 hover:text-zinc-700 hover:bg-black/[0.04]'
+                  ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100'
+                  : 'text-slate-400 hover:text-amber-500 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
               title={
                 review.status !== 'approved'
@@ -136,59 +125,50 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
                   ? 'Remove from Featured'
                   : 'Mark as Featured'
               }
+              aria-label="Toggle Featured"
             >
               <Star className={`w-4 h-4 ${review.isFeatured ? 'fill-amber-400 text-amber-500' : ''}`} />
             </button>
 
-            {/* Create Social Post (Only for approved reviews) */}
-            {review.status === 'approved' && onOpenSocialCard && (
-              <button
-                onClick={() => onOpenSocialCard(review)}
-                className="p-1.5 rounded-lg text-violet-600 hover:bg-violet-500/10 transition-colors apple-touch"
-                title="Create Social Post"
-                aria-label="Create Social Post"
-              >
-                <Sparkles className="w-4 h-4" />
-              </button>
-            )}
-
-            {/* Open Detail Modal */}
+            {/* Inspect Detail Modal */}
             <button
+              type="button"
               onClick={() => onOpenDetails(review)}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-black/[0.04] transition-colors apple-touch"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title="Inspect details"
+              aria-label="Inspect details"
             >
               <MoreHorizontal className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Rating & Date */}
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-0.5">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <Star
-                key={s}
-                className={`w-3.5 h-3.5 ${
-                  s <= review.rating
-                    ? 'text-amber-400 fill-amber-400'
-                    : 'text-zinc-200'
-                }`}
-              />
-            ))}
-          </div>
-          <span className="text-[11px] text-zinc-400 font-medium">{formattedDate}</span>
+        {/* ── Star Rating Row ── */}
+        <div className="flex items-center gap-1 mb-2 text-amber-500">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <Star
+              key={s}
+              className={`w-3.5 h-3.5 ${
+                s <= review.rating
+                  ? 'fill-amber-400 text-amber-400'
+                  : 'text-slate-200 dark:text-slate-700'
+              }`}
+            />
+          ))}
+          <span className="ml-1 text-xs font-bold text-slate-900 dark:text-white">
+            {review.rating.toFixed(1)}
+          </span>
         </div>
 
-        {/* Headline */}
+        {/* ── Testimonial Pull-Quote / Headline ── */}
         {review.title && (
-          <h4 className="text-sm font-bold text-zinc-950 mb-1.5 line-clamp-1 font-display tracking-tight">
-            {review.title}
-          </h4>
+          <h3 className="font-headline-sm text-sm sm:text-base font-bold text-slate-950 dark:text-white mb-1.5 line-clamp-1 tracking-tight">
+            “{review.title}”
+          </h3>
         )}
 
-        {/* Content */}
-        <p className="text-zinc-700 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-4 font-normal">
+        {/* ── Full Quote Body ── */}
+        <p className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed mb-3.5 line-clamp-4 font-normal">
           "{review.content}"
         </p>
 
@@ -199,7 +179,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
               href={sanitizeUrl(review.videoUrl)}
               target="_blank"
               rel="noopener noreferrer"
-              className="apple-touch inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-700 hover:bg-pink-500/20 text-xs font-semibold border border-pink-500/20 transition-colors"
+              className="apple-touch inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 hover:bg-pink-100 text-xs font-semibold border border-pink-200/80 dark:border-pink-800 transition-colors"
             >
               <Video className="w-3.5 h-3.5" />
               <span>Watch Video Testimonial</span>
@@ -210,7 +190,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
 
         {/* Screenshot Proof Preview if screenshot */}
         {review.screenshotUrl && (
-          <div className="mb-3 rounded-xl overflow-hidden border border-zinc-200/80 bg-zinc-50 relative group/img">
+          <div className="mb-3 rounded-xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 relative group/img">
             <img
               src={review.screenshotUrl}
               alt={review.title || 'Screenshot Proof'}
@@ -223,13 +203,13 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           </div>
         )}
 
-        {/* Tags */}
+        {/* Modern Tag Pills */}
         {review.tags && review.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-4">
+          <div className="flex flex-wrap items-center gap-1.5 mb-3.5">
             {review.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-black/[0.03] text-zinc-600 border border-black/[0.05]"
+                className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700"
               >
                 #{tag}
               </span>
@@ -238,61 +218,63 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
         )}
       </div>
 
-      {/* Bottom Footer: Reviewer Info & Moderation Action Bar */}
-      <div className="pt-4 border-t border-black/[0.05] space-y-3">
-        {/* Reviewer Details */}
-        <div className="flex items-center gap-2.5">
-          {review.avatarUrl ? (
-            <img
-              src={review.avatarUrl}
-              alt={review.name}
-              className="w-9 h-9 rounded-full object-cover ring-2 ring-white shadow-xs"
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = 'none';
-              }}
-            />
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-500 text-white font-bold text-xs flex items-center justify-center shadow-xs">
-              {review.name.charAt(0).toUpperCase()}
-            </div>
-          )}
+      {/* ── Customer Attribution & Actions Toolbar ── */}
+      <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 space-y-3">
+        
+        {/* Attribution Row with Avatar and Social Card Button */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {review.avatarUrl ? (
+              <img
+                src={review.avatarUrl}
+                alt={review.name}
+                className="w-9 h-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800 shadow-2xs shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs shrink-0">
+                {review.name.charAt(0).toUpperCase()}
+              </div>
+            )}
 
-          <div className="min-w-0 flex-1">
-            <h5 className="text-xs font-bold text-zinc-950 truncate tracking-tight">{review.name}</h5>
-            <p className="text-[11px] text-zinc-500 truncate flex items-center gap-1">
-              <span>{review.role || 'Verified Customer'}</span>
-              {review.company && (
-                <>
-                  <span className="text-zinc-300">•</span>
-                  <span className="text-zinc-700 font-medium truncate">{review.company}</span>
-                </>
-              )}
-            </p>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1 truncate">
+                <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                  {review.name}
+                </span>
+                <BadgeCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              </div>
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 truncate capitalize">
+                {review.role || 'Verified Customer'} • {intakeSourceText}
+              </span>
+            </div>
           </div>
+
+          {onOpenSocialCard && (
+            <button
+              type="button"
+              onClick={() => onOpenSocialCard(review)}
+              className="apple-touch flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-semibold border border-indigo-200/80 dark:border-indigo-800 transition-colors shrink-0 cursor-pointer shadow-2xs"
+              title="Create branded social graphic"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+              <span className="hidden sm:inline">Social Card</span>
+            </button>
+          )}
         </div>
 
-        {/* Quick Social Share / Export Image Button */}
-        {onOpenSocialCard && (
-          <button
-            type="button"
-            onClick={() => onOpenSocialCard(review)}
-            className="apple-touch w-full py-1.5 px-3 rounded-xl bg-violet-500/10 hover:bg-violet-500/15 border border-violet-500/20 text-violet-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
-            title="Create branded social media image for Twitter, LinkedIn, and Instagram"
-          >
-            <Share2 className="w-3.5 h-3.5 text-violet-600" />
-            <span>Export as Social Image (PNG)</span>
-          </button>
-        )}
-
-        {/* Apple Tactile Moderation Action Bar */}
-        <div className="grid grid-cols-4 gap-1.5 pt-0.5">
+        {/* Moderation Actions Toolbar */}
+        <div className="grid grid-cols-4 gap-1.5 pt-1">
           {/* Approve */}
           <button
+            type="button"
             onClick={() => onUpdateStatus(review.id, 'approved')}
-            className={`apple-touch py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+            className={`apple-touch py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
               review.status === 'approved'
-                ? 'bg-emerald-500/15 text-emerald-800 border border-emerald-500/30 shadow-2xs'
-                : 'bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200/80'
+                ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-200 border border-emerald-300 shadow-2xs'
+                : 'bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-300 border border-slate-200/70 dark:border-slate-700'
             }`}
             title="Approve Review"
           >
@@ -302,11 +284,12 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
 
           {/* Reject */}
           <button
+            type="button"
             onClick={() => onUpdateStatus(review.id, 'rejected')}
-            className={`apple-touch py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+            className={`apple-touch py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
               review.status === 'rejected'
-                ? 'bg-rose-500/15 text-rose-800 border border-rose-500/30 shadow-2xs'
-                : 'bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200/80'
+                ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-200 border border-rose-300 shadow-2xs'
+                : 'bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-700 dark:text-slate-200 hover:text-rose-700 dark:hover:text-rose-300 border border-slate-200/70 dark:border-slate-700'
             }`}
             title="Reject Review"
           >
@@ -316,11 +299,12 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
 
           {/* Archive */}
           <button
+            type="button"
             onClick={() => onUpdateStatus(review.id, 'archived')}
-            className={`apple-touch py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+            className={`apple-touch py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
               review.status === 'archived'
-                ? 'bg-slate-200 text-slate-800 border border-slate-300 shadow-2xs'
-                : 'bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/80'
+                ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white border border-slate-300 shadow-2xs'
+                : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/70 dark:border-slate-700'
             }`}
             title="Archive Review"
           >
@@ -330,17 +314,19 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
 
           {/* Delete */}
           <button
+            type="button"
             onClick={() => onDelete(review.id)}
-            className="apple-touch py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200/80 flex items-center justify-center gap-1 transition-all cursor-pointer"
+            className="apple-touch py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200/70 dark:border-slate-700 flex items-center justify-center gap-1 transition-all cursor-pointer"
             title="Delete Permanently"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Delete</span>
           </button>
         </div>
+
       </div>
-    </div>
+    </article>
   );
 };
-export default ReviewCard;
 
+export default ReviewCard;

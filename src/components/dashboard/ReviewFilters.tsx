@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Search, 
   LayoutGrid, 
   Table as TableIcon, 
   Download, 
   RotateCcw, 
-  ChevronDown
+  ChevronDown,
+  SlidersHorizontal
 } from 'lucide-react';
 import { ReviewFilters as FilterType, ReviewStatus, ReviewStats } from '../../types';
 
@@ -32,10 +33,11 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
   onResetSeedData,
   availableTags,
 }) => {
-  const [showExportMenu, setShowExportMenu] = React.useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const statusTabs: { key: ReviewStatus | 'all'; label: string; count: number }[] = [
-    { key: 'all', label: 'All Reviews', count: stats.total },
+    { key: 'all', label: 'All', count: stats.total },
     { key: 'pending', label: 'Pending', count: stats.pendingCount },
     { key: 'approved', label: 'Approved', count: stats.approvedCount },
     { key: 'rejected', label: 'Rejected', count: stats.rejectedCount },
@@ -43,27 +45,33 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
   ];
 
   return (
-    <div className="apple-glass-card p-3.5 sm:p-4 space-y-3 font-sans">
-      {/* Top row: Status Segmented Control & View Mode & Export */}
+    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 space-y-3.5 shadow-sm font-sans">
+      
+      {/* ── Top Row: Segmented Capsule Navigation & View Toggle / Export ── */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         
-        {/* Apple Segmented Status Pills */}
-        <div className="flex flex-wrap items-center gap-1 p-1 bg-slate-100/90 rounded-xl border border-slate-200/70">
+        {/* Luminous Segmented Capsule Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
           {statusTabs.map((tab) => {
             const isActive = filters.status === tab.key;
             return (
               <button
                 key={tab.key}
+                type="button"
                 onClick={() => setFilters((prev) => ({ ...prev, status: tab.key }))}
-                className={`apple-touch flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`apple-touch shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-white text-slate-950 shadow-2xs border border-slate-200/80'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
                 <span>{tab.label}</span>
                 <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                  isActive ? 'bg-violet-100 text-violet-700' : 'bg-slate-200 text-slate-600'
+                  isActive
+                    ? 'bg-white/20 text-white'
+                    : tab.key === 'pending' && tab.count > 0
+                    ? 'bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-100'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}>
                   {tab.count}
                 </span>
@@ -72,29 +80,33 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
           })}
         </div>
 
-        {/* Action controls: View toggle & Export & Reset */}
-        <div className="flex items-center gap-2 self-end lg:self-auto">
-          {/* View mode toggle */}
-          <div className="flex items-center p-1 bg-slate-100/90 rounded-xl border border-slate-200/70">
+        {/* View Mode Toggle & Export Dropdown */}
+        <div className="flex items-center gap-2 self-end lg:self-auto shrink-0">
+          {/* View Mode */}
+          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700">
             <button
+              type="button"
               onClick={() => setViewMode('grid')}
               className={`apple-touch p-1.5 rounded-lg text-xs transition-all cursor-pointer ${
                 viewMode === 'grid'
-                  ? 'bg-white text-slate-950 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-900'
+                  ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-2xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
               title="Grid View"
+              aria-label="Grid View"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
             </button>
             <button
+              type="button"
               onClick={() => setViewMode('table')}
               className={`apple-touch p-1.5 rounded-lg text-xs transition-all cursor-pointer ${
                 viewMode === 'table'
-                  ? 'bg-white text-slate-950 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-900'
+                  ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-2xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
               title="Table View"
+              aria-label="Table View"
             >
               <TableIcon className="w-3.5 h-3.5" />
             </button>
@@ -103,10 +115,11 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
           {/* Export Dropdown */}
           <div className="relative">
             <button
+              type="button"
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="apple-touch apple-btn-secondary flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer"
+              className="apple-touch flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>Export</span>
               <ChevronDown className="w-3 h-3 text-slate-400" />
             </button>
@@ -117,22 +130,24 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
                   className="fixed inset-0 z-20" 
                   onClick={() => setShowExportMenu(false)} 
                 />
-                <div className="absolute right-0 mt-1.5 w-36 bg-white rounded-xl border border-slate-200 shadow-xl z-30 py-1 overflow-hidden animate-slide-up">
+                <div className="absolute right-0 mt-1.5 w-36 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl z-30 py-1 overflow-hidden animate-slide-up">
                   <button
+                    type="button"
                     onClick={() => {
                       onExportJSON();
                       setShowExportMenu(false);
                     }}
-                    className="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer"
+                    className="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                   >
                     Export JSON
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
                       onExportCSV();
                       setShowExportMenu(false);
                     }}
-                    className="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer"
+                    className="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                   >
                     Export CSV
                   </button>
@@ -141,102 +156,118 @@ export const ReviewFilters: React.FC<ReviewFiltersProps> = ({
             )}
           </div>
 
-          {/* Reset sample data */}
+          {/* Reset Demo Data */}
           <button
+            type="button"
             onClick={onResetSeedData}
             title="Reset sample data"
-            className="apple-touch apple-btn-secondary p-1.5 rounded-xl text-slate-600 hover:text-slate-900 cursor-pointer"
+            className="apple-touch p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Second row: Search & Inline Filter Controls */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 pt-1 border-t border-slate-100">
-        {/* Search Input */}
-        <div className="relative md:col-span-5">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+      {/* ── Search & Fast Filter Row ── */}
+      <div className="flex flex-col gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+        
+        {/* Full-width Search Bar with Tune Button */}
+        <div className="relative w-full">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search by name, company, or text..."
+            placeholder="Search keywords, customer name, role..."
             value={filters.search}
             onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
-            className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200/80 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 text-slate-900 placeholder-slate-400 shadow-2xs transition-all"
+            className="w-full h-10 pl-10 pr-10 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs border border-slate-200/80 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs placeholder:text-slate-400 transition-all"
           />
+          <button
+            type="button"
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
+            title="Toggle fast filter pills"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+          </button>
         </div>
 
-        {/* Sort selector */}
-        <div className="relative md:col-span-2">
-          <select
-            value={`${filters.sortBy}-${filters.sortOrder}`}
-            onChange={(e) => {
-              const [sortBy, sortOrder] = e.target.value.split('-') as [any, any];
-              setFilters((prev) => ({ ...prev, sortBy, sortOrder }));
-            }}
-            className="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 hover:bg-white border border-slate-200/80 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 text-slate-800 shadow-2xs appearance-none cursor-pointer"
-          >
-            <option value="createdAt-desc">Newest first</option>
-            <option value="createdAt-asc">Oldest first</option>
-            <option value="rating-desc">Highest rated</option>
-            <option value="rating-asc">Lowest rated</option>
-          </select>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+        {/* Filter Pills Sub-bar */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+          {/* Rating Pill Dropdown */}
+          <div className="relative shrink-0">
+            <select
+              value={filters.rating}
+              onChange={(e) => {
+                const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
+                setFilters((prev) => ({ ...prev, rating: val }));
+              }}
+              className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium border border-slate-200/80 dark:border-slate-700 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 focus:outline-none cursor-pointer"
+            >
+              <option value="all">Rating: All Ratings</option>
+              <option value="5">Rating: 5★ only</option>
+              <option value="4">Rating: 4★ & up</option>
+              <option value="3">Rating: 3★ only</option>
+              <option value="2">Rating: 2★ only</option>
+              <option value="1">Rating: 1★ only</option>
+            </select>
+            <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          {/* Tags Pill Dropdown */}
+          <div className="relative shrink-0">
+            <select
+              value={filters.tag}
+              onChange={(e) => setFilters((prev) => ({ ...prev, tag: e.target.value }))}
+              className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium border border-slate-200/80 dark:border-slate-700 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 focus:outline-none cursor-pointer"
+            >
+              <option value="all">Tags: All Tags</option>
+              {availableTags.map((tag) => (
+                <option key={tag} value={tag}>
+                  #{tag}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          {/* Source Pill Dropdown */}
+          <div className="relative shrink-0">
+            <select
+              value={filters.source || 'all'}
+              onChange={(e) => setFilters((prev) => ({ ...prev, source: e.target.value as any }))}
+              className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium border border-slate-200/80 dark:border-slate-700 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 focus:outline-none cursor-pointer"
+            >
+              <option value="all">Source: All Sources</option>
+              <option value="form">Source: Direct Form</option>
+              <option value="manual">Source: Manual Entry</option>
+              <option value="import">Source: Imported</option>
+            </select>
+            <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          {/* Sort Pill Dropdown */}
+          <div className="relative shrink-0">
+            <select
+              value={`${filters.sortBy}-${filters.sortOrder}`}
+              onChange={(e) => {
+                const [sortBy, sortOrder] = e.target.value.split('-') as [any, any];
+                setFilters((prev) => ({ ...prev, sortBy, sortOrder }));
+              }}
+              className="appearance-none pl-3 pr-7 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium border border-slate-200/80 dark:border-slate-700 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 focus:outline-none cursor-pointer"
+            >
+              <option value="createdAt-desc">Sort: Newest first</option>
+              <option value="createdAt-asc">Sort: Oldest first</option>
+              <option value="rating-desc">Sort: Highest rated</option>
+              <option value="rating-asc">Sort: Lowest rated</option>
+            </select>
+            <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
         </div>
 
-        {/* Rating Filter */}
-        <div className="relative md:col-span-2">
-          <select
-            value={filters.rating}
-            onChange={(e) => {
-              const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
-              setFilters((prev) => ({ ...prev, rating: val }));
-            }}
-            className="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 hover:bg-white border border-slate-200/80 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 text-slate-800 shadow-2xs appearance-none cursor-pointer"
-          >
-            <option value="all">All Ratings</option>
-            <option value="5">5 Stars only</option>
-            <option value="4">4 Stars only</option>
-            <option value="3">3 Stars only</option>
-            <option value="2">2 Stars only</option>
-            <option value="1">1 Star only</option>
-          </select>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
-        </div>
-
-        {/* Tag Filter */}
-        <div className="relative md:col-span-1.5 sm:col-span-2">
-          <select
-            value={filters.tag}
-            onChange={(e) => setFilters((prev) => ({ ...prev, tag: e.target.value }))}
-            className="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 hover:bg-white border border-slate-200/80 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 text-slate-800 shadow-2xs appearance-none cursor-pointer"
-          >
-            <option value="all">All Tags</option>
-            {availableTags.map((tag) => (
-              <option key={tag} value={tag}>
-                #{tag}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
-        </div>
-
-        {/* Source Filter */}
-        <div className="relative md:col-span-1.5 sm:col-span-1">
-          <select
-            value={filters.source || 'all'}
-            onChange={(e) => setFilters((prev) => ({ ...prev, source: e.target.value as any }))}
-            className="w-full px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 hover:bg-white border border-slate-200/80 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 text-slate-800 shadow-2xs appearance-none cursor-pointer"
-          >
-            <option value="all">All Sources</option>
-            <option value="form">Direct Form</option>
-            <option value="manual">Manual Entry</option>
-            <option value="import">Imported</option>
-          </select>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
-        </div>
       </div>
+
     </div>
   );
 };
+
 export default ReviewFilters;

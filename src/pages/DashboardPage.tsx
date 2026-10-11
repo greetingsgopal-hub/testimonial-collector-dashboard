@@ -23,6 +23,7 @@ import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
+import { ReviewPipelineHero } from '../components/dashboard/ReviewPipelineHero';
 import { storage } from '../lib/storage';
 import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
@@ -31,16 +32,11 @@ import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { EmailVerificationBanner } from '../components/auth/EmailVerificationBanner';
 import { 
-  Send, 
-  Settings, 
-  Clock, 
-  Link as LinkIcon, 
-  History,
-  ArrowRight,
   Check,
   X,
   Trash2,
-  Sparkles
+  Archive,
+  MailCheck
 } from 'lucide-react';
 const TAB_LABEL_MAP: Record<string, string> = {
   welcome: 'Welcome Hub',
@@ -115,7 +111,6 @@ export const DashboardPage = () => {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [socialNotification, setSocialNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [currentCollectionForm, setCurrentCollectionForm] = useState<CollectionForm | null>(collectionForm);
-  const [copiedLink, setCopiedLink] = useState(false);
   const [publishComplete, setPublishComplete] = useState(false);
   const activeProjectId = project?.id;
 
@@ -325,8 +320,10 @@ export const DashboardPage = () => {
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(collectionUrl);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
+    setSocialNotification({
+      type: 'success',
+      message: 'Direct intake review invite link copied to clipboard!',
+    });
   };
 
   // Filtered & Sorted reviews
@@ -569,137 +566,55 @@ export const DashboardPage = () => {
           {activeTab === 'proof' && (
             <div className="space-y-4 max-w-7xl mx-auto">
               
-              {/* Apple Unified Command Center */}
-              <div className="apple-glass-card p-4 sm:p-5 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
-                
-                {/* Header Row */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
-                  <div>
-                    <div className="flex items-center gap-2.5">
-                      <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                        Moderation Queue
-                      </h1>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-500/10 text-violet-700 border border-violet-500/20 shadow-2xs">
-                        {effectiveReviews.length} {effectiveReviews.length === 1 ? 'Entry' : 'Entries'}
-                      </span>
-                      <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        {project?.name || 'Primary Project'}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-1 font-normal">
-                      Manage incoming testimonials, approve live proofs, and broadcast verified praise.
-                    </p>
-                  </div>
-
-                  {/* Actions Bar */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      onClick={handleCopyLink}
-                      className="apple-touch apple-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                      title="Copy customer invitation link"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>{copiedLink ? 'Link Copied!' : '+ Invite Customer'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        const topApproved = effectiveReviews.find(r => r.status === 'approved') || effectiveReviews[0];
-                        if (topApproved) setSocialCardReview(topApproved);
-                      }}
-                      className="apple-touch apple-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer text-violet-700 bg-violet-50/80 border-violet-200/80 hover:bg-violet-100"
-                      title="Create shareable social quote graphic"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-violet-600" />
-                      <span>Quote Graphic</span>
-                    </button>
-
-                    <button
-                      onClick={() => setShowCollectionModal(true)}
-                      className="apple-touch apple-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Settings className="w-3.5 h-3.5 text-slate-500" />
-                      <span>Configure</span>
-                    </button>
-
-                    <button
-                      onClick={() => setShowHistoryModal(true)}
-                      className="apple-touch apple-btn-secondary p-2 rounded-xl cursor-pointer"
-                      title="Publish History"
-                    >
-                      <History className="w-3.5 h-3.5 text-slate-500" />
-                    </button>
-
-                    <button
-                      onClick={() => setShowAccountsModal(true)}
-                      className="apple-touch apple-btn-secondary p-2 rounded-xl text-emerald-600 cursor-pointer"
-                      title="Connected Accounts"
-                    >
-                      <LinkIcon className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+              {/* Luminous Review Pipeline Hero & Command Center */}
+              <ReviewPipelineHero
+                stats={effectiveStats}
+                reviews={effectiveReviews}
+                projectName={project?.name}
+                isBatchActive={selectedReviewIds.size > 0}
+                onBatchToggle={handleSelectAll}
+                onInspectSentiment={() => {
+                  const sentimentElem = document.getElementById('sentiment-dashboard-section');
+                  if (sentimentElem) {
+                    sentimentElem.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    setActiveTab('analyze');
+                  }
+                }}
+                onInviteCustomer={handleCopyLink}
+                onOpenSocialCard={() => {
+                  const topApproved = effectiveReviews.find(r => r.status === 'approved') || effectiveReviews[0];
+                  if (topApproved) setSocialCardReview(topApproved);
+                }}
+                onConfigure={() => setShowCollectionModal(true)}
+                onOpenHistory={() => setShowHistoryModal(true)}
+                onOpenAccounts={() => setShowAccountsModal(true)}
+              />
 
               {/* Sample Reviews Notice for New Accounts */}
               {isViewingSampleData && (
-                <div className="apple-glass-card border-violet-500/30 bg-violet-500/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in shadow-2xs">
+                <div className="apple-glass-card border-violet-500/30 bg-violet-500/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in shadow-2xs rounded-2xl">
                   <div className="flex items-center gap-3">
                     <span className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse shrink-0" />
                     <div>
-                      <p className="text-xs font-bold text-slate-900 tracking-tight">
+                      <p className="text-xs font-bold text-slate-900 dark:text-white tracking-tight">
                         You are viewing sample reviews
                       </p>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         Real customer reviews will appear here automatically as they come in.
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={handleClearSampleData}
-                    className="apple-touch px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-all cursor-pointer self-start sm:self-auto shrink-0 shadow-2xs"
+                    className="apple-touch px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all cursor-pointer self-start sm:self-auto shrink-0 shadow-2xs"
                   >
                     Clear Sample Data
                   </button>
                 </div>
               )}
 
-              {/* Single Consolidated Priority Moderation Action Bar */}
-              {effectiveStats.pendingCount > 0 && (
-                <div className="apple-glass-card p-4 border-amber-300/70 bg-gradient-to-r from-amber-50/90 via-orange-50/40 to-amber-50/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-950 animate-fade-in shadow-xs rounded-2xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-800 flex items-center justify-center shrink-0 border border-amber-500/30">
-                      <Clock className="w-5 h-5 text-amber-700 animate-pulse" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-xs sm:text-sm text-amber-950">
-                          {effectiveStats.pendingCount} testimonial{effectiveStats.pendingCount === 1 ? '' : 's'} awaiting your review
-                        </span>
-                        <span className="px-2 py-0.2 rounded-full text-[10px] font-extrabold bg-amber-200/80 text-amber-900">
-                          Action Required
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-amber-800/90 mt-0.5 leading-snug">
-                        Approve testimonials to broadcast them live to your Wall of Love and website widgets.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                    <button
-                      onClick={() => setFilters(prev => ({ ...prev, status: 'pending' }))}
-                      className="apple-touch px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
-                    >
-                      <span>Review Queue</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Top KPIs & Distribution */}
+              {/* Top KPIs & Distribution (Horizontal Luminous Strip) */}
               <MetricsCards
                 stats={effectiveStats}
                 onFilterByStatus={(status) => setFilters(prev => ({ ...prev, status }))}
@@ -708,7 +623,9 @@ export const DashboardPage = () => {
 
               {/* AI Sentiment Analysis */}
               {effectiveReviews.length > 0 && (
-                <SentimentDashboard reviews={effectiveReviews} />
+                <div id="sentiment-dashboard-section">
+                  <SentimentDashboard reviews={effectiveReviews} />
+                </div>
               )}
 
               {/* Filters, View Switcher & Export */}
@@ -726,19 +643,19 @@ export const DashboardPage = () => {
 
               {/* Bulk Selection Header Toolbar */}
               {filteredReviews.length > 0 && (
-                <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-100/80 rounded-xl border border-slate-200/70 text-xs">
-                  <label className="flex items-center gap-2 font-medium text-slate-700 cursor-pointer select-none">
+                <div className="flex items-center justify-between px-4 py-2.5 bg-slate-100/90 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 text-xs shadow-2xs">
+                  <label className="flex items-center gap-2.5 font-semibold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       id="bulk-select-all"
                       checked={selectedReviewIds.size > 0 && selectedReviewIds.size === filteredReviews.length}
                       onChange={handleSelectAll}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 border-slate-300 cursor-pointer"
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-0 accent-indigo-600 cursor-pointer"
                     />
                     <span>
                       {selectedReviewIds.size > 0
                         ? `${selectedReviewIds.size} of ${filteredReviews.length} selected`
-                        : `Select all (${filteredReviews.length}) for bulk moderation`}
+                        : `Select all for bulk moderation (${filteredReviews.length})`}
                     </span>
                   </label>
 
@@ -748,7 +665,8 @@ export const DashboardPage = () => {
                         type="button"
                         id="bulk-approve-btn"
                         onClick={handleBulkApprove}
-                        className="apple-touch px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer shadow-2xs"
+                        className="apple-touch px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
+                        title="Bulk Approve Selected"
                       >
                         <Check className="w-3.5 h-3.5" />
                         <span>Approve ({selectedReviewIds.size})</span>
@@ -757,7 +675,8 @@ export const DashboardPage = () => {
                         type="button"
                         id="bulk-reject-btn"
                         onClick={handleBulkReject}
-                        className="apple-touch px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs flex items-center gap-1 cursor-pointer shadow-2xs"
+                        className="apple-touch px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
+                        title="Bulk Reject Selected"
                       >
                         <X className="w-3.5 h-3.5" />
                         <span>Reject</span>
@@ -766,21 +685,38 @@ export const DashboardPage = () => {
                         type="button"
                         id="bulk-archive-btn"
                         onClick={handleBulkArchive}
-                        className="apple-touch px-2.5 py-1 rounded-lg bg-slate-600 hover:bg-slate-700 text-white font-semibold text-xs cursor-pointer"
+                        className="apple-touch px-3 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-semibold text-xs cursor-pointer shadow-xs active:scale-95 transition-all"
+                        title="Bulk Archive Selected"
                       >
-                        Archive
+                        <Archive className="w-3.5 h-3.5" />
+                        <span>Archive</span>
                       </button>
                       <button
                         type="button"
                         id="bulk-delete-btn"
                         onClick={handleBulkDelete}
-                        className="apple-touch p-1 rounded-lg text-rose-600 hover:bg-rose-100 cursor-pointer"
+                        className="apple-touch p-1.5 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer transition-colors"
                         title="Delete Selected"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Empty State / Queue Clears Fast Delight Card */}
+              {filteredReviews.length === 0 && !isLoading && (
+                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-8 sm:p-10 flex flex-col items-center justify-center text-center gap-3 my-4 shadow-sm">
+                  <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-200/60 dark:border-indigo-800">
+                    <MailCheck className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-display">
+                    Queue Clears Fast!
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
+                    Approved items instantly populate your Wall of Love embed code & API feed.
+                  </p>
                 </div>
               )}
 
@@ -817,6 +753,46 @@ export const DashboardPage = () => {
                   onOpenDetails={(rev) => setInspectingReview(rev)}
                   onOpenSocialCard={setSocialCardReview}
                 />
+              )}
+
+              {/* Sticky Mobile Bulk Float Bar (Luminous Proof) */}
+              {selectedReviewIds.size > 0 && (
+                <div className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-40 animate-slide-up">
+                  <div className="rounded-2xl bg-slate-950/95 dark:bg-slate-900/95 text-white p-3.5 shadow-2xl backdrop-blur-xl border border-white/10 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 pl-1">
+                      <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">
+                        {selectedReviewIds.size}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-200">Selected</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={handleBulkApprove}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold active:scale-95 transition-transform cursor-pointer shadow-sm"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Approve All</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleBulkReject}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold active:scale-95 transition-transform cursor-pointer shadow-sm"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        <span>Reject</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedReviewIds(new Set())}
+                        className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                        title="Dismiss Selection"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           )}

@@ -482,4 +482,21 @@
   background-size: 100% 100%;
 }
 
+/* Luminous Proof Card Styling */
+.proof-card {
+  background: #ffffff;
+  border: 1px solid rgba(19, 27, 46, 0.06);
+  box-shadow: 0 4px 16px rgba(19, 27, 46, 0.05);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .proof-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+.proof-card:hover {
+  box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.08), 0 8px 10px -6px rgba(19, 27, 46, 0.04);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
 
