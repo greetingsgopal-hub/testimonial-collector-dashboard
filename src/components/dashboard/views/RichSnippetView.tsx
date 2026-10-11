@@ -13,6 +13,7 @@ import {
   Sparkles,
   Globe,
   Share2,
+  Play,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { Review } from '../../../types';
@@ -33,6 +34,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<PlatformTab>('wordpress');
   const [showAdvancedConfig, setShowAdvancedConfig] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   // Schema Customization State
   const [schemaType, setSchemaType] = useState<'Product' | 'SoftwareApplication' | 'LocalBusiness' | 'Organization' | 'Service'>('SoftwareApplication');
@@ -100,13 +102,24 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
     {
       name: string;
       quickLocation: string;
+      videoTitle: string;
+      videoDuration: string;
+      screenTitle: string;
+      actionHighlight: string;
+      videoSummary: string;
       steps: string[];
+      timestamps: { time: string; label: string; desc: string }[];
       tip?: string;
     }
   > = {
     wordpress: {
       name: 'WordPress',
       quickLocation: 'RankMath, Yoast SEO, or Header & Footer Scripts Plugin',
+      videoTitle: 'How to Install Google Stars on WordPress in 45 Seconds',
+      videoDuration: '45s',
+      screenTitle: 'WordPress Admin → Settings → WPCode / Header Scripts',
+      actionHighlight: 'Paste inside Header Scripts (Header) Box',
+      videoSummary: 'Navigate to WPCode or RankMath Custom Scripts, paste the Panda Praise snippet into the header box, and click Save.',
       steps: [
         'Open your WordPress Admin dashboard (yourdomain.com/wp-admin).',
         'Option A (RankMath / Yoast): Open plugin settings → Schema or Custom Scripts box.',
@@ -114,11 +127,22 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
         'Paste your Panda Praise Golden Stars code into the Header Scripts (Header) box.',
         'Click "Save Changes". Google will detect the stars on its next crawl.',
       ],
+      timestamps: [
+        { time: '0:05', label: 'Open WP Admin', desc: 'Navigate to your WordPress dashboard' },
+        { time: '0:18', label: 'Open Header Scripts', desc: 'Go to WPCode or RankMath Custom Scripts' },
+        { time: '0:32', label: 'Paste Schema Code', desc: 'Paste the Panda Praise JSON-LD snippet' },
+        { time: '0:42', label: 'Save & Purge Cache', desc: 'Click Save Changes and purge cache' },
+      ],
       tip: 'If using caching plugins (WP Rocket, LiteSpeed), purge your cache after saving.',
     },
     shopify: {
       name: 'Shopify',
       quickLocation: 'Online Store → Themes → Edit code → theme.liquid',
+      videoTitle: 'How to Install Google Stars on Shopify in 45 Seconds',
+      videoDuration: '45s',
+      screenTitle: 'Shopify Admin → Online Store → Themes → theme.liquid',
+      actionHighlight: 'Paste on line before </head>',
+      videoSummary: 'Open your active theme code, locate theme.liquid, scroll to the closing </head> tag, and paste the code on a new line right above it.',
       steps: [
         'Log in to Shopify Admin (admin.shopify.com) and go to Online Store → Themes.',
         'Click the "..." (Actions) button next to your active theme and select "Edit code".',
@@ -127,11 +151,22 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
         'Paste your Panda Praise code on a new line directly BEFORE </head>.',
         'Click the green "Save" button in the top right.',
       ],
+      timestamps: [
+        { time: '0:08', label: 'Open Themes', desc: 'Go to Online Store → Themes' },
+        { time: '0:20', label: 'Edit Code', desc: 'Click "..." Actions → Edit code' },
+        { time: '0:31', label: 'Locate </head>', desc: 'Open theme.liquid and search </head>' },
+        { time: '0:42', label: 'Paste & Save', desc: 'Paste above </head> and click Save' },
+      ],
       tip: 'Adding before </head> ensures Google indexes the review schema on all storefront pages.',
     },
     webflow: {
       name: 'Webflow',
       quickLocation: 'Project Settings → Custom Code → Head Code',
+      videoTitle: 'How to Install Google Stars on Webflow in 40 Seconds',
+      videoDuration: '40s',
+      screenTitle: 'Webflow Dashboard → Project Settings → Custom Code',
+      actionHighlight: 'Paste in Head Code Box across all pages',
+      videoSummary: 'Go to Project Settings → Custom Code, paste your Panda Praise schema code into the Head Code textarea, and hit Publish.',
       steps: [
         'Open your Webflow Dashboard and select your project.',
         'Go to Project Settings (or gear icon in Designer) → "Custom Code".',
@@ -139,11 +174,22 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
         'Paste your Panda Praise Golden Stars code into the box.',
         'Click "Save Changes" and hit "Publish" to selected domains.',
       ],
+      timestamps: [
+        { time: '0:06', label: 'Project Settings', desc: 'Open Webflow Dashboard project settings' },
+        { time: '0:18', label: 'Custom Code', desc: 'Click Custom Code tab in the left bar' },
+        { time: '0:28', label: 'Paste into Head Code', desc: 'Paste snippet into Head Code box' },
+        { time: '0:38', label: 'Publish Site', desc: 'Save changes and hit Publish' },
+      ],
       tip: 'Requires Webflow Basic hosting plan or higher to publish custom code.',
     },
     framer: {
       name: 'Framer',
       quickLocation: 'Site Settings → General → Custom Code → Head Start',
+      videoTitle: 'How to Install Google Stars on Framer in 40 Seconds',
+      videoDuration: '40s',
+      screenTitle: 'Framer Studio → Site Settings → Custom Code → Head Start',
+      actionHighlight: 'Paste into Head Start (or End of <head>)',
+      videoSummary: 'Open Framer editor, go to Site Settings → General → Custom Code, paste into the Head Start input, and click Publish.',
       steps: [
         'Open your project in the Framer editor.',
         'Click the Framer logo in the top-left → Site Settings → General.',
@@ -151,16 +197,33 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
         'Paste your code into the "Head Start" (or "End of <head>") input box.',
         'Close settings and click "Publish" in the top-right corner.',
       ],
+      timestamps: [
+        { time: '0:05', label: 'Site Settings', desc: 'Click Framer icon → Site Settings' },
+        { time: '0:16', label: 'Scroll to Custom Code', desc: 'Navigate down to Custom Code section' },
+        { time: '0:27', label: 'Paste in Head Start', desc: 'Paste snippet into Head Start box' },
+        { time: '0:38', label: 'Publish to Web', desc: 'Close settings and click Publish' },
+      ],
       tip: 'Framer automatically bundles the structured JSON-LD into your live HTML output.',
     },
     html: {
       name: 'HTML / Next.js',
       quickLocation: '<head> of index.html or root layout.tsx template',
+      videoTitle: 'How to Install Google Stars on HTML / Next.js in 35 Seconds',
+      videoDuration: '35s',
+      screenTitle: 'VS Code → app/layout.tsx or public/index.html',
+      actionHighlight: 'Render inside <head> tag directly',
+      videoSummary: 'In static HTML, paste between <head> and </head>. In Next.js App Router, inject inside app/layout.tsx using script tag.',
       steps: [
         'Static HTML: Open your root index.html and paste directly between <head> and </head>.',
         'Next.js (App Router): Open app/layout.tsx and add inside <head> using <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(...) }} />.',
         'Next.js (Pages Router): Import Head from "next/head" and paste inside <Head> in _document.tsx or _app.tsx.',
         'Deploy your frontend build to production.',
+      ],
+      timestamps: [
+        { time: '0:05', label: 'Open Layout / Index', desc: 'Open app/layout.tsx or index.html' },
+        { time: '0:15', label: 'Inject JSON-LD', desc: 'Insert script tag inside <head>' },
+        { time: '0:26', label: 'Run Local Build', desc: 'Verify zero hydration mismatch' },
+        { time: '0:34', label: 'Deploy & Test', desc: 'Deploy and test with Google Rich Results' },
       ],
       tip: 'Verify zero hydration mismatch by ensuring the schema script renders directly in static markup.',
     },
@@ -316,9 +379,25 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
                 {platformGuides[selectedPlatform].name} Installation Instructions
               </strong>
             </div>
-            <span className="text-[10px] font-bold text-purple-700 bg-white/90 border border-purple-200 px-2.5 py-0.5 rounded-full inline-flex self-start sm:self-auto">
-              Target: {platformGuides[selectedPlatform].quickLocation}
-            </span>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Watch Video Tutorial Trigger Button */}
+              <button
+                type="button"
+                onClick={() => setShowVideoModal(true)}
+                className="apple-touch inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-violet-700 bg-violet-100/90 hover:bg-violet-200/90 border border-violet-300 shadow-2xs transition-all cursor-pointer group"
+              >
+                <Play className="w-3 h-3 fill-violet-600 text-violet-600 group-hover:scale-110 transition-transform" />
+                <span>Watch Video Tutorial</span>
+                <span className="text-[10px] font-semibold text-violet-600 bg-white/90 px-1.5 py-0.2 rounded-full border border-violet-200">
+                  {platformGuides[selectedPlatform].videoDuration}
+                </span>
+              </button>
+
+              <span className="text-[10px] font-bold text-purple-700 bg-white/90 border border-purple-200 px-2.5 py-0.5 rounded-full inline-flex self-start sm:self-auto">
+                Target: {platformGuides[selectedPlatform].quickLocation}
+              </span>
+            </div>
           </div>
 
           <ol className="space-y-1.5 text-xs text-zinc-700">
@@ -507,6 +586,142 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
           </button>
         )}
       </section>
+
+      {/* ── Interactive Platform Video Tutorial Modal ── */}
+      {showVideoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
+          <div
+            className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center shadow-xs">
+                  <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 leading-snug">
+                    {platformGuides[selectedPlatform].videoTitle}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Target: {platformGuides[selectedPlatform].quickLocation}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                aria-label="Close Video Tutorial"
+                onClick={() => setShowVideoModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-200/60 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body with Scroll */}
+            <div className="p-5 overflow-y-auto space-y-4">
+              {/* Simulated 16:9 HD Screencast Stage */}
+              <div className="aspect-video w-full rounded-2xl bg-zinc-950 relative overflow-hidden border border-zinc-800 shadow-inner flex flex-col justify-between p-4 group">
+                {/* Stage Header Bar */}
+                <div className="flex items-center justify-between text-zinc-400 text-xs pb-2 border-b border-zinc-800/80">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <span className="font-mono text-[11px] text-zinc-300 ml-1">
+                      {platformGuides[selectedPlatform].screenTitle}
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-violet-950 text-violet-300 border border-violet-800">
+                    Micro-Walkthrough Guide
+                  </span>
+                </div>
+
+                {/* Animated Interactive Screen Mockup */}
+                <div className="my-auto py-2 px-3 sm:px-6 flex flex-col items-center justify-center text-center space-y-2.5">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold animate-pulse">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{platformGuides[selectedPlatform].actionHighlight}</span>
+                  </div>
+                  <p className="text-zinc-200 text-xs max-w-md font-sans">
+                    {platformGuides[selectedPlatform].videoSummary}
+                  </p>
+                  <div className="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-700/80 max-w-lg w-full text-left font-mono text-[11px] text-violet-300 truncate">
+                    &lt;script type="application/ld+json"&gt; {businessName} Schema... &lt;/script&gt;
+                  </div>
+                </div>
+
+                {/* Player Controls Bar */}
+                <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                    <span className="text-[11px] font-mono text-zinc-300">
+                      0:00 / {platformGuides[selectedPlatform].videoDuration}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-zinc-400 font-sans">
+                    Non-Technical Visual Guide
+                  </span>
+                </div>
+              </div>
+
+              {/* Step-by-Step Timestamps */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  Key Timestamps & Click-by-Click Guide
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {platformGuides[selectedPlatform].timestamps.map((ts, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-2.5 text-xs hover:border-violet-300 transition-colors"
+                    >
+                      <span className="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] bg-violet-100 text-violet-700 border border-violet-200 shrink-0">
+                        {ts.time}
+                      </span>
+                      <div className="min-w-0">
+                        <strong className="text-slate-900 font-semibold block truncate leading-tight">
+                          {ts.label}
+                        </strong>
+                        <span className="text-slate-500 text-[11px] leading-tight block">
+                          {ts.desc}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer with In-Modal Copy & Close */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+              <span className="text-[11px] text-slate-500">
+                Paste directly into <strong className="text-slate-700">{platformGuides[selectedPlatform].quickLocation}</strong>
+              </span>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleCopy();
+                  }}
+                  className="apple-touch flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>{copied ? '✓ Code Copied!' : 'Copy Schema Code'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowVideoModal(false)}
+                  className="apple-touch px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

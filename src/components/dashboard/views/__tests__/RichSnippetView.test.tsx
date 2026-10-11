@@ -213,4 +213,35 @@ describe('RichSnippetView - Google Search Star Generator', () => {
     expect(container.textContent).toContain('Rating: 4.5');
     expect(container.textContent).toContain('2 verified reviews');
   });
+
+  it('6. Opens interactive video tutorial modal when Watch Video Tutorial is clicked', async () => {
+    await act(async () => {
+      root.render(<RichSnippetView reviews={[]} />);
+    });
+
+    const watchVideoBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Watch Video Tutorial')
+    );
+    expect(watchVideoBtn).toBeDefined();
+
+    await act(async () => {
+      watchVideoBtn!.click();
+    });
+
+    // Modal is rendered with platform-specific video title and timestamps
+    expect(container.textContent).toContain('How to Install Google Stars on WordPress');
+    expect(container.textContent).toContain('Key Timestamps');
+
+    // Close modal button exists and works
+    const closeBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.getAttribute('aria-label') === 'Close Video Tutorial' || b.textContent?.includes('✕')
+    );
+    expect(closeBtn).toBeDefined();
+
+    await act(async () => {
+      closeBtn!.click();
+    });
+
+    expect(container.textContent).not.toContain('How to Install Google Stars on WordPress in 45 Seconds');
+  });
 });
