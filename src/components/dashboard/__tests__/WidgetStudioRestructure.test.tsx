@@ -144,6 +144,21 @@ describe('WidgetStudio Restructure & Upgrades', () => {
 
     expect(container.textContent).toContain('iFrame Fallback Installation Guide');
     expect(container.querySelector('pre')?.textContent).toContain('<iframe src=');
+
+    // Switch to AI & Vibe Coded via quick pill button
+    const vibeBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('AI & Vibe Coded')
+    );
+    expect(vibeBtn).toBeDefined();
+
+    await act(async () => {
+      vibeBtn!.click();
+    });
+
+    expect(container.textContent).toContain('AI & Vibe Coded (Cloudflare / Netlify) Installation Guide');
+    expect(container.textContent).toContain('Cloudflare');
+    expect(container.textContent).toContain('Netlify');
+    expect(container.textContent).toContain('Cursor');
   });
 
   it('5. Permanent quick-action dock provides active platform indicator and copy trigger', async () => {
@@ -170,7 +185,21 @@ describe('WidgetStudio Restructure & Upgrades', () => {
 
     expect(writeTextMock).toHaveBeenCalled();
     expect(container.textContent).toContain('Copied!');
+
+    // Look for "Copy AI Prompt" button
+    const copyAiPromptBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Copy AI Prompt')
+    );
+    expect(copyAiPromptBtn).toBeDefined();
+
+    await act(async () => {
+      copyAiPromptBtn!.click();
+    });
+
+    expect(writeTextMock).toHaveBeenCalledTimes(2);
+    expect(writeTextMock.mock.calls[1][0]).toContain('Panda Praise');
   });
+
 
   it('6. Streamlined onboarding guide can expand 4 steps and be dismissed', async () => {
     await act(async () => {

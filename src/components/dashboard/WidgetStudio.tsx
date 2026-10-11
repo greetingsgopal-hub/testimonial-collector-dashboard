@@ -37,7 +37,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getSampleReviews } from '../../lib/mockData';
 import { EmbedCodeModal } from './EmbedCodeModal';
 
-export type CmsPlatform = 'wordpress' | 'webflow' | 'wix' | 'shopify' | 'squarespace' | 'framer' | 'react' | 'nextjs' | 'html' | 'other' | 'iframe';
+export type CmsPlatform = 'wordpress' | 'webflow' | 'wix' | 'shopify' | 'squarespace' | 'framer' | 'react' | 'nextjs' | 'html' | 'vibe' | 'other' | 'iframe';
 
 /**
  * Widget layouts the public /embed.js runtime can actually render on a
@@ -218,6 +218,9 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
       case 'nextjs':
         return `// In your Next.js component (App Router or Pages):\n'use client';\nimport Script from 'next/script';\n\nexport function WallOfLove() {\n  return (\n    <section>\n      <div\n        id="panda-praise-wall"\n        data-project-id="${projId}"\n        data-theme="${wallTheme}"\n        data-min-rating="${minRating}"\n        data-sources="${sourcesStr}"\n        data-widget-type="${embedType}"\n        data-max-count="${settings.maxCount}"\n      />\n      <Script src="${runtimeScriptUrl}" strategy="lazyOnload" />\n    </section>\n  );\n}`;
+
+      case 'vibe':
+        return `<!-- AI & Vibe Coded (Cloudflare Pages, Netlify, Cursor, Lovable, Bolt, v0) -->\n<!-- Prompt for AI: "Embed this Panda Praise testimonial widget in my landing page reviews section" -->\n${htmlSnippet}`;
 
       case 'html':
       case 'other':
@@ -486,7 +489,29 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
         'Confirm testimonials render in your browser.',
       ],
     },
+    vibe: {
+      id: 'vibe',
+      label: 'AI & Vibe Coded (Cloudflare / Netlify)',
+      badge: '1-Prompt AI Install',
+      badgeColor: 'text-violet-700 bg-violet-50 border-violet-200',
+      whatToOpen: 'Open your AI coding tool (Cursor, Lovable, Bolt.new, v0) or hosting dashboard (Cloudflare Pages, Netlify).',
+      targetPage: 'The landing page, hero section, or testimonials component where you want reviews to display (e.g. papasystem.in).',
+      embedElement: 'Ask your AI assistant: "Embed this Panda Praise widget into my testimonials section", or use Netlify/Cloudflare snippet injection.',
+      afterPasting: 'The AI adds the container div and loads the script. For Cloudflare/Netlify edge injection, it serves automatically without touching code.',
+      howToPublish: 'Push changes with Git, or let Cloudflare / Netlify automatically deploy your site.',
+      howToVerify: 'Visit your live site in an incognito window and verify the testimonials wall appears and animates.',
+      note: 'Perfect for vibe-coded sites hosted on Cloudflare Pages, Netlify, or Vercel. You can prompt your AI assistant or inject at the edge without manual coding.',
+      steps: [
+        'Method A (AI Assistant): Copy the code and ask Cursor, Lovable, Bolt, or v0 to place it in your reviews section.',
+        'Method B (Static HTML): Paste the container <div> into index.html and the script before </body>.',
+        'Method C (Netlify): Go to Site Settings → Build & Deploy → Snippet injection → Add snippet before </body>.',
+        'Method D (Cloudflare): Go to Domain Dashboard → Rules / Snippets or Zaraz → Inject HTML before </body>.',
+        'Deploy and verify your live website in a new browser tab.',
+      ],
+    },
   };
+
+  const [copiedAiPrompt, setCopiedAiPrompt] = useState(false);
 
   const handlePublishSetup = () => {
     const projectId = project?.id;
@@ -503,6 +528,18 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
       setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopied(false);
+    }
+  };
+
+  const handleCopyAiPrompt = async () => {
+    const aiPrompt = `Please embed this Panda Praise testimonial widget into my landing page's testimonials section. Place the container <div> where the reviews should display, and load the script:\n\n${getEmbedSnippet()}`;
+    try {
+      await navigator.clipboard.writeText(aiPrompt);
+      setCopiedAiPrompt(true);
+      handlePublishSetup();
+      setTimeout(() => setCopiedAiPrompt(false), 2000);
+    } catch {
+      setCopiedAiPrompt(false);
     }
   };
 
@@ -887,6 +924,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                   { id: 'webflow', label: 'Webflow' },
                   { id: 'shopify', label: 'Shopify' },
                   { id: 'framer', label: 'Framer' },
+                  { id: 'vibe', label: 'AI & Vibe Coded' },
                   { id: 'react', label: 'React' },
                   { id: 'nextjs', label: 'Next.js' },
                   { id: 'iframe', label: 'iFrame' },
@@ -912,7 +950,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               {/* Full Platform Dropdown with Verified Compatibility Badges */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-[11px] text-gray-500">
-                  <span className="font-semibold text-gray-700">All Supported Platforms (11)</span>
+                  <span className="font-semibold text-gray-700">All Supported Platforms (12)</span>
                   <span className="text-emerald-700 font-medium">✓ 100% Tested Compatibility</span>
                 </div>
                 <div className="relative">
@@ -921,6 +959,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                     onChange={(e) => setCmsPlatform(e.target.value as CmsPlatform)}
                     className="w-full px-3.5 py-2.5 bg-gray-50 hover:bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#6701e6]/30 focus:border-[#6701e6] transition-all cursor-pointer appearance-none pr-9"
                   >
+                    <option value="vibe">AI & Vibe Coded (Cloudflare Pages, Netlify, Cursor, Lovable, Bolt)</option>
                     <option value="wordpress">WordPress (CMS Block / Gutenberg / Elementor)</option>
                     <option value="webflow">Webflow (Code Embed Element)</option>
                     <option value="wix">Wix (Embed HTML Block)</option>
@@ -1008,15 +1047,27 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                 </div>
               </div>
 
-              {/* Copy Button */}
-              <button
-                type="button"
-                onClick={handleCopyCode}
-                className="w-full py-3 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-[0.99]"
-              >
-                {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
-                <span>{copied ? '✓ Snippet Copied to Clipboard!' : 'Copy Embed Code'}</span>
-              </button>
+              {/* Copy Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className="flex-1 py-3 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-[0.99]"
+                >
+                  {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                  <span>{copied ? '✓ Snippet Copied!' : 'Copy Embed Code'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCopyAiPrompt}
+                  className="py-3 px-4 rounded-xl bg-violet-50 hover:bg-violet-100 border border-violet-200 text-xs font-bold text-violet-800 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.99]"
+                  title="Copy 1-click prompt for Cursor, Lovable, Bolt, or v0"
+                >
+                  {copiedAiPrompt ? <Check className="w-4 h-4 text-emerald-600" /> : <Sparkles className="w-4 h-4 text-violet-600" />}
+                  <span>{copiedAiPrompt ? '✓ AI Prompt Copied!' : 'Copy AI Prompt'}</span>
+                </button>
+              </div>
 
               {/* Video Walkthrough Storyboard Toggle Button */}
               <button

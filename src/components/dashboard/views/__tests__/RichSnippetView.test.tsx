@@ -174,6 +174,66 @@ describe('RichSnippetView - Google Search Star Generator', () => {
 
     expect(container.textContent).toContain('HTML / Next.js Installation Instructions');
     expect(container.textContent).toContain('app/layout.tsx');
+
+    // Switch to AI & Vibe Coded (Cloudflare / Netlify)
+    const vibeBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('AI & Vibe Coded') || b.textContent?.includes('Vibe Coded')
+    );
+    expect(vibeBtn).toBeDefined();
+
+    await act(async () => {
+      vibeBtn!.click();
+    });
+
+    expect(container.textContent).toContain('AI & Vibe Coded (Cloudflare / Netlify) Installation Instructions');
+    expect(container.textContent).toContain('Copy AI Prompt');
+    expect(container.textContent).toContain('Netlify');
+    expect(container.textContent).toContain('Cloudflare');
+  });
+
+  it('4b. Action dock: copies 1-click AI prompt for Cursor/Lovable when reviews exist', async () => {
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: writeTextMock,
+      },
+    });
+
+    const reviews: Review[] = [
+      {
+        id: 'r1',
+        projectId: 'proj_100',
+        authorName: 'Client 1',
+        name: 'Client 1',
+        email: 'client1@test.com',
+        rating: 5,
+        content: 'Superb service!',
+        status: 'approved',
+        type: 'text',
+        consent: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+
+    await act(async () => {
+      root.render(<RichSnippetView reviews={reviews} />);
+    });
+
+    const aiPromptBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Copy AI Prompt')
+    );
+    expect(aiPromptBtn).toBeDefined();
+
+    await act(async () => {
+      aiPromptBtn!.click();
+    });
+
+    expect(writeTextMock).toHaveBeenCalled();
+    const copiedPrompt = writeTextMock.mock.calls[0][0];
+    expect(copiedPrompt).toContain('Add this Google Review structured data');
+    expect(copiedPrompt).toContain('<script type="application/ld+json">');
+    expect(container.textContent).toContain('Copied AI prompt');
   });
 
   it('5. Computes rating and review count from approved reviews and ignores sample/pending', async () => {

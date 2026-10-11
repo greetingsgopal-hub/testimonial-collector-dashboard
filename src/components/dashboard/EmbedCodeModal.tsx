@@ -18,7 +18,7 @@ import {
   FileCode2,
 } from 'lucide-react';
 
-export type EmbedPlatform = 'webflow' | 'wordpress' | 'shopify' | 'react' | 'iframe';
+export type EmbedPlatform = 'webflow' | 'wordpress' | 'shopify' | 'react' | 'iframe' | 'vibe';
 
 export interface EmbedCodeModalProps {
   isOpen: boolean;
@@ -46,7 +46,9 @@ export const EmbedCodeModal: React.FC<EmbedCodeModalProps> = ({
   const [activeTab, setActiveTab] = useState<EmbedPlatform>('webflow');
   const [reactSubTab, setReactSubTab] = useState<'html' | 'react' | 'nextjs'>('react');
   const [copied, setCopied] = useState(false);
+  const [aiPromptCopied, setAiPromptCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+
 
   // Live website verification state
   const [verifyUrl, setVerifyUrl] = useState('');
@@ -146,12 +148,40 @@ export function TestimonialWidget() {
 }`;
         }
         return `<!-- Custom HTML: Paste right before closing </body> tag -->\n${htmlEmbed}`;
+      case 'vibe':
+        return `<!-- AI & Vibe Coded (Cloudflare / Netlify / Cursor / Lovable / Bolt / v0) -->\n<!-- 1. Testimonial Container -->\n<div ${attrs}></div>\n\n<!-- 2. Asynchronous Script Loader -->\n<script src="https://pandapraise.com/widget.js" async></script>`;
       case 'iframe':
         return `<iframe\n  src="https://pandapraise.com/w/${cleanProjectId}?embed=true"\n  width="100%"\n  height="600"\n  frameborder="0"\n  style="border:0; width:100%; min-height:600px; border-radius:16px;"\n  loading="lazy"\n></iframe>`;
       default:
         return htmlEmbed;
     }
   }, [cleanProjectId, widgetType, theme, minRating, sourcesStr, maxCount, activeTab, reactSubTab]);
+
+  const aiPrompt = useMemo(() => {
+    return `You are helping me add verified social proof to my website using Panda Praise.
+I want to install our testimonial widget in my site.
+
+Please follow these 2 steps:
+1. Place this container where the testimonials should render (e.g., above footer, testimonials section, or pricing page):
+<div id="panda-praise-wall" data-project-id="${cleanProjectId}" data-widget-type="${widgetType}" data-theme="${theme}"${minRating > 0 ? ` data-min-rating="${minRating}"` : ''}${sourcesStr ? ` data-sources="${sourcesStr}"` : ''}${maxCount !== 12 ? ` data-max-count="${maxCount}"` : ''}></div>
+
+2. Inject the Panda Praise widget loader script asynchronously before the closing </body> tag:
+<script src="https://pandapraise.com/widget.js" async></script>
+
+If using React/Next.js/Astro/Svelte, wrap the script appropriately or use the standard script component. Keep existing CSS styles intact.`;
+  }, [cleanProjectId, widgetType, theme, minRating, sourcesStr, maxCount]);
+
+  const handleCopyAiPrompt = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(aiPrompt);
+      }
+      setAiPromptCopied(true);
+      setTimeout(() => setAiPromptCopied(false), 2000);
+    } catch {
+      setAiPromptCopied(false);
+    }
+  };
 
   const handleCopy = async () => {
     try {
@@ -164,6 +194,7 @@ export function TestimonialWidget() {
       setCopied(false);
     }
   };
+
 
   const handleCopyLink = async () => {
     if (!publicWallUrl) return;
@@ -273,8 +304,32 @@ export function TestimonialWidget() {
                 <code>{snippetCode}</code>
               </pre>
 
-              {/* Prominent Copy Button */}
-              <div className="absolute right-3 top-3">
+              {/* Prominent Action Buttons: AI Prompt + Code */}
+              <div className="absolute right-3 top-3 flex items-center gap-2">
+                <button
+                  type="button"
+                  data-testid="copy-ai-prompt-btn"
+                  onClick={handleCopyAiPrompt}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95 ${
+                    aiPromptCopied
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-purple-900/80 hover:bg-purple-800 text-purple-200 border border-purple-700/60'
+                  }`}
+                  title="Copy ready-to-paste prompt for Cursor, Lovable, Bolt.new, v0"
+                >
+                  {aiPromptCopied ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-white" />
+                      <span>Copied Prompt!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5 text-purple-300" />
+                      <span>Copy AI Prompt</span>
+                    </>
+                  )}
+                </button>
+
                 <button
                   type="button"
                   data-testid="copy-snippet-btn"
@@ -312,7 +367,26 @@ export function TestimonialWidget() {
             </div>
 
             {/* Platform Tab Buttons */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+              <button
+                type="button"
+                data-testid="tab-vibe"
+                onClick={() => setActiveTab('vibe')}
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                  activeTab === 'vibe'
+                    ? 'border-[#6701e6] bg-violet-50/70 dark:bg-violet-950/40 text-[#6701e6] dark:text-violet-300 font-bold ring-2 ring-violet-500/20'
+                    : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300 text-xs font-semibold'
+                }`}
+              >
+                <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-[#6701e6] dark:text-violet-400 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </div>
+                <div className="truncate">
+                  <span className="block text-xs">AI & Vibe Coded</span>
+                  <span className="block text-[10px] text-gray-500 dark:text-gray-400 font-normal">Cloudflare / Netlify</span>
+                </div>
+              </button>
+
               <button
                 type="button"
                 data-testid="tab-webflow"
@@ -392,6 +466,51 @@ export function TestimonialWidget() {
 
             {/* Instruction Card for Selected Platform */}
             <div className="p-4 rounded-2xl bg-gray-50/90 dark:bg-slate-800/40 border border-gray-200/80 dark:border-slate-800 space-y-3.5">
+              {activeTab === 'vibe' && (
+                <div className="space-y-3 text-xs">
+                  <div className="flex items-center justify-between pb-2 border-b border-gray-200/60 dark:border-slate-700">
+                    <span className="font-bold text-gray-900 dark:text-white">AI & Vibe Coded Websites (Cloudflare / Netlify / Cursor / Lovable)</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-[#6701e6] dark:text-violet-300">
+                      Edge & AI Friendly
+                    </span>
+                  </div>
+                  <ol className="space-y-2 text-gray-700 dark:text-gray-300">
+                    <li className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-violet-200 dark:bg-violet-900/80 text-[#6701e6] dark:text-violet-300 font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                        1
+                      </span>
+                      <span>
+                        <strong>AI Assistant (Cursor / Lovable / Bolt / v0):</strong> Click <strong>Copy AI Prompt</strong> above and paste directly into your AI editor chat. The AI will position the container and script in your landing page layout.
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-violet-200 dark:bg-violet-900/80 text-[#6701e6] dark:text-violet-300 font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                        2
+                      </span>
+                      <span>
+                        <strong>Cloudflare Pages / Workers:</strong> If using static HTML (like papasystem.in), add the <code>&lt;div&gt;</code> in your HTML template and the <code>&lt;script&gt;</code> before <code>&lt;/body&gt;</code>. Alternatively, use Cloudflare Snippets / Zaraz to inject the script at the edge.
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-violet-200 dark:bg-violet-900/80 text-[#6701e6] dark:text-violet-300 font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                        3
+                      </span>
+                      <span>
+                        <strong>Netlify Sites:</strong> In Site Configuration &gt; Build &amp; deploy &gt; Post processing &gt; Snippet injection, inject the script before <code>&lt;/body&gt;</code> without modifying source code.
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-4 h-4 rounded-full bg-violet-200 dark:bg-violet-900/80 text-[#6701e6] dark:text-violet-300 font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                        4
+                      </span>
+                      <span>
+                        Deploy your branch to preview or production. Then use the <strong>Automated Live Website Verifier</strong> below to test live activation.
+                      </span>
+                    </li>
+                  </ol>
+                </div>
+              )}
+
               {activeTab === 'webflow' && (
                 <div className="space-y-3 text-xs">
                   <div className="flex items-center justify-between pb-2 border-b border-gray-200/60 dark:border-slate-700">
