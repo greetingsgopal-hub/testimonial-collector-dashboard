@@ -159,4 +159,57 @@ describe('PublicCollectorPage CRO Single-Page Form Suite', () => {
     expect(submitBtn).not.toBeNull();
     expect(submitBtn?.textContent).toContain('Review Bhejein 🚀');
   });
+
+  it('5. Successfully submitting a review renders the Praise Submitted celebration screen with card & reward', async () => {
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/c/acme-corp']}>
+          <Routes>
+            <Route path="/c/:collectionSlug" element={<PublicCollectorPage />} />
+          </Routes>
+        </MemoryRouter>
+      );
+    });
+
+    const nameInput = container.querySelector('input[placeholder*="Rivera"]') as HTMLInputElement;
+    const roleInput = container.querySelector('#role-input') as HTMLInputElement;
+    const textarea = container.querySelector('textarea') as HTMLTextAreaElement;
+    const form = container.querySelector('form') as HTMLFormElement;
+
+    expect(nameInput).not.toBeNull();
+    expect(roleInput).not.toBeNull();
+    expect(textarea).not.toBeNull();
+    expect(form).not.toBeNull();
+
+    await act(async () => {
+      const nativeInputSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        'value'
+      )?.set;
+      nativeInputSetter?.call(nameInput, 'Alex Rivera');
+      nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+      nativeInputSetter?.call(roleInput, 'Product Lead @ Acme Corp');
+      roleInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+      const nativeTextareaSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLTextAreaElement.prototype,
+        'value'
+      )?.set;
+      nativeTextareaSetter?.call(textarea, 'Absolutely love using papasystem in our daily workflow!');
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    await act(async () => {
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+
+    // Check celebration screen elements
+    expect(container.textContent).toContain("You're amazing, Alex! 🎉");
+    expect(container.textContent).toContain('Your Live Praise Card');
+    expect(container.textContent).toContain('Download Share Card');
+    expect(container.textContent).toContain('PRAISE20');
+    expect(container.textContent).toContain('Return to Acme Corp');
+  });
 });
+

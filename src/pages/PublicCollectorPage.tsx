@@ -253,7 +253,16 @@ export const PublicCollectorPage: React.FC = () => {
         formId: formConfig?.id || 'unknown',
         hasAvatar: Boolean(formData.avatarUrl),
       });
-      setSubmittedReview(created);
+      const fullSubmittedReview: Review = {
+        ...created,
+        name: created.name || formData.name,
+        role: created.role || formData.role,
+        title: created.title || formData.title,
+        content: created.content || formData.content,
+        rating: created.rating || activeRating,
+        avatarUrl: created.avatarUrl || formData.avatarUrl,
+      };
+      setSubmittedReview(fullSubmittedReview);
     } catch (err: any) {
       setValidationError(err.message || 'Failed to submit review. Please try again.');
     } finally {
