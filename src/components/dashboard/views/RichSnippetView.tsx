@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { Review } from '../../../types';
+import { buildRichSnippetJsonLd } from './richSnippetSchema';
 
 interface RichSnippetViewProps {
   reviews?: Review[];
@@ -37,56 +38,43 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
   const [showVideoModal, setShowVideoModal] = useState(false);
 
   // Schema Customization State
-  const [schemaType, setSchemaType] = useState<'Product' | 'SoftwareApplication' | 'LocalBusiness' | 'Organization' | 'Service'>('SoftwareApplication');
+  const [schemaType, setSchemaType] = useState<'Product' | 'SoftwareApplication'>('SoftwareApplication');
   const [businessName, setBusinessName] = useState(project?.name || workspace?.name || 'Panda Praise');
   const [websiteUrl, setWebsiteUrl] = useState(project?.websiteUrl || 'https://pandapraise.com');
 
   const approvedReviews = reviews.filter((r) => r.status === 'approved');
-  const calculatedRating = approvedReviews.length
-    ? (approvedReviews.reduce((sum, r) => sum + r.rating, 0) / approvedReviews.length).toFixed(1)
-    : reviews.length
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-    : '5.0';
-
-  const calculatedCount = approvedReviews.length || reviews.length || 12;
-  const isDemoStats = approvedReviews.length === 0 && reviews.length === 0;
-
-  const [ratingValue, setRatingValue] = useState('');
-  const [reviewCount, setReviewCount] = useState('');
-  const [description, setDescription] = useState(
-    'Collect, manage, and showcase verified customer testimonials and reviews with Panda Praise.'
+  const eligibleReviews = approvedReviews.filter(
+    (r) => r.isSample !== true && r.source !== 'sample' && Number.isFinite(r.rating) && r.rating >= 1 && r.rating <= 5
   );
-
-  const effectiveRating = ratingValue || calculatedRating;
-  const effectiveCount = reviewCount || String(calculatedCount);
-
-  const jsonLdCode = `<script type="application/ld+json">
-{
-  "@context": "https://schema.org/",
-  "@type": "${schemaType}",
-  "name": "${businessName}",
-  "url": "${websiteUrl}",
-  "description": "${description}",
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "${effectiveRating}",
-    "bestRating": "5",
-    "worstRating": "1",
-    "ratingCount": "${effectiveCount}"
-  }
-}
-</script>`;
-
+  const calculatedRating = eligibleReviews.length
+    ? (eligibleReviews.reduce((sum, r) => sum + r.rating, 0) / eligibleReviews.length).toFixed(2)
+    : null;
+  const calculatedCount = eligibleReviews.length;
+  const isDemoStats = eligibleReviews.length === 0;
+  const [description, setDescription] = useState(
+    'Collect, manage, and showcase customer testimonials and reviews with Panda Praise.'
+  );
+  const effectiveRating = calculatedRating;
+  const effectiveCount = calculatedCount;
+  const schemaJson = buildRichSnippetJsonLd({
+    entityType: schemaType, name: businessName, url: websiteUrl, description, reviews: eligibleReviews,
+  });
+  const jsonLdCode = schemaJson
+    ? `<script type="application/ld+json">\n${schemaJson}\n</script>`
+    : null;
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
-
   const handleCopy = async () => {
+    if (!jsonLdCode) {
+      showToast('No snippet generated. Add eligible, approved reviews first.');
+      return;
+    }
     try {
       await navigator.clipboard.writeText(jsonLdCode);
       setCopied(true);
-      showToast('✓ Copied! Paste into your site header to activate search stars.');
+      showToast('Copied JSON-LD. Google decides whether a rich result appears.');
       setTimeout(() => setCopied(false), 3000);
     } catch {
       setCopied(false);
@@ -114,18 +102,18 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
   > = {
     wordpress: {
       name: 'WordPress',
-      quickLocation: 'RankMath, Yoast SEO, or Header & Footer Scripts Plugin',
+      quickLocation: 'WPCode → Code Snippets → Header & Footer',
       videoTitle: 'How to Install Google Stars on WordPress in 45 Seconds',
       videoDuration: '45s',
-      screenTitle: 'WordPress Admin → Settings → WPCode / Header Scripts',
-      actionHighlight: 'Paste inside Header Scripts (Header) Box',
-      videoSummary: 'Navigate to WPCode or RankMath Custom Scripts, paste the Panda Praise snippet into the header box, and click Save.',
+      screenTitle: 'WordPress Admin → Code Snippets → Header & Footer',
+      actionHighlight: 'Paste verified JSON-LD into Header field',
+      videoSummary: 'Open WPCode → Header & Footer, paste verified JSON-LD into the Header field, and save. The exact steps depend on your installed WPCode version.',
       steps: [
         'Open your WordPress Admin dashboard (yourdomain.com/wp-admin).',
-        'Option A (RankMath / Yoast): Open plugin settings → Schema or Custom Scripts box.',
-        'Option B (WPCode / Header plugin): Go to Settings → WPCode / Insert Headers & Footers.',
-        'Paste your Panda Praise Golden Stars code into the Header Scripts (Header) box.',
-        'Click "Save Changes". Google will detect the stars on its next crawl.',
+        'In WordPress Admin, open Code Snippets → Header & Footer (WPCode).',
+        'Paste verified JSON-LD into the Header field only when that placement matches your setup.',
+        'Click Save Changes and confirm the actual success message.',
+        'Test the published URL. Valid markup does not guarantee Google will show stars.',
       ],
       timestamps: [
         { time: '0:05', label: 'Open WP Admin', desc: 'Navigate to your WordPress dashboard' },
@@ -251,25 +239,25 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
           <div className="space-y-2.5 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-900 text-[11px] font-bold tracking-tight">
               <Star className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
-              <span>One-Click Golden Stars</span>
+              <span>Review Structured Data</span>
               <span className="text-amber-400">•</span>
-              <span className="text-amber-800 font-semibold">Google Search Star Generator</span>
+              <span className="text-amber-800 font-semibold">Review Structured Data Generator</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight font-display">
-              Google Search Star Generator
+              Review Structured Data Generator
             </h1>
 
             <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
-              Display glowing 5-star ratings directly under your website link in Google search results. Google Rich Snippets build instant credibility, grab attention, and increase organic click-through rates by up to 35%.
+              Generate review structured data from eligible, approved customer ratings. Valid markup does not guarantee that Google will display stars; eligibility depends on Google's guidelines and the content visible on your page.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-zinc-500 font-medium">
               <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                <Sparkles className="w-3 h-3 text-emerald-600" /> 60-Second Setup
+                <Sparkles className="w-3 h-3 text-emerald-600" /> JSON-LD Generator
               </span>
-              <span>• Zero Coding Required</span>
-              <span>• Auto-Syncs with Approved Reviews</span>
+              <span>• Requires eligible review data</span>
+              <span>• Google controls rich-result display</span>
             </div>
           </div>
         </div>
@@ -281,11 +269,11 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
           <div className="flex items-center gap-2">
             <Search className="w-4 h-4 text-zinc-400" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500 font-mono">
-              Live Google Search Appearance
+              Illustrative Search Preview
             </h2>
           </div>
           <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-            {isDemoStats ? 'Live Preview with Real-time Sync' : 'Verified Schema Live'}
+            {isDemoStats ? 'Preview only — no eligible ratings' : 'Illustrative preview — not Google output'}
           </span>
         </div>
 
@@ -307,25 +295,21 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
             {businessName} — Verified Reviews & Ratings
           </h3>
 
-          {/* Google Golden Stars Row */}
+          {/* Illustrative preview; not a live Google result */}
           <div className="flex items-center flex-wrap gap-2 text-xs pt-0.5">
-            <div className="flex items-center gap-0.5 text-amber-500">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
-              ))}
-            </div>
-            <span className="font-bold text-zinc-900 text-xs">
-              Rating: {effectiveRating}
-            </span>
-            <span className="text-zinc-500 text-xs">
-              • ‎{effectiveCount} verified reviews
-            </span>
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-100/70 px-1.5 py-0.5 rounded">
-              <Check className="w-2.5 h-2.5" /> Schema Validated
-            </span>
+            {effectiveRating !== null ? (
+              <>
+                <div className="flex items-center gap-0.5 text-amber-500" aria-label="Illustrative rating stars">
+                  {[1, 2, 3, 4, 5].map((s) => <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
+                </div>
+                <span className="font-bold text-zinc-900 text-xs">Illustrative rating: {effectiveRating}</span>
+                <span className="text-zinc-500 text-xs">• {effectiveCount} eligible approved ratings</span>
+              </>
+            ) : <span className="text-amber-800 text-xs">No eligible approved ratings. Aggregate-rating markup will not be generated.</span>}
           </div>
+          <p className="text-[11px] text-zinc-500">This is a design preview, not a Google Search result or validation result. Use markup only when these genuine ratings refer to the selected entity and are visible on the target page.</p>
 
-          {/* Meta Description */}
+          {/* Description */}
           <p className="text-xs text-zinc-600 leading-relaxed pt-1 line-clamp-2">
             {description}
           </p>
@@ -340,7 +324,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
             <div className="flex items-center gap-2">
               <Code2 className="w-4 h-4 text-[#6701e6]" />
               <h3 className="text-sm font-bold text-zinc-950">
-                Your Ready-to-Paste Star Code (Google Schema)
+                Review Structured Data (JSON-LD)
               </h3>
             </div>
             <p className="text-xs text-zinc-500">
@@ -388,7 +372,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
                 className="apple-touch inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-violet-700 bg-violet-100/90 hover:bg-violet-200/90 border border-violet-300 shadow-2xs transition-all cursor-pointer group"
               >
                 <Play className="w-3 h-3 fill-violet-600 text-violet-600 group-hover:scale-110 transition-transform" />
-                <span>Watch Video Tutorial</span>
+                <span>View Setup Guide (Preview)</span>
                 <span className="text-[10px] font-semibold text-violet-600 bg-white/90 px-1.5 py-0.2 rounded-full border border-violet-200">
                   {platformGuides[selectedPlatform].videoDuration}
                 </span>
@@ -426,7 +410,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
           <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 flex items-center justify-between gap-3 text-xs font-semibold animate-in fade-in duration-200">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Copied! Paste into your site header to activate search stars.</span>
+              <span>Copied! Paste into your site header, then validate eligibility. Google decides whether stars appear.</span>
             </div>
             <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0">
               Ready to Paste
@@ -437,7 +421,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
         {/* Code Snippet Box */}
         <div className="relative group">
           <pre className="p-4 rounded-xl bg-zinc-950 text-purple-200 text-xs font-mono overflow-x-auto leading-relaxed border border-zinc-800 scrollbar-thin max-h-56 select-all">
-            {jsonLdCode}
+            {jsonLdCode ?? 'No JSON-LD generated. Add genuine, approved, non-sample ratings and verify they are visible on the target page.'}
           </pre>
         </div>
 
@@ -447,7 +431,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
             <span className="font-mono text-[11px] bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200 font-semibold text-zinc-700">
               JSON-LD • Schema.org
             </span>
-            <span>Automatically formatted with your live rating ({effectiveRating}★)</span>
+            <span>{effectiveRating !== null ? `Calculated from ${effectiveCount} approved ratings (${effectiveRating}★ average)` : "No eligible rating data available"}</span>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -457,7 +441,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
               className="apple-touch inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-xs transition-all cursor-pointer active:scale-95"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
-              <span>{copied ? '✓ Snippet Copied!' : 'Copy Google Schema Code'}</span>
+              <span>{copied ? '✓ Snippet Copied!' : 'Copy JSON-LD'}</span>
             </button>
 
             {/* Interactive Secondary Button: Test with Google Rich Results Tool */}
@@ -494,11 +478,8 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
                     onChange={(e) => setSchemaType(e.target.value as any)}
                     className="w-full px-3 py-1.5 rounded-lg text-xs bg-white border border-black/[0.08] text-zinc-900 focus:outline-none"
                   >
-                    <option value="SoftwareApplication">SoftwareApplication (SaaS / Apps)</option>
-                    <option value="Product">Product (Physical / Digital Goods)</option>
-                    <option value="LocalBusiness">LocalBusiness (Agencies, Stores & Clinics)</option>
-                    <option value="Organization">Organization (Companies & Brands)</option>
-                    <option value="Service">Service (Consulting & Services)</option>
+                    <option value="SoftwareApplication">SoftwareApplication (software only)</option>
+                    <option value="Product">Product (a specific product only)</option>
                   </select>
                 </div>
 
@@ -523,30 +504,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-zinc-700 block">Rating Value Override</label>
-                  <input
-                    type="text"
-                    value={ratingValue}
-                    onChange={(e) => setRatingValue(e.target.value)}
-                    placeholder={`Auto: ${calculatedRating}`}
-                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-white border border-black/[0.08] text-zinc-900 focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-zinc-700 block">Review Count Override</label>
-                  <input
-                    type="number"
-                    value={reviewCount}
-                    onChange={(e) => setReviewCount(e.target.value)}
-                    placeholder={`Auto: ${calculatedCount}`}
-                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-white border border-black/[0.08] text-zinc-900 focus:outline-none"
-                  />
-                </div>
-              </div>
-
+                            <p className="text-[11px] leading-relaxed text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3">Use Product only for reviews of that specific product, and SoftwareApplication only for reviews of that software. Use only genuine ratings visible on the target page. Google may not show a rich result even when markup is valid.</p>
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-zinc-700 block">Meta Description</label>
                 <textarea
@@ -634,7 +592,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
                     </span>
                   </div>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-violet-950 text-violet-300 border border-violet-800">
-                    Micro-Walkthrough Guide
+                    Illustrative Guide — Not a Recording
                   </span>
                 </div>
 
@@ -661,7 +619,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
                     </span>
                   </div>
                   <span className="text-[10px] text-zinc-400 font-sans">
-                    Non-Technical Visual Guide
+                    Static walkthrough preview — not a video
                   </span>
                 </div>
               </div>
