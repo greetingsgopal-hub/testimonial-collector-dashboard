@@ -7,12 +7,16 @@ import {
   Check,
   Printer,
   Layers,
+  X,
+  Star,
+  Camera,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-interface QrCodeGeneratorProps {
+export interface QrCodeGeneratorProps {
   onClose?: () => void;
 }
+
 
 export type QrStyle = 'rounded' | 'dots' | 'classic';
 
@@ -130,7 +134,7 @@ export function generateQrSvg(
   </svg>`;
 }
 
-export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
+export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = ({ onClose }) => {
   const { collectionForm, project } = useAuth();
   const [activeTab, setActiveTab] = useState<'form' | 'wall'>('form');
   const [qrStyle, setQrStyle] = useState<QrStyle>('rounded');
@@ -139,6 +143,7 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedImage, setCopiedImage] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+
 
   const collectionUrl = collectionForm
     ? `${window.location.origin}/c/${collectionForm.publicSlug}`
@@ -359,100 +364,156 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
     printWindow.document.close();
   };
 
+  const businessName = (collectionForm as any)?.settings?.brandName || project?.name || 'PandaPraise';
+
   return (
     <div className="space-y-6 font-sans">
       
-      {/* ── Apple Header & Destination Switcher ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-violet-600/10 border border-violet-600/20 flex items-center justify-center text-violet-700 shadow-2xs">
+      {/* ── Header with Title, Destination Switcher & Close Button ── */}
+      <div className="flex items-center justify-between gap-3 pb-4 border-b border-slate-200/80 dark:border-slate-800">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-2xl bg-violet-600/10 dark:bg-violet-500/20 border border-violet-600/20 dark:border-violet-500/30 flex items-center justify-center text-violet-700 dark:text-violet-400 shadow-2xs shrink-0">
             <QrCode className="w-5 h-5" />
           </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight flex items-center gap-2">
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-lg font-bold text-slate-950 dark:text-white tracking-tight flex items-center gap-2 truncate">
               Review QR Card
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate hidden sm:block">
               Customers point their smartphone camera to leave a review in seconds.
             </p>
           </div>
         </div>
 
-        {/* Apple Segmented Switch */}
-        <div className="inline-flex p-1 rounded-2xl bg-slate-100 border border-slate-200/80 self-start sm:self-auto shadow-2xs">
-          <button
-            onClick={() => setActiveTab('form')}
-            className={`apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'form'
-                ? 'bg-white text-slate-950 shadow-xs'
-                : 'text-slate-500 hover:text-slate-900'
-            }`}
-          >
-            Review Form
-          </button>
-          <button
-            onClick={() => setActiveTab('wall')}
-            className={`apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'wall'
-                ? 'bg-white text-slate-950 shadow-xs'
-                : 'text-slate-500 hover:text-slate-900'
-            }`}
-          >
-            Wall of Love
-          </button>
+        {/* Right Header: Destination Switch + Non-colliding Close Button */}
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="inline-flex p-1 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/60 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setActiveTab('form')}
+              className={`apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                activeTab === 'form'
+                  ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              Review Form
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('wall')}
+              className={`apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                activeTab === 'wall'
+                  ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              Wall of Love
+            </button>
+          </div>
+
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Close modal"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* ── Main Two-Column Apple Workspace ── */}
+      {/* ── Main Two-Column Layout ── */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
         
-        {/* Left: The Physical Apple Card Preview */}
+        {/* Left: Interactive Acrylic Standee Card Mockup */}
         <div className="md:col-span-5 flex flex-col items-center gap-3">
-          <div className="w-full rounded-3xl bg-slate-50 border border-slate-200/80 p-5 shadow-inner flex flex-col items-center">
+          <div className="w-full rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 p-5 shadow-inner flex flex-col items-center relative overflow-hidden">
             
             {/* The Acrylic Standee Card */}
-            <div
-              className="w-full max-w-[220px] aspect-square rounded-2xl p-3 flex items-center justify-center shadow-md border border-slate-200/60 transition-transform duration-300 hover:scale-[1.02]"
-              style={{ backgroundColor: selectedFinish.bg }}
-            >
+            <div className="relative w-full max-w-[240px] pt-2 pb-1 flex flex-col items-center">
+              
+              {/* Card Body */}
               <div
-                className="w-full h-full flex items-center justify-center"
-                dangerouslySetInnerHTML={{ __html: qrSvg }}
-              />
+                className="w-full rounded-2xl p-4 flex flex-col items-center text-center shadow-lg border border-white/60 dark:border-white/10 relative transition-transform duration-300 hover:scale-[1.02]"
+                style={{ backgroundColor: selectedFinish.bg }}
+              >
+                {/* Brand / Header */}
+                <div className="mb-2 w-full">
+                  <p className="text-xs font-bold truncate tracking-tight text-slate-900">
+                    {businessName}
+                  </p>
+                  {/* 5 Rating Stars */}
+                  <div className="flex items-center justify-center gap-0.5 mt-1" aria-label="5 out of 5 stars">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <p className="text-[11px] font-semibold text-slate-600 mt-1">
+                    {activeTab === 'form' ? 'Leave us a review' : 'See our wall of love'}
+                  </p>
+                </div>
+
+                {/* The QR Code Container */}
+                <div className="w-full aspect-square rounded-xl p-2 bg-white shadow-xs border border-slate-200/60 flex items-center justify-center">
+                  <div
+                    className="w-full h-full flex items-center justify-center"
+                    dangerouslySetInnerHTML={{ __html: qrSvg }}
+                  />
+                </div>
+
+                {/* Scan Instruction Footer */}
+                <div className="mt-3 flex items-center justify-center gap-1.5 text-[10px] font-semibold text-slate-500">
+                  <Camera className="w-3 h-3 text-slate-500" />
+                  <span>Scan with phone camera</span>
+                </div>
+              </div>
+
+              {/* Physical Acrylic Base Foot Simulation */}
+              <div className="w-3/4 h-2 mt-1 rounded-full bg-slate-300/60 dark:bg-slate-700/60 blur-[1px] shadow-sm" />
             </div>
 
-            <div className="mt-3 text-center">
-              <span className="text-[11px] font-semibold text-slate-500">
-                Point iPhone or Android camera to scan
+            <div className="mt-2 text-center">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                Ready to display on front desk or tabletop
               </span>
             </div>
           </div>
 
           {/* Quick Destination Pill */}
-          <div className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs">
-            <span className="text-[11px] font-mono text-slate-600 truncate flex-1 min-w-0 select-all">
+          <div className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2 shadow-2xs">
+            <span className="text-[11px] font-mono text-slate-600 dark:text-slate-300 truncate flex-1 min-w-0 select-all">
               {activeUrl}
             </span>
             <button
+              type="button"
               onClick={handleCopyLink}
-              className="apple-touch px-2 py-1 rounded-lg text-[11px] font-bold text-violet-700 hover:bg-violet-100 transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
+              className="apple-touch px-2 py-1 rounded-lg text-[11px] font-bold text-violet-700 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
               title="Copy link"
             >
-              {copiedLink ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+              {copiedLink ? <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3 h-3" />}
               <span>{copiedLink ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
         </div>
 
-        {/* Right: Clean Apple Customization Controls */}
+        {/* Right: Customization Controls & Tiered Actions */}
         <div className="md:col-span-7 space-y-4">
           
-          {/* 1. Apple Finish Colors */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-800">
-              Finish Color
-            </label>
-            <div className="grid grid-cols-5 gap-2">
+          {/* 1. Finish Color - Non-truncating Swatches */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <label className="font-bold text-slate-800 dark:text-slate-200">
+                Finish Color
+              </label>
+              <span className="text-slate-500 dark:text-slate-400 font-medium">
+                {selectedFinish.name}
+              </span>
+            </div>
+            <div className="flex items-center gap-2.5 flex-wrap">
               {APPLE_FINISHES.map((finish) => {
                 const isSelected = selectedFinish.name === finish.name;
                 return (
@@ -460,21 +521,16 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
                     key={finish.name}
                     type="button"
                     onClick={() => setSelectedFinish(finish)}
-                    className={`apple-touch p-2 rounded-2xl border text-center transition-all flex flex-col items-center gap-1.5 cursor-pointer ${
+                    className={`apple-touch relative w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                       isSelected
-                        ? 'border-violet-600 bg-violet-50/50 shadow-xs ring-2 ring-violet-600/20'
-                        : 'border-slate-200/80 bg-white hover:border-slate-300'
+                        ? 'ring-2 ring-violet-600 ring-offset-2 dark:ring-offset-slate-900 scale-105 shadow-sm'
+                        : 'hover:scale-105 opacity-85 hover:opacity-100'
                     }`}
+                    style={{ backgroundColor: finish.fg }}
+                    title={finish.name}
+                    aria-label={finish.name}
                   >
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center shadow-xs border border-black/10"
-                      style={{ backgroundColor: finish.fg }}
-                    >
-                      {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
-                    </div>
-                    <span className="text-[10px] font-semibold text-slate-700 truncate w-full">
-                      {finish.name}
-                    </span>
+                    {isSelected && <Check className="w-4 h-4 text-white drop-shadow-xs" />}
                   </button>
                 );
               })}
@@ -483,7 +539,7 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
 
           {/* 2. Shape Geometry */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-800">
+            <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
               Corner Geometry
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -493,7 +549,7 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
                 className={`apple-touch py-2 px-3 rounded-xl text-xs font-semibold border text-center transition-all cursor-pointer ${
                   qrStyle === 'rounded'
                     ? 'border-violet-600 bg-violet-600 text-white shadow-xs'
-                    : 'border-slate-200/80 bg-white text-slate-700 hover:bg-slate-50'
+                    : 'border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750'
                 }`}
               >
                 ● Squircle
@@ -504,7 +560,7 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
                 className={`apple-touch py-2 px-3 rounded-xl text-xs font-semibold border text-center transition-all cursor-pointer ${
                   qrStyle === 'dots'
                     ? 'border-violet-600 bg-violet-600 text-white shadow-xs'
-                    : 'border-slate-200/80 bg-white text-slate-700 hover:bg-slate-50'
+                    : 'border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750'
                 }`}
               >
                 ○ Dots
@@ -515,7 +571,7 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
                 className={`apple-touch py-2 px-3 rounded-xl text-xs font-semibold border text-center transition-all cursor-pointer ${
                   qrStyle === 'classic'
                     ? 'border-violet-600 bg-violet-600 text-white shadow-xs'
-                    : 'border-slate-200/80 bg-white text-slate-700 hover:bg-slate-50'
+                    : 'border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750'
                 }`}
               >
                 ■ Classic
@@ -524,19 +580,19 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
           </div>
 
           {/* 3. Center Brand Emblem Switch */}
-          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3 shadow-2xs">
+          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3 shadow-2xs">
             <div className="flex items-center gap-2.5">
               <span className="text-base">🐼</span>
               <div>
-                <span className="text-xs font-bold text-slate-900 block">Panda Center Icon</span>
-                <span className="text-[11px] text-slate-500">Show verified brand icon in center</span>
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">Panda Center Icon</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Show verified brand icon in center</span>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setIncludeEmblem(!includeEmblem)}
               className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
-                includeEmblem ? 'bg-violet-600' : 'bg-slate-300'
+                includeEmblem ? 'bg-violet-600' : 'bg-slate-300 dark:bg-slate-700'
               }`}
             >
               <div
@@ -547,9 +603,10 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
             </button>
           </div>
 
-          {/* 4. Apple Action Buttons */}
-          <div className="space-y-2 pt-1">
+          {/* 4. Tiered Action Buttons */}
+          <div className="space-y-3 pt-1">
             <button
+              type="button"
               onClick={handleDownloadPng}
               disabled={isExporting}
               className="apple-touch apple-btn-primary w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
@@ -560,25 +617,27 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
 
             <div className="grid grid-cols-2 gap-2">
               <button
+                type="button"
                 onClick={handleDownloadSvg}
-                className="apple-touch apple-btn-secondary py-2 px-3 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 cursor-pointer"
+                className="apple-touch apple-btn-secondary py-2 px-3 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 cursor-pointer bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750"
               >
-                <Layers className="w-3.5 h-3.5 text-slate-500" />
+                <Layers className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                 <span>Save Vector (SVG)</span>
               </button>
 
               <button
+                type="button"
                 onClick={handleCopyImage}
-                className="apple-touch apple-btn-secondary py-2 px-3 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 cursor-pointer"
+                className="apple-touch apple-btn-secondary py-2 px-3 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 cursor-pointer bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750"
               >
                 {copiedImage ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    <span className="text-emerald-700">Copied!</span>
+                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-emerald-700 dark:text-emerald-400">Copied!</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3.5 h-3.5 text-slate-500" />
+                    <Copy className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                     <span>Copy Image</span>
                   </>
                 )}
@@ -586,27 +645,27 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = () => {
             </div>
 
             {/* Acrylic Standee Print Options */}
-            <div className="pt-2 border-t border-slate-200/80">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                Print Acrylic Standee
+            <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1.5">
+                Print Tabletop Cards
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => handlePrintStandee('4x6')}
-                  className="apple-touch py-2 px-2.5 rounded-xl text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="apple-touch py-2 px-2.5 rounded-xl text-xs font-semibold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/40 border border-violet-200 dark:border-violet-800 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   title="Print formatted 4x6 inch acrylic table tent"
                 >
-                  <Printer className="w-3.5 h-3.5 text-violet-600" />
+                  <Printer className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" />
                   <span>4" × 6" Table Tent</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handlePrintStandee('5x7')}
-                  className="apple-touch py-2 px-2.5 rounded-xl text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="apple-touch py-2 px-2.5 rounded-xl text-xs font-semibold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/40 border border-violet-200 dark:border-violet-800 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   title="Print formatted 5x7 inch acrylic countertop stand"
                 >
-                  <Printer className="w-3.5 h-3.5 text-violet-600" />
+                  <Printer className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" />
                   <span>5" × 7" Countertop</span>
                 </button>
               </div>
