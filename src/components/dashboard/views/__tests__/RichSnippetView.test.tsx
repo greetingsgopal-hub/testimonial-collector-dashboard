@@ -29,25 +29,25 @@ describe('RichSnippetView - Google Search Star Generator', () => {
     container.remove();
   });
 
-  it('1. Displays friendly, value-first header and prominent Google SERP preview', async () => {
+  it('1. Displays informative header and illustrative search preview without fabricated ratings', async () => {
     await act(async () => {
       root.render(<RichSnippetView reviews={[]} />);
     });
 
-    // Value-first header text
-    expect(container.textContent).toContain('Google Search Star Generator');
-    expect(container.textContent).toContain('One-Click Golden Stars');
-    expect(container.textContent).toContain('60-Second Setup');
+    // Truthful header text
+    expect(container.textContent).toContain('Review Structured Data Generator');
+    expect(container.textContent).toContain('JSON-LD Generator');
+    expect(container.textContent).toContain('Google controls rich-result display');
 
-    // Prominent Google Search appearance card
-    expect(container.textContent).toContain('Live Google Search Appearance');
+    // Illustrative search appearance card without fake ratings
+    expect(container.textContent).toContain('Illustrative Search Preview');
     expect(container.textContent).toContain('Acme SaaS — Verified Reviews & Ratings');
     expect(container.textContent).toContain('acme.io');
-    expect(container.textContent).toContain('Schema Validated');
-    expect(container.textContent).toContain('Rating: 5.0');
+    expect(container.textContent).toContain('No eligible approved ratings. Aggregate-rating markup will not be generated.');
+    expect(container.textContent).not.toContain('Schema Validated');
   });
 
-  it('2. Unified action dock: copies schema code and displays success status pill', async () => {
+  it('2. Action dock: copies schema code when eligible reviews exist and displays status pill', async () => {
     const writeTextMock = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, {
       clipboard: {
@@ -55,13 +55,30 @@ describe('RichSnippetView - Google Search Star Generator', () => {
       },
     });
 
+    const reviews: Review[] = [
+      {
+        id: 'r1',
+        projectId: 'proj_100',
+        authorName: 'Client 1',
+        name: 'Client 1',
+        email: 'client1@test.com',
+        rating: 5,
+        content: 'Superb service!',
+        status: 'approved',
+        type: 'text',
+        consent: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+
     await act(async () => {
-      root.render(<RichSnippetView reviews={[]} />);
+      root.render(<RichSnippetView reviews={reviews} />);
     });
 
-    // Find the Copy Google Schema Code button in the unified dock
+    // Find the Copy JSON-LD button in the unified dock
     const copyBtn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.includes('Copy Google Schema Code')
+      (b) => b.textContent?.includes('Copy JSON-LD')
     );
     expect(copyBtn).toBeDefined();
 
@@ -75,9 +92,9 @@ describe('RichSnippetView - Google Search Star Generator', () => {
     expect(copiedText).toContain('"name": "Acme SaaS"');
     expect(copiedText).toContain('"url": "https://acme.io"');
 
-    // Verify success status pill appears
+    // Verify status pill appears
     expect(container.textContent).toContain(
-      'Copied! Paste into your site header to activate search stars.'
+      'Copied! Paste into your site header, then validate eligibility.'
     );
   });
 
@@ -104,7 +121,7 @@ describe('RichSnippetView - Google Search Star Generator', () => {
 
     // Initial state: WordPress
     expect(container.textContent).toContain('WordPress Installation Instructions');
-    expect(container.textContent).toContain('RankMath, Yoast SEO, or Header & Footer Scripts Plugin');
+    expect(container.textContent).toContain('WPCode → Code Snippets → Header & Footer');
 
     // Switch to Shopify
     const shopifyBtn = Array.from(container.querySelectorAll('button')).find(
@@ -159,7 +176,7 @@ describe('RichSnippetView - Google Search Star Generator', () => {
     expect(container.textContent).toContain('app/layout.tsx');
   });
 
-  it('5. Computes rating and review count from approved reviews', async () => {
+  it('5. Computes rating and review count from approved reviews and ignores sample/pending', async () => {
     const reviews: Review[] = [
       {
         id: 'r1',
@@ -203,6 +220,21 @@ describe('RichSnippetView - Google Search Star Generator', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
+      {
+        id: 'r4',
+        projectId: 'proj_100',
+        authorName: 'Sample Client',
+        name: 'Sample Client',
+        email: 'sample@test.com',
+        rating: 5,
+        content: 'Sample data',
+        status: 'approved',
+        isSample: true,
+        type: 'text',
+        consent: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
     ];
 
     await act(async () => {
@@ -210,17 +242,17 @@ describe('RichSnippetView - Google Search Star Generator', () => {
     });
 
     // (5 + 4) / 2 = 4.5
-    expect(container.textContent).toContain('Rating: 4.5');
-    expect(container.textContent).toContain('2 verified reviews');
+    expect(container.textContent).toContain('Illustrative rating: 4.50');
+    expect(container.textContent).toContain('2 eligible approved ratings');
   });
 
-  it('6. Opens interactive video tutorial modal when Watch Video Tutorial is clicked', async () => {
+  it('6. Opens interactive setup guide preview modal when View Setup Guide is clicked', async () => {
     await act(async () => {
       root.render(<RichSnippetView reviews={[]} />);
     });
 
     const watchVideoBtn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.includes('Watch Video Tutorial')
+      (b) => b.textContent?.includes('View Setup Guide (Preview)')
     );
     expect(watchVideoBtn).toBeDefined();
 
@@ -229,8 +261,9 @@ describe('RichSnippetView - Google Search Star Generator', () => {
     });
 
     // Modal is rendered with platform-specific video title and timestamps
-    expect(container.textContent).toContain('How to Install Google Stars on WordPress');
+    expect(container.textContent).toContain('How to Install Google Stars on WordPress in 45 Seconds');
     expect(container.textContent).toContain('Key Timestamps');
+    expect(container.textContent).toContain('Illustrative Guide — Not a Recording');
 
     // Close modal button exists and works
     const closeBtn = Array.from(container.querySelectorAll('button')).find(
@@ -242,6 +275,6 @@ describe('RichSnippetView - Google Search Star Generator', () => {
       closeBtn!.click();
     });
 
-    expect(container.textContent).not.toContain('How to Install Google Stars on WordPress in 45 Seconds');
+    expect(container.textContent).not.toContain('Illustrative Guide — Not a Recording');
   });
 });

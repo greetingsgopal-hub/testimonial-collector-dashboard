@@ -4,6 +4,7 @@ export interface RatingSource {
   rating: number;
   status: string;
   isSample?: boolean;
+  source?: string;
 }
 
 export interface RichSnippetInput {
@@ -25,6 +26,7 @@ export function buildRichSnippetJsonLd(input: RichSnippetInput): string | null {
       (review) =>
         review.status === 'approved' &&
         review.isSample !== true &&
+        review.source !== 'sample' &&
         Number.isFinite(review.rating) &&
         review.rating >= 1 &&
         review.rating <= 5,
@@ -43,12 +45,14 @@ export function buildRichSnippetJsonLd(input: RichSnippetInput): string | null {
     eligibleRatings.reduce((total, rating) => total + rating, 0) /
     eligibleRatings.length;
 
-  const schema = {
+  const trimmedDescription = input.description.trim();
+
+  const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': input.entityType,
     name: input.name.trim(),
     url: input.url.trim(),
-    description: input.description.trim(),
+    ...(trimmedDescription ? { description: trimmedDescription } : {}),
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: Number(ratingValue.toFixed(2)),
@@ -58,7 +62,7 @@ export function buildRichSnippetJsonLd(input: RichSnippetInput): string | null {
     },
   };
 
-  return JSON.stringify(schema, null, 2);
+  return JSON.stringify(schema, null, 2).replace(/</g, '\\u003c');
 }
 
 function isValidHttpUrl(value: string): boolean {

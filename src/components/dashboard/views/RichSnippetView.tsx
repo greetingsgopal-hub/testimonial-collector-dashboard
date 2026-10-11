@@ -44,7 +44,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
 
   const approvedReviews = reviews.filter((r) => r.status === 'approved');
   const eligibleReviews = approvedReviews.filter(
-    (r) => r.isSample !== true && Number.isFinite(r.rating) && r.rating >= 1 && r.rating <= 5
+    (r) => r.isSample !== true && r.source !== 'sample' && Number.isFinite(r.rating) && r.rating >= 1 && r.rating <= 5
   );
   const calculatedRating = eligibleReviews.length
     ? (eligibleReviews.reduce((sum, r) => sum + r.rating, 0) / eligibleReviews.length).toFixed(2)

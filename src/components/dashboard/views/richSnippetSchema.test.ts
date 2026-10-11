@@ -56,16 +56,33 @@ describe('buildRichSnippetJsonLd', () => {
     expect(schema.aggregateRating.reviewCount).toBeUndefined();
   });
 
-  it('escapes user-provided text safely through JSON serialization', () => {
+  it('escapes user-provided text safely through JSON serialization and neutralizes script tags', () => {
     const result = buildRichSnippetJsonLd({
       ...base,
-      name: 'Example "App"',
-      description: 'A \\ product',
+      name: 'Example "App" </script><script>alert(1)</script>',
+      description: 'A \\ product with <tags>',
       reviews: [{ rating: 5, status: 'approved' }],
     });
 
+    expect(result).not.toBeNull();
+    // Raw </script> must not appear in the generated JSON-LD string to prevent HTML script breakout
+    expect(result).not.toContain('</script>');
+    expect(result).toContain('\\u003c/script>');
     expect(() => JSON.parse(result!)).not.toThrow();
-    expect(JSON.parse(result!).name).toBe('Example "App"');
+    const parsed = JSON.parse(result!);
+    expect(parsed.name).toBe('Example "App" </script><script>alert(1)</script>');
+    expect(parsed.description).toBe('A \\ product with <tags>');
+  });
+
+  it('excludes reviews marked with source: sample', () => {
+    expect(
+      buildRichSnippetJsonLd({
+        ...base,
+        reviews: [
+          { rating: 5, status: 'approved', source: 'sample' },
+        ],
+      }),
+    ).toBeNull();
   });
 
   it('rejects missing names and non-HTTP URLs', () => {
