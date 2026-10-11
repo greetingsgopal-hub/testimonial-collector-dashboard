@@ -239,13 +239,13 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
           <div className="space-y-2.5 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-900 text-[11px] font-bold tracking-tight">
               <Star className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
-              <span>One-Click Golden Stars</span>
+              <span>Review Structured Data</span>
               <span className="text-amber-400">•</span>
-              <span className="text-amber-800 font-semibold">Google Search Star Generator</span>
+              <span className="text-amber-800 font-semibold">Review Structured Data Generator</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight font-display">
-              Google Search Star Generator
+              Review Structured Data Generator
             </h1>
 
             <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
@@ -269,7 +269,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
           <div className="flex items-center gap-2">
             <Search className="w-4 h-4 text-zinc-400" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500 font-mono">
-              Live Google Search Appearance
+              Illustrative Search Preview
             </h2>
           </div>
           <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
@@ -441,7 +441,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
               className="apple-touch inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold shadow-xs transition-all cursor-pointer active:scale-95"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
-              <span>{copied ? '✓ Snippet Copied!' : 'Copy Google Schema Code'}</span>
+              <span>{copied ? '✓ Snippet Copied!' : 'Copy JSON-LD'}</span>
             </button>
 
             {/* Interactive Secondary Button: Test with Google Rich Results Tool */}
