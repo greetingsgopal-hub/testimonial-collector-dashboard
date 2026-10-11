@@ -171,5 +171,47 @@ describe('EmbedCodeModal Component', () => {
       reactTab.click();
     });
     expect(document.body.textContent).toContain('useEffect');
+
+    // Click AI & Vibe Coded tab
+    const vibeTab = document.querySelector('[data-testid="tab-vibe"]') as HTMLButtonElement;
+    expect(vibeTab).not.toBeNull();
+    act(() => {
+      vibeTab.click();
+    });
+    expect(document.body.textContent).toContain('Cloudflare');
+    expect(document.body.textContent).toContain('Netlify');
+    expect(document.body.textContent).toContain('Cursor');
+  });
+
+  it('provides a 1-click Copy AI Prompt action for vibe coders', async () => {
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, {
+      clipboard: { writeText: writeTextMock },
+    });
+
+    act(() => {
+      root.render(
+        <EmbedCodeModal
+          isOpen={true}
+          onClose={vi.fn()}
+          projectId="proj-vibe-test"
+        />
+      );
+    });
+
+    const aiPromptBtn = document.querySelector('[data-testid="copy-ai-prompt-btn"]') as HTMLButtonElement;
+    expect(aiPromptBtn).not.toBeNull();
+    expect(aiPromptBtn.textContent).toContain('Copy AI Prompt');
+
+    await act(async () => {
+      aiPromptBtn.click();
+    });
+
+    expect(writeTextMock).toHaveBeenCalled();
+    const promptText = writeTextMock.mock.calls[0][0];
+    expect(promptText).toContain('Panda Praise');
+    expect(promptText).toContain('data-project-id="proj-vibe-test"');
+    expect(promptText).toContain('https://pandapraise.com/widget.js');
   });
 });
+

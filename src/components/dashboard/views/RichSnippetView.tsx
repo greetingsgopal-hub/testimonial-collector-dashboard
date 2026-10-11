@@ -24,7 +24,7 @@ interface RichSnippetViewProps {
   onOpenSocialCard?: (review: Review) => void;
 }
 
-export type PlatformTab = 'wordpress' | 'shopify' | 'webflow' | 'framer' | 'html';
+export type PlatformTab = 'wordpress' | 'shopify' | 'webflow' | 'framer' | 'html' | 'vibe';
 
 export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
   reviews = [],
@@ -32,6 +32,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
 }) => {
   const { project, workspace } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [copiedAiPrompt, setCopiedAiPrompt] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<PlatformTab>('wordpress');
   const [showAdvancedConfig, setShowAdvancedConfig] = useState(false);
@@ -78,6 +79,22 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
       setTimeout(() => setCopied(false), 3000);
     } catch {
       setCopied(false);
+    }
+  };
+
+  const handleCopyAiPrompt = async () => {
+    if (!jsonLdCode) {
+      showToast('No snippet generated. Add eligible, approved reviews first.');
+      return;
+    }
+    const promptText = `Add this Google Review structured data (JSON-LD) inside the <head> tag of my website's root index.html (or layout.tsx template) to signal review ratings to Google Search:\n\n${jsonLdCode}`;
+    try {
+      await navigator.clipboard.writeText(promptText);
+      setCopiedAiPrompt(true);
+      showToast('Copied AI prompt for Cursor / Lovable / v0 / Bolt!');
+      setTimeout(() => setCopiedAiPrompt(false), 3000);
+    } catch {
+      setCopiedAiPrompt(false);
     }
   };
 
@@ -215,6 +232,29 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
       ],
       tip: 'Verify zero hydration mismatch by ensuring the schema script renders directly in static markup.',
     },
+    vibe: {
+      name: 'AI & Vibe Coded (Cloudflare / Netlify)',
+      quickLocation: 'AI Prompt / index.html <head> / Cloudflare & Netlify Edge',
+      videoTitle: 'How to Install Google Stars on Vibe Coded Sites in 30 Seconds',
+      videoDuration: '30s',
+      screenTitle: 'AI Prompt / index.html <head> / Cloudflare & Netlify Edge',
+      actionHighlight: 'Paste into AI prompt or site <head>',
+      videoSummary: 'Copy the 1-click AI prompt to paste into Cursor/Lovable, or paste directly into index.html <head>, or use Netlify/Cloudflare snippet injection without touching code.',
+      steps: [
+        '1-Click AI Prompt: Click "Copy AI Prompt" below and paste into Cursor, Lovable, Bolt, or v0 to install automatically.',
+        'Direct HTML / Vite: Open index.html and paste between <head> and </head> (e.g. papasystem.in).',
+        'Netlify: Site Settings → Build & Deploy → Snippet Injection → Add Snippet (insert before </head>).',
+        'Cloudflare: Domain Dashboard → Rules / Snippets or Zaraz → Inject into Header.',
+        'Test your published URL in Google Rich Results Test.',
+      ],
+      timestamps: [
+        { time: '0:05', label: 'Copy AI Prompt', desc: 'Click Copy AI Prompt button below' },
+        { time: '0:12', label: 'Prompt AI Agent', desc: 'Paste into Cursor, Lovable, Bolt, or v0' },
+        { time: '0:22', label: 'Or Edge Injection', desc: 'Inject in Cloudflare or Netlify dashboard' },
+        { time: '0:30', label: 'Deploy & Verify', desc: 'Check with Google Rich Results Test' },
+      ],
+      tip: 'Perfect for vibe-coded sites hosted on Cloudflare Pages or Netlify (like papasystem.in). Use the 1-click AI prompt to let your AI assistant do the work!',
+    },
   };
 
   const primaryReviewForSocial = approvedReviews[0] || reviews[0];
@@ -334,7 +374,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
 
           {/* Platform Tabs Selector */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
-            {(['wordpress', 'shopify', 'webflow', 'framer', 'html'] as PlatformTab[]).map((p) => {
+            {(['wordpress', 'shopify', 'webflow', 'framer', 'html', 'vibe'] as PlatformTab[]).map((p) => {
               const isSelected = selectedPlatform === p;
               return (
                 <button
@@ -347,7 +387,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
                       : 'bg-zinc-100 hover:bg-zinc-200/80 text-zinc-700 border border-zinc-200'
                   }`}
                 >
-                  {platformGuides[p].name}
+                  {p === 'vibe' ? 'AI & Vibe Coded' : platformGuides[p].name}
                 </button>
               );
             })}
@@ -434,7 +474,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
             <span>{effectiveRating !== null ? `Calculated from ${effectiveCount} approved ratings (${effectiveRating}★ average)` : "No eligible rating data available"}</span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
             {/* Primary Copy Button */}
             <button
               onClick={handleCopy}
@@ -442,6 +482,17 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
             >
               {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
               <span>{copied ? '✓ Snippet Copied!' : 'Copy JSON-LD'}</span>
+            </button>
+
+            {/* 1-Click AI Prompt Copy Button for Cursor, Lovable, Bolt, v0 */}
+            <button
+              type="button"
+              onClick={handleCopyAiPrompt}
+              className="apple-touch inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-violet-50 hover:bg-violet-100 text-violet-800 border border-violet-200 text-xs font-bold shadow-2xs transition-all cursor-pointer active:scale-95"
+              title="Copy 1-click prompt for Cursor, Lovable, Bolt, or v0"
+            >
+              {copiedAiPrompt ? <Check className="w-4 h-4 text-emerald-600" /> : <Sparkles className="w-4 h-4 text-violet-600" />}
+              <span>{copiedAiPrompt ? '✓ AI Prompt Copied!' : 'Copy AI Prompt (Cursor / Lovable / v0)'}</span>
             </button>
 
             {/* Interactive Secondary Button: Test with Google Rich Results Tool */}
