@@ -359,21 +359,26 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
       {/* ── Unified Ready-to-Paste Star Code Studio ── */}
       <section className="apple-glass-card rounded-2xl p-5 sm:p-6 border border-black/[0.06] bg-white/80 backdrop-blur-xl space-y-5">
         {/* Dock Header with Platform Switcher */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b border-black/[0.05]">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Code2 className="w-4 h-4 text-[#6701e6]" />
-              <h3 className="text-sm font-bold text-zinc-950">
-                Review Structured Data (JSON-LD)
-              </h3>
+        <div className="space-y-3.5 pb-4 border-b border-black/[0.05]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Code2 className="w-4 h-4 text-[#6701e6]" />
+                <h3 className="text-sm font-bold text-zinc-950">
+                  Review Structured Data (JSON-LD)
+                </h3>
+              </div>
+              <p className="text-xs text-zinc-500">
+                Select your platform below for instant, tailor-made placement instructions.
+              </p>
             </div>
-            <p className="text-xs text-zinc-500">
-              Select your platform below for instant, tailor-made placement instructions.
-            </p>
+            <span className="self-start sm:self-auto text-[10px] font-bold text-[#6701e6] bg-purple-50 border border-purple-200/80 px-2.5 py-1 rounded-full">
+              6 Supported Platforms
+            </span>
           </div>
 
-          {/* Platform Tabs Selector */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
+          {/* Platform Tabs Selector: Clean responsive wrapping with generous breathing room and zero cutoff */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
             {(['wordpress', 'shopify', 'webflow', 'framer', 'html', 'vibe'] as PlatformTab[]).map((p) => {
               const isSelected = selectedPlatform === p;
               return (
@@ -381,10 +386,10 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
                   key={p}
                   type="button"
                   onClick={() => setSelectedPlatform(p)}
-                  className={`apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all cursor-pointer whitespace-nowrap ${
+                  className={`apple-touch px-3.5 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[#6701e6] text-white shadow-xs font-bold'
-                      : 'bg-zinc-100 hover:bg-zinc-200/80 text-zinc-700 border border-zinc-200'
+                      ? 'bg-[#6701e6] text-white shadow-xs font-bold ring-2 ring-violet-500/20'
+                      : 'bg-zinc-100/90 hover:bg-zinc-200/80 text-zinc-700 border border-zinc-200/80'
                   }`}
                 >
                   {p === 'vibe' ? 'AI & Vibe Coded' : platformGuides[p].name}
@@ -393,6 +398,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
             })}
           </div>
         </div>
+
 
         {/* Dynamic Platform Instructions Box */}
         <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-200 space-y-3 animate-in fade-in duration-200">

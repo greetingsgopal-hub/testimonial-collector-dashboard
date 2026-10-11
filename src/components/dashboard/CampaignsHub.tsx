@@ -436,38 +436,47 @@ export const CampaignsHub: React.FC<CampaignsHubProps> = () => {
                       </button>
                     </div>
 
-                    {/* Campaign Name & Subject preview */}
-                    <h3 className="text-sm font-bold text-slate-900 tracking-tight">{camp.name}</h3>
-                    {isEmail && camp.template.subject && (
-                      <p className="text-xs text-slate-500 mt-1 line-clamp-1 italic">
-                        &quot;{camp.template.subject}&quot;
+                    {/* Campaign Name & Subject preview with uniform vertical alignment */}
+                    <h3 className="text-sm font-bold text-slate-900 tracking-tight truncate">{camp.name}</h3>
+                    <div className="h-5 mt-1 flex items-center">
+                      {isEmail && camp.template.subject ? (
+                        <p className="text-xs text-slate-500 line-clamp-1 italic truncate">
+                          &quot;{camp.template.subject}&quot;
+                        </p>
+                      ) : (
+                        <span className="text-[11px] font-medium text-slate-400">
+                          Direct message preview
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-3 bg-slate-50/90 rounded-xl p-3 border border-slate-100 h-[4.25rem] flex items-center overflow-hidden shadow-2xs">
+                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                        {camp.template.messageBody}
                       </p>
-                    )}
-                    <p className="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                      {camp.template.messageBody}
-                    </p>
+                    </div>
                   </div>
 
                   {/* Micro-metrics & Action Dock */}
-                  <div className="mt-4 pt-3 border-t border-slate-100">
-                    <div className="grid grid-cols-4 gap-2 text-center mb-3">
-                      <div className="bg-slate-50/80 p-1.5 rounded-lg">
-                        <span className="text-[10px] text-slate-400 font-semibold block uppercase">Sent</span>
-                        <span className="text-xs font-bold text-slate-800">{camp.stats.sent}</span>
+                  <div className="mt-4 pt-3.5 border-t border-slate-100">
+                    <div className="grid grid-cols-4 gap-2 text-center mb-3.5">
+                      <div className="bg-slate-50 py-2 px-1 rounded-xl border border-slate-100/80">
+                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Sent</span>
+                        <span className="text-xs font-black text-slate-800">{camp.stats.sent}</span>
                       </div>
-                      <div className="bg-slate-50/80 p-1.5 rounded-lg">
-                        <span className="text-[10px] text-slate-400 font-semibold block uppercase">Opened</span>
-                        <span className="text-xs font-bold text-slate-800">{camp.stats.opened}</span>
+                      <div className="bg-slate-50 py-2 px-1 rounded-xl border border-slate-100/80">
+                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Opened</span>
+                        <span className="text-xs font-black text-slate-800">{camp.stats.opened}</span>
                       </div>
-                      <div className="bg-slate-50/80 p-1.5 rounded-lg">
-                        <span className="text-[10px] text-slate-400 font-semibold block uppercase">Clicked</span>
-                        <span className="text-xs font-bold text-slate-800">{clickPct}%</span>
+                      <div className="bg-slate-50 py-2 px-1 rounded-xl border border-slate-100/80">
+                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Clicked</span>
+                        <span className="text-xs font-black text-slate-800">{clickPct}%</span>
                       </div>
-                      <div className="bg-slate-50/80 p-1.5 rounded-lg">
-                        <span className="text-[10px] text-slate-400 font-semibold block uppercase">Converted</span>
-                        <span className="text-xs font-bold text-emerald-600">{convPct}%</span>
+                      <div className="bg-slate-50 py-2 px-1 rounded-xl border border-slate-100/80">
+                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Converted</span>
+                        <span className="text-xs font-black text-emerald-600">{convPct}%</span>
                       </div>
                     </div>
+
 
                     <div className="flex items-center justify-between gap-2">
                       <button
