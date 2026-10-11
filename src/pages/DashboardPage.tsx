@@ -492,6 +492,8 @@ export const DashboardPage = () => {
               onConfigureForm={() => setShowCollectionModal(true)}
               onSendInvites={handleCopyLink}
               onViewProof={() => setActiveTab('proof')}
+              onNavigateToCampaigns={() => setActiveTab('campaigns')}
+              onNavigateToWidgets={() => setActiveTab('widgets')}
               onUpdateForm={handleUpdateCollectionForm}
               reviews={effectiveReviews}
               stats={effectiveStats}

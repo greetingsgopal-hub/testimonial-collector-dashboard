@@ -153,4 +153,92 @@ describe('FormsView Collect Page Upgrades Suite', () => {
     expect(qrBtn).not.toBeNull();
     expect(testLiveBtn).not.toBeNull();
   });
+
+  it('5. Renders Collection Pulse metrics strip and Review Pipeline callout banner', async () => {
+    const mockReviews = [
+      {
+        id: 'rev_1',
+        name: 'Alex Rivera',
+        rating: 5,
+        status: 'approved' as const,
+        type: 'text' as const,
+        content: 'Remarkable tool!',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'rev_2',
+        name: 'Sarah Chen',
+        rating: 4,
+        status: 'pending' as const,
+        type: 'text' as const,
+        content: 'Loved the smooth onboarding.',
+        createdAt: new Date().toISOString(),
+      },
+    ];
+
+    await act(async () => {
+      root.render(
+        <FormsView
+          onConfigureForm={mockOnConfigure}
+          onViewProof={mockOnViewProof}
+          onUpdateForm={mockOnUpdateForm}
+          reviews={mockReviews}
+        />
+      );
+    });
+
+    expect(container.textContent).toContain('Collection Pulse');
+    expect(container.textContent).toContain('Total Collected');
+    expect(container.textContent).toContain('Avg Rating');
+    expect(container.textContent).toContain('Approved Proof');
+    expect(container.textContent).toContain('Format Mode');
+
+    // Review Pipeline Callout Banner
+    expect(container.textContent).toContain('Submissions in Queue');
+    const moderateBtn = Array.from(container.querySelectorAll('button')).find(
+      btn => btn.textContent?.includes('Moderate')
+    );
+    expect(moderateBtn).toBeDefined();
+
+    await act(async () => {
+      moderateBtn?.click();
+    });
+    expect(mockOnViewProof).toHaveBeenCalledTimes(1);
+  });
+
+  it('6. Renders Distribution Channels and Styling & Branding callouts', async () => {
+    const mockNavigateCampaigns = vi.fn();
+    const mockNavigateWidgets = vi.fn();
+
+    await act(async () => {
+      root.render(
+        <FormsView
+          onConfigureForm={mockOnConfigure}
+          onViewProof={mockOnViewProof}
+          onUpdateForm={mockOnUpdateForm}
+          onNavigateToCampaigns={mockNavigateCampaigns}
+          onNavigateToWidgets={mockNavigateWidgets}
+          reviews={[]}
+        />
+      );
+    });
+
+    expect(container.textContent).toContain('Distribution Channels');
+    expect(container.textContent).toContain('Custom Branded Link');
+    expect(container.textContent).toContain('Email Campaign');
+    expect(container.textContent).toContain('In-Person & Packaging QR');
+    expect(container.textContent).toContain('Inline Web Pop-up');
+    expect(container.textContent).toContain('Styling & Branding');
+
+    // Test clicking Styling & Branding Edit trigger
+    const editBtn = Array.from(container.querySelectorAll('button')).find(
+      btn => btn.textContent?.includes('Edit')
+    );
+    expect(editBtn).toBeDefined();
+
+    await act(async () => {
+      editBtn?.click();
+    });
+    expect(mockOnConfigure).toHaveBeenCalledTimes(1);
+  });
 });
