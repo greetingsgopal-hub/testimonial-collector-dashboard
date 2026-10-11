@@ -12,17 +12,22 @@ import {
   ChevronUp,
   Sparkles,
   Globe,
+  Share2,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { Review } from '../../../types';
 
 interface RichSnippetViewProps {
   reviews?: Review[];
+  onOpenSocialCard?: (review: Review) => void;
 }
 
 export type PlatformTab = 'wordpress' | 'shopify' | 'webflow' | 'framer' | 'html';
 
-export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }) => {
+export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
+  reviews = [],
+  onOpenSocialCard,
+}) => {
   const { project, workspace } = useAuth();
   const [copied, setCopied] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -161,6 +166,8 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
     },
   };
 
+  const primaryReviewForSocial = approvedReviews[0] || reviews[0];
+
   return (
     <div className="max-w-5xl mx-auto py-4 px-2 sm:px-4 space-y-6 animate-fade-in font-sans text-left">
       {/* Toast Notification */}
@@ -262,19 +269,77 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
         </div>
       </section>
 
-      {/* ── Unified Action & Code Dock ── */}
-      <section className="apple-glass-card rounded-2xl p-5 sm:p-6 border border-black/[0.06] bg-white/80 backdrop-blur-xl space-y-4">
-        {/* Header with Title and Description */}
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Code2 className="w-4 h-4 text-[#6701e6]" />
-            <h3 className="text-sm font-bold text-zinc-950">
-              Your Ready-to-Paste Star Code (Google Schema)
-            </h3>
+      {/* ── Unified Ready-to-Paste Star Code Studio ── */}
+      <section className="apple-glass-card rounded-2xl p-5 sm:p-6 border border-black/[0.06] bg-white/80 backdrop-blur-xl space-y-5">
+        {/* Dock Header with Platform Switcher */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b border-black/[0.05]">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Code2 className="w-4 h-4 text-[#6701e6]" />
+              <h3 className="text-sm font-bold text-zinc-950">
+                Your Ready-to-Paste Star Code (Google Schema)
+              </h3>
+            </div>
+            <p className="text-xs text-zinc-500">
+              Select your platform below for instant, tailor-made placement instructions.
+            </p>
           </div>
-          <p className="text-xs text-zinc-500">
-            Paste this single script tag into your website header to display golden stars in search results.
-          </p>
+
+          {/* Platform Tabs Selector */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
+            {(['wordpress', 'shopify', 'webflow', 'framer', 'html'] as PlatformTab[]).map((p) => {
+              const isSelected = selectedPlatform === p;
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setSelectedPlatform(p)}
+                  className={`apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all cursor-pointer whitespace-nowrap ${
+                    isSelected
+                      ? 'bg-[#6701e6] text-white shadow-xs font-bold'
+                      : 'bg-zinc-100 hover:bg-zinc-200/80 text-zinc-700 border border-zinc-200'
+                  }`}
+                >
+                  {platformGuides[p].name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Dynamic Platform Instructions Box */}
+        <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-200 space-y-3 animate-in fade-in duration-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-purple-200/60 pb-2">
+            <div className="flex items-center gap-2">
+              <Globe className="w-4 h-4 text-[#6701e6]" />
+              <strong className="text-xs font-bold text-purple-950">
+                {platformGuides[selectedPlatform].name} Installation Instructions
+              </strong>
+            </div>
+            <span className="text-[10px] font-bold text-purple-700 bg-white/90 border border-purple-200 px-2.5 py-0.5 rounded-full inline-flex self-start sm:self-auto">
+              Target: {platformGuides[selectedPlatform].quickLocation}
+            </span>
+          </div>
+
+          <ol className="space-y-1.5 text-xs text-zinc-700">
+            {platformGuides[selectedPlatform].steps.map((st, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="w-4 h-4 rounded-full bg-purple-200 text-[#6701e6] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                  {i + 1}
+                </span>
+                <span className="leading-relaxed">{st}</span>
+              </li>
+            ))}
+          </ol>
+
+          {platformGuides[selectedPlatform].tip && (
+            <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 text-[11px] text-purple-900 flex items-start gap-2">
+              <HelpCircle className="w-3.5 h-3.5 text-[#6701e6] shrink-0 mt-0.5" />
+              <span className="leading-relaxed">
+                <strong>Pro-Tip:</strong> {platformGuides[selectedPlatform].tip}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Success Status Pill (Visible When Copied) */}
@@ -290,7 +355,14 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
           </div>
         )}
 
-        {/* Integrated Actions Toolbar Dock */}
+        {/* Code Snippet Box */}
+        <div className="relative group">
+          <pre className="p-4 rounded-xl bg-zinc-950 text-purple-200 text-xs font-mono overflow-x-auto leading-relaxed border border-zinc-800 scrollbar-thin max-h-56 select-all">
+            {jsonLdCode}
+          </pre>
+        </div>
+
+        {/* Action Toolbar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
           <div className="flex items-center gap-2 text-xs text-zinc-500">
             <span className="font-mono text-[11px] bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200 font-semibold text-zinc-700">
@@ -323,15 +395,8 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
           </div>
         </div>
 
-        {/* Code Snippet Box */}
-        <div className="relative group">
-          <pre className="p-4 rounded-xl bg-zinc-950 text-purple-200 text-xs font-mono overflow-x-auto leading-relaxed border border-zinc-800 scrollbar-thin max-h-56 select-all">
-            {jsonLdCode}
-          </pre>
-        </div>
-
         {/* Collapsible Advanced Schema Settings */}
-        <div className="pt-1 border-t border-black/[0.05]">
+        <div className="pt-2 border-t border-black/[0.05]">
           <button
             onClick={() => setShowAdvancedConfig(!showAdvancedConfig)}
             className="apple-touch text-xs font-semibold text-zinc-600 hover:text-zinc-900 flex items-center gap-1.5 cursor-pointer py-1.5"
@@ -417,129 +482,33 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({ reviews = [] }
         </div>
       </section>
 
-      {/* ── Interactive Platform-Specific Guide Selector ── */}
-      <section className="apple-glass-card rounded-2xl p-5 sm:p-6 border border-black/[0.06] bg-white/80 backdrop-blur-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.05]">
-          <div>
+      {/* ── Social Media Quote Graphic Studio Bridge ── */}
+      <section className="apple-glass-card rounded-2xl p-5 sm:p-6 border border-violet-500/20 bg-gradient-to-r from-violet-500/5 via-indigo-500/5 to-purple-500/5 backdrop-blur-xl relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Share2 className="w-4 h-4 text-violet-600" />
             <h3 className="text-sm font-bold text-zinc-950">
-              Where to Paste the Code (Platform Guides)
+              Want to post reviews on Social Media (LinkedIn, X, Instagram)?
             </h3>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Click your website builder for instant, platform-specific installation instructions:
-            </p>
           </div>
-
-          {/* Platform Interactive Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-            {(['wordpress', 'shopify', 'webflow', 'framer', 'html'] as PlatformTab[]).map((p) => {
-              const isSelected = selectedPlatform === p;
-              return (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setSelectedPlatform(p)}
-                  className={`apple-touch px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-[#6701e6] text-white shadow-xs font-bold'
-                      : 'bg-zinc-100 hover:bg-zinc-200/80 text-zinc-700 border border-zinc-200'
-                  }`}
-                >
-                  {platformGuides[p].name}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Dynamic Platform Instructions Box */}
-        <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-200 space-y-3 animate-in fade-in duration-200">
-          <div className="flex items-start justify-between gap-2 border-b border-purple-200/60 pb-2">
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-[#6701e6]" />
-              <strong className="text-xs font-bold text-purple-950">
-                {platformGuides[selectedPlatform].name} Installation Instructions
-              </strong>
-            </div>
-            <span className="text-[10px] font-bold text-purple-700 bg-white/90 border border-purple-200 px-2 py-0.5 rounded-full">
-              Target: {platformGuides[selectedPlatform].quickLocation}
-            </span>
-          </div>
-
-          <ol className="space-y-1.5 text-xs text-zinc-700">
-            {platformGuides[selectedPlatform].steps.map((st, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <span className="w-4 h-4 rounded-full bg-purple-200 text-[#6701e6] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
-                  {i + 1}
-                </span>
-                <span className="leading-relaxed">{st}</span>
-              </li>
-            ))}
-          </ol>
-
-          {platformGuides[selectedPlatform].tip && (
-            <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 text-[11px] text-purple-900 flex items-start gap-2">
-              <HelpCircle className="w-3.5 h-3.5 text-[#6701e6] shrink-0 mt-0.5" />
-              <span className="leading-relaxed">
-                <strong>Pro-Tip:</strong> {platformGuides[selectedPlatform].tip}
-              </span>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ── How It Works in 3 Clear Steps (Bento Layout) ── */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Step 1 */}
-        <div className="apple-glass-card rounded-2xl p-5 border border-black/[0.06] bg-white/70 backdrop-blur-xl space-y-2">
-          <div className="w-8 h-8 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-700 font-bold text-xs font-mono mb-2">
-            01
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-            Automatic Sync
-          </span>
-          <h3 className="text-sm font-bold text-zinc-950">
-            Ratings Synchronized
-          </h3>
-          <p className="text-xs text-zinc-500 leading-relaxed">
-            Your real average rating (<strong className="text-zinc-800">{effectiveRating}★</strong>) and review count (<strong className="text-zinc-800">{effectiveCount} reviews</strong>) are automatically embedded into Google Schema.
+          <p className="text-xs text-zinc-600">
+            Generate high-res 1080p branded testimonial quote graphics ready to download or copy in 1 click.
           </p>
         </div>
 
-        {/* Step 2 */}
-        <div className="apple-glass-card rounded-2xl p-5 border border-black/[0.06] bg-white/70 backdrop-blur-xl space-y-2">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-700 font-bold text-xs font-mono mb-2">
-            02
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-            One-Click Snippet
-          </span>
-          <h3 className="text-sm font-bold text-zinc-950">
-            Copy Schema Code
-          </h3>
-          <p className="text-xs text-zinc-500 leading-relaxed">
-            Click the <strong className="text-zinc-800">Copy Google Schema Code</strong> button in the code dock to copy the pre-formatted structured data snippet.
-          </p>
-        </div>
-
-        {/* Step 3 */}
-        <div className="apple-glass-card rounded-2xl p-5 border border-black/[0.06] bg-white/70 backdrop-blur-xl space-y-2">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 font-bold text-xs font-mono mb-2">
-            03
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-            Paste & Activate
-          </span>
-          <h3 className="text-sm font-bold text-zinc-950">
-            Paste & Let Google Index
-          </h3>
-          <p className="text-xs text-zinc-500 leading-relaxed">
-            Paste the code into your website's header. Google crawlers will detect it on their next pass and activate golden stars in search results.
-          </p>
-        </div>
+        {onOpenSocialCard && primaryReviewForSocial && (
+          <button
+            type="button"
+            onClick={() => onOpenSocialCard(primaryReviewForSocial)}
+            className="apple-touch shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold shadow-xs transition-all cursor-pointer active:scale-95"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Open Social Quote Studio</span>
+          </button>
+        )}
       </section>
     </div>
   );
 };
 
 export default RichSnippetView;
-

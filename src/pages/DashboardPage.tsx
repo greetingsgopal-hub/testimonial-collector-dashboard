@@ -39,7 +39,8 @@ import {
   ArrowRight,
   Check,
   X,
-  Trash2
+  Trash2,
+  Sparkles
 } from 'lucide-react';
 const TAB_LABEL_MAP: Record<string, string> = {
   welcome: 'Welcome Hub',
@@ -48,7 +49,7 @@ const TAB_LABEL_MAP: Record<string, string> = {
   proof: 'Moderation Queue',
   widgets: 'Widgets',
   campaigns: 'Campaigns',
-  'rich-snippet': 'Post Online',
+  'rich-snippet': 'Google Stars (SEO)',
   integrate: 'Integrations',
   settings: 'Settings',
   feedback: 'Feedback',
@@ -525,7 +526,10 @@ export const DashboardPage = () => {
 
           {/* Rich Snippet (SEO Schema) */}
           {activeTab === 'rich-snippet' && (
-            <RichSnippetView reviews={effectiveReviews} />
+            <RichSnippetView
+              reviews={effectiveReviews}
+              onOpenSocialCard={setSocialCardReview}
+            />
           )}
 
           {/* AI Sentiment Analysis */}
@@ -598,6 +602,18 @@ export const DashboardPage = () => {
                     >
                       <Send className="w-3.5 h-3.5" />
                       <span>{copiedLink ? 'Link Copied!' : '+ Invite Customer'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const topApproved = effectiveReviews.find(r => r.status === 'approved') || effectiveReviews[0];
+                        if (topApproved) setSocialCardReview(topApproved);
+                      }}
+                      className="apple-touch apple-btn-secondary px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer text-violet-700 bg-violet-50/80 border-violet-200/80 hover:bg-violet-100"
+                      title="Create shareable social quote graphic"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-violet-600" />
+                      <span>Quote Graphic</span>
                     </button>
 
                     <button

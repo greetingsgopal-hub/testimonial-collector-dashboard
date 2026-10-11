@@ -115,7 +115,7 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
     expect(container.textContent).toContain('Moderation Queue');
     expect(container.textContent).toContain('4'); // proof count badge
     expect(container.textContent).toContain('Widgets');
-    expect(container.textContent).toContain('Post Online');
+    expect(container.textContent).toContain('Google Stars');
     expect(container.textContent).toContain('Integrations');
   });
 

@@ -5,7 +5,6 @@ import {
   FileText,
   Download,
   CheckCircle2,
-  Globe,
   Puzzle,
   Settings,
   LogOut,
@@ -14,6 +13,7 @@ import {
   Plus,
   ChevronsUpDown,
   Mail,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Project } from '../../types';
@@ -241,7 +241,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           </span>
         </button>
 
-        {/* 5. Post Online */}
+        {/* Google Stars (SEO) */}
         <button
           onClick={() => setActiveTab('rich-snippet')}
           className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
@@ -251,9 +251,14 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           }`}
         >
           <div className="flex items-center gap-2.5">
-            <Globe className={`w-4 h-4 transition-colors ${activeTab === 'rich-snippet' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
-            <span>Post Online</span>
+            <Sparkles className={`w-4 h-4 transition-colors ${activeTab === 'rich-snippet' ? 'text-amber-400' : 'text-slate-400 group-hover:text-amber-500'}`} />
+            <span>Google Stars (SEO)</span>
           </div>
+          <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-bold ${
+            activeTab === 'rich-snippet' ? 'bg-white/20 text-white' : 'bg-amber-50 text-amber-700'
+          }`}>
+            SEO
+          </span>
         </button>
 
         {/* Subtle Separator */}
