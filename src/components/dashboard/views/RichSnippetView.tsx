@@ -60,7 +60,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
     entityType: schemaType, name: businessName, url: websiteUrl, description, reviews: eligibleReviews,
   });
   const jsonLdCode = schemaJson
-    ? `<script type="application/ld+json">\\n${schemaJson}\\n</script>`
+    ? `<script type="application/ld+json">\n${schemaJson}\n</script>`
     : null;
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -372,7 +372,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
                 className="apple-touch inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-violet-700 bg-violet-100/90 hover:bg-violet-200/90 border border-violet-300 shadow-2xs transition-all cursor-pointer group"
               >
                 <Play className="w-3 h-3 fill-violet-600 text-violet-600 group-hover:scale-110 transition-transform" />
-                <span>Watch Video Tutorial</span>
+                <span>View Setup Guide (Preview)</span>
                 <span className="text-[10px] font-semibold text-violet-600 bg-white/90 px-1.5 py-0.2 rounded-full border border-violet-200">
                   {platformGuides[selectedPlatform].videoDuration}
                 </span>
@@ -410,7 +410,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
           <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 flex items-center justify-between gap-3 text-xs font-semibold animate-in fade-in duration-200">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Copied! Paste into your site header to activate search stars.</span>
+              <span>Copied! Paste into your site header, then validate eligibility. Google decides whether stars appear.</span>
             </div>
             <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0">
               Ready to Paste
@@ -431,7 +431,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
             <span className="font-mono text-[11px] bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200 font-semibold text-zinc-700">
               JSON-LD • Schema.org
             </span>
-            <span>Automatically formatted with your live rating ({effectiveRating}★)</span>
+            <span>{effectiveRating !== null ? `Calculated from ${effectiveCount} approved ratings (${effectiveRating}★ average)` : "No eligible rating data available"}</span>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -592,7 +592,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
                     </span>
                   </div>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-violet-950 text-violet-300 border border-violet-800">
-                    Micro-Walkthrough Guide
+                    Illustrative Guide — Not a Recording
                   </span>
                 </div>
 
@@ -619,7 +619,7 @@ export const RichSnippetView: React.FC<RichSnippetViewProps> = ({
                     </span>
                   </div>
                   <span className="text-[10px] text-zinc-400 font-sans">
-                    Non-Technical Visual Guide
+                    Static walkthrough preview — not a video
                   </span>
                 </div>
               </div>
