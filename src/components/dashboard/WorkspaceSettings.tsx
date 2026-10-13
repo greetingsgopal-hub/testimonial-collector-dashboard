@@ -16,7 +16,11 @@ import {
   Trash2,
   AlertTriangle,
   Lock,
+  Send,
+  CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
+import { CmsEmbedModal } from './CmsEmbedModal';
 import { useAuth } from '../../context/AuthContext';
 import { usePageSeo } from '../../lib/seo';
 import { TeamRole, PLAN_LIMITS, Project } from '../../types';
@@ -44,6 +48,36 @@ export const WorkspaceSettings: React.FC = () => {
   // Security Tab State
   const [passwordResetSent, setPasswordResetSent] = useState(false);
   const [passwordResetError, setPasswordResetError] = useState<string | null>(null);
+
+  // Webhooks & CMS Integrations State (Phase 3)
+  const [showCmsEmbedModal, setShowCmsEmbedModal] = useState(false);
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState('');
+  const [discordWebhookUrl, setDiscordWebhookUrl] = useState('');
+  const [zapierWebhookUrl, setZapierWebhookUrl] = useState('');
+  const [testingWebhookPlatform, setTestingWebhookPlatform] = useState<string | null>(null);
+  const [webhookTestFeedback, setWebhookTestFeedback] = useState<Record<string, { success: boolean; msg: string }>>({});
+
+  const handleTestWebhook = async (platform: 'slack' | 'discord' | 'zapier', url: string) => {
+    if (!url) return;
+    setTestingWebhookPlatform(platform);
+    try {
+      const res = await fetch('/api/webhooks/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform, targetUrl: url }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setWebhookTestFeedback(prev => ({ ...prev, [platform]: { success: true, msg: 'Test alert sent successfully!' } }));
+      } else {
+        setWebhookTestFeedback(prev => ({ ...prev, [platform]: { success: false, msg: data.error || 'Failed to dispatch test' } }));
+      }
+    } catch (err: any) {
+      setWebhookTestFeedback(prev => ({ ...prev, [platform]: { success: false, msg: err.message || 'Network error' } }));
+    } finally {
+      setTestingWebhookPlatform(null);
+    }
+  };
 
   const plan = workspace?.plan || 'free';
   const limits = PLAN_LIMITS[plan];
@@ -525,40 +559,181 @@ export const WorkspaceSettings: React.FC = () => {
                 )}
               </div>
 
-              <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-3">
-                <h3 className="text-base font-bold text-gray-900">Webhooks</h3>
-                <p className="text-xs text-gray-500">
-                  Get notified when testimonials are created, approved, or deleted.
-                </p>
+              <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-4">
+                <div>
+                  <h3 className="text-base font-bold text-gray-900">Real-Time Alert Webhooks</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Dispatch instant alerts when testimonials are submitted or approved to Slack, Discord, or Zapier/Make.
+                  </p>
+                </div>
 
-                {limits.webhooks ? (
-                  <div className="space-y-3 pt-2">
-                    <p className="text-xs text-gray-500">No webhooks configured yet.</p>
-                    <button className="flex items-center gap-1.5 text-xs font-bold text-[#6701e6] hover:underline cursor-pointer">
-                      <Plus size={14} />
-                      Add Webhook Endpoint
-                    </button>
+                <div className="space-y-4 pt-2">
+                  {/* Slack Alert */}
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#E01E5A]"></span>
+                        Slack Incoming Webhook URL
+                      </label>
+                      <button
+                        onClick={() => handleTestWebhook('slack', slackWebhookUrl || 'https://hooks.slack.com/services/demo')}
+                        disabled={testingWebhookPlatform === 'slack'}
+                        className="flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        <Send size={12} />
+                        {testingWebhookPlatform === 'slack' ? 'Sending...' : 'Send Test Card'}
+                      </button>
+                    </div>
+                    <input
+                      type="url"
+                      value={slackWebhookUrl}
+                      onChange={(e) => setSlackWebhookUrl(e.target.value)}
+                      placeholder="https://hooks.slack.com/services/T00/B00/XXXX"
+                      className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                    />
+                    {webhookTestFeedback['slack'] && (
+                      <p className={`text-[11px] font-semibold flex items-center gap-1 ${
+                        webhookTestFeedback['slack'].success ? 'text-emerald-600' : 'text-rose-600'
+                      }`}>
+                        {webhookTestFeedback['slack'].success ? <CheckCircle2 size={12} /> : null}
+                        {webhookTestFeedback['slack'].msg}
+                      </p>
+                    )}
                   </div>
-                ) : (
-                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
-                    <p className="text-xs font-medium text-amber-800 flex items-center gap-2">
-                      <Crown size={14} className="text-amber-600" />
-                      Webhooks require a paid plan.
-                    </p>
+
+                  {/* Discord Alert */}
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#5865F2]"></span>
+                        Discord Webhook URL
+                      </label>
+                      <button
+                        onClick={() => handleTestWebhook('discord', discordWebhookUrl || 'https://discord.com/api/webhooks/demo')}
+                        disabled={testingWebhookPlatform === 'discord'}
+                        className="flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        <Send size={12} />
+                        {testingWebhookPlatform === 'discord' ? 'Sending...' : 'Send Test Embed'}
+                      </button>
+                    </div>
+                    <input
+                      type="url"
+                      value={discordWebhookUrl}
+                      onChange={(e) => setDiscordWebhookUrl(e.target.value)}
+                      placeholder="https://discord.com/api/webhooks/..."
+                      className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                    />
+                    {webhookTestFeedback['discord'] && (
+                      <p className={`text-[11px] font-semibold flex items-center gap-1 ${
+                        webhookTestFeedback['discord'].success ? 'text-emerald-600' : 'text-rose-600'
+                      }`}>
+                        {webhookTestFeedback['discord'].success ? <CheckCircle2 size={12} /> : null}
+                        {webhookTestFeedback['discord'].msg}
+                      </p>
+                    )}
                   </div>
-                )}
+
+                  {/* Generic REST / Zapier Webhook */}
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#FF4A00]"></span>
+                        Zapier / Make.com REST Hook Trigger
+                      </label>
+                      <button
+                        onClick={() => handleTestWebhook('zapier', zapierWebhookUrl || 'https://hooks.zapier.com/hooks/catch/demo')}
+                        disabled={testingWebhookPlatform === 'zapier'}
+                        className="flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        <Send size={12} />
+                        {testingWebhookPlatform === 'zapier' ? 'Sending...' : 'Send Test Ping'}
+                      </button>
+                    </div>
+                    <input
+                      type="url"
+                      value={zapierWebhookUrl}
+                      onChange={(e) => setZapierWebhookUrl(e.target.value)}
+                      placeholder="https://hooks.zapier.com/hooks/catch/..."
+                      className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                    />
+                    {webhookTestFeedback['zapier'] && (
+                      <p className={`text-[11px] font-semibold flex items-center gap-1 ${
+                        webhookTestFeedback['zapier'].success ? 'text-emerald-600' : 'text-rose-600'
+                      }`}>
+                        {webhookTestFeedback['zapier'].success ? <CheckCircle2 size={12} /> : null}
+                        {webhookTestFeedback['zapier'].msg}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              {/* API Docs link */}
-              <div className="p-6 rounded-2xl bg-purple-50/60 border border-purple-200">
-                <h3 className="text-sm font-bold text-[#6701e6] mb-1">📖 API Documentation</h3>
-                <p className="text-xs text-gray-600 mb-3">
-                  Full REST API reference with code samples for Node.js, Python, and curl.
-                </p>
-                <button className="flex items-center gap-1.5 text-xs font-bold text-[#6701e6] hover:underline cursor-pointer">
-                  View Documentation
-                  <ExternalLink size={13} />
-                </button>
+              {/* Third-Party CMS Embed Integrations */}
+              <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-base font-bold text-gray-900 flex items-center gap-1.5">
+                      <Sparkles size={16} className="text-[#6701e6]" />
+                      Third-Party CMS Embeds & Plugins
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Ready-to-copy code snippets & downloadable WordPress plugin for Shopify, WordPress, Webflow, Framer, and Notion.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowCmsEmbedModal(true)}
+                    className="px-4 py-2 rounded-xl text-xs font-bold bg-[#6701e6] hover:bg-[#5200bd] text-white transition-all shadow-md shadow-purple-500/20 whitespace-nowrap cursor-pointer"
+                  >
+                    Open CMS Installer →
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2">
+                  {['Shopify', 'WordPress', 'Webflow', 'Framer', 'Notion'].map((platform) => (
+                    <div key={platform} className="p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-center text-xs font-bold text-gray-700">
+                      {platform}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Developer Documentation & Affiliates */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-6 rounded-2xl bg-purple-50/60 border border-purple-200 space-y-2">
+                  <h3 className="text-sm font-bold text-[#6701e6] flex items-center gap-1.5">
+                    📖 Developer API Reference
+                  </h3>
+                  <p className="text-xs text-gray-600">
+                    Full REST API reference with OpenAPI 3.0 specification and code samples for Node.js, Python, and curl.
+                  </p>
+                  <a
+                    href="/developers"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#6701e6] hover:underline pt-1"
+                  >
+                    Open API Console & Docs
+                    <ExternalLink size={13} />
+                  </a>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2">
+                  <h3 className="text-sm font-bold text-emerald-800 flex items-center gap-1.5">
+                    🎁 Partner & Affiliate Program
+                  </h3>
+                  <p className="text-xs text-gray-600">
+                    Earn 30% to 40% lifetime recurring commissions on every customer you refer to PandaPraise.
+                  </p>
+                  <a
+                    href="/affiliates"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:underline pt-1"
+                  >
+                    View Affiliate Portal
+                    <ExternalLink size={13} />
+                  </a>
+                </div>
               </div>
             </div>
           )}
@@ -643,6 +818,13 @@ export const WorkspaceSettings: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Third-Party CMS Embed Modal */}
+      <CmsEmbedModal
+        isOpen={showCmsEmbedModal}
+        onClose={() => setShowCmsEmbedModal(false)}
+        spaceSlug={project?.slug || 'demo'}
+      />
     </div>
   );
 };

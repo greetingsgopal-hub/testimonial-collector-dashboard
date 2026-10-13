@@ -25,6 +25,8 @@ const VerifyEmailPage = React.lazy(() => import('./pages/VerifyEmailPage').then(
 const ReferralRedirectPage = React.lazy(() => import('./pages/ReferralRedirectPage').then((m) => ({ default: m.ReferralRedirectPage })));
 const AlternativePage = React.lazy(() => import('./pages/AlternativePage').then((m) => ({ default: m.AlternativePage })));
 const UseCasePage = React.lazy(() => import('./pages/UseCasePage').then((m) => ({ default: m.UseCasePage })));
+const AffiliatePage = React.lazy(() => import('./pages/AffiliatePage').then((m) => ({ default: m.AffiliatePage })));
+const DeveloperDocsPage = React.lazy(() => import('./pages/DeveloperDocsPage').then((m) => ({ default: m.DeveloperDocsPage })));
 import { captureReferralCode } from './lib/referral';
 
 /**
@@ -77,6 +79,11 @@ export function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/affiliates" element={<AffiliatePage />} />
+            <Route path="/partner" element={<AffiliatePage />} />
+            <Route path="/partners" element={<AffiliatePage />} />
+            <Route path="/developers" element={<DeveloperDocsPage />} />
+            <Route path="/api-docs" element={<DeveloperDocsPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsPage />} />

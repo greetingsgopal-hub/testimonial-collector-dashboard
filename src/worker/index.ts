@@ -35,6 +35,9 @@ import { handleCampaignTriggerWebhook } from './handlers/campaignTriggerWebhook'
 import { handleCampaignTrackClick, handleCampaignDispatchTrigger } from './handlers/campaignTrackHandler';
 import { handleReferralRedirect, handleReferralStats } from './handlers/referralHandler';
 import { handleSitemapXml, handleRobotsTxt, handleSeoPagePreRender } from './handlers/seoHandler';
+import { handleWebhookTestDispatch } from './handlers/alertWebhooks';
+import { handlePublicApi } from './handlers/publicApiHandler';
+import { handleAffiliatesApi } from './handlers/affiliateHandler';
 
 export default {
   async fetch(request: Request, env: WorkerEnv, _ctx: ExecutionContext): Promise<Response> {
@@ -74,10 +77,23 @@ export default {
       const preflight = handleOptionsPreflight(request);
       if (preflight) return preflight;
 
+      // Public REST API & Developer Keys (/api/v1/*)
+      if (pathname.startsWith('/api/v1/')) {
+        return await handlePublicApi(request, env);
+      }
+
+      // Self-Serve Affiliate & Partner Engine (/api/affiliates/*)
+      if (pathname.startsWith('/api/affiliates/')) {
+        return await handleAffiliatesApi(request, env);
+      }
+
       // 2. Normalize endpoint name
       const endpoint = pathname.replace(/^\/api\//, '').split('?')[0].replace(/\/$/, '');
 
       switch (endpoint) {
+        case 'webhook/test':
+        case 'webhooks/test':
+          return await handleWebhookTestDispatch(request, env);
         // Unauthenticated liveness probe for uptime monitoring.
         // Deliberately cheap: no Firestore/Stripe calls, no secrets exposed.
         case 'health': {

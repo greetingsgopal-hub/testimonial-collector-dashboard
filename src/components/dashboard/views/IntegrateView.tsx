@@ -18,6 +18,7 @@ import {
 import { socialClient, SocialStatusResponse } from '../../../lib/socialClient';
 import { ConnectSourceModal } from './ConnectSourceModal';
 import { WebhookConfigModal } from '../WebhookConfigModal';
+import { CmsEmbedModal } from '../CmsEmbedModal';
 
 // Custom Brand Icons
 const LinkedInIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
@@ -138,6 +139,7 @@ export const IntegrateView: React.FC = () => {
   const [showConnectModal, setShowConnectModal] = useState<boolean>(false);
   const [connectModalPlatform, setConnectModalPlatform] = useState<string>('facebook');
   const [showWebhookModal, setShowWebhookModal] = useState<boolean>(false);
+  const [showCmsEmbedModal, setShowCmsEmbedModal] = useState<boolean>(false);
 
   // Instagram Integration State
   const [isInstagramConnected, setIsInstagramConnected] = useState<boolean>(() => {
@@ -589,6 +591,50 @@ export const IntegrateView: React.FC = () => {
       ],
     },
     {
+      id: 'cms',
+      title: 'CMS & Website Embeds',
+      icon: <Code2 className="w-4 h-4 text-purple-600" />,
+      description: 'Embed testimonials and live marquee tickers on Shopify, WordPress, Webflow, Framer, and Notion with zero layout shift.',
+      items: [
+        {
+          id: 'shopify',
+          name: 'Shopify Store',
+          icon: <div className="w-6 h-6 rounded-lg bg-[#96bf48] text-white flex items-center justify-center font-bold text-xs">S</div>,
+          description: '1-Click Liquid section embed for product pages, cart drawers, and homepages to increase checkout conversions.',
+          badgeType: 'active',
+          badgeLabel: 'Active & Ready',
+          isCmsLive: true,
+        },
+        {
+          id: 'wordpress',
+          name: 'WordPress / WooCommerce',
+          icon: <div className="w-6 h-6 rounded-lg bg-[#21759b] text-white flex items-center justify-center font-bold text-xs">W</div>,
+          description: 'Official [pandapraise] shortcode and standalone downloadable plugin for Gutenberg, Elementor, and WooCommerce.',
+          badgeType: 'active',
+          badgeLabel: 'Active & Ready',
+          isCmsLive: true,
+        },
+        {
+          id: 'webflow',
+          name: 'Webflow',
+          icon: <div className="w-6 h-6 rounded-lg bg-[#4353ff] text-white flex items-center justify-center font-bold text-xs">Wf</div>,
+          description: 'Shadow DOM HTML embed block for Webflow design systems with zero host styling bleed.',
+          badgeType: 'active',
+          badgeLabel: 'Active & Ready',
+          isCmsLive: true,
+        },
+        {
+          id: 'framer',
+          name: 'Framer',
+          icon: <div className="w-6 h-6 rounded-lg bg-black text-white flex items-center justify-center font-bold text-xs">F</div>,
+          description: 'Framer custom HTML utility component with smooth responsive layout and dark mode support.',
+          badgeType: 'active',
+          badgeLabel: 'Active & Ready',
+          isCmsLive: true,
+        },
+      ],
+    },
+    {
       id: 'notifications',
       title: 'Team Notifications & Collaboration',
       icon: <Bell className="w-4 h-4 text-emerald-600" />,
@@ -598,10 +644,10 @@ export const IntegrateView: React.FC = () => {
           id: 'slack',
           name: 'Slack',
           icon: <SlackIcon className="w-6 h-6" />,
-          description: "Stream real-time customer reviews and 5-star praise straight into your team's Slack channels the second they drop.",
-          badgeType: 'coming_soon',
-          badgeLabel: 'Coming Soon',
-          canJoinWaitlist: true,
+          description: "Stream real-time customer reviews and 5-star praise straight into your team's Slack channels with Block Kit cards.",
+          badgeType: 'active',
+          badgeLabel: 'Active & Ready',
+          isSlackAlertLive: true,
         },
         {
           id: 'teams',
@@ -634,18 +680,18 @@ export const IntegrateView: React.FC = () => {
           name: 'REST API',
           icon: <div className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center font-mono text-[10px] font-bold">API</div>,
           description: 'Connect custom apps via developer tokens. Query testimonials and programmatically manage collection forms with secure bearer tokens.',
-          badgeType: 'coming_soon',
-          badgeLabel: 'Coming Soon',
-          canJoinWaitlist: true,
+          badgeType: 'active',
+          badgeLabel: 'Active & Ready',
+          isRestApiLive: true,
         },
         {
           id: 'zapier',
           name: 'Zapier',
           icon: <ZapierIcon className="w-6 h-6" />,
-          description: 'Connect Panda Praise to 5,000+ apps including HubSpot, Salesforce, Notion, and Airtable without writing code.',
-          badgeType: 'coming_soon',
-          badgeLabel: 'Coming Soon',
-          canJoinWaitlist: true,
+          description: 'Connect Panda Praise to 5,000+ apps including HubSpot, Salesforce, Notion, and Airtable via real-time REST Hook triggers.',
+          badgeType: 'active',
+          badgeLabel: 'Active & Ready',
+          isZapierLive: true,
         },
       ],
     },
@@ -1178,6 +1224,56 @@ export const IntegrateView: React.FC = () => {
                         </a>
                       )}
 
+                      {/* CMS Embed Actions (Shopify, WordPress, Webflow, Framer) */}
+                      {(item as any).isCmsLive && (
+                        <button
+                          type="button"
+                          onClick={() => setShowCmsEmbedModal(true)}
+                          className="apple-touch w-full py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Install Embed Widget</span>
+                        </button>
+                      )}
+
+                      {/* Slack Alert Action */}
+                      {item.id === 'slack' && (
+                        <button
+                          type="button"
+                          onClick={() => setShowWebhookModal(true)}
+                          className="apple-touch w-full py-2 px-3 rounded-xl bg-[#E01E5A] hover:bg-[#c2184d] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Bell className="w-3.5 h-3.5" />
+                          <span>Configure Slack Alert</span>
+                        </button>
+                      )}
+
+                      {/* REST API Action */}
+                      {item.id === 'rest-api' && (
+                        <a
+                          href="/developers"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="apple-touch w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Code2 className="w-3.5 h-3.5" />
+                          <span>View API Docs</span>
+                          <ArrowUpRight className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+
+                      {/* Zapier Action */}
+                      {item.id === 'zapier' && (
+                        <button
+                          type="button"
+                          onClick={() => setShowWebhookModal(true)}
+                          className="apple-touch w-full py-2 px-3 rounded-xl bg-[#FF4A00] hover:bg-[#e04100] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Zap className="w-3.5 h-3.5" />
+                          <span>Configure Zapier Triggers</span>
+                        </button>
+                      )}
+
                       {/* Other Waitlist Cards */}
                       {item.id !== 'linkedin' &&
                         item.id !== 'facebook' &&
@@ -1185,7 +1281,11 @@ export const IntegrateView: React.FC = () => {
                         item.id !== 'google-reviews' &&
                         item.id !== 'trustpilot' &&
                         item.id !== 'webhooks' &&
-                        item.id !== 'chrome-extension' && (
+                        item.id !== 'chrome-extension' &&
+                        !(item as any).isCmsLive &&
+                        item.id !== 'slack' &&
+                        item.id !== 'rest-api' &&
+                        item.id !== 'zapier' && (
                         <button
                           type="button"
                           onClick={() => handleJoinWaitlist(item.id, item.name)}
@@ -1474,6 +1574,13 @@ export const IntegrateView: React.FC = () => {
       <WebhookConfigModal
         isOpen={showWebhookModal}
         onClose={() => setShowWebhookModal(false)}
+      />
+
+      {/* Third-Party CMS Embed Modal */}
+      <CmsEmbedModal
+        isOpen={showCmsEmbedModal}
+        onClose={() => setShowCmsEmbedModal(false)}
+        spaceSlug="feedback"
       />
     </div>
   );
