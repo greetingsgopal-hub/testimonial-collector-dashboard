@@ -115,9 +115,9 @@ export const LandingPage: React.FC = () => {
       <div className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all text-white py-2 px-4 text-center relative z-40 flex items-center justify-center gap-2 shadow-xs text-xs sm:text-sm font-medium">
         <Link to="/signup" className="flex items-center gap-2 hover:underline">
           <span className="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-            ⚡ Proven ROI
+            ⚡ Social Proof
           </span>
-          <span>Turn customer praise into +34% higher website conversions</span>
+          <span>Turn customer praise into your most trusted marketing</span>
           <span className="hidden sm:inline text-white/90 font-bold ml-1">| Start Free in 2 Minutes →</span>
         </Link>
       </div>
@@ -425,7 +425,7 @@ export const LandingPage: React.FC = () => {
                   </span>
                   <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 shadow-2xs">
                     <Sparkles className="w-3 h-3 text-emerald-500" />
-                    +34% Conversion Lift
+                    Sample preview
                   </span>
                 </div>
                 <div className="bg-white rounded-xl p-3 border border-indigo-100 shadow-sm space-y-1.5">
@@ -979,7 +979,7 @@ export const LandingPage: React.FC = () => {
                         {/* Floating trust pill */}
                         <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
                           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                          <span>99.4% Customer Satisfaction</span>
+                          <span>Your rating, always on display</span>
                         </div>
                       </div>
                     )}
@@ -994,15 +994,15 @@ export const LandingPage: React.FC = () => {
                           ★★★★★
                         </div>
                         <p className="text-sm sm:text-base font-semibold leading-relaxed mb-4 text-white">
-                          "Panda Praise helped us collect 42 verified testimonials in our first week. Our conversion rate jumped by 34%!"
+                          "This is where your customer's words shine — a real quote from a real customer, beautifully framed on your site."
                         </p>
                         <div className="flex items-center justify-between pt-3 border-t border-white/20">
                           <div>
-                            <p className="text-xs font-bold text-white">Sarah Jenkins</p>
-                            <p className="text-[11px] text-violet-200">Founder, GrowthStack</p>
+                            <p className="text-xs font-bold text-white">Your Customer</p>
+                            <p className="text-[11px] text-violet-200">Your biggest fan</p>
                           </div>
                           <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">
-                            Verified Review
+                            Sample
                           </span>
                         </div>
                       </div>
@@ -1010,7 +1010,7 @@ export const LandingPage: React.FC = () => {
                   </div>
 
                   <p className="mt-4 text-[11px] text-gray-400">
-                    Live interactive preview — easily embedded with a 1-line copy-paste code snippet.
+                    Live interactive preview with sample reviews — easily embedded with a 1-line copy-paste code snippet.
                   </p>
                 </div>
               )}

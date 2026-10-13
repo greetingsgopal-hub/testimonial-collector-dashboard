@@ -106,7 +106,7 @@ describe('LandingPage CRO & Structural Optimizations', () => {
 
     expect(canvas?.textContent).toContain('4.9');
     expect(canvas?.textContent).toContain('1,280+ 5-Star Reviews');
-    expect(canvas?.textContent).toContain('99.4% Customer Satisfaction');
+    expect(canvas?.textContent).toContain('Your rating, always on display');
 
     // Switch to Social Proof Card
     const cardBtn = container.querySelector('#interactive-widget-tab-card') as HTMLButtonElement;
@@ -116,8 +116,9 @@ describe('LandingPage CRO & Structural Optimizations', () => {
       cardBtn.click();
     });
 
-    expect(canvas?.textContent).toContain('Sarah Jenkins');
-    expect(canvas?.textContent).toContain('GrowthStack');
+    expect(canvas?.textContent).toContain('Your Customer');
+    expect(canvas?.textContent).toContain('Sample');
+    expect(canvas?.textContent).not.toContain('GrowthStack');
   });
 
   it('3. Streamlined footer has deduplicated 4-column layout and prominent CTA banner', async () => {

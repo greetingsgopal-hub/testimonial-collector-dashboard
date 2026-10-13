@@ -242,32 +242,21 @@ export const LoginPage: React.FC = () => {
               ))}
             </div>
 
-            {/* Testimonial Quote */}
+            {/* Product promise */}
             <p className="text-sm sm:text-base text-purple-100 font-medium leading-relaxed">
-              "Panda Praise helped us collect over 140 authentic customer testimonials in our first two weeks. Conversion on our SaaS landing page jumped by 32% within 3 days of embedding the Wall of Love."
+              Share one link. Collect real customer words. Embed them on your site with a single line of code — no fake reviews, no design skills, no friction.
             </p>
-
-            {/* Author Profile */}
-            <div className="flex items-center gap-3 pt-2 border-t border-white/10">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-400 to-indigo-300 flex items-center justify-center font-bold text-gray-950 text-sm shadow-sm shrink-0">
-                SJ
-              </div>
-              <div>
-                <span className="text-xs font-bold text-white block">Sarah Jenkins</span>
-                <span className="text-[11px] text-purple-200/80 block">Head of Growth at OrbitSaaS</span>
-              </div>
-            </div>
 
           </div>
         </div>
 
         {/* Bottom: Live Social Proof Metrics */}
         <div className="relative z-10 flex items-center justify-between text-xs text-purple-200/80 border-t border-white/10 pt-4">
-          <span>4,200+ Testimonials Collected</span>
+          <span>Free to start</span>
           <span>•</span>
-          <span>99.9% Widget Uptime</span>
+          <span>2-minute setup</span>
           <span>•</span>
-          <span>Zero-Code Setup</span>
+          <span>Zero-code embeds</span>
         </div>
 
       </div>

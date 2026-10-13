@@ -319,7 +319,7 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
 
     // 2. Large Decorative Quote Mark
     ctx.fillStyle = themeConfig.accent;
-    ctx.font = `bold ${format === 'story' ? '88px' : '72px'} "Outfit", "Inter", sans-serif`;
+    ctx.font = `bold ${format === 'story' ? '88px' : '72px'} "Plus Jakarta Sans", "Inter", sans-serif`;
     ctx.fillText('“', padding, currentY);
     currentY += 24;
 
@@ -327,7 +327,7 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
     const quoteFontSize = format === 'story' ? 44 : format === 'square' ? 42 : 36;
     const lineHeight = quoteFontSize * 1.38;
     ctx.fillStyle = themeConfig.text;
-    ctx.font = `500 ${quoteFontSize}px "Outfit", "Inter", -apple-system, BlinkMacSystemFont, sans-serif`;
+    ctx.font = `500 ${quoteFontSize}px "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif`;
 
     const maxTextWidth = width - padding * 2;
     const maxLines = format === 'story' ? 14 : format === 'square' ? 9 : 6;
@@ -348,7 +348,7 @@ export const SocialCardModal: React.FC<SocialCardModalProps> = ({
 
       // Author Name
       ctx.fillStyle = themeConfig.text;
-      ctx.font = `bold ${format === 'story' ? '38px' : '32px'} "Outfit", "Inter", sans-serif`;
+      ctx.font = `bold ${format === 'story' ? '38px' : '32px'} "Plus Jakarta Sans", "Inter", sans-serif`;
       ctx.fillText(review.name, padding, currentY);
 
       // Role & Company

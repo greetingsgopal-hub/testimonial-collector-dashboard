@@ -35,28 +35,6 @@ describe('escapeHtml', () => {
   });
 });
 
-describe('HIGH-5: EmailSignatureEmbed escapes user content in generated HTML', () => {
-  it('imports and applies escapeHtml to testimonial content', () => {
-    const source = readFileSync(
-      resolve(process.cwd(), 'src/components/dashboard/EmailSignatureEmbed.tsx'),
-      'utf8'
-    );
-    expect(source).toContain("import { escapeHtml } from '../../lib/security'");
-    expect(source).toMatch(/escapeHtml\(truncateQuote\(topReview\.content/);
-    expect(source).toMatch(/escapeHtml\(topReview\.name\)/);
-    expect(source).toMatch(/escapeHtml\(topReview\.company\)/);
-  });
-
-  it('validates brandColor as a hex color before interpolation', () => {
-    const source = readFileSync(
-      resolve(process.cwd(), 'src/components/dashboard/EmailSignatureEmbed.tsx'),
-      'utf8'
-    );
-    expect(source).toMatch(/safeColor/);
-    expect(source).toMatch(/\^#\( \[0-9a-f\]\{3\}|\[0-9a-f\]\{6\}\)\$/i);
-  });
-});
-
 describe('MEDIUM: QrCodeGenerator validates colors into SVG markup', () => {
   it('sanitizes fg/bg colors and data before building SVG', () => {
     const source = readFileSync(

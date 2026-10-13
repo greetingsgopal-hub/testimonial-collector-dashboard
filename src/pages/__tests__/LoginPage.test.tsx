@@ -110,14 +110,14 @@ describe('LoginPage - Modern Distraction-Free Auth Redesign', () => {
     // Value statement
     expect(container.textContent).toContain('Turn customer praise into your highest-converting sales asset.');
 
-    // Customer success quote
-    expect(container.textContent).toContain('Sarah Jenkins');
-    expect(container.textContent).toContain('Head of Growth at OrbitSaaS');
-    expect(container.textContent).toContain('Conversion on our SaaS landing page jumped by 32%');
+    // Honest product promise (no fabricated customer quotes or metrics)
+    expect(container.textContent).toContain('Share one link. Collect real customer words.');
+    expect(container.textContent).not.toContain('Sarah Jenkins');
+    expect(container.textContent).not.toContain('OrbitSaaS');
 
-    // Trust metrics
-    expect(container.textContent).toContain('4,200+ Testimonials Collected');
-    expect(container.textContent).toContain('99.9% Widget Uptime');
+    // Trust metrics — only verifiable claims
+    expect(container.textContent).toContain('Free to start');
+    expect(container.textContent).toContain('2-minute setup');
   });
 
   it('5. Submitting valid email and password triggers signIn', async () => {

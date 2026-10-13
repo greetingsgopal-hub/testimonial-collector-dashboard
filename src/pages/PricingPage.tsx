@@ -30,7 +30,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Can I cancel my subscription?',
-    a: 'Absolutely. Cancel anytime from your billing dashboard in 1 click. You retain complete access to your paid plan until the end of your current billing period.',
+    a: 'Absolutely. There are no lock-ins — you can cancel anytime and you retain complete access to your paid plan until the end of your current billing period.',
   },
   {
     q: 'Do you provide a GST invoice for tax credit?',
@@ -405,12 +405,12 @@ export const PricingPage = () => {
                 <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">{currency === 'INR' ? '₹799' : '$19'}</span>
                 <span className="text-xs font-semibold text-zinc-400">/month</span>
               </div>
-              <p className="text-[11px] text-zinc-400 mb-6">Billed monthly • Cancel anytime in 1 click</p>
+              <p className="text-[11px] text-zinc-400 mb-6">Billed monthly • Cancel anytime</p>
 
               <div className="space-y-3 py-5 border-t border-white/10 text-xs text-zinc-300">
                 <div className="flex items-center gap-2">
                   <Check size={14} className="text-emerald-400 shrink-0" />
-                  <span><strong className="text-white font-semibold">Cancel anytime in 1 click</strong></span>
+                  <span><strong className="text-white font-semibold">Cancel anytime</strong></span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check size={14} className="text-emerald-400 shrink-0" />
