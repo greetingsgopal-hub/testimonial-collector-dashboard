@@ -7,6 +7,7 @@ import {
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
   sendEmailVerification,
+  applyActionCode,
   onAuthStateChanged,
   User as FirebaseUser,
 } from 'firebase/auth';
@@ -33,6 +34,8 @@ function translateFirebaseError(error: any): string {
     'auth/user-not-found':            'No account found with this email. Please check or sign up.',
     'auth/wrong-password':            'Incorrect password. Please try again or use Forgot Password.',
     'auth/invalid-credential':        'Incorrect email or password. Please try again.',
+    'auth/invalid-action-code':       'The verification link or code is invalid or has already been used.',
+    'auth/expired-action-code':       'The verification link has expired. Please request a new one.',
     'auth/too-many-requests':         'Too many failed attempts. Please wait a moment and try again.',
     'auth/email-already-in-use':      'An account with this email already exists. Please sign in instead.',
     'auth/weak-password':             'Password must be at least 6 characters long.',
@@ -72,6 +75,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   sendVerificationEmail: () => Promise<{ success: boolean; error?: string }>;
+  verifyEmailWithCode: (oobCode: string) => Promise<{ success: boolean; error?: string }>;
   checkVerificationStatus: () => Promise<boolean>;
   enableDemoMode: () => void;
   disableDemoMode: () => void;
@@ -652,9 +656,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // Automatically send verification email on new account creation
+      // Automatically send verification email with redirect to /verify-email
       try {
-        await sendEmailVerification(userCredential.user);
+        const redirectUrl = typeof window !== 'undefined'
+          ? `${window.location.origin}/verify-email`
+          : 'https://pandapraise.com/verify-email';
+        await sendEmailVerification(userCredential.user, {
+          url: redirectUrl,
+          handleCodeInApp: true,
+        });
       } catch (verifErr) {
         console.warn('[AuthContext] Initial verification email trigger failed:', verifErr);
       }
@@ -796,7 +806,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: 'No active user found. Please sign in.' };
     }
     try {
-      await sendEmailVerification(auth.currentUser);
+      const redirectUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/verify-email`
+        : 'https://pandapraise.com/verify-email';
+      await sendEmailVerification(auth.currentUser, {
+        url: redirectUrl,
+        handleCodeInApp: true,
+      });
+      return { success: true };
+    } catch (error: any) {
+      const friendlyMessage = translateFirebaseError(error);
+      return { success: false, error: friendlyMessage };
+    }
+  };
+
+  const verifyEmailWithCode = async (oobCode: string): Promise<{ success: boolean; error?: string }> => {
+    if (!oobCode || !oobCode.trim()) {
+      return { success: false, error: 'Invalid or missing verification code.' };
+    }
+    const cleanCode = oobCode.trim();
+    if (isDemoMode) {
+      if (user) {
+        setUser(prev => prev ? { ...prev, emailVerified: true } : null);
+      }
+      return { success: true };
+    }
+    if (!auth) {
+      return { success: false, error: 'Authentication service not configured.' };
+    }
+    try {
+      await applyActionCode(auth, cleanCode);
+      if (auth.currentUser) {
+        await auth.currentUser.reload();
+        const verified = Boolean(auth.currentUser.emailVerified);
+        setUser(prev => prev ? { ...prev, emailVerified: verified } : null);
+      }
       return { success: true };
     } catch (error: any) {
       const friendlyMessage = translateFirebaseError(error);
@@ -809,7 +853,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!auth || !auth.currentUser) return false;
     try {
       await auth.currentUser.reload();
-      const verified = auth.currentUser.emailVerified;
+      const verified = Boolean(auth.currentUser.emailVerified);
       if (user) {
         setUser(prev => prev ? { ...prev, emailVerified: verified } : null);
       }
@@ -866,6 +910,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signOut,
         resetPassword,
         sendVerificationEmail,
+        verifyEmailWithCode,
         checkVerificationStatus,
         enableDemoMode,
         disableDemoMode,

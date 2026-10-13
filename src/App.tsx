@@ -21,6 +21,7 @@ const OnboardingUpgradePage = React.lazy(() => import('./pages/OnboardingUpgrade
 const PricingPage = React.lazy(() => import('./pages/PricingPage').then((m) => ({ default: m.PricingPage })));
 const WallOfLovePage = React.lazy(() => import('./pages/WallOfLovePage').then((m) => ({ default: m.WallOfLovePage })));
 const ViralActivationPage = React.lazy(() => import('./pages/ViralActivationPage').then((m) => ({ default: m.ViralActivationPage })));
+const VerifyEmailPage = React.lazy(() => import('./pages/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage })));
 
 /**
  * Ultra-lightweight route loading fallback
@@ -75,6 +76,9 @@ export function App() {
             <Route path="/w/:publicWidgetId" element={<PublicWidgetPage />} />
             <Route path="/love/:slug" element={<WallOfLovePage />} />
             <Route path="/wall-of-love" element={<WallOfLovePage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/auth/action" element={<VerifyEmailPage />} />
+            <Route path="/__/auth/action" element={<VerifyEmailPage />} />
 
             {/* Protected Routes */}
             <Route

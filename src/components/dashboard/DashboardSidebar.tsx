@@ -142,25 +142,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         </button>
       </div>
 
-      {/* ── Active Workspace Header Card (Matches Bottom Menu Naming) ── */}
-      <div className="p-3 border-b border-slate-200/60">
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/90 border border-slate-200/70 shadow-2xs">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
-              {activeWorkspaceName.charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p id="sidebar-top-workspace-name" className="text-xs font-bold text-slate-900 truncate leading-tight tracking-tight">
-                {activeWorkspaceName}
-              </p>
-              <p className="text-[11px] font-medium text-emerald-600 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Active Workspace</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* ── Navigation Items (Cleanly Spaced Apple HIG Simple Stack) ── */}
       <div className="flex-1 overflow-y-auto px-3.5 pt-3 pb-6 space-y-1 scrollbar-thin">

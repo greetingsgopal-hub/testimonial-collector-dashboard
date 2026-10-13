@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, AlertTriangle, RefreshCw, CheckCircle, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Mail, AlertTriangle, RefreshCw, CheckCircle, Clock, KeyRound, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const EmailVerificationBanner: React.FC = () => {
-  const { user, isEmailVerified, isDemoMode, sendVerificationEmail, checkVerificationStatus } = useAuth();
+  const { user, isEmailVerified, isDemoMode, sendVerificationEmail, verifyEmailWithCode, checkVerificationStatus } = useAuth();
   const [resending, setResending] = useState(false);
   const [checking, setChecking] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [manualCode, setManualCode] = useState('');
+  const [submittingCode, setSubmittingCode] = useState(false);
   const [notice, setNotice] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
   // If there is no user, user is in demo mode, or email is verified, hide the banner
@@ -81,6 +85,55 @@ export const EmailVerificationBanner: React.FC = () => {
     }
   };
 
+  const extractCode = (input: string): string => {
+    const trimmed = input.trim();
+    if (!trimmed) return '';
+    try {
+      if (trimmed.includes('oobCode=')) {
+        const url = new URL(trimmed.startsWith('http') ? trimmed : `https://pandapraise.com/${trimmed}`);
+        const code = url.searchParams.get('oobCode');
+        if (code) return code;
+      }
+    } catch {
+      // Not a valid URL, treat as raw code
+    }
+    return trimmed;
+  };
+
+  const handleManualVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = extractCode(manualCode);
+    if (!code) {
+      setNotice({ type: 'error', text: 'Please enter a valid verification code or link.' });
+      return;
+    }
+
+    setSubmittingCode(true);
+    setNotice(null);
+    try {
+      const res = await verifyEmailWithCode(code);
+      if (res.success) {
+        setNotice({
+          type: 'success',
+          text: 'Email verified successfully! Full publishing features unlocked.',
+        });
+        setShowCodeInput(false);
+      } else {
+        setNotice({
+          type: 'error',
+          text: res.error || 'Invalid or expired verification code.',
+        });
+      }
+    } catch (err: any) {
+      setNotice({
+        type: 'error',
+        text: err?.message || 'Failed to verify code.',
+      });
+    } finally {
+      setSubmittingCode(false);
+    }
+  };
+
   return (
     <div className="mx-6 mt-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 transition-all animate-fade-in shadow-2xs">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
@@ -101,7 +154,16 @@ export const EmailVerificationBanner: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end">
+        <div className="flex flex-wrap items-center gap-2 shrink-0 w-full md:w-auto justify-end">
+          <button
+            type="button"
+            onClick={() => setShowCodeInput(!showCodeInput)}
+            className="px-2.5 py-1.5 rounded-xl border border-amber-400/40 bg-white/60 hover:bg-white text-amber-900 font-semibold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+          >
+            <KeyRound className="w-3.5 h-3.5 text-amber-700" />
+            <span>{showCodeInput ? 'Hide Code Input' : 'Enter Code'}</span>
+          </button>
+
           <button
             type="button"
             onClick={handleResend}
@@ -141,8 +203,36 @@ export const EmailVerificationBanner: React.FC = () => {
               </>
             )}
           </button>
+
+          <Link
+            to="/verify-email"
+            className="p-1.5 rounded-xl text-amber-700 hover:text-amber-950 hover:bg-amber-500/20 transition-colors"
+            title="Open Verification Center"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </Link>
         </div>
       </div>
+
+      {/* Expandable Manual Code Entry Input */}
+      {showCodeInput && (
+        <form onSubmit={handleManualVerify} className="mt-3 pt-3 border-t border-amber-500/20 flex items-center gap-2 animate-fade-in">
+          <input
+            type="text"
+            value={manualCode}
+            onChange={(e) => setManualCode(e.target.value)}
+            placeholder="Paste verification link or oobCode..."
+            className="flex-1 px-3 py-1.5 text-xs bg-white border border-amber-300 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+          />
+          <button
+            type="submit"
+            disabled={submittingCode || !manualCode.trim()}
+            className="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50 cursor-pointer shrink-0"
+          >
+            {submittingCode ? 'Verifying...' : 'Submit Code'}
+          </button>
+        </form>
+      )}
 
       {notice && (
         <div className={`mt-3 pt-2.5 border-t border-amber-500/20 text-xs flex items-center justify-between ${

@@ -73,7 +73,7 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
     container.remove();
   });
 
-  it('1. Top workspace header displays active workspace name matching bottom naming convention', async () => {
+  it('1. Top redundant active workspace header is removed for clean navigation layout', async () => {
     await act(async () => {
       root.render(
         <MemoryRouter>
@@ -87,11 +87,8 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
     });
 
     const topName = container.querySelector('#sidebar-top-workspace-name');
-    expect(topName).not.toBeNull();
-    expect(topName?.textContent).toContain('Acme SaaS Corp');
-
-    // Shows Active Workspace pulse badge
-    expect(container.textContent).toContain('Active Workspace');
+    expect(topName).toBeNull();
+    expect(container.textContent).not.toContain('Active Workspace');
   });
 
   it('2. Renders all standard navigation links cleanly spaced with badge count', async () => {
