@@ -49,27 +49,27 @@
 ---
 
 ## Phase 3: Integrations Marketplace & Affiliate Program
-- [ ] **3.1 Third-Party CMS Embed Integrations**
-  - [ ] **Shopify:** Native App Embed script tag & Liquid snippet copy helper
-  - [ ] **WordPress:** Standalone WordPress plugin package (`pandapraise-wp-plugin.zip`) with shortcode `[pandapraise widget="id"]`
-  - [ ] **Webflow / Framer / Notion:** Step-by-step interactive embed installation guides with custom iframe/script generators
-- [ ] **3.2 Real-Time Alert Webhooks (Slack & Discord)**
-  - [ ] Slack incoming webhook integration: Send formatted testimonial card with stars, reviewer name, and 1-click approve button
-  - [ ] Discord webhook integration: Send rich embed with reviewer avatar and quote
-  - [ ] Settings tab to configure webhook URLs and test dispatch with 1 click
-- [ ] **3.3 Zapier / Make.com Automation Engine**
-  - [ ] REST Hook triggers: `testimonial.created`, `testimonial.approved`
-  - [ ] Inbound webhook trigger for CRM integrations (HubSpot, Stripe, WooCommerce)
-- [ ] **3.4 Self-Serve Affiliate & Partner Program**
-  - [ ] Affiliate registration portal (`/affiliates`)
-  - [ ] Unique tracking link generation with real-time click and conversion attribution
-  - [ ] Affiliate dashboard displaying clicks, referrals, active MRR, and unpaid earnings (30% recurring)
-  - [ ] Stripe Connect onboarding link for automated payouts
-  - [ ] Agency partner tier with multi-client workspace discounts and co-branding options
-- [ ] **3.5 Public REST API & Developer Keys**
-  - [ ] API Key management in workspace settings (`pp_live_...`)
-  - [ ] Public endpoints: `GET /api/v1/testimonials`, `POST /api/v1/testimonials`, `GET /api/v1/widgets`
-  - [ ] Interactive OpenAPI / Swagger documentation page
+- [x] **3.1 Third-Party CMS Embed Integrations**
+  - [x] **Shopify:** Native App Embed script tag & Liquid snippet copy helper
+  - [x] **WordPress:** Standalone WordPress plugin package (`pandapraise-wp-plugin.php`) with shortcode `[pandapraise widget="id"]`
+  - [x] **Webflow / Framer / Notion:** Step-by-step interactive embed installation guides with custom iframe/script generators
+- [x] **3.2 Real-Time Alert Webhooks (Slack & Discord)**
+  - [x] Slack incoming webhook integration: Send formatted testimonial card with stars, reviewer name, and 1-click approve button
+  - [x] Discord webhook integration: Send rich embed with reviewer avatar and quote
+  - [x] Settings tab to configure webhook URLs and test dispatch with 1 click
+- [x] **3.3 Zapier / Make.com Automation Engine**
+  - [x] REST Hook triggers: `testimonial.created`, `testimonial.approved`
+  - [x] Inbound webhook trigger for CRM integrations (HubSpot, Stripe, WooCommerce)
+- [x] **3.4 Self-Serve Affiliate & Partner Program**
+  - [x] Affiliate registration portal (`/affiliates`)
+  - [x] Unique tracking link generation with real-time click and conversion attribution
+  - [x] Affiliate dashboard displaying clicks, referrals, active MRR, and unpaid earnings (30% recurring)
+  - [x] Stripe Connect onboarding link for automated payouts
+  - [x] Agency partner tier with multi-client workspace discounts and co-branding options
+- [x] **3.5 Public REST API & Developer Keys**
+  - [x] API Key management in workspace settings (`pp_live_...`)
+  - [x] Public endpoints: `GET /api/v1/testimonials`, `POST /api/v1/testimonials`, `GET /api/v1/widgets`
+  - [x] Interactive OpenAPI / Swagger documentation page
 
 ---
 
