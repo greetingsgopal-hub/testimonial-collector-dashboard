@@ -142,10 +142,7 @@ export const SignupPage: React.FC = () => {
   };
 
   const handleGoogleSignup = async () => {
-    if (isGoogleSubmitting) {
-      setIsGoogleSubmitting(false);
-      return;
-    }
+    if (isGoogleSubmitting) return;
     setLocalError(null);
     setIsGoogleSubmitting(true);
     try {
@@ -310,12 +307,21 @@ export const SignupPage: React.FC = () => {
             {/* Sign up with Google Button */}
             <button
               type="button"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isGoogleSubmitting}
               onClick={handleGoogleSignup}
               className="w-full py-2 px-4 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-800 font-semibold text-sm flex items-center justify-center gap-2.5 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
             >
-              <GoogleIcon className="w-4 h-4 shrink-0" />
-              <span>{isGoogleSubmitting ? 'Connecting... (Click to cancel)' : 'Sign up with Google'}</span>
+              {isGoogleSubmitting ? (
+                <>
+                  <div className="w-4 h-4 rounded-full border-2 border-slate-300 border-t-violet-600 animate-spin shrink-0" />
+                  <span>Connecting with Google...</span>
+                </>
+              ) : (
+                <>
+                  <GoogleIcon className="w-4 h-4 shrink-0" />
+                  <span>Sign up with Google</span>
+                </>
+              )}
             </button>
           </form>
 

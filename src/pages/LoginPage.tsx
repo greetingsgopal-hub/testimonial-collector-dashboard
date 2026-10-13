@@ -57,10 +57,7 @@ export const LoginPage: React.FC = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    if (isGoogleSubmitting) {
-      setIsGoogleSubmitting(false);
-      return;
-    }
+    if (isGoogleSubmitting) return;
     setLocalError(null);
     setIsGoogleSubmitting(true);
     try {
@@ -113,12 +110,21 @@ export const LoginPage: React.FC = () => {
             <button
               id="google-signin-btn"
               type="button"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isGoogleSubmitting}
               onClick={handleGoogleSignIn}
-              className="w-full py-2.5 px-4 rounded-xl border border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50/80 text-gray-800 font-semibold text-sm flex items-center justify-center gap-2.5 transition-all shadow-2xs cursor-pointer disabled:opacity-50"
+              className="w-full py-2.5 px-4 rounded-xl border border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50/80 text-gray-800 font-semibold text-sm flex items-center justify-center gap-2.5 transition-all shadow-2xs cursor-pointer disabled:opacity-60"
             >
-              <GoogleIcon className="w-4 h-4 shrink-0" />
-              <span>{isGoogleSubmitting ? 'Signing in with Google... (Click to cancel)' : 'Sign in with Google'}</span>
+              {isGoogleSubmitting ? (
+                <>
+                  <div className="w-4 h-4 rounded-full border-2 border-slate-300 border-t-violet-600 animate-spin shrink-0" />
+                  <span>Signing in with Google...</span>
+                </>
+              ) : (
+                <>
+                  <GoogleIcon className="w-4 h-4 shrink-0" />
+                  <span>Sign in with Google</span>
+                </>
+              )}
             </button>
 
             {/* Clear Divider */}
