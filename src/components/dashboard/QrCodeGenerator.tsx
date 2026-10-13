@@ -28,10 +28,6 @@ interface AppleFinish {
 
 const APPLE_FINISHES: AppleFinish[] = [
   { name: 'Space Black', fg: '#0f172a', bg: '#ffffff' },
-  { name: 'Panda Violet', fg: '#7c3aed', bg: '#faf5ff' },
-  { name: 'Pacific Blue', fg: '#0284c7', bg: '#f0f9ff' },
-  { name: 'Forest Emerald', fg: '#059669', bg: '#ecfdf5' },
-  { name: 'Sunset Amber', fg: '#d97706', bg: '#fffbeb' },
 ];
 
 /**
@@ -43,7 +39,7 @@ export function generateQrSvg(
   size: number = 320,
   fg: string = '#0f172a',
   bg: string = '#ffffff',
-  style: QrStyle = 'rounded',
+  style: QrStyle = 'classic',
   includeLogo: boolean = true
 ): string {
   const safeFg = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fg) ? fg : '#0f172a';
@@ -85,13 +81,15 @@ export function generateQrSvg(
       const x = (margin + col) * cellSize;
       const y = (margin + row) * cellSize;
 
-      let rx = cellSize * 0.35;
-      if (isFinder) {
+      let rx = 0;
+      if (style === 'classic') {
+        rx = 0;
+      } else if (isFinder) {
         rx = cellSize * 0.25;
       } else if (style === 'dots') {
         rx = cellSize * 0.48;
-      } else if (style === 'classic') {
-        rx = 0;
+      } else {
+        rx = cellSize * 0.35;
       }
 
       pathData += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellSize.toFixed(2)}" height="${cellSize.toFixed(2)}" rx="${rx.toFixed(2)}" fill="${safeFg}" />`;
@@ -137,7 +135,7 @@ export function generateQrSvg(
 export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = ({ onClose }) => {
   const { collectionForm, project } = useAuth();
   const [activeTab, setActiveTab] = useState<'form' | 'wall'>('form');
-  const [qrStyle, setQrStyle] = useState<QrStyle>('rounded');
+  const [qrStyle, setQrStyle] = useState<QrStyle>('classic');
   const [selectedFinish, setSelectedFinish] = useState<AppleFinish>(APPLE_FINISHES[0]);
   const [includeEmblem, setIncludeEmblem] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -539,40 +537,19 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = ({ onClose }) => 
 
           {/* 2. Shape Geometry */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
-              Corner Geometry
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => setQrStyle('rounded')}
-                className={`apple-touch py-2 px-3 rounded-xl text-xs font-semibold border text-center transition-all cursor-pointer ${
-                  qrStyle === 'rounded'
-                    ? 'border-violet-600 bg-violet-600 text-white shadow-xs'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750'
-                }`}
-              >
-                ● Squircle
-              </button>
-              <button
-                type="button"
-                onClick={() => setQrStyle('dots')}
-                className={`apple-touch py-2 px-3 rounded-xl text-xs font-semibold border text-center transition-all cursor-pointer ${
-                  qrStyle === 'dots'
-                    ? 'border-violet-600 bg-violet-600 text-white shadow-xs'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750'
-                }`}
-              >
-                ○ Dots
-              </button>
+            <div className="flex items-center justify-between text-xs">
+              <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                Corner Geometry
+              </label>
+              <span className="text-slate-500 dark:text-slate-400 font-medium">
+                Classic
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setQrStyle('classic')}
-                className={`apple-touch py-2 px-3 rounded-xl text-xs font-semibold border text-center transition-all cursor-pointer ${
-                  qrStyle === 'classic'
-                    ? 'border-violet-600 bg-violet-600 text-white shadow-xs'
-                    : 'border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750'
-                }`}
+                className="apple-touch py-2 px-3.5 rounded-xl text-xs font-semibold border text-center transition-all cursor-pointer border-violet-600 bg-violet-600 text-white shadow-xs flex items-center gap-1.5"
               >
                 ■ Classic
               </button>
