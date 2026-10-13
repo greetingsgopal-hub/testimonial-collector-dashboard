@@ -33,11 +33,17 @@ import { handleVerifyWidget } from './handlers/verifyWidget';
 import { executeAutomatedBackgroundSync } from './lib/backgroundSync';
 import { handleCampaignTriggerWebhook } from './handlers/campaignTriggerWebhook';
 import { handleCampaignTrackClick, handleCampaignDispatchTrigger } from './handlers/campaignTrackHandler';
+import { handleReferralRedirect, handleReferralStats } from './handlers/referralHandler';
 
 export default {
   async fetch(request: Request, env: WorkerEnv, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const pathname = url.pathname;
+
+    // In-App Referral Funnel (/r/:code) -> Sets 60-day cookie and redirects
+    if (pathname.startsWith('/r/')) {
+      return await handleReferralRedirect(request, env);
+    }
 
     // Public Static Client-Side JavaScript Runtime for Wall of Love Embed
     if (
@@ -215,6 +221,10 @@ export default {
         case 'import/commit':
         case 'import-commit-reviews':
           return await handleUniversalReviewsCommit(request, env);
+
+        case 'referral/stats':
+        case 'referral-stats':
+          return await handleReferralStats(request, env);
 
         default:
           return new Response(JSON.stringify({ error: `API route '${pathname}' not found.` }), {

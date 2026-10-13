@@ -496,8 +496,33 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
       .pp-carousel-dot.pp-active {
         background: #6701e6;
       }
-      .pp-theme-dark .pp-carousel-dot.pp-active {
-        background: #a855f7;
+      /* ── LAYOUT: MARQUEE (continuous auto-scrolling ticker) ── */
+      .pp-marquee {
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+        padding: 8px 0;
+        mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+        -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+      }
+      .pp-marquee-track {
+        display: flex;
+        gap: 16px;
+        width: max-content;
+        animation: pp-marquee-scroll 35s linear infinite;
+      }
+      .pp-marquee-track:hover {
+        animation-play-state: paused;
+      }
+      .pp-marquee .pp-card {
+        width: 320px;
+        max-width: 320px;
+        flex-shrink: 0;
+        margin-bottom: 0;
+      }
+      @keyframes pp-marquee-scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
       }
 
       /* ── LAYOUT: TRUST BADGE ── */
@@ -630,15 +655,26 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
     return html;
   }
 
-  // Viral Growth Loop: "Collected with PandaPraise" footer link
-  function renderFooterBadge(hideBadge) {
+  // Viral Growth Loop: "Collected with PandaPraise" footer link with attribution
+  function renderFooterBadge(hideBadge, projectId) {
     if (hideBadge) return '';
+    var refParam = projectId ? '&ref=' + encodeURIComponent(projectId) : '';
     var html = '<div class="pp-footer-badge">';
-    html += '  <a href="https://pandapraise.com?utm_source=widget&utm_medium=referral&utm_campaign=powered_by" target="_blank" rel="noopener" class="pp-footer-link">';
+    html += '  <a href="https://pandapraise.com?utm_source=widget&utm_medium=referral&utm_campaign=powered_by' + refParam + '" target="_blank" rel="noopener" class="pp-footer-link">';
     html += '    ' + ICONS.heart + ' Collected with PandaPraise';
     html += '  </a>';
     html += '</div>';
     return html;
+  }
+
+  function getContainerProjectId(container, data) {
+    var raw = (container && container.getAttribute)
+      ? (container.getAttribute('data-project-id') || container.getAttribute('data-project') || '')
+      : '';
+    if (!raw && container && container.host && container.host.getAttribute) {
+      raw = container.host.getAttribute('data-project-id') || container.host.getAttribute('data-project') || '';
+    }
+    return raw || (data && data.projectId) || '';
   }
 
   function renderWall(container, data, theme, hideBadge) {
@@ -648,13 +684,42 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
       return;
     }
 
+    var projId = getContainerProjectId(container, data);
     var html = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '">';
     html += '<div class="pp-wall-masonry">';
     for (var i = 0; i < reviews.length; i++) {
       html += renderCard(reviews[i]);
     }
     html += '</div>';
-    html += renderFooterBadge(hideBadge);
+    html += renderFooterBadge(hideBadge, projId);
+    html += '</div>';
+
+    var prefix = container.host ? '<style>' + getStylesCss() + '</style>' : '';
+    container.innerHTML = prefix + html;
+  }
+
+  function renderMarquee(container, data, theme, hideBadge) {
+    var reviews = data.testimonials || [];
+    if (reviews.length === 0) {
+      renderEmpty(container);
+      return;
+    }
+
+    var projId = getContainerProjectId(container, data);
+    var html = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '">';
+    html += '<div class="pp-marquee">';
+    html += '<div class="pp-marquee-track">';
+    // Render set 1
+    for (var i = 0; i < reviews.length; i++) {
+      html += renderCard(reviews[i]);
+    }
+    // Render set 2 for seamless infinite loop
+    for (var j = 0; j < reviews.length; j++) {
+      html += renderCard(reviews[j]);
+    }
+    html += '</div>';
+    html += '</div>';
+    html += renderFooterBadge(hideBadge, projId);
     html += '</div>';
 
     var prefix = container.host ? '<style>' + getStylesCss() + '</style>' : '';
@@ -668,9 +733,10 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
       return;
     }
 
+    var projId = getContainerProjectId(container, data);
     var html = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '">';
     html += '<div class="pp-spotlight">' + renderCard(reviews[0]) + '</div>';
-    html += renderFooterBadge(hideBadge);
+    html += renderFooterBadge(hideBadge, projId);
     html += '</div>';
 
     var prefix = container.host ? '<style>' + getStylesCss() + '</style>' : '';
@@ -684,6 +750,7 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
       return;
     }
 
+    var projId = getContainerProjectId(container, data);
     var html = '<div class="pp-wall-container pp-theme-' + sanitizeTheme(theme) + '">';
     html += '<div class="pp-carousel">';
     for (var i = 0; i < reviews.length; i++) {
@@ -701,7 +768,7 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
       html += '</div>';
     }
     html += '</div>';
-    html += renderFooterBadge(hideBadge);
+    html += renderFooterBadge(hideBadge, projId);
     html += '</div>';
 
     var prefix = container.host ? '<style>' + getStylesCss() + '</style>' : '';
@@ -757,7 +824,7 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
     }
 
     var avg = parseFloat(data.averageRating || '0') || 0;
-    var projectId = container.getAttribute ? (container.getAttribute('data-project-id') || container.getAttribute('data-project') || '') : '';
+    var projectId = getContainerProjectId(container, data);
     var href = projectId
       ? 'https://pandapraise.com/w/' + encodeURIComponent(projectId)
       : 'https://pandapraise.com';
@@ -775,7 +842,7 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
     container.innerHTML = prefix + html;
   }
 
-  var ALLOWED_LAYOUTS = { wall: true, masonry: true, grid: true, carousel: true, spotlight: true, badge: true };
+  var ALLOWED_LAYOUTS = { wall: true, masonry: true, grid: true, carousel: true, spotlight: true, badge: true, marquee: true };
 
   function sanitizeLayout(layout) {
     var l = (layout || '').toLowerCase();
@@ -789,6 +856,8 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
         return renderCarousel(container, data, theme, hideBadge);
       case 'spotlight':
         return renderSpotlight(container, data, theme, hideBadge);
+      case 'marquee':
+        return renderMarquee(container, data, theme, hideBadge);
       case 'badge':
         return renderBadge(container, data, theme);
       default:
@@ -815,6 +884,24 @@ export function handleEmbedScript(_request: Request, _env: WorkerEnv): Response 
       html += '    </div>';
       html += '  </div>';
       html += '</div>';
+    } else if (l === 'marquee') {
+      html += '<div class="pp-marquee"><div class="pp-marquee-track">';
+      for (var m = 0; m < 4; m++) {
+        html += '<div class="pp-card pp-skeleton-card" style="width:320px;flex-shrink:0;">';
+        html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-40" style="margin-bottom:14px;"></div>';
+        html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-full"></div>';
+        html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-80"></div>';
+        html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-60" style="margin-bottom:18px;"></div>';
+        html += '  <div class="pp-skeleton-avatar-row">';
+        html += '    <div class="pp-skeleton-shimmer pp-skeleton-avatar"></div>';
+        html += '    <div style="flex:1;">';
+        html += '      <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-40" style="margin-bottom:6px;"></div>';
+        html += '      <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-20"></div>';
+        html += '    </div>';
+        html += '  </div>';
+        html += '</div>';
+      }
+      html += '</div></div>';
     } else if (l === 'badge') {
       html += '<div class="pp-card pp-badge pp-skeleton-card" style="padding:24px 20px;">';
       html += '  <div class="pp-skeleton-shimmer pp-skeleton-line pp-w-40" style="margin:0 auto 10px auto;"></div>';

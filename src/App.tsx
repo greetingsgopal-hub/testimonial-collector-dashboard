@@ -22,6 +22,8 @@ const PricingPage = React.lazy(() => import('./pages/PricingPage').then((m) => (
 const WallOfLovePage = React.lazy(() => import('./pages/WallOfLovePage').then((m) => ({ default: m.WallOfLovePage })));
 const ViralActivationPage = React.lazy(() => import('./pages/ViralActivationPage').then((m) => ({ default: m.ViralActivationPage })));
 const VerifyEmailPage = React.lazy(() => import('./pages/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage })));
+const ReferralRedirectPage = React.lazy(() => import('./pages/ReferralRedirectPage').then((m) => ({ default: m.ReferralRedirectPage })));
+import { captureReferralCode } from './lib/referral';
 
 /**
  * Ultra-lightweight route loading fallback
@@ -45,7 +47,10 @@ function AnalyticsRouteTracker() {
 
   useEffect(() => {
     trackPageView(location.pathname);
-  }, [location.pathname]);
+    if (location.search) {
+      captureReferralCode(location.search);
+    }
+  }, [location.pathname, location.search]);
 
   return null;
 }
@@ -63,6 +68,7 @@ export function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
+            <Route path="/r/:code" element={<ReferralRedirectPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />

@@ -30,6 +30,9 @@ import { getSampleReviews, isSampleDataCleared, setSampleDataCleared } from '../
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { EmailVerificationBanner } from '../components/auth/EmailVerificationBanner';
+import { PlanLimitBanner } from '../components/dashboard/PlanLimitBanner';
+import { UpgradeModal } from '../components/dashboard/UpgradeModal';
+import { ReferralHub } from '../components/dashboard/ReferralHub';
 import { 
   Check,
   X,
@@ -51,6 +54,7 @@ const TAB_LABEL_MAP: Record<string, string> = {
   feedback: 'Feedback',
   tags: 'Tags',
   analyze: 'Analytics',
+  referral: 'Referral Program (Give 1M / Get 1M)',
 };
 
 export const DashboardPage = () => {
@@ -59,7 +63,8 @@ export const DashboardPage = () => {
     description: 'Panda Praise customer review management and moderation dashboard.',
   });
 
-  const { project, collectionForm } = useAuth();
+  const { project, collectionForm, workspace } = useAuth();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTabState] = useState<DashboardTab>(() => {
     const paramTab = searchParams.get('tab') as DashboardTab;
@@ -480,6 +485,13 @@ export const DashboardPage = () => {
         {/* Firebase Email Verification Notification Gate */}
         <EmailVerificationBanner />
 
+        {/* Free Plan Limits & Upgrade Funnel */}
+        <PlanLimitBanner
+          workspace={workspace}
+          testimonialCount={effectiveReviews.length}
+          onUpgrade={() => setShowUpgradeModal(true)}
+        />
+
         {socialNotification && (
           <div className={`mx-6 mt-4 p-3 rounded-xl flex items-center justify-between text-xs font-semibold ${
             socialNotification.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'
@@ -557,6 +569,13 @@ export const DashboardPage = () => {
           {/* AI Sentiment Analysis */}
           {activeTab === 'analyze' && (
             <AnalyzeView reviews={effectiveReviews} />
+          )}
+
+          {/* In-App Referral Hub ("Give 1 Month / Get 1 Month") */}
+          {activeTab === 'referral' && (
+            <div className="max-w-6xl mx-auto">
+              <ReferralHub workspace={workspace} />
+            </div>
           )}
 
           {/* Settings (Head 1: Integrations & Filters, Head 2: Account & Billing Management) */}
@@ -863,6 +882,11 @@ export const DashboardPage = () => {
       <PublishHistoryModal
         isOpen={showHistoryModal}
         onClose={() => setShowHistoryModal(false)}
+      />
+
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
       />
 
     </div>

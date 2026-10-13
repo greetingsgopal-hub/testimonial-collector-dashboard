@@ -13,7 +13,8 @@ import {
   ChevronsUpDown,
   Mail,
   Sparkles,
-X,
+  Gift,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Project } from '../../types';
@@ -29,6 +30,7 @@ export type DashboardTab =
   | 'tags'
   | 'rich-snippet'
   | 'analyze'
+  | 'referral'
   | 'integrate'
   | 'settings';
 
@@ -270,7 +272,27 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           <div className="h-px bg-slate-200/70" />
         </div>
 
-        {/* 6. Settings */}
+        {/* 6. Referral Program */}
+        <button
+          onClick={() => setActiveTab('referral')}
+          className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === 'referral'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <Gift className={`w-4 h-4 transition-colors ${activeTab === 'referral' ? 'text-amber-300' : 'text-purple-600 group-hover:text-purple-700'}`} />
+            <span>Referrals</span>
+          </div>
+          <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold ${
+            activeTab === 'referral' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'
+          }`}>
+            Free Month
+          </span>
+        </button>
+
+        {/* 7. Settings */}
         <button
           onClick={() => setActiveTab('settings')}
           className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
