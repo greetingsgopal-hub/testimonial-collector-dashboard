@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
 import { Check, ArrowRight, Sparkles } from 'lucide-react';
+import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
 
 const SELLING_OPTIONS = [
   'Courses',
@@ -28,6 +29,8 @@ export const OnboardingPage: React.FC = () => {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [firstName, setFirstName] = useState(user?.displayName?.split(' ')[0] || '');
   const [sellingCategory, setSellingCategory] = useState('SaaS subscriptions');
+  const [isOther, setIsOther] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState(project?.websiteUrl || '');
 
   // Multi-cannon celebration bomb with colorful paper cuttings
@@ -97,13 +100,15 @@ export const OnboardingPage: React.FC = () => {
   };
 
   const handleSelectCategory = (cat: string) => {
+    setIsOther(false);
     setSellingCategory(cat);
   };
 
   const handleStep2Proceed = () => {
-    if (sellingCategory) {
-      setStep(3);
+    if (isOther && customCategory.trim()) {
+      setSellingCategory(customCategory.trim());
     }
+    setStep(3);
   };
 
   // Step 4 progressive setup states
@@ -213,18 +218,34 @@ export const OnboardingPage: React.FC = () => {
           <span className="text-xs">→</span>
         </button>
 
-        {/* Center Intersecting Avatar Badge */}
-        <div className="absolute left-1/2 -bottom-5 -translate-x-1/2 flex items-center justify-center">
+        {/* Top-right Panda Praise Brand Lockup */}
+        <div className="absolute top-2.5 right-5 flex items-center gap-1.5 select-none">
+          <PandaPraiseIcon size={20} className="shrink-0 drop-shadow-xs" />
+          <span className="text-white text-xs font-bold tracking-tight">Panda Praise</span>
+        </div>
+
+        {/* Center Intersecting Avatar / Brand Badge */}
+        <div className="absolute left-1/2 -bottom-5 sm:-bottom-6 -translate-x-1/2 flex items-center justify-center">
           <div
             className="relative cursor-pointer group"
             onClick={fireCelebrationBomb}
             title="Click for celebration bomb!"
           >
-            {/* Gray avatar silhouette circle */}
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gray-200 border-2 border-white shadow-sm flex items-center justify-center text-gray-400 group-hover:scale-105 transition-transform">
-              <svg className="w-6 h-6 fill-gray-400" viewBox="0 0 24 24">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-              </svg>
+            {/* User profile photo or Panda Praise icon */}
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white border-2 border-white shadow-sm flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
+              {user?.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt={user.displayName || 'Profile'}
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <PandaPraiseIcon size={34} className="shrink-0" />
+              )}
             </div>
 
             {/* Overlapping white circle with purple heart */}
@@ -282,7 +303,7 @@ export const OnboardingPage: React.FC = () => {
 
             <div className="max-w-md mx-auto mt-8 space-y-2.5 text-left">
               {SELLING_OPTIONS.map((opt) => {
-                const isSelected = sellingCategory === opt;
+                const isSelected = !isOther && sellingCategory === opt;
                 return (
                   <button
                     key={opt}
@@ -307,6 +328,50 @@ export const OnboardingPage: React.FC = () => {
                   </button>
                 );
               })}
+
+              {/* ── Option 7: Custom Product or Service ── */}
+              <div
+                onClick={() => {
+                  setIsOther(true);
+                  setSellingCategory(customCategory.trim() || 'Other');
+                }}
+                className={`w-full px-4 py-3.5 rounded-xl border transition-all cursor-pointer text-left ${
+                  isOther
+                    ? 'border-[#6701e6] bg-purple-50/40 ring-2 ring-[#6701e6]/10'
+                    : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                      isOther ? 'border-[#6701e6] bg-[#6701e6]' : 'border-gray-300'
+                    }`}
+                  >
+                    {isOther && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                  </div>
+                  <span className="text-sm font-medium text-gray-800">
+                    Other product or service
+                  </span>
+                </div>
+
+                {isOther && (
+                  <div className="mt-2.5 pl-7" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="text"
+                      autoFocus
+                      id="custom-product-service-input"
+                      value={customCategory}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCustomCategory(val);
+                        setSellingCategory(val.trim() || 'Other');
+                      }}
+                      placeholder="Mention your product or service (e.g. Marketing Agency, Mobile App, Consulting...)"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-purple-300 focus:border-[#6701e6] focus:ring-2 focus:ring-[#6701e6]/20 text-sm text-gray-900 bg-white outline-none shadow-2xs transition-all"
+                    />
+                  </div>
+                )}
+              </div>
 
               {/* Proceed / Continue Button */}
               <button

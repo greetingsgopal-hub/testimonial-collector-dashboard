@@ -188,4 +188,47 @@ describe('OnboardingPage High-Velocity Setup & Transition Flow', () => {
     // Should NOT have the distracting "See Formats & Plans" link
     expect(container.textContent).not.toContain('See Formats & Plans');
   });
+
+  it('4. Renders brand logo in header and custom product/service box in step 2', async () => {
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/onboarding']}>
+          <Routes>
+            <Route path="/onboarding" element={<OnboardingPage />} />
+          </Routes>
+        </MemoryRouter>
+      );
+    });
+
+    // Check brand logo is rendered in the top banner
+    expect(container.querySelector('svg[aria-label="Panda Praise Logo"]')).not.toBeNull();
+    expect(container.textContent).toContain('Panda Praise');
+
+    // Progress to Step 2
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+    });
+    const step1Form = container.querySelector('form');
+    await act(async () => {
+      step1Form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      vi.advanceTimersByTime(300);
+    });
+
+    // Step 2: "Other product or service" box should exist in the list
+    expect(container.textContent).toContain('Other product or service');
+
+    // Clicking "Other product or service" reveals custom text input
+    const otherOption = Array.from(container.querySelectorAll('span')).find(
+      (s) => s.textContent?.includes('Other product or service')
+    )?.closest('div');
+    expect(otherOption).not.toBeNull();
+
+    await act(async () => {
+      otherOption?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    const customInput = container.querySelector('#custom-product-service-input') as HTMLInputElement;
+    expect(customInput).not.toBeNull();
+    expect(customInput.placeholder).toContain('Mention your product or service');
+  });
 });

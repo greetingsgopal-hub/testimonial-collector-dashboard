@@ -56,6 +56,7 @@ export interface AuthUser {
   uid: string;
   email: string | null;
   displayName?: string | null;
+  photoURL?: string | null;
   emailVerified: boolean;
 }
 
@@ -606,6 +607,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
           emailVerified: firebaseUser.emailVerified,
         };
         setUser(authUser);
