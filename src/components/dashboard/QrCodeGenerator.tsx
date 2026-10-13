@@ -135,8 +135,8 @@ export function generateQrSvg(
 export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = ({ onClose }) => {
   const { collectionForm, project } = useAuth();
   const [activeTab, setActiveTab] = useState<'form' | 'wall'>('form');
-  const [qrStyle, setQrStyle] = useState<QrStyle>('classic');
-  const [selectedFinish, setSelectedFinish] = useState<AppleFinish>(APPLE_FINISHES[0]);
+  const qrStyle: QrStyle = 'classic';
+  const selectedFinish: AppleFinish = APPLE_FINISHES[0];
   const [includeEmblem, setIncludeEmblem] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedImage, setCopiedImage] = useState(false);
@@ -501,62 +501,9 @@ export const QrCodeGenerator: React.FC<QrCodeGeneratorProps> = ({ onClose }) => 
         {/* Right: Customization Controls & Tiered Actions */}
         <div className="md:col-span-7 space-y-4">
           
-          {/* 1. Finish Color - Non-truncating Swatches */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <label className="font-bold text-slate-800 dark:text-slate-200">
-                Finish Color
-              </label>
-              <span className="text-slate-500 dark:text-slate-400 font-medium">
-                {selectedFinish.name}
-              </span>
-            </div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              {APPLE_FINISHES.map((finish) => {
-                const isSelected = selectedFinish.name === finish.name;
-                return (
-                  <button
-                    key={finish.name}
-                    type="button"
-                    onClick={() => setSelectedFinish(finish)}
-                    className={`apple-touch relative w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                      isSelected
-                        ? 'ring-2 ring-violet-600 ring-offset-2 dark:ring-offset-slate-900 scale-105 shadow-sm'
-                        : 'hover:scale-105 opacity-85 hover:opacity-100'
-                    }`}
-                    style={{ backgroundColor: finish.fg }}
-                    title={finish.name}
-                    aria-label={finish.name}
-                  >
-                    {isSelected && <Check className="w-4 h-4 text-white drop-shadow-xs" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* 2. Shape Geometry */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                Corner Geometry
-              </label>
-              <span className="text-slate-500 dark:text-slate-400 font-medium">
-                Classic
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setQrStyle('classic')}
-                className="apple-touch py-2 px-3.5 rounded-xl text-xs font-semibold border text-center transition-all cursor-pointer border-violet-600 bg-violet-600 text-white shadow-xs flex items-center gap-1.5"
-              >
-                ■ Classic
-              </button>
-            </div>
-          </div>
 
-          {/* 3. Center Brand Emblem Switch */}
+          {/* Center Brand Emblem Switch */}
           <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3 shadow-2xs">
             <div className="flex items-center gap-2.5">
               <span className="text-base">🐼</span>

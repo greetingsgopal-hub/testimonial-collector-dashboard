@@ -45,26 +45,16 @@ describe('QrCodeGenerator Modernized Standee Modal', () => {
     expect(container.querySelector('[aria-label="5 out of 5 stars"]')).not.toBeNull();
   });
 
-  it('renders classic corner geometry and space black finish', () => {
+  it('does not display redundant color or geometry option controls', () => {
     act(() => {
       root.render(<QrCodeGenerator />);
     });
 
-    expect(container.textContent).toContain('Finish Color');
-    expect(container.textContent).toContain('Space Black');
-
-    // Space Black swatch button is present and active
-    const spaceBlackBtn = container.querySelector('button[aria-label="Space Black"]') as HTMLButtonElement;
-    expect(spaceBlackBtn).not.toBeNull();
-
-    // Removed colors like Pacific Blue are not present
-    const pacificBlueBtn = container.querySelector('button[aria-label="Pacific Blue"]');
-    expect(pacificBlueBtn).toBeNull();
-
-    // Classic geometry is rendered and other geometries (Squircle, Dots) are removed
-    expect(container.textContent).toContain('Classic');
-    expect(container.textContent).not.toContain('Squircle');
-    expect(container.textContent).not.toContain('Dots');
+    // Control selectors for Finish Color and Corner Geometry are removed
+    expect(container.textContent).not.toContain('Finish Color');
+    expect(container.textContent).not.toContain('Corner Geometry');
+    expect(container.querySelector('button[aria-label="Space Black"]')).toBeNull();
+    expect(container.querySelector('button[aria-label="Pacific Blue"]')).toBeNull();
   });
 
   it('allows switching destination between Review Form and Wall of Love', () => {
