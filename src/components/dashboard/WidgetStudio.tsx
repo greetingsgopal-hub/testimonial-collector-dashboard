@@ -30,7 +30,8 @@ import {
   Smartphone,
   MousePointer,
   Share2,
-  X
+  X,
+  ArrowUpRight
 } from 'lucide-react';
 import { Review, WidgetType, WidgetSettings } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -547,35 +548,28 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto font-sans">
-      {/* Studio Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-200 shadow-xs">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            {onBack && (
-              <button
-                onClick={onBack}
-                className="px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-1 transition-colors cursor-pointer mr-2"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Back</span>
-              </button>
-            )}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-[#6701e6] text-xs font-bold uppercase tracking-wider border border-purple-200">
-              <Sparkles className="w-3.5 h-3.5" />
-              Wall of Love & Widget Studio
-            </div>
+      {/* ── Streamlined Top Control Bar (Format Selector & Share Action) ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:p-3.5 rounded-2xl border border-gray-200/90 shadow-2xs">
+        <div className="flex items-center gap-2">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-1.5 transition-colors cursor-pointer border border-gray-200/80 bg-white shrink-0"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back</span>
+            </button>
+          )}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-[#6701e6] text-xs font-bold uppercase tracking-wider border border-purple-200">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Widgets Studio</span>
           </div>
-          <h2 className="text-2xl font-bold font-display text-gray-950 tracking-tight">
-            Embeddable Testimonial Widgets
-          </h2>
-          <p className="text-sm text-gray-500">
-            Publish once. When you approve new testimonials in Panda Praise, your live website Wall of Love updates automatically.
-          </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 self-start md:self-auto">
+        <div className="flex flex-wrap items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
           {/* Widget Format Selector */}
-          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-gray-100 rounded-xl border border-gray-200">
+          <div className="flex flex-wrap items-center gap-1 p-1 bg-gray-100/90 rounded-xl border border-gray-200/80">
             {[
               { id: 'wall', label: 'Wall of Love', icon: Layers },
               { id: 'carousel', label: 'Carousel', icon: Maximize2 },
@@ -593,11 +587,11 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                     type="button"
                     disabled
                     title="Coming soon — not yet available for website embed"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 bg-gray-100/60 cursor-not-allowed opacity-70"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-gray-400 bg-gray-100/60 cursor-not-allowed opacity-70"
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5" />
                     <span>{item.label}</span>
-                    <span className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">
+                    <span className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.2 rounded-full bg-gray-200 text-gray-500">
                       Soon
                     </span>
                   </button>
@@ -608,9 +602,9 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                   key={item.id}
                   type="button"
                   onClick={() => setSettings((prev) => ({ ...prev, type: item.id as WidgetType }))}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[#6701e6] text-white shadow-xs'
+                      ? 'bg-[#6701e6] text-white shadow-2xs'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
                   }`}
                 >
@@ -621,15 +615,112 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
             })}
           </div>
 
-          {/* Senja-Style Share & Embed CTA */}
+          {/* Share & Embed CTA */}
           <button
+            type="button"
             onClick={() => setIsShareModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95 shrink-0"
+            className="px-3.5 py-1.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:shadow-sm active:scale-95 shrink-0"
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 className="w-3.5 h-3.5" />
             <span>Share & Embed</span>
           </button>
         </div>
+      </div>
+
+      {/* ── Redesigned Space: Widget Installation & Get Extension Product ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        
+        {/* Card 1: Widget Installation (Clean, 1-Click Embed Snippet) */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/90 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200/70 text-[#6701e6] flex items-center justify-center shrink-0 shadow-2xs">
+                <Code2 className="w-5 h-5" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-gray-950">Widget Installation</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                    Live Auto-Sync
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Embed live testimonials in 10 seconds. Place snippet before &lt;/body&gt; or in your builder.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Compact Code Snippet Box */}
+          <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 text-slate-100 border border-slate-800">
+            <code className="text-[11px] font-mono truncate text-purple-200">
+              {`<div id="pandapraise-widget" data-project-id="${project?.id || 'demo'}"></div>`}
+            </code>
+            <button
+              type="button"
+              onClick={handleCopyCode}
+              className="px-3 py-1.5 rounded-lg bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copied!' : 'Copy Embed Code'}</span>
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between text-xs pt-0.5">
+            <span className="text-[11px] text-gray-500 truncate mr-2">
+              Supports WordPress, Webflow, Shopify, Framer, Next.js & static HTML.
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsShareModalOpen(true)}
+              className="text-[11px] font-bold text-[#6701e6] hover:underline flex items-center gap-1 cursor-pointer shrink-0"
+            >
+              <span>Full Guide & Platforms</span>
+              <ArrowUpRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+
+        {/* Card 2: Get Extension Product (1-Click Clipper for Chrome & Edge) */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#1e1035] via-[#2d1254] to-[#0f0728] text-white shadow-md flex flex-col justify-between space-y-3 border border-purple-500/30">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center shrink-0 text-purple-300">
+                <Sparkles className="w-5 h-5 text-purple-300" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-white tracking-tight">
+                    PandaPraise 1-Click Clipper
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full bg-purple-500/30 text-[10px] font-extrabold text-purple-200 border border-purple-400/40">
+                    Chrome Extension
+                  </span>
+                </div>
+                <p className="text-xs text-purple-200/80 leading-snug">
+                  Clip customer praise from Twitter/X, LinkedIn, WhatsApp Web & Slack directly into your Proof Vault in 1 second.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 pt-1">
+            <div className="flex items-center gap-2 text-[11px] text-purple-200/70">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Primary Tool • Instant Social Proof Capture</span>
+            </div>
+            <a
+              href="https://github.com/greetingsgopal-hub/testimonial-collector-dashboard/tree/main/extension"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 rounded-xl bg-white hover:bg-gray-100 text-gray-950 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95"
+            >
+              <span>Get Extension</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
+
       </div>
 
       {/* Streamlined Dismissible Onboarding Guide */}

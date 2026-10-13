@@ -5,7 +5,6 @@ import {
   FileText,
   Download,
   CheckCircle2,
-  Puzzle,
   Settings,
   LogOut,
   Layers,
@@ -271,18 +270,18 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           <div className="h-px bg-slate-200/70" />
         </div>
 
-        {/* 6. Integrations */}
+        {/* 6. Settings */}
         <button
-          onClick={() => setActiveTab('integrate')}
+          onClick={() => setActiveTab('settings')}
           className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-            activeTab === 'integrate'
+            activeTab === 'settings' || activeTab === 'integrate'
               ? 'bg-slate-900 text-white shadow-xs'
               : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
           }`}
         >
           <div className="flex items-center gap-2.5">
-            <Puzzle className={`w-4 h-4 transition-colors ${activeTab === 'integrate' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
-            <span>Integrations</span>
+            <Settings className={`w-4 h-4 transition-colors ${activeTab === 'settings' || activeTab === 'integrate' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+            <span>Settings</span>
           </div>
         </button>
       </div>

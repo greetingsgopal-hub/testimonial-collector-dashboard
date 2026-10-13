@@ -265,4 +265,26 @@ describe('WidgetStudio Restructure & Upgrades', () => {
     });
     expect(container.querySelector('.max-w-xs')).toBeNull();
   });
+
+  it('8. Renders streamlined top control bar with Widget Installation snippet card and Get Extension Product CTA', async () => {
+    await act(async () => {
+      root.render(<WidgetStudio reviews={[]} />);
+    });
+
+    // Top control bar
+    expect(container.textContent).toContain('Widgets Studio');
+    expect(container.textContent).toContain('Share & Embed');
+
+    // Widget Installation Card
+    expect(container.textContent).toContain('Widget Installation');
+    expect(container.textContent).toContain('Live Auto-Sync');
+    expect(container.textContent).toContain('Embed live testimonials in 10 seconds');
+    expect(container.textContent).toContain('data-project-id="test_project_123"');
+
+    // Get Extension Product Card
+    expect(container.textContent).toContain('PandaPraise 1-Click Clipper');
+    expect(container.textContent).toContain('Chrome Extension');
+    expect(container.textContent).toContain('Clip customer praise from Twitter/X, LinkedIn, WhatsApp Web & Slack');
+    expect(container.textContent).toContain('Get Extension');
+  });
 });

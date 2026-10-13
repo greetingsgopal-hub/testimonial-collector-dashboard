@@ -516,6 +516,15 @@ export const IntegrateView: React.FC = () => {
       description: 'Connect direct social accounts to publish testimonials and trigger post-checkout review emails.',
       items: [
         {
+          id: 'chrome-extension',
+          name: 'PandaPraise 1-Click Clipper (Chrome Extension)',
+          icon: <Sparkles className="w-6 h-6 text-purple-600" />,
+          description: 'Clip customer praise from Twitter/X, LinkedIn, WhatsApp Web & Slack directly into your Proof Vault in 1 second.',
+          badgeType: 'active',
+          badgeLabel: 'Primary Tool',
+          isExtensionLive: true,
+        },
+        {
           id: 'linkedin',
           name: 'LinkedIn',
           icon: <LinkedInIcon className="w-6 h-6 text-[#0a66c2]" />,
@@ -734,108 +743,59 @@ export const IntegrateView: React.FC = () => {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-gray-200 text-left">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-gray-950 tracking-tight font-display">Integrations & Apps</h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-purple-50 text-[#6701e6] text-xs font-bold border border-purple-200">
-              Verified Marketplace
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-gray-600">
-            Connect Panda Praise to your favorite apps, automate review collection, and stream customer praise everywhere.
-          </p>
-        </div>
-      </div>
-
-      {/* ── Compact Chrome Extension Anchor (High Visibility, Low Vertical Footprint) ── */}
-      <div className="p-4 rounded-2xl bg-gradient-to-r from-[#1e1035] via-[#2d1254] to-[#0f0728] text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-purple-500/30">
-        <div className="flex items-center gap-3 text-left">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center shrink-0 text-purple-300">
-            <Sparkles className="w-5 h-5 text-purple-300" />
-          </div>
-          <div className="space-y-0.5">
+      {/* ── Main Settings Title & Sub-Navigation ── */}
+      <div className="space-y-4 pb-2 border-b border-gray-200 text-left">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-white tracking-tight">
-                PandaPraise 1-Click Clipper (Chrome Extension)
-              </span>
-              <span className="px-2 py-0.2 rounded-full bg-purple-500/30 text-[10px] font-extrabold text-purple-200 border border-purple-400/40">
-                Primary Tool
+              <h1 className="text-2xl font-bold text-gray-950 tracking-tight font-display">Settings</h1>
+              <span className="px-2.5 py-0.5 rounded-full bg-purple-50 text-[#6701e6] text-xs font-bold border border-purple-200">
+                Workspace & Apps
               </span>
             </div>
-            <p className="text-[11px] text-purple-200/80 leading-snug">
-              Clip customer praise from Twitter/X, LinkedIn, WhatsApp Web & Slack directly into your Proof Vault in 1 second.
+            <p className="text-xs sm:text-sm text-gray-600">
+              Manage your connected integrations, review filters, and account & billing management.
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+
+        {/* Head Section Jump / Sub-Navigation Pills */}
+        <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-xl border border-gray-200/80 w-fit text-xs font-bold">
           <a
-            href="https://github.com/greetingsgopal-hub/testimonial-collector-dashboard/tree/main/extension"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 rounded-xl bg-white hover:bg-gray-100 text-gray-950 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+            href="#settings-integrations"
+            className="px-3 py-1.5 rounded-lg bg-white text-gray-900 shadow-2xs flex items-center gap-1.5"
           >
-            <span>Get Extension</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
+            <Zap className="w-3.5 h-3.5 text-purple-600" />
+            <span>1. Integrations & Filters</span>
+          </a>
+          <a
+            href="#settings-billing"
+            className="px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-200/60 transition-colors flex items-center gap-1.5"
+          >
+            <StripeIcon className="w-3.5 h-3.5" />
+            <span>2. Account & Billing Management</span>
           </a>
         </div>
       </div>
 
-      {/* ── Dedicated Account & Billing Management Group (Extracted from Social Cards) ── */}
-      <section className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-3 text-left">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-center p-2.5 shrink-0">
-              <StripeIcon className="w-6 h-6 text-[#635BFF]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-gray-950">Account & Billing Management</h3>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                  Stripe Connected
-                </span>
-              </div>
-              <p className="text-xs text-gray-500">
-                Manage your PandaPraise workspace subscription tier, invoices, and payment cards securely via Stripe.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-            <div className="text-right hidden sm:block">
-              <span className="text-xs font-bold text-gray-900 block capitalize">
-                {stripeSubscription?.plan ? `${stripeSubscription.plan} Plan` : 'Free Plan'}
-              </span>
-              <span className="text-[10px] text-gray-500">
-                Status: {stripeSubscription?.subscriptionStatus || 'active'}
+      {/* ═══════════════════════════════════════════════════════════
+          HEAD 1: INTEGRATIONS AND THEIR FILTERS
+          ═══════════════════════════════════════════════════════════ */}
+      <div id="settings-integrations" className="space-y-4 text-left">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-gray-100">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-950 tracking-tight">Integrations & Apps</h2>
+              <span className="px-2.5 py-0.5 rounded-full bg-purple-50 text-[#6701e6] text-[10px] font-bold border border-purple-200">
+                Verified Marketplace
               </span>
             </div>
-
-            {stripeSubscription?.plan && stripeSubscription.plan !== 'free' ? (
-              <button
-                type="button"
-                onClick={handleBillingPortal}
-                disabled={billingPortalLoading}
-                className="px-4 py-2 rounded-xl bg-gray-950 hover:bg-gray-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
-              >
-                <span>{billingPortalLoading ? 'Opening Portal...' : 'Manage Invoices & Plan'}</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => (window.location.href = '/pricing')}
-                className="px-4 py-2 rounded-xl bg-[#635BFF] hover:bg-[#5249e0] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
-              >
-                <span>Upgrade Plan</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </button>
-            )}
+            <p className="text-xs text-gray-500">
+              Connect Panda Praise to your favorite apps, automate review collection, and stream customer praise everywhere.
+            </p>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* ── Category Filter Tabs & Instant Search Toolbar ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
@@ -1205,13 +1165,27 @@ export const IntegrateView: React.FC = () => {
                         </button>
                       )}
 
+                      {/* Chrome Extension Action */}
+                      {item.id === 'chrome-extension' && (
+                        <a
+                          href="https://github.com/greetingsgopal-hub/testimonial-collector-dashboard/tree/main/extension"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="apple-touch w-full py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <span>Get Extension</span>
+                          <ArrowUpRight className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+
                       {/* Other Waitlist Cards */}
                       {item.id !== 'linkedin' &&
                         item.id !== 'facebook' &&
                         item.id !== 'instagram' &&
                         item.id !== 'google-reviews' &&
                         item.id !== 'trustpilot' &&
-                        item.id !== 'webhooks' && (
+                        item.id !== 'webhooks' &&
+                        item.id !== 'chrome-extension' && (
                         <button
                           type="button"
                           onClick={() => handleJoinWaitlist(item.id, item.name)}
@@ -1328,6 +1302,81 @@ export const IntegrateView: React.FC = () => {
           )}
         </section>
       )}
+
+      {/* ═══════════════════════════════════════════════════════════
+          HEAD 2: ACCOUNT AND BILLING MANAGEMENT
+          ═══════════════════════════════════════════════════════════ */}
+      <section id="settings-billing" className="pt-8 border-t border-gray-200 text-left space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-gray-100">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-950 tracking-tight">Account & Billing Management</h2>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                Stripe Connected
+              </span>
+            </div>
+            <p className="text-xs text-gray-500">
+              Manage your PandaPraise workspace subscription tier, invoices, and payment cards securely via Stripe.
+            </p>
+          </div>
+        </div>
+
+        {/* Dedicated Account & Billing Management Card */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-3 text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-center p-2.5 shrink-0">
+                <StripeIcon className="w-6 h-6 text-[#635BFF]" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-gray-950">Account & Billing Management</h3>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    Stripe Connected
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Manage your PandaPraise workspace subscription tier, invoices, and payment cards securely via Stripe.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+              <div className="text-right hidden sm:block">
+                <span className="text-xs font-bold text-gray-900 block capitalize">
+                  {stripeSubscription?.plan ? `${stripeSubscription.plan} Plan` : 'Free Plan'}
+                </span>
+                <span className="text-[10px] text-gray-500">
+                  Status: {stripeSubscription?.subscriptionStatus || 'active'}
+                </span>
+              </div>
+
+              {stripeSubscription?.plan && stripeSubscription.plan !== 'free' ? (
+                <button
+                  type="button"
+                  onClick={handleBillingPortal}
+                  disabled={billingPortalLoading}
+                  className="px-4 py-2 rounded-xl bg-gray-950 hover:bg-gray-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <span>{billingPortalLoading ? 'Opening Portal...' : 'Manage Invoices & Plan'}</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => (window.location.href = '/pricing')}
+                  className="px-4 py-2 rounded-xl bg-[#635BFF] hover:bg-[#5249e0] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Upgrade Plan</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ── Facebook Page Selection Modal (explicit selection, no IDs shown) ── */}
       {showFbPagePicker && (

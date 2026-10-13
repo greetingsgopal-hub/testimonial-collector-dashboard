@@ -12,7 +12,6 @@ import { CollectionConfigModal } from '../components/dashboard/CollectionConfigM
 import { ConnectedAccountsModal } from '../components/dashboard/ConnectedAccountsModal';
 import { PublishHistoryModal } from '../components/dashboard/PublishHistoryModal';
 import { ImportPage } from './ImportPage';
-import { WorkspaceSettings } from '../components/dashboard/WorkspaceSettings';
 import { SentimentDashboard } from '../components/dashboard/SentimentDashboard';
 import { WelcomeView } from '../components/dashboard/views/WelcomeView';
 import { FormsView } from '../components/dashboard/views/FormsView';
@@ -47,7 +46,7 @@ const TAB_LABEL_MAP: Record<string, string> = {
   widgets: 'Widgets',
   campaigns: 'Campaigns',
   'rich-snippet': 'Google Stars (SEO)',
-  integrate: 'Integrations',
+  integrate: 'Settings',
   settings: 'Settings',
   feedback: 'Feedback',
   tags: 'Tags',
@@ -560,15 +559,10 @@ export const DashboardPage = () => {
             <AnalyzeView reviews={effectiveReviews} />
           )}
 
-          {/* Integrations */}
-          {activeTab === 'integrate' && (
-            <IntegrateView />
-          )}
-
-          {/* Project & Workspace Settings */}
-          {activeTab === 'settings' && (
+          {/* Settings (Head 1: Integrations & Filters, Head 2: Account & Billing Management) */}
+          {(activeTab === 'settings' || activeTab === 'integrate') && (
             <div className="max-w-6xl mx-auto">
-              <WorkspaceSettings />
+              <IntegrateView />
             </div>
           )}
 
