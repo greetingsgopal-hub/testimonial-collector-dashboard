@@ -23,6 +23,8 @@ const WallOfLovePage = React.lazy(() => import('./pages/WallOfLovePage').then((m
 const ViralActivationPage = React.lazy(() => import('./pages/ViralActivationPage').then((m) => ({ default: m.ViralActivationPage })));
 const VerifyEmailPage = React.lazy(() => import('./pages/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage })));
 const ReferralRedirectPage = React.lazy(() => import('./pages/ReferralRedirectPage').then((m) => ({ default: m.ReferralRedirectPage })));
+const AlternativePage = React.lazy(() => import('./pages/AlternativePage').then((m) => ({ default: m.AlternativePage })));
+const UseCasePage = React.lazy(() => import('./pages/UseCasePage').then((m) => ({ default: m.UseCasePage })));
 import { captureReferralCode } from './lib/referral';
 
 /**
@@ -69,6 +71,8 @@ export function App() {
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/r/:code" element={<ReferralRedirectPage />} />
+            <Route path="/alternatives/:slug" element={<AlternativePage />} />
+            <Route path="/best-:slug-testimonial-tools" element={<UseCasePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />

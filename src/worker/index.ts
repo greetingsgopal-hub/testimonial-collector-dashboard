@@ -34,11 +34,20 @@ import { executeAutomatedBackgroundSync } from './lib/backgroundSync';
 import { handleCampaignTriggerWebhook } from './handlers/campaignTriggerWebhook';
 import { handleCampaignTrackClick, handleCampaignDispatchTrigger } from './handlers/campaignTrackHandler';
 import { handleReferralRedirect, handleReferralStats } from './handlers/referralHandler';
+import { handleSitemapXml, handleRobotsTxt, handleSeoPagePreRender } from './handlers/seoHandler';
 
 export default {
   async fetch(request: Request, env: WorkerEnv, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const pathname = url.pathname;
+
+    // Technical SEO: Dynamic XML Sitemap & Robots.txt
+    if (pathname === '/sitemap.xml') {
+      return await handleSitemapXml(request, env);
+    }
+    if (pathname === '/robots.txt') {
+      return await handleRobotsTxt(request, env);
+    }
 
     // In-App Referral Funnel (/r/:code) -> Sets 60-day cookie and redirects
     if (pathname.startsWith('/r/')) {
@@ -232,6 +241,12 @@ export default {
             headers: { 'Content-Type': 'application/json' },
           });
       }
+    }
+
+    // Programmatic SEO: Edge pre-rendered competitor and use-case pages
+    const seoPageResponse = await handleSeoPagePreRender(request, env);
+    if (seoPageResponse) {
+      return seoPageResponse;
     }
 
     // Static Assets & Single-Page Application routing fallback
