@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Star, Quote, ExternalLink, Filter, AlertCircle, RefreshCw, ShieldCheck, Video } from 'lucide-react';
+import { Star, Quote, Filter, ExternalLink, AlertCircle, RefreshCw, ShieldCheck, Video, Copy, Check, FileText, Download, X } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { Review, WallOfLoveTheme } from '../types';
 import { usePageSeo } from '../lib/seo';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
 import { filterTestimonials, parseFilterRulesFromParams } from '../lib/testimonialFilter';
+import { generateCaseStudy, caseStudyToMarkdown, CaseStudy } from '../lib/ai-case-study';
 
 // ── Theme Definitions ───────────────────────────────────────
 const THEME_STYLES: Record<WallOfLoveTheme, {
@@ -112,8 +113,37 @@ export const WallOfLovePage = () => {
   const [activeTheme, setActiveTheme] = useState<WallOfLoveTheme>(themeParam);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [showThemePicker, setShowThemePicker] = useState(false);
+  const [showCaseStudyModal, setShowCaseStudyModal] = useState(false);
+  const [copiedCaseStudy, setCopiedCaseStudy] = useState(false);
 
   const theme = THEME_STYLES[activeTheme];
+
+  const activeCaseStudy: CaseStudy | null = useMemo(() => {
+    if (!reviews.length) return null;
+    return generateCaseStudy(reviews, title || slug || 'PandaPraise');
+  }, [reviews, title, slug]);
+
+  const handleCopyCaseStudy = () => {
+    if (!activeCaseStudy) return;
+    const md = caseStudyToMarkdown(activeCaseStudy);
+    navigator.clipboard.writeText(md);
+    setCopiedCaseStudy(true);
+    setTimeout(() => setCopiedCaseStudy(false), 2000);
+  };
+
+  const handleDownloadCaseStudy = () => {
+    if (!activeCaseStudy) return;
+    const md = caseStudyToMarkdown(activeCaseStudy);
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `case-study-${(slug || 'customer').toLowerCase()}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   const loadReviews = async () => {
     try {
@@ -207,6 +237,17 @@ export const WallOfLovePage = () => {
               <ShieldCheck size={13} className={activeTheme === 'pastel' || activeTheme === 'whimsical' ? 'text-emerald-600' : 'text-emerald-400'} />
               <span>100% Verified Proof</span>
             </div>
+
+            {/* Export Case Study Trigger */}
+            <button
+              onClick={() => setShowCaseStudyModal(true)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border ${theme.cardBorder} ${theme.cardBg} ${theme.textSecondary} hover:opacity-100 hover:border-violet-500/40 transition-all cursor-pointer`}
+              title="Export 5-star customer proof into a structured Case Study"
+            >
+              <FileText size={13} className="text-violet-400" />
+              <span className="hidden sm:inline">Export Case Study</span>
+              <span className="sm:hidden">Case Study</span>
+            </button>
 
             {/* Theme Switcher */}
             <div className="relative">
@@ -312,10 +353,105 @@ export const WallOfLovePage = () => {
         )}
       </div>
 
+      {/* Case Study Export Modal */}
+      {showCaseStudyModal && activeCaseStudy && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className={`w-full max-w-2xl max-h-[85vh] flex flex-col rounded-2xl border ${theme.cardBg} ${theme.cardBorder} shadow-2xl overflow-hidden`}>
+            {/* Modal Header */}
+            <div className={`px-6 py-4 border-b ${theme.cardBorder} flex items-center justify-between`}>
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-violet-400" />
+                <h3 className="font-bold text-sm">Customer Case Study Export</h3>
+              </div>
+              <button
+                onClick={() => setShowCaseStudyModal(false)}
+                className={`p-1 rounded-lg ${theme.textSecondary} hover:opacity-80 cursor-pointer`}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body / Preview */}
+            <div className="p-6 overflow-y-auto space-y-4 text-xs leading-relaxed">
+              <div className="p-4 rounded-xl bg-violet-500/10 border border-violet-500/20 space-y-1">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-violet-400">Success Story</span>
+                <h4 className="text-base font-bold text-white">{activeCaseStudy.title}</h4>
+                <p className={`${theme.textSecondary}`}>{activeCaseStudy.subtitle}</p>
+                <p className="text-[11px] text-zinc-400 mt-2">
+                  Customer: <span className="text-zinc-200 font-semibold">{activeCaseStudy.customerName}</span> ({activeCaseStudy.customerRole} at {activeCaseStudy.customerCompany})
+                </p>
+              </div>
+
+              <div>
+                <h5 className="font-semibold text-zinc-200 mb-1">The Challenge</h5>
+                <p className={theme.textSecondary}>{activeCaseStudy.challenge}</p>
+              </div>
+
+              <div>
+                <h5 className="font-semibold text-zinc-200 mb-1">The Solution</h5>
+                <p className={theme.textSecondary}>{activeCaseStudy.solution}</p>
+              </div>
+
+              {activeCaseStudy.results.length > 0 && (
+                <div>
+                  <h5 className="font-semibold text-zinc-200 mb-1.5">Key Results</h5>
+                  <ul className="space-y-1">
+                    {activeCaseStudy.results.map((r, i) => (
+                      <li key={i} className="flex items-center gap-1.5 text-zinc-300">
+                        <span className="text-emerald-400">✓</span> {r}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {activeCaseStudy.testimonialQuotes.length > 0 && (
+                <div>
+                  <h5 className="font-semibold text-zinc-200 mb-1.5">Customer Quotes</h5>
+                  <div className="space-y-2">
+                    {activeCaseStudy.testimonialQuotes.map((q, i) => (
+                      <blockquote key={i} className={`p-3 rounded-lg border ${theme.cardBorder} bg-black/20 italic`}>
+                        "{q.content}"
+                        <span className="block mt-1 font-semibold not-italic text-[11px] text-zinc-400">
+                          — {q.author}, {q.role}
+                        </span>
+                      </blockquote>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Actions */}
+            <div className={`px-6 py-4 border-t ${theme.cardBorder} flex items-center justify-between`}>
+              <span className={`text-[11px] ${theme.textSecondary}`}>
+                {activeCaseStudy.wordCount} words · Ready for blog, sales collateral, or PDF
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleCopyCaseStudy}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors cursor-pointer"
+                >
+                  {copiedCaseStudy ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                  <span>{copiedCaseStudy ? 'Copied Markdown' : 'Copy Markdown'}</span>
+                </button>
+                <button
+                  onClick={handleDownloadCaseStudy}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white transition-colors cursor-pointer"
+                >
+                  <Download size={14} />
+                  <span>Download .md</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Footer / Branding */}
       <footer className={`py-8 text-center border-t ${theme.cardBorder}`}>
         <a
-              href="https://pandapraise.com"
+          href="https://pandapraise.com"
           target="_blank"
           rel="noopener noreferrer"
           className={`inline-flex items-center gap-2 text-xs ${theme.textSecondary} hover:opacity-80 transition-opacity`}
@@ -337,6 +473,31 @@ interface TestimonialCardProps {
 
 const TestimonialCard: React.FC<TestimonialCardProps> = ({ review, theme, activeTheme }) => {
   const isLight = activeTheme === 'pastel' || activeTheme === 'whimsical';
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyQuote = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const text = `"${review.content}" — ${review.name}${review.company ? `, ${review.company}` : ''}`;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareX = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const snippet = review.content.length > 200 ? `${review.content.slice(0, 197)}...` : review.content;
+    const text = `"${snippet}" — ${review.name}`;
+    const shareUrl = window.location.href;
+    const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
+    window.open(tweetUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleShareLinkedIn = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shareUrl = window.location.href;
+    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+    window.open(linkedInUrl, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div className={`p-5 rounded-2xl border ${theme.cardBg} ${theme.cardBorder} transition-all duration-300 hover:scale-[1.01]`}>
@@ -477,9 +638,41 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ review, theme, active
           )}
         </div>
       </div>
+
+      {/* 1-Click Viral Sharing Actions */}
+      <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-current/5 text-xs">
+        <button
+          onClick={handleCopyQuote}
+          title="Copy Quote"
+          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md transition-colors cursor-pointer ${
+            copied
+              ? 'text-emerald-500 bg-emerald-500/10'
+              : `${theme.textSecondary} hover:opacity-100 hover:bg-current/5`
+          }`}
+        >
+          {copied ? <Check size={12} /> : <Copy size={12} />}
+          <span className="text-[11px] font-medium">{copied ? 'Copied!' : 'Copy Quote'}</span>
+        </button>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleShareX}
+            title="Share to X"
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${theme.textSecondary} hover:text-white hover:bg-current/10`}
+          >
+            <span>𝕏</span>
+            <span className="hidden sm:inline">Post</span>
+          </button>
+          <button
+            onClick={handleShareLinkedIn}
+            title="Share to LinkedIn"
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${theme.textSecondary} hover:text-sky-400 hover:bg-current/10`}
+          >
+            <span className="font-bold">in</span>
+            <span className="hidden sm:inline">Share</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
-
-// Need React import for FC type
-import React from 'react';

@@ -38,6 +38,7 @@ import { handleSitemapXml, handleRobotsTxt, handleSeoPagePreRender } from './han
 import { handleWebhookTestDispatch } from './handlers/alertWebhooks';
 import { handlePublicApi } from './handlers/publicApiHandler';
 import { handleAffiliatesApi } from './handlers/affiliateHandler';
+import { handlePppGeoDetection } from './handlers/pppHandler';
 
 export default {
   async fetch(request: Request, env: WorkerEnv, _ctx: ExecutionContext): Promise<Response> {
@@ -91,6 +92,10 @@ export default {
       const endpoint = pathname.replace(/^\/api\//, '').split('?')[0].replace(/\/$/, '');
 
       switch (endpoint) {
+        case 'geo/ppp':
+        case 'ppp':
+          return await handlePppGeoDetection(request, env);
+
         case 'webhook/test':
         case 'webhooks/test':
           return await handleWebhookTestDispatch(request, env);

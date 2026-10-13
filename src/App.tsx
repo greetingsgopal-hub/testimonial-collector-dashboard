@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { initAnalytics, trackPageView } from './lib/analytics';
+import { CookieConsentBanner } from './components/CookieConsentBanner';
 
 // Lazy-loaded routes for ultra-fast initial page loads and zero bundle bloat
 const LandingPage = React.lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
@@ -151,6 +152,7 @@ export function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
+        <CookieConsentBanner />
       </BrowserRouter>
     </AuthProvider>
   );

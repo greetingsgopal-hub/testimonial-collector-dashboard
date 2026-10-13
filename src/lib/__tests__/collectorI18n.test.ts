@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { COLLECTOR_TRANSLATIONS, CollectorLang } from '../collectorI18n';
 import { cleanBrandOrProductName } from '../security';
 
-describe('Collector Bilingual (English & Hinglish) i18n Suite', () => {
-  const languages: CollectorLang[] = ['en', 'hi'];
+describe('Collector 6-Language (EN, ES, PT, DE, FR, HI) i18n Suite', () => {
+  const languages: CollectorLang[] = ['en', 'es', 'pt', 'de', 'fr', 'hi'];
 
   it('provides complete translation trees for both English and Hinglish', () => {
     languages.forEach((lang) => {
