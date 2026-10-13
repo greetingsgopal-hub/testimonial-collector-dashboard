@@ -36,7 +36,8 @@ import {
   X,
   Trash2,
   Archive,
-  MailCheck
+MailCheck,
+Menu
 } from 'lucide-react';
 const TAB_LABEL_MAP: Record<string, string> = {
   welcome: 'Welcome Hub',
@@ -69,8 +70,11 @@ export const DashboardPage = () => {
     return 'welcome';
   });
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const setActiveTab = useCallback((tab: DashboardTab) => {
     setActiveTabState(tab);
+    setSidebarOpen(false);
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       next.set('tab', tab);
@@ -437,7 +441,19 @@ export const DashboardPage = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         proofCount={effectiveReviews.length}
+        mobileOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
+
+      {/* Mobile drawer backdrop */}
+      {sidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm lg:hidden"
+        />
+      )}
 
       {/* ── Main Content Area ── */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
@@ -445,6 +461,14 @@ export const DashboardPage = () => {
         {/* Top Slim Header Bar */}
         <header className="h-12 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open navigation"
+              className="lg:hidden p-1.5 -ml-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <span className="text-xs font-bold text-slate-900 tracking-tight">{TAB_LABEL_MAP[activeTab] || activeTab}</span>
             <span className="text-slate-300">•</span>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate max-w-[240px]">

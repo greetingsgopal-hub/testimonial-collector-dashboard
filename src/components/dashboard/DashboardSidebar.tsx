@@ -14,6 +14,7 @@ import {
   ChevronsUpDown,
   Mail,
   Sparkles,
+X,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Project } from '../../types';
@@ -36,12 +37,17 @@ interface DashboardSidebarProps {
   activeTab: DashboardTab;
   setActiveTab: (tab: DashboardTab) => void;
   proofCount?: number;
+  /** Mobile drawer state — below lg the sidebar is an off-canvas slide-over. */
+  mobileOpen?: boolean;
+  onClose?: () => void;
 }
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   activeTab,
   setActiveTab,
   proofCount = 0,
+  mobileOpen = false,
+  onClose,
 }) => {
   const {
     user,
@@ -64,6 +70,16 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   const userEmail = user?.email || '';
   const userInitial = displayName.charAt(0).toUpperCase();
   const planTier = (workspace?.plan || 'free').toUpperCase();
+
+  // Close the mobile drawer on Escape
+  useEffect(() => {
+    if (!mobileOpen || !onClose) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [mobileOpen, onClose]);
 
   // Close profile dropdown on outside click
   useEffect(() => {
@@ -106,7 +122,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   };
 
   return (
-    <aside className="w-64 min-w-[16rem] shrink-0 bg-[#f4f7fb]/95 backdrop-blur-2xl border-r border-slate-200/80 flex flex-col h-screen sticky top-0 select-none z-30 font-sans text-sm">
+    <aside className={`w-64 min-w-[16rem] shrink-0 bg-[#f4f7fb]/95 backdrop-blur-2xl border-r border-slate-200/80 flex flex-col h-screen select-none font-sans text-sm fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:z-30 lg:translate-x-0 ${mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
       
       {/* Brand Header */}
       <div className="px-5 py-3.5 border-b border-slate-200/60 flex items-center justify-between">
@@ -116,6 +132,14 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             Panda Praise
           </span>
         </Link>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close navigation"
+          className="lg:hidden p-1.5 -mr-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+        >
+          <X className="w-4.5 h-4.5" />
+        </button>
       </div>
 
       {/* ── Active Workspace Header Card (Matches Bottom Menu Naming) ── */}
