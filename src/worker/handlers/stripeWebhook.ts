@@ -220,7 +220,7 @@ async function handlePaymentSucceeded(invoice: any, env: WorkerEnv): Promise<voi
   }
 
   // Only update if currently past_due or incomplete
-  const currentStatus = workspace.data?.subscriptionStatus || workspace.subscriptionStatus;
+  const currentStatus = workspace.data?.subscriptionStatus || (workspace as any).subscriptionStatus;
   if (currentStatus === 'past_due' || currentStatus === 'incomplete') {
     await updateWorkspaceSubscription(workspace.id, {
       subscriptionStatus: 'active',
