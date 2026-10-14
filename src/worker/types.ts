@@ -26,7 +26,14 @@ export interface WorkerEnv {
   FIREBASE_CLIENT_EMAIL?: string;
   FIREBASE_PRIVATE_KEY?: string;
   NODE_ENV?: string;
-  // Stripe subscription billing
+  // Razorpay subscription and one-time billing (India-first processor)
+  RAZORPAY_KEY_ID?: string;
+  RAZORPAY_KEY_SECRET?: string;
+  RAZORPAY_WEBHOOK_SECRET?: string;
+  RAZORPAY_PLAN_MONTHLY?: string;
+  RAZORPAY_PLAN_ANNUAL?: string;
+  RAZORPAY_FOUNDING_AMOUNT?: string;
+  // Stripe subscription billing (legacy fallback)
   STRIPE_SECRET_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;
   STRIPE_PRICE_SUBSCRIPTION_MONTHLY?: string;
