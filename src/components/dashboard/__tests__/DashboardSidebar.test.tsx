@@ -115,7 +115,7 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
     expect(container.textContent).toContain('On Social Media');
     expect(container.textContent).toContain('Campaigns');
     expect(container.textContent).toContain('Referrals');
-    expect(container.textContent).toContain('Settings');
+    expect(container.textContent).toContain('Accounts & Billing mgmt');
     expect(container.textContent).not.toContain('Google Stars');
   });
 

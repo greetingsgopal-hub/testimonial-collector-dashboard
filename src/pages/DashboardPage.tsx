@@ -16,9 +16,9 @@ import { WelcomeView } from '../components/dashboard/views/WelcomeView';
 import { CollectImportView } from '../components/dashboard/views/CollectImportView';
 import { SocialPostView } from '../components/dashboard/views/SocialPostView';
 import { FeedbackView } from '../components/dashboard/views/FeedbackView';
-import { TagsView } from '../components/dashboard/views/TagsView';
 import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
-import { IntegrateView } from '../components/dashboard/views/IntegrateView';
+import { AccountBillingView } from '../components/dashboard/views/AccountBillingView';
+import { TagsView } from '../components/dashboard/views/TagsView';
 import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
 import { ReviewPipelineHero } from '../components/dashboard/ReviewPipelineHero';
@@ -48,8 +48,8 @@ const TAB_LABEL_MAP: Record<string, string> = {
   widgets: 'Post on Internet · On Website',
   social: 'Post on Internet · On Social Media',
   campaigns: 'Campaigns',
-  integrate: 'Settings',
-  settings: 'Settings',
+  integrate: 'Accounts & Billing mgmt',
+  settings: 'Accounts & Billing mgmt',
   feedback: 'Feedback',
   tags: 'Tags',
   analyze: 'Analytics',
@@ -547,7 +547,7 @@ export const DashboardPage = () => {
           {activeTab === 'tags' && (
             <TagsView
               tags={availableTags}
-              onAddTag={(t) => handleSaveTags(reviews[0]?.id || '', [...availableTags, t])}
+              onAddTag={(t: string) => handleSaveTags(reviews[0]?.id || '', [...availableTags, t])}
             />
           )}
 
@@ -563,10 +563,13 @@ export const DashboardPage = () => {
             </div>
           )}
 
-          {/* Settings (Head 1: Integrations & Filters, Head 2: Account & Billing Management) */}
+          {/* Accounts & Billing Management */}
           {(activeTab === 'settings' || activeTab === 'integrate') && (
-            <div className="max-w-6xl mx-auto">
-              <IntegrateView />
+            <div className="max-w-5xl mx-auto font-sans">
+              <AccountBillingView
+                workspace={workspace}
+                onUpgrade={() => setShowUpgradeModal(true)}
+              />
             </div>
           )}
 
