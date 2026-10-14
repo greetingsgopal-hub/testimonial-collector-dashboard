@@ -43,7 +43,7 @@ describe('FormsView Collect Page Upgrades Suite', () => {
     container.remove();
   });
 
-  it('1. Renders actionable empty state banner and Preview Sample Submissions when reviews is empty', async () => {
+  it('1. Clean layout: does not render bulky placecards', async () => {
     await act(async () => {
       root.render(
         <FormsView
@@ -65,72 +65,14 @@ describe('FormsView Collect Page Upgrades Suite', () => {
       );
     });
 
-    // Check encouraging inline banner
-    expect(container.textContent).toContain('Your collection form is live!');
-    expect(container.textContent).toContain('Share your link or print your QR code to start gathering praise.');
-
-    // Check Preview Sample Submissions button
-    const previewBtn = container.querySelector('[data-testid="preview-sample-submissions-btn"]');
-    expect(previewBtn).not.toBeNull();
-    expect(previewBtn?.textContent).toContain('Preview Sample Submissions');
-
-    await act(async () => {
-      (previewBtn as HTMLButtonElement).click();
-    });
-    expect(mockOnViewProof).toHaveBeenCalledTimes(1);
+    // Verify removed placecards are gone
+    expect(container.textContent).not.toContain('Your collection form is live!');
+    expect(container.querySelector('[data-testid="preview-sample-submissions-btn"]')).toBeNull();
+    expect(container.querySelector('[data-testid="form-customer-preview-snippet"]')).toBeNull();
+    expect(container.querySelector('[data-testid="review-mode-controls"]')).toBeNull();
   });
 
-  it('2. Embeds collection form URL inside a dedicated "Your Collection Link" card with one-click copy and preview snippet', async () => {
-    await act(async () => {
-      root.render(
-        <FormsView
-          onConfigureForm={mockOnConfigure}
-          onViewProof={mockOnViewProof}
-          onUpdateForm={mockOnUpdateForm}
-          reviews={[]}
-        />
-      );
-    });
-
-    const linkCard = container.querySelector('[data-testid="collection-link-card"]');
-    expect(linkCard).not.toBeNull();
-    expect(linkCard?.textContent).toContain('/c/beta-flow');
-
-    // Quick preview snippet
-    const previewSnippet = container.querySelector('[data-testid="form-customer-preview-snippet"]');
-    expect(previewSnippet).not.toBeNull();
-    expect(previewSnippet?.textContent).toContain('Beta Flow');
-
-    // Copy link button inside card
-    const copyBtn = container.querySelector('[data-testid="copy-collection-link-btn"]');
-    expect(copyBtn).not.toBeNull();
-  });
-
-  it('3. Provides interactive review mode quick-toggle controls', async () => {
-    await act(async () => {
-      root.render(
-        <FormsView
-          onConfigureForm={mockOnConfigure}
-          onViewProof={mockOnViewProof}
-          onUpdateForm={mockOnUpdateForm}
-          reviews={[]}
-        />
-      );
-    });
-
-    const modeToggle = container.querySelector('[data-testid="review-mode-controls"]');
-    expect(modeToggle).not.toBeNull();
-
-    const videoPill = container.querySelector('[data-testid="mode-toggle-video"]');
-    expect(videoPill).not.toBeNull();
-
-    await act(async () => {
-      (videoPill as HTMLButtonElement).click();
-    });
-    expect(mockOnUpdateForm).toHaveBeenCalledWith(expect.objectContaining({ allowVideo: true }));
-  });
-
-  it('4. Groups Configure, QR Code, and Test Live Form in a unified action toolbar', async () => {
+  it('2. Groups Configure, QR Code, and Copy Share Link in a unified action toolbar', async () => {
     await act(async () => {
       root.render(
         <FormsView
@@ -147,11 +89,18 @@ describe('FormsView Collect Page Upgrades Suite', () => {
 
     const configureBtn = toolbar?.querySelector('[data-testid="toolbar-configure-btn"]');
     const qrBtn = toolbar?.querySelector('[data-testid="toolbar-qr-btn"]');
-    const testLiveBtn = toolbar?.querySelector('[data-testid="toolbar-test-live-btn"]');
+    const copyLinkBtn = toolbar?.querySelector('[data-testid="toolbar-copy-link-btn"]');
 
     expect(configureBtn).not.toBeNull();
     expect(qrBtn).not.toBeNull();
-    expect(testLiveBtn).not.toBeNull();
+    expect(copyLinkBtn).not.toBeNull();
+    expect(copyLinkBtn?.textContent).toContain('Copy Share Link');
+
+    // Test clicking copy link
+    await act(async () => {
+      (copyLinkBtn as HTMLButtonElement).click();
+    });
+    expect(copyLinkBtn?.textContent).toContain('Copied!');
   });
 
   it('5. Renders Collection Pulse metrics strip and Review Pipeline callout banner', async () => {

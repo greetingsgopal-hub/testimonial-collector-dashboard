@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { 
   Copy, 
   Check, 
-  ExternalLink, 
   Star, 
   QrCode, 
-  FileText, 
   Video,
   Sparkles,
   Settings,
@@ -17,12 +15,10 @@ import {
   Code,
   ChevronRight,
   Palette,
-  ArrowRight,
-  Share2
+  ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { Review, ReviewStats, CollectionForm } from '../../../types';
-import { cleanBrandOrProductName, deduplicateRepeatedString } from '../../../lib/security';
 import { QrCodeGenerator } from '../QrCodeGenerator';
 
 export interface FormsViewProps {
@@ -40,7 +36,7 @@ export const FormsView: React.FC<FormsViewProps> = ({
   onConfigureForm,
   onSendInvites,
   onViewProof,
-  onUpdateForm,
+  onUpdateForm: _onUpdateForm,
   onNavigateToCampaigns,
   onNavigateToWidgets,
   reviews = [],
@@ -51,34 +47,13 @@ export const FormsView: React.FC<FormsViewProps> = ({
   const [channelToast, setChannelToast] = useState<string | null>(null);
   const [showQrModal, setShowQrModal] = useState(false);
 
-  // Review Mode Quick-Toggle State
-  const [reviewMode, setReviewMode] = useState<'text' | 'video' | 'rating'>(() => {
-    if (collectionForm?.allowVideo) return 'video';
-    return 'text';
-  });
-
-  // Business Name Resolution
-  const cleanBusinessName =
-    cleanBrandOrProductName(collectionForm?.settings?.brandName) ||
-    cleanBrandOrProductName(project?.name) ||
-    project?.name ||
-    'our business';
-
-  // Sanitize title to avoid stale "Gopal's Testimonials" or "Testimonial Form"
-  let formTitle = deduplicateRepeatedString(collectionForm?.title?.trim()) || '';
-  if (
-    !formTitle ||
-    formTitle.includes("Gopal's Testimonials") ||
-    formTitle.includes("Gopal’s Testimonials") ||
-    formTitle.toLowerCase().includes('testimonials') ||
-    formTitle.endsWith('Testimonial Form')
-  ) {
-    formTitle = `Share your experience with ${cleanBusinessName}`;
-  }
+  // Review Mode for Pulse Metric Display
+  const reviewMode: 'text' | 'video' | 'rating' = collectionForm?.allowVideo
+    ? 'video'
+    : (collectionForm?.settings?.requireRating ? 'rating' : 'text');
 
   const publicSlug = collectionForm?.publicSlug || project?.slug || 'feedback';
   const collectionUrl = `${window.location.origin}/c/${publicSlug}`;
-  const isFormActive = collectionForm?.isActive ?? true;
 
   // Active Metrics Calculations
   const totalCount = reviews.length > 0 ? reviews.length : (stats?.total ?? 0);
@@ -96,36 +71,15 @@ export const FormsView: React.FC<FormsViewProps> = ({
         : '5.0');
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(collectionUrl);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(collectionUrl).catch(() => {});
+    }
     setCopied(true);
     setChannelToast('Direct intake link copied to clipboard!');
     setTimeout(() => {
       setCopied(false);
       setChannelToast(null);
     }, 2500);
-  };
-
-  const handleSelectMode = (mode: 'text' | 'video' | 'rating') => {
-    setReviewMode(mode);
-    if (onUpdateForm) {
-      if (mode === 'video') {
-        onUpdateForm({
-          allowVideo: true,
-          settings: {
-            ...collectionForm?.settings,
-            requireRating: true,
-          },
-        });
-      } else {
-        onUpdateForm({
-          allowVideo: false,
-          settings: {
-            ...collectionForm?.settings,
-            requireRating: true,
-          },
-        });
-      }
-    }
   };
 
   return (
@@ -174,17 +128,25 @@ export const FormsView: React.FC<FormsViewProps> = ({
           <span>QR Code</span>
         </button>
 
-        <a
-          data-testid="toolbar-test-live-btn"
-          href={collectionUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          data-testid="toolbar-copy-link-btn"
+          onClick={handleCopy}
           className="apple-touch flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-white dark:bg-slate-900 shadow-2xs border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all active:scale-[0.98] text-xs font-medium text-slate-800 dark:text-slate-200 cursor-pointer"
-          title="Test Live"
+          title="Copy Share Link"
         >
-          <ExternalLink className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-          <span>Test Live</span>
-        </a>
+          {copied ? (
+            <>
+              <Check className="w-4 h-4 text-emerald-600" />
+              <span className="text-emerald-600 font-semibold">Copied!</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+              <span>Copy Share Link</span>
+            </>
+          )}
+        </button>
 
         <button
           type="button"
@@ -198,195 +160,11 @@ export const FormsView: React.FC<FormsViewProps> = ({
         </button>
       </div>
 
-      {/* 4. Actionable Empty State & Encouraging Inline Banner */}
-      {totalCount === 0 && (
-        <div className="rounded-xl border border-violet-500/20 bg-gradient-to-r from-violet-500/10 via-indigo-500/10 to-purple-500/10 p-3.5 sm:p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-violet-600/10 border border-violet-500/20 text-violet-700 flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4 text-violet-600" />
-            </div>
-            <div>
-              <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white tracking-tight">
-                Your collection form is live!
-              </h3>
-              <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                Share your link or print your QR code to start gathering praise.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={handleCopy}
-              className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 text-xs font-medium shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
-              <span>{copied ? 'Copied Link!' : 'Copy Share Link'}</span>
-            </button>
-            <button
-              data-testid="preview-sample-submissions-btn"
-              onClick={onViewProof}
-              className="px-2.5 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Preview Sample Submissions</span>
-            </button>
-          </div>
-        </div>
+      {channelToast && (
+        <p className="text-center text-xs font-medium text-emerald-600 dark:text-emerald-400 animate-fade-in">
+          {channelToast}
+        </p>
       )}
-
-      {/* 5. Active Campaign Spotlight Card (Streamlined & Compact) */}
-      <div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900 shadow-2xs p-3 space-y-2.5 border border-slate-200/80 dark:border-slate-800">
-        <div className="flex items-start justify-between relative z-10 gap-2">
-          <div className="space-y-0.5 min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[11px] font-semibold ${
-                isFormActive
-                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-              }`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isFormActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
-                <span>{isFormActive ? 'Active' : 'Paused'}</span>
-              </span>
-
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[11px]">
-                {reviewMode === 'video' ? (
-                  <>
-                    <Video className="w-3 h-3 text-indigo-600" />
-                    <span>Video + Text</span>
-                  </>
-                ) : reviewMode === 'rating' ? (
-                  <>
-                    <Star className="w-3 h-3 text-amber-500" />
-                    <span>Rating Focused</span>
-                  </>
-                ) : (
-                  <>
-                    <FileText className="w-3 h-3 text-indigo-600" />
-                    <span>Verified Text</span>
-                  </>
-                )}
-              </span>
-            </div>
-
-            <h2 className="text-[15px] font-semibold text-slate-900 dark:text-white leading-snug truncate">
-              {formTitle}
-            </h2>
-          </div>
-
-          <button
-            type="button"
-            onClick={onConfigureForm}
-            className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-indigo-600 dark:text-indigo-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-            title="Configure form"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Compact Horizontal Snapshot Bar */}
-        <div data-testid="form-customer-preview-snippet" className="rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-950/60 border border-slate-200/60 dark:border-slate-800/80 relative group flex items-center justify-between p-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <img 
-              alt="Active Collection Form Preview" 
-              className="w-16 h-10 rounded object-cover object-top opacity-90 shrink-0 border border-slate-200 dark:border-slate-700" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOEIvgFPR5Qt9FyS9yY-auht0kem2gUultI_IwAJYT_TC56io0-V0fRcR1JrCyct9W3UQG4bb858oIgCJjVjcrBPKL0-vZ8R6TZgIPABeR-Sa4kc1bcSObpHBvUC7J_CMv3z5nhlBV_iHmUHGPbrJXAa2qRANmXhI2ObuS3udy8lHsxTh5Q295DKk9LrYVMg0kZUNmtwLi8HupQac7br4njQGb41Z12jV0jASPwTQ3bk4lo2Iq0uS9P9uiLQF1amXoIA"
-            />
-            <div className="min-w-0">
-              <div className="flex items-center gap-1 text-amber-500">
-                <Star className="w-3 h-3 fill-amber-400" />
-                <span className="text-[11px] text-slate-900 dark:text-white font-semibold">5-Star Prompt</span>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                Live intake form active • {cleanBusinessName}
-              </p>
-            </div>
-          </div>
-          <span className="text-[10px] bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/50 dark:border-indigo-800/50 px-2 py-0.5 rounded-full text-indigo-600 dark:text-indigo-400 font-medium shrink-0">
-            Preview
-          </span>
-        </div>
-
-        {/* Interactive Feedback Mode Controls */}
-        <div data-testid="review-mode-controls" className="flex items-center justify-between gap-2 pt-0.5">
-          <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Intake Mode</span>
-          <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 gap-1">
-            <button
-              data-testid="mode-toggle-text"
-              type="button"
-              onClick={() => handleSelectMode('text')}
-              className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1 cursor-pointer ${
-                reviewMode === 'text'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs font-semibold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <FileText className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
-              <span>Text+Rating</span>
-            </button>
-
-            <button
-              data-testid="mode-toggle-video"
-              type="button"
-              onClick={() => handleSelectMode('video')}
-              className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1 cursor-pointer ${
-                reviewMode === 'video'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs font-semibold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <Video className="w-3 h-3 text-violet-600 dark:text-violet-400" />
-              <span>Video</span>
-            </button>
-
-            <button
-              data-testid="mode-toggle-rating"
-              type="button"
-              onClick={() => handleSelectMode('rating')}
-              className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1 cursor-pointer ${
-                reviewMode === 'rating'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs font-semibold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <Star className="w-3 h-3 text-amber-500" />
-              <span>Rating Only</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Shareable URL Container - Compact */}
-        <div data-testid="collection-link-card" className="rounded-lg bg-slate-100 dark:bg-slate-800/80 p-2 flex items-center justify-between gap-2 border border-slate-200/50 dark:border-slate-700/50">
-          <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            <Globe className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-            <span className="text-[12px] font-mono text-slate-700 dark:text-slate-200 truncate select-all">
-              {collectionUrl}
-            </span>
-          </div>
-          <button
-            type="button"
-            data-testid="copy-collection-link-btn"
-            onClick={handleCopy}
-            className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 px-2 py-1 rounded bg-white dark:bg-slate-700 active:bg-indigo-50 font-label-sm text-xs font-semibold shadow-2xs transition-colors shrink-0 cursor-pointer"
-          >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="text-emerald-600">Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5" />
-                <span>Copy</span>
-              </>
-            )}
-          </button>
-        </div>
-        {channelToast && (
-          <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 animate-fade-in">
-            {channelToast}
-          </p>
-        )}
-      </div>
 
       {/* 6. Live Collection Performance & Analytics Grid (Compact) */}
       <div className="flex flex-col space-y-2">
