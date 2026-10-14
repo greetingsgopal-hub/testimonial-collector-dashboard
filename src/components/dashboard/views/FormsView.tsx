@@ -11,10 +11,6 @@ import {
   Inbox,
   CheckCircle2,
   Mail,
-  Globe,
-  Code,
-  ChevronRight,
-  Palette,
   ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
@@ -34,11 +30,11 @@ export interface FormsViewProps {
 
 export const FormsView: React.FC<FormsViewProps> = ({
   onConfigureForm,
-  onSendInvites,
+  onSendInvites: _onSendInvites,
   onViewProof,
   onUpdateForm: _onUpdateForm,
-  onNavigateToCampaigns,
-  onNavigateToWidgets,
+  onNavigateToCampaigns: _onNavigateToCampaigns,
+  onNavigateToWidgets: _onNavigateToWidgets,
   reviews = [],
   stats,
 }) => {
@@ -274,132 +270,7 @@ export const FormsView: React.FC<FormsViewProps> = ({
         </div>
       </div>
 
-      {/* 7. Multi-channel Collection Options (Unified Grouped Card) */}
-      <div className="flex flex-col space-y-1.5">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-[15px] font-semibold text-slate-900 dark:text-white font-display">
-            Distribution Channels
-          </h3>
-          <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-full">
-            4 Channels
-          </span>
-        </div>
-
-        <div className="rounded-xl bg-white dark:bg-slate-900 shadow-2xs border border-slate-200/80 dark:border-slate-800 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
-          {/* Channel 1: Dedicated Branded URL */}
-          <div 
-            onClick={handleCopy}
-            className="p-2.5 flex items-center justify-between transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer"
-          >
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
-                <Globe className="w-4 h-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-semibold text-slate-900 dark:text-white truncate">Custom Branded Link</span>
-                  <span className="px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-[10px] font-semibold">
-                    Active
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                  Direct share via Slack, SMS or WhatsApp
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 ml-1" />
-          </div>
-
-          {/* Channel 2: Email Campaign */}
-          <div 
-            onClick={() => onNavigateToCampaigns ? onNavigateToCampaigns() : (onSendInvites ? onSendInvites() : handleCopy())}
-            className="p-2.5 flex items-center justify-between transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer"
-          >
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-950/60 flex items-center justify-center text-violet-600 dark:text-violet-400 shrink-0">
-                <Mail className="w-4 h-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-semibold text-slate-900 dark:text-white truncate">Email Campaign</span>
-                  <span className="px-1.5 py-0.2 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[10px] font-semibold">
-                    Scheduled
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                  Automated drip requests post-checkout
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 ml-1" />
-          </div>
-
-          {/* Channel 3: Packaging QR */}
-          <div 
-            onClick={() => setShowQrModal(true)}
-            className="p-2.5 flex items-center justify-between transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer"
-          >
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
-                <QrCode className="w-4 h-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="text-xs font-semibold text-slate-900 dark:text-white truncate block">
-                  In-Person &amp; Packaging QR
-                </span>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                  Print vector cards for product unboxings
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 ml-1" />
-          </div>
-
-          {/* Channel 4: Website Embed */}
-          <div 
-            onClick={() => onNavigateToWidgets ? onNavigateToWidgets() : onConfigureForm()}
-            className="p-2.5 flex items-center justify-between transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer"
-          >
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-violet-600 dark:text-violet-400 shrink-0">
-                <Code className="w-4 h-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="text-xs font-semibold text-slate-900 dark:text-white truncate block">
-                  Inline Web Pop-up
-                </span>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                  Embed 1-line script onto your app dashboard
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 ml-1" />
-          </div>
-        </div>
-      </div>
-
-      {/* 8. Form Customization Callout (Compact) */}
-      <div className="rounded-xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 p-2.5 flex items-center justify-between shadow-2xs">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-2xs shrink-0">
-            <Palette className="w-4 h-4" />
-          </div>
-          <div className="min-w-0">
-            <h4 className="text-xs font-semibold text-slate-900 dark:text-white truncate">Styling &amp; Branding</h4>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">Custom logo, questions &amp; color palette</p>
-          </div>
-        </div>
-        <button 
-          type="button"
-          onClick={onConfigureForm}
-          className="text-indigo-600 dark:text-indigo-400 text-[12px] font-semibold hover:underline flex items-center gap-0.5 shrink-0 ml-2 cursor-pointer"
-        >
-          <span>Edit</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
-      {/* 9. QR Code Modal */}
+      {/* QR Code Modal */}
       {showQrModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 max-w-3xl w-full shadow-2xl relative my-auto max-h-[94vh] overflow-y-auto text-slate-900 dark:text-slate-100">

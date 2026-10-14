@@ -155,7 +155,7 @@ describe('FormsView Collect Page Upgrades Suite', () => {
     expect(mockOnViewProof).toHaveBeenCalledTimes(1);
   });
 
-  it('6. Renders Distribution Channels and Styling & Branding callouts', async () => {
+  it('6. Does not render Distribution Channels or Styling & Branding sections', async () => {
     const mockNavigateCampaigns = vi.fn();
     const mockNavigateWidgets = vi.fn();
 
@@ -172,22 +172,11 @@ describe('FormsView Collect Page Upgrades Suite', () => {
       );
     });
 
-    expect(container.textContent).toContain('Distribution Channels');
-    expect(container.textContent).toContain('Custom Branded Link');
-    expect(container.textContent).toContain('Email Campaign');
-    expect(container.textContent).toContain('In-Person & Packaging QR');
-    expect(container.textContent).toContain('Inline Web Pop-up');
-    expect(container.textContent).toContain('Styling & Branding');
-
-    // Test clicking Styling & Branding Edit trigger
-    const editBtn = Array.from(container.querySelectorAll('button')).find(
-      btn => btn.textContent?.includes('Edit')
-    );
-    expect(editBtn).toBeDefined();
-
-    await act(async () => {
-      editBtn?.click();
-    });
-    expect(mockOnConfigure).toHaveBeenCalledTimes(1);
+    expect(container.textContent).not.toContain('Distribution Channels');
+    expect(container.textContent).not.toContain('Custom Branded Link');
+    expect(container.textContent).not.toContain('Email Campaign');
+    expect(container.textContent).not.toContain('In-Person & Packaging QR');
+    expect(container.textContent).not.toContain('Inline Web Pop-up');
+    expect(container.textContent).not.toContain('Styling & Branding');
   });
 });
