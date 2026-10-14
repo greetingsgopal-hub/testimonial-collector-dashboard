@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  X, 
-  Copy, 
-  Check, 
-  ExternalLink, 
-  Globe, 
-  ToggleLeft, 
-  ToggleRight,
+import {
+  X,
+  Copy,
+  Check,
+  ExternalLink,
+  Globe,
   AlertCircle,
-  Save
+  Save,
 } from 'lucide-react';
 import { CollectionForm } from '../../types';
 import { storage } from '../../lib/storage';
@@ -51,10 +49,6 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
     collectionForm?.description || 'Your honest feedback helps our team and community grow.'
   );
   const [publicSlug, setPublicSlug] = useState(collectionForm?.publicSlug || 'feedback');
-  const [isActive, setIsActive] = useState(collectionForm?.isActive ?? true);
-  const [allowVideo] = useState(false);
-  const [autoTag, setAutoTag] = useState(collectionForm?.settings?.autoTag || '');
-  const [autoApprove, setAutoApprove] = useState(collectionForm?.settings?.autoApprove ?? false);
 
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -98,8 +92,6 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
       const formSettings = {
         ...collectionForm?.settings,
         brandName: cleanBrand || undefined,
-        autoTag: autoTag.trim() || undefined,
-        autoApprove,
       };
 
       if (collectionForm?.id) {
@@ -107,8 +99,8 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
           title: cleanTitle.trim(),
           description: description.trim(),
           publicSlug: publicSlug.trim(),
-          isActive,
-          allowVideo,
+          isActive: collectionForm.isActive ?? true,
+          allowVideo: collectionForm.allowVideo ?? false,
           projectId: collectionForm.projectId || projectId,
           settings: formSettings,
           ...((cleanBrand ? { publicBrandName: cleanBrand } : {}) as any),
@@ -119,8 +111,8 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
           title: cleanTitle.trim(),
           description: description.trim(),
           publicSlug: publicSlug.trim(),
-          isActive,
-          allowVideo,
+          isActive: true,
+          allowVideo: false,
           settings: formSettings,
           ...((cleanBrand ? { publicBrandName: cleanBrand } : {}) as any),
         });
@@ -136,23 +128,25 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white w-full max-w-xl rounded-2xl border border-gray-200 shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-fade-in font-sans">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-[#6701e6] flex items-center justify-center border border-purple-100">
-              <Globe className="w-4 h-4" />
+        <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 flex items-center justify-center shrink-0">
+              <Globe className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900">Collection Settings</h3>
-              <p className="text-xs text-gray-500">Configure your customer-facing collection form</p>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Collection Settings</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Configure your customer-facing collection form</p>
             </div>
           </div>
 
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+            aria-label="Close modal"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -161,37 +155,37 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSave} className="p-5 sm:p-6 space-y-5 overflow-y-auto">
           {error && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2">
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2 shadow-2xs">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Shareable Link Box */}
-          <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-500">
-              Shareable Public URL
+          {/* Section: SHAREABLE PUBLIC URL */}
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 space-y-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              SHAREABLE PUBLIC URL
             </label>
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 readOnly
                 value={publicUrl}
-                className="w-full px-3 py-2 rounded-lg bg-white border border-gray-300 text-xs font-mono text-gray-800 focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 text-xs font-mono text-slate-800 dark:text-slate-200 select-all focus:outline-none"
               />
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="px-3 py-2 rounded-lg bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer shadow-xs"
+                className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-xs font-bold text-white flex items-center gap-1.5 shrink-0 transition-colors shadow-sm cursor-pointer"
               >
-                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? 'Copied' : 'Copy'}</span>
               </button>
               <a
                 href={publicUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-600 hover:text-gray-900 shrink-0 transition-colors cursor-pointer"
+                className="p-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shrink-0 transition-colors cursor-pointer"
                 title="Preview public page"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -199,157 +193,97 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
             </div>
           </div>
 
-          {/* Brand / Product Name */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-              Brand / Product Name
-            </label>
-            <input
-              type="text"
-              value={brandName}
-              onChange={(e) => setBrandName(e.target.value)}
-              placeholder="e.g. Acme Inc or Panda Praise"
-              className="w-full px-3.5 py-2 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6]"
-            />
-            <p className="text-[11px] text-gray-500 mt-1">
-              Used in the rating question: "Did you like {cleanBrandOrProductName(brandName) || 'our business'}?"
-            </p>
-          </div>
-
-          {/* Title */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-              Collection Title *
-            </label>
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Share Your Experience with Acme"
-              className="w-full px-3.5 py-2 rounded-xl text-sm bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6]"
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-              Instructions / Prompt for Customers
-            </label>
-            <textarea
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="What questions or topics should customers address?"
-              className="w-full px-3.5 py-2 rounded-xl text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6] leading-relaxed resize-none"
-            />
-          </div>
-
-          {/* Public Slug */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-              URL Identifier (Slug) *
-            </label>
-            <div className="flex items-center">
-              <span className="px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-xl text-xs font-mono text-gray-500 select-none">
-                /c/
-              </span>
-              <input
-                type="text"
-                required
-                value={publicSlug}
-                onChange={handleSlugChange}
-                placeholder="e.g. your-feedback"
-                className="flex-1 px-3 py-2 rounded-r-xl text-xs font-mono bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6]"
-              />
-            </div>
-            <p className="text-[11px] text-gray-500 mt-1">
-              Lowercase letters, numbers, and hyphens only. Must be unique across the platform.
-            </p>
-          </div>
-
-          {/* Status & Options */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-            {/* Active Toggle */}
-            <div
-              onClick={() => setIsActive(!isActive)}
-              className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
-                isActive
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : 'bg-gray-50 border-gray-200 text-gray-500'
-              }`}
-            >
-              <div>
-                <div className="text-xs font-bold">Active for Submissions</div>
-                <div className="text-[10px] text-gray-500">
-                  {isActive ? 'Accepting new responses' : 'Closed / Paused'}
-                </div>
-              </div>
-              {isActive ? (
-                <ToggleRight className="w-6 h-6 text-emerald-600" />
-              ) : (
-                <ToggleLeft className="w-6 h-6 text-gray-400" />
-              )}
-            </div>
-
-            {/* Form Mode Indicator */}
-            <div className="p-3.5 rounded-xl border bg-gray-50 border-gray-200 text-gray-600 flex items-center justify-between">
-              <div>
-                <div className="text-xs font-bold text-gray-800">Review Input Mode</div>
-                <div className="text-[10px] text-gray-500">
-                  Standard Verified Text Form (Video input is suspended)
-                </div>
-              </div>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-100 text-purple-700">Text Only</span>
-            </div>
-          </div>
-
-          {/* Automatic Tagging & Auto-Approval Settings */}
-          <div className="p-4 rounded-xl bg-purple-50/50 border border-purple-200 space-y-3">
-            <div className="text-xs font-bold text-gray-900 uppercase tracking-wider">
-              Automatic Processing Rules
-            </div>
-
+          {/* Clean Form Fields */}
+          <div className="space-y-4">
+            {/* Brand / Product Name */}
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">
-                Auto-Tag Incoming Testimonials
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                Brand / Product Name
               </label>
               <input
                 type="text"
-                value={autoTag}
-                onChange={(e) => setAutoTag(e.target.value.toLowerCase().replace(/[^a-z0-9-,\s]/g, ''))}
-                placeholder="e.g. enterprise, case-study, vip"
-                className="w-full px-3 py-2 rounded-lg text-xs bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#6701e6]"
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
+                placeholder="e.g. Acme Inc or Panda Praise"
+                className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/10 transition-all shadow-2xs"
               />
-              <p className="text-[10px] text-gray-500 mt-1">
-                Comma-separated tags (e.g. enterprise, case-study). Submissions will receive all specified tags automatically.
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                Displayed on review invitations and public collection pages.
               </p>
             </div>
 
-            <label className="flex items-center gap-2.5 pt-1 text-xs text-gray-700 font-medium cursor-pointer">
+            {/* Collection Title * */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                Collection Title *
+              </label>
               <input
-                type="checkbox"
-                checked={autoApprove}
-                onChange={(e) => setAutoApprove(e.target.checked)}
-                className="rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6]"
+                type="text"
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Share Your Experience with Acme"
+                className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/10 transition-all shadow-2xs"
               />
-              <span>Automatically approve testimonials from this form (skip pending queue)</span>
-            </label>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                The primary headline shown at the top of your collection form.
+              </p>
+            </div>
+
+            {/* Instructions / Prompt for Customers (textarea) */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                Instructions / Prompt for Customers
+              </label>
+              <textarea
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="What questions or topics should customers address?"
+                className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/10 transition-all shadow-2xs leading-relaxed resize-none"
+              />
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                Provide helpful guidance or question prompts to inspire authentic responses.
+              </p>
+            </div>
+
+            {/* URL Identifier (Slug) * with fixed “/c/” prefix */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                URL Identifier (Slug) *
+              </label>
+              <div className="flex items-center">
+                <span className="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200/80 dark:border-slate-700 rounded-l-xl text-xs font-mono text-slate-500 select-none">
+                  /c/
+                </span>
+                <input
+                  type="text"
+                  required
+                  value={publicSlug}
+                  onChange={handleSlugChange}
+                  placeholder="e.g. your-feedback"
+                  className="flex-1 px-3.5 py-2.5 rounded-r-xl text-xs font-mono bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/10 transition-all shadow-2xs"
+                />
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                Lowercase letters, numbers, and hyphens only. Must be unique across the platform.
+              </p>
+            </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-4 border-t border-gray-100 flex items-center justify-end gap-2.5">
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="px-5 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
             >
               <Save className="w-3.5 h-3.5" />
               <span>{isSaving ? 'Saving...' : 'Save Collection Settings'}</span>
@@ -360,3 +294,5 @@ export const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({
     </div>
   );
 };
+
+export default CollectionConfigModal;
