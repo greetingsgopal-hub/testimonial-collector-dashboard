@@ -28,10 +28,8 @@ export const SignupPage: React.FC = () => {
   const [isExistingAccount, setIsExistingAccount] = useState(false);
 
   const { 
-    user, 
     signUp, 
     signInWithGoogle, 
-    signOut,
     updateProjectDetails, 
     updateCollectionFormDetails, 
     project, 
@@ -216,35 +214,6 @@ export const SignupPage: React.FC = () => {
                 <span>Log in to your account</span>
                 <ArrowRight className="w-3 h-3" />
               </Link>
-            </div>
-          )}
-
-          {/* Existing Logged-in Account Compact Banner */}
-          {user && (
-            <div className="mb-3 p-2.5 sm:p-3 rounded-xl bg-purple-50/90 border border-purple-200/80 text-xs text-purple-950 flex flex-col sm:flex-row sm:items-center justify-between gap-2 animate-fade-in shadow-2xs">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <Sparkles className="w-3.5 h-3.5 text-brand-600 shrink-0" />
-                <span className="truncate text-xs">Signed in as <strong className="font-semibold text-slate-900">{user.email}</strong></span>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => navigate('/dashboard')}
-                  className="px-3 py-1 rounded-lg bg-[#6701e6] hover:bg-[#5200bd] text-white font-semibold text-xs flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                >
-                  <span>Dashboard</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await signOut();
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 font-medium text-xs transition-colors cursor-pointer"
-                >
-                  Sign out
-                </button>
-              </div>
             </div>
           )}
 
