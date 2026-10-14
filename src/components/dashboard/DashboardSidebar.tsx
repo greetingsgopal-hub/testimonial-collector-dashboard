@@ -15,8 +15,10 @@ import {
   Sparkles,
   Gift,
   X,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { isSuperadmin } from '../../lib/admin';
 import { Project } from '../../types';
 
 export type DashboardTab =
@@ -306,6 +308,24 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             <span>Settings</span>
           </div>
         </button>
+
+        {/* 8. Superadmin Platform Console (Visible only to authorized root admins) */}
+        {isSuperadmin(user?.email) && (
+          <div className="pt-2 mt-2 border-t border-slate-200/60">
+            <Link
+              to="/admin"
+              className="apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer bg-red-500/10 text-red-700 hover:bg-red-500/15 border border-red-500/20"
+            >
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-red-600" />
+                <span>Superadmin</span>
+              </div>
+              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-red-600 text-white">
+                Root
+              </span>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* ── Unified Bottom Profile Chip & Popover Dropdown ── */}
@@ -444,6 +464,18 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 <Settings className="w-3.5 h-3.5 text-slate-400" />
                 <span>Account Settings</span>
               </button>
+
+              {isSuperadmin(user?.email) && (
+                <Link
+                  to="/admin"
+                  id="sidebar-superadmin-console-link"
+                  onClick={() => setShowProfileMenu(false)}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-left flex items-center gap-2 text-xs text-red-700 hover:bg-red-50 transition-colors font-medium"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-red-600" />
+                  <span>Superadmin Console</span>
+                </Link>
+              )}
 
               <button
                 type="button"

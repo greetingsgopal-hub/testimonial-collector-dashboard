@@ -42,7 +42,7 @@ function toFirestoreValue(val: any): any {
   return { stringValue: String(val) };
 }
 
-function fromFirestoreFields(fields: Record<string, any>): any {
+export function fromFirestoreFields(fields: Record<string, any>): any {
   const result: Record<string, any> = {};
   for (const [key, val] of Object.entries(fields)) {
     if ('stringValue' in val) result[key] = val.stringValue;

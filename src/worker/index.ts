@@ -43,6 +43,7 @@ import { handleAffiliatesApi } from './handlers/affiliateHandler';
 import { handlePppGeoDetection } from './handlers/pppHandler';
 import { handlePublicTestimonialSubmit } from './handlers/publicSubmissionHandler';
 import { handleAccountDeletion } from './handlers/accountDeletionHandler';
+import { handleAdminGetWorkspaces, handleAdminUpdateWorkspacePlan } from './handlers/admin';
 
 export default {
   async fetch(request: Request, env: WorkerEnv, _ctx: ExecutionContext): Promise<Response> {
@@ -94,6 +95,15 @@ export default {
 
       // 2. Normalize endpoint name
       const endpoint = pathname.replace(/^\/api\//, '').split('?')[0].replace(/\/$/, '');
+
+      // Superadmin Platform Console Endpoints
+      if (endpoint === 'admin/workspaces') {
+        return await handleAdminGetWorkspaces(request, env);
+      }
+      const adminPlanMatch = endpoint.match(/^admin\/workspaces\/([^/]+)\/plan$/);
+      if (adminPlanMatch) {
+        return await handleAdminUpdateWorkspacePlan(request, env, decodeURIComponent(adminPlanMatch[1]));
+      }
 
       switch (endpoint) {
         case 'geo/ppp':

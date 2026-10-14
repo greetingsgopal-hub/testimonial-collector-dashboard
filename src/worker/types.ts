@@ -48,6 +48,9 @@ export interface WorkerEnv {
   // Cloudflare Turnstile Anti-Abuse CAPTCHA
   TURNSTILE_SECRET_KEY?: string;
   VITE_TURNSTILE_SITE_KEY?: string;
+  // Admin / Superadmin authorization allowlist
+  ADMIN_EMAILS?: string;
+  VITE_SUPERADMIN_EMAILS?: string;
   // Cloudflare KV for distributed rate limiting across edge isolates
   RATE_LIMIT_KV?: KVNamespaceLike;
 }

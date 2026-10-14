@@ -29,6 +29,8 @@ const AlternativePage = React.lazy(() => import('./pages/AlternativePage').then(
 const UseCasePage = React.lazy(() => import('./pages/UseCasePage').then((m) => ({ default: m.UseCasePage })));
 const AffiliatePage = React.lazy(() => import('./pages/AffiliatePage').then((m) => ({ default: m.AffiliatePage })));
 const DeveloperDocsPage = React.lazy(() => import('./pages/DeveloperDocsPage').then((m) => ({ default: m.DeveloperDocsPage })));
+const AdminPage = React.lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })));
+import { SuperadminGuard } from './components/auth/SuperadminGuard';
 import { captureReferralCode } from './lib/referral';
 
 /**
@@ -149,6 +151,14 @@ export function App() {
                 <ProtectedRoute>
                   <DashboardPage />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <SuperadminGuard>
+                  <AdminPage />
+                </SuperadminGuard>
               }
             />
 
