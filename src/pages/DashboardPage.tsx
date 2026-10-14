@@ -593,7 +593,9 @@ export const DashboardPage = () => {
 
           {/* Automated Review Request Drip Campaigns (Stage 5) */}
           {activeTab === 'campaigns' && (
-            <CampaignsHub onNavigateToProof={() => setActiveTab('proof')} />
+            <div className="max-w-5xl mx-auto font-sans">
+              <CampaignsHub onNavigateToProof={() => setActiveTab('proof')} />
+            </div>
           )}
 
           {/* MAIN MODERATION QUEUE & PROOF DASHBOARD VIEW */}
