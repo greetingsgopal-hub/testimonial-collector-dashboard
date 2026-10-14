@@ -146,3 +146,10 @@ describe('C5: Worker Firestore write path uses service account (rules bypass)', 
     expect(src).toMatch(/private_key/);
   });
 });
+
+describe('Priority 0: Security & Email Verification in firestore.rules', () => {
+  it('requires email_verified == true for workspace creation', () => {
+    const block = workspaceBlock();
+    expect(block).toMatch(/request\.auth\.token\.email_verified\s*==\s*true/);
+  });
+});

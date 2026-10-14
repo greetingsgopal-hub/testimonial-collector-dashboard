@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
+import { startStripeCheckout } from '../lib/stripe';
 
 const FAQ_ITEMS = [
   {
@@ -64,7 +65,11 @@ export const PricingPage = () => {
     }
     setCheckoutLoading(plan);
     try {
-      window.location.href = `/dashboard/settings?plan=${plan}&currency=${currency}&checkout=true`;
+      const res = await startStripeCheckout(plan);
+      if (!res.success) {
+        setCheckoutError(res.error || 'Failed to initialize Stripe checkout. Redirecting to settings…');
+        window.location.href = `/dashboard/settings?plan=${plan}&currency=${currency}&checkout=true`;
+      }
     } catch {
       setCheckoutError('Redirecting to your billing dashboard…');
       window.location.href = '/dashboard/settings';

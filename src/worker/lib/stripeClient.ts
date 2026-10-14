@@ -250,3 +250,32 @@ export async function getWorkspaceByCustomerId(
 
   return { id: workspaceId, data };
 }
+
+/**
+ * Cascade deletion: Cancel all subscriptions and delete customer in Stripe.
+ */
+export async function deleteStripeCustomerAndSubscriptions(
+  customerId: string,
+  env: WorkerEnv
+): Promise<void> {
+  if (!customerId || !env.STRIPE_SECRET_KEY) return;
+  try {
+    const stripe = getStripeClient(env);
+    // Cancel active subscriptions
+    const subscriptions = await stripe.subscriptions.list({ customer: customerId, status: 'all' });
+    for (const sub of subscriptions.data) {
+      if (sub.status !== 'canceled') {
+        try {
+          await stripe.subscriptions.cancel(sub.id);
+        } catch (err) {
+          console.warn(`[Stripe] Failed to cancel subscription ${sub.id}:`, err);
+        }
+      }
+    }
+    // Delete customer
+    await stripe.customers.del(customerId);
+  } catch (err) {
+    console.warn(`[Stripe] Failed to delete customer ${customerId}:`, err);
+  }
+}
+

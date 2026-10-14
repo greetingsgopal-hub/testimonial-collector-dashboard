@@ -19,11 +19,14 @@ import {
   Send,
   CheckCircle2,
   Sparkles,
+  X,
 } from 'lucide-react';
 import { CmsEmbedModal } from './CmsEmbedModal';
 import { useAuth } from '../../context/AuthContext';
 import { usePageSeo } from '../../lib/seo';
 import { TeamRole, PLAN_LIMITS, Project } from '../../types';
+import { startStripeCheckout, openBillingPortal } from '../../lib/stripe';
+import { requestAccountDeletion } from '../../lib/account';
 
 type SettingsTab = 'general' | 'team' | 'billing' | 'branding' | 'api' | 'security';
 
@@ -33,7 +36,7 @@ export const WorkspaceSettings: React.FC = () => {
     description: 'Manage your workspace settings, team members, billing, security, and integrations.',
   });
 
-  const { workspace, project, user, allProjects = [], updateProjectDetails, deleteProjectById, resetPassword } = useAuth();
+  const { workspace, project, user, allProjects = [], updateProjectDetails, deleteProjectById, resetPassword, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [wsName, setWsName] = useState(workspace?.name || project?.name || 'My Workspace');
   const [isSaving, setIsSaving] = useState(false);
@@ -44,6 +47,15 @@ export const WorkspaceSettings: React.FC = () => {
 
   // Danger Zone / GDPR Deletion State
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showAccountDeleteModal, setShowAccountDeleteModal] = useState(false);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [accountDeletionError, setAccountDeletionError] = useState<string | null>(null);
+
+  // Billing portal and checkout state
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+  const [billingError, setBillingError] = useState<string | null>(null);
 
   // Security Tab State
   const [passwordResetSent, setPasswordResetSent] = useState(false);
@@ -76,6 +88,60 @@ export const WorkspaceSettings: React.FC = () => {
       setWebhookTestFeedback(prev => ({ ...prev, [platform]: { success: false, msg: err.message || 'Network error' } }));
     } finally {
       setTestingWebhookPlatform(null);
+    }
+  };
+
+  const handleStartCheckout = async (priceId: string = 'monthly') => {
+    setIsCheckingOut(true);
+    setBillingError(null);
+    try {
+      const res = await startStripeCheckout(priceId);
+      if (!res.success && res.error) {
+        setBillingError(res.error);
+      }
+    } catch (err: any) {
+      setBillingError(err.message || 'Failed to start checkout');
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
+  const handleOpenBillingPortal = async () => {
+    setIsOpeningPortal(true);
+    setBillingError(null);
+    try {
+      const res = await openBillingPortal();
+      if (!res.success && res.error) {
+        setBillingError(res.error);
+      }
+    } catch (err: any) {
+      setBillingError(err.message || 'Failed to open customer billing portal.');
+    } finally {
+      setIsOpeningPortal(false);
+    }
+  };
+
+  const handleExecuteAccountDeletion = async () => {
+    if (deleteConfirmationText !== 'DELETE') return;
+    setIsDeletingAccount(true);
+    setAccountDeletionError(null);
+    try {
+      const res = await requestAccountDeletion();
+      if (res.success) {
+        if (signOut) {
+          await signOut();
+        }
+        try {
+          localStorage.clear();
+        } catch {}
+        window.location.href = '/';
+      } else {
+        setAccountDeletionError(res.error || 'Failed to delete account.');
+      }
+    } catch (err: any) {
+      setAccountDeletionError(err.message || 'Network error during account deletion.');
+    } finally {
+      setIsDeletingAccount(false);
     }
   };
 
@@ -320,6 +386,24 @@ export const WorkspaceSettings: React.FC = () => {
                     {isDeleting ? 'Deleting Workspace...' : 'Delete Workspace'}
                   </button>
                 </div>
+
+                <div className="pt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-t border-rose-200">
+                  <div>
+                    <p className="text-xs font-bold text-rose-900">Permanent Account Deletion (GDPR Article 17)</p>
+                    <p className="text-[11px] text-rose-700/80">Purges account, cancels subscriptions, and deletes all workspace data</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setDeleteConfirmationText('');
+                      setAccountDeletionError(null);
+                      setShowAccountDeleteModal(true);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-rose-950 hover:bg-black text-rose-200 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <AlertTriangle size={14} />
+                    Delete Account & All Data
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -407,11 +491,29 @@ export const WorkspaceSettings: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  {plan === 'free' && (
-                    <a href="/onboarding/upgrade" className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-black hover:bg-gray-800 text-white transition-all shadow-xs">
+                  {billingError && (
+                    <div className="w-full text-xs text-rose-600 font-medium">
+                      {billingError}
+                    </div>
+                  )}
+                  {plan === 'free' ? (
+                    <button
+                      onClick={() => handleStartCheckout('monthly')}
+                      disabled={isCheckingOut}
+                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-black hover:bg-gray-800 text-white transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                    >
                       <Crown size={14} className="text-amber-400" />
-                      Upgrade
-                    </a>
+                      {isCheckingOut ? 'Loading...' : 'Upgrade to Pro'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleOpenBillingPortal}
+                      disabled={isOpeningPortal}
+                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#6701e6] hover:bg-[#5200bd] text-white transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                    >
+                      <CreditCard size={14} />
+                      {isOpeningPortal ? 'Opening Portal...' : 'Manage Subscription'}
+                    </button>
                   )}
                 </div>
 
@@ -825,6 +927,71 @@ export const WorkspaceSettings: React.FC = () => {
         onClose={() => setShowCmsEmbedModal(false)}
         spaceSlug={project?.slug || 'demo'}
       />
+
+      {/* GDPR Article 17 Account Deletion Confirmation Modal */}
+      {showAccountDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-rose-200 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+              <div className="flex items-center gap-2 text-rose-700">
+                <AlertTriangle size={20} />
+                <h3 className="text-base font-bold text-gray-900">Delete Account & All Data</h3>
+              </div>
+              <button
+                onClick={() => setShowAccountDeleteModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl space-y-2">
+              <p className="text-xs font-bold text-rose-900">
+                GDPR Article 17 — Irreversible Purge
+              </p>
+              <p className="text-xs text-rose-700/90 leading-relaxed">
+                This action cannot be undone. All your workspaces, projects, collected testimonials, widgets, social integrations, and active Stripe subscriptions will be immediately and permanently deleted.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-gray-700 block">
+                Type <span className="font-mono font-bold text-rose-600">DELETE</span> to confirm:
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmationText}
+                onChange={e => setDeleteConfirmationText(e.target.value)}
+                placeholder="DELETE"
+                className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-300 font-mono focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+              />
+            </div>
+
+            {accountDeletionError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold text-rose-800">
+                {accountDeletionError}
+              </div>
+            )}
+
+            <div className="pt-2 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowAccountDeleteModal(false)}
+                disabled={isDeletingAccount}
+                className="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExecuteAccountDeletion}
+                disabled={deleteConfirmationText !== 'DELETE' || isDeletingAccount}
+                className="px-4 py-2 text-xs font-bold rounded-xl bg-rose-600 hover:bg-rose-700 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+              >
+                {isDeletingAccount ? 'Permanently Purging...' : 'Permanently Delete Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

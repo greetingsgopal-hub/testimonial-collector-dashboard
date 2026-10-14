@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Check, Sparkles, Zap, ShieldCheck } from 'lucide-react';
+import { startStripeCheckout } from '../../lib/stripe';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -14,19 +15,25 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const handleChoosePro = () => {
+  const handleChoosePro = async () => {
     if (onSelectPlan) {
       onSelectPlan('pro');
     } else {
-      window.location.href = '/dashboard/settings?tab=billing&plan=pro&checkout=true';
+      const res = await startStripeCheckout('pro');
+      if (!res.success) {
+        window.location.href = '/dashboard/settings?tab=billing&plan=pro&checkout=true';
+      }
     }
   };
 
-  const handleChooseFounding = () => {
+  const handleChooseFounding = async () => {
     if (onSelectPlan) {
       onSelectPlan('founding');
     } else {
-      window.location.href = '/dashboard/settings?tab=billing&plan=founding&checkout=true';
+      const res = await startStripeCheckout('founding');
+      if (!res.success) {
+        window.location.href = '/dashboard/settings?tab=billing&plan=founding&checkout=true';
+      }
     }
   };
 

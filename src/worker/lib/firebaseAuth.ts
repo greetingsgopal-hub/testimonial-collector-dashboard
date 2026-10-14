@@ -62,3 +62,27 @@ export function extractBearerToken(authHeader?: string | null): string | null {
   }
   return null;
 }
+
+export async function deleteFirebaseAccount(idToken: string, env: WorkerEnv): Promise<boolean> {
+  if (!idToken || typeof idToken !== 'string') return false;
+
+  try {
+    const apiKey = getFirebaseApiKey(env);
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${encodeURIComponent(apiKey)}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken }),
+    });
+
+    if (!response.ok) {
+      console.warn('[FirebaseAuth] Account deletion returned non-ok status:', response.status);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('[FirebaseAuth] Error deleting account:', err);
+    return false;
+  }
+}
+

@@ -39,6 +39,8 @@ import { handleWebhookTestDispatch } from './handlers/alertWebhooks';
 import { handlePublicApi } from './handlers/publicApiHandler';
 import { handleAffiliatesApi } from './handlers/affiliateHandler';
 import { handlePppGeoDetection } from './handlers/pppHandler';
+import { handlePublicTestimonialSubmit } from './handlers/publicSubmissionHandler';
+import { handleAccountDeletion } from './handlers/accountDeletionHandler';
 
 export default {
   async fetch(request: Request, env: WorkerEnv, _ctx: ExecutionContext): Promise<Response> {
@@ -255,6 +257,16 @@ export default {
         case 'referral/stats':
         case 'referral-stats':
           return await handleReferralStats(request, env);
+
+        // Public testimonial submission (Turnstile & IP rate limiting)
+        case 'testimonials/submit':
+        case 'testimonial/submit':
+          return await handlePublicTestimonialSubmit(request, env);
+
+        // Self-service account deletion (GDPR Right to Erasure cascade)
+        case 'account/delete':
+        case 'account/purge':
+          return await handleAccountDeletion(request, env);
 
         default:
           return new Response(JSON.stringify({ error: `API route '${pathname}' not found.` }), {

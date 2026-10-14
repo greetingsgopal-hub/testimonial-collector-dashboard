@@ -1,101 +1,51 @@
-# PandaPraise Global Distribution Infrastructure: Task List
+# PandaPraise: Remaining Priority 0 Tasks
 
-## Phase 0: Discovery & Architecture Validation
-- [x] Inspect existing workspace, repositories, and test suite health (407 Vitest tests passing)
-- [x] Perform gap analysis between existing codebase (`testimonial-collector-dashboard`) and master prompt distribution requirements
-- [x] Draft comprehensive `implementation_plan.md` covering architecture, P0/P1/P2 priorities, and risk register
-- [x] Draft comprehensive `task.md` checklist with phased deliverables
-- [x] Obtain explicit user feedback and approval before writing production code
+## 1. Email Verification (Critical)
+- [x] **1.1 Firestore Security Rules Gate**
+  - [x] Update `firestore.rules` so workspace creation and sensitive writes require `request.auth.token.email_verified == true`.
+  - [x] Add static analysis tests in `src/worker/firestore.rules.test.ts`.
+- [x] **1.2 Auth & Onboarding Flow Hardening**
+  - [x] Ensure `sendEmailVerification` is dispatched on `signUp`.
+  - [x] Gate creation of new workspaces/projects in UI if user is unverified.
+  - [x] Ensure persistent `EmailVerificationBanner` is visible across dashboard when `user.emailVerified === false`.
+  - [x] Support direct "Resend verification email" with cooldown timer.
 
----
+## 2. Harden & Wire Stripe Billing & Free-Tier Server Limits
+- [x] **2.1 Frontend Stripe Client Wiring**
+  - [x] Create `src/lib/stripe.ts` with `startStripeCheckout({ priceId })` and `openBillingPortal()`.
+  - [x] Wire `PricingPage.tsx` checkout buttons to call `startStripeCheckout`.
+  - [x] Wire `UpgradeModal.tsx` and `PlanLimitBanner.tsx` to initiate checkout directly.
+  - [x] Add "Manage Subscription / Billing Portal" button in `WorkspaceSettings.tsx` (Billing tab) for active paid subscribers.
+- [x] **2.2 Server-Side Tier Limits Enforcement**
+  - [x] Enforce max 15 testimonials, max 1 project, max 1 widget server-side in Firestore rules and Worker.
+  - [x] Ensure Stripe webhook correctly updates `plan`, `subscriptionStatus`, and `currentPeriodEnd`.
+  - [x] Verify Founding lifetime price tier is handled as permanent Pro access.
 
-## Phase 1: Core PLG Foundation & Viral Embed Widget
-- [x] **1.1 Free Plan Limits & Upgrade Funnel**
-  - [x] Enforce 15-testimonial cap on free tier in storage routers & UI
-  - [x] Implement elegant "Limit Reached" upgrade banners and modals linking to Stripe Checkout
-  - [x] Add upgrade trigger on video collection and white-labeling requests
-- [x] **1.2 Frictionless < 2-Minute Onboarding**
-  - [x] Streamline 3-step onboarding flow: Space Name → Form Questions → Instant Collector Link + QR Standee
-  - [x] Auto-seed a high-converting sample testimonial so users immediately see a populated widget
-  - [x] Instant 1-click test review submission to experience the end-to-end loop in < 120 seconds
-- [x] **1.3 Viral "Powered by PandaPraise" Embed Widget**
-  - [x] Refactor `/embed.js` to render inside Shadow DOM (guarantee zero host CSS interference on Shopify/WordPress/Webflow)
-  - [x] Add viral watermark pill with encoded tracking link: `pandapraise.com?ref={workspace_slug}`
-  - [x] Add custom badge toggle locked to Pro/Business plans
-  - [x] Build 5 high-converting widget layouts: Wall of Love, Marquee, Carousel, Floating Toast, Rating Badge
-- [x] **1.4 In-App Referral Engine ("Give 1 Month / Get 1 Month")**
-  - [x] Generate unique referral link per workspace (`/r/:code`)
-  - [x] Track referral visits and signups with 60-day attribution cookie
-  - [x] Referral management dashboard tab showing invite status and accumulated free months
-  - [x] Unit & integration tests for referral tracking and credit application
+## 3. Protect Public Collection Forms (Abuse Prevention)
+- [x] **3.1 Cloudflare Turnstile & IP Rate Limiting Endpoint**
+  - [x] Create Worker endpoint `POST /api/testimonials/submit` in `src/worker/handlers/publicSubmissionHandler.ts`.
+  - [x] Verify Turnstile token server-side via `challenges.cloudflare.com/turnstile/v0/siteverify`.
+  - [x] Implement IP rate limiting (max 5 submissions per IP per 10 minutes) returning 429 when exceeded.
+  - [x] Verify active status of collection form before saving review to Firestore via Admin API.
+- [x] **3.2 Public Form Integration & Firebase App Check**
+  - [x] Integrate Turnstile widget in `src/pages/PublicCollectorPage.tsx` with graceful test bypass fallback.
+  - [x] Route form submissions through `POST /api/testimonials/submit`.
+  - [x] Retain strong input validation and Firebase App Check initialization.
 
----
+## 4. Self-Service Account Deletion (GDPR Article 17)
+- [x] **4.1 Cloudflare Worker Account Purge Endpoint**
+  - [x] Create `POST /api/account/delete` in `src/worker/handlers/accountDeletionHandler.ts`.
+  - [x] Require valid Firebase ID Token and explicit `{ confirmation: "DELETE" }`.
+  - [x] Cascade delete: workspaces, projects, collection_forms, reviews, public_reviews, widgets, social_connections.
+  - [x] Cancel Stripe subscriptions and delete customer in Stripe.
+  - [x] Delete Firebase Auth user record via Identity Toolkit API.
+- [x] **4.2 Settings UI Dangerous Deletion Modal**
+  - [x] Add "Danger Zone: Delete Account & All Data" in `WorkspaceSettings.tsx`.
+  - [x] Add confirmation modal requiring user to type "DELETE" before enabling action.
+  - [x] On success, sign out, clear local cache, and redirect to homepage (`/`).
 
-## Phase 2: Programmatic SEO Engine & Content Infrastructure
-- [x] **2.1 Programmatic Competitor Comparison Engine (`/alternatives/:competitor`)**
-  - [x] Define comparison dataset: Senja, Testimonial.to, Trustpilot, Boast, Endorsal, VocalVideo, ShoutOut, WallOfLove
-  - [x] Build high-converting comparison page layout (Feature matrix, pricing teardown, migration guide, customer reviews)
-  - [x] Inject dynamic `SoftwareApplication` and `FAQPage` JSON-LD schema
-  - [x] Cloudflare Worker edge SSR pre-rendering for Googlebot / search crawler indexing
-- [x] **2.2 Programmatic Use-Case Landing Pages (`/best-:useCase-testimonial-tools`)**
-  - [x] Define use-case templates: Shopify e-commerce, B2B SaaS, Agencies, Course creators, Freelancers, Local businesses
-  - [x] Pre-render industry-specific value propositions, recommended widget layouts, and conversion case studies
-- [x] **2.3 Technical SEO Foundation**
-  - [x] Dynamic `/sitemap.xml` endpoint listing all static and programmatic routes with lastmod timestamps
-  - [x] Dynamic `/robots.txt` with sitemap directives and crawler rules
-  - [x] Edge dynamic OpenGraph card generator (`/api/og`) rendering custom social preview cards
-  - [x] Verification tests for XML sitemap validity and JSON-LD schema compliance
+## 5. Verification & Walkthrough
+- [x] Verify 100% test pass rate across all test suites (`npm test` - 79 suites, 474 tests passed).
+- [x] Verify clean production build (`npm run build` - succeeded in 8.23s).
+- [x] Produce `walkthrough.md` with verification steps and testing evidence.
 
----
-
-## Phase 3: Integrations Marketplace & Affiliate Program
-- [x] **3.1 Third-Party CMS Embed Integrations**
-  - [x] **Shopify:** Native App Embed script tag & Liquid snippet copy helper
-  - [x] **WordPress:** Standalone WordPress plugin package (`pandapraise-wp-plugin.php`) with shortcode `[pandapraise widget="id"]`
-  - [x] **Webflow / Framer / Notion:** Step-by-step interactive embed installation guides with custom iframe/script generators
-- [x] **3.2 Real-Time Alert Webhooks (Slack & Discord)**
-  - [x] Slack incoming webhook integration: Send formatted testimonial card with stars, reviewer name, and 1-click approve button
-  - [x] Discord webhook integration: Send rich embed with reviewer avatar and quote
-  - [x] Settings tab to configure webhook URLs and test dispatch with 1 click
-- [x] **3.3 Zapier / Make.com Automation Engine**
-  - [x] REST Hook triggers: `testimonial.created`, `testimonial.approved`
-  - [x] Inbound webhook trigger for CRM integrations (HubSpot, Stripe, WooCommerce)
-- [x] **3.4 Self-Serve Affiliate & Partner Program**
-  - [x] Affiliate registration portal (`/affiliates`)
-  - [x] Unique tracking link generation with real-time click and conversion attribution
-  - [x] Affiliate dashboard displaying clicks, referrals, active MRR, and unpaid earnings (30% recurring)
-  - [x] Stripe Connect onboarding link for automated payouts
-  - [x] Agency partner tier with multi-client workspace discounts and co-branding options
-- [x] **3.5 Public REST API & Developer Keys**
-  - [x] API Key management in workspace settings (`pp_live_...`)
-  - [x] Public endpoints: `GET /api/v1/testimonials`, `POST /api/v1/testimonials`, `GET /api/v1/widgets`
-  - [x] Interactive OpenAPI / Swagger documentation page
-
----
-
-## Phase 4: Global Readiness, Virality & Analytics Polish
-- [x] **4.1 Internationalization (i18n)**
-  - [x] Multi-language support for 6 key languages: English (EN), Spanish (ES), Portuguese (PT), German (DE), French (FR), Hindi (HI)
-  - [x] Language toggle for public review collection forms, widgets, and key marketing funnels
-- [x] **4.2 Multi-Currency & Purchasing Power Parity (PPP) Engine**
-  - [x] Cloudflare edge Geo-IP country header detection (`request.cf.country`)
-  - [x] PPP discount rates: USD ($19/$49), INR (₹999/₹2,499), EUR (€18/€45), BRL (R$59/R$149)
-  - [x] Edge API endpoint `GET /api/geo/ppp` returning local currency and discount
-- [x] **4.3 Public Wall of Love & 1-Click Viral Sharing**
-  - [x] Showcase directory at `/wall/:slug` displaying real client reviews
-  - [x] 1-Click "Share to LinkedIn", "Share to X", and "Copy Quote" on every review card
-  - [x] 1-Click AI customer case study generator transforming 5-star reviews into structured Markdown/HTML with instant download
-- [x] **4.4 Growth & Conversion Analytics Dashboard**
-  - [x] Visual 5-stage funnel dashboard in `AnalyzeView.tsx`: Views → Submissions → Approvals → Widget Impressions → Referral Clicks
-  - [x] Summary KPIs: Form conversion rate, approval velocity, live impressions, and viral watermark CTR
-- [x] **4.5 GDPR & CCPA Compliance Hardening**
-  - [x] Explicit consent checkboxes for marketing use and video rights during collection
-  - [x] Self-service account deletion (GDPR Article 17) cascade in settings
-  - [x] Cookie consent preferences banner (`CookieConsentBanner.tsx`) with persistent preferences
-
----
-
-## Phase 5: Verification & Final Polish
-- [x] Run full automated test suite: **77 test files passed, 464 tests passed (100% pass rate)**
-- [x] Run production build (`tsc && vite build`): **0 errors, 7.11s build time**
-- [x] Generate comprehensive walkthrough report and delivery documentation

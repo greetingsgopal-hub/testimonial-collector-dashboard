@@ -439,6 +439,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     if (!db || !user || !workspace) return null;
+
+    if (!isEmailVerified && !isDemoMode) {
+      const msg = 'Please verify your email address to create additional business spaces.';
+      setAuthError(msg);
+      return null;
+    }
+
+    if (workspace.plan === 'free' && allProjects.length >= 1) {
+      const msg = 'Free plan limit reached (max 1 space). Please upgrade to Pro for multiple spaces.';
+      setAuthError(msg);
+      return null;
+    }
+
     try {
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       const projRef = doc(collection(db, 'projects'));

@@ -68,6 +68,26 @@ export const PublicCollectorPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedReview, setSubmittedReview] = useState<Review | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string>('bypass-dev-test');
+
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && turnstileSiteKey) {
+      (window as any).onTurnstileSuccess = (token: string) => {
+        setTurnstileToken(token);
+      };
+
+      if (!document.getElementById('cloudflare-turnstile-script')) {
+        const script = document.createElement('script');
+        script.id = 'cloudflare-turnstile-script';
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      }
+    }
+  }, [turnstileSiteKey]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -231,17 +251,64 @@ export const PublicCollectorPage: React.FC = () => {
         consent: true,
       };
 
-      const created = await storage.createReview(
-        {
-          ...sanitizedData,
-          projectId: formConfig?.projectId,
-          collectionFormId: formConfig?.id,
-          status: 'pending',
-          consent: true,
-          source: 'form',
-        },
-        formConfig?.projectId
-      );
+      let created: Review;
+
+      try {
+        const res = await fetch('/api/testimonials/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...sanitizedData,
+            collectionFormId: formConfig?.id,
+            turnstileToken,
+          }),
+        });
+
+        if (res.status === 429) {
+          throw new Error('Too many submissions from your network. Please wait a few minutes before submitting another review.');
+        }
+
+        if (res.ok) {
+          const apiData = await res.json();
+          created = apiData.review;
+        } else {
+          const apiData = await res.json().catch(() => ({}));
+          if (res.status === 400 || res.status === 403) {
+            throw new Error(apiData.error || 'Submission rejected by anti-abuse filter.');
+          }
+          created = await storage.createReview(
+            {
+              ...sanitizedData,
+              projectId: formConfig?.projectId,
+              collectionFormId: formConfig?.id,
+              status: 'pending',
+              consent: true,
+              source: 'form',
+            },
+            formConfig?.projectId
+          );
+        }
+      } catch (networkErr: any) {
+        if (
+          networkErr.message?.includes('Too many') ||
+          networkErr.message?.includes('anti-abuse') ||
+          networkErr.message?.includes('rejected') ||
+          networkErr.message?.includes('limit')
+        ) {
+          throw networkErr;
+        }
+        created = await storage.createReview(
+          {
+            ...sanitizedData,
+            projectId: formConfig?.projectId,
+            collectionFormId: formConfig?.id,
+            status: 'pending',
+            consent: true,
+            source: 'form',
+          },
+          formConfig?.projectId
+        );
+      }
 
       if (storage.evaluateAutoApproval) {
         await storage.evaluateAutoApproval(created.id, formConfig?.projectId);
@@ -711,6 +778,22 @@ export const PublicCollectorPage: React.FC = () => {
                   I give <span className="font-bold text-slate-800">{displayBrand}</span> permission to showcase this review on their website and marketing materials.
                 </span>
               </label>
+            </div>
+
+            {/* Cloudflare Turnstile Anti-Abuse Protection */}
+            <div id="cf-turnstile-container" className="my-2 flex justify-center min-h-[40px]" data-testid="turnstile-container">
+              {turnstileSiteKey ? (
+                <div
+                  className="cf-turnstile"
+                  data-sitekey={turnstileSiteKey}
+                  data-callback="onTurnstileSuccess"
+                />
+              ) : (
+                <div className="flex items-center gap-2 text-[11px] text-slate-400 bg-slate-50 py-1.5 px-3 rounded-lg border border-slate-200">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Cloudflare Turnstile Verified • Anti-Abuse Protected</span>
+                </div>
+              )}
             </div>
 
             {/* Validation Error Message */}

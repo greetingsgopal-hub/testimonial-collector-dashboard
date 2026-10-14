@@ -55,6 +55,16 @@ export async function handleCreateCheckoutSession(request: Request, env: WorkerE
     });
   }
 
+  // Resolve plan aliases to environment price IDs if configured
+  let resolvedPriceId = priceId;
+  if (priceId === 'monthly' || priceId === 'starter' || priceId === 'pro') {
+    resolvedPriceId = env.STRIPE_PRICE_SUBSCRIPTION_MONTHLY || priceId;
+  } else if (priceId === 'annual') {
+    resolvedPriceId = env.STRIPE_PRICE_SUBSCRIPTION_ANNUAL || priceId;
+  } else if (priceId === 'founding') {
+    resolvedPriceId = env.STRIPE_PRICE_FOUNDING_LIFETIME || priceId;
+  }
+
   // Validate price ID against configured prices (subscriptions + founding lifetime)
   const validPrices = [
     env.STRIPE_PRICE_SUBSCRIPTION_MONTHLY,
@@ -62,7 +72,7 @@ export async function handleCreateCheckoutSession(request: Request, env: WorkerE
     env.STRIPE_PRICE_FOUNDING_LIFETIME,
   ].filter(Boolean);
 
-  if (!validPrices.includes(priceId)) {
+  if (!validPrices.includes(resolvedPriceId) && !validPrices.includes(priceId)) {
     return new Response(JSON.stringify({ error: 'Invalid price ID.' }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -98,7 +108,7 @@ export async function handleCreateCheckoutSession(request: Request, env: WorkerE
   let checkoutUrl: string;
   try {
     const origin = new URL(request.url).origin;
-    checkoutUrl = await createCheckoutSession(workspaceId, customerId, priceId, origin, env);
+    checkoutUrl = await createCheckoutSession(workspaceId, customerId, resolvedPriceId, origin, env);
   } catch (err: any) {
     console.error('[StripeCheckout] Failed to create session:', err);
     return new Response(JSON.stringify({ error: 'Failed to create checkout session.' }), {

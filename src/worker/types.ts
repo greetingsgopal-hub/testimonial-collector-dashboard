@@ -38,6 +38,9 @@ export interface WorkerEnv {
   TWILIO_ACCOUNT_SID?: string;
   TWILIO_AUTH_TOKEN?: string;
   TWILIO_WHATSAPP_NUMBER?: string;
+  // Cloudflare Turnstile Anti-Abuse CAPTCHA
+  TURNSTILE_SECRET_KEY?: string;
+  VITE_TURNSTILE_SITE_KEY?: string;
 }
 
 export interface ScheduledEvent {

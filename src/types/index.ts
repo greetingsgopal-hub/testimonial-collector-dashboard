@@ -575,7 +575,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     maxTestimonials: 15,
     maxProjects: 1,
     maxSeats: 1,
-    maxWidgets: 3,
+    maxWidgets: 1,
     removeBranding: false,
     hdVideo: false,
     richSnippets: false,
