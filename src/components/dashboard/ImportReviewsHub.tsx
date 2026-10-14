@@ -135,83 +135,65 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner & Overview */}
-      <div className="bg-gradient-to-r from-indigo-900/10 via-purple-900/10 to-pink-900/10 border border-indigo-200/40 dark:border-indigo-800/40 rounded-3xl p-6 sm:p-8 backdrop-blur-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 mb-2">
-              <Sparkles className="w-3.5 h-3.5" />
-              Stage 4: Automated Import Pipelines
+    <div className="space-y-6 font-sans">
+      {/* ── 2. Full-Width Soft Purple-to-Lavender Gradient Hero Card ── */}
+      <div className="relative rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 text-white p-6 sm:p-8 overflow-hidden shadow-xl">
+        <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold mb-3 border border-white/20">
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>Stage 4: Automated Import Pipelines</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                Import & Collect Testimonials
+              </h2>
+              <p className="text-xs sm:text-sm text-purple-100 mt-2 leading-relaxed">
+                Consolidate customer praise across all channels into one canonical social proof engine.
+              </p>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-              Import & Collect Testimonials
-            </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-xl">
-              Consolidate customer praise across all channels into one canonical social proof engine.
-            </p>
+
+            {onViewProof && (
+              <button
+                type="button"
+                onClick={onViewProof}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold text-xs shadow-xs backdrop-blur-md transition-all shrink-0 cursor-pointer self-start sm:self-auto"
+              >
+                <span>View Moderation Queue</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
-          {onViewProof && (
-            <button
-              onClick={onViewProof}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 shadow-sm transition"
-            >
-              View Moderation Queue
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        {/* Source Navigation Tabs */}
-        <div className="flex flex-wrap items-center gap-2 mt-6 pt-6 border-t border-indigo-200/30 dark:border-indigo-800/30">
-          <button
-            onClick={() => setActiveTab('csv')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
-              activeTab === 'csv'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
-                : 'bg-white/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'
-            }`}
-          >
-            <FileSpreadsheet className="w-4 h-4" />
-            CSV Spreadsheet
-          </button>
-
-          <button
-            onClick={() => setActiveTab('manual')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
-              activeTab === 'manual'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
-                : 'bg-white/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'
-            }`}
-          >
-            <Edit3 className="w-4 h-4" />
-            Manual Entry
-          </button>
-
-          <button
-            onClick={() => setActiveTab('twitter')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
-              activeTab === 'twitter'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
-                : 'bg-white/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'
-            }`}
-          >
-            <XIcon className="w-4 h-4 text-slate-800 dark:text-slate-100" />
-            X / Twitter
-          </button>
-
-          <button
-            onClick={() => setActiveTab('google')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
-              activeTab === 'google'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
-                : 'bg-white/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'
-            }`}
-          >
-            <MapPin className="w-4 h-4 text-emerald-500" />
-            Google Business
-          </button>
+          {/* Below headline: horizontal source tabs/pills */}
+          <div className="mt-6 pt-6 border-t border-white/15 flex flex-wrap items-center gap-2.5">
+            {[
+              { id: 'csv', label: 'CSV Spreadsheet', icon: FileSpreadsheet },
+              { id: 'manual', label: 'Manual Entry', icon: Edit3 },
+              { id: 'twitter', label: 'X / Twitter', icon: XIcon },
+              { id: 'google', label: 'Google Business', icon: MapPin },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as TabType)}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-purple-900 text-white font-bold shadow-md border border-purple-300/40'
+                      : 'bg-white/10 hover:bg-white/20 text-purple-100 hover:text-white font-semibold border border-white/25 backdrop-blur-sm'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-purple-200' : 'text-purple-200/80'}`} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -228,25 +210,32 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
 
       {/* Tab 2: Manual Review Entry Form */}
       {activeTab === 'manual' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xs space-y-6">
           <div className="max-w-2xl">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
-              <Edit3 className="w-5 h-5 text-indigo-500" />
-              Add Testimonial Manually
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
-              Create a direct, pre-approved testimonial for clients who provided feedback via email, Slack, or in-person meetings.
-            </p>
+            <div className="flex items-start gap-3.5 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 flex items-center justify-center shrink-0 shadow-2xs">
+                <Edit3 className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  Add Testimonial Manually
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                  Create a direct, pre-approved testimonial for clients who provided feedback via email, Slack, or in-person meetings.
+                </p>
+              </div>
+            </div>
 
             {manualSuccess && (
-              <div className="mb-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-xs flex items-center justify-between">
+              <div className="mb-6 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-xs flex items-center justify-between shadow-2xs">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   <span>Testimonial saved and approved successfully!</span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setManualSuccess(false)}
-                  className="font-bold underline hover:no-underline"
+                  className="font-bold underline hover:no-underline cursor-pointer"
                 >
                   Add Another
                 </button>
@@ -254,7 +243,7 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
             )}
 
             {manualError && (
-              <div className="mb-6 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2">
+              <div className="mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2 shadow-2xs">
                 <AlertCircle className="w-4 h-4 text-rose-600" />
                 <span>{manualError}</span>
               </div>
@@ -272,7 +261,7 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
                     value={manualName}
                     onChange={(e) => setManualName(e.target.value)}
                     placeholder="e.g. Elena Rostova"
-                    className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-purple-500 outline-none"
                   />
                 </div>
 
@@ -285,7 +274,7 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
                     value={manualRole}
                     onChange={(e) => setManualRole(e.target.value)}
                     placeholder="e.g. VP of Product"
-                    className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-purple-500 outline-none"
                   />
                 </div>
               </div>
@@ -300,7 +289,7 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
                     value={manualCompany}
                     onChange={(e) => setManualCompany(e.target.value)}
                     placeholder="e.g. Acme Corp"
-                    className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-purple-500 outline-none"
                   />
                 </div>
 
@@ -314,7 +303,7 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
                         type="button"
                         key={star}
                         onClick={() => setManualRating(star)}
-                        className="p-1 focus:outline-none transition-transform hover:scale-110"
+                        className="p-1 focus:outline-none transition-transform hover:scale-110 cursor-pointer"
                       >
                         <Star
                           className={`w-5 h-5 ${
@@ -342,7 +331,7 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
                   value={manualContent}
                   onChange={(e) => setManualContent(e.target.value)}
                   placeholder="Paste what the customer said about your product or service..."
-                  className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-purple-500 outline-none"
                 />
                 <p className="text-[10px] text-slate-400 mt-1">
                   {manualContent.trim().length} / 2500 characters (minimum 10)
@@ -359,7 +348,7 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
                     value={manualAvatarUrl}
                     onChange={(e) => setManualAvatarUrl(e.target.value)}
                     placeholder="https://example.com/avatar.jpg"
-                    className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-purple-500 outline-none"
                   />
                 </div>
 
@@ -372,7 +361,7 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
                     value={manualEmail}
                     onChange={(e) => setManualEmail(e.target.value)}
                     placeholder="customer@example.com"
-                    className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-purple-500 outline-none"
                   />
                 </div>
               </div>
@@ -381,7 +370,7 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmittingManual}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-sm transition disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 shadow-sm transition disabled:opacity-50 cursor-pointer"
                 >
                   <ShieldCheck className="w-4 h-4" />
                   {isSubmittingManual ? 'Saving Testimonial...' : 'Save & Approve Testimonial'}
@@ -394,17 +383,21 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
 
       {/* Tab 3: X / Twitter Placeholder Hook */}
       {activeTab === 'twitter' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xs space-y-6">
           <div className="max-w-xl">
-            <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white flex items-center justify-center mb-4">
-              <XIcon className="w-6 h-6" />
+            <div className="flex items-start gap-3.5 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 flex items-center justify-center shrink-0 shadow-2xs">
+                <XIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  Import from X (Twitter)
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                  Turn public praise, tweets, and threads into verified social proof cards for your widgets.
+                </p>
+              </div>
             </div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-1">
-              Import from X (Twitter)
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
-              Turn public praise, tweets, and threads into verified social proof cards for your widgets.
-            </p>
 
             <form onSubmit={handleSearchTweet} className="space-y-4">
               <div>
@@ -417,12 +410,12 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
                     value={tweetInput}
                     onChange={(e) => setTweetInput(e.target.value)}
                     placeholder="https://x.com/username/status/1234567890"
-                    className="flex-1 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-sky-500 outline-none"
+                    className="flex-1 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-purple-500 outline-none"
                   />
                   <button
                     type="submit"
                     disabled={isSearchingTweet || !tweetInput.trim()}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 transition disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 transition disabled:opacity-50 shadow-2xs cursor-pointer"
                   >
                     <Search className="w-3.5 h-3.5" />
                     {isSearchingTweet ? 'Fetching...' : 'Lookup'}
@@ -431,7 +424,7 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
               </div>
 
               {tweetMessage && (
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs">
                   {tweetMessage}
                 </div>
               )}
@@ -442,17 +435,21 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
 
       {/* Tab 4: Google Business Profile Hook */}
       {activeTab === 'google' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xs space-y-6">
           <div className="max-w-xl">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 flex items-center justify-center mb-4">
-              <MapPin className="w-6 h-6" />
+            <div className="flex items-start gap-3.5 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 flex items-center justify-center shrink-0 shadow-2xs">
+                <MapPin className="w-5 h-5 text-amber-500" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  Google Business Profile & Places
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                  Connect your Google Maps business profile to automatically fetch verified 5-star customer ratings.
+                </p>
+              </div>
             </div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-1">
-              Google Business Profile & Places
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
-              Connect your Google Maps business profile to automatically fetch verified 5-star customer ratings.
-            </p>
 
             <form onSubmit={handleSearchGoogle} className="space-y-4">
               <div>
@@ -465,12 +462,12 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
                     value={googleQuery}
                     onChange={(e) => setGoogleQuery(e.target.value)}
                     placeholder="https://maps.google.com/?cid=... or Acme Corp London"
-                    className="flex-1 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="flex-1 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-3 focus:ring-2 focus:ring-purple-500 outline-none"
                   />
                   <button
                     type="submit"
                     disabled={isSearchingGoogle || !googleQuery.trim()}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 transition disabled:opacity-50 shadow-2xs cursor-pointer"
                   >
                     <Search className="w-3.5 h-3.5" />
                     {isSearchingGoogle ? 'Connecting...' : 'Connect'}
@@ -479,7 +476,7 @@ export const ImportReviewsHub: React.FC<ImportReviewsHubProps> = ({
               </div>
 
               {googleMessage && (
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs">
                   {googleMessage}
                 </div>
               )}

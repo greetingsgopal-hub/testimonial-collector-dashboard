@@ -9,7 +9,6 @@ import {
   RefreshCw,
   Trash2,
   Sparkles,
-  Layers,
   ChevronRight,
 } from 'lucide-react';
 import {
@@ -150,55 +149,60 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+    <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-6 font-sans">
       {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Layers className="w-5 h-5 text-indigo-500" />
-            Upload CSV Testimonials
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Import bulk reviews from spreadsheets, previous platforms, or client exports in seconds.
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 flex items-center justify-center shrink-0 shadow-2xs">
+            <UploadCloud className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Upload CSV Testimonials
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              Import bulk reviews from spreadsheets, previous platforms, or client exports in seconds.
+            </p>
+          </div>
         </div>
 
         <button
+          type="button"
           onClick={handleDownloadTemplate}
-          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition"
+          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 border border-purple-200 dark:border-purple-800/60 transition shadow-2xs shrink-0 cursor-pointer self-start sm:self-auto"
         >
-          <Download className="w-4 h-4 text-slate-500" />
-          Download CSV Template
+          <Download className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+          <span>Download CSV Template</span>
         </button>
       </div>
 
       {/* Progress steps pill */}
-      <div className="flex items-center gap-2 my-6 text-xs font-medium">
+      <div className="flex items-center gap-2 text-xs font-medium">
         <span
-          className={`px-3 py-1 rounded-full flex items-center gap-1.5 ${
+          className={`px-3.5 py-1 rounded-full flex items-center gap-1.5 transition-colors ${
             step === 'upload'
-              ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 font-bold'
-              : 'text-slate-400'
+              ? 'bg-purple-600 text-white font-bold shadow-2xs'
+              : 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-semibold'
           }`}
         >
           1. Upload
         </span>
-        <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600" />
+        <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
         <span
-          className={`px-3 py-1 rounded-full flex items-center gap-1.5 ${
+          className={`px-3.5 py-1 rounded-full flex items-center gap-1.5 transition-colors ${
             step === 'map'
-              ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 font-bold'
-              : 'text-slate-400'
+              ? 'bg-purple-600 text-white font-bold shadow-2xs'
+              : 'text-slate-400 dark:text-slate-500'
           }`}
         >
           2. Map Fields
         </span>
-        <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600" />
+        <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
         <span
-          className={`px-3 py-1 rounded-full flex items-center gap-1.5 ${
-            step === 'preview'
-              ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 font-bold'
-              : 'text-slate-400'
+          className={`px-3.5 py-1 rounded-full flex items-center gap-1.5 transition-colors ${
+            step === 'preview' || step === 'complete'
+              ? 'bg-purple-600 text-white font-bold shadow-2xs'
+              : 'text-slate-400 dark:text-slate-500'
           }`}
         >
           3. Validate & Commit
@@ -215,10 +219,10 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-colors ${
+          className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all flex flex-col items-center justify-center ${
             isDragging
-              ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20'
-              : 'border-slate-300 dark:border-slate-700 hover:border-indigo-400 hover:bg-slate-50/50 dark:hover:bg-slate-800/40'
+              ? 'border-purple-500 bg-purple-100/50 dark:bg-purple-950/40 scale-[1.005]'
+              : 'border-purple-200 dark:border-purple-900/60 bg-purple-50/30 dark:bg-purple-950/10 hover:border-purple-400 dark:hover:border-purple-700 hover:bg-purple-50/60'
           }`}
         >
           <input
@@ -228,18 +232,18 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
             accept=".csv,text/csv"
             className="hidden"
           />
-          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-indigo-50 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-sm">
-            <UploadCloud className="w-7 h-7" />
+          <div className="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 flex items-center justify-center mb-3 shadow-2xs">
+            <UploadCloud className="w-8 h-8" />
           </div>
-          <p className="text-base font-semibold text-slate-800 dark:text-slate-100 mb-1">
+          <p className="text-base font-bold text-slate-900 dark:text-white mb-1.5">
             Drag and drop your .CSV spreadsheet here
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-4">
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-5 leading-relaxed">
             Supports standard CSV files with headers for author name, review content, rating, company, and photos.
           </p>
           <button
             type="button"
-            className="px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 transition shadow-sm"
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-all cursor-pointer"
           >
             Browse Computer
           </button>
@@ -249,9 +253,9 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
       {/* Step 2: Column Mapping */}
       {step === 'map' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/80 dark:border-slate-800">
             <div className="flex items-center gap-3">
-              <FileText className="w-5 h-5 text-indigo-500" />
+              <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               <div>
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{fileName}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -260,16 +264,17 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
               </div>
             </div>
             <button
+              type="button"
               onClick={handleReset}
-              className="text-xs text-rose-500 hover:text-rose-600 flex items-center gap-1 font-medium"
+              className="text-xs text-rose-500 hover:text-rose-600 flex items-center gap-1 font-semibold cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" /> Re-upload
             </button>
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-indigo-500" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               Map CSV Columns to PandaPraise Fields
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
@@ -288,14 +293,14 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
               ].map(({ field, label, required }) => (
                 <div
                   key={field}
-                  className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-1.5"
+                  className="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2 shadow-2xs"
                 >
                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
                     <span>
                       {label} {required && <span className="text-rose-500">*</span>}
                     </span>
                     {mapping[field as keyof CsvMappingConfig] ? (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full">
                         Matched
                       </span>
                     ) : (
@@ -307,7 +312,7 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
                     onChange={(e) =>
                       setMapping({ ...mapping, [field]: e.target.value || undefined })
                     }
-                    className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-2 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-2.5 focus:ring-2 focus:ring-purple-500 outline-none"
                   >
                     <option value="">-- Ignore / Not in CSV --</option>
                     {parsedHeaders.map((header) => (
@@ -321,12 +326,13 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
             <button
+              type="button"
               onClick={() => setStep('preview')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-500 shadow-sm transition"
+              className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl text-white bg-purple-600 hover:bg-purple-700 shadow-sm transition cursor-pointer"
             >
-              Continue to Preview & Validate
+              <span>Continue to Preview & Validate</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -338,17 +344,17 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
         <div className="space-y-6">
           {/* Summary status cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40">
+            <div className="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40">
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Rows in File</p>
               <p className="text-xl font-black text-slate-900 dark:text-white mt-1">{parsedRows.length}</p>
             </div>
-            <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/20">
+            <div className="p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/20">
               <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">Valid Ready to Import</p>
               <p className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
                 {validationResult.validReviews.length}
               </p>
             </div>
-            <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20">
+            <div className="p-4 rounded-2xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20">
               <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">Flagged Rows</p>
               <p className="text-xl font-black text-amber-600 dark:text-amber-400 mt-1">
                 {validationResult.invalidRows.length}
@@ -357,14 +363,14 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
           </div>
 
           {importError && (
-            <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2">
+            <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>{importError}</span>
             </div>
           )}
 
           {/* Validation preview table */}
-          <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+          <div className="border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
             <div className="max-h-80 overflow-y-auto">
               <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
                 <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -375,11 +381,11 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
                     <th className="py-2.5 px-3">Content Preview</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {validationResult.validReviews.slice(0, 15).map((rev, idx) => (
                     <tr key={`valid-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                       <td className="py-2.5 px-3 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full">
                           <CheckCircle2 className="w-3 h-3" /> Valid
                         </span>
                       </td>
@@ -399,7 +405,7 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
                   {validationResult.invalidRows.map((inv, idx) => (
                     <tr key={`inv-${idx}`} className="bg-rose-50/40 dark:bg-rose-950/20">
                       <td className="py-2.5 px-3 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 dark:text-rose-400 bg-rose-100 dark:bg-rose-950/60 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 dark:text-rose-400 bg-rose-100 dark:bg-rose-950/60 px-2.5 py-0.5 rounded-full">
                           <AlertTriangle className="w-3 h-3" /> Fix Needed
                         </span>
                       </td>
@@ -415,28 +421,30 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
             <button
+              type="button"
               onClick={() => setStep('map')}
-              className="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+              className="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer"
             >
               ← Back to Mapping
             </button>
 
             <button
+              type="button"
               onClick={handleExecuteImport}
               disabled={isImporting || validationResult.validReviews.length === 0}
-              className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition"
+              className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition cursor-pointer"
             >
               {isImporting ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  Importing Testimonials...
+                  <span>Importing Testimonials...</span>
                 </>
               ) : (
                 <>
                   <UploadCloud className="w-4 h-4" />
-                  Commit & Import {validationResult.validReviews.length} Testimonials
+                  <span>Commit & Import {validationResult.validReviews.length} Testimonials</span>
                 </>
               )}
             </button>
@@ -447,7 +455,7 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
       {/* Step 4: Success State */}
       {step === 'complete' && (
         <div className="text-center py-10 space-y-4">
-          <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-sm">
+          <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-2xs">
             <CheckCircle2 className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">
@@ -458,8 +466,9 @@ export const CsvBulkImporter: React.FC<CsvBulkImporterProps> = ({
           </p>
           <div className="pt-2">
             <button
+              type="button"
               onClick={handleReset}
-              className="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition"
+              className="px-5 py-2.5 text-xs font-bold rounded-xl bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition cursor-pointer"
             >
               Import Another CSV File
             </button>

@@ -1147,13 +1147,13 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
       {/* ── MAIN SELECTION VIEW ── */}
       {!selectedPlatform && viewMode === 'hub' ? (
         <div className="max-w-4xl mx-auto space-y-4">
-          <div className="flex justify-end">
+          <div className="flex justify-end pb-1">
             <button
               onClick={() => setViewMode('directory')}
-              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1.5 transition"
+              className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center gap-1.5 transition group cursor-pointer"
             >
               <span>Explore All 30+ Integration Directories & Social Channels</span>
-              <ArrowRight size={14} />
+              <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
             </button>
           </div>
           <ImportReviewsHub
