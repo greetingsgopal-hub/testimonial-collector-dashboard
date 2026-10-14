@@ -572,7 +572,7 @@ export const DashboardPage = () => {
 
           {/* Post on Internet · On Website (Widgets Studio) */}
           {activeTab === 'widgets' && (
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-5xl mx-auto font-sans">
               <WidgetStudio
                 reviews={effectiveReviews}
                 onBack={() => setActiveTab('proof')}

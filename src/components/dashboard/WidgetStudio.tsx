@@ -30,8 +30,7 @@ import {
   Smartphone,
   MousePointer,
   Share2,
-  X,
-  ArrowUpRight
+  X
 } from 'lucide-react';
 import { Review, WidgetType, WidgetSettings } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -547,36 +546,36 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
   const guide = PLATFORM_GUIDES[cmsPlatform] || PLATFORM_GUIDES.wordpress;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto font-sans">
-      {/* ── Streamlined Top Control Bar (Format Selector & Share Action) ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:p-3.5 rounded-2xl border border-gray-200/90 shadow-2xs">
+    <div className="space-y-6 max-w-5xl mx-auto font-sans">
+      {/* ── Top Toolbar (Same Soft White Card Style) ── */}
+      <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           {onBack && (
             <button
               type="button"
               onClick={onBack}
-              className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-1.5 transition-colors cursor-pointer border border-gray-200/80 bg-white shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-900 shrink-0 shadow-2xs transition-all cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back</span>
             </button>
           )}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-[#6701e6] text-xs font-bold uppercase tracking-wider border border-purple-200">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-xs font-bold border border-purple-200/80 dark:border-purple-800">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Widgets Studio</span>
+            <span className="uppercase tracking-wider">Widgets Studio</span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
-          {/* Widget Format Selector */}
-          <div className="flex flex-wrap items-center gap-1 p-1 bg-gray-100/90 rounded-xl border border-gray-200/80">
+        <div className="flex flex-wrap items-center gap-2 self-stretch lg:self-auto justify-between lg:justify-end">
+          {/* Widget Type Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 py-0.5">
             {[
               { id: 'wall', label: 'Wall of Love', icon: Layers },
               { id: 'carousel', label: 'Carousel', icon: Maximize2 },
               { id: 'spotlight', label: 'Single Card', icon: Sparkles },
               { id: 'badge', label: 'Trust Badge', icon: Award },
-              { id: 'floating_tab', label: 'Floating Tab', icon: MessageSquarePlus, soon: true },
-              { id: 'social_toast', label: 'Social Toast', icon: Bell, soon: true },
+              { id: 'floating_tab', label: 'Floating Tab', soonText: 'SOON', icon: MessageSquarePlus, soon: true },
+              { id: 'social_toast', label: 'Social Toast', soonText: 'SOON', icon: Bell, soon: true },
             ].map((item) => {
               const Icon = item.icon;
               const isSelected = settings.type === item.id;
@@ -587,12 +586,12 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                     type="button"
                     disabled
                     title="Coming soon — not yet available for website embed"
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-gray-400 bg-gray-100/60 cursor-not-allowed opacity-70"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 cursor-not-allowed shadow-2xs opacity-80"
                   >
                     <Icon className="w-3.5 h-3.5" />
                     <span>{item.label}</span>
-                    <span className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.2 rounded-full bg-gray-200 text-gray-500">
-                      Soon
+                    <span className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                      SOON
                     </span>
                   </button>
                 );
@@ -602,10 +601,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                   key={item.id}
                   type="button"
                   onClick={() => setSettings((prev) => ({ ...prev, type: item.id as WidgetType }))}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[#6701e6] text-white shadow-2xs'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
+                      ? 'bg-purple-600 text-white font-bold shadow-2xs border border-purple-600'
+                      : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 font-semibold shadow-2xs'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -619,7 +618,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
           <button
             type="button"
             onClick={() => setIsShareModalOpen(true)}
-            className="px-3.5 py-1.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:shadow-sm active:scale-95 shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95 shrink-0"
           >
             <Share2 className="w-3.5 h-3.5" />
             <span>Share & Embed</span>
@@ -627,24 +626,24 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
         </div>
       </div>
 
-      {/* ── Redesigned Space: Widget Installation & Get Extension Product ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+      {/* ── Two Equal Top Cards Side-by-Side ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
         
-        {/* Card 1: Widget Installation (Clean, 1-Click Embed Snippet) */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/90 shadow-2xs flex flex-col justify-between space-y-3">
+        {/* Left Card: Widget Installation (White) */}
+        <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs flex flex-col justify-between space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200/70 text-[#6701e6] flex items-center justify-center shrink-0 shadow-2xs">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200/70 dark:border-purple-800 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-2xs">
                 <Code2 className="w-5 h-5" />
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-gray-950">Widget Installation</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Widget Installation</h3>
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold border border-emerald-200/80 dark:border-emerald-800">
                     Live Auto-Sync
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Embed live testimonials in 10 seconds. Place snippet before &lt;/body&gt; or in your builder.
                 </p>
               </div>
@@ -652,48 +651,48 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
           </div>
 
           {/* Compact Code Snippet Box */}
-          <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 text-slate-100 border border-slate-800">
+          <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 text-slate-100 border border-slate-800 shadow-2xs">
             <code className="text-[11px] font-mono truncate text-purple-200">
               {`<div id="pandapraise-widget" data-project-id="${project?.id || 'demo'}"></div>`}
             </code>
             <button
               type="button"
               onClick={handleCopyCode}
-              className="px-3 py-1.5 rounded-lg bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
+              className="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? 'Copied!' : 'Copy Embed Code'}</span>
             </button>
           </div>
 
-          <div className="flex items-center justify-between text-xs pt-0.5">
-            <span className="text-[11px] text-gray-500 truncate mr-2">
+          <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100 dark:border-slate-800/80">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate mr-2 font-medium">
               Supports WordPress, Webflow, Shopify, Framer, Next.js & static HTML.
             </span>
             <button
               type="button"
               onClick={() => setIsShareModalOpen(true)}
-              className="text-[11px] font-bold text-[#6701e6] hover:underline flex items-center gap-1 cursor-pointer shrink-0"
+              className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center gap-1 cursor-pointer shrink-0"
             >
-              <span>Full Guide & Platforms</span>
-              <ArrowUpRight className="w-3 h-3" />
+              <span>Full Guide & Platforms →</span>
             </button>
           </div>
         </div>
 
-        {/* Card 2: Get Extension Product (1-Click Clipper for Chrome & Edge) */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#1e1035] via-[#2d1254] to-[#0f0728] text-white shadow-md flex flex-col justify-between space-y-3 border border-purple-500/30">
-          <div className="flex items-start justify-between gap-3">
+        {/* Right Card: PandaPraise 1-Click Clipper (Dark Purple Gradient) */}
+        <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#1e1035] via-[#2d1254] to-[#0f0728] text-white p-5 sm:p-6 shadow-md flex flex-col justify-between space-y-4 border border-purple-500/30 relative overflow-hidden">
+          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex items-start justify-between gap-3 relative z-10">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center shrink-0 text-purple-300">
+              <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 text-purple-200">
                 <Sparkles className="w-5 h-5 text-purple-300" />
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-white tracking-tight">
+                  <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
                     PandaPraise 1-Click Clipper
                   </h3>
-                  <span className="px-2 py-0.5 rounded-full bg-purple-500/30 text-[10px] font-extrabold text-purple-200 border border-purple-400/40">
+                  <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-[10px] font-extrabold text-purple-200 border border-white/20 backdrop-blur-md">
                     Chrome Extension
                   </span>
                 </div>
@@ -704,43 +703,42 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-3 pt-1">
-            <div className="flex items-center gap-2 text-[11px] text-purple-200/70">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Primary Tool • Instant Social Proof Capture</span>
+          <div className="flex items-center justify-between gap-3 pt-1 relative z-10">
+            <div className="flex items-center gap-2 text-[11px] text-purple-200/80 font-medium">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span>Primary Tool · Instant Social Proof Capture</span>
             </div>
             <a
               href="https://github.com/greetingsgopal-hub/testimonial-collector-dashboard/tree/main/extension"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 rounded-xl bg-white hover:bg-gray-100 text-gray-950 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95"
+              className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-950 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 shrink-0"
             >
-              <span>Get Extension</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <span>Get Extension →</span>
             </a>
           </div>
         </div>
 
       </div>
 
-      {/* Streamlined Dismissible Onboarding Guide */}
+      {/* ── Fast 3-Step Setup Banner (Light Purple) ── */}
       {!isGuideDismissed && (
-        <div className="bg-gradient-to-r from-purple-50/90 via-indigo-50/80 to-purple-50/90 p-4 rounded-2xl border border-purple-200/80 shadow-xs transition-all duration-300">
+        <div className="rounded-2xl bg-purple-50/70 dark:bg-purple-950/40 p-4 sm:p-5 border border-purple-200/80 dark:border-purple-800/80 shadow-2xs transition-all">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="flex items-center justify-center w-7 h-7 rounded-xl bg-[#6701e6] text-white text-xs font-black shadow-xs shrink-0">
+              <span className="flex items-center justify-center w-7 h-7 rounded-xl bg-purple-600 text-white text-xs font-black shadow-xs shrink-0">
                 ⚡
               </span>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-gray-950 uppercase tracking-wide">
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                     Fast 3-Step Setup
                   </h3>
-                  <span className="text-[10px] font-semibold text-purple-700 bg-purple-100/80 px-2 py-0.5 rounded-full border border-purple-200">
+                  <span className="text-[10px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100/80 dark:bg-purple-900/60 px-2.5 py-0.5 rounded-full border border-purple-200 dark:border-purple-800">
                     Ready in 2 min
                   </span>
                 </div>
-                <p className="text-xs text-gray-600 mt-0.5">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                   1. Customize theme & filters → 2. Select platform → 3. Copy embed snippet & publish
                 </p>
               </div>
@@ -750,16 +748,15 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               <button
                 type="button"
                 onClick={() => setIsGuideExpanded((prev) => !prev)}
-                className="px-3 py-1.5 rounded-lg bg-white/80 hover:bg-white text-purple-900 border border-purple-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl bg-white/90 dark:bg-slate-900/90 hover:bg-white text-purple-900 dark:text-purple-200 border border-purple-200 dark:border-purple-800 text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
               >
-                <span>{isGuideExpanded ? 'Hide Steps' : 'View 4 Steps'}</span>
-                {isGuideExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                <span>{isGuideExpanded ? 'Hide Steps ▴' : 'View 4 Steps ▾'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => setIsGuideDismissed(true)}
                 title="Dismiss guide"
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-white/60 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 aria-label="Dismiss guide"
               >
                 <X className="w-4 h-4" />
@@ -815,12 +812,12 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
         </div>
       )}
 
-      {/* Fixed Split-Screen Workspace: Left Builder & Right Sticky Preview */}
+      {/* ── Bottom Split Layout ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Builder Controls & Platform Guides (5 cols) */}
         <div className="lg:col-span-5 space-y-5">
           {/* Builder Section Tabs */}
-          <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl border border-gray-200 text-xs font-semibold">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 text-xs font-semibold">
             {[
               { id: 'all', label: 'All Settings' },
               { id: 'style', label: 'Theme & Style' },
@@ -831,10 +828,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveBuilderTab(tab.id as any)}
-                className={`flex-1 py-1.5 px-2 rounded-lg text-center transition-all cursor-pointer ${
+                className={`flex-1 py-1.5 px-2 rounded-xl text-center transition-all cursor-pointer ${
                   activeBuilderTab === tab.id
-                    ? 'bg-white text-gray-900 font-bold shadow-xs'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+                    ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 font-bold shadow-2xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {tab.label}
@@ -844,13 +841,13 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
           {/* 1. Theme & Appearance */}
           {(activeBuilderTab === 'all' || activeBuilderTab === 'style') && (
-            <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-3.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-[#6701e6]" />
+            <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 1. Theme & Appearance
               </h3>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2.5">
                 {[
                   { id: 'light_gradient', label: 'Light Gradient', icon: Sun, desc: 'Pastel purple glow' },
                   { id: 'dark', label: 'Dark Mode', icon: Moon, desc: 'Sleek onyx & neon' },
@@ -866,21 +863,21 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                         setWallTheme(th.id as WallTheme);
                         setSettings((prev) => ({ ...prev, theme: th.id === 'dark' ? 'dark' : 'light' }));
                       }}
-                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs ${
                         isSelected
-                          ? 'border-[#6701e6] bg-purple-50/70 ring-2 ring-[#6701e6]/20'
-                          : 'border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-300'
+                          ? 'border-purple-600 bg-purple-50/70 dark:bg-purple-950/40 ring-2 ring-purple-500/20'
+                          : 'border-slate-200/80 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
-                        <Icon className={`w-4 h-4 ${isSelected ? 'text-[#6701e6]' : 'text-gray-500'}`} />
-                        {isSelected && <span className="w-2 h-2 rounded-full bg-[#6701e6]" />}
+                        <Icon className={`w-4 h-4 ${isSelected ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`} />
+                        {isSelected && <span className="w-2 h-2 rounded-full bg-purple-600" />}
                       </div>
                       <div>
-                        <p className={`text-xs font-bold ${isSelected ? 'text-[#6701e6]' : 'text-gray-900'}`}>
+                        <p className={`text-xs font-bold ${isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-slate-900 dark:text-white'}`}>
                           {th.label}
                         </p>
-                        <p className="text-[10px] text-gray-500 leading-tight">{th.desc}</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">{th.desc}</p>
                       </div>
                     </button>
                   );
@@ -891,15 +888,15 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
           {/* 2. Rating & Platform Source Filters */}
           {(activeBuilderTab === 'all' || activeBuilderTab === 'filters') && (
-            <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-2">
-                <Filter className="w-4 h-4 text-[#6701e6]" />
+            <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <Filter className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 2. Filter Rating & Sources
               </h3>
 
               {/* Minimum Star Rating */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 block">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
                   Minimum Star Rating
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -916,12 +913,12 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                         onClick={() => setMinRating(r.value)}
                         className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center ${
                           isSelected
-                            ? 'bg-[#6701e6] text-white border-[#6701e6] shadow-xs'
-                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                            ? 'bg-purple-600 text-white border-purple-600 shadow-2xs'
+                            : 'bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700 hover:bg-slate-100'
                         }`}
                       >
                         <div>{r.label}</div>
-                        <div className={`text-[10px] font-normal ${isSelected ? 'text-purple-200' : 'text-gray-500'}`}>
+                        <div className={`text-[10px] font-normal ${isSelected ? 'text-purple-200' : 'text-slate-500 dark:text-slate-400'}`}>
                           {r.desc}
                         </div>
                       </button>
@@ -931,8 +928,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               </div>
 
               {/* Toggle Sources */}
-              <div className="space-y-2 pt-2 border-t border-gray-100">
-                <label className="text-xs font-semibold text-gray-700 block">
+              <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
                   Included Review Sources
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -941,7 +938,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                     { id: 'linkedin', label: 'LinkedIn', icon: <LinkedInIcon /> },
                     { id: 'instagram', label: 'Instagram', icon: <InstagramIcon /> },
                     { id: 'facebook', label: 'Facebook', icon: <FacebookIcon /> },
-                    { id: 'direct', label: 'Direct Form', icon: <Globe className="w-3.5 h-3.5 text-gray-500" /> },
+                    { id: 'direct', label: 'Direct Form', icon: <Globe className="w-3.5 h-3.5 text-slate-500" /> },
                   ].map((src) => {
                     const isChecked = selectedSources.includes(src.id);
                     return (
@@ -951,8 +948,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                         onClick={() => toggleSource(src.id)}
                         className={`py-2 px-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
                           isChecked
-                            ? 'bg-purple-50/70 border-[#6701e6]/40 text-gray-900 font-bold'
-                            : 'bg-gray-50/70 border-gray-200 text-gray-400 opacity-60 hover:opacity-90'
+                            ? 'bg-purple-50/70 dark:bg-purple-950/40 border-purple-300 dark:border-purple-800 text-slate-900 dark:text-white font-bold'
+                            : 'bg-slate-50/70 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700 text-slate-400 opacity-60 hover:opacity-90'
                         }`}
                       >
                         <div className="flex items-center gap-1.5">
@@ -963,7 +960,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                           type="checkbox"
                           checked={isChecked}
                           readOnly
-                          className="rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6] pointer-events-none"
+                          className="rounded border-slate-300 text-purple-600 focus:ring-purple-600 pointer-events-none"
                         />
                       </button>
                     );
@@ -972,10 +969,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               </div>
 
               {/* Max Items */}
-              <div className="space-y-1.5 pt-2 border-t border-gray-100">
+              <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-gray-700">Display Limit</span>
-                  <span className="text-[#6701e6] font-bold">{settings.maxCount} testimonials</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">Display Limit</span>
+                  <span className="text-purple-600 dark:text-purple-400 font-bold">{settings.maxCount} testimonials</span>
                 </div>
                 <input
                   type="range"
@@ -984,7 +981,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                   step="3"
                   value={settings.maxCount}
                   onChange={(e) => setSettings((prev) => ({ ...prev, maxCount: Number(e.target.value) }))}
-                  className="w-full accent-[#6701e6] cursor-pointer"
+                  className="w-full accent-purple-600 cursor-pointer"
                 />
               </div>
             </div>
@@ -992,24 +989,24 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
           {/* 3. Embed Code & Compact Platform Selection */}
           {(activeBuilderTab === 'all' || activeBuilderTab === 'platform') && (
-            <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-4">
+            <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs space-y-4">
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-2">
-                    <Code2 className="w-4 h-4 text-[#6701e6]" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <Code2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                     3. Install on Your Website
                   </h3>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800 px-2.5 py-0.5 rounded-full">
                     Zero Layout Shift
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Select your website builder or framework:
                 </p>
               </div>
 
               {/* Compact Quick Platform Buttons */}
-              <div className="flex flex-wrap gap-1.5 p-1.5 bg-gray-100 rounded-xl text-xs font-semibold">
+              <div className="flex flex-wrap gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-semibold border border-slate-200/80 dark:border-slate-700">
                 {[
                   { id: 'wordpress', label: 'WordPress' },
                   { id: 'webflow', label: 'Webflow' },
@@ -1028,8 +1025,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                       onClick={() => setCmsPlatform(p.id as CmsPlatform)}
                       className={`px-2.5 py-1.5 rounded-lg text-center transition-all cursor-pointer text-xs ${
                         isSelected
-                          ? 'bg-[#6701e6] text-white font-bold shadow-xs'
-                          : 'bg-white/70 text-gray-700 hover:bg-white hover:text-gray-900'
+                          ? 'bg-purple-600 text-white font-bold shadow-2xs'
+                          : 'bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-900 hover:text-slate-900'
                       }`}
                     >
                       {p.label}
@@ -1040,15 +1037,15 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
               {/* Full Platform Dropdown with Verified Compatibility Badges */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] text-gray-500">
-                  <span className="font-semibold text-gray-700">All Supported Platforms (12)</span>
-                  <span className="text-emerald-700 font-medium">✓ 100% Tested Compatibility</span>
+                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">All Supported Platforms (12)</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">✓ 100% Tested Compatibility</span>
                 </div>
                 <div className="relative">
                   <select
                     value={cmsPlatform}
                     onChange={(e) => setCmsPlatform(e.target.value as CmsPlatform)}
-                    className="w-full px-3.5 py-2.5 bg-gray-50 hover:bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#6701e6]/30 focus:border-[#6701e6] transition-all cursor-pointer appearance-none pr-9"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-600 transition-all cursor-pointer appearance-none pr-9 shadow-2xs"
                   >
                     <option value="vibe">AI & Vibe Coded (Cloudflare Pages, Netlify, Cursor, Lovable, Bolt)</option>
                     <option value="wordpress">WordPress (CMS Block / Gutenberg / Elementor)</option>
@@ -1063,16 +1060,16 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                     <option value="iframe">Universal iFrame (Isolated Container)</option>
                     <option value="other">Other Website Builder / CMS</option>
                   </select>
-                  <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
               {/* Platform Specific Instruction Card */}
-              <div className="p-4 rounded-xl bg-purple-50/50 border border-purple-200/90 space-y-3.5">
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-purple-100 pb-2.5">
+              <div className="p-4 rounded-2xl bg-purple-50/50 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-800/80 space-y-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-purple-100 dark:border-purple-900/50 pb-2.5">
                   <div className="flex items-center gap-2">
-                    <Monitor className="w-4 h-4 text-[#6701e6]" />
-                    <span className="text-xs font-bold text-gray-900">
+                    <Monitor className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
                       {guide.label} Installation Guide
                     </span>
                   </div>
@@ -1083,33 +1080,33 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
                 {/* Customer Journey Quick Reference */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                  <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
-                    <span className="font-bold text-gray-500 uppercase text-[9px] block">What to open:</span>
-                    <p className="text-gray-800">{guide.whatToOpen}</p>
+                  <div className="p-2.5 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-purple-100 dark:border-purple-900/50 space-y-0.5 shadow-2xs">
+                    <span className="font-bold text-slate-400 uppercase text-[9px] block">What to open:</span>
+                    <p className="text-slate-800 dark:text-slate-200">{guide.whatToOpen}</p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
-                    <span className="font-bold text-gray-500 uppercase text-[9px] block">Target Page:</span>
-                    <p className="text-gray-800">{guide.targetPage}</p>
+                  <div className="p-2.5 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-purple-100 dark:border-purple-900/50 space-y-0.5 shadow-2xs">
+                    <span className="font-bold text-slate-400 uppercase text-[9px] block">Target Page:</span>
+                    <p className="text-slate-800 dark:text-slate-200">{guide.targetPage}</p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
-                    <span className="font-bold text-gray-500 uppercase text-[9px] block">Element to Add:</span>
-                    <p className="text-[#6701e6] font-bold">{guide.embedElement}</p>
+                  <div className="p-2.5 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-purple-100 dark:border-purple-900/50 space-y-0.5 shadow-2xs">
+                    <span className="font-bold text-slate-400 uppercase text-[9px] block">Element to Add:</span>
+                    <p className="text-purple-600 dark:text-purple-400 font-bold">{guide.embedElement}</p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-white/90 border border-purple-100 space-y-0.5">
-                    <span className="font-bold text-gray-500 uppercase text-[9px] block">After Pasting:</span>
-                    <p className="text-gray-800">{guide.afterPasting}</p>
+                  <div className="p-2.5 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-purple-100 dark:border-purple-900/50 space-y-0.5 shadow-2xs">
+                    <span className="font-bold text-slate-400 uppercase text-[9px] block">After Pasting:</span>
+                    <p className="text-slate-800 dark:text-slate-200">{guide.afterPasting}</p>
                   </div>
                 </div>
 
                 {/* Numbered Step-by-Step Flow */}
                 <div className="space-y-1.5 pt-1">
-                  <span className="text-[11px] font-bold text-gray-700 block uppercase tracking-wider">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block uppercase tracking-wider">
                     Step-by-Step Clicks:
                   </span>
-                  <ol className="space-y-1 text-xs text-gray-700">
+                  <ol className="space-y-1 text-xs text-slate-700 dark:text-slate-300">
                     {guide.steps.map((st, idx) => (
                       <li key={idx} className="flex items-start gap-2">
-                        <span className="w-4 h-4 rounded-full bg-purple-200 text-[#6701e6] font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="w-4 h-4 rounded-full bg-purple-200 dark:bg-purple-900/70 text-purple-700 dark:text-purple-300 font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
                           {idx + 1}
                         </span>
                         <span className="leading-relaxed">{st}</span>
@@ -1120,7 +1117,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
                 {/* Special Platform Note */}
                 {guide.note && (
-                  <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
+                  <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-900 dark:text-amber-200 flex items-start gap-2">
                     <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                     <p className="leading-relaxed">{guide.note}</p>
                   </div>
@@ -1130,10 +1127,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               {/* Code Box */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-gray-700">Generated Code Snippet</span>
-                  <span className="text-[10px] font-mono text-gray-400">Auto-configured</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">Generated Code Snippet</span>
+                  <span className="text-[10px] font-mono text-slate-400">Auto-configured</span>
                 </div>
-                <div className="p-3.5 rounded-xl bg-gray-950 font-mono text-[11px] text-emerald-400 border border-gray-800 overflow-x-auto select-all max-h-36 scrollbar-thin">
+                <div className="p-3.5 rounded-xl bg-slate-950 font-mono text-[11px] text-emerald-400 border border-slate-800 overflow-x-auto select-all max-h-36 scrollbar-thin shadow-2xs">
                   <pre className="whitespace-pre-wrap">{getEmbedSnippet()}</pre>
                 </div>
               </div>
@@ -1143,7 +1140,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="flex-1 py-3 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-xs font-bold text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-[0.99]"
+                  className="flex-1 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-xs font-bold text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.99]"
                 >
                   {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
                   <span>{copied ? '✓ Snippet Copied!' : 'Copy Embed Code'}</span>
@@ -1152,10 +1149,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                 <button
                   type="button"
                   onClick={handleCopyAiPrompt}
-                  className="py-3 px-4 rounded-xl bg-violet-50 hover:bg-violet-100 border border-violet-200 text-xs font-bold text-violet-800 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.99]"
+                  className="py-3 px-4 rounded-xl bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800 text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.99]"
                   title="Copy 1-click prompt for Cursor, Lovable, Bolt, or v0"
                 >
-                  {copiedAiPrompt ? <Check className="w-4 h-4 text-emerald-600" /> : <Sparkles className="w-4 h-4 text-violet-600" />}
+                  {copiedAiPrompt ? <Check className="w-4 h-4 text-emerald-600" /> : <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
                   <span>{copiedAiPrompt ? '✓ AI Prompt Copied!' : 'Copy AI Prompt'}</span>
                 </button>
               </div>
@@ -1164,7 +1161,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               <button
                 type="button"
                 onClick={() => setShowVideoStoryboard((prev) => !prev)}
-                className="w-full py-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-xs font-bold text-[#6701e6] flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800 text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs"
               >
                 <Video className="w-4 h-4" />
                 <span>
@@ -1175,13 +1172,13 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
               {/* Expandable Video Walkthrough Storyboard */}
               {showVideoStoryboard && (
-                <div className="p-4 rounded-xl bg-gray-900 text-white border border-gray-800 space-y-3 animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                <div className="p-4 rounded-2xl bg-slate-900 text-white border border-slate-800 space-y-3 animate-in fade-in duration-200 shadow-2xs">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                     <div className="flex items-center gap-2">
                       <Play className="w-4 h-4 text-purple-400" />
                       <span className="text-xs font-bold">Instructional Video Storyboard (60s Walkthrough)</span>
                     </div>
-                    <span className="text-[10px] text-purple-300 font-mono bg-purple-900/60 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] text-purple-300 font-mono bg-purple-900/60 px-2.5 py-0.5 rounded-full">
                       Target: 30–90s
                     </span>
                   </div>
@@ -1225,16 +1222,16 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                         desc: 'Navigates to live website URL (e.g. https://papasystem.in/), scrolls down to testimonials section: Panda Praise Wall of Love renders cards smoothly with 0 layout shift!',
                       },
                     ].map((sc, i) => (
-                      <div key={i} className="p-2.5 rounded-lg bg-gray-800/80 border border-gray-700/60 space-y-1">
+                      <div key={i} className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="font-mono text-purple-300 font-bold text-[11px]">{sc.time}</span>
-                          <span className="text-[10px] text-gray-400 font-medium">{sc.action}</span>
+                          <span className="text-[10px] text-slate-400 font-medium">{sc.action}</span>
                         </div>
                         <p className="text-[11px] text-emerald-400 flex items-center gap-1.5 font-medium">
                           <MousePointer className="w-3 h-3 text-emerald-400" />
                           {sc.cursor}
                         </p>
-                        <p className="text-[11px] text-gray-300 leading-relaxed">{sc.desc}</p>
+                        <p className="text-[11px] text-slate-300 leading-relaxed">{sc.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -1243,17 +1240,17 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
             </div>
           )}
 
-          {/* Permanent Quick-Action Dock */}
-          <div className="sticky bottom-4 z-20 p-3.5 bg-white/95 backdrop-blur-md rounded-2xl border border-purple-200/90 shadow-lg flex items-center justify-between gap-3">
+          {/* WordPress Snippet Row / Permanent Quick-Action Dock */}
+          <div className="sticky bottom-4 z-20 p-3.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-purple-200/90 dark:border-purple-800 shadow-md flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-[#6701e6]/10 text-[#6701e6] flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 border border-purple-200/60 dark:border-purple-800">
                 <Code2 className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-gray-900 truncate">
+                <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                   {guide.label} Snippet
                 </p>
-                <span className="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
+                <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   Ready to Paste
                 </span>
@@ -1263,7 +1260,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? 'Copied!' : 'Copy Embed Code'}</span>
@@ -1271,7 +1268,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               <button
                 type="button"
                 onClick={() => setIsShareModalOpen(true)}
-                className="px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-[#6701e6] border border-purple-200 text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
+                className="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
                 title="Share & verify live"
               >
                 <Share2 className="w-3.5 h-3.5" />
@@ -1283,38 +1280,38 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
         {/* Right Column: Sticky Live Interactive Widget Preview Canvas (7 cols) */}
         <div className="lg:col-span-7 lg:sticky lg:top-20 z-10">
-          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-xs flex flex-col h-[calc(100vh-6rem)] max-h-[860px]">
+          <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs flex flex-col h-[calc(100vh-6rem)] max-h-[860px]">
             {/* Header with Title, Sample Badge & Device Switcher */}
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4 gap-2">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4 gap-2">
               <div className="flex flex-wrap items-center gap-2 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <Eye className="w-4 h-4 text-[#6701e6]" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-800 truncate">
+                  <Eye className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 truncate">
                     Live Interactive Preview
                   </span>
                 </div>
                 {isUsingSampleReviews && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-700 border border-violet-200 shadow-2xs">
-                    <Sparkles className="w-3 h-3 text-violet-600" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800 shadow-2xs">
+                    <Sparkles className="w-3 h-3 text-purple-600 dark:text-purple-400" />
                     Sample Preview
                   </span>
                 )}
-                <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500">
+                <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
                   <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>{displayReviews.length} reviews</span>
                 </div>
               </div>
 
               {/* Device Preview Switcher (Desktop / Tablet / Mobile) */}
-              <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-lg border border-gray-200 shrink-0">
+              <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 shrink-0">
                 <button
                   type="button"
                   onClick={() => setPreviewDevice('desktop')}
                   title="Desktop Preview (100%)"
-                  className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                     previewDevice === 'desktop'
-                      ? 'bg-white text-[#6701e6] shadow-2xs font-bold'
-                      : 'text-gray-500 hover:text-gray-900'
+                      ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-2xs font-bold'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <Monitor className="w-3.5 h-3.5" />
@@ -1323,10 +1320,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                   type="button"
                   onClick={() => setPreviewDevice('tablet')}
                   title="Tablet Preview (480px)"
-                  className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                     previewDevice === 'tablet'
-                      ? 'bg-white text-[#6701e6] shadow-2xs font-bold'
-                      : 'text-gray-500 hover:text-gray-900'
+                      ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-2xs font-bold'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <Tablet className="w-3.5 h-3.5" />
@@ -1335,10 +1332,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                   type="button"
                   onClick={() => setPreviewDevice('mobile')}
                   title="Mobile Preview (320px)"
-                  className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                     previewDevice === 'mobile'
-                      ? 'bg-white text-[#6701e6] shadow-2xs font-bold'
-                      : 'text-gray-500 hover:text-gray-900'
+                      ? 'bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-2xs font-bold'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <Smartphone className="w-3.5 h-3.5" />
@@ -1348,12 +1345,12 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
             {/* Canvas Scrollable Wrapper */}
             <div
-              className={`flex-1 rounded-2xl p-6 transition-all duration-300 overflow-y-auto scrollbar-thin ${
+              className={`flex-1 rounded-2xl p-5 sm:p-6 transition-all duration-300 overflow-y-auto scrollbar-thin ${
                 wallTheme === 'dark'
-                  ? 'bg-[#0f172a] border border-gray-800 text-white'
+                  ? 'bg-[#0f172a] border border-slate-800 text-white'
                   : wallTheme === 'minimalist'
-                    ? 'bg-white border border-gray-200 text-gray-900 shadow-xs'
-                    : 'bg-gradient-to-br from-purple-50/50 via-white to-indigo-50/40 border border-purple-100 text-gray-900'
+                    ? 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white shadow-2xs'
+                    : 'bg-gradient-to-br from-purple-50/40 via-white to-indigo-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-purple-950/20 border border-purple-100/80 dark:border-slate-800 text-slate-900 dark:text-white'
               }`}
             >
               {/* Responsive Width Constraint Container */}
@@ -1368,9 +1365,9 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
               >
                 {/* Sample Testimonials Alert Banner */}
                 {isUsingSampleReviews && (
-                  <div className="mb-4 p-2.5 rounded-xl bg-violet-50/90 border border-violet-200/80 text-violet-900 text-xs flex items-center justify-between gap-2 animate-in fade-in">
+                  <div className="mb-4 p-3 rounded-2xl bg-purple-50/80 dark:bg-purple-950/40 border border-purple-200/70 dark:border-purple-800 text-purple-900 dark:text-purple-200 text-xs flex items-center justify-between gap-2 shadow-2xs animate-in fade-in">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-violet-600 shrink-0" />
+                      <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
                       <span className="font-medium text-[11px] sm:text-xs">
                         Pre-loaded with sample reviews so you can customize immediately.
                       </span>
@@ -1379,7 +1376,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                       <button
                         type="button"
                         onClick={onOpenProof}
-                        className="text-[11px] font-bold text-violet-700 hover:text-violet-900 underline whitespace-nowrap cursor-pointer shrink-0"
+                        className="text-[11px] font-bold text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-white underline whitespace-nowrap cursor-pointer shrink-0"
                       >
                         Go to Proof →
                       </button>
@@ -1392,8 +1389,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                     <div className="w-12 h-12 rounded-2xl bg-purple-100 text-[#6701e6] flex items-center justify-center mb-3">
                       <Filter className="w-6 h-6" />
                     </div>
-                    <h4 className="text-base font-bold text-gray-900 mb-1">No Testimonials Match Filters</h4>
-                    <p className="text-xs text-gray-500 max-w-sm mb-4">
+                    <h4 className="text-base font-bold text-slate-900 dark:text-white mb-1">No Testimonials Match Filters</h4>
+                    <p className="text-xs text-slate-500 max-w-sm mb-4">
                       Try lowering the minimum star rating or selecting more review sources.
                     </p>
                     <button
@@ -1402,7 +1399,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                         setMinRating(0);
                         setSelectedSources(['google', 'linkedin', 'instagram', 'facebook', 'direct']);
                       }}
-                      className="px-4 py-2 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white text-xs font-bold cursor-pointer transition-colors shadow-xs"
+                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold cursor-pointer transition-colors shadow-2xs"
                     >
                       Reset Filters
                     </button>
@@ -1420,10 +1417,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                             key={r.id}
                             className={`break-inside-avoid mb-4 p-5 rounded-2xl transition-all duration-200 flex flex-col justify-between ${
                               wallTheme === 'dark'
-                                ? 'bg-[#1e293b] border border-white/10 text-gray-100 shadow-md hover:border-purple-500/50'
+                                ? 'bg-[#1e293b] border border-white/10 text-slate-100 shadow-md hover:border-purple-500/50'
                                 : wallTheme === 'minimalist'
-                                  ? 'bg-white border border-gray-200 text-gray-900 hover:border-gray-950'
-                                  : 'bg-white border border-purple-100/80 text-gray-900 shadow-xs hover:shadow-md hover:border-[#6701e6]/40'
+                                  ? 'bg-white border border-slate-200 text-slate-900 hover:border-slate-950 shadow-2xs'
+                                  : 'bg-white border border-purple-100/90 text-slate-900 shadow-2xs hover:shadow-xs hover:border-purple-300'
                             }`}
                           >
                             {/* Top row: Stars + Source */}
@@ -1433,7 +1430,7 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                                   <Star
                                     key={i}
                                     className={`w-3.5 h-3.5 ${
-                                      i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'
+                                      i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-700'
                                     }`}
                                   />
                                 ))}
@@ -1441,48 +1438,48 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
                               {/* Source badge */}
                               {source === 'google' && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
                                   <GoogleIcon /> Google
                                 </span>
                               )}
                               {source === 'linkedin' && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-[#0A66C2] border border-sky-200">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-[#0A66C2] border border-sky-200">
                                   <LinkedInIcon /> LinkedIn
                                 </span>
                               )}
                               {source === 'instagram' && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-pink-50 text-[#E4405F] border border-pink-200">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-pink-50 text-[#E4405F] border border-pink-200">
                                   <InstagramIcon /> Instagram
                                 </span>
                               )}
                               {source === 'facebook' && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#1877F2] border border-blue-200">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#1877F2] border border-blue-200">
                                   <FacebookIcon /> Facebook
                                 </span>
                               )}
                               {(source === 'sample' || r.isSample) && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                                  <Sparkles className="w-3 h-3 text-[#6701e6]" /> Verified
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/70 dark:border-purple-800 shadow-2xs">
+                                  <Sparkles className="w-3 h-3 text-purple-600 dark:text-purple-400" /> Verified
                                 </span>
                               )}
                             </div>
 
                             {/* Review text */}
                             <p className={`text-xs leading-relaxed mb-4 ${
-                              wallTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                              wallTheme === 'dark' ? 'text-slate-300' : 'text-slate-700'
                             }`}>
                               "{r.content || r.text}"
                             </p>
 
                             {/* Author info */}
                             <div className={`flex items-center gap-3 pt-3 border-t ${
-                              wallTheme === 'dark' ? 'border-white/10' : 'border-gray-100'
+                              wallTheme === 'dark' ? 'border-white/10' : 'border-slate-100'
                             }`}>
-                              <div className="w-8 h-8 rounded-full overflow-hidden bg-purple-100 shrink-0 border border-gray-200">
+                              <div className="w-8 h-8 rounded-full overflow-hidden bg-purple-100 shrink-0 border border-slate-200">
                                 {r.avatarUrl ? (
                                   <img src={r.avatarUrl} alt={r.name} className="w-full h-full object-cover" />
                                 ) : (
-                                  <span className="text-xs font-bold text-[#6701e6] flex items-center justify-center h-full">
+                                  <span className="text-xs font-bold text-purple-700 flex items-center justify-center h-full">
                                     {r.name?.charAt(0) || 'U'}
                                   </span>
                                 )}
@@ -1490,13 +1487,13 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-1">
                                   <p className={`text-xs font-bold leading-tight truncate ${
-                                    wallTheme === 'dark' ? 'text-white' : 'text-gray-900'
+                                    wallTheme === 'dark' ? 'text-white' : 'text-slate-900'
                                   }`}>
                                     {r.name}
                                   </p>
                                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                                 </div>
-                                <p className="text-[10.5px] text-gray-400 truncate leading-tight">
+                                <p className="text-[10.5px] text-slate-400 truncate leading-tight">
                                   {r.role || r.authorTitle || ''} {r.company ? `• ${r.company}` : ''}
                                 </p>
                               </div>
@@ -1508,10 +1505,10 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onBack, onO
 
                     {/* Footer Attribution Badge */}
                     <div className="text-center pt-2">
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border ${
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1 rounded-full border ${
                         wallTheme === 'dark'
-                          ? 'bg-white/5 text-gray-400 border-white/10'
-                          : 'bg-white text-gray-600 border-gray-200 shadow-2xs'
+                          ? 'bg-white/5 text-slate-400 border-white/10'
+                          : 'bg-white text-slate-600 border-slate-200/80 shadow-2xs'
                       }`}>
                         <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
                         Verified with Panda Praise
