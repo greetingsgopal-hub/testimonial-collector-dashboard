@@ -12,6 +12,8 @@ describe('TASK 8: /api/health liveness probe', () => {
     const data: any = await res.json();
     expect(data.status).toBe('ok');
     expect(data.service).toBe('pandapraise-api');
+    expect(data.bindings).toBeDefined();
+    expect(typeof data.bindings.rateLimitKv).toBe('boolean');
     expect(typeof data.timestamp).toBe('string');
   });
 

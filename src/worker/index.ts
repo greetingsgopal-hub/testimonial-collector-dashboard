@@ -101,13 +101,18 @@ export default {
         case 'webhook/test':
         case 'webhooks/test':
           return await handleWebhookTestDispatch(request, env);
-        // Unauthenticated liveness probe for uptime monitoring.
-        // Deliberately cheap: no Firestore/Stripe calls, no secrets exposed.
+        // Unauthenticated liveness and binding health probe for uptime monitoring.
+        // Deliberately safe: boolean checks only, no secret values exposed.
         case 'health': {
           return new Response(
             JSON.stringify({
               status: 'ok',
               service: 'pandapraise-api',
+              bindings: {
+                rateLimitKv: Boolean(env.RATE_LIMIT_KV),
+                firebaseConfigured: Boolean(env.FIREBASE_PROJECT_ID),
+                stripeConfigured: Boolean(env.STRIPE_SECRET_KEY),
+              },
               timestamp: new Date().toISOString(),
             }),
             { status: 200, headers: { 'Content-Type': 'application/json' } }
