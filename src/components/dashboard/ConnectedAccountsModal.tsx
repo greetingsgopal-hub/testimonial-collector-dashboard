@@ -74,20 +74,23 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
   const platforms: {
     id: SocialPlatform;
     name: string;
+    connectLabel: string;
     description: string;
     iconColor: string;
-    requiresApproval?: boolean;
+    isBottomLight?: boolean;
     note?: string;
   }[] = [
     {
       id: 'linkedin',
       name: 'LinkedIn',
+      connectLabel: 'Connect LinkedIn',
       description: 'Direct 1-click publishing to personal member profile and company page feeds via the official Posts API.',
       iconColor: '#0a66c2',
     },
     {
       id: 'twitter',
       name: 'X (Twitter)',
+      connectLabel: 'Connect X (Twitter)',
       description: 'Publish text and high-res cards directly to your X timeline.',
       iconColor: '#1d9bf0',
       note: 'Requires X Developer Portal credentials (API v2).',
@@ -95,6 +98,7 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
     {
       id: 'facebook',
       name: 'Facebook Pages',
+      connectLabel: 'Connect Facebook Pages',
       description: 'Direct publishing to verified Facebook business and brand pages.',
       iconColor: '#1877f2',
       note: 'Requires Meta App Review for pages_manage_posts.',
@@ -102,6 +106,7 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
     {
       id: 'instagram',
       name: 'Instagram Business',
+      connectLabel: 'Connect Instagram Business',
       description: 'Publish square posts and stories to connected Instagram Professional accounts.',
       iconColor: '#e1306c',
       note: 'Restricted by Meta to Business/Creator accounts linked to a Facebook Page.',
@@ -109,54 +114,63 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
     {
       id: 'google',
       name: 'Google Business Profile',
+      connectLabel: 'Connect Google Business',
       description: 'Import verified Google reviews from your Business Profile locations.',
       iconColor: '#4285F4',
+      isBottomLight: true,
       note: 'Import-only: connects Google Business Profile for review sync, not social publishing.',
     },
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in font-sans">
+      <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+        
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
-              <span>Connected Social Accounts</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
+            <div className="flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                Connected Social Accounts
+              </h2>
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800 font-bold">
                 OAuth 2.0 Secure
               </span>
-            </h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Connect once to unlock instant 1-click social distribution for all approved customer wins.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Content */}
+        {/* Content Body */}
         <div className="p-6 overflow-y-auto space-y-4">
           {error && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2.5">
+            <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800 text-xs text-rose-800 dark:text-rose-300 flex items-start gap-2.5 shadow-2xs">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="font-semibold">Connection Notice</p>
+              <div className="space-y-0.5">
+                <p className="font-bold">Connection Notice</p>
                 <p>{error}</p>
               </div>
             </div>
           )}
 
           {loading ? (
-            <div className="py-12 flex flex-col items-center justify-center gap-3 text-gray-500">
-              <RefreshCw className="w-6 h-6 animate-spin text-[#6701e6]" />
-              <p className="text-xs">Checking account connection status...</p>
+            /* Loading State */
+            <div className="py-14 flex flex-col items-center justify-center gap-3 text-slate-500 dark:text-slate-400">
+              <RefreshCw className="w-7 h-7 animate-spin text-purple-600" />
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                Checking account connection status…
+              </p>
             </div>
           ) : (
+            /* List State: Vertical list of clean white rows */
             <div className="space-y-3">
               {platforms.map((p) => {
                 const conn = statusData?.connections[p.id];
@@ -166,32 +180,40 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
                 return (
                   <div
                     key={p.id}
-                    className="p-4 rounded-xl bg-gray-50 border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-purple-300 transition-colors"
+                    className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs ${
+                      p.isBottomLight
+                        ? 'bg-slate-50/70 dark:bg-slate-950/40 border-slate-200/60 dark:border-slate-800/60'
+                        : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-purple-200/80 dark:hover:border-purple-800/80'
+                    }`}
                   >
                     <div className="space-y-1 sm:max-w-[65%]">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-gray-900">{p.name}</span>
+                        <span className="font-bold text-sm text-slate-900 dark:text-white">
+                          {p.name}
+                        </span>
                         {isConnected && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800">
                             <CheckCircle2 className="w-3 h-3" />
                             <span>Connected</span>
                           </span>
                         )}
                         {isExpired && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800">
                             <AlertCircle className="w-3 h-3" />
                             <span>Expired</span>
                           </span>
                         )}
                       </div>
 
-                      <p className="text-xs text-gray-600">{p.description}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">
+                        {p.description}
+                      </p>
 
                       {isConnected && conn?.accountName && (
-                        <p className="text-xs text-gray-800 font-medium pt-0.5">
-                          Account: <span className="font-bold text-gray-950">{conn.accountName}</span>
+                        <p className="text-xs text-slate-800 dark:text-slate-200 font-medium pt-0.5">
+                          Account: <span className="font-bold text-slate-900 dark:text-white">{conn.accountName}</span>
                           {conn.connectedAt && (
-                            <span className="text-gray-500 font-normal">
+                            <span className="text-slate-400 font-normal">
                               {' '}
                               • Connected {new Date(conn.connectedAt).toLocaleDateString()}
                             </span>
@@ -200,37 +222,40 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
                       )}
 
                       {p.note && !isConnected && (
-                        <p className="text-[11px] text-gray-500 italic">{p.note}</p>
+                        <p className="text-[11px] text-slate-400 italic">{p.note}</p>
                       )}
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
                       {isConnected ? (
                         <button
+                          type="button"
                           onClick={() => handleDisconnect(p.id)}
                           disabled={disconnecting === p.id}
-                          className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-gray-700 hover:text-rose-700 border border-gray-300 hover:border-rose-300 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs"
+                          className="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-700 dark:text-slate-300 hover:text-rose-700 dark:hover:text-rose-400 border border-slate-200/80 dark:border-slate-700 hover:border-rose-300 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs"
                         >
                           <Unlink className="w-3.5 h-3.5" />
                           <span>{disconnecting === p.id ? 'Disconnecting...' : 'Disconnect'}</span>
                         </button>
                       ) : isExpired ? (
                         <button
+                          type="button"
                           onClick={() => handleConnect(p.id)}
                           disabled={connecting === p.id}
-                          className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
+                          className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs active:scale-95"
                         >
                           <RefreshCw className={`w-3.5 h-3.5 ${connecting === p.id ? 'animate-spin' : ''}`} />
                           <span>{connecting === p.id ? 'Redirecting...' : `Reconnect ${p.name}`}</span>
                         </button>
                       ) : (
                         <button
+                          type="button"
                           onClick={() => handleConnect(p.id)}
                           disabled={connecting === p.id}
-                          className="px-3.5 py-1.5 rounded-xl bg-[#6701e6] hover:bg-[#5200bd] text-white font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
+                          className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs active:scale-95"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
-                          <span>{connecting === p.id ? 'Redirecting...' : `Connect ${p.name}`}</span>
+                          <span>{connecting === p.id ? 'Redirecting...' : p.connectLabel}</span>
                         </button>
                       )}
                     </div>
@@ -240,8 +265,11 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
             </div>
           )}
 
-          <div className="p-3.5 rounded-xl bg-purple-50/50 border border-purple-100 text-[11px] text-gray-600 space-y-1">
-            <p className="font-bold text-[#6701e6]">Panda Praise Privacy & Security Guarantee:</p>
+          {/* Soft Purple Privacy Box */}
+          <div className="p-4 rounded-2xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800/80 text-xs text-slate-600 dark:text-slate-300 space-y-1.5 shadow-2xs">
+            <p className="font-bold text-purple-700 dark:text-purple-300">
+              Panda Praise Privacy & Security Guarantee:
+            </p>
             <p>
               • Panda Praise never stores client secrets or raw tokens in the browser or public databases.
             </p>
@@ -255,10 +283,11 @@ export const ConnectedAccountsModal: React.FC<ConnectedAccountsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-gray-100 bg-gray-50/50 flex justify-end">
+        <div className="px-6 py-3.5 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50 flex justify-end">
           <button
+            type="button"
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
+            className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
           >
             Done
           </button>

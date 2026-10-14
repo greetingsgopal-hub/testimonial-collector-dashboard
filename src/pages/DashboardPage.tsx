@@ -583,10 +583,12 @@ export const DashboardPage = () => {
 
           {/* Post on Internet · On Social Media */}
           {activeTab === 'social' && (
-            <SocialPostView
-              reviews={effectiveReviews}
-              onOpenAccountsModal={() => setShowAccountsModal(true)}
-            />
+            <div className="max-w-5xl mx-auto font-sans">
+              <SocialPostView
+                reviews={effectiveReviews}
+                onOpenAccountsModal={() => setShowAccountsModal(true)}
+              />
+            </div>
           )}
 
           {/* Automated Review Request Drip Campaigns (Stage 5) */}
