@@ -244,16 +244,30 @@ describe('Stripe webhook handler (C5)', () => {
       );
     });
 
-    it('invoice.payment_succeeded does not overwrite active status', async () => {
-      mockedGetWorkspace.mockResolvedValue({ id: 'ws_1', data: { subscriptionStatus: 'active' } });
-      const event = makeEvent('invoice.payment_succeeded', {
-        customer: 'cus_1',
+    it('checkout.session.completed with founding lifetime purchase sets lifetime pro plan', async () => {
+      const event = makeEvent('checkout.session.completed', {
+        mode: 'payment',
+        payment_status: 'paid',
+        customer: 'cus_founding_1',
+        metadata: { workspaceId: 'ws_founding', priceId: 'price_founding_lifetime' },
       });
       mockedVerify.mockReturnValue(event as any);
 
-      await handleStripeWebhook(signedRequest(event), baseEnv as any);
+      await handleStripeWebhook(signedRequest(event), {
+        ...baseEnv,
+        STRIPE_PRICE_FOUNDING_LIFETIME: 'price_founding_lifetime',
+      } as any);
 
-      expect(mockedUpdateWorkspace).not.toHaveBeenCalled();
+      expect(mockedUpdateWorkspace).toHaveBeenCalledWith(
+        'ws_founding',
+        expect.objectContaining({
+          plan: 'pro',
+          billingCycle: 'lifetime',
+          subscriptionStatus: 'active',
+          stripeCustomerId: 'cus_founding_1',
+        }),
+        expect.anything()
+      );
     });
   });
 

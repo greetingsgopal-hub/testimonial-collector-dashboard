@@ -101,13 +101,13 @@ export async function createCheckoutSession(
       },
     ],
     success_url: `${origin}/dashboard/settings?checkout_success=true`,
-    cancel_url: `${origin}/dashboard/settings?checkout_canceled=true`,
     metadata: {
       workspaceId,
+      priceId,
     },
     ...(isOneTime
-      ? { payment_intent_data: { metadata: { workspaceId } } }
-      : { subscription_data: { metadata: { workspaceId } } }),
+      ? { payment_intent_data: { metadata: { workspaceId, priceId } } }
+      : { subscription_data: { metadata: { workspaceId, priceId } } }),
   });
 
   return session.url || '';

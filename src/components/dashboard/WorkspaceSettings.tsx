@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Building2,
   Users,
@@ -55,6 +55,21 @@ export const WorkspaceSettings: React.FC = () => {
   // Billing portal and checkout state
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+  const [checkoutCanceled, setCheckoutCanceled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('checkout_success') === 'true' || params.get('checkout') === 'success') {
+        setCheckoutSuccess(true);
+        setActiveTab('billing');
+      } else if (params.get('checkout_canceled') === 'true' || params.get('checkout') === 'canceled') {
+        setCheckoutCanceled(true);
+        setActiveTab('billing');
+      }
+    }
+  }, []);
   const [billingError, setBillingError] = useState<string | null>(null);
 
   // Security Tab State
@@ -473,6 +488,64 @@ export const WorkspaceSettings: React.FC = () => {
           {/* ── Billing ── */}
           {activeTab === 'billing' && (
             <div className="space-y-6">
+              {checkoutSuccess && (
+                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between shadow-2xs animate-fade-in">
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold">Subscription Activated! 🎉</p>
+                      <p className="text-xs text-emerald-700">Thank you for upgrading. Your Pro features and limits are now active.</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCheckoutSuccess(false)}
+                    className="text-xs text-emerald-700 hover:text-emerald-900 font-semibold cursor-pointer px-2 py-1"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              )}
+
+              {checkoutCanceled && (
+                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-gray-700 flex items-center justify-between shadow-2xs animate-fade-in">
+                  <div className="flex items-center gap-2.5">
+                    <AlertTriangle className="w-5 h-5 text-gray-500 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold">Checkout Canceled</p>
+                      <p className="text-xs text-gray-500">No charges were made. You can upgrade whenever you're ready.</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCheckoutCanceled(false)}
+                    className="text-xs text-gray-600 hover:text-gray-900 font-semibold cursor-pointer px-2 py-1"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              )}
+
+              {workspace?.subscriptionStatus === 'past_due' && (
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center gap-2.5">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold">Payment Past Due</p>
+                      <p className="text-xs text-amber-700">Your latest payment attempt failed. Please update your card in the billing portal to avoid interruption.</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleOpenBillingPortal}
+                    disabled={isOpeningPortal}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer disabled:opacity-50"
+                  >
+                    {isOpeningPortal ? 'Opening Portal...' : 'Update Payment Method'}
+                  </button>
+                </div>
+              )}
+
               <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-xs">
                 <div className="flex items-start justify-between mb-6">
                   <div>

@@ -104,22 +104,33 @@ async function handleCheckoutCompleted(session: any, env: WorkerEnv): Promise<vo
   const subscriptionId = session.subscription;
   const paymentStatus = session.payment_status;
 
-  // Get plan from line items price ID
-  const priceId = session.line_items?.data?.[0]?.price?.id;
-  const plan = priceId ? getPricePlanTier(priceId, env) : null;
+  // Get plan from line items price ID or session metadata
+  const priceId = session.metadata?.priceId || session.line_items?.data?.[0]?.price?.id;
+  let plan = priceId ? getPricePlanTier(priceId, env) : null;
+  if (!plan && (session.mode === 'payment' || session.metadata?.plan === 'pro')) {
+    plan = 'pro';
+  }
 
   const updateData: any = {
     stripeCustomerId: customerId,
-    stripeSubscriptionId: subscriptionId,
     subscriptionStatus: paymentStatus === 'paid' ? 'active' : 'incomplete',
   };
+
+  if (subscriptionId) {
+    updateData.stripeSubscriptionId = subscriptionId;
+  }
 
   if (plan) {
     updateData.plan = plan;
   }
 
+  if (session.mode === 'payment' || (env.STRIPE_PRICE_FOUNDING_LIFETIME && priceId === env.STRIPE_PRICE_FOUNDING_LIFETIME)) {
+    updateData.billingCycle = 'lifetime';
+    updateData.plan = 'pro';
+  }
+
   await updateWorkspaceSubscription(workspaceId, updateData, env);
-  console.log(`[StripeWebhook] Checkout completed for workspace ${workspaceId}, plan=${plan || 'unknown'}`);
+  console.log(`[StripeWebhook] Checkout completed for workspace ${workspaceId}, plan=${updateData.plan || plan || 'unknown'}`);
 }
 
 /**
@@ -208,8 +219,9 @@ async function handlePaymentSucceeded(invoice: any, env: WorkerEnv): Promise<voi
     return;
   }
 
-  // Only update if currently past_due
-  if (workspace.data.subscriptionStatus === 'past_due') {
+  // Only update if currently past_due or incomplete
+  const currentStatus = workspace.data?.subscriptionStatus || workspace.subscriptionStatus;
+  if (currentStatus === 'past_due' || currentStatus === 'incomplete') {
     await updateWorkspaceSubscription(workspace.id, {
       subscriptionStatus: 'active',
     }, env);
