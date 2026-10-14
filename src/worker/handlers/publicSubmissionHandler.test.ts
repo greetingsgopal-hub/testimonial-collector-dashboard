@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { handlePublicTestimonialSubmit, verifyTurnstileToken } from './publicSubmissionHandler';
-import { WorkerEnv } from '../types';
+import { WorkerEnv, KVNamespaceLike } from '../types';
 
 vi.mock('../lib/firestoreAdmin', () => ({
   getDocument: vi.fn(),
@@ -30,9 +30,8 @@ describe('Public Testimonial Submission Handler (Turnstile + Rate Limiting + Fre
     expect(res.status).toBe(405);
   });
 
-  it('enforces IP rate limiting after 5 requests from the same IP', async () => {
+  it('enforces IP rate limiting after 5 requests from the same IP (memory fallback)', async () => {
     const ip = '203.0.113.42';
-    // Mock valid form
     vi.mocked(getDocument).mockResolvedValue({
       id: 'form-123',
       ownerId: 'owner-1',
@@ -42,7 +41,6 @@ describe('Public Testimonial Submission Handler (Turnstile + Rate Limiting + Fre
     vi.mocked(queryUserDocuments).mockResolvedValue([]);
     vi.mocked(saveDocument).mockResolvedValue(undefined);
 
-    // Mock Turnstile fetch verification
     globalThis.fetch = vi.fn().mockImplementation(() =>
       Promise.resolve(new Response(JSON.stringify({ success: true }), { status: 200 }))
     );
@@ -64,18 +62,123 @@ describe('Public Testimonial Submission Handler (Turnstile + Rate Limiting + Fre
         }),
       });
 
-    // Submissions 1 through 5 should succeed (201)
     for (let i = 0; i < 5; i++) {
       const res = await handlePublicTestimonialSubmit(makeReq(), env);
       expect(res.status).toBe(201);
     }
 
-    // 6th submission from same IP must be rate limited (429)
     const blockedRes = await handlePublicTestimonialSubmit(makeReq(), env);
     expect(blockedRes.status).toBe(429);
     expect(blockedRes.headers.get('Retry-After')).toBeTruthy();
     const data = await blockedRes.json();
     expect(data.error).toContain('Too many submissions');
+  });
+
+  it('enforces rate limiting via Cloudflare KV when RATE_LIMIT_KV is bound', async () => {
+    const kvStore = new Map<string, string>();
+    const mockKV: KVNamespaceLike = {
+      get: vi.fn(async (key: string) => kvStore.get(key) || null),
+      put: vi.fn(async (key: string, val: string) => { kvStore.set(key, val); }),
+      delete: vi.fn(async (key: string) => { kvStore.delete(key); }),
+    };
+
+    env.RATE_LIMIT_KV = mockKV;
+    const ip = '198.51.100.99';
+
+    vi.mocked(getDocument).mockResolvedValue({
+      id: 'form-kv',
+      ownerId: 'owner-kv',
+      projectId: 'proj-kv',
+      isActive: true,
+    });
+    vi.mocked(queryUserDocuments).mockResolvedValue([]);
+    vi.mocked(saveDocument).mockResolvedValue(undefined);
+
+    globalThis.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(new Response(JSON.stringify({ success: true }), { status: 200 }))
+    );
+
+    const makeReq = () =>
+      new Request('https://pandapraise.com/api/testimonials/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'CF-Connecting-IP': ip,
+        },
+        body: JSON.stringify({
+          collectionFormId: 'form-kv',
+          name: 'KV User',
+          content: 'Testing rate limits across Cloudflare edge nodes with KV.',
+          rating: 5,
+          consent: true,
+          turnstileToken: 'test-token',
+        }),
+      });
+
+    for (let i = 0; i < 5; i++) {
+      const res = await handlePublicTestimonialSubmit(makeReq(), env);
+      expect(res.status).toBe(201);
+    }
+    expect(mockKV.put).toHaveBeenCalled();
+
+    const blocked = await handlePublicTestimonialSubmit(makeReq(), env);
+    expect(blocked.status).toBe(429);
+  });
+
+  it('fails closed with 503 when KV encounters an unhandled exception', async () => {
+    const errorKV: KVNamespaceLike = {
+      get: vi.fn().mockRejectedValue(new Error('Cloudflare KV cluster unreachable')),
+      put: vi.fn(),
+      delete: vi.fn(),
+    };
+    env.RATE_LIMIT_KV = errorKV;
+
+    const req = new Request('https://pandapraise.com/api/testimonials/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-Connecting-IP': '198.51.100.100',
+      },
+      body: JSON.stringify({
+        collectionFormId: 'form-123',
+        name: 'Jane Doe',
+        content: 'Testing rate limit KV outage fail-closed handling.',
+        rating: 5,
+        consent: true,
+        turnstileToken: 'test-token',
+      }),
+    });
+
+    const res = await handlePublicTestimonialSubmit(req, env);
+    expect(res.status).toBe(503);
+    const data = await res.json();
+    expect(data.error).toContain('Rate limit service unavailable');
+  });
+
+  it('fails closed in production with 503 if TURNSTILE_SECRET_KEY is missing', async () => {
+    env.NODE_ENV = 'production';
+    delete env.TURNSTILE_SECRET_KEY;
+
+    const req = new Request('https://pandapraise.com/api/testimonials/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-Connecting-IP': '198.51.100.101',
+      },
+      body: JSON.stringify({
+        collectionFormId: 'form-123',
+        name: 'Jane Doe',
+        content: 'Testing production turnstile unconfigured behavior.',
+        rating: 5,
+        consent: true,
+        turnstileToken: 'test-token',
+      }),
+    });
+
+    const res = await handlePublicTestimonialSubmit(req, env);
+    expect(res.status).toBe(503);
+    const data = await res.json();
+    expect(data.error).toContain('Security verification service is unconfigured');
   });
 
   it('rejects missing Turnstile CAPTCHA token when TURNSTILE_SECRET_KEY is configured', async () => {
@@ -101,10 +204,12 @@ describe('Public Testimonial Submission Handler (Turnstile + Rate Limiting + Fre
   });
 
   it('rejects invalid Turnstile token when verification endpoint fails', async () => {
-    globalThis.fetch = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ success: false, 'error-codes': ['invalid-input-response'] }), {
-        status: 200,
-      })
+    globalThis.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ success: false, 'error-codes': ['invalid-input-response'] }), {
+          status: 200,
+        })
+      )
     );
 
     const req = new Request('https://pandapraise.com/api/testimonials/submit', {
@@ -130,8 +235,8 @@ describe('Public Testimonial Submission Handler (Turnstile + Rate Limiting + Fre
   });
 
   it('rejects submission when collection form is inactive or closed', async () => {
-    globalThis.fetch = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ success: true }), { status: 200 })
+    globalThis.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(new Response(JSON.stringify({ success: true }), { status: 200 }))
     );
 
     vi.mocked(getDocument).mockResolvedValue({
@@ -163,8 +268,8 @@ describe('Public Testimonial Submission Handler (Turnstile + Rate Limiting + Fre
   });
 
   it('enforces server-side free plan limit of 15 reviews', async () => {
-    globalThis.fetch = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ success: true }), { status: 200 })
+    globalThis.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(new Response(JSON.stringify({ success: true }), { status: 200 }))
     );
 
     vi.mocked(getDocument).mockResolvedValue({
@@ -174,13 +279,11 @@ describe('Public Testimonial Submission Handler (Turnstile + Rate Limiting + Fre
       isActive: true,
     });
 
-    // Workspace on free plan
     vi.mocked(queryUserDocuments).mockImplementation(async (collection: string) => {
       if (collection === 'workspaces') {
         return [{ id: 'ws-free', plan: 'free', ownerId: 'owner-free-tier' }];
       }
       if (collection === 'reviews') {
-        // Return 15 existing reviews
         return Array(15).fill({ id: 'existing-rev' });
       }
       return [];

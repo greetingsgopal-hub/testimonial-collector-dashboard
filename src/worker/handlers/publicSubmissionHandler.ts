@@ -1,6 +1,6 @@
 import { WorkerEnv } from '../types';
 import { getCorsHeaders } from '../lib/cors';
-import { checkRateLimit } from '../lib/rateLimit';
+import { checkRateLimitKV } from '../lib/rateLimit';
 import { getDocument, queryUserDocuments, saveDocument } from '../lib/firestoreAdmin';
 
 /**
@@ -41,8 +41,8 @@ export async function verifyTurnstileToken(
 }
 
 /**
- * Public testimonial submission handler with IP rate limiting (5 / 10m),
- * Cloudflare Turnstile bot verification, and free tier ceiling enforcement (15 testimonials).
+ * Public testimonial submission handler with IP rate limiting (5 / 10m via KV),
+ * Cloudflare Turnstile bot verification (fail-closed in prod), and free tier ceiling enforcement (15 testimonials).
  * POST /api/testimonials/submit
  */
 export async function handlePublicTestimonialSubmit(request: Request, env: WorkerEnv): Promise<Response> {
@@ -56,13 +56,23 @@ export async function handlePublicTestimonialSubmit(request: Request, env: Worke
     });
   }
 
-  // 1. IP Rate Limiting (5 submissions per 10 minutes per IP)
+  // 1. IP Rate Limiting (5 submissions per 10 minutes per IP across isolates via Cloudflare KV)
   const clientIp =
     request.headers.get('CF-Connecting-IP') ||
     request.headers.get('X-Forwarded-For')?.split(',')[0].trim() ||
     '127.0.0.1';
 
-  const rateCheck = checkRateLimit(`public-submit:${clientIp}`, 5, 10 * 60 * 1000);
+  const rateCheck = await checkRateLimitKV(`public-submit:${clientIp}`, 5, 600, env.RATE_LIMIT_KV);
+  if (rateCheck.error) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit service unavailable. Please try again shortly.' }),
+      {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
+  }
+
   if (!rateCheck.allowed) {
     return new Response(
       JSON.stringify({
@@ -90,8 +100,20 @@ export async function handlePublicTestimonialSubmit(request: Request, env: Worke
     });
   }
 
-  // 3. Cloudflare Turnstile verification
-  if (env.TURNSTILE_SECRET_KEY) {
+  // 3. Cloudflare Turnstile verification (fail closed in production)
+  const isProduction = env.NODE_ENV === 'production';
+  if (!env.TURNSTILE_SECRET_KEY) {
+    if (isProduction) {
+      console.error('[Turnstile] TURNSTILE_SECRET_KEY is missing in production. Rejecting (fail closed).');
+      return new Response(
+        JSON.stringify({ error: 'Security verification service is unconfigured. Submissions are temporarily paused.' }),
+        {
+          status: 503,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+  } else {
     const turnstileToken = body.turnstileToken;
     if (!turnstileToken || typeof turnstileToken !== 'string') {
       return new Response(

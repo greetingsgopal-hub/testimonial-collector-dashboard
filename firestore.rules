@@ -51,7 +51,7 @@ service cloud.firestore {
     // Owner-only modifications; public read for widget and branding lookups.
     match /projects/{projectId} {
       allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow create: if isAuthenticated() && request.auth.token.email_verified == true && request.resource.data.ownerId == request.auth.uid;
       allow update: if isOwner(resource.data.ownerId) && isOwnerUnchanged();
       allow delete: if isOwner(resource.data.ownerId);
     }
@@ -60,6 +60,7 @@ service cloud.firestore {
     match /widgets/{widgetId} {
       allow read: if true;
       allow create: if isAuthenticated() && 
+                    request.auth.token.email_verified == true &&
                     (request.resource.data.ownerId == request.auth.uid || request.resource.data.userId == request.auth.uid);
       allow update, delete: if isAuthenticated() && 
                             (resource.data.ownerId == request.auth.uid || resource.data.userId == request.auth.uid);
@@ -70,7 +71,7 @@ service cloud.firestore {
     // ownerId cannot be mutated on update
     match /collection_forms/{formId} {
       allow read: if (isAuthenticated() && resource.data.ownerId == request.auth.uid) || resource.data.isActive == true;
-      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow create: if isAuthenticated() && request.auth.token.email_verified == true && request.resource.data.ownerId == request.auth.uid;
       allow update: if isOwner(resource.data.ownerId) && isOwnerUnchanged();
       allow delete: if isOwner(resource.data.ownerId);
     }
@@ -109,6 +110,9 @@ service cloud.firestore {
       // import). Owner-scoped: a user can only create reviews in their own
       // tenant. Status may be pending or approved (the owner moderates their
       // own content); public_reviews sync is still gated by its own rules.
+      // NOTE: Direct anonymous create has been removed. All public submissions
+      // MUST go through the Cloudflare Worker (/api/testimonials/submit), which
+      // validates Turnstile CAPTCHA and rate limits before writing via Admin API.
       allow create: if
         isAuthenticated() &&
         request.resource.data.ownerId == request.auth.uid &&
@@ -141,41 +145,6 @@ service cloud.firestore {
         request.resource.data.tags is list &&
         request.resource.data.tags.size() <= 10 &&
         (!('avatarUrl' in request.resource.data) || request.resource.data.avatarUrl == null || (request.resource.data.avatarUrl is string && request.resource.data.avatarUrl.size() <= 75000));
-
-      // Anonymous public submission. App Check should be enforced in Firebase
-      // for production abuse protection; these rules provide the data-integrity boundary.
-      allow create: if
-        request.resource.data.keys().hasOnly([
-          'projectId', 'collectionFormId', 'ownerId', 'name', 'email', 'role', 'company',
-          'avatarUrl', 'rating', 'title', 'content', 'type', 'videoUrl', 'tags', 'source',
-          'status', 'isFeatured', 'consent', 'helpfulCount', 'createdAt', 'updatedAt'
-        ]) &&
-        request.resource.data.status == 'pending' &&
-        request.resource.data.source == 'form' &&
-        request.resource.data.isFeatured == false &&
-        request.resource.data.consent == true &&
-        request.resource.data.name is string &&
-        request.resource.data.name.size() >= 1 &&
-        request.resource.data.name.size() <= 100 &&
-        request.resource.data.email is string &&
-        request.resource.data.email.size() <= 150 &&
-        request.resource.data.role is string &&
-        request.resource.data.role.size() <= 120 &&
-        request.resource.data.content is string &&
-        request.resource.data.content.size() >= 10 &&
-        request.resource.data.content.size() <= 2500 &&
-        request.resource.data.rating is number &&
-        request.resource.data.rating >= 1 &&
-        request.resource.data.rating <= 5 &&
-        request.resource.data.type in ['text', 'video'] &&
-        request.resource.data.tags is list &&
-        request.resource.data.tags.size() <= 10 &&
-        (!('avatarUrl' in request.resource.data) || request.resource.data.avatarUrl == null || (request.resource.data.avatarUrl is string && request.resource.data.avatarUrl.size() <= 75000)) &&
-        request.resource.data.collectionFormId is string &&
-        exists(/databases/$(database)/documents/collection_forms/$(request.resource.data.collectionFormId)) &&
-        get(/databases/$(database)/documents/collection_forms/$(request.resource.data.collectionFormId)).data.isActive == true &&
-        request.resource.data.ownerId == get(/databases/$(database)/documents/collection_forms/$(request.resource.data.collectionFormId)).data.ownerId &&
-        request.resource.data.projectId == get(/databases/$(database)/documents/collection_forms/$(request.resource.data.collectionFormId)).data.projectId;
     }
 
     // 5. Public Approved Reviews (Zero-Trust Display Store)

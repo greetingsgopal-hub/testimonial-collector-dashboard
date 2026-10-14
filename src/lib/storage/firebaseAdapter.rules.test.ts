@@ -21,9 +21,10 @@ const adapterSrc = readFileSync(join(process.cwd(), 'src/lib/storage/firebaseAda
 const rules = readFileSync(join(process.cwd(), 'firestore.rules'), 'utf8');
 
 describe('TASK 4 regression: public submission end-to-end', () => {
-  it('rules accept null avatarUrl on review create (all 5 guards)', () => {
+  it('rules accept null avatarUrl on review create (all 4 guards after closing anonymous direct writes)', () => {
     const nullGuards = rules.match(/avatarUrl == null/g) ?? [];
-    expect(nullGuards.length).toBe(5);
+    // 4 guards remain (owner review create, public_reviews create/update); anonymous direct create is closed.
+    expect(nullGuards.length).toBe(4);
   });
 
   it('evaluateAutoApproval fetches the form doc by collectionFormId (doc-level get, rules-safe)', () => {

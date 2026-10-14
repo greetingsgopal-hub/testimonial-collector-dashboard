@@ -252,8 +252,10 @@ export const PublicCollectorPage: React.FC = () => {
       };
 
       let created: Review;
+      const backendType = getActiveBackendInfo()?.type;
 
-      try {
+      if (backendType === 'firebase') {
+        // Production Firestore: strictly enforce server-side route through Cloudflare Worker
         const res = await fetch('/api/testimonials/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -268,35 +270,13 @@ export const PublicCollectorPage: React.FC = () => {
           throw new Error('Too many submissions from your network. Please wait a few minutes before submitting another review.');
         }
 
-        if (res.ok) {
-          const apiData = await res.json();
-          created = apiData.review;
-        } else {
-          const apiData = await res.json().catch(() => ({}));
-          if (res.status === 400 || res.status === 403) {
-            throw new Error(apiData.error || 'Submission rejected by anti-abuse filter.');
-          }
-          created = await storage.createReview(
-            {
-              ...sanitizedData,
-              projectId: formConfig?.projectId,
-              collectionFormId: formConfig?.id,
-              status: 'pending',
-              consent: true,
-              source: 'form',
-            },
-            formConfig?.projectId
-          );
+        const apiData = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(apiData.error || `Submission failed (HTTP ${res.status}). Please try again.`);
         }
-      } catch (networkErr: any) {
-        if (
-          networkErr.message?.includes('Too many') ||
-          networkErr.message?.includes('anti-abuse') ||
-          networkErr.message?.includes('rejected') ||
-          networkErr.message?.includes('limit')
-        ) {
-          throw networkErr;
-        }
+        created = apiData.review;
+      } else {
+        // Offline / Demo / Test mock storage fallback
         created = await storage.createReview(
           {
             ...sanitizedData,

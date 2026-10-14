@@ -41,6 +41,14 @@ export interface WorkerEnv {
   // Cloudflare Turnstile Anti-Abuse CAPTCHA
   TURNSTILE_SECRET_KEY?: string;
   VITE_TURNSTILE_SITE_KEY?: string;
+  // Cloudflare KV for distributed rate limiting across edge isolates
+  RATE_LIMIT_KV?: KVNamespaceLike;
+}
+
+export interface KVNamespaceLike {
+  get(key: string, options?: any): Promise<any>;
+  put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
+  delete(key: string): Promise<void>;
 }
 
 export interface ScheduledEvent {

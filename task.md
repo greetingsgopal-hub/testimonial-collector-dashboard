@@ -1,51 +1,47 @@
-# PandaPraise: Remaining Priority 0 Tasks
+# PandaPraise: Priority 0 Hardening Tasks (Global Standard)
 
-## 1. Email Verification (Critical)
-- [x] **1.1 Firestore Security Rules Gate**
-  - [x] Update `firestore.rules` so workspace creation and sensitive writes require `request.auth.token.email_verified == true`.
-  - [x] Add static analysis tests in `src/worker/firestore.rules.test.ts`.
-- [x] **1.2 Auth & Onboarding Flow Hardening**
-  - [x] Ensure `sendEmailVerification` is dispatched on `signUp`.
-  - [x] Gate creation of new workspaces/projects in UI if user is unverified.
-  - [x] Ensure persistent `EmailVerificationBanner` is visible across dashboard when `user.emailVerified === false`.
-  - [x] Support direct "Resend verification email" with cooldown timer.
+## 1. Email Verification Enforcement in Rules & Guards
+- [ ] **1.1 Firestore Security Rules Gate**
+  - [ ] Require `request.auth.token.email_verified == true` for `workspaces`, `projects`, `collection_forms`, and `widgets`.
+  - [ ] Add static analysis tests in `src/worker/firestore.rules.test.ts`.
+- [ ] **1.2 Auth & Onboarding Verification State**
+  - [ ] Confirm `sendEmailVerification` on `signUp`, persistent banner, and project creation gates unverified users.
 
-## 2. Harden & Wire Stripe Billing & Free-Tier Server Limits
-- [x] **2.1 Frontend Stripe Client Wiring**
-  - [x] Create `src/lib/stripe.ts` with `startStripeCheckout({ priceId })` and `openBillingPortal()`.
-  - [x] Wire `PricingPage.tsx` checkout buttons to call `startStripeCheckout`.
-  - [x] Wire `UpgradeModal.tsx` and `PlanLimitBanner.tsx` to initiate checkout directly.
-  - [x] Add "Manage Subscription / Billing Portal" button in `WorkspaceSettings.tsx` (Billing tab) for active paid subscribers.
-- [x] **2.2 Server-Side Tier Limits Enforcement**
-  - [x] Enforce max 15 testimonials, max 1 project, max 1 widget server-side in Firestore rules and Worker.
-  - [x] Ensure Stripe webhook correctly updates `plan`, `subscriptionStatus`, and `currentPeriodEnd`.
-  - [x] Verify Founding lifetime price tier is handled as permanent Pro access.
+## 2. Close Direct Public Firestore Write Path
+- [ ] **2.1 Remove Direct Anonymous Write in Rules**
+  - [ ] Remove anonymous `allow create` rule on `/reviews/{reviewId}` in `firestore.rules`.
+  - [ ] Retain owner-authenticated create for manual/CSV entries.
+- [ ] **2.2 Route All Public Submissions through Worker**
+  - [ ] In `PublicCollectorPage.tsx`, remove anonymous direct fallback to `storage.createReview`.
+  - [ ] Submissions strictly write via `POST /api/testimonials/submit` using the service account.
 
-## 3. Protect Public Collection Forms (Abuse Prevention)
-- [x] **3.1 Cloudflare Turnstile & IP Rate Limiting Endpoint**
-  - [x] Create Worker endpoint `POST /api/testimonials/submit` in `src/worker/handlers/publicSubmissionHandler.ts`.
-  - [x] Verify Turnstile token server-side via `challenges.cloudflare.com/turnstile/v0/siteverify`.
-  - [x] Implement IP rate limiting (max 5 submissions per IP per 10 minutes) returning 429 when exceeded.
-  - [x] Verify active status of collection form before saving review to Firestore via Admin API.
-- [x] **3.2 Public Form Integration & Firebase App Check**
-  - [x] Integrate Turnstile widget in `src/pages/PublicCollectorPage.tsx` with graceful test bypass fallback.
-  - [x] Route form submissions through `POST /api/testimonials/submit`.
-  - [x] Retain strong input validation and Firebase App Check initialization.
+## 3. Production-Grade KV Rate Limiting & Fail-Closed Turnstile
+- [ ] **3.1 Cloudflare KV Rate Limiter**
+  - [ ] Define `RATE_LIMIT_KV` binding in `WorkerEnv`.
+  - [ ] Implement `checkRateLimitKV(ip, limit, windowSeconds, kv, isProd)` with fail-closed semantics on KV failure (503).
+- [ ] **3.2 Production Turnstile Enforcement**
+  - [ ] Reject public submissions if `TURNSTILE_SECRET_KEY` is missing in production (`NODE_ENV === 'production'`) with 503.
+- [ ] **3.3 Rate Limiting & Turnstile Unit Tests**
+  - [ ] Write tests covering KV rate limits, KV error fail-closed, and production Turnstile absence.
 
-## 4. Self-Service Account Deletion (GDPR Article 17)
-- [x] **4.1 Cloudflare Worker Account Purge Endpoint**
-  - [x] Create `POST /api/account/delete` in `src/worker/handlers/accountDeletionHandler.ts`.
-  - [x] Require valid Firebase ID Token and explicit `{ confirmation: "DELETE" }`.
-  - [x] Cascade delete: workspaces, projects, collection_forms, reviews, public_reviews, widgets, social_connections.
-  - [x] Cancel Stripe subscriptions and delete customer in Stripe.
-  - [x] Delete Firebase Auth user record via Identity Toolkit API.
-- [x] **4.2 Settings UI Dangerous Deletion Modal**
-  - [x] Add "Danger Zone: Delete Account & All Data" in `WorkspaceSettings.tsx`.
-  - [x] Add confirmation modal requiring user to type "DELETE" before enabling action.
-  - [x] On success, sign out, clear local cache, and redirect to homepage (`/`).
+## 4. Hardened GDPR Account Deletion (Storage Purge & Resilient Cascade)
+- [ ] **4.1 Firebase Storage Media Purge**
+  - [ ] Create `src/worker/lib/firebaseStorage.ts` with `deleteUserStorageObjects(uid, env)` using service account OAuth token.
+- [ ] **4.2 Resilient Cascade Deletion**
+  - [ ] In `accountDeletionHandler.ts`, execute collection deletes with `Promise.allSettled`.
+  - [ ] Ensure Stripe customer and subscriptions are cancelled/deleted before Firebase Auth user is deleted.
+- [ ] **4.3 Account Deletion Unit Tests**
+  - [ ] Update `accountDeletionHandler.test.ts` to assert storage deletion and resilient cascade handling.
 
-## 5. Verification & Walkthrough
-- [x] Verify 100% test pass rate across all test suites (`npm test` - 79 suites, 474 tests passed).
-- [x] Verify clean production build (`npm run build` - succeeded in 8.23s).
-- [x] Produce `walkthrough.md` with verification steps and testing evidence.
+## 5. Free-Tier Server Enforcement Completeness
+- [ ] **5.1 Server-Side Ceilings**
+  - [ ] Max 15 testimonials (Worker public submit checks workspace plan).
+  - [ ] Max 1 space/project (AuthContext and Firestore rules).
+  - [ ] Max 1 widget (types, rules, and UI).
 
+## 6. Verification, Build, Push & Cloudflare Deployment
+- [ ] Run full Vitest suite (`npm test`).
+- [ ] Run production build (`cmd /c npm run build`).
+- [ ] Commit and push to GitHub.
+- [ ] Deploy to Cloudflare Worker (`cmd /c npx wrangler deploy`).
+- [ ] Test live health endpoint and produce `walkthrough.md`.

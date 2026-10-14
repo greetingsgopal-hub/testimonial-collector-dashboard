@@ -95,16 +95,6 @@ describe('Owner review creation path (manual entry / CSV import)', () => {
     expect(block).toMatch(/request\.resource\.data\.status in \['pending', 'approved'\]/);
   });
 
-  it('keeps the anonymous submission path forcing pending/form/consent', () => {
-    const block = reviewsBlock();
-    // The anonymous create must still force status == 'pending', source == 'form',
-    // consent == true, isFeatured == false.
-    expect(block).toMatch(/request\.resource\.data\.status == 'pending'/);
-    expect(block).toMatch(/request\.resource\.data\.source == 'form'/);
-    expect(block).toMatch(/request\.resource\.data\.consent == true/);
-    expect(block).toMatch(/request\.resource\.data\.isFeatured == false/);
-  });
-
   it('caps review content, rating, and tags on the owner path', () => {
     const block = reviewsBlock();
     expect(block).toMatch(/request\.resource\.data\.rating >= 1/);
@@ -112,12 +102,17 @@ describe('Owner review creation path (manual entry / CSV import)', () => {
     expect(block).toMatch(/request\.resource\.data\.tags\.size\(\) <= 10/);
   });
 
+  it('closes direct anonymous review creation in rules (public forms must use Cloudflare Worker)', () => {
+    const block = reviewsBlock();
+    // Reviews creation must strictly require authentication and tenant ownership
+    expect(block).toMatch(/allow create: if\s+isAuthenticated\(\) &&\s+request\.resource\.data\.ownerId == request\.auth\.uid/);
+    // There must be only one allow create in reviewsBlock (the authenticated owner one)
+    const matches = block.match(/allow create:/g);
+    expect(matches).not.toBeNull();
+    expect(matches!.length).toBe(1);
+  });
+
   it('accepts a null avatarUrl on review create (regression: null-avatar submissions were rejected)', () => {
-    // The adapter always writes the avatarUrl key (null when the reviewer has no
-    // photo). A rule of the form "absent || is string" rejects null because the key
-    // IS present. Every avatar guard must therefore also permit `== null`, otherwise
-    // anonymous submissions without an avatar get PERMISSION_DENIED and the public
-    // collection form silently breaks in production.
     const block = reviewsBlock();
     expect(block).toMatch(/request\.resource\.data\.avatarUrl == null/);
   });
@@ -151,5 +146,23 @@ describe('Priority 0: Security & Email Verification in firestore.rules', () => {
   it('requires email_verified == true for workspace creation', () => {
     const block = workspaceBlock();
     expect(block).toMatch(/request\.auth\.token\.email_verified\s*==\s*true/);
+  });
+
+  it('requires email_verified == true for project creation', () => {
+    const m = rules.match(/match \/projects\/\{projectId\} \{[\s\S]*?\n    \}/);
+    expect(m).not.toBeNull();
+    expect(m![0]).toMatch(/request\.auth\.token\.email_verified\s*==\s*true/);
+  });
+
+  it('requires email_verified == true for widget creation', () => {
+    const m = rules.match(/match \/widgets\/\{widgetId\} \{[\s\S]*?\n    \}/);
+    expect(m).not.toBeNull();
+    expect(m![0]).toMatch(/request\.auth\.token\.email_verified\s*==\s*true/);
+  });
+
+  it('requires email_verified == true for collection form creation', () => {
+    const m = rules.match(/match \/collection_forms\/\{formId\} \{[\s\S]*?\n    \}/);
+    expect(m).not.toBeNull();
+    expect(m![0]).toMatch(/request\.auth\.token\.email_verified\s*==\s*true/);
   });
 });

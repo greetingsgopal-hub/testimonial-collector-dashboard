@@ -22,9 +22,14 @@ vi.mock('../lib/stripeClient', () => ({
   deleteStripeCustomerAndSubscriptions: vi.fn(),
 }));
 
+vi.mock('../lib/firebaseStorage', () => ({
+  deleteUserStorageObjects: vi.fn(),
+}));
+
 import { verifyFirebaseToken, deleteFirebaseAccount } from '../lib/firebaseAuth';
 import { queryUserDocuments, queryDocumentsByField, deleteDocument } from '../lib/firestoreAdmin';
 import { deleteStripeCustomerAndSubscriptions } from '../lib/stripeClient';
+import { deleteUserStorageObjects } from '../lib/firebaseStorage';
 
 describe('GDPR Right to Erasure Account Deletion Handler', () => {
   let env: WorkerEnv;
@@ -125,6 +130,7 @@ describe('GDPR Right to Erasure Account Deletion Handler', () => {
     vi.mocked(queryDocumentsByField).mockResolvedValue([]);
     vi.mocked(deleteDocument).mockResolvedValue(undefined);
     vi.mocked(deleteStripeCustomerAndSubscriptions).mockResolvedValue(undefined);
+    vi.mocked(deleteUserStorageObjects).mockResolvedValue({ deletedCount: 1, errors: [] });
     vi.mocked(deleteFirebaseAccount).mockResolvedValue(true);
 
     const req = new Request('https://pandapraise.com/api/account/delete', {
@@ -144,6 +150,9 @@ describe('GDPR Right to Erasure Account Deletion Handler', () => {
     // Verify Stripe customer & subscription purge was invoked
     expect(deleteStripeCustomerAndSubscriptions).toHaveBeenCalledWith('cus_stripe_123', env);
 
+    // Verify Storage purge was invoked
+    expect(deleteUserStorageObjects).toHaveBeenCalledWith('user-purge-456', env);
+
     // Verify Firestore documents were deleted
     expect(deleteDocument).toHaveBeenCalledWith('workspaces', 'ws-1', undefined, env);
     expect(deleteDocument).toHaveBeenCalledWith('projects', 'proj-1', undefined, env);
@@ -156,6 +165,31 @@ describe('GDPR Right to Erasure Account Deletion Handler', () => {
     expect(deleteDocument).toHaveBeenCalledWith('users', 'user-purge-456', undefined, env);
 
     // Verify Firebase Auth account purge was invoked
+    expect(deleteFirebaseAccount).toHaveBeenCalledWith('valid-id-token', env);
+  });
+
+  it('resiliently completes cascade even if storage purge throws', async () => {
+    vi.mocked(verifyFirebaseToken).mockResolvedValue({ uid: 'user-partial-fail', email: 'fail@example.com' });
+    vi.mocked(queryUserDocuments).mockResolvedValue([]);
+    vi.mocked(queryDocumentsByField).mockResolvedValue([]);
+    vi.mocked(deleteDocument).mockResolvedValue(undefined);
+    vi.mocked(deleteStripeCustomerAndSubscriptions).mockResolvedValue(undefined);
+    vi.mocked(deleteUserStorageObjects).mockRejectedValue(new Error('Storage service unavailable'));
+    vi.mocked(deleteFirebaseAccount).mockResolvedValue(true);
+
+    const req = new Request('https://pandapraise.com/api/account/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer valid-id-token',
+      },
+      body: JSON.stringify({ confirmation: 'DELETE' }),
+    });
+
+    const res = await handleAccountDeletion(req, env);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
     expect(deleteFirebaseAccount).toHaveBeenCalledWith('valid-id-token', env);
   });
 });

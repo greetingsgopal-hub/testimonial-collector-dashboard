@@ -21,6 +21,12 @@
   "triggers": {
     "crons": ["0 */6 * * *"]
   },
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT_KV",
+      "id": "ed7ef4cc06c940c882448d3fcba25398"
+    }
+  ],
   "routes": [
     {
       "pattern": "pandapraise.com/*",
