@@ -66,3 +66,110 @@
   - Server-side testimonial cap: `existingCount >= 15` in `publicSubmissionHandler.ts` blocks public submissions with `403 FREE_TIER_LIMIT_REACHED`.
   - Server-side / Client space cap: Max 1 space on free tier enforced in `AuthContext.tsx`.
   - Stripe webhook is the authoritative updater of `plan` and `subscriptionStatus`. Client writes to billing fields are locked in `firestore.rules`.
+
+---
+
+# Walkthrough: Priority 2 Hardening – Global SaaS Scale
+
+**Date:** Oct 14, 2026  
+**Latest Worker Deploy Version:** `31b18c5c-a93a-4a66-867c-08157276db30`  
+**Test Suite:** 79/79 test files passed (485/485 tests)  
+**Production Build:** Clean `tsc && vite build` (0 errors)
+
+---
+
+## Priority 2 Hardened Workstreams & Verification Steps
+
+### P2.1 — Conversion & Monetization Reliability
+- **Implementation:**
+  - Stripe checkout metadata stores explicit `priceId` alongside `workspaceId` and `plan`.
+  - `stripeWebhook.ts` safely unwraps `workspace.data?.subscriptionStatus` or `workspace.subscriptionStatus` to transition subscriptions from `past_due` back to `active`.
+  - Founding lifetime tier mapping correctly sets `plan: 'pro'` with lifetime duration.
+  - `WorkspaceSettings.tsx` displays alert banners for:
+    - Post-checkout success toast/banner (`/dashboard?checkout=success`).
+    - Post-checkout canceled banner (`/dashboard?checkout=canceled`).
+    - Urgent `past_due` warning banner with direct button to Stripe Customer Portal.
+- **Manual Verification Step:**
+  1. Navigate to `/dashboard?checkout=success`.
+  2. Verify green celebration banner: *"🎉 Subscription Activated! Thank you for upgrading..."*.
+  3. Change workspace state to `past_due` in dev tools or navigate with `past_due` workspace.
+  4. Verify red warning banner: *"Action Required: Payment Past Due. Your last subscription payment could not be processed..."* with **Update Payment Method** button.
+
+### P2.2 — Public Collection Funnel Quality & Anti-Spam
+- **Implementation:**
+  - Anti-spam heuristics in `publicSubmissionHandler.ts`:
+    - Rejects strings with 5+ consecutively repeated identical characters (e.g. `aaaaaa`).
+    - Rejects spam with 3+ repeated identical words.
+    - Rejects known disposable/temporary email provider domains (10minutemail, mailinator, guerrillamail, tempmail, throwawaymail).
+  - Mobile UX in `PublicCollectorPage.tsx`:
+    - Triggers smooth scroll to `#collector-error-banner` when validation fails on mobile viewports.
+    - Added touch-friendly 44px minimum target sizes for star ratings and submission buttons.
+- **Manual Verification Step:**
+  1. Open a public submission link (e.g., `https://pandapraise.com/c/demo-space-feedback`).
+  2. Type a message consisting of `aaaaaaaaaa` or `test test test test test`.
+  3. Submit review; verify HTTP 400 rejection: *"Please provide meaningful feedback without repetitive characters."*
+  4. Type an email with `@mailinator.com`; verify HTTP 400 rejection: *"Please provide a valid permanent email address."*
+
+### P2.3 — Embed / Widget Production Hardening
+- **Implementation:**
+  - `embedTestimonials.ts`: Queries only `public_reviews` collection where status is strictly `approved`.
+  - PII Protection: Submitter email addresses, IPs, and user IDs are stripped; only public display name, rating, text, and avatar URL are returned.
+  - Graceful empty states: Renders sleek transparent container when 0 approved reviews exist.
+  - Workers log structured telemetry events for widget impressions.
+- **Manual Verification Step:**
+  1. Embed the widget snippet `<script src="https://pandapraise.com/embed.js" data-space="demo"></script>` into an empty test page.
+  2. Inspect network tab to verify only approved testimonials are received with no sensitive PII fields.
+
+### P2.4 — Onboarding & Activation (PLG)
+- **Implementation:**
+  - 5-step PLG checklist in `WelcomeView.tsx`:
+    1. Create your first space
+    2. Customize collection form
+    3. Copy public link or QR code
+    4. Approve your first testimonial
+    5. Copy embed widget snippet
+  - Unverified email users see an amber reminder banner locking live publish capabilities until email confirmation.
+- **Manual Verification Step:**
+  1. Sign in with a new account.
+  2. Verify the 5-step interactive onboarding card is prominently shown on the dashboard overview with completion tracking.
+
+### P2.5 — SEO & Marketing Site Integrity
+- **Implementation:**
+  - Stripped fabricated static ratings (`4.9`, `128`) from `seoHandler.ts` and programmatic SEO JSON-LD structured data.
+  - Replaced with honest software schema (`SoftwareApplication` / `WebApplication`) without fabricated consumer reviews.
+  - Added schema integrity assertion in `seoHandler.test.ts`.
+- **Manual Verification Step:**
+  1. Fetch `curl -s https://pandapraise.com/ | grep -i "application/ld+json"`.
+  2. Verify JSON-LD contains legitimate software application schema with no fabricated aggregate ratings.
+
+### P2.6 — Observability, Reliability & Ops
+- **Implementation:**
+  - Created `src/worker/lib/logger.ts` emitting structured JSON logs (`logWorkerEvent`) for Cloudflare Tail Workers and Datadog/Axiom ingestion.
+  - Enhanced `/api/health` endpoint:
+    - Returns `{ status: "ok", service: "pandapraise-api", bindings: { rateLimitKv: true, firebaseConfigured: true, stripeConfigured: boolean } }`.
+    - Never exposes secret keys or tokens.
+  - Updated `.env.example` with complete configuration options for Cloudflare KV, Turnstile, Firebase Service Accounts, and Stripe.
+- **Manual Verification Step:**
+  1. Run `curl https://pandapraise.com/api/health`.
+  2. Verify response is HTTP 200 with `rateLimitKv: true` and `firebaseConfigured: true`.
+
+### P2.7 — Referral & Partner/Affiliate Realism
+- **Implementation:**
+  - Removed all hardcoded mock metrics (`clicks: 218`, `conversions: 14`, `totalRevenueAttributedUsd: 1386.00`) from `affiliateHandler.ts` and `referralHandler.ts`.
+  - Replaced with honest zero baselines (`clicks: 0`, `conversions: 0`, `earnings: 0`) for unpopulated partners.
+  - Updated `createDefaultAffiliateProfile` in `src/lib/affiliate.ts` and dynamic conversion rate formatting in `AffiliatePage.tsx`.
+- **Manual Verification Step:**
+  1. Navigate to `https://pandapraise.com/affiliates`.
+  2. Inspect the Partner Command Center stats:
+     - Referral Clicks: `0`
+     - Conversions: `0` (`0.0% conv. rate`)
+     - Attributed MRR: `$0`
+     - Unpaid Balance: `$0`
+  3. No inflated vanity numbers are shown.
+
+### P2.8 — End-to-End Suite Verification
+- **Full Test Suite:** 79 test files, 485 tests, 100% passing.
+- **Production Bundle:** Clean build via `tsc && vite build`.
+- **Live Deployment:** Cloudflare Worker deployed to zone `pandapraise.com/*`.
+- **Git Push:** All 6 commits pushed to `origin/main`.
+
