@@ -69,6 +69,24 @@ describe('C5: Firestore rules — subscription state protection', () => {
     expect(block).toMatch(/request\.resource\.data\.plan == 'free'/);
     expect(block).toMatch(/!\('stripeCustomerId' in request\.resource\.data\)/);
     expect(block).toMatch(/!\('stripeSubscriptionId' in request\.resource\.data\)/);
+    expect(block).toMatch(/!\('razorpayCustomerId' in request\.resource\.data\)/);
+    expect(block).toMatch(/!\('razorpaySubscriptionId' in request\.resource\.data\)/);
+  });
+
+  it('locks razorpayCustomerId and razorpaySubscriptionId against client updates', () => {
+    const block = workspaceBlock();
+    expect(block).toMatch(/'razorpayCustomerId'/);
+    expect(block).toMatch(/'razorpaySubscriptionId'/);
+    expect(block).toMatch(/'razorpayPaymentId'/);
+    expect(block).toMatch(/'razorpayOrderId'/);
+  });
+});
+
+describe('Razorpay: Firestore rules — razorpay_events ledger protection', () => {
+  it('has an explicit deny rule for razorpay_events', () => {
+    const m = rules.match(/match \/razorpay_events\/\{eventId\} \{[\s\S]*?\n    \}/);
+    expect(m, 'razorpay_events match block must exist in firestore.rules').not.toBeNull();
+    expect(m![0]).toMatch(/allow read, write: if false/);
   });
 });
 
