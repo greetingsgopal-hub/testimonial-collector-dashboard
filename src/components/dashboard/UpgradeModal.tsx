@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Check, Sparkles, Zap, ShieldCheck } from 'lucide-react';
-import { startStripeCheckout } from '../../lib/stripe';
+import { startRazorpayCheckout } from '../../lib/razorpay';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -19,7 +19,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
     if (onSelectPlan) {
       onSelectPlan('pro');
     } else {
-      const res = await startStripeCheckout('pro');
+      const res = await startRazorpayCheckout('pro');
       if (!res.success) {
         window.location.href = '/dashboard/settings?tab=billing&plan=pro&checkout=true';
       }
@@ -30,7 +30,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
     if (onSelectPlan) {
       onSelectPlan('founding');
     } else {
-      const res = await startStripeCheckout('founding');
+      const res = await startRazorpayCheckout('founding');
       if (!res.success) {
         window.location.href = '/dashboard/settings?tab=billing&plan=founding&checkout=true';
       }

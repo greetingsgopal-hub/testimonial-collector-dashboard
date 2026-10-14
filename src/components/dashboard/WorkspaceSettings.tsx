@@ -25,7 +25,7 @@ import { CmsEmbedModal } from './CmsEmbedModal';
 import { useAuth } from '../../context/AuthContext';
 import { usePageSeo } from '../../lib/seo';
 import { TeamRole, PLAN_LIMITS, Project } from '../../types';
-import { startStripeCheckout, openBillingPortal } from '../../lib/stripe';
+import { startRazorpayCheckout } from '../../lib/razorpay';
 import { requestAccountDeletion } from '../../lib/account';
 
 type SettingsTab = 'general' | 'team' | 'billing' | 'branding' | 'api' | 'security';
@@ -106,11 +106,11 @@ export const WorkspaceSettings: React.FC = () => {
     }
   };
 
-  const handleStartCheckout = async (priceId: string = 'monthly') => {
+  const handleStartCheckout = async (plan: string = 'monthly') => {
     setIsCheckingOut(true);
     setBillingError(null);
     try {
-      const res = await startStripeCheckout(priceId);
+      const res = await startRazorpayCheckout(plan);
       if (!res.success && res.error) {
         setBillingError(res.error);
       }
@@ -122,18 +122,8 @@ export const WorkspaceSettings: React.FC = () => {
   };
 
   const handleOpenBillingPortal = async () => {
-    setIsOpeningPortal(true);
-    setBillingError(null);
-    try {
-      const res = await openBillingPortal();
-      if (!res.success && res.error) {
-        setBillingError(res.error);
-      }
-    } catch (err: any) {
-      setBillingError(err.message || 'Failed to open customer billing portal.');
-    } finally {
-      setIsOpeningPortal(false);
-    }
+    // Direct upgrade / plan switch for active subscriptions
+    handleStartCheckout('monthly');
   };
 
   const handleExecuteAccountDeletion = async () => {
@@ -526,22 +516,22 @@ export const WorkspaceSettings: React.FC = () => {
                 </div>
               )}
 
-              {workspace?.subscriptionStatus === 'past_due' && (
+              {(workspace?.subscriptionStatus === 'past_due' || workspace?.subscriptionStatus === 'halted') && (
                 <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                   <div className="flex items-center gap-2.5">
                     <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
                     <div>
-                      <p className="text-sm font-bold">Payment Past Due</p>
-                      <p className="text-xs text-amber-700">Your latest payment attempt failed. Please update your card in the billing portal to avoid interruption.</p>
+                      <p className="text-sm font-bold">Subscription Payment {workspace?.subscriptionStatus === 'halted' ? 'Halted' : 'Past Due'}</p>
+                      <p className="text-xs text-amber-700">Your latest recurring payment failed or was halted. Please re-subscribe to maintain uninterrupted access.</p>
                     </div>
                   </div>
                   <button
                     type="button"
-                    onClick={handleOpenBillingPortal}
-                    disabled={isOpeningPortal}
+                    onClick={() => handleStartCheckout('monthly')}
+                    disabled={isCheckingOut}
                     className="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer disabled:opacity-50"
                   >
-                    {isOpeningPortal ? 'Opening Portal...' : 'Update Payment Method'}
+                    {isCheckingOut ? 'Opening...' : 'Renew Subscription'}
                   </button>
                 </div>
               )}

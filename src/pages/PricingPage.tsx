@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { PandaPraiseIcon } from '../components/PandaPraiseLogo';
-import { startStripeCheckout } from '../lib/stripe';
+import { startRazorpayCheckout } from '../lib/razorpay';
 
 const FAQ_ITEMS = [
   {
@@ -65,9 +65,9 @@ export const PricingPage = () => {
     }
     setCheckoutLoading(plan);
     try {
-      const res = await startStripeCheckout(plan);
+      const res = await startRazorpayCheckout(plan);
       if (!res.success) {
-        setCheckoutError(res.error || 'Failed to initialize Stripe checkout. Redirecting to settings…');
+        setCheckoutError(res.error || 'Failed to initialize Razorpay checkout. Redirecting to settings…');
         window.location.href = `/dashboard/settings?plan=${plan}&currency=${currency}&checkout=true`;
       }
     } catch {
