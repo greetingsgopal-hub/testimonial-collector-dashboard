@@ -139,11 +139,6 @@ function renderCompetitorHtml(comp: any, origin: string): Response {
           price: '0.00',
           priceCurrency: 'USD',
         },
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: '4.9',
-          reviewCount: '128',
-        },
       },
       {
         '@type': 'FAQPage',

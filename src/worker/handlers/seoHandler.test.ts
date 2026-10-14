@@ -51,6 +51,7 @@ describe('Programmatic SEO Engine (Phase 2)', () => {
     expect(html).toContain('PandaPraise vs Senja');
     expect(html).toContain('application/ld+json');
     expect(html).toContain('"@type":"SoftwareApplication"');
+    expect(html).not.toContain('"aggregateRating"');
     expect(html).toContain('"@type":"FAQPage"');
     expect(html).toContain('Migration Guide');
     expect(html).toContain('Feature Comparison');
