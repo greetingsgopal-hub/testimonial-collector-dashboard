@@ -161,8 +161,8 @@ describe('Dashboard Moderation Queue & Customization Restructure Suite', () => {
 
     // Should NOT have misleading "Customize" sidebar tab
     expect(container.textContent).not.toContain('Customize');
-    // Should clearly show Moderation Queue
-    expect(container.textContent).toContain('Moderation Queue');
+    // Should clearly show Evaluate (formerly Moderation Queue)
+    expect(container.textContent).toContain('Evaluate');
   });
 
   it('2. MetricsCards gracefully displays pending broadcast status instead of broken 0%', () => {

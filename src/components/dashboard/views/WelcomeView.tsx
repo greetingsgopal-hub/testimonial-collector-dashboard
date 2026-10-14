@@ -39,7 +39,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
   onImport,
   onProof,
   onOpenWall,
-  onRichSnippet,
+  onRichSnippet: _onRichSnippet,
   onWidgets,
   reviews,
   publishComplete,
@@ -437,20 +437,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
               Embed your live Wall of Love widget on your website with 1 line of HTML code.
             </p>
 
-            {/* SEO Rich Snippets as Clean Secondary Option */}
-            <div onClick={(e) => e.stopPropagation()} className="mb-3.5">
-              <button
-                type="button"
-                onClick={onRichSnippet}
-                className="w-full px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100/90 border border-slate-200/80 text-[11px] font-semibold text-slate-700 flex items-center justify-between transition-colors cursor-pointer group/seo"
-              >
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="w-3 h-3 text-amber-500" />
-                  <span>Google Rich Snippets (SEO Schema)</span>
-                </div>
-                <ArrowRight className="w-3 h-3 text-slate-400 group-hover/seo:text-slate-600 transition-colors" />
-              </button>
-            </div>
+            
           </div>
 
           <div onClick={(e) => e.stopPropagation()} className="pt-1">

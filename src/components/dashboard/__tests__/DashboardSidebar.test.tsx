@@ -107,13 +107,16 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
     });
 
     expect(container.textContent).toContain('Welcome Hub');
-    expect(container.textContent).toContain('Collect');
-    expect(container.textContent).toContain('Import');
-    expect(container.textContent).toContain('Moderation Queue');
+    expect(container.textContent).toContain('Collect or Import');
+    expect(container.textContent).toContain('Evaluate');
     expect(container.textContent).toContain('4'); // proof count badge
-    expect(container.textContent).toContain('Widgets');
-    expect(container.textContent).toContain('Google Stars');
+    expect(container.textContent).toContain('Post on Internet');
+    expect(container.textContent).toContain('On Website');
+    expect(container.textContent).toContain('On Social Media');
+    expect(container.textContent).toContain('Campaigns');
+    expect(container.textContent).toContain('Referrals');
     expect(container.textContent).toContain('Settings');
+    expect(container.textContent).not.toContain('Google Stars');
   });
 
   it('3. Bottom profile chip shows user name, avatar initial, and active workspace name', async () => {

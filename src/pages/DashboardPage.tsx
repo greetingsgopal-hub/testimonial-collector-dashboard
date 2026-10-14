@@ -11,13 +11,12 @@ import { DatabaseConfigModal } from '../components/dashboard/DatabaseConfigModal
 import { CollectionConfigModal } from '../components/dashboard/CollectionConfigModal';
 import { ConnectedAccountsModal } from '../components/dashboard/ConnectedAccountsModal';
 import { PublishHistoryModal } from '../components/dashboard/PublishHistoryModal';
-import { ImportPage } from './ImportPage';
 import { SentimentDashboard } from '../components/dashboard/SentimentDashboard';
 import { WelcomeView } from '../components/dashboard/views/WelcomeView';
-import { FormsView } from '../components/dashboard/views/FormsView';
+import { CollectImportView } from '../components/dashboard/views/CollectImportView';
+import { SocialPostView } from '../components/dashboard/views/SocialPostView';
 import { FeedbackView } from '../components/dashboard/views/FeedbackView';
 import { TagsView } from '../components/dashboard/views/TagsView';
-import { RichSnippetView } from '../components/dashboard/views/RichSnippetView';
 import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { WidgetStudio } from '../components/dashboard/WidgetStudio';
@@ -43,12 +42,12 @@ Menu
 } from 'lucide-react';
 const TAB_LABEL_MAP: Record<string, string> = {
   welcome: 'Welcome Hub',
-  forms: 'Collect',
-  import: 'Import',
-  proof: 'Moderation Queue',
-  widgets: 'Widgets',
+  forms: 'Collect or Import',
+  import: 'Collect or Import',
+  proof: 'Evaluate',
+  widgets: 'Post on Internet · On Website',
+  social: 'Post on Internet · On Social Media',
   campaigns: 'Campaigns',
-  'rich-snippet': 'Google Stars (SEO)',
   integrate: 'Settings',
   settings: 'Settings',
   feedback: 'Feedback',
@@ -521,9 +520,10 @@ export const DashboardPage = () => {
             />
           )}
 
-          {/* Forms Management */}
-          {activeTab === 'forms' && (
-            <FormsView
+          {/* Collect or Import (Merged unified view) */}
+          {(activeTab === 'forms' || activeTab === 'import') && (
+            <CollectImportView
+              initialSubTab={activeTab === 'import' ? 'import' : 'collect'}
               onConfigureForm={() => setShowCollectionModal(true)}
               onSendInvites={handleCopyLink}
               onViewProof={() => setActiveTab('proof')}
@@ -533,13 +533,6 @@ export const DashboardPage = () => {
               reviews={effectiveReviews}
               stats={effectiveStats}
             />
-          )}
-
-          {/* Import Page */}
-          {activeTab === 'import' && (
-            <div className="max-w-6xl mx-auto">
-              <ImportPage onViewProof={() => setActiveTab('proof')} />
-            </div>
           )}
 
           {/* Feedback Queue (Unsatisfied 1-3 star ratings) */}
@@ -555,14 +548,6 @@ export const DashboardPage = () => {
             <TagsView
               tags={availableTags}
               onAddTag={(t) => handleSaveTags(reviews[0]?.id || '', [...availableTags, t])}
-            />
-          )}
-
-          {/* Rich Snippet (SEO Schema) */}
-          {activeTab === 'rich-snippet' && (
-            <RichSnippetView
-              reviews={effectiveReviews}
-              onOpenSocialCard={setSocialCardReview}
             />
           )}
 
@@ -585,7 +570,7 @@ export const DashboardPage = () => {
             </div>
           )}
 
-          {/* Website Widgets Studio */}
+          {/* Post on Internet · On Website (Widgets Studio) */}
           {activeTab === 'widgets' && (
             <div className="max-w-7xl mx-auto">
               <WidgetStudio
@@ -594,6 +579,14 @@ export const DashboardPage = () => {
                 onOpenProof={() => setActiveTab('proof')}
               />
             </div>
+          )}
+
+          {/* Post on Internet · On Social Media */}
+          {activeTab === 'social' && (
+            <SocialPostView
+              reviews={effectiveReviews}
+              onOpenAccountsModal={() => setShowAccountsModal(true)}
+            />
           )}
 
           {/* Automated Review Request Drip Campaigns (Stage 5) */}
