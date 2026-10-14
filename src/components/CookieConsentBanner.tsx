@@ -46,13 +46,22 @@ export const CookieConsentBanner: React.FC = () => {
         We use essential cookies to provide our services and optional analytics cookies to measure distribution performance in compliance with GDPR and CCPA.
       </p>
 
-      <div className="mt-4 flex items-center justify-between gap-2">
-        <a
-          href="/privacy-policy"
-          className="text-zinc-400 hover:text-white underline text-[11px]"
-        >
-          Privacy Policy
-        </a>
+      <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 text-[11px]">
+          <a
+            href="/cookie-policy"
+            className="text-zinc-400 hover:text-white underline"
+          >
+            Cookie Policy
+          </a>
+          <span className="text-zinc-600">•</span>
+          <a
+            href="/privacy-policy"
+            className="text-zinc-400 hover:text-white underline"
+          >
+            Privacy Policy
+          </a>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleDecline}

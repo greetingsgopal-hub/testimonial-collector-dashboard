@@ -270,8 +270,14 @@ export const PublicWidgetPage = () => {
       )}
 
       <div className="text-center mt-3">
-        <a href="/" target="_blank" rel="noopener noreferrer" className="text-[9px] opacity-50 hover:opacity-80" style={{ color: muted }}>
-          Powered by Panda Praise
+        <a 
+          href="https://pandapraise.com/?ref=embed_widget&utm_source=widget_badge&utm_medium=referral&utm_campaign=powered_by_badge" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-[9px] opacity-50 hover:opacity-80 transition-opacity" 
+          style={{ color: muted }}
+        >
+          ⚡ Powered by Panda Praise
         </a>
       </div>
     </div>

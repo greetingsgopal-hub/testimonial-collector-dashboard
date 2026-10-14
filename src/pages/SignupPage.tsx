@@ -20,6 +20,7 @@ export const SignupPage: React.FC = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -109,8 +110,18 @@ export const SignupPage: React.FC = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setLocalError('Password must be at least 6 characters long.');
+    if (!agreeToTerms) {
+      setLocalError('Please agree to the Terms of Service and Privacy Policy to continue.');
+      return;
+    }
+
+    if (password.length < 8) {
+      setLocalError('Password must be at least 8 characters long.');
+      return;
+    }
+
+    if (!/[A-Za-z]/.test(password) || !/[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      setLocalError('Password must contain at least one letter and one number or special character.');
       return;
     }
 
@@ -268,13 +279,18 @@ export const SignupPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-medium text-gray-700">
+                  Password
+                </label>
+                <span className="text-[10px] text-gray-400">
+                  Min 8 characters
+                </span>
+              </div>
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••"
@@ -282,18 +298,28 @@ export const SignupPage: React.FC = () => {
               />
             </div>
 
-            {/* Terms & Privacy Acknowledgement */}
-            <p className="text-[11px] text-gray-500 text-center leading-tight pt-0.5">
-              By creating an account, you agree to our{' '}
-              <Link to="/terms" className="text-[#6701e6] hover:underline font-medium">
-                Terms of Service
-              </Link>{' '}
-              and{' '}
-              <Link to="/privacy-policy" className="text-[#6701e6] hover:underline font-medium">
-                Privacy Policy
-              </Link>
-              .
-            </p>
+            {/* Terms & Privacy Consent Checkbox */}
+            <div className="flex items-start gap-2.5 pt-1">
+              <input
+                id="agreeToTerms"
+                type="checkbox"
+                required
+                checked={agreeToTerms}
+                onChange={(e) => setAgreeToTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6] cursor-pointer shrink-0"
+              />
+              <label htmlFor="agreeToTerms" className="text-[11px] text-gray-600 leading-snug cursor-pointer select-none">
+                I agree to the{' '}
+                <Link to="/terms" target="_blank" className="text-[#6701e6] hover:underline font-semibold">
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link to="/privacy-policy" target="_blank" className="text-[#6701e6] hover:underline font-semibold">
+                  Privacy Policy
+                </Link>
+                .
+              </label>
+            </div>
 
             {/* Solid Black Sign up Button */}
             <button

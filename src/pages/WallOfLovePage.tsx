@@ -451,7 +451,7 @@ export const WallOfLovePage = () => {
       {/* Footer / Branding */}
       <footer className={`py-8 text-center border-t ${theme.cardBorder}`}>
         <a
-          href="https://pandapraise.com"
+          href="https://pandapraise.com/?ref=wall_of_love&utm_source=wall_badge&utm_medium=referral&utm_campaign=powered_by_badge"
           target="_blank"
           rel="noopener noreferrer"
           className={`inline-flex items-center gap-2 text-xs ${theme.textSecondary} hover:opacity-80 transition-opacity`}
