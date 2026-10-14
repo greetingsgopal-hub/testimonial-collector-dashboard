@@ -52,9 +52,8 @@ export const WorkspaceSettings: React.FC = () => {
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [accountDeletionError, setAccountDeletionError] = useState<string | null>(null);
 
-  // Billing portal and checkout state
+  // Billing and checkout state
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [checkoutCanceled, setCheckoutCanceled] = useState(false);
 
@@ -571,11 +570,11 @@ export const WorkspaceSettings: React.FC = () => {
                   ) : (
                     <button
                       onClick={handleOpenBillingPortal}
-                      disabled={isOpeningPortal}
+                      disabled={isCheckingOut}
                       className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#6701e6] hover:bg-[#5200bd] text-white transition-all shadow-xs cursor-pointer disabled:opacity-50"
                     >
                       <CreditCard size={14} />
-                      {isOpeningPortal ? 'Opening Portal...' : 'Manage Subscription'}
+                      {isCheckingOut ? 'Opening...' : 'Manage Subscription'}
                     </button>
                   )}
                 </div>

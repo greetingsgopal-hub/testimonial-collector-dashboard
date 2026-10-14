@@ -1,49 +1,43 @@
-# Priority 2: Global SaaS Hardening & Scale – Task Checklist
+# Razorpay Billing Replacement – Task Checklist
 
-## P2.1 — Conversion & Monetization Reliability
-- [x] Audit Stripe checkout parameters and ensure `founding`, `annual`, `monthly`, and `pro` price IDs resolve correctly to environment variables without fallback mismatch.
-- [x] Handle `past_due` and `unpaid` subscription statuses in the dashboard with alert banner and direct billing portal link.
-- [x] Add post-checkout redirect detection (`/dashboard?checkout=success` and `checkout=canceled`) showing status banners and portal links.
-- [x] Fix `stripeWebhook.ts` customer matching (`workspace.data.subscriptionStatus` vs `workspace.subscriptionStatus`) to ensure past_due -> active restoration works reliably.
-- [x] Validate unit tests in `src/worker/handlers/stripeCheckout.test.ts` and `src/worker/handlers/stripeWebhook.test.ts` (26/26 tests passing).
+## Task 1: Razorpay Worker Client & Web Crypto Signature Verification
+- [x] Write unit tests for Razorpay client and HMAC-SHA256 signature verification in `src/worker/lib/razorpayClient.test.ts`.
+- [x] Implement `src/worker/lib/razorpayClient.ts` with Web Crypto HMAC verification and REST APIs for Subscriptions, Orders, and Cancel.
+- [x] Add Razorpay environment types in `src/worker/types.ts`.
+- [x] Run vitest on `razorpayClient.test.ts` and ensure all tests pass (9/9 tests passing).
+- [x] Commit: `feat(razorpay): add razorpay client and web crypto webhook signature verification`.
 
-## P2.2 — Public Collection Funnel Quality
-- [x] Add spam heuristic checks to `publicSubmissionHandler.ts`: reject empty/repeated character strings (e.g., "aaaaaaa..."), detect obvious disposable email patterns, and trim inputs.
-- [x] Improve mobile validation and error feedback in `PublicCollectorPage.tsx` (smooth scroll to field errors, clear status messages).
-- [x] Verify moderation queue in dashboard receives reviews and status defaults to `pending` (or auto-approved if rules match).
-- [x] Add unit tests for anti-spam filters in `publicSubmissionHandler.test.ts` (12/12 tests passing).
+## Task 2: Razorpay Server Endpoints (Checkout & Webhooks)
+- [x] Write unit tests for checkout session creation in `src/worker/handlers/razorpayCheckout.test.ts`.
+- [x] Implement `src/worker/handlers/razorpayCheckout.ts` (`POST /api/razorpay/checkout`).
+- [x] Write unit tests for webhook handling and idempotency in `src/worker/handlers/razorpayWebhook.test.ts`.
+- [x] Implement `src/worker/handlers/razorpayWebhook.ts` (`POST /api/webhook/razorpay`).
+- [x] Update `src/worker/index.ts` with routes `/api/razorpay/checkout`, `/api/webhook/razorpay`, `/api/razorpay/cancel`.
+- [x] Update `/api/health` in `src/worker/index.ts` to output `razorpayConfigured`.
+- [x] Update `src/worker/health.test.ts` to assert `razorpayConfigured`.
+- [x] Run vitest on Razorpay handler tests and ensure all tests pass (15/15 tests passing).
+- [x] Commit: `feat(razorpay): implement razorpay checkout, webhook, and health check routes`.
 
-## P2.3 — Embed / Widget Production Hardening
-- [x] Audit `embedTestimonials.ts` to ensure privacy: only `approved` reviews in `public_reviews` are returned, emails/IPs are never exposed.
-- [x] Add graceful empty-state handling in `embedScript.ts` and `embedTestimonials.ts` when 0 reviews exist.
-- [x] Add embed telemetry event logging (`embed_view`, `embed_load_error`) in Cloudflare Worker logs for observability.
-- [x] Update `embedScript.test.ts` and `embedTestimonials.test.ts` (23/23 tests passing).
+## Task 3: Firestore Security Rules & Idempotency Ledger
+- [x] Update `firestore.rules` to lock `razorpayCustomerId`, `razorpaySubscriptionId`, `razorpayPaymentId`, `razorpayOrderId`.
+- [x] Add explicit deny for `/razorpay_events/{eventId}` in `firestore.rules`.
+- [x] Run rules tests in `src/lib/storage/firebaseAdapter.rules.test.ts` and `src/worker/firestore.rules.test.ts` (32/32 tests passing).
+- [x] Deploy live firestore.rules to Firebase production project.
+- [x] Commit: `fix(rules): lock razorpay billing fields and event ledger in firestore rules`.
 
-## P2.4 — Onboarding & Activation (PLG)
-- [x] Optimize first-session activation checklist in `WelcomeView.tsx`: (1) create space, (2) customize form, (3) copy public link/QR, (4) approve first review, (5) copy embed snippet.
-- [x] Add verification banner prompt on locked features if user's email is unverified (`email_verified !== true`).
-- [x] Ensure both Google OAuth and Email/Password signups land in a fully initialized workspace state with a default space and collection form.
+## Task 4: Frontend Razorpay Integration
+- [x] Write tests in `src/lib/__tests__/razorpay.test.ts` (4/4 tests passing).
+- [x] Implement `src/lib/razorpay.ts` (script loader + checkout runner).
+- [x] Update `src/pages/PricingPage.tsx` to use `startRazorpayCheckout`.
+- [x] Update `src/components/dashboard/UpgradeModal.tsx` to use `startRazorpayCheckout`.
+- [x] Update `src/components/dashboard/WorkspaceSettings.tsx` to use `startRazorpayCheckout` and display Razorpay subscription status.
+- [x] Run component and frontend tests.
+- [x] Commit: `feat(frontend): integrate razorpay checkout and subscription status management`.
 
-## P2.5 — SEO & Marketing Site Integrity
-- [x] Remove hardcoded fake ratings/review counts (`4.9`, `128`) from `seoHandler.ts` and programmatic SEO pages; replace with honest software metadata schema.
-- [x] Audit `sitemap.xml` and `robots.txt` in `seoHandler.ts` for valid URLs and canonical paths.
-- [x] Verify Open Graph, Twitter Cards, and canonical tags on landing, pricing, wall-of-love, and alternatives routes.
-- [x] Update `seoHandler.test.ts` to verify accurate schemas (5/5 tests passing).
-
-## P2.6 — Observability, Reliability, Ops
-- [x] Implement structured JSON logging helper `logWorkerEvent(category, action, details)` for checkout, webhooks, public submissions, account deletions, and rate limits.
-- [x] Enhance `/api/health` in `src/worker/index.ts` to check critical bindings (`RATE_LIMIT_KV`, `FIREBASE_PROJECT_ID`, `STRIPE_SECRET_KEY` presence) without exposing secret values.
-- [x] Update `.env.example` with comprehensive documentation of all production variables and secrets.
-- [x] Add unit tests in `health.test.ts` verifying binding health checks (2/2 tests passing).
-
-## P2.7 — Referral / Affiliate Correctness
-- [x] Remove hardcoded fake stats (`clicks: 218`, `conversions: 14`, etc.) from `referralHandler.ts` and `affiliateHandler.ts`.
-- [x] Return clean honest baseline stats (0 clicks, 0 conversions, $0 revenue) for fresh partners.
-- [x] Add self-referral prevention (cannot refer own account/email).
-- [x] Update `referralHandler.test.ts` and `affiliateHandler.test.ts` (8/8 tests passing).
-
-## P2.8 — Data Integrity & Compliance Polish
-- [x] Verify account deletion endpoint still functions with storage purge and all P2 additions (7/7 tests passing).
-- [x] Confirm CSV/JSON export in dashboard includes only reviews and data belonging to the authenticated workspace owner.
-- [x] Verify zero secrets exposed in `VITE_*` environment or client bundle chunks.
-- [x] Run full test suite (`vitest run`), execute production build (`npm run build`), deploy to Cloudflare Worker, and document manual verification steps in `walkthrough.md`.
+## Task 5: Documentation, Deployment & Full Verification
+- [x] Update `.env.example` with Razorpay keys, plan IDs, and founding amounts.
+- [x] Run full vitest suite (83 test files, 513 tests — 100% passing).
+- [x] Run `npm run build` production bundle check (0 errors).
+- [x] Deploy Cloudflare Worker (`npx wrangler deploy`) to `pandapraise.com/*`.
+- [x] Update `walkthrough.md` with Razorpay test instructions and secret management steps.
+- [x] Push all commits to `origin/main`.

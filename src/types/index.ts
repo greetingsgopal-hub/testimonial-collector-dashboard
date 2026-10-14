@@ -30,7 +30,7 @@ export interface Workspace {
   billingCycle?: BillingCycle;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
-  subscriptionStatus?: 'active' | 'trialing' | 'past_due' | 'cancelled' | 'incomplete';
+  subscriptionStatus?: 'active' | 'trialing' | 'past_due' | 'cancelled' | 'incomplete' | 'halted' | 'pending';
   planExpiresAt?: string;
   // Branding
   logoUrl?: string;

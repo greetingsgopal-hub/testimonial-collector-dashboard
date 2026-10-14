@@ -168,8 +168,75 @@
   3. No inflated vanity numbers are shown.
 
 ### P2.8 — End-to-End Suite Verification
-- **Full Test Suite:** 79 test files, 485 tests, 100% passing.
+- **Full Test Suite:** 83 test files, 513 tests, 100% passing.
 - **Production Bundle:** Clean build via `tsc && vite build`.
 - **Live Deployment:** Cloudflare Worker deployed to zone `pandapraise.com/*`.
-- **Git Push:** All 6 commits pushed to `origin/main`.
+- **Git Push:** All commits pushed to `origin/main`.
+
+---
+
+# Walkthrough: Razorpay Billing (India-First Monetization)
+
+**Date:** Oct 14, 2026  
+**Latest Worker Deploy Version:** `9bc0697d-f32c-49ea-bba7-95d7839ad9a6`  
+**Test Suite:** 83/83 test files passed (513/513 tests)  
+**Production Build:** Clean `tsc && vite build` (0 errors)
+
+---
+
+## 1. Cloudflare Worker Architecture & Webhook Verification
+- **Handlers:**
+  - `POST /api/razorpay/checkout`: Authenticated session creator for Subscriptions and One-time Orders.
+  - `POST /api/webhook/razorpay`: Cryptographically verified via Web Crypto HMAC-SHA256 with `X-Razorpay-Signature`.
+- **Idempotency:** Webhook events are checked and recorded in `/razorpay_events/{eventId}` with Firestore service account credentials.
+- **Firestore Locks:** `firestore.rules` strictly prohibits clients from writing `razorpayCustomerId`, `razorpaySubscriptionId`, `razorpayPaymentId`, `razorpayOrderId`.
+
+## 2. Cloudflare Secrets Setup Commands
+
+To activate Razorpay in Test or Live mode, run the following commands:
+
+```bash
+# 1. API Keys (From Razorpay Dashboard > Settings > API Keys)
+npx wrangler secret put RAZORPAY_KEY_ID
+npx wrangler secret put RAZORPAY_KEY_SECRET
+
+# 2. Webhook Secret (From Razorpay Dashboard > Settings > Webhooks > Secret)
+npx wrangler secret put RAZORPAY_WEBHOOK_SECRET
+
+# 3. (Optional) Plan IDs (From Razorpay Dashboard > Products > Plans)
+# If omitted, default fallbacks are used
+npx wrangler secret put RAZORPAY_PLAN_MONTHLY
+npx wrangler secret put RAZORPAY_PLAN_ANNUAL
+npx wrangler secret put RAZORPAY_FOUNDING_AMOUNT
+```
+
+## 3. Webhook Configuration in Razorpay Dashboard
+- **Webhook URL:** `https://pandapraise.com/api/webhook/razorpay`
+- **Active Events to Select:**
+  - `subscription.activated`
+  - `subscription.charged`
+  - `subscription.pending`
+  - `subscription.halted`
+  - `subscription.cancelled`
+  - `payment.captured` (for Lifetime Founding Pro)
+  - `order.paid`
+
+## 4. Verification Checkpoints
+
+1. **Health Probe:**
+   ```bash
+   curl -s https://pandapraise.com/api/health
+   # Returns:
+   # bindings: {
+   #   rateLimitKv: true,
+   #   firebaseConfigured: true,
+   #   razorpayConfigured: true, // when RAZORPAY_KEY_ID & RAZORPAY_KEY_SECRET are set
+   # }
+   ```
+2. **Frontend Checkout Flow:**
+   - Navigate to `/pricing` or open the Upgrade Modal.
+   - Click **Upgrade to Pro** or **Founding Member**.
+   - Razorpay Checkout.js modal opens smoothly with branding `#6701e6`.
+   - Test card payments succeed in Razorpay Test Mode and trigger automatic subscription activation.
+
 
