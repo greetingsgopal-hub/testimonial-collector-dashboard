@@ -21,6 +21,7 @@ export const SignupPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [highlightTerms, setHighlightTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -111,7 +112,9 @@ export const SignupPage: React.FC = () => {
     }
 
     if (!agreeToTerms) {
-      setLocalError('Please agree to the Terms of Service and Privacy Policy to continue.');
+      setLocalError('Please check the box below to agree to the Terms of Service and Privacy Policy before creating your account.');
+      setHighlightTerms(true);
+      document.getElementById('agreeToTerms')?.focus();
       return;
     }
 
@@ -155,6 +158,15 @@ export const SignupPage: React.FC = () => {
   const handleGoogleSignup = async () => {
     if (isGoogleSubmitting) return;
     setLocalError(null);
+
+    // Hard gate: Terms must be accepted before Google sign-up popup is triggered
+    if (!agreeToTerms) {
+      setLocalError('Please check the box below to agree to the Terms of Service and Privacy Policy before signing up with Google.');
+      setHighlightTerms(true);
+      document.getElementById('agreeToTerms')?.focus();
+      return;
+    }
+
     setIsGoogleSubmitting(true);
     try {
       const res = await signInWithGoogle();
@@ -298,27 +310,50 @@ export const SignupPage: React.FC = () => {
               />
             </div>
 
-            {/* Terms & Privacy Consent Checkbox */}
-            <div className="flex items-start gap-2.5 pt-1">
-              <input
-                id="agreeToTerms"
-                type="checkbox"
-                required
-                checked={agreeToTerms}
-                onChange={(e) => setAgreeToTerms(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6] cursor-pointer shrink-0"
-              />
-              <label htmlFor="agreeToTerms" className="text-[11px] text-gray-600 leading-snug cursor-pointer select-none">
-                I agree to the{' '}
-                <Link to="/terms" target="_blank" className="text-[#6701e6] hover:underline font-semibold">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link to="/privacy-policy" target="_blank" className="text-[#6701e6] hover:underline font-semibold">
-                  Privacy Policy
-                </Link>
-                .
-              </label>
+            {/* Terms & Privacy Consent Checkbox (Strict First-Time Gate) */}
+            <div 
+              className={`p-3 rounded-xl border transition-all duration-200 ${
+                highlightTerms && !agreeToTerms
+                  ? 'bg-red-50/90 border-red-300 ring-2 ring-red-400/40'
+                  : agreeToTerms
+                  ? 'bg-purple-50/60 border-purple-200'
+                  : 'bg-gray-50/80 border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-start gap-2.5">
+                <input
+                  id="agreeToTerms"
+                  type="checkbox"
+                  required
+                  checked={agreeToTerms}
+                  onChange={(e) => {
+                    setAgreeToTerms(e.target.checked);
+                    if (e.target.checked) {
+                      setHighlightTerms(false);
+                      if (localError?.includes('Terms of Service')) {
+                        setLocalError(null);
+                      }
+                    }
+                  }}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-[#6701e6] focus:ring-[#6701e6] cursor-pointer shrink-0 accent-[#6701e6]"
+                />
+                <label htmlFor="agreeToTerms" className="text-xs text-gray-700 leading-snug cursor-pointer select-none">
+                  I agree to Panda Praise's{' '}
+                  <Link to="/terms" target="_blank" className="text-[#6701e6] hover:underline font-semibold">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link to="/privacy-policy" target="_blank" className="text-[#6701e6] hover:underline font-semibold">
+                    Privacy Policy
+                  </Link>
+                  . <span className="text-red-500 font-bold" title="Required to sign up">*</span>
+                </label>
+              </div>
+              {highlightTerms && !agreeToTerms && (
+                <p className="mt-2 text-[11px] font-semibold text-red-600 flex items-center gap-1.5 pl-6.5 animate-fade-in">
+                  <span>⚠️ You must check this box to agree before creating your account.</span>
+                </p>
+              )}
             </div>
 
             {/* Solid Black Sign up Button */}

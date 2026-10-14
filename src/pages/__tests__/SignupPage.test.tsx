@@ -59,7 +59,7 @@ describe('SignupPage Security & Compliance', () => {
     const checkbox = container.querySelector('#agreeToTerms') as HTMLInputElement;
     expect(checkbox).not.toBeNull();
     expect(checkbox.type).toBe('checkbox');
-    expect(container.textContent).toContain('I agree to the Terms of Service and Privacy Policy');
+    expect(container.textContent).toContain('Terms of Service and Privacy Policy');
   });
 
   it('blocks submission and shows error if terms consent checkbox is unchecked', async () => {
@@ -81,8 +81,46 @@ describe('SignupPage Security & Compliance', () => {
       form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     });
 
-    expect(container.textContent).toContain('Please agree to the Terms of Service and Privacy Policy to continue');
+    expect(container.textContent).toContain('Please check the box below to agree to the Terms of Service and Privacy Policy');
     expect(mockSignUp).not.toHaveBeenCalled();
+  });
+
+  it('strictly blocks Google sign-up and highlights terms when consent checkbox is unchecked', async () => {
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/signup']}>
+          <SignupPage />
+        </MemoryRouter>
+      );
+    });
+
+    // Find the Google button
+    const googleBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Sign up with Google')
+    );
+    expect(googleBtn).not.toBeUndefined();
+
+    // Click Google button without checking terms
+    await act(async () => {
+      googleBtn!.click();
+    });
+
+    expect(mockSignInWithGoogle).not.toHaveBeenCalled();
+    expect(container.textContent).toContain('Please check the box below to agree to the Terms of Service and Privacy Policy');
+    expect(container.textContent).toContain('You must check this box to agree before creating your account');
+
+    // Now check the terms box
+    const checkbox = container.querySelector('#agreeToTerms') as HTMLInputElement;
+    await act(async () => {
+      checkbox.click();
+    });
+
+    // Click Google button again - now it should succeed
+    await act(async () => {
+      googleBtn!.click();
+    });
+
+    expect(mockSignInWithGoogle).toHaveBeenCalledTimes(1);
   });
 
   it('blocks submission and displays password policy error when password is under 8 chars or lacks complexity', async () => {
