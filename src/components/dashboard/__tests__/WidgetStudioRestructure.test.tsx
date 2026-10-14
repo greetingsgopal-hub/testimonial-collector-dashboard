@@ -266,14 +266,13 @@ describe('WidgetStudio Restructure & Upgrades', () => {
     expect(container.querySelector('.max-w-xs')).toBeNull();
   });
 
-  it('8. Renders streamlined top control bar with Widget Installation snippet card and Get Extension Product CTA', async () => {
+  it('8. Renders streamlined top layout with Widget Installation snippet card and Get Extension Product CTA', async () => {
     await act(async () => {
       root.render(<WidgetStudio reviews={[]} />);
     });
 
-    // Top control bar
-    expect(container.textContent).toContain('Widgets Studio');
-    expect(container.textContent).toContain('Share & Embed');
+    // Top control bar is cleanly removed
+    expect(container.textContent).not.toContain('WIDGETS STUDIO');
 
     // Widget Installation Card
     expect(container.textContent).toContain('Widget Installation');
