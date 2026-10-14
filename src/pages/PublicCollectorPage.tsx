@@ -543,23 +543,6 @@ export const PublicCollectorPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Catchy Headline */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-800" htmlFor="headline-input">Catchy Headline</label>
-                  <span className="text-[10px] text-slate-400 font-medium bg-slate-100 px-1.5 py-0.5 rounded">Optional</span>
-                </div>
-                <input
-                  id="headline-input"
-                  type="text"
-                  value={formData.title || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="e.g. Exactly what our remote team needed!"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm transition-all"
-                  maxLength={120}
-                />
-              </div>
-
               {/* Your Review */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
@@ -595,7 +578,7 @@ export const PublicCollectorPage: React.FC = () => {
                   value={formData.content}
                   onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
                   placeholder={`What did you love most? Share your authentic thoughts, measurable results, or why you'd recommend ${displayBrand}...`}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm transition-all resize-none leading-relaxed"
+                  className="w-full min-h-[110px] rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm transition-all resize-none leading-relaxed"
                   required
                 />
               </div>
@@ -710,45 +693,58 @@ export const PublicCollectorPage: React.FC = () => {
                 <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-extrabold uppercase text-emerald-700">Real-Time</span>
               </div>
 
-              <article className="relative rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-sm space-y-2 text-left" id="live-rendered-card">
-                <div className="absolute right-3.5 top-3 text-slate-200 select-none">
-                  <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
-                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-                  </svg>
-                </div>
-
-                <div className="flex items-center gap-1 text-amber-400 text-xs">
-                  <span>{'★'.repeat(formData.rating || 5)}</span>
-                  <span className="text-[10px] font-bold text-slate-500 ml-1">{(formData.rating || 5).toFixed(1)}</span>
-                </div>
-
-                <h2 className="text-xs font-bold text-slate-900 pr-6 tracking-tight" id="preview-headline">
-                  "{formData.title?.trim() || 'Exactly what our team needed'}"
-                </h2>
-
-                <p className="text-[11px] text-slate-600 leading-relaxed italic" id="preview-body">
-                  "{formData.content?.trim() || 'Your feedback and testimonial will appear here in real-time as you fill out the form above...'}"
-                </p>
-
-                <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold text-white shadow-sm overflow-hidden">
-                    {formData.avatarUrl ? (
-                      <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      getInitials(formData.name)
-                    )}
-                  </div>
-                  <div className="leading-tight">
-                    <div className="flex items-center gap-1">
-                      <span className="text-[11px] font-bold text-slate-900" id="preview-name">
-                        {formData.name.trim() || 'Alex Rivera'}
-                      </span>
-                      <Check className="h-3 w-3 text-emerald-500 stroke-[3]" />
+              <article className="relative rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs space-y-3 text-left transition-all hover:shadow-sm" id="live-rendered-card">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center text-amber-400 text-sm tracking-tight">
+                      {'★'.repeat(formData.rating || 5)}
                     </div>
-                    <span className="text-[9px] text-slate-400 font-medium" id="preview-role">
-                      {formData.role?.trim() || 'Product Lead @ Acme Corp'}
+                    <span className="text-[11px] font-bold text-slate-700 bg-amber-50 border border-amber-200/60 rounded-md px-1.5 py-0.2">
+                      {(formData.rating || 5).toFixed(1)}
                     </span>
                   </div>
+                  <div className="flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 rounded-full px-2 py-0.5">
+                    <Check className="h-3 w-3 stroke-[3]" />
+                    <span>Verified Review</span>
+                  </div>
+                </div>
+
+                {formData.title?.trim() ? (
+                  <h3 className="text-xs font-bold text-slate-900 tracking-tight" id="preview-headline">
+                    "{formData.title.trim()}"
+                  </h3>
+                ) : null}
+
+                <div className="relative">
+                  <p className="text-xs sm:text-[13px] text-slate-700 leading-relaxed italic" id="preview-body">
+                    "{formData.content?.trim() || 'Your feedback and review will appear here in real-time as you type above...'}"
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-2.5 border-t border-slate-100/90">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-[11px] font-bold text-white shadow-xs overflow-hidden shrink-0">
+                      {formData.avatarUrl ? (
+                        <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        getInitials(formData.name)
+                      )}
+                    </div>
+                    <div className="leading-tight">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-bold text-slate-900" id="preview-name">
+                          {formData.name.trim() || 'Alex Rivera'}
+                        </span>
+                        <Check className="h-3 w-3 text-emerald-500 stroke-[3]" />
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-medium truncate max-w-[190px] block" id="preview-role">
+                        {formData.role?.trim() || 'Product Lead @ Acme Corp'}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">
+                    Today
+                  </span>
                 </div>
               </article>
             </section>

@@ -75,7 +75,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
     : 'AR';
 
   const authorRole = [review.role, review.company].filter(Boolean).join(' @ ') || 'Product Lead @ Acme Corp';
-  const headline = review.title || 'Exactly what our team needed';
+  const headline = review.title?.trim() || '';
   const reviewBody =
     review.content ||
     'PandaPraise cut our social proof collection time by 80%. The live widget embed and verified badges boosted our conversion rate within 48 hours!';
@@ -120,8 +120,8 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
             <rect x="0" y="0" width="600" height="8" rx="4" fill="url(#topGrad)"/>
             <text x="32" y="44" font-family="-apple-system, sans-serif" font-size="16" fill="#f59e0b" font-weight="bold">★★★★★ ${rating.toFixed(1)}</text>
             <text x="568" y="44" font-family="-apple-system, sans-serif" font-size="12" fill="#94a3b8" text-anchor="end">Verified via PandaPraise</text>
-            <text x="32" y="85" font-family="-apple-system, sans-serif" font-size="20" fill="#0f172a" font-weight="bold">“${headline.replace(/"/g, '')}”</text>
-            <text x="32" y="125" font-family="-apple-system, sans-serif" font-size="15" fill="#334155" width="536">
+            ${headline ? `<text x="32" y="85" font-family="-apple-system, sans-serif" font-size="20" fill="#0f172a" font-weight="bold">“${headline.replace(/"/g, '')}”</text>` : ''}
+            <text x="32" y="${headline ? '125' : '95'}" font-family="-apple-system, sans-serif" font-size="15" fill="#334155" width="536">
               <tspan x="32" dy="0">“${reviewBody.slice(0, 75).replace(/"/g, '')}</tspan>
               <tspan x="32" dy="24">${reviewBody.slice(75, 150).replace(/"/g, '')}...”</tspan>
             </text>
@@ -354,9 +354,11 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               </div>
 
               {/* Headline */}
-              <h3 className="text-base font-bold text-[#0f0e1b] tracking-tight font-display mb-2">
-                “{headline}”
-              </h3>
+              {headline ? (
+                <h3 className="text-base font-bold text-[#0f0e1b] tracking-tight font-display mb-2">
+                  “{headline}”
+                </h3>
+              ) : null}
 
               {/* Body Quote */}
               <p className="text-gray-700 text-[13.5px] leading-relaxed mb-4">

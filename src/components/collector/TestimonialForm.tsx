@@ -123,22 +123,7 @@ export const TestimonialForm: React.FC<TestimonialFormProps> = ({
         </span>
       </div>
 
-      {/* 2. Headline */}
-      <div className="space-y-1">
-        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          Headline
-        </label>
-        <input
-          type="text"
-          placeholder="e.g. Exactly what our team needed"
-          value={formData.title || ''}
-          onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-          className="w-full px-3.5 py-2 rounded-xl text-xs sm:text-sm bg-slate-50/80 border border-slate-200/90 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-500/10 transition-all shadow-2xs"
-          maxLength={120}
-        />
-      </div>
-
-      {/* 3. Testimonial */}
+      {/* 2. Testimonial */}
       <div className="space-y-1">
         <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
           Testimonial <span className="text-violet-600">*</span>
