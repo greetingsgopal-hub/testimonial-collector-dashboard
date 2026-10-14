@@ -3,6 +3,7 @@ import { getCorsHeaders } from '../lib/cors';
 import { verifyFirebaseToken, extractBearerToken, deleteFirebaseAccount } from '../lib/firebaseAuth';
 import { queryUserDocuments, queryDocumentsByField, deleteDocument } from '../lib/firestoreAdmin';
 import { deleteStripeCustomerAndSubscriptions } from '../lib/stripeClient';
+import { cancelRazorpaySubscription } from '../lib/razorpayClient';
 import { deleteUserStorageObjects } from '../lib/firebaseStorage';
 
 /**
@@ -79,17 +80,20 @@ export async function handleAccountDeletion(request: Request, env: WorkerEnv): P
       purgeErrors.push(`Storage purge: ${storageErr.message}`);
     }
 
-    // 4. Cancel Stripe subscriptions & delete Stripe Customer
+    // 4. Cancel Stripe & Razorpay subscriptions & delete billing customers
     try {
       const workspaces = await queryUserDocuments('workspaces', uid, undefined, env);
       for (const ws of workspaces) {
         if (ws.stripeCustomerId) {
           await deleteStripeCustomerAndSubscriptions(ws.stripeCustomerId, env);
         }
+        if (ws.razorpaySubscriptionId) {
+          await cancelRazorpaySubscription(ws.razorpaySubscriptionId, false, env);
+        }
       }
-    } catch (stripeErr: any) {
-      console.warn('[AccountDeletion] Stripe customer cancellation warning:', stripeErr);
-      purgeErrors.push(`Stripe cleanup: ${stripeErr.message}`);
+    } catch (billingErr: any) {
+      console.warn('[AccountDeletion] Billing customer/subscription cancellation warning:', billingErr);
+      purgeErrors.push(`Billing cleanup: ${billingErr.message}`);
     }
 
     // 5. Resilient parallel collection cascade purge via Promise.allSettled

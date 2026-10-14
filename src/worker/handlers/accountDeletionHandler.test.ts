@@ -22,6 +22,10 @@ vi.mock('../lib/stripeClient', () => ({
   deleteStripeCustomerAndSubscriptions: vi.fn(),
 }));
 
+vi.mock('../lib/razorpayClient', () => ({
+  cancelRazorpaySubscription: vi.fn(),
+}));
+
 vi.mock('../lib/firebaseStorage', () => ({
   deleteUserStorageObjects: vi.fn(),
 }));
@@ -29,6 +33,7 @@ vi.mock('../lib/firebaseStorage', () => ({
 import { verifyFirebaseToken, deleteFirebaseAccount } from '../lib/firebaseAuth';
 import { queryUserDocuments, queryDocumentsByField, deleteDocument } from '../lib/firestoreAdmin';
 import { deleteStripeCustomerAndSubscriptions } from '../lib/stripeClient';
+import { cancelRazorpaySubscription } from '../lib/razorpayClient';
 import { deleteUserStorageObjects } from '../lib/firebaseStorage';
 
 describe('GDPR Right to Erasure Account Deletion Handler', () => {
@@ -101,7 +106,7 @@ describe('GDPR Right to Erasure Account Deletion Handler', () => {
 
     vi.mocked(queryUserDocuments).mockImplementation(async (collection: string) => {
       if (collection === 'workspaces') {
-        return [{ id: 'ws-1', ownerId: 'user-purge-456', stripeCustomerId: 'cus_stripe_123' }];
+        return [{ id: 'ws-1', ownerId: 'user-purge-456', stripeCustomerId: 'cus_stripe_123', razorpaySubscriptionId: 'sub_test_456' }];
       }
       if (collection === 'projects') {
         return [{ id: 'proj-1', ownerId: 'user-purge-456' }];
@@ -130,6 +135,7 @@ describe('GDPR Right to Erasure Account Deletion Handler', () => {
     vi.mocked(queryDocumentsByField).mockResolvedValue([]);
     vi.mocked(deleteDocument).mockResolvedValue(undefined);
     vi.mocked(deleteStripeCustomerAndSubscriptions).mockResolvedValue(undefined);
+    vi.mocked(cancelRazorpaySubscription).mockResolvedValue(undefined);
     vi.mocked(deleteUserStorageObjects).mockResolvedValue({ deletedCount: 1, errors: [] });
     vi.mocked(deleteFirebaseAccount).mockResolvedValue(true);
 
@@ -149,6 +155,9 @@ describe('GDPR Right to Erasure Account Deletion Handler', () => {
 
     // Verify Stripe customer & subscription purge was invoked
     expect(deleteStripeCustomerAndSubscriptions).toHaveBeenCalledWith('cus_stripe_123', env);
+
+    // Verify Razorpay subscription cancellation was invoked
+    expect(cancelRazorpaySubscription).toHaveBeenCalledWith('sub_test_456', false, env);
 
     // Verify Storage purge was invoked
     expect(deleteUserStorageObjects).toHaveBeenCalledWith('user-purge-456', env);
