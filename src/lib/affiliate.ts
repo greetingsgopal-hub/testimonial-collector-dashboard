@@ -48,12 +48,12 @@ export function createDefaultAffiliateProfile(
     email,
     tier,
     commissionRate: tier === 'agency' ? 0.40 : 0.30,
-    clicks: 142,
-    conversions: 8,
-    totalRevenueAttributedUsd: 792,
-    unpaidEarningsUsd: tier === 'agency' ? 316.8 : 237.6,
-    paidEarningsUsd: 480,
-    stripeConnected: true,
+    clicks: 0,
+    conversions: 0,
+    totalRevenueAttributedUsd: 0,
+    unpaidEarningsUsd: 0,
+    paidEarningsUsd: 0,
+    stripeConnected: false,
     createdAt: new Date().toISOString(),
   };
 }

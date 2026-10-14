@@ -257,7 +257,9 @@ export const AffiliatePage: React.FC = () => {
                 Referral Clicks
               </div>
               <div className="text-2xl font-black text-gray-900 mt-2">{profile.clicks}</div>
-              <div className="text-[11px] text-emerald-600 font-semibold mt-1">↑ +24 this week</div>
+              <div className="text-[11px] text-gray-500 font-medium mt-1">
+                {profile.clicks > 0 ? 'Unique visits tracked' : 'Share link to start'}
+              </div>
             </div>
 
             <div className="p-5 rounded-2xl bg-white border border-gray-200 shadow-xs">
@@ -266,7 +268,11 @@ export const AffiliatePage: React.FC = () => {
                 Conversions
               </div>
               <div className="text-2xl font-black text-gray-900 mt-2">{profile.conversions}</div>
-              <div className="text-[11px] text-purple-600 font-semibold mt-1">5.6% conv. rate</div>
+              <div className="text-[11px] text-purple-600 font-semibold mt-1">
+                {profile.clicks > 0
+                  ? `${((profile.conversions / profile.clicks) * 100).toFixed(1)}% conv. rate`
+                  : '0.0% conv. rate'}
+              </div>
             </div>
 
             <div className="p-5 rounded-2xl bg-white border border-gray-200 shadow-xs">
@@ -284,7 +290,9 @@ export const AffiliatePage: React.FC = () => {
                 Unpaid Balance
               </div>
               <div className="text-2xl font-black text-[#6701e6] mt-2">${profile.unpaidEarningsUsd}</div>
-              <div className="text-[11px] text-purple-700 font-semibold mt-1">Payout scheduled 1st</div>
+              <div className="text-[11px] text-purple-700 font-semibold mt-1">
+                {profile.unpaidEarningsUsd > 0 ? 'Payout scheduled 1st' : 'Net-30 automatic payout'}
+              </div>
             </div>
           </div>
 

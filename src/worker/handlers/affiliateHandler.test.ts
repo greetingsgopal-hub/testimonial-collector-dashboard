@@ -75,7 +75,10 @@ describe('Self-Serve Affiliate & Partner Engine (Task 3.4)', () => {
       const data = await res.json();
       expect(data.stats).toBeDefined();
       expect(data.stats.commissionRate).toBe(0.3);
-      expect(data.stats.unpaidEarningsUsd).toBeGreaterThanOrEqual(0);
+      expect(data.stats.clicks).toBe(0);
+      expect(data.stats.conversions).toBe(0);
+      expect(data.stats.totalRevenueAttributedUsd).toBe(0);
+      expect(data.stats.unpaidEarningsUsd).toBe(0);
     });
   });
 

@@ -21,4 +21,19 @@ describe('Referral Handler (Task 1.4)', () => {
     expect(response.status).toBe(302);
     expect(response.headers.get('Location')).toBe('https://pandapraise.com/');
   });
+
+  it('returns clean zero baseline stats for referral code', async () => {
+    const { handleReferralStats } = await import('./referralHandler');
+    const request = new Request('https://pandapraise.com/api/referral/stats?code=growth42');
+    const response = await handleReferralStats(request, {} as any);
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data.code).toBe('growth42');
+    expect(data.clicks).toBe(0);
+    expect(data.signups).toBe(0);
+    expect(data.monthsEarned).toBe(0);
+    expect(data.rewardValueUSD).toBe(0);
+    expect(data.status).toBe('active');
+  });
 });
