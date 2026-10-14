@@ -310,4 +310,86 @@ describe('Public Testimonial Submission Handler (Turnstile + Rate Limiting + Fre
     const data = await res.json();
     expect(data.error).toContain('free tier limit of 15 testimonials');
   });
+
+  it('rejects repetitive character spam (e.g. aaaaaaaaaa...) with 400', async () => {
+    globalThis.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(new Response(JSON.stringify({ success: true }), { status: 200 }))
+    );
+
+    const req = new Request('https://pandapraise.com/api/testimonials/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-Connecting-IP': '198.51.100.10',
+      },
+      body: JSON.stringify({
+        collectionFormId: 'form-123',
+        name: 'Spam Bot',
+        content: 'This product was aaaaaaaaaaaaaaaaa terrible junk',
+        rating: 1,
+        consent: true,
+        turnstileToken: 'valid-token',
+      }),
+    });
+
+    const res = await handlePublicTestimonialSubmit(req, env);
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toContain('repetitive spam characters');
+  });
+
+  it('rejects repetitive word spam with 400', async () => {
+    globalThis.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(new Response(JSON.stringify({ success: true }), { status: 200 }))
+    );
+
+    const req = new Request('https://pandapraise.com/api/testimonials/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-Connecting-IP': '198.51.100.11',
+      },
+      body: JSON.stringify({
+        collectionFormId: 'form-123',
+        name: 'Word Spammer',
+        content: 'buy buy buy buy buy buy cheap goods now',
+        rating: 5,
+        consent: true,
+        turnstileToken: 'valid-token',
+      }),
+    });
+
+    const res = await handlePublicTestimonialSubmit(req, env);
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toContain('repetitive spam words');
+  });
+
+  it('rejects disposable throwaway emails with 400', async () => {
+    globalThis.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(new Response(JSON.stringify({ success: true }), { status: 200 }))
+    );
+
+    const req = new Request('https://pandapraise.com/api/testimonials/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-Connecting-IP': '198.51.100.12',
+      },
+      body: JSON.stringify({
+        collectionFormId: 'form-123',
+        name: 'Throwaway User',
+        email: 'fakeuser@mailinator.com',
+        content: 'Legitimate looking review content that meets character limits.',
+        rating: 5,
+        consent: true,
+        turnstileToken: 'valid-token',
+      }),
+    });
+
+    const res = await handlePublicTestimonialSubmit(req, env);
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toContain('valid permanent email address');
+  });
 });

@@ -165,6 +165,43 @@ export async function handlePublicTestimonialSubmit(request: Request, env: Worke
     });
   }
 
+  // 4b. Anti-Spam content checks
+  // Repeated character spam (e.g. "aaaaaaaaaa...")
+  if (/(.)\1{9,}/.test(content)) {
+    return new Response(JSON.stringify({ error: 'Review content appears to contain repetitive spam characters.' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Obvious repetitive word spam (e.g. "spam spam spam spam spam")
+  if (/\b([a-zA-Z0-9]+)\b(?:\s+\1\b){4,}/i.test(content)) {
+    return new Response(JSON.stringify({ error: 'Review content appears to contain repetitive spam words.' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Disposable email check
+  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+  const disposableDomains = [
+    'mailinator.com',
+    'tempmail.com',
+    '10minutemail.com',
+    'guerrillamail.com',
+    'trashmail.com',
+    'yopmail.com',
+    'sharklasers.com',
+    'getairmail.com',
+    'dispostable.com',
+  ];
+  if (email && disposableDomains.some((d) => email.endsWith(`@${d}`))) {
+    return new Response(JSON.stringify({ error: 'Please provide a valid permanent email address.' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   if (isNaN(rating) || rating < 1 || rating > 5) {
     return new Response(JSON.stringify({ error: 'Rating must be a number between 1 and 5.' }), {
       status: 400,

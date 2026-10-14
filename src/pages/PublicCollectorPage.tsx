@@ -218,6 +218,14 @@ export const PublicCollectorPage: React.FC = () => {
     const validation = validateReviewInput(formData);
     if (!validation.valid) {
       setValidationError(validation.error || 'Please fill in all required fields.');
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          const errEl = document.getElementById('collector-error-banner');
+          if (errEl) {
+            errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 50);
+      }
       return;
     }
 
@@ -778,8 +786,9 @@ export const PublicCollectorPage: React.FC = () => {
 
             {/* Validation Error Message */}
             {validationError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold animate-fade-in">
-                {validationError}
+              <div id="collector-error-banner" className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold animate-fade-in flex items-center gap-2.5 shadow-2xs">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{validationError}</span>
               </div>
             )}
           </main>
