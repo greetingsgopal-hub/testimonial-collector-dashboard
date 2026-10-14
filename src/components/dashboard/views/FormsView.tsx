@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  Copy, 
-  Check, 
-  Star, 
-  QrCode, 
+import {
+  Copy,
+  Check,
+  Star,
+  QrCode,
   Video,
   Sparkles,
   Settings,
   Radio,
-  Inbox,
-  CheckCircle2,
   Mail,
-  ArrowRight
+  CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { Review, ReviewStats, CollectionForm } from '../../../types';
@@ -40,234 +38,223 @@ export const FormsView: React.FC<FormsViewProps> = ({
 }) => {
   const { project, collectionForm } = useAuth();
   const [copied, setCopied] = useState(false);
-  const [channelToast, setChannelToast] = useState<string | null>(null);
   const [showQrModal, setShowQrModal] = useState(false);
-
-  // Review Mode for Pulse Metric Display
-  const reviewMode: 'text' | 'video' | 'rating' = collectionForm?.allowVideo
-    ? 'video'
-    : (collectionForm?.settings?.requireRating ? 'rating' : 'text');
 
   const publicSlug = collectionForm?.publicSlug || project?.slug || 'feedback';
   const collectionUrl = `${window.location.origin}/c/${publicSlug}`;
 
   // Active Metrics Calculations
   const totalCount = reviews.length > 0 ? reviews.length : (stats?.total ?? 0);
-  const approvedCount = reviews.length > 0 
-    ? reviews.filter(r => r.status === 'approved').length 
-    : (stats?.approvedCount ?? 0);
-  const pendingCount = reviews.length > 0
-    ? reviews.filter(r => r.status === 'pending').length
-    : (stats?.pendingCount ?? 0);
+  const approvedCount =
+    reviews.length > 0
+      ? reviews.filter((r) => r.status === 'approved').length
+      : (stats?.approvedCount ?? 0);
+  const pendingCount =
+    reviews.length > 0
+      ? reviews.filter((r) => r.status === 'pending').length
+      : (stats?.pendingCount ?? 0);
 
-  const avgRating = stats?.averageRating && stats.averageRating > 0
-    ? stats.averageRating.toFixed(1)
-    : (reviews.length > 0 
-        ? (reviews.reduce((sum, r) => sum + (r.rating || 5), 0) / reviews.length).toFixed(1) 
-        : '5.0');
+  const avgRating =
+    stats?.averageRating && stats.averageRating > 0
+      ? stats.averageRating.toFixed(1)
+      : reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + (r.rating || 5), 0) / reviews.length).toFixed(1)
+      : '5.0';
 
   const handleCopy = () => {
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(collectionUrl).catch(() => {});
     }
     setCopied(true);
-    setChannelToast('Direct intake link copied to clipboard!');
     setTimeout(() => {
       setCopied(false);
-      setChannelToast(null);
     }, 2500);
   };
 
+  const projectName = project?.name || project?.slug || 'feedback';
+
   return (
-    <div className="max-w-4xl mx-auto py-4 px-3 sm:px-6 space-y-3 font-sans">
-      
-      {/* 1. Breadcrumb & Workspace Status Bar */}
-      <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-label-sm text-xs shadow-2xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse" />
-            <span>Collect</span>
-            <span className="text-slate-400">•</span>
-            <span className="font-semibold text-slate-900 dark:text-white">{project?.slug || 'feedback'}</span>
+    <div className="space-y-6 font-sans">
+      {/* ── 2. Full-Width Purple-to-Violet Hero Card ── */}
+      <div className="relative rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 text-white p-6 sm:p-8 overflow-hidden shadow-xl">
+        <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="relative z-10">
+          {/* Top Row: Pill Badge on Left, Green-Dot Indicator on Right */}
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold border border-white/20">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>Collect · {projectName}</span>
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white border border-white/20">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Live Intake</span>
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-full text-xs font-semibold shadow-2xs">
-          <Radio className="w-3 h-3 animate-pulse" />
-          <span>Live Intake</span>
-        </div>
-      </div>
-
-      {/* 2. Screen Header */}
-      <div className="flex flex-col">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight font-display">
+          {/* Headline */}
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             Collect Testimonials
           </h1>
-          <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+
+          {/* One short clean white supporting sentence */}
+          <p className="text-xs sm:text-sm text-purple-100 mt-2 leading-relaxed max-w-xl">
+            Capture authentic customer reviews and ratings using your branded collection form.
+          </p>
+
+          {/* Action Buttons Row */}
+          <div data-testid="collection-action-toolbar" className="mt-6 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              data-testid="toolbar-qr-btn"
+              onClick={() => setShowQrModal(true)}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-purple-900 hover:bg-purple-50 font-bold text-xs shadow-md transition-all cursor-pointer"
+              title="QR Code"
+            >
+              <QrCode className="w-4 h-4 text-purple-700" />
+              <span>QR Code</span>
+            </button>
+
+            <button
+              type="button"
+              data-testid="toolbar-copy-link-btn"
+              onClick={handleCopy}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-purple-900 hover:bg-purple-50 font-bold text-xs shadow-md transition-all cursor-pointer"
+              title="Copy Share Link"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-600" />
+                  <span className="text-emerald-700">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 text-purple-700" />
+                  <span>Copy Share Link</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              data-testid="toolbar-configure-btn"
+              onClick={onConfigureForm}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-900/80 text-white font-bold text-xs border border-white/20 shadow-md transition-all cursor-pointer"
+              title="Settings"
+            >
+              <Settings className="w-4 h-4 text-purple-200" />
+              <span>Settings</span>
+            </button>
+          </div>
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">
-          Capture authentic customer reviews and ratings using your branded collection form.
-        </p>
       </div>
 
-      {/* 3. Quick Action Toolbar */}
-      <div data-testid="collection-action-toolbar" className="grid grid-cols-3 gap-2">
-        <button
-          type="button"
-          data-testid="toolbar-qr-btn"
-          onClick={() => setShowQrModal(true)}
-          className="apple-touch flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-white dark:bg-slate-900 shadow-2xs border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all active:scale-[0.98] text-xs font-medium text-slate-800 dark:text-slate-200 cursor-pointer"
-          title="QR Code"
-        >
-          <QrCode className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-          <span>QR Code</span>
-        </button>
-
-        <button
-          type="button"
-          data-testid="toolbar-copy-link-btn"
-          onClick={handleCopy}
-          className="apple-touch flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-white dark:bg-slate-900 shadow-2xs border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all active:scale-[0.98] text-xs font-medium text-slate-800 dark:text-slate-200 cursor-pointer"
-          title="Copy Share Link"
-        >
-          {copied ? (
-            <>
-              <Check className="w-4 h-4 text-emerald-600" />
-              <span className="text-emerald-600 font-semibold">Copied!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-              <span>Copy Share Link</span>
-            </>
-          )}
-        </button>
-
-        <button
-          type="button"
-          data-testid="toolbar-configure-btn"
-          onClick={onConfigureForm}
-          className="apple-touch flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-2xs transition-all active:scale-[0.98] text-xs font-semibold cursor-pointer"
-          title="Settings"
-        >
-          <Settings className="w-4 h-4 text-white" />
-          <span>Settings</span>
-        </button>
+      {/* ── 3. Section Header: Collection Pulse ── */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <Radio className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-pulse" />
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            Collection Pulse
+          </h2>
+        </div>
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Realtime</span>
       </div>
 
-      {channelToast && (
-        <p className="text-center text-xs font-medium text-emerald-600 dark:text-emerald-400 animate-fade-in">
-          {channelToast}
-        </p>
-      )}
+      {/* ── 4. Four Equal White Metric Cards in 2x2 Grid ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+        {/* Card 1: Total Collected */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Total Collected
+            </span>
+            <Mail className="w-4 h-4 text-purple-600" />
+          </div>
+          <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            {totalCount}
+          </span>
+          <span className="text-xs text-slate-400 mt-1">Authentic reviews</span>
+        </div>
 
-      {/* 6. Live Collection Performance & Analytics Grid (Compact) */}
-      <div className="flex flex-col space-y-2">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1.5">
-            <Radio className="w-4 h-4 text-indigo-600 dark:text-indigo-400 animate-pulse" />
-            <h3 className="text-[15px] font-semibold text-slate-900 dark:text-white font-display">
-              Collection Pulse
+        {/* Card 2: Avg Rating */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Avg Rating
+            </span>
+            <Star className="w-4 h-4 text-amber-500" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+              {avgRating}
+            </span>
+            <div className="flex text-amber-400 gap-0.5">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Star key={s} className="w-3.5 h-3.5 fill-amber-400" />
+              ))}
+            </div>
+          </div>
+          <span className="text-xs text-slate-400 mt-1">Verified customers</span>
+        </div>
+
+        {/* Card 3: Approved Proof */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Approved Proof
+            </span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+          </div>
+          <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
+            {approvedCount}
+          </span>
+          <span className="text-xs text-slate-400 mt-1">Live on wall widgets</span>
+        </div>
+
+        {/* Card 4: Format Mode */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Format Mode
+            </span>
+            <Video className="w-4 h-4 text-purple-600" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+              Hybrid
+            </span>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300">
+              Video+Text
+            </span>
+          </div>
+          <span className="text-xs text-slate-400 mt-1">All inputs enabled</span>
+        </div>
+      </div>
+
+      {/* ── 5. Bottom Full-Width Light-Purple Banner Card ── */}
+      <div className="p-5 sm:p-6 rounded-2xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200/70 dark:border-purple-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 flex items-center justify-center shrink-0">
+            <Mail className="w-5 h-5 text-purple-700 dark:text-purple-300" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              {pendingCount > 0 ? `${pendingCount} Submissions in Queue` : `${totalCount} Submissions in Queue`}
             </h3>
-          </div>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">Realtime</span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          {/* Total Submissions Card */}
-          <div className="rounded-xl bg-white dark:bg-slate-900 p-2.5 shadow-2xs border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Total Collected</span>
-              <div className="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                <Inbox className="w-3.5 h-3.5" />
-              </div>
-            </div>
-            <div className="mt-1 flex items-baseline gap-1.5">
-              <span className="text-[18px] text-slate-900 dark:text-white font-bold font-display">{totalCount}</span>
-              {totalCount > 0 && <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">+{totalCount} this wk</span>}
-            </div>
-            <p className="text-[11px] text-slate-400">Authentic reviews</p>
-          </div>
-
-          {/* Average Rating Card */}
-          <div className="rounded-xl bg-white dark:bg-slate-900 p-2.5 shadow-2xs border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Avg Rating</span>
-              <div className="w-6 h-6 rounded-md bg-amber-50 dark:bg-amber-950/60 flex items-center justify-center text-amber-500">
-                <Star className="w-3.5 h-3.5 fill-amber-400" />
-              </div>
-            </div>
-            <div className="mt-1 flex items-baseline gap-1">
-              <span className="text-[18px] text-slate-900 dark:text-white font-bold font-display">{avgRating}</span>
-              <div className="flex text-amber-400 scale-90 origin-left">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star key={s} className="w-3 h-3 fill-amber-400" />
-                ))}
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-400">Verified customers</p>
-          </div>
-
-          {/* Approved Proof */}
-          <div className="rounded-xl bg-white dark:bg-slate-900 p-2.5 shadow-2xs border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Approved Proof</span>
-              <div className="w-6 h-6 rounded-md bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-              </div>
-            </div>
-            <div className="mt-1 flex items-baseline gap-1.5">
-              <span className="text-[18px] text-emerald-600 dark:text-emerald-400 font-bold font-display">{approvedCount}</span>
-              {pendingCount > 0 && <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">{pendingCount} Pending</span>}
-            </div>
-            <p className="text-[11px] text-slate-400">Live on wall widgets</p>
-          </div>
-
-          {/* Intake Mode */}
-          <div className="rounded-xl bg-white dark:bg-slate-900 p-2.5 shadow-2xs border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Format Mode</span>
-              <div className="w-6 h-6 rounded-md bg-violet-50 dark:bg-violet-950/60 flex items-center justify-center text-violet-600">
-                <Video className="w-3.5 h-3.5" />
-              </div>
-            </div>
-            <div className="mt-1 flex items-baseline gap-1.5">
-              <span className="text-[16px] text-slate-900 dark:text-white font-semibold font-display">
-                {reviewMode === 'video' ? 'Hybrid' : reviewMode === 'rating' ? 'Ratings' : 'Text'}
-              </span>
-              <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium">
-                {reviewMode === 'video' ? 'Video+Text' : reviewMode === 'rating' ? 'Stars' : 'Text+Stars'}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400">All inputs enabled</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Review, approve, and publish authentic stories to your Wall of Love.
+            </p>
           </div>
         </div>
 
-        {/* Compact Review Pipeline Callout Banner */}
-        <div className="rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 p-2.5 flex items-center justify-between shadow-2xs">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0">
-              <Mail className="w-4 h-4 text-white" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-900 dark:text-white leading-tight truncate">
-                {pendingCount > 0 ? `${pendingCount} Submissions in Queue` : `${totalCount} Submissions in Queue`}
-              </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                Review and publish to your Wall
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onViewProof}
-            className="apple-touch flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-semibold active:scale-95 transition-all shrink-0 ml-2 cursor-pointer"
-          >
-            <span>Moderate</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onViewProof}
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-sm transition-all shrink-0 cursor-pointer"
+        >
+          <span>Moderate →</span>
+        </button>
       </div>
 
       {/* QR Code Modal */}
@@ -278,7 +265,8 @@ export const FormsView: React.FC<FormsViewProps> = ({
           </div>
         </div>
       )}
-
     </div>
   );
 };
+
+export default FormsView;
