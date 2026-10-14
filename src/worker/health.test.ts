@@ -14,6 +14,7 @@ describe('TASK 8: /api/health liveness probe', () => {
     expect(data.service).toBe('pandapraise-api');
     expect(data.bindings).toBeDefined();
     expect(typeof data.bindings.rateLimitKv).toBe('boolean');
+    expect(typeof data.bindings.razorpayConfigured).toBe('boolean');
     expect(typeof data.timestamp).toBe('string');
   });
 

@@ -22,6 +22,8 @@ import { handleFacebookWebhook } from './handlers/facebookWebhook';
 import { handleStripeWebhook } from './handlers/stripeWebhook';
 import { handleReviewInviteWebhook } from './handlers/reviewInviteWebhook';
 import { handleCreateCheckoutSession, handleBillingPortal, handleGetSubscription } from './handlers/stripeCheckout';
+import { handleRazorpayCheckout } from './handlers/razorpayCheckout';
+import { handleRazorpayWebhook } from './handlers/razorpayWebhook';
 import { handleSocialPublish } from './handlers/socialPublish';
 import { handleSocialStatus } from './handlers/socialStatus';
 import { handleSocialDisconnect } from './handlers/socialDisconnect';
@@ -111,6 +113,7 @@ export default {
               bindings: {
                 rateLimitKv: Boolean(env.RATE_LIMIT_KV),
                 firebaseConfigured: Boolean(env.FIREBASE_PROJECT_ID),
+                razorpayConfigured: Boolean(env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET),
                 stripeConfigured: Boolean(env.STRIPE_SECRET_KEY),
               },
               timestamp: new Date().toISOString(),
@@ -154,7 +157,16 @@ export default {
         case 'campaign/dispatch':
           return await handleCampaignDispatchTrigger(request, env);
 
-        // Stripe subscription billing
+        // Razorpay billing (India-first processor)
+        case 'razorpay/checkout':
+          return await handleRazorpayCheckout(request, env);
+
+        case 'webhook/razorpay':
+        case 'webhooks/razorpay':
+        case 'razorpay-webhook':
+          return await handleRazorpayWebhook(request, env);
+
+        // Stripe subscription billing (legacy fallback)
         case 'webhooks/stripe':
         case 'stripe-webhook':
           return await handleStripeWebhook(request, env);
