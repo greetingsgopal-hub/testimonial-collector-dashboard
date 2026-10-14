@@ -12,6 +12,7 @@ import {
   Download,
   Search,
   ChevronDown,
+  ChevronRight,
   PenTool,
   Clock,
   MapPin,
@@ -1163,83 +1164,88 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
           />
         </div>
       ) : !selectedPlatform ? (
-        <div className="max-w-xl mx-auto">
-          <div className="flex justify-between items-center mb-4">
+        <div className="max-w-xl mx-auto font-sans">
+          {/* Back Link */}
+          <div className="flex items-center mb-6">
             <button
+              type="button"
               onClick={() => setViewMode('hub')}
-              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1.5 transition"
+              className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center gap-1.5 transition group cursor-pointer"
             >
-              <ArrowLeft size={14} />
+              <ArrowLeft size={13} className="transition-transform group-hover:-translate-x-0.5" />
               <span>Back to Quick Import Hub (CSV, Manual, X, Google)</span>
             </button>
           </div>
-          {/* Header */}
+
+          {/* Centered Page Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white font-display tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Import Testimonials
             </h1>
-            <p className="mt-2 text-sm sm:text-base text-gray-500 dark:text-gray-400 font-normal">
+            <p className="mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-md mx-auto">
               Bring your existing customer proof into Panda Praise
             </p>
           </div>
 
-          {/* Main Card Container */}
-          <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-200/90 dark:border-gray-800 shadow-xl shadow-gray-200/40 dark:shadow-none p-5 sm:p-7 backdrop-blur-xl">
-            {/* Search Input */}
-            <div className="relative mb-3">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+          {/* Main White Content Card */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xs p-5 sm:p-7 space-y-4">
+            {/* Full-Width Search Input */}
+            <div className="relative">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search a source"
-                className="w-full pl-11 pr-10 py-3 text-sm rounded-xl
-                         bg-gray-50/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80
-                         text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
-                         focus:outline-none focus:ring-2 focus:ring-[#6701e6]/20 focus:border-[#6701e6] transition-all"
+                className="w-full pl-10 pr-10 py-3 text-xs sm:text-sm rounded-2xl
+                         bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80
+                         text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                         focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition-all"
               />
               {searchQuery && (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer p-1"
                 >
-                  <X size={16} />
+                  <X size={15} />
                 </button>
               )}
             </div>
 
-            {/* Source Rows */}
-            <div className="divide-y divide-gray-100 dark:divide-gray-800/60">
+            {/* Clean Vertical List of Source Rows */}
+            <div className="divide-y divide-slate-100 dark:divide-slate-800/60 pt-1">
               {filteredSources.map((source) => {
                 const isAvailable = source.status === 'available';
 
                 return (
                   <button
                     key={source.id}
+                    type="button"
                     onClick={() => handleSelectSource(source)}
-                    className="w-full flex items-center justify-between px-3.5 py-3.5 rounded-xl
-                             hover:bg-gray-50 dark:hover:bg-gray-800/70
+                    className="w-full flex items-center justify-between px-3 sm:px-4 py-3.5 rounded-2xl
+                             hover:bg-purple-50/50 dark:hover:bg-slate-800/60
                              transition-all duration-150 group text-left cursor-pointer"
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-700/50">
+                      <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-100 dark:border-slate-700/50 shadow-2xs">
                         {source.icon}
                       </div>
-                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-[#6701e6] dark:group-hover:text-purple-400 transition-colors truncate">
+                      <span className="text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
                         {source.name}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
                       {!isAvailable && (
-                        <span className="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 flex items-center gap-1">
-                          <Clock size={11} className="shrink-0" />
+                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 flex items-center gap-1">
+                          <Clock size={10} className="shrink-0" />
                           <span>Coming soon</span>
                         </span>
                       )}
-                      <ArrowRight
-                        size={18}
-                        className="text-gray-400 dark:text-gray-500 group-hover:text-[#6701e6] dark:group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all"
+                      <ChevronRight
+                        size={16}
+                        className="text-slate-400 dark:text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all"
                       />
                     </div>
                   </button>
@@ -1247,7 +1253,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
               })}
 
               {filteredSources.length === 0 && (
-                <div className="py-8 text-center text-sm text-gray-400 dark:text-gray-500">
+                <div className="py-10 text-center text-xs text-slate-400 dark:text-slate-500">
                   No sources found matching &quot;{searchQuery}&quot;
                 </div>
               )}
@@ -1255,7 +1261,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onViewProof }) => {
           </div>
 
           {/* Tagline */}
-          <p className="text-center text-xs sm:text-sm font-medium text-gray-400 dark:text-gray-500 mt-6 tracking-wide">
+          <p className="text-center text-xs font-medium text-slate-400 dark:text-slate-500 mt-6 tracking-wide">
             All your proof. One place.
           </p>
 
