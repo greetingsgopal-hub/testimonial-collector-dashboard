@@ -311,7 +311,20 @@ export default {
 
     // Static Assets & Single-Page Application routing fallback
     if (env.ASSETS) {
-      return await env.ASSETS.fetch(request);
+      const response = await env.ASSETS.fetch(request);
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('text/html')) {
+        const headers = new Headers(response.headers);
+        headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        headers.set('Pragma', 'no-cache');
+        headers.set('Expires', '0');
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
+        });
+      }
+      return response;
     }
 
     return new Response('Asset binding not configured.', { status: 500 });

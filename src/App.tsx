@@ -5,8 +5,7 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { initAnalytics, trackPageView } from './lib/analytics';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
 
-// Lazy-loaded routes for ultra-fast initial page loads and zero bundle bloat
-const LandingPage = React.lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
+import { LandingPage } from './pages/LandingPage';
 const LoginPage = React.lazy(() => import('./pages/LoginPage').then((m) => ({ default: m.LoginPage })));
 const SignupPage = React.lazy(() => import('./pages/SignupPage').then((m) => ({ default: m.SignupPage })));
 const ForgotPasswordPage = React.lazy(() => import('./pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));

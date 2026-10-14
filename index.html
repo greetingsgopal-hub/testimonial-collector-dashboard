@@ -29,7 +29,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   </head>
   <body class="bg-[#FFFFFF] text-slate-900 font-sans antialiased min-h-screen selection:bg-[#4F46E5]/15 selection:text-[#4F46E5]">
-    <div id="root"></div>
+    <div id="root">
+      <div id="pp-initial-loader" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+          <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 25px -5px rgba(124,58,237,0.35);">
+            <span style="font-size:24px;line-height:1;">🐼</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:14px;height:14px;border:2px solid #ddd6fe;border-top-color:#7c3aed;border-radius:50%;animation:pp-spin 0.7s linear infinite;"></div>
+            <span style="font-size:13px;font-weight:600;color:#475569;letter-spacing:-0.01em;">Panda Praise</span>
+          </div>
+        </div>
+      </div>
+      <style>
+        @keyframes pp-spin { to { transform: rotate(360deg); } }
+      </style>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
