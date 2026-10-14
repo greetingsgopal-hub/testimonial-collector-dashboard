@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
-import { Clock, Download, Copy, Check, X, ArrowRight, ExternalLink, PlusCircle, UserPlus, ShieldCheck } from 'lucide-react';
+import { Clock, Download, Copy, Check, X, ArrowRight, UserPlus, ShieldCheck } from 'lucide-react';
 import { Review } from '../../types';
 import { analytics } from '../../lib/analytics';
 import { CollectorLang } from '../../lib/collectorI18n';
@@ -10,7 +10,7 @@ interface SuccessModalProps {
   review: Review | null;
   onClose: () => void;
   onGoToDashboard?: () => void;
-  onResetForm: () => void;
+  onResetForm?: () => void;
   isPublicView?: boolean;
   businessName?: string;
   projectId?: string;
@@ -22,7 +22,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
   review,
   onClose,
   onGoToDashboard,
-  onResetForm,
+  onResetForm: _onResetForm,
   isPublicView = false,
   businessName,
   projectId,
@@ -256,15 +256,17 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                 <span>{lang === 'en' ? 'EN' : 'Hinglish'}</span>
               </button>
 
-              {/* Dismiss / Close minimal action */}
-              <button
-                onClick={onClose}
-                aria-label="Close form view"
-                className="size-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-white/80 transition-colors cursor-pointer"
-                type="button"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              {/* Dismiss / Close minimal action (only in non-public view) */}
+              {!isPublicView && (
+                <button
+                  onClick={onClose}
+                  aria-label="Close form view"
+                  className="size-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-white/80 transition-colors cursor-pointer"
+                  type="button"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </header>
@@ -553,29 +555,6 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                 </button>
               </div>
             )}
-          </section>
-
-          {/* Next Steps & Return Navigation */}
-          <section className="mt-6 space-y-2">
-            <button
-              onClick={onClose}
-              type="button"
-              className="w-full py-3 bg-[#0f0e1b] hover:bg-black text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
-            >
-              <span>Return to {displayBrand}</span>
-              <ExternalLink className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => {
-                onResetForm();
-                onClose();
-              }}
-              type="button"
-              className="w-full py-2.5 bg-transparent hover:bg-gray-100 text-gray-600 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>Submit another praise or update this one</span>
-            </button>
           </section>
         </main>
 

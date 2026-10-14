@@ -209,7 +209,35 @@ describe('PublicCollectorPage CRO Single-Page Form Suite', () => {
     expect(container.textContent).toContain('Your Live Praise Card');
     expect(container.textContent).toContain('Download Share Card');
     expect(container.textContent).toContain('PRAISE20');
-    expect(container.textContent).toContain('Return to Acme Corp');
+    expect(container.textContent).not.toContain('Return to Acme Corp');
+    expect(container.textContent).not.toContain('Submit another praise');
+  });
+
+  it('6. Enforces One Link, One Device, One Testimonial Rule — blocks duplicate submissions on same link and device', async () => {
+    localStorage.setItem(
+      'pandapraise_submitted_acme-corp',
+      JSON.stringify({
+        submittedAt: '2026-10-14T10:00:00.000Z',
+        reviewId: 'rev_prev_1',
+        name: 'Alex Rivera',
+      })
+    );
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/c/acme-corp']}>
+          <Routes>
+            <Route path="/c/:collectionSlug" element={<PublicCollectorPage />} />
+          </Routes>
+        </MemoryRouter>
+      );
+    });
+
+    // Should display the One Link, One Device screen and NOT display form inputs
+    expect(container.textContent).toContain('Testimonial Already Recorded');
+    expect(container.textContent).toContain('1 Link • 1 Device • 1 Testimonial Rule');
+    expect(container.querySelector('form')).toBeNull();
+    expect(container.querySelector('textarea')).toBeNull();
   });
 });
 

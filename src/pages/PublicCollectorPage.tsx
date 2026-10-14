@@ -3,7 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { SuccessModal } from '../components/collector/SuccessModal';
 import { Review, ReviewInput, CollectionForm, Project } from '../types';
 import { storage, getActiveBackendInfo } from '../lib/storage';
-import { AlertCircle, Clock, ShieldCheck, Check, ArrowRight, Video, FileText, Camera } from 'lucide-react';
+import { AlertCircle, Clock, ShieldCheck, Check, ArrowRight, Video, FileText, Camera, X, User, CheckCircle2, Lock } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
 import { cleanBrandOrProductName, deduplicateRepeatedString, sanitizeText, validateReviewInput } from '../lib/security';
@@ -26,6 +26,8 @@ const INITIAL_FORM_STATE: ReviewInput = {
 export const PublicCollectorPage: React.FC = () => {
   const { collectionSlug } = useParams<{ collectionSlug: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const cleanSlug = (collectionSlug || '').replace(/^[\[%5B]+|[\]%5D]+$/gi, '').trim();
 
   const urlLang = searchParams.get('lang') === 'hi' ? 'hi' : searchParams.get('lang') === 'en' ? 'en' : null;
   const [lang, setLang] = useState<CollectorLang>(() => {
@@ -60,6 +62,28 @@ export const PublicCollectorPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isClosed, setIsClosed] = useState(false);
+
+  // One Link, One Device, One Testimonial Rule state
+  const [alreadySubmitted, setAlreadySubmitted] = useState<boolean>(() => {
+    if (!cleanSlug) return false;
+    try {
+      return Boolean(localStorage.getItem(`pandapraise_submitted_${cleanSlug}`));
+    } catch {
+      return false;
+    }
+  });
+  const [existingSubmissionData] = useState<{ name?: string; submittedAt?: string } | null>(() => {
+    if (!cleanSlug) return null;
+    try {
+      const stored = localStorage.getItem(`pandapraise_submitted_${cleanSlug}`);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Avatar / Profile Pic state
+  const [keepAvatarBlank, setKeepAvatarBlank] = useState<boolean>(false);
 
   // Form State
   const [formData, setFormData] = useState<ReviewInput>(INITIAL_FORM_STATE);
@@ -181,6 +205,7 @@ export const PublicCollectorPage: React.FC = () => {
   const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setKeepAvatarBlank(false);
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
@@ -191,6 +216,25 @@ export const PublicCollectorPage: React.FC = () => {
     }
   };
 
+  const handleRemoveAvatar = () => {
+    setFormData(prev => ({ ...prev, avatarUrl: '' }));
+    setKeepAvatarBlank(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleToggleBlankAvatar = () => {
+    setKeepAvatarBlank(prev => {
+      const next = !prev;
+      if (next) {
+        setFormData(f => ({ ...f, avatarUrl: '' }));
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+      return next;
+    });
+  };
+
   const handleIdeaChipClick = (promptText: string) => {
     setFormData(prev => {
       const cleanPrompt = promptText.replace(/^[^\w]+/, '').trim();
@@ -199,16 +243,6 @@ export const PublicCollectorPage: React.FC = () => {
         : `${cleanPrompt}: `;
       return { ...prev, content: newContent };
     });
-  };
-
-  const handleAutofillLinkedIn = () => {
-    if (!formData.name) {
-      setFormData(prev => ({
-        ...prev,
-        name: 'Alex Rivera',
-        role: 'Product Lead @ Acme Corp',
-      }));
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -315,8 +349,22 @@ export const PublicCollectorPage: React.FC = () => {
         title: created.title || formData.title,
         content: created.content || formData.content,
         rating: created.rating || activeRating,
-        avatarUrl: created.avatarUrl || formData.avatarUrl,
+        avatarUrl: keepAvatarBlank ? '' : (created.avatarUrl || formData.avatarUrl),
       };
+
+      // Enforce One Link, One Device, One Testimonial Rule in local storage
+      try {
+        if (cleanSlug) {
+          localStorage.setItem(`pandapraise_submitted_${cleanSlug}`, JSON.stringify({
+            submittedAt: new Date().toISOString(),
+            reviewId: created.id,
+            name: fullSubmittedReview.name,
+            brand: displayBrand,
+          }));
+        }
+      } catch (e) {}
+
+      setAlreadySubmitted(true);
       setSubmittedReview(fullSubmittedReview);
     } catch (err: any) {
       setValidationError(err.message || 'Failed to submit review. Please try again.');
@@ -389,6 +437,52 @@ export const PublicCollectorPage: React.FC = () => {
     );
   }
 
+  // One Link, One Device, One Testimonial Rule Enforced Screen
+  if (alreadySubmitted && !submittedReview) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex flex-col items-center justify-center p-4 text-center font-sans selection:bg-emerald-100 selection:text-emerald-700">
+        <div className="max-w-md w-full p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 space-y-5 shadow-xl shadow-slate-900/5">
+          <div className="relative inline-flex items-center justify-center mx-auto">
+            <div className="absolute inset-0 rounded-full bg-emerald-200/50 blur-lg animate-pulse" />
+            <div className="relative h-14 w-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md">
+              <CheckCircle2 className="w-8 h-8 stroke-[2.2]" />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-0.5 text-[11px] font-bold text-emerald-800">
+              <span>✓ Testimonial Already Recorded</span>
+            </div>
+            <h2 className="text-xl font-extrabold tracking-tight text-slate-900 font-display">
+              Thank You{existingSubmissionData?.name ? `, ${existingSubmissionData.name}` : ''}!
+            </h2>
+            <p className="text-xs text-slate-600 leading-relaxed max-w-xs mx-auto text-balance">
+              Your verified praise for <strong className="text-slate-900">{displayBrand}</strong> has already been received and logged to the dashboard.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 text-left space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <Lock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>1 Link • 1 Device • 1 Testimonial Rule</span>
+            </div>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              To prevent duplicate entries and guarantee authentic social proof, each collection link accepts only one verified testimonial per device.
+            </p>
+            <p className="text-[10px] text-slate-400 font-medium">
+              Need to submit another review? Please ask <strong className="text-slate-700">{displayBrand}</strong> to send a fresh link.
+            </p>
+          </div>
+
+          <div className="pt-1 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+            <span>Verified by</span>
+            <span className="font-bold text-slate-700">PandaPraise 🐾</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-full bg-slate-50/60 text-slate-900 antialiased selection:bg-emerald-100 selection:text-emerald-700 font-sans">
       <div 
@@ -448,9 +542,9 @@ export const PublicCollectorPage: React.FC = () => {
 
         {/* Main Form Content */}
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between">
-          <main className="flex-1 px-4 py-5 space-y-5" data-purpose="main-feedback-form">
+          <main className="flex-1 px-4 py-3.5 space-y-3.5" data-purpose="main-feedback-form">
             {/* Reassurance Banner */}
-            <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50/70 to-emerald-50/60 px-3 py-2 text-[11px] font-medium text-emerald-800 border border-emerald-500/20 shadow-sm">
+            <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50/70 to-emerald-50/60 px-2.5 py-1.5 text-[10.5px] font-medium text-emerald-800 border border-emerald-500/20 shadow-2xs">
               <div className="flex items-center gap-2">
                 <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>Takes less than 30 seconds • No login required</span>
@@ -462,33 +556,36 @@ export const PublicCollectorPage: React.FC = () => {
             </div>
 
             {/* Prompt Heading */}
-            <section className="text-center space-y-1.5 pt-1" data-purpose="prompt-heading">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-0.5 text-[11px] font-bold text-emerald-700 shadow-sm">
+            <section className="text-center space-y-1 pt-0.5" data-purpose="prompt-heading">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[10.5px] font-bold text-emerald-700 shadow-2xs">
                 <span>✨ Share Your Experience</span>
               </div>
-              <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
-                How was your experience with{' '}
-                <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                  {displayBrand}
-                </span>?
+              <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 leading-snug px-1 text-balance max-w-sm mx-auto">
+                How was your experience{' '}
+                <span className="inline-block whitespace-normal break-words">
+                  with{' '}
+                  <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent font-black">
+                    {displayBrand}?
+                  </span>
+                </span>
               </h1>
-              <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
+              <p className="text-[11px] text-slate-500 max-w-xs mx-auto leading-relaxed text-balance pt-0.5">
                 Your authentic story inspires our team and guides future members to make confident decisions.
               </p>
             </section>
 
             {/* Star Rating Module */}
-            <section className="rounded-2xl border border-emerald-100/80 bg-white p-4 shadow-sm space-y-3" data-purpose="star-rating-module">
+            <section className="rounded-2xl border border-emerald-100/80 bg-white p-3 shadow-2xs space-y-2" data-purpose="star-rating-module">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   Overall Satisfaction
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-800 border border-amber-200 shadow-sm" id="rating-text-badge">
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800 border border-amber-200 shadow-2xs" id="rating-text-badge">
                   {getRatingBadgeText(activeRating)}
                 </span>
               </div>
 
-              <div className="flex items-center justify-center gap-2 py-1" id="star-rating-container">
+              <div className="flex items-center justify-center gap-1.5 py-0.5" id="star-rating-container">
                 {[1, 2, 3, 4, 5].map((val) => (
                   <button
                     key={val}
@@ -500,7 +597,7 @@ export const PublicCollectorPage: React.FC = () => {
                     className="star-btn p-1 text-amber-400 hover:scale-110 transition-transform active:scale-95 focus:outline-none cursor-pointer"
                   >
                     <svg 
-                      className={`h-8 w-8 drop-shadow-sm transition-colors ${val <= activeRating ? 'fill-current text-amber-400' : 'fill-slate-100 text-slate-200'}`} 
+                      className={`h-7 w-7 drop-shadow-2xs transition-colors ${val <= activeRating ? 'fill-current text-amber-400' : 'fill-slate-100 text-slate-200'}`} 
                       viewBox="0 0 20 20"
                     >
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -511,14 +608,14 @@ export const PublicCollectorPage: React.FC = () => {
             </section>
 
             {/* Form Fields Container */}
-            <div className="rounded-2xl border border-emerald-100/80 bg-white p-4 shadow-sm space-y-4" data-purpose="form-fields-container">
+            <div className="rounded-2xl border border-emerald-100/80 bg-white p-3.5 shadow-2xs space-y-3" data-purpose="form-fields-container">
               {/* Submission Mode Tabs */}
-              <div className="grid grid-cols-2 rounded-xl bg-slate-100/90 p-1 text-xs font-semibold text-slate-600 border border-slate-200/60" data-purpose="submission-mode-tabs">
+              <div className="grid grid-cols-2 rounded-xl bg-slate-100/90 p-0.5 text-xs font-semibold text-slate-600 border border-slate-200/60" data-purpose="submission-mode-tabs">
                 <button
                   type="button"
                   id="tab-text"
                   onClick={() => setSubmissionMode('text')}
-                  className={`flex items-center justify-center gap-1.5 rounded-lg py-2 transition-all cursor-pointer ${
+                  className={`flex items-center justify-center gap-1.5 rounded-lg py-1.5 transition-all cursor-pointer ${
                     submissionMode === 'text'
                       ? 'bg-white text-emerald-700 shadow-sm font-bold'
                       : 'text-slate-500 hover:text-slate-800'
@@ -531,7 +628,7 @@ export const PublicCollectorPage: React.FC = () => {
                   type="button"
                   id="tab-video"
                   onClick={() => setSubmissionMode('video')}
-                  className={`flex items-center justify-center gap-1.5 rounded-lg py-2 transition-all cursor-pointer ${
+                  className={`flex items-center justify-center gap-1.5 rounded-lg py-1.5 transition-all cursor-pointer ${
                     submissionMode === 'video'
                       ? 'bg-white text-emerald-700 shadow-sm font-bold'
                       : 'text-slate-500 hover:text-slate-800'
@@ -554,8 +651,8 @@ export const PublicCollectorPage: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 pb-0.5 text-[11px] overflow-x-auto">
-                  <span className="text-[10px] text-slate-400 shrink-0 font-semibold uppercase tracking-wider">Ideas:</span>
+                <div className="flex items-center gap-1.5 pb-0.5 text-[10.5px] overflow-x-auto">
+                  <span className="text-[9.5px] text-slate-400 shrink-0 font-semibold uppercase tracking-wider">Ideas:</span>
                   <button
                     type="button"
                     onClick={() => handleIdeaChipClick('What problem did it solve?')}
@@ -574,18 +671,18 @@ export const PublicCollectorPage: React.FC = () => {
 
                 <textarea
                   id="testimonial-input"
-                  rows={4}
+                  rows={3}
                   value={formData.content}
                   onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  placeholder={`What did you love most? Share your authentic thoughts, measurable results, or why you'd recommend ${displayBrand}...`}
-                  className="w-full min-h-[110px] rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm transition-all resize-none leading-relaxed"
+                  placeholder={`What did you love most? Share your authentic thoughts, results, or why you'd recommend ${displayBrand}...`}
+                  className="w-full min-h-[96px] rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-sm transition-all resize-none leading-relaxed"
                   required
                 />
               </div>
 
               {/* Video URL Input if in Video Mode */}
               {submissionMode === 'video' && (
-                <div className="space-y-1.5 p-3 rounded-xl bg-emerald-50/50 border border-emerald-200/60 animate-fade-in">
+                <div className="space-y-1.5 p-2.5 rounded-xl bg-emerald-50/50 border border-emerald-200/60 animate-fade-in">
                   <label className="text-xs font-bold text-slate-800 flex items-center gap-1">
                     <Video className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Video Recording URL (Loom, YouTube, MP4)</span>
@@ -595,13 +692,13 @@ export const PublicCollectorPage: React.FC = () => {
                     value={formData.videoUrl || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, videoUrl: e.target.value }))}
                     placeholder="https://www.loom.com/share/... or YouTube link"
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 shadow-sm"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 shadow-sm"
                   />
                 </div>
               )}
 
               {/* About You */}
-              <div className="pt-2 border-t border-slate-100 space-y-3">
+              <div className="pt-2 border-t border-slate-100 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-800">About You</span>
                   <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200/60 rounded-full px-2 py-0.5 flex items-center gap-1">
@@ -611,7 +708,7 @@ export const PublicCollectorPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  {/* Avatar Upload Trigger */}
+                  {/* Avatar Upload Trigger & Blank Toggle */}
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -619,31 +716,73 @@ export const PublicCollectorPage: React.FC = () => {
                     accept="image/*"
                     className="hidden"
                   />
-                  <div
-                    id="avatar-trigger"
-                    title="Upload Photo"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="relative group cursor-pointer shrink-0"
-                  >
-                    <div 
-                      id="avatar-preview-box"
-                      className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-emerald-100 to-teal-50 text-emerald-700 font-bold border-2 border-dashed border-emerald-300 text-xs shadow-sm overflow-hidden"
+                  <div className="flex flex-col items-center gap-1 shrink-0">
+                    <div
+                      id="avatar-trigger"
+                      title={formData.avatarUrl ? 'Click to change photo' : 'Upload photo'}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="relative group cursor-pointer"
                     >
+                      <div 
+                        id="avatar-preview-box"
+                        className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-emerald-100 to-teal-50 text-emerald-700 font-bold border-2 border-dashed border-emerald-300 text-xs shadow-sm overflow-hidden"
+                      >
+                        {formData.avatarUrl ? (
+                          <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                        ) : keepAvatarBlank ? (
+                          <User className="h-5 w-5 text-slate-400" />
+                        ) : (
+                          <span id="avatar-initials">{getInitials(formData.name)}</span>
+                        )}
+                      </div>
                       {formData.avatarUrl ? (
-                        <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveAvatar();
+                          }}
+                          title="Remove Photo"
+                          className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 text-white shadow-sm hover:bg-rose-700 cursor-pointer"
+                        >
+                          <X className="h-2.5 w-2.5" />
+                        </button>
                       ) : (
-                        <span id="avatar-initials">{getInitials(formData.name)}</span>
+                        <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-600 text-white shadow">
+                          <Camera className="h-2.5 w-2.5" />
+                        </div>
                       )}
-                    </div>
-                    <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-600 text-white shadow">
-                      <Camera className="h-2.5 w-2.5" />
                     </div>
                   </div>
 
                   <div className="flex-1 space-y-1">
-                    <label className="text-[11px] font-bold text-slate-700" htmlFor="name-input">
-                      Full Name <span className="text-emerald-600">*</span>
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-bold text-slate-700" htmlFor="name-input">
+                        Full Name <span className="text-emerald-600">*</span>
+                      </label>
+                      {/* Avatar Quick Clear / Blank Action */}
+                      {formData.avatarUrl ? (
+                        <button
+                          type="button"
+                          onClick={handleRemoveAvatar}
+                          className="text-[10px] text-rose-600 hover:text-rose-700 font-semibold cursor-pointer"
+                        >
+                          ✕ Remove photo
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleToggleBlankAvatar}
+                          className={`text-[10px] font-medium transition-colors cursor-pointer ${
+                            keepAvatarBlank
+                              ? 'text-emerald-700 font-bold'
+                              : 'text-slate-400 hover:text-slate-600 underline'
+                          }`}
+                        >
+                          {keepAvatarBlank ? '✓ Blank avatar set' : 'Keep avatar blank'}
+                        </button>
+                      )}
+                    </div>
                     <input
                       id="name-input"
                       type="text"
@@ -669,31 +808,20 @@ export const PublicCollectorPage: React.FC = () => {
                     className="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-1.5 text-xs text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 shadow-sm"
                   />
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleAutofillLinkedIn}
-                  className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 text-[11px] font-semibold text-slate-700 transition-colors shadow-sm cursor-pointer"
-                >
-                  <svg className="h-3.5 w-3.5 text-[#0A66C2]" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
-                  </svg>
-                  <span>Auto-fill details via LinkedIn</span>
-                </button>
               </div>
             </div>
 
             {/* Live Widget Preview */}
-            <section className="rounded-2xl border border-emerald-200/90 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/50 p-4 shadow-sm space-y-2.5" data-purpose="live-card-preview">
+            <section className="rounded-2xl border border-emerald-200/90 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/50 p-3 shadow-2xs space-y-2" data-purpose="live-card-preview">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="flex h-2 w-2 rounded-full bg-emerald-600 animate-ping" />
-                  <span className="text-[11px] font-bold text-slate-800 tracking-wider uppercase">Live Widget Preview</span>
+                  <span className="text-[10.5px] font-bold text-slate-800 tracking-wider uppercase">Live Widget Preview</span>
                 </div>
                 <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-extrabold uppercase text-emerald-700">Real-Time</span>
               </div>
 
-              <article className="relative rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs space-y-3 text-left transition-all hover:shadow-sm" id="live-rendered-card">
+              <article className="relative rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs space-y-2.5 text-left transition-all hover:shadow-sm" id="live-rendered-card">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <div className="flex items-center text-amber-400 text-sm tracking-tight">
@@ -721,11 +849,15 @@ export const PublicCollectorPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between pt-2.5 border-t border-slate-100/90">
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100/90">
                   <div className="flex items-center gap-2.5">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-[11px] font-bold text-white shadow-xs overflow-hidden shrink-0">
                       {formData.avatarUrl ? (
                         <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : keepAvatarBlank ? (
+                        <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+                          <User className="h-4 w-4" />
+                        </div>
                       ) : (
                         getInitials(formData.name)
                       )}
@@ -790,12 +922,12 @@ export const PublicCollectorPage: React.FC = () => {
           </main>
 
           {/* Sticky Action Footer */}
-          <footer className="sticky bottom-0 z-40 border-t border-emerald-100/80 bg-white/95 p-4 backdrop-blur-md" data-purpose="sticky-bottom-action">
+          <footer className="sticky bottom-0 z-40 border-t border-emerald-100/80 bg-white/95 p-3.5 backdrop-blur-md" data-purpose="sticky-bottom-action">
             <button
               id="submit-testimonial-btn"
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 py-3.5 px-6 font-bold text-white shadow-float hover:shadow-emerald-500/30 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.98] transition-all text-sm cursor-pointer disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 py-3 px-5 font-bold text-white shadow-float hover:shadow-emerald-500/30 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.98] transition-all text-xs sm:text-sm cursor-pointer disabled:opacity-60"
             >
               {isSubmitting ? (
                 <>
@@ -814,7 +946,7 @@ export const PublicCollectorPage: React.FC = () => {
               )}
             </button>
 
-            <div className="mt-2.5 flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-medium">
+            <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-medium">
               <span>Powered by</span>
               <span className="font-bold text-slate-700 flex items-center gap-0.5">PandaPraise 🐾</span>
               <span>•</span>
@@ -832,9 +964,13 @@ export const PublicCollectorPage: React.FC = () => {
             projectId={formConfig?.projectId}
             formId={formConfig?.id}
             lang={lang}
-            onClose={() => setSubmittedReview(null)}
+            onClose={() => {
+              setSubmittedReview(null);
+              setAlreadySubmitted(true);
+            }}
             onResetForm={() => {
-              setFormData(INITIAL_FORM_STATE);
+              setSubmittedReview(null);
+              setAlreadySubmitted(true);
             }}
           />
         )}
