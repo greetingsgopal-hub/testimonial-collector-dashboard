@@ -3,6 +3,7 @@
  */
 
 const DEFAULT_SUPERADMIN_EMAILS = [
+  'hello@pandapraise.com',
   'admin@pandapraise.com',
   'founder@pandapraise.com',
   'greetingsgopal@gmail.com',

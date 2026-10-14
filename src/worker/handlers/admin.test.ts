@@ -40,6 +40,7 @@ describe('Admin Handler & Security', () => {
 
   describe('isAuthorizedAdmin', () => {
     it('recognizes default and custom admin emails', () => {
+      expect(isAuthorizedAdmin('hello@pandapraise.com', env)).toBe(true);
       expect(isAuthorizedAdmin('admin@pandapraise.com', env)).toBe(true);
       expect(isAuthorizedAdmin('founder@pandapraise.com', env)).toBe(true);
       expect(isAuthorizedAdmin('CUSTOM_ADMIN@example.com ', env)).toBe(true);

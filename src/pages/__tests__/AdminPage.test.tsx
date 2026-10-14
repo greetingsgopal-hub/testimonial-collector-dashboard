@@ -32,6 +32,7 @@ describe('Superadmin Access & AdminPage', () => {
 
   describe('isSuperadmin helper', () => {
     it('allows default superadmin emails', () => {
+      expect(isSuperadmin('hello@pandapraise.com')).toBe(true);
       expect(isSuperadmin('admin@pandapraise.com')).toBe(true);
       expect(isSuperadmin('FOUNDER@PANDAPRAISE.COM')).toBe(true);
       expect(isSuperadmin('greetingsgopal@gmail.com')).toBe(true);

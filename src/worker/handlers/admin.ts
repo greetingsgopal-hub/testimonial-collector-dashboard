@@ -4,6 +4,7 @@ import { verifyFirebaseToken, extractBearerToken } from '../lib/firebaseAuth';
 import { getAuthHeader, fromFirestoreFields, saveDocument } from '../lib/firestoreAdmin';
 
 const DEFAULT_ADMIN_EMAILS = [
+  'hello@pandapraise.com',
   'admin@pandapraise.com',
   'founder@pandapraise.com',
   'greetingsgopal@gmail.com',
