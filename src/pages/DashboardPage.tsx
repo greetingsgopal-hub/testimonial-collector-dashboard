@@ -596,7 +596,7 @@ export const DashboardPage = () => {
 
           {/* MAIN MODERATION QUEUE & PROOF DASHBOARD VIEW */}
           {activeTab === 'proof' && (
-            <div className="space-y-4 max-w-7xl mx-auto">
+            <div className="space-y-6 max-w-5xl mx-auto font-sans">
               
               {/* Luminous Review Pipeline Hero & Command Center */}
               <ReviewPipelineHero
