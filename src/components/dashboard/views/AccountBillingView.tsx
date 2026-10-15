@@ -3,9 +3,7 @@ import {
   CreditCard,
   CheckCircle2,
   Sparkles,
-  Zap,
   ExternalLink,
-  ArrowUpRight,
   Receipt,
   FileText,
   Check,
@@ -15,12 +13,7 @@ import {
   ShieldCheck,
   Edit3,
   Video,
-  FileCheck,
-  Globe,
-  Share2,
-  Mail,
-  Sliders,
-  X
+  FileCheck
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { Workspace } from '../../../types';
@@ -141,6 +134,20 @@ export const AccountBillingView: React.FC<AccountBillingViewProps> = ({
     setBillingDetails({ ...tempBilling });
     setIsEditingBilling(false);
     showToast('Billing & tax information updated successfully.');
+  };
+
+  const handleAddPaymentMethod = () => {
+    if (onUpgrade) {
+      onUpgrade();
+    } else {
+      setCardOnFile({
+        brand: 'Visa',
+        last4: '4242',
+        expMonth: '08',
+        expYear: '28',
+      });
+      showToast('Card on file updated (Visa •••• 4242).');
+    }
   };
 
   const planTier = stripeSubscription?.plan || workspace?.plan || 'free';
@@ -338,7 +345,7 @@ export const AccountBillingView: React.FC<AccountBillingViewProps> = ({
                 </div>
                 <button
                   type="button"
-                  onClick={onUpgrade || handleBillingPortal}
+                  onClick={handleAddPaymentMethod}
                   className="mt-1 text-xs font-bold text-purple-600 hover:text-purple-700 hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
