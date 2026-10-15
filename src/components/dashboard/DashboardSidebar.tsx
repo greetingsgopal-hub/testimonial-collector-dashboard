@@ -129,13 +129,15 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   };
 
   return (
-    <aside className={`w-64 min-w-[16rem] shrink-0 bg-[#f4f7fb]/95 backdrop-blur-2xl border-r border-slate-200/80 flex flex-col h-screen select-none font-sans text-sm fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:z-30 lg:translate-x-0 ${mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
+    <aside className={`w-64 min-w-[16rem] shrink-0 bg-[#0b101b] border-r border-[#1f293d] flex flex-col h-screen select-none font-sans text-sm fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:z-30 lg:translate-x-0 text-[#f8fafc] ${mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
       
       {/* Brand Header */}
-      <div className="px-5 py-3.5 border-b border-slate-200/60 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-2 group apple-touch">
-          <span className="font-extrabold text-lg tracking-tight text-slate-900 font-display whitespace-nowrap flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-violet-600 shadow-xs shadow-violet-600/50" />
+      <div className="px-5 py-3.5 border-b border-[#1f293d] flex items-center justify-between">
+        <Link to="/dashboard" className="flex items-center gap-2 group">
+          <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center text-[#030712] font-black text-xs">
+            P
+          </div>
+          <span className="font-bold text-base tracking-tight text-white group-hover:text-[#56c5d0] transition-colors whitespace-nowrap">
             Panda Praise
           </span>
         </Link>
@@ -143,7 +145,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           type="button"
           onClick={onClose}
           aria-label="Close navigation"
-          className="lg:hidden p-1.5 -mr-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+          className="lg:hidden p-1.5 -mr-1.5 rounded-md text-[#94a3b8] hover:text-white hover:bg-[#1f293d] transition-colors"
         >
           <X className="w-4.5 h-4.5" />
         </button>

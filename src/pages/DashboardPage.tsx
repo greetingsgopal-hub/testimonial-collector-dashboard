@@ -437,9 +437,9 @@ export const DashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex apple-canvas text-zinc-900 font-sans selection:bg-violet-100 selection:text-violet-900">
+    <div className="min-h-screen flex bg-[#030712] text-[#f8fafc] font-sans selection:bg-[#56c5d0]/30 selection:text-[#56c5d0]">
       
-      {/* ── Apple HIG Left Vertical Sidebar ── */}
+      {/* ── Slate Minimal Left Vertical Sidebar ── */}
       <DashboardSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -454,7 +454,7 @@ export const DashboardPage = () => {
           type="button"
           aria-label="Close navigation"
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
         />
       )}
 
@@ -462,21 +462,21 @@ export const DashboardPage = () => {
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         
         {/* Top Slim Header Bar */}
-        <header className="h-12 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-20">
+        <header className="h-12 border-b border-[#1f293d] bg-[#0b101b]/90 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-20 text-[#f8fafc]">
           <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open navigation"
-              className="lg:hidden p-1.5 -ml-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+              className="lg:hidden p-1.5 -ml-1.5 rounded-md text-[#94a3b8] hover:text-white hover:bg-[#1f293d] transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <span className="text-xs font-bold text-slate-900 tracking-tight">{TAB_LABEL_MAP[activeTab] || activeTab}</span>
-            <span className="text-slate-300">•</span>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate max-w-[240px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span className="truncate font-medium text-slate-600">{project?.name || 'Main Product'}</span>
+            <span className="text-xs font-semibold text-white tracking-tight">{TAB_LABEL_MAP[activeTab] || activeTab}</span>
+            <span className="text-[#3e4c5e]">•</span>
+            <div className="flex items-center gap-1.5 text-xs text-[#94a3b8] truncate max-w-[240px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#56c5d0]" />
+              <span className="truncate font-medium text-slate-300">{project?.name || 'Main Product'}</span>
             </div>
           </div>
         </header>
