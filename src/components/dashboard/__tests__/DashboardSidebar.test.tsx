@@ -106,20 +106,23 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
       );
     });
 
+    expect(container.textContent).toContain('PandaPraise');
     expect(container.textContent).toContain('Welcome Hub');
     expect(container.textContent).toContain('Collect or Import');
     expect(container.textContent).toContain('Evaluate');
     expect(container.textContent).toContain('4'); // proof count badge
-    expect(container.textContent).toContain('Post on Internet');
+    expect(container.textContent).toContain('Widgets & Embeds');
     expect(container.textContent).toContain('On Website');
     expect(container.textContent).toContain('On Social Media');
     expect(container.textContent).toContain('Campaigns');
     expect(container.textContent).toContain('Referrals');
-    expect(container.textContent).toContain('Accounts & Billing mgmt');
+    expect(container.textContent).toContain('Billing & Plans');
+    expect(container.textContent).not.toContain('Post on Internet');
+    expect(container.textContent).not.toContain('Accounts & Billing mgmt');
     expect(container.textContent).not.toContain('Google Stars');
   });
 
-  it('3. Bottom profile chip shows user name, avatar initial, and active workspace name', async () => {
+  it('3. Bottom profile chip shows user name, avatar initial, and active workspace name with truncation and title', async () => {
     await act(async () => {
       root.render(
         <MemoryRouter>
@@ -137,8 +140,11 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
     const nameEl = container.querySelector('#sidebar-profile-display-name');
     expect(nameEl?.textContent).toContain('Alex Rivers');
 
-    const wsEl = container.querySelector('#sidebar-profile-workspace-name');
+    const wsEl = container.querySelector('#sidebar-profile-workspace-name') as HTMLElement;
     expect(wsEl?.textContent).toContain('Acme SaaS Corp');
+    expect(wsEl?.className).toContain('truncate');
+    expect(wsEl?.className).toContain('max-w-[160px]');
+    expect(wsEl?.getAttribute('title')).toBe('Acme SaaS Corp');
   });
 
   it('4. Clicking bottom profile chip toggles unified popover with project list, checkmark, and plan badge', async () => {
@@ -250,6 +256,7 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
 
     const settingsBtn = container.querySelector('#sidebar-account-settings-btn') as HTMLButtonElement;
     expect(settingsBtn).not.toBeNull();
+    expect(settingsBtn.textContent).toContain('Billing & Plans');
 
     await act(async () => {
       settingsBtn.click();
