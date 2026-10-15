@@ -379,9 +379,9 @@ export default function BillingAndPlansPage({
       </section>
 
       {/* TWO-COLUMN MAIN GRID */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: Conditional Free vs Pro State */}
-        <div className="lg:col-span-6 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col justify-between">
+        <div className="lg:col-span-6 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col gap-6">
           {currentPlan === 'free' ? (
             <>
               <div>
@@ -395,7 +395,7 @@ export default function BillingAndPlansPage({
                   </span>
                 </div>
 
-                <ul className="py-5 space-y-3 text-sm text-slate-700">
+                <ul className="pt-4 pb-1 space-y-3 text-sm text-slate-700">
                   <li className="flex items-center gap-3">
                     <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[2.5]" />
                     <span>Up to 10 Text & 2 Video Testimonials</span>
@@ -415,7 +415,7 @@ export default function BillingAndPlansPage({
                 </ul>
               </div>
 
-              <div className="rounded-2xl bg-[#FAF7FF] border border-purple-200/80 p-5 flex flex-col justify-between">
+              <div className="rounded-2xl bg-[#FAF7FF] border border-purple-200/80 p-5 flex flex-col gap-4">
                 <div>
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -467,7 +467,7 @@ export default function BillingAndPlansPage({
             </>
           ) : (
             /* PRO ACTIVE STATE HUB */
-            <div className="flex flex-col justify-between h-full space-y-6">
+            <div className="flex flex-col gap-6">
               <div>
                 <div className="flex items-start justify-between gap-4 pb-5 border-b border-slate-100">
                   <div>
@@ -524,7 +524,7 @@ export default function BillingAndPlansPage({
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="lg:col-span-6 flex flex-col justify-between gap-6">
+        <div className="lg:col-span-6 flex flex-col gap-6">
           {/* Billing & Tax Details */}
           <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4">
