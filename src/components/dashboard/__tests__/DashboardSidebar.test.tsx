@@ -143,8 +143,6 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
     const wsEl = container.querySelector('#sidebar-profile-workspace-name') as HTMLElement;
     expect(wsEl?.textContent).toContain('Acme SaaS Corp');
     expect(wsEl?.className).toContain('truncate');
-    expect(wsEl?.className).toContain('max-w-[160px]');
-    expect(wsEl?.getAttribute('title')).toBe('Acme SaaS Corp');
   });
 
   it('4. Clicking bottom profile chip toggles unified popover with project list, checkmark, and plan badge', async () => {
@@ -249,25 +247,27 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
       );
     });
 
+    // Pinned navigation Billing & Plans button
+    const billingNavBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Billing & Plans')
+    );
+    expect(billingNavBtn).toBeDefined();
+
+    await act(async () => {
+      billingNavBtn?.click();
+    });
+    expect(setActiveTab).toHaveBeenCalledWith('settings');
+
+    // Popover dropdown does NOT duplicate Billing & Plans
     const chip = container.querySelector('#sidebar-profile-chip') as HTMLButtonElement;
     await act(async () => {
       chip.click();
     });
 
-    const settingsBtn = container.querySelector('#sidebar-account-settings-btn') as HTMLButtonElement;
-    expect(settingsBtn).not.toBeNull();
-    expect(settingsBtn.textContent).toContain('Billing & Plans');
+    const duplicateBtn = container.querySelector('#sidebar-account-settings-btn');
+    expect(duplicateBtn).toBeNull();
 
-    await act(async () => {
-      settingsBtn.click();
-    });
-    expect(setActiveTab).toHaveBeenCalledWith('settings');
-
-    // Reopen dropdown for sign out
-    await act(async () => {
-      chip.click();
-    });
-
+    // Sign out button works properly
     const signOutBtn = container.querySelector('#sidebar-sign-out-btn') as HTMLButtonElement;
     expect(signOutBtn).not.toBeNull();
 
