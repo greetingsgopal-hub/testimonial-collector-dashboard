@@ -8,22 +8,43 @@ const DEFAULT_ADMIN_EMAILS = [
   'admin@pandapraise.com',
   'founder@pandapraise.com',
   'greetingsgopal@gmail.com',
+  'greetings.gopal@gmail.com',
 ];
+
+function canonicalizeEmail(email: string): string {
+  const normalized = email.trim().toLowerCase();
+  const atIndex = normalized.indexOf('@');
+  if (atIndex === -1) return normalized;
+
+  const user = normalized.slice(0, atIndex);
+  const domain = normalized.slice(atIndex + 1);
+
+  if (domain === 'gmail.com' || domain === 'googlemail.com') {
+    const cleanUser = user.split('+')[0].replace(/\./g, '');
+    return `${cleanUser}@gmail.com`;
+  }
+
+  return normalized;
+}
 
 /**
  * Checks whether an email has superadmin privileges.
  */
 export function isAuthorizedAdmin(email: string | undefined | null, env: WorkerEnv): boolean {
   if (!email || typeof email !== 'string') return false;
-  const normalized = email.trim().toLowerCase();
 
   const customAdmins = (env.ADMIN_EMAILS || env.VITE_SUPERADMIN_EMAILS || '')
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 
-  const allAdmins = new Set([...DEFAULT_ADMIN_EMAILS, ...customAdmins]);
-  return allAdmins.has(normalized);
+  const rawList = [...DEFAULT_ADMIN_EMAILS, ...customAdmins];
+  const canonicalList = new Set(rawList.map(canonicalizeEmail));
+
+  const targetRaw = email.trim().toLowerCase();
+  const targetCanonical = canonicalizeEmail(targetRaw);
+
+  return canonicalList.has(targetRaw) || canonicalList.has(targetCanonical);
 }
 
 /**
