@@ -109,39 +109,36 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#030712] text-[#f8fafc] selection:bg-[#56c5d0]/30 selection:text-[#56c5d0] relative pb-20 sm:pb-0 font-sans">
+    <div className="min-h-screen bg-[#FFFFFF] text-[#0F172A] selection:bg-brand-500/20 selection:text-brand-900 relative pb-20 sm:pb-0 font-sans">
       
       {/* ── 1. Top Announcement Bar ── */}
-      <div className="bg-[#0b101b] border-b border-[#1f293d] hover:bg-[#131b2c] transition-all text-[#56c5d0] py-2 px-4 text-center relative z-40 flex items-center justify-center gap-2 shadow-xs text-xs sm:text-sm font-medium">
+      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all text-white py-2 px-4 text-center relative z-40 flex items-center justify-center gap-2 shadow-xs text-xs sm:text-sm font-medium">
         <Link to="/signup" className="flex items-center gap-2 hover:underline">
-          <span className="bg-[#1f293d] text-white text-[11px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">
+          <span className="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
             ⚡ Social Proof
           </span>
           <span>Turn customer praise into your most trusted marketing</span>
-          <span className="hidden sm:inline text-[#94a3b8] font-semibold ml-1">| Start Free in 2 Minutes →</span>
+          <span className="hidden sm:inline text-white/90 font-bold ml-1">| Start Free in 2 Minutes →</span>
         </Link>
       </div>
 
       {/* Ambient background glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem]" style={{ background: 'radial-gradient(75rem 28rem at 50% -4rem, rgba(86, 197, 208, 0.08), transparent)' }} />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem]" style={{ background: 'radial-gradient(75rem 28rem at 50% -4rem, rgb(79 70 229 / 0.08), transparent)' }} />
 
       {/* ── 2. Header / Navigation (Sticky Frozen Navbar) ── */}
-      <header className="sticky top-0 z-50 w-full bg-[#0b101b]/95 border-b border-[#1f293d] backdrop-blur-md shadow-xs transition-shadow">
+      <header className="sticky top-0 z-50 w-full bg-white/95 border-b border-gray-200/80 backdrop-blur-md shadow-xs transition-shadow">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
           
           {/* Logo strictly clean text "Panda Praise" */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-7 h-7 rounded-md bg-white flex items-center justify-center text-[#030712] font-black text-xs shadow-xs">
-              P
-            </div>
-            <span className="font-sans font-bold text-xl sm:text-2xl tracking-tight text-white group-hover:text-[#56c5d0] transition-colors">
-              Panda <span className="text-[#56c5d0]">Praise</span>
+            <span className="font-bold text-xl sm:text-2xl tracking-tight text-slate-900 group-hover:text-brand-700 transition-colors">
+              Panda <span className="text-brand-600">Praise</span>
             </span>
           </Link>
 
           {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#94a3b8]">
-            <Link to="/pricing" className="hover:text-white transition-colors">
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
+            <Link to="/pricing" className="hover:text-brand-600 transition-colors">
               Pricing
             </Link>
             <button
