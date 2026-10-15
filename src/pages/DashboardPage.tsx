@@ -565,7 +565,7 @@ export const DashboardPage = () => {
 
           {/* Accounts & Billing Management */}
           {(activeTab === 'settings' || activeTab === 'integrate') && (
-            <div className="max-w-5xl mx-auto font-sans">
+            <div className="max-w-6xl mx-auto font-sans">
               <AccountBillingView
                 workspace={workspace}
                 onUpgrade={() => setShowUpgradeModal(true)}

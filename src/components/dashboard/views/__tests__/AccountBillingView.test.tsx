@@ -3,20 +3,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React, { act } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { AccountBillingView } from '../AccountBillingView';
+import BillingAndPlansPage from '../../../../pages/BillingAndPlansPage';
 
-vi.mock('../../../../context/AuthContext', () => ({
-  useAuth: () => ({
-    project: { id: 'proj_billing_1', name: 'papasystem', slug: 'papasystem' },
-    user: { uid: 'usr_owner_1', email: 'owner@papasystem.com', displayName: 'Gopal Thakur' },
-    workspace: { id: 'ws_papasystem', name: 'papasystem Workspace', plan: 'free' },
-  }),
-}));
-
-describe('AccountBillingView Suite - Conversion-First SaaS Architecture', () => {
+describe('AccountBillingView & BillingAndPlansPage Suite', () => {
   let container: HTMLDivElement;
   let root: Root;
 
   beforeEach(() => {
+    localStorage.clear();
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -27,50 +21,50 @@ describe('AccountBillingView Suite - Conversion-First SaaS Architecture', () => 
       root.unmount();
     });
     container.remove();
+    localStorage.clear();
   });
 
-  it('1. Renders top header with Free Plan • Active badge and Upgrade to Pro ⚡ CTA (removes Stripe Connected)', async () => {
+  it('1. Renders page header banner with Free Plan • Active and Upgrade to Pro CTA', async () => {
     await act(async () => {
       root.render(<AccountBillingView />);
     });
 
     expect(container.textContent).toContain('Account & Billing Management');
     expect(container.textContent).toContain('Free Plan • Active');
-    expect(container.textContent).not.toContain('Stripe Connected');
-    expect(container.textContent).toContain('Manage your PandaPraise workspace subscription tier, usage quotas, payment methods, and tax invoices.');
-    expect(container.textContent).toContain('Upgrade to Pro ⚡');
+    expect(container.textContent).toContain('Manage your PandaPraise workspace subscription tier, usage quotas, payment methods, and GST invoices via Razorpay.');
+    expect(container.textContent).toContain('Upgrade to Pro');
   });
 
-  it('2. Renders 4 conversion-driving KPI cards with real quotas and payment method state', async () => {
+  it('2. Renders 4 KPI cards with real quotas and clean Razorpay payment method state (No fake 4242)', async () => {
     await act(async () => {
       root.render(<AccountBillingView />);
     });
 
-    // Card 1: CURRENT PLAN
-    expect(container.textContent).toContain('CURRENT PLAN');
+    // Card 1: Current Plan
+    expect(container.textContent).toContain('Current Plan');
     expect(container.textContent).toContain('Free Plan');
     expect(container.textContent).toContain('$0 / month • Free Forever');
-    expect(container.textContent).not.toContain('↑ Standard Monthly Renewal');
 
-    // Card 2: VIDEO & AUDIO PROOFS
-    expect(container.textContent).toContain('VIDEO & AUDIO PROOFS');
+    // Card 2: Video & Audio Proofs
+    expect(container.textContent).toContain('Video & Audio Proofs');
     expect(container.textContent).toContain('1 / 2 Used');
     expect(container.textContent).toContain('1 video proof remaining on Free Plan');
 
-    // Card 3: TEXT TESTIMONIALS
-    expect(container.textContent).toContain('TEXT TESTIMONIALS');
+    // Card 3: Text Testimonials
+    expect(container.textContent).toContain('Text Testimonials');
     expect(container.textContent).toContain('8 / 10 Used');
-    expect(container.textContent).toContain('Upgrade for unlimited text & video proofs');
+    expect(container.textContent).toContain('2 text proofs remaining on Free Plan');
 
-    // Card 4: PAYMENT METHOD (Empty state)
-    expect(container.textContent).toContain('PAYMENT METHOD');
-    expect(container.textContent).toContain('No Card on File');
-    expect(container.textContent).toContain('+ Add Payment Method');
-    expect(container.textContent).toContain('Secured via Razorpay (PCI-DSS L1)');
-    expect(container.textContent).not.toContain('Proof Limit');
+    // Card 4: Payment Method (Clean Razorpay state)
+    expect(container.textContent).toContain('Payment Method');
+    expect(container.textContent).toContain('No Payment Method');
+    expect(container.textContent).toContain('Add via Razorpay');
+    expect(container.textContent).toContain('Secured by Razorpay (PCI-DSS L1)');
+    expect(container.textContent).not.toContain('•••• 4242');
+    expect(container.textContent).not.toContain('okaxis');
   });
 
-  it('3. Renders left column with Included in Free Plan vs Unlock with PandaPraise Pro tier breakdown', async () => {
+  it('3. Renders left column with Included in Free Plan vs Unlock with PandaPraise Pro breakdown', async () => {
     await act(async () => {
       root.render(<AccountBillingView />);
     });
@@ -85,91 +79,66 @@ describe('AccountBillingView Suite - Conversion-First SaaS Architecture', () => 
 
     // Pro upsell section
     expect(container.textContent).toContain('Unlock with PandaPraise Pro');
-    expect(container.textContent).toContain('$29 / mo');
+    expect(container.textContent).toContain('₹2,499 / mo');
     expect(container.textContent).toContain('Unlimited Text, Audio & Video Testimonials');
     expect(container.textContent).toContain('Remove "Powered by PandaPraise" Branding');
-    expect(container.textContent).toContain('Automated Review Request Drips');
-    expect(container.textContent).toContain('Custom Subdomain & Custom Domain');
-    expect(container.textContent).toContain('AI Sentiment Analysis & Spam Moderation Shield');
-    expect(container.textContent).toContain('1-Click Social Media Distribution Studio');
-    expect(container.textContent).toContain('Inbound Webhooks & Developer REST API');
-    expect(container.textContent).toContain('Upgrade to Pro — ₹2,499/mo →');
+    expect(container.textContent).toContain('Automated Review Request Drips (Email & WhatsApp)');
+    expect(container.textContent).toContain('Custom Subdomain & Domain Collection Forms');
+    expect(container.textContent).toContain('AI Sentiment Analysis & Spam Shield');
+    expect(container.textContent).toContain('Pay with Razorpay — ₹2,499/mo');
   });
 
-  it('4. Renders Billing & Tax Details card with company name, email, tax ID and edit trigger', async () => {
+  it('4. Renders Billing & Tax Details card and opens edit modal', async () => {
     await act(async () => {
       root.render(<AccountBillingView />);
     });
 
     expect(container.textContent).toContain('Billing & Tax Details');
     expect(container.textContent).toContain('Legal / Company Name');
-    expect(container.textContent).toContain('Billing Email');
     expect(container.textContent).toContain('Tax ID (GSTIN / VAT Number)');
+    expect(container.textContent).toContain('Billing Email Address');
+    expect(container.textContent).toContain('Receives Razorpay GST receipts');
     expect(container.textContent).toContain('Edit Billing Info');
+
+    // Click Edit Billing Info
+    const editBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Edit Billing Info')
+    );
+    expect(editBtn).toBeDefined();
+
+    await act(async () => {
+      editBtn?.click();
+    });
+
+    expect(container.textContent).toContain('Edit Billing & GST Details');
+    expect(container.textContent).toContain('Save Changes');
   });
 
-  it('5. Renders Invoices card with empty state on Free Plan and interactive demo toggle', async () => {
+  it('5. Renders Invoices card with empty state on Free Plan (No fake sequential invoices)', async () => {
     await act(async () => {
       root.render(<AccountBillingView />);
     });
 
     expect(container.textContent).toContain('Invoices & Receipts');
-    // On free plan without payments, must not show sequential $0.00 invoices
     expect(container.textContent).toContain('No billing history yet');
-    expect(container.textContent).toContain('Paid invoices and downloadable tax receipts will appear here once you upgrade to a paid plan.');
-    expect(container.textContent).not.toContain('$0.00 Paid');
-
-    // Unclipped banner
-    expect(container.textContent).toContain('Invoices are synced with Razorpay.');
-
-    // Toggle demo paid mode to preview real paid invoices
-    const demoToggle = container.querySelector('#demo-toggle-invoices') as HTMLButtonElement;
-    expect(demoToggle).not.toBeNull();
-    expect(demoToggle.textContent).toContain('Preview Paid Invoices');
-
-    await act(async () => {
-      demoToggle.click();
-    });
-
-    expect(container.textContent).toContain('INV-2026-004');
-    expect(container.textContent).toContain('₹2,499');
-    expect(container.textContent).toContain('Paid');
+    expect(container.textContent).toContain('Once you complete a payment via Razorpay, your verified GST tax invoice will appear here automatically.');
+    expect(container.textContent).not.toContain('INV-2026-004');
+    expect(container.textContent).toContain('Payments processed via Razorpay.');
   });
 
-  it('6. Opens Razorpay Secure Checkout modal and verifies payment instrument', async () => {
+  it('6. Renders full standalone layout with sidebar when hideSidebar is false', async () => {
     await act(async () => {
-      root.render(<AccountBillingView />);
+      root.render(<BillingAndPlansPage hideSidebar={false} />);
     });
 
-    // Find and click + Add Payment Method
-    const addMethodBtn = Array.from(container.querySelectorAll('button')).find((b) =>
-      b.textContent?.includes('+ Add Payment Method')
-    );
-    expect(addMethodBtn).toBeDefined();
-
-    await act(async () => {
-      addMethodBtn?.click();
-    });
-
-    expect(container.textContent).toContain('Razorpay Trusted Gateway');
-    expect(container.textContent).toContain('Upgrade to PandaPraise Pro');
-    expect(container.textContent).toContain('Credit / Debit Card');
-    expect(container.textContent).toContain('UPI Autopay');
-
-    // Click Pay via Razorpay
-    const payBtn = Array.from(container.querySelectorAll('button')).find((b) =>
-      b.textContent?.includes('Pay ₹2,499 via Razorpay')
-    );
-    expect(payBtn).toBeDefined();
-
-    await act(async () => {
-      payBtn?.click();
-      await new Promise((r) => setTimeout(r, 60));
-    });
-
-    // Verification updates payment instrument display and plan
-    expect(container.textContent).toContain('•••• 4242');
-    expect(container.textContent).toContain('Visa • Exp 08/28 (Manage)');
-    expect(container.textContent).toContain('Pro Plan • Active');
+    // Check sidebar elements
+    expect(container.textContent).toContain('PandaPraise');
+    expect(container.textContent).toContain('Welcome Hub');
+    expect(container.textContent).toContain('Collect or Import');
+    expect(container.textContent).toContain('Evaluate');
+    expect(container.textContent).toContain('Widgets & Embeds');
+    expect(container.textContent).toContain('Campaigns');
+    expect(container.textContent).toContain('Referrals');
+    expect(container.textContent).toContain('Billing & Plans');
   });
 });
