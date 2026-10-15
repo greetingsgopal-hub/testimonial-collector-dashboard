@@ -9,8 +9,8 @@ import {
   Users,
   Award,
   Sparkles,
-  ExternalLink,
 } from 'lucide-react';
+import { OneClickSocialSharing } from './OneClickSocialSharing';
 
 interface ReferralHubProps {
   workspace: Workspace | null;
@@ -28,18 +28,7 @@ export const ReferralHub: React.FC<ReferralHubProps> = ({ workspace }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const shareText = encodeURIComponent(
-    'I use PandaPraise to collect and embed customer testimonials in 2 minutes. Sign up through my invite link and get 1 free month of Pro!'
-  );
-  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(
-    referralUrl
-  )}`;
-  const linkedinShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-    referralUrl
-  )}`;
-  const whatsappShareUrl = `https://api.whatsapp.com/send?text=${shareText}%20${encodeURIComponent(
-    referralUrl
-  )}`;
+
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto font-sans">
@@ -116,42 +105,7 @@ export const ReferralHub: React.FC<ReferralHubProps> = ({ workspace }) => {
       </div>
 
       {/* ── 3. Quick Social Sharing ── */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-4">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-          1-Click Social Sharing
-        </h3>
-        <div className="flex flex-wrap items-center gap-3">
-          <a
-            href={twitterShareUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-colors"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            <span>Share on X / Twitter</span>
-          </a>
-
-          <a
-            href={linkedinShareUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0A66C2] hover:bg-[#084e96] text-white text-xs font-semibold shadow-xs transition-colors"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span>Share on LinkedIn</span>
-          </a>
-
-          <a
-            href={whatsappShareUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#25D366] hover:bg-[#1ebe5d] text-white text-xs font-semibold shadow-xs transition-colors"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            <span>Share on WhatsApp</span>
-          </a>
-        </div>
-      </div>
+      <OneClickSocialSharing referralCode={referralCode} />
 
       {/* ── 4. How It Works ── */}
       <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800">
