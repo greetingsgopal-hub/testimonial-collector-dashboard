@@ -119,3 +119,68 @@ export async function startRazorpayCheckout(
     return { success: false, error: err.message || 'Error launching checkout' };
   }
 }
+
+/**
+ * Create a Razorpay Order directly via Cloudflare Worker backend.
+ * POST /api/razorpay/create-order
+ */
+export async function createRazorpayOrder(params?: {
+  amount?: number;
+  currency?: string;
+  workspace?: string;
+  taxId?: string;
+}): Promise<{
+  success: boolean;
+  data?: { orderId: string; amount: number; currency: string; keyId: string };
+  error?: string;
+}> {
+  try {
+    const res = await fetch('/api/razorpay/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params || {}),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return { success: false, error: data.error || 'Failed to create Razorpay order' };
+    }
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Network error creating order' };
+  }
+}
+
+/**
+ * Verify Razorpay payment signature and obtain formatted invoice and payment instrument details.
+ * POST /api/razorpay/verify-payment
+ */
+export async function verifyRazorpayPayment(payload: {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}): Promise<{
+  success: boolean;
+  data?: {
+    verified: boolean;
+    plan: string;
+    paymentMethod: { type: string; headline: string; subtext: string };
+    invoice: { id: string; paymentId: string; date: string; amount: string; status: string };
+  };
+  error?: string;
+}> {
+  try {
+    const res = await fetch('/api/razorpay/verify-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return { success: false, error: data.error || 'Payment signature verification failed' };
+    }
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Network error verifying payment' };
+  }
+}
+

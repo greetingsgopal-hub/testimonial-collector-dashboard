@@ -137,4 +137,80 @@ describe('Frontend Razorpay Checkout Client (src/lib/razorpay.ts)', () => {
     expect(res.success).toBe(false);
     expect(res.error).toBe('Razorpay credentials not configured');
   });
+
+  describe('createRazorpayOrder', () => {
+    it('calls /api/razorpay/create-order and returns order data on success', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          orderId: 'order_123',
+          amount: 249900,
+          currency: 'INR',
+          keyId: 'rzp_test_key',
+        }),
+      });
+      globalThis.fetch = mockFetch;
+
+      const { createRazorpayOrder } = await import('../razorpay');
+      const res = await createRazorpayOrder({ amount: 249900, currency: 'INR' });
+      expect(res.success).toBe(true);
+      expect(res.data?.orderId).toBe('order_123');
+    });
+
+    it('returns error when /api/razorpay/create-order fails', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        json: async () => ({ error: 'Order creation failed' }),
+      });
+      globalThis.fetch = mockFetch;
+
+      const { createRazorpayOrder } = await import('../razorpay');
+      const res = await createRazorpayOrder();
+      expect(res.success).toBe(false);
+      expect(res.error).toBe('Order creation failed');
+    });
+  });
+
+  describe('verifyRazorpayPayment', () => {
+    it('calls /api/razorpay/verify-payment and returns verified status', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          verified: true,
+          plan: 'Pro Plan',
+          paymentMethod: { type: 'card', headline: '•••• 4242', subtext: 'Visa • CREDIT' },
+          invoice: { id: 'INV-2026-4242', paymentId: 'pay_4242', date: 'Oct 15, 2026', amount: '₹2,499', status: 'Paid' },
+        }),
+      });
+      globalThis.fetch = mockFetch;
+
+      const { verifyRazorpayPayment } = await import('../razorpay');
+      const res = await verifyRazorpayPayment({
+        razorpay_order_id: 'order_123',
+        razorpay_payment_id: 'pay_4242',
+        razorpay_signature: 'sig_valid',
+      });
+      expect(res.success).toBe(true);
+      expect(res.data?.verified).toBe(true);
+      expect(res.data?.paymentMethod.headline).toBe('•••• 4242');
+    });
+
+    it('returns error when signature verification fails', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        json: async () => ({ error: 'Invalid payment signature' }),
+      });
+      globalThis.fetch = mockFetch;
+
+      const { verifyRazorpayPayment } = await import('../razorpay');
+      const res = await verifyRazorpayPayment({
+        razorpay_order_id: 'order_123',
+        razorpay_payment_id: 'pay_invalid',
+        razorpay_signature: 'sig_bad',
+      });
+      expect(res.success).toBe(false);
+      expect(res.error).toBe('Invalid payment signature');
+    });
+  });
 });
+

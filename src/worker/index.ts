@@ -23,6 +23,7 @@ import { handleStripeWebhook } from './handlers/stripeWebhook';
 import { handleReviewInviteWebhook } from './handlers/reviewInviteWebhook';
 import { handleCreateCheckoutSession, handleBillingPortal, handleGetSubscription } from './handlers/stripeCheckout';
 import { handleRazorpayCheckout } from './handlers/razorpayCheckout';
+import { handleRazorpayCreateOrder, handleRazorpayVerifyPayment } from './handlers/razorpayOrderHandler';
 import { handleRazorpayWebhook } from './handlers/razorpayWebhook';
 import { handleSocialPublish } from './handlers/socialPublish';
 import { handleSocialStatus } from './handlers/socialStatus';
@@ -170,6 +171,12 @@ export default {
         // Razorpay billing (India-first processor)
         case 'razorpay/checkout':
           return await handleRazorpayCheckout(request, env);
+
+        case 'razorpay/create-order':
+          return await handleRazorpayCreateOrder(request, env);
+
+        case 'razorpay/verify-payment':
+          return await handleRazorpayVerifyPayment(request, env);
 
         case 'webhook/razorpay':
         case 'webhooks/razorpay':
