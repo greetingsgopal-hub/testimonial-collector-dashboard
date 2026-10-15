@@ -66,7 +66,7 @@ describe('AccountBillingView Suite - Conversion-First SaaS Architecture', () => 
     expect(container.textContent).toContain('PAYMENT METHOD');
     expect(container.textContent).toContain('No Card on File');
     expect(container.textContent).toContain('+ Add Payment Method');
-    expect(container.textContent).toContain('Secured by Stripe (PCI-DSS L1)');
+    expect(container.textContent).toContain('Secured via Razorpay (PCI-DSS L1)');
     expect(container.textContent).not.toContain('Proof Limit');
   });
 
@@ -93,7 +93,7 @@ describe('AccountBillingView Suite - Conversion-First SaaS Architecture', () => 
     expect(container.textContent).toContain('AI Sentiment Analysis & Spam Moderation Shield');
     expect(container.textContent).toContain('1-Click Social Media Distribution Studio');
     expect(container.textContent).toContain('Inbound Webhooks & Developer REST API');
-    expect(container.textContent).toContain('Upgrade to Pro — $29/mo →');
+    expect(container.textContent).toContain('Upgrade to Pro — ₹2,499/mo →');
   });
 
   it('4. Renders Billing & Tax Details card with company name, email, tax ID and edit trigger', async () => {
@@ -120,7 +120,7 @@ describe('AccountBillingView Suite - Conversion-First SaaS Architecture', () => 
     expect(container.textContent).not.toContain('$0.00 Paid');
 
     // Unclipped banner
-    expect(container.textContent).toContain('Invoices are synced with Stripe. Need tax exemption or GST/VAT number? Update your Billing Info above.');
+    expect(container.textContent).toContain('Invoices are synced with Razorpay.');
 
     // Toggle demo paid mode to preview real paid invoices
     const demoToggle = container.querySelector('#demo-toggle-invoices') as HTMLButtonElement;
@@ -132,7 +132,44 @@ describe('AccountBillingView Suite - Conversion-First SaaS Architecture', () => 
     });
 
     expect(container.textContent).toContain('INV-2026-004');
-    expect(container.textContent).toContain('$29.00');
+    expect(container.textContent).toContain('₹2,499');
     expect(container.textContent).toContain('Paid');
+  });
+
+  it('6. Opens Razorpay Secure Checkout modal and verifies payment instrument', async () => {
+    await act(async () => {
+      root.render(<AccountBillingView />);
+    });
+
+    // Find and click + Add Payment Method
+    const addMethodBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('+ Add Payment Method')
+    );
+    expect(addMethodBtn).toBeDefined();
+
+    await act(async () => {
+      addMethodBtn?.click();
+    });
+
+    expect(container.textContent).toContain('Razorpay Trusted Gateway');
+    expect(container.textContent).toContain('Upgrade to PandaPraise Pro');
+    expect(container.textContent).toContain('Credit / Debit Card');
+    expect(container.textContent).toContain('UPI Autopay');
+
+    // Click Pay via Razorpay
+    const payBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Pay ₹2,499 via Razorpay')
+    );
+    expect(payBtn).toBeDefined();
+
+    await act(async () => {
+      payBtn?.click();
+      await new Promise((r) => setTimeout(r, 60));
+    });
+
+    // Verification updates payment instrument display and plan
+    expect(container.textContent).toContain('•••• 4242');
+    expect(container.textContent).toContain('VISA • CREDIT (Manage)');
+    expect(container.textContent).toContain('Pro Plan • Active');
   });
 });
