@@ -169,7 +169,7 @@ describe('AccountBillingView Suite - Conversion-First SaaS Architecture', () => 
 
     // Verification updates payment instrument display and plan
     expect(container.textContent).toContain('•••• 4242');
-    expect(container.textContent).toContain('VISA • CREDIT (Manage)');
+    expect(container.textContent).toContain('Visa • Exp 08/28 (Manage)');
     expect(container.textContent).toContain('Pro Plan • Active');
   });
 });

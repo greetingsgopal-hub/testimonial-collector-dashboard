@@ -74,7 +74,16 @@ export const AccountBillingView: React.FC<AccountBillingViewProps> = ({
   const [razorpayPaymentMethod, setRazorpayPaymentMethod] = useState<PaymentMethodDisplay | null>(() => {
     try {
       const saved = localStorage.getItem('pandapraise_rzp_payment_method');
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.headline?.includes('@') || parsed?.headline?.includes('okaxis')) {
+          localStorage.removeItem('pandapraise_rzp_payment_method');
+          localStorage.removeItem('pandapraise_plan_active');
+          return null;
+        }
+        return parsed;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -94,6 +103,11 @@ export const AccountBillingView: React.FC<AccountBillingViewProps> = ({
 
   const [isPaidPlanActive, setIsPaidPlanActive] = useState<boolean>(() => {
     try {
+      const savedMethod = localStorage.getItem('pandapraise_rzp_payment_method');
+      if (!savedMethod) {
+        localStorage.removeItem('pandapraise_plan_active');
+        return false;
+      }
       return localStorage.getItem('pandapraise_plan_active') === 'true';
     } catch {
       return false;
@@ -103,6 +117,19 @@ export const AccountBillingView: React.FC<AccountBillingViewProps> = ({
   const [isRazorpayModalOpen, setIsRazorpayModalOpen] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<'card' | 'upi'>('card');
+
+  // Purge any accidental legacy mock keys from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('pandapraise_rzp_payment_method');
+      if (saved && (saved.includes('@') || saved.includes('okaxis'))) {
+        localStorage.removeItem('pandapraise_rzp_payment_method');
+        localStorage.removeItem('pandapraise_plan_active');
+        setRazorpayPaymentMethod(null);
+        setIsPaidPlanActive(false);
+      }
+    } catch {}
+  }, []);
 
   const [billingInfo, setBillingInfo] = useState<BillingInfo>({
     companyName: workspace?.name || project?.name || 'Project Potato Technologies Pvt Ltd',
@@ -177,13 +204,25 @@ export const AccountBillingView: React.FC<AccountBillingViewProps> = ({
   };
 
   const applyVerifiedPayment = (data: any) => {
-    const method: PaymentMethodDisplay = data?.paymentMethod || {
-      type: 'card',
-      headline: '•••• 4242',
-      subtext: 'VISA • CREDIT',
-    };
+    const rawMethod = data?.paymentMethod;
+    let method: PaymentMethodDisplay;
+
+    if (rawMethod?.type === 'upi') {
+      method = {
+        type: 'upi',
+        headline: 'UPI Autopay',
+        subtext: 'Verified UPI Mandate',
+      };
+    } else {
+      method = {
+        type: 'card',
+        headline: rawMethod?.headline && rawMethod.headline.startsWith('••••') ? rawMethod.headline : '•••• 4242',
+        subtext: 'Visa • Exp 08/28',
+      };
+    }
+
     const inv: InvoiceItem = data?.invoice || {
-      id: `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-5)}`,
+      id: `INV-${new Date().getFullYear()}-4242`,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
       amount: '₹2,499',
       status: 'Paid',
@@ -201,7 +240,7 @@ export const AccountBillingView: React.FC<AccountBillingViewProps> = ({
       localStorage.setItem('pandapraise_rzp_invoices', JSON.stringify([inv, ...invoices]));
     } catch {}
 
-    showToast(`Verified via Razorpay! Upgraded to Pro Plan (${method.headline}).`);
+    showToast(`Verified via Razorpay! Upgraded to Pro Plan.`);
     setIsRazorpayModalOpen(false);
   };
 
@@ -274,8 +313,8 @@ export const AccountBillingView: React.FC<AccountBillingViewProps> = ({
       const mockPaymentId = `pay_${Date.now().toString().slice(-8)}`;
       const newMethod: PaymentMethodDisplay =
         selectedMethod === 'card'
-          ? { type: 'card', headline: '•••• 4242', subtext: 'VISA • CREDIT' }
-          : { type: 'upi', headline: `${user?.email?.split('@')[0] || 'founder'}@okaxis`, subtext: 'Verified UPI Mandate' };
+          ? { type: 'card', headline: '•••• 4242', subtext: 'Visa • Exp 08/28' }
+          : { type: 'upi', headline: 'UPI Autopay', subtext: 'Verified UPI Mandate' };
 
       const newInv: InvoiceItem = {
         id: `INV-${new Date().getFullYear()}-${mockPaymentId.slice(-5)}`,
@@ -481,7 +520,7 @@ export const AccountBillingView: React.FC<AccountBillingViewProps> = ({
               {razorpayPaymentMethod ? (
                 <span>{razorpayPaymentMethod.subtext} (Manage)</span>
               ) : (hasCardOnFile || previewPaidState) ? (
-                <span>VISA • CREDIT (Manage)</span>
+                <span>Visa • Exp 08/28 (Manage)</span>
               ) : (
                 <>
                   <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
