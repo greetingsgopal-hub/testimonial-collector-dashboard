@@ -96,6 +96,14 @@ describe('PricingPage Architecture & Monetization', () => {
     expect(lifetimeCard).not.toBeNull();
     expect(lifetimeCard?.textContent).toContain('Founding Member Pass');
     expect(lifetimeCard?.textContent).toContain('One-Time Payment');
+
+    // Ensure INR currency is active to test standard INR pricing regardless of CI runner timezone
+    const inrToggle = container.querySelector('#currency-toggle-inr') as HTMLButtonElement;
+    if (inrToggle) {
+      await act(async () => {
+        inrToggle.click();
+      });
+    }
     expect(lifetimeCard?.textContent).toContain('₹4,999');
 
     const lifetimeBtn = container.querySelector('#btn-checkout-lifetime');
