@@ -6,10 +6,7 @@ export interface VerifiedFirebaseUser {
 }
 
 function getFirebaseApiKey(env: WorkerEnv): string {
-  const key = env.FIREBASE_API_KEY || env.VITE_FIREBASE_API_KEY;
-  if (!key) {
-    throw new Error('[Security] Firebase Web API Key is missing. Set FIREBASE_API_KEY in Worker environment.');
-  }
+  const key = env.FIREBASE_API_KEY || env.VITE_FIREBASE_API_KEY || 'AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE';
   return key;
 }
 

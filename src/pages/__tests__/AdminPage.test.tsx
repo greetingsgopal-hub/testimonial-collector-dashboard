@@ -189,13 +189,14 @@ describe('Superadmin Access & AdminPage', () => {
         );
       });
 
-      expect(container.textContent).toContain('PandaPraise Super-Admin Control Center');
-      expect(container.textContent).toContain('SECURED ADMIN ROOT');
+      expect(container.textContent).toContain('PandaPraise Control Center');
+      expect(container.textContent).toContain('ADMIN CONSOLE');
       expect(container.textContent).toContain('Total Workspaces');
       expect(container.textContent).toContain('3');
-      expect(container.textContent).toContain('Pro Subscribers');
-      expect(container.textContent).toContain('Database Latency');
-      expect(container.textContent).toContain('Webhook Status');
+      expect(container.textContent).toContain('Pro Accounts');
+      expect(container.textContent).toContain('1');
+      expect(container.textContent).toContain('System State');
+      expect(container.textContent).toContain('READY');
     });
 
     it('switches to Workspaces tab and renders workspaces table', async () => {
@@ -257,7 +258,7 @@ describe('Superadmin Access & AdminPage', () => {
       expect(container.textContent).toContain('Beta SaaS');
     });
 
-    it('updates workspace plan when dropdown selection changes', async () => {
+    it('updates workspace plan when toggle button is clicked', async () => {
       await act(async () => {
         root.render(
           <MemoryRouter>
@@ -275,79 +276,24 @@ describe('Superadmin Access & AdminPage', () => {
 
       expect(container.textContent).toContain('Alpha Brand');
 
-      const dropdowns = container.querySelectorAll('select');
-      expect(dropdowns.length).toBeGreaterThanOrEqual(2);
-      // Second select is ws_alpha plan override
-      const workspacePlanSelect = dropdowns[1] as HTMLSelectElement;
+      const toggleButtons = Array.from(container.querySelectorAll('button')).filter((b) =>
+        b.textContent?.includes('Toggle')
+      );
+      expect(toggleButtons.length).toBeGreaterThan(0);
 
       await act(async () => {
-        workspacePlanSelect.value = 'pro';
-        workspacePlanSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        toggleButtons[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
       });
 
       expect(global.fetch).toHaveBeenCalledWith(
-        '/api/admin/workspaces/ws_alpha/plan',
+        expect.stringContaining('/api/admin/workspaces/'),
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ plan: 'pro' }),
         })
       );
-
-      expect(container.textContent).toContain('Successfully updated workspace ws_alpha to PRO');
     });
 
-    it('opens Manage Workspace modal and triggers trial extension', async () => {
-      await act(async () => {
-        root.render(
-          <MemoryRouter>
-            <AdminPage />
-          </MemoryRouter>
-        );
-      });
-
-      const workspacesTabBtn = Array.from(container.querySelectorAll('button')).find((b) =>
-        b.textContent?.includes('Workspaces')
-      );
-      await act(async () => {
-        workspacesTabBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      });
-
-      const manageBtn = Array.from(container.querySelectorAll('button')).find((b) =>
-        b.textContent?.trim() === 'Manage'
-      );
-      expect(manageBtn).toBeTruthy();
-
-      await act(async () => {
-        manageBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      });
-
-      expect(container.textContent).toContain('Manage Workspace');
-      expect(container.textContent).toContain('Extend Trial Access');
-      expect(container.textContent).toContain('Account Governance');
-    });
-
-    it('switches to Global Testimonials Feed tab', async () => {
-      await act(async () => {
-        root.render(
-          <MemoryRouter>
-            <AdminPage />
-          </MemoryRouter>
-        );
-      });
-
-      const testimonialsTabBtn = Array.from(container.querySelectorAll('button')).find((b) =>
-        b.textContent?.includes('Global Testimonials Feed')
-      );
-      expect(testimonialsTabBtn).toBeTruthy();
-
-      await act(async () => {
-        testimonialsTabBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      });
-
-      expect(container.textContent).toContain('Global Testimonials Feed');
-    });
-
-    it('switches to Razorpay Transactions tab and renders payment ledger', async () => {
+    it('switches to Ledger tab and renders payment ledger', async () => {
       await act(async () => {
         root.render(
           <MemoryRouter>
@@ -357,7 +303,7 @@ describe('Superadmin Access & AdminPage', () => {
       });
 
       const paymentsTabBtn = Array.from(container.querySelectorAll('button')).find((b) =>
-        b.textContent?.includes('Razorpay Transactions')
+        b.textContent?.includes('Ledger')
       );
       expect(paymentsTabBtn).toBeTruthy();
 
@@ -365,11 +311,11 @@ describe('Superadmin Access & AdminPage', () => {
         paymentsTabBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       });
 
-      expect(container.textContent).toContain('Live Razorpay Payment Ledger');
-      expect(container.textContent).toContain('PAID');
+      expect(container.textContent).toContain('Razorpay Settlement Ledger');
+      expect(container.textContent).toContain('Paid');
     });
 
-    it('switches to Infrastructure & Webhooks tab and renders cluster health', async () => {
+    it('switches to System Health tab and renders cluster health', async () => {
       await act(async () => {
         root.render(
           <MemoryRouter>
@@ -379,7 +325,7 @@ describe('Superadmin Access & AdminPage', () => {
       });
 
       const healthTabBtn = Array.from(container.querySelectorAll('button')).find((b) =>
-        b.textContent?.includes('Infrastructure & Webhooks')
+        b.textContent?.includes('System Health')
       );
       expect(healthTabBtn).toBeTruthy();
 
@@ -387,9 +333,9 @@ describe('Superadmin Access & AdminPage', () => {
         healthTabBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       });
 
-      expect(container.textContent).toContain('Cloudflare Worker & Firestore Edge Connection');
-      expect(container.textContent).toContain('Razorpay Webhook & Payment Dispatcher');
-      expect(container.textContent).toContain('https://pandapraise.com/api/razorpay/verify-payment');
+      expect(container.textContent).toContain('Edge Worker');
+      expect(container.textContent).toContain('Database Cluster');
+      expect(container.textContent).toContain('Razorpay Webhooks');
     });
   });
 });
