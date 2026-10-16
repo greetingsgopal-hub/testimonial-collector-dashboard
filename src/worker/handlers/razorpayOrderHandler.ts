@@ -49,16 +49,36 @@ export async function verifySignature(
   }
 }
 
+export function getRazorpayCredentials(env: any): { keyId: string; keySecret: string } | null {
+  if (!env) return null;
+  const keyId =
+    env.RAZORPAY_KEY_ID ||
+    env.VITE_RAZORPAY_KEY_ID ||
+    env.RAZORPAY_KEY ||
+    env.RAZORPAY_API_KEY ||
+    env.razorpay_key_id;
+  const keySecret =
+    env.RAZORPAY_KEY_SECRET ||
+    env.RAZORPAY_SECRET ||
+    env.RAZORPAY_API_SECRET ||
+    env.RAZORPAY_SECRET_KEY ||
+    env.razorpay_key_secret;
+
+  if (keyId && keySecret) {
+    return { keyId: String(keyId).trim(), keySecret: String(keySecret).trim() };
+  }
+  return null;
+}
+
 /**
  * Helper to build Razorpay Basic Auth Header.
  */
 function getAuthHeader(env: RazorpayEnv): string {
-  const keyId = env.RAZORPAY_KEY_ID;
-  const keySecret = env.RAZORPAY_KEY_SECRET;
-  if (!keyId || !keySecret) {
+  const creds = getRazorpayCredentials(env);
+  if (!creds) {
     throw new Error('Razorpay credentials not configured (RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET missing)');
   }
-  return 'Basic ' + btoa(`${keyId}:${keySecret}`);
+  return 'Basic ' + btoa(`${creds.keyId}:${creds.keySecret}`);
 }
 
 /**
@@ -80,8 +100,8 @@ export async function handleRazorpayCreateOrder(
     const planId = body.planId;
     const userId = body.userId;
 
-    const hasKeys = Boolean(env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET);
-    if (!hasKeys) {
+    const creds = getRazorpayCredentials(env);
+    if (!creds) {
       // Graceful Sandbox / Test Mode when API secrets are not yet configured in Worker
       const sandboxOrderId = `order_sandbox_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
       return new Response(
@@ -97,7 +117,7 @@ export async function handleRazorpayCreateOrder(
       );
     }
 
-    const authHeader = getAuthHeader(env);
+    const authHeader = 'Basic ' + btoa(`${creds.keyId}:${creds.keySecret}`);
     const rzpRes = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
       headers: {
@@ -133,7 +153,7 @@ export async function handleRazorpayCreateOrder(
         orderId: order.id,
         amount: order.amount,
         currency: order.currency,
-        keyId: env.RAZORPAY_KEY_ID,
+        keyId: creds.keyId,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -176,8 +196,9 @@ export async function handleRazorpayVerifyPayment(
       );
     }
 
+    const creds = getRazorpayCredentials(env);
     const isSandbox =
-      !env.RAZORPAY_KEY_SECRET ||
+      !creds ||
       razorpay_order_id.startsWith('order_sandbox_') ||
       razorpay_payment_id.startsWith('pay_sandbox_');
 
@@ -186,7 +207,7 @@ export async function handleRazorpayVerifyPayment(
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature,
-        env.RAZORPAY_KEY_SECRET || ''
+        creds.keySecret
       );
 
       if (!isValid) {

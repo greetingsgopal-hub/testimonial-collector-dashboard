@@ -136,6 +136,19 @@ export default {
         // Unauthenticated liveness and binding health probe for uptime monitoring.
         // Deliberately safe: boolean checks only, no secret values exposed.
         case 'health': {
+          const razorpayKeyId =
+            env.RAZORPAY_KEY_ID ||
+            (env as any).VITE_RAZORPAY_KEY_ID ||
+            (env as any).RAZORPAY_KEY ||
+            (env as any).RAZORPAY_API_KEY ||
+            (env as any).razorpay_key_id;
+          const razorpayKeySecret =
+            env.RAZORPAY_KEY_SECRET ||
+            (env as any).RAZORPAY_SECRET ||
+            (env as any).RAZORPAY_API_SECRET ||
+            (env as any).RAZORPAY_SECRET_KEY ||
+            (env as any).razorpay_key_secret;
+
           return new Response(
             JSON.stringify({
               status: 'ok',
@@ -143,9 +156,10 @@ export default {
               bindings: {
                 rateLimitKv: Boolean(env.RATE_LIMIT_KV),
                 firebaseConfigured: Boolean(env.FIREBASE_PROJECT_ID),
-                razorpayConfigured: Boolean(env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET),
+                razorpayConfigured: Boolean(razorpayKeyId && razorpayKeySecret),
                 stripeConfigured: Boolean(env.STRIPE_SECRET_KEY),
               },
+              detectedRazorpayKeys: Object.keys(env).filter((k) => /razor|rzp/i.test(k)),
               timestamp: new Date().toISOString(),
             }),
             { status: 200, headers: { 'Content-Type': 'application/json' } }
