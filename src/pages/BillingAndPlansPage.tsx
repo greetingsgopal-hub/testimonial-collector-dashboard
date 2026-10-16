@@ -139,11 +139,14 @@ export default function BillingAndPlansPage({
   });
   const [formState, setFormState] = useState(billingInfo);
 
-  const API_BASE_URL =
-    (import.meta as any).env?.VITE_API_BASE_URL || '';
+  const rawApiBase =
+    (import.meta as any).env?.VITE_FIREBASE_API_BASE ||
+    (import.meta as any).env?.VITE_API_BASE_URL ||
+    '';
+  const API_BASE_URL = rawApiBase.replace(/\/$/, '');
 
   const RAZORPAY_KEY_ID =
-    (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_YOUR_KEY_HERE';
+    (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_live_TodkFfMsbdY3vr';
 
   const initiateRazorpayPayment = async () => {
     setPaymentError(null);
@@ -151,22 +154,37 @@ export default function BillingAndPlansPage({
 
     try {
       const sdkLoaded = await loadRazorpayScript();
-      if (!sdkLoaded) {
-        throw new Error('Failed to load Razorpay Checkout SDK. Check your network.');
+      if (!sdkLoaded || !window.Razorpay) {
+        throw new Error('Failed to load Razorpay Checkout SDK. Check your internet connection.');
       }
 
-      // 1. Call your backend to create a real Razorpay Order ID
+      const activeUserId =
+        workspace?.id ||
+        workspace?.owner_id ||
+        (() => {
+          try {
+            return localStorage.getItem('pandapraise_user_id');
+          } catch {
+            return null;
+          }
+        })() ||
+        'guest_user';
       let orderId = '';
       let currency = 'INR';
       let amountInPaise = 249900; // ₹2,499.00
+      let activeKeyId = RAZORPAY_KEY_ID;
 
+      // 1. Call backend to create official Razorpay Order ID
       try {
-        const res = await fetch(`${API_BASE_URL}/api/razorpay/create-order`, {
+        const orderEndpoint = API_BASE_URL ? `${API_BASE_URL}/createRazorpayOrder` : '/createRazorpayOrder';
+        const res = await fetch(orderEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            amount: 249900,
+            amount: amountInPaise,
             currency: 'INR',
+            planId: 'pro',
+            userId: activeUserId,
             workspace: billingInfo.companyName,
             taxId: billingInfo.taxId,
           }),
@@ -175,10 +193,30 @@ export default function BillingAndPlansPage({
         if (res.ok) {
           const data = await res.json();
           orderId = data.orderId;
-          amountInPaise = data.amount;
-          currency = data.currency;
+          amountInPaise = data.amount || amountInPaise;
+          currency = data.currency || currency;
+          if (data.keyId) activeKeyId = data.keyId;
         } else {
-          console.warn('Backend order creation endpoint missing. Falling back to direct checkout.');
+          // Fallback to secondary route if primary was not matched
+          const fallbackRes = await fetch(`${API_BASE_URL}/api/razorpay/create-order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              amount: amountInPaise,
+              currency: 'INR',
+              planId: 'pro',
+              userId: activeUserId,
+              workspace: billingInfo.companyName,
+              taxId: billingInfo.taxId,
+            }),
+          });
+          if (fallbackRes.ok) {
+            const fbData = await fallbackRes.json();
+            orderId = fbData.orderId;
+            amountInPaise = fbData.amount || amountInPaise;
+            currency = fbData.currency || currency;
+            if (fbData.keyId) activeKeyId = fbData.keyId;
+          }
         }
       } catch (err) {
         console.warn('Network error reaching backend order route:', err);
@@ -186,12 +224,12 @@ export default function BillingAndPlansPage({
 
       // 2. Configure Razorpay Options
       const options: Record<string, any> = {
-        key: RAZORPAY_KEY_ID,
+        key: activeKeyId,
         amount: amountInPaise,
         currency: currency,
         name: 'PandaPraise',
-        description: 'PandaPraise Pro Monthly Subscription',
-        ...(orderId ? { order_id: orderId } : {}), // Crucial for valid test-mode transactions
+        description: 'PandaPraise Pro Subscription',
+        ...(orderId ? { order_id: orderId } : {}),
         prefill: {
           name: billingInfo.companyName,
           email: billingInfo.billingEmail,
@@ -199,6 +237,7 @@ export default function BillingAndPlansPage({
         notes: {
           company_name: billingInfo.companyName,
           gstin: billingInfo.taxId,
+          userId: activeUserId,
         },
         theme: {
           color: '#7C3AED',
@@ -214,11 +253,16 @@ export default function BillingAndPlansPage({
           razorpay_signature?: string;
         }) => {
           try {
-            // 3. Verify payment on your backend
-            const verifyRes = await fetch(`${API_BASE_URL}/api/razorpay/verify-payment`, {
+            // 3. Cryptographically verify payment on backend & update Firestore workspace
+            const verifyEndpoint = API_BASE_URL ? `${API_BASE_URL}/verifyRazorpayPayment` : '/verifyRazorpayPayment';
+            const verifyRes = await fetch(verifyEndpoint, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(response),
+              body: JSON.stringify({
+                ...response,
+                planId: 'pro',
+                userId: activeUserId,
+              }),
             });
 
             if (verifyRes.ok) {
