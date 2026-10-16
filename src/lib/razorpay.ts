@@ -1,4 +1,5 @@
-import { auth } from './firebase';
+import { auth, db } from './firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 declare global {
   interface Window {
@@ -208,4 +209,125 @@ export async function verifyRazorpayPayment(payload: {
     return { success: false, error: err.message || 'Network error verifying payment' };
   }
 }
+
+/**
+ * 1. Fetch Real Workspace Plan from Firebase Firestore
+ */
+export async function fetchWorkspacePlan(workspaceId: string): Promise<'starter' | 'pro' | 'agency' | 'lifetime'> {
+  try {
+    if (!db) {
+      console.warn('Firestore instance not available, defaulting to starter plan');
+      return 'starter';
+    }
+    const wsRef = doc(db, 'workspaces', workspaceId);
+    const wsSnap = await getDoc(wsRef);
+    if (wsSnap.exists()) {
+      const data = wsSnap.data();
+      return (data.plan as any) || 'starter';
+    }
+    return 'starter';
+  } catch (err) {
+    console.error('Failed to fetch real workspace plan:', err);
+    return 'starter';
+  }
+}
+
+/**
+ * 2. Real Razorpay Checkout Pipeline Trigger
+ */
+export async function initiateLiveRazorpayCheckout({
+  planId,
+  planName,
+  amountInRupees,
+  workspaceId,
+  userEmail,
+}: {
+  planId: 'pro' | 'agency' | 'lifetime';
+  planName: string;
+  amountInRupees: number;
+  workspaceId: string;
+  userEmail: string;
+}) {
+  const amountInPaise = amountInRupees * 100;
+  const rawBase =
+    (import.meta as any).env?.VITE_FIREBASE_API_BASE ||
+    (import.meta as any).env?.VITE_API_BASE_URL ||
+    '';
+  const API_BASE = rawBase.replace(/\/$/, '');
+
+  try {
+    // Step A: Request secure order from backend endpoint (Worker or Cloud Functions)
+    const orderEndpoint = API_BASE ? `${API_BASE}/createRazorpayOrder` : '/createRazorpayOrder';
+    const orderRes = await fetch(orderEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: amountInPaise,
+        currency: 'INR',
+        planId,
+        userId: workspaceId,
+      }),
+    });
+
+    const orderData = await orderRes.json().catch(() => ({}));
+    if (!orderRes.ok) {
+      throw new Error(orderData.error || 'Failed to create secure Razorpay order.');
+    }
+
+    // Ensure Razorpay SDK is loaded
+    const loaded = await loadRazorpayScript(4000);
+    if (!loaded || !(window as any).Razorpay) {
+      throw new Error('Failed to load Razorpay payment gateway. Please check your internet connection or disable ad-blocker.');
+    }
+
+    // Step B: Launch official Razorpay Checkout SDK
+    const options = {
+      key: orderData.keyId,
+      amount: orderData.amount,
+      currency: orderData.currency || 'INR',
+      name: 'PandaPraise',
+      description: `${planName} Subscription`,
+      order_id: orderData.orderId,
+      prefill: {
+        email: userEmail,
+      },
+      theme: { color: '#7C3AED' },
+      handler: async (response: {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+      }) => {
+        // Step C: Verify HMAC signature on backend & update Firestore
+        const verifyEndpoint = API_BASE ? `${API_BASE}/verifyRazorpayPayment` : '/verifyRazorpayPayment';
+        const verifyRes = await fetch(verifyEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            planId,
+            userId: workspaceId,
+          }),
+        });
+
+        if (verifyRes.ok) {
+          try {
+            localStorage.setItem('pandapraise_plan_active', planId);
+          } catch {}
+          window.location.href = `/?upgraded=true&payment_id=${response.razorpay_payment_id}`;
+        } else {
+          alert('Payment received, but backend verification failed. Contact support.');
+        }
+      },
+    };
+
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+  } catch (err: any) {
+    console.error('Live checkout error:', err);
+    alert(err.message || 'Unable to open payment window.');
+  }
+}
+
 

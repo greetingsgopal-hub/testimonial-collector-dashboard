@@ -1,13 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { startRazorpayCheckout, loadRazorpayScript } from '../razorpay';
+import {
+  startRazorpayCheckout,
+  loadRazorpayScript,
+  fetchWorkspacePlan,
+  initiateLiveRazorpayCheckout,
+} from '../razorpay';
 
 vi.mock('../firebase', () => ({
   auth: {
     currentUser: null,
   },
+  db: {},
+}));
+
+vi.mock('firebase/firestore', () => ({
+  doc: vi.fn().mockReturnValue({ id: 'mock-doc' }),
+  getDoc: vi.fn(),
 }));
 
 import { auth } from '../firebase';
+import { getDoc } from 'firebase/firestore';
 
 describe('Frontend Razorpay Checkout Client (src/lib/razorpay.ts)', () => {
   beforeEach(() => {
@@ -212,5 +224,77 @@ describe('Frontend Razorpay Checkout Client (src/lib/razorpay.ts)', () => {
       expect(res.error).toBe('Invalid payment signature');
     });
   });
+
+  describe('fetchWorkspacePlan', () => {
+    it('returns workspace plan from firestore document when exists', async () => {
+      vi.mocked(getDoc).mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ plan: 'pro' }),
+      } as any);
+
+      const plan = await fetchWorkspacePlan('ws_123');
+      expect(plan).toBe('pro');
+    });
+
+    it('returns starter when workspace document does not exist', async () => {
+      vi.mocked(getDoc).mockResolvedValueOnce({
+        exists: () => false,
+      } as any);
+
+      const plan = await fetchWorkspacePlan('ws_missing');
+      expect(plan).toBe('starter');
+    });
+
+    it('returns starter and catches error when getDoc throws', async () => {
+      vi.mocked(getDoc).mockRejectedValueOnce(new Error('Network offline'));
+
+      const plan = await fetchWorkspacePlan('ws_error');
+      expect(plan).toBe('starter');
+    });
+  });
+
+  describe('initiateLiveRazorpayCheckout', () => {
+    it('creates order and triggers Razorpay modal with correct parameters', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          orderId: 'order_live_999',
+          amount: 249900,
+          currency: 'INR',
+          keyId: 'rzp_live_TodkFfMsbdY3vr',
+        }),
+      });
+      globalThis.fetch = mockFetch;
+
+      const mockOpen = vi.fn();
+      // @ts-ignore
+      window.Razorpay = vi.fn(function () {
+        return { open: mockOpen };
+      });
+
+      await initiateLiveRazorpayCheckout({
+        planId: 'pro',
+        planName: 'Pro',
+        amountInRupees: 2499,
+        workspaceId: 'ws_test',
+        userEmail: 'user@example.com',
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('createRazorpayOrder'),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            amount: 249900,
+            currency: 'INR',
+            planId: 'pro',
+            userId: 'ws_test',
+          }),
+        })
+      );
+      expect(mockOpen).toHaveBeenCalled();
+    });
+  });
 });
+
 
