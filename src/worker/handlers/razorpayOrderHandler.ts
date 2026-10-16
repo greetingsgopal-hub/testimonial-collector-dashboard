@@ -1,4 +1,5 @@
 import { WorkerEnv } from '../types';
+import { saveDocument } from '../lib/firestoreAdmin';
 
 export interface RazorpayEnv {
   RAZORPAY_KEY_ID?: string;
@@ -77,6 +78,8 @@ export async function handleRazorpayCreateOrder(
     const body: any = await request.json().catch(() => ({}));
     const amountInPaise = body.amount || 249900; // ₹2,499.00 (or 2900 for $29)
     const currency = body.currency || 'INR';
+    const planId = body.planId;
+    const userId = body.userId;
 
     const rzpRes = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
@@ -87,8 +90,10 @@ export async function handleRazorpayCreateOrder(
       body: JSON.stringify({
         amount: amountInPaise,
         currency,
-        receipt: `rcpt_${Date.now()}`,
+        receipt: `rcpt_${Date.now()}_${userId || 'guest'}`,
         notes: {
+          planId: planId || 'pro',
+          userId: userId || 'anonymous',
           workspace: body.workspace || 'PandaPraise',
           gstin: body.taxId || '',
         },
@@ -142,6 +147,8 @@ export async function handleRazorpayVerifyPayment(
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
+      planId,
+      userId,
     }: any = await request.json().catch(() => ({}));
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -168,12 +175,55 @@ export async function handleRazorpayVerifyPayment(
       });
     }
 
+    const targetPlan = planId === 'lifetime' ? 'lifetime' : planId === 'agency' ? 'agency' : 'pro';
+
+    // Signature is valid! Update user's workspace plan and ledger in Firestore
+    if (userId) {
+      try {
+        await saveDocument(
+          'workspaces',
+          userId,
+          {
+            plan: targetPlan,
+            updated_at: new Date().toISOString(),
+          },
+          undefined,
+          env as any
+        );
+
+        const paymentDocId = `pay_${razorpay_payment_id || Date.now()}`;
+        await saveDocument(
+          'payments',
+          paymentDocId,
+          {
+            userId,
+            planId: targetPlan,
+            payment_id: razorpay_payment_id,
+            order_id: razorpay_order_id,
+            status: 'Paid',
+            created_at: new Date().toISOString(),
+          },
+          undefined,
+          env as any
+        );
+      } catch (dbErr) {
+        console.error('[RazorpayOrder] Failed to persist payment/plan to Firestore:', dbErr);
+      }
+    }
+
     // Fetch actual payment instrument details (Card last4 / network or UPI VPA) from Razorpay
-    const paymentRes = await fetch(
-      `https://api.razorpay.com/v1/payments/${razorpay_payment_id}`,
-      { headers: { Authorization: authHeader } }
-    );
-    const paymentData: any = await paymentRes.json();
+    let paymentData: any = {};
+    try {
+      const paymentRes = await fetch(
+        `https://api.razorpay.com/v1/payments/${razorpay_payment_id}`,
+        { headers: { Authorization: authHeader } }
+      );
+      if (paymentRes.ok) {
+        paymentData = await paymentRes.json();
+      }
+    } catch (err) {
+      console.warn('[RazorpayOrder] Could not fetch instrument details:', err);
+    }
 
     let paymentMethodDisplay = {
       type: paymentData.method || 'card',
@@ -205,16 +255,18 @@ export async function handleRazorpayVerifyPayment(
       }),
       amount:
         paymentData.currency === 'INR'
-          ? `₹${(paymentData.amount / 100).toLocaleString('en-IN')}`
-          : `$${(paymentData.amount / 100).toFixed(2)}`,
+          ? `₹${((paymentData.amount || 0) / 100).toLocaleString('en-IN')}`
+          : `$${((paymentData.amount || 0) / 100).toFixed(2)}`,
       status: 'Paid',
     };
 
-    // Ready for persistence to storage if workspace context provided
     return new Response(
       JSON.stringify({
+        success: true,
         verified: true,
+        paymentId: razorpay_payment_id,
         plan: 'Pro Plan',
+        planId: targetPlan,
         paymentMethod: paymentMethodDisplay,
         invoice: newInvoice,
       }),

@@ -11,6 +11,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
+import { useAuth } from '../context/AuthContext';
 
 declare global {
   interface Window {
@@ -200,6 +201,12 @@ export default function PricingPage() {
       return;
     }
 
+    let authContext: any = null;
+    try {
+      authContext = useAuth();
+    } catch {}
+    const targetUserId = authContext?.workspace?.id || authContext?.user?.uid || '';
+
     setCheckoutBanner(null);
     setLoadingPlan(planId);
 
@@ -223,6 +230,7 @@ export default function PricingPage() {
             amount: amountInSubunits,
             currency,
             planId,
+            userId: targetUserId,
             billingCycle: planId === 'lifetime' ? 'one_time' : billingCycle,
           }),
         });
@@ -276,6 +284,7 @@ export default function PricingPage() {
               body: JSON.stringify({
                 ...response,
                 planId,
+                userId: targetUserId,
                 billingCycle: planId === 'lifetime' ? 'lifetime' : billingCycle,
                 currency,
                 amount: amountInSubunits,
