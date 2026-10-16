@@ -6,7 +6,6 @@ import {
   Crown,
   ArrowRight,
   ChevronDown,
-  Star,
   Loader2,
   CheckCircle2,
 } from 'lucide-react';
@@ -37,7 +36,7 @@ export interface PlanConfig {
   features: string[];
 }
 
-// Dynamically load official Razorpay SDK
+// Dynamically load the official Razorpay SDK script
 function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
     if (typeof window === 'undefined') {
@@ -83,7 +82,7 @@ export const PLANS: PlanConfig[] = [
     description: 'For growing SaaS startups, creators, and D2C brands scaling conversions.',
     popular: true,
     pricing: {
-      INR: { monthly: 1499, annual: 999, annualTotal: 11988 },
+      INR: { monthly: 799, annual: 399, annualTotal: 4788 },
       USD: { monthly: 29, annual: 19, annualTotal: 228 },
     },
     ctaText: 'Upgrade to Pro',
@@ -103,7 +102,7 @@ export const PLANS: PlanConfig[] = [
     badge: 'MULTI-WORKSPACE & API',
     description: 'For agencies and high-volume teams managing multiple brands & custom pipelines.',
     pricing: {
-      INR: { monthly: 3999, annual: 2499, annualTotal: 29988 },
+      INR: { monthly: 2499, annual: 1499, annualTotal: 17988 },
       USD: { monthly: 79, annual: 49, annualTotal: 588 },
     },
     ctaText: 'Get Agency Scale',
@@ -134,7 +133,7 @@ export const COMPARISON_ROWS = [
 export const FAQS = [
   {
     q: 'How does the Founding Member Lifetime Pass work?',
-    a: 'Pay once and unlock lifetime Pro access for your workspace plus 2 bonus client workspaces, with zero recurring monthly or annual fees. Limited strictly to our first 50 founding supporters.',
+    a: 'Pay once and unlock lifetime Pro access for your workspace plus extra bonus workspaces, with zero recurring monthly or annual fees. Limited strictly to our first 50 founding supporters.',
   },
   {
     q: 'Can I pay in INR with UPI/RuPay or in USD with an International Card?',
@@ -150,16 +149,18 @@ export const FAQS = [
   },
   {
     q: 'Can I cancel my monthly or annual subscription anytime?',
-    a: 'Absolutely. There is zero lock-in. You can manage or cancel your subscription with 1 click directly inside your workspace Billing & Plans tab.',
+    a: 'Absolutely. There is zero lock-in. You can manage or cancel your subscription anytime directly inside your workspace Billing & Plans tab.',
   },
 ];
 
-export default function PricingPage() {
+export function PricingPage() {
   usePageSeo({
-    title: 'Pricing — Panda Praise (Global & India Edition)',
-    description: 'Transparent pricing for founders, creators, and agencies. Start free forever or upgrade to Pro with Razorpay UPI, Cards & GST input credit.',
+    title: 'PandaPraise Pricing | Simple, Transparent Plans for High-Converting Social Proof',
+    description:
+      'Explore PandaPraise pricing: Starter free forever, Pro for scaling SaaS, and Agency multi-workspace. Instant UPI, RuPay, global cards, and GST invoicing.',
   });
 
+  const { user } = useAuth();
   const [currency, setCurrency] = useState<Currency>('INR');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('annual');
   const [loadingPlan, setLoadingPlan] = useState<PlanId | null>(null);
@@ -169,7 +170,7 @@ export default function PricingPage() {
     message: string;
   } | null>(null);
 
-  // Auto-detect visitor location so global visitors see USD and Indian visitors see INR
+  // Auto-detect location: default to INR for Indian timezones, USD for worldwide
   useEffect(() => {
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
@@ -184,8 +185,13 @@ export default function PricingPage() {
   }, []);
 
   const RAZORPAY_KEY_ID =
-    (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_YOUR_KEY_HERE';
-  const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || '';
+    (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_live_YOUR_KEY_HERE';
+  // Replace with your Firebase Cloud Functions base URL or Cloudflare Worker fallback
+  const rawApiBase =
+    (import.meta as any).env?.VITE_FIREBASE_API_BASE ||
+    (import.meta as any).env?.VITE_API_BASE_URL ||
+    '';
+  const FIREBASE_API_BASE = rawApiBase.replace(/\/$/, '');
 
   const formatMoney = (amount: number) => {
     if (currency === 'INR') {
@@ -194,22 +200,16 @@ export default function PricingPage() {
     return `$${amount.toLocaleString('en-US')}`;
   };
 
-  // REAL RAZORPAY CHECKOUT PIPELINE
-  const handleCheckout = async (planId: PlanId, planLabel: string, amountMajorUnits: number) => {
+  // REAL RAZORPAY CHECKOUT PIPELINE FOR FIREBASE & CLOUDFLARE
+  const handleRealRazorpayCheckout = async (
+    planId: PlanId,
+    planLabel: string,
+    amountMajorUnits: number
+  ) => {
     if (planId === 'starter') {
-      window.location.href = '/signup?plan=free';
+      window.location.href = '/signup';
       return;
     }
-
-    let authContext: any = null;
-    try {
-      authContext = useAuth();
-    } catch {}
-    const targetUserId =
-      authContext?.workspace?.id ||
-      authContext?.user?.uid ||
-      (typeof window !== 'undefined' ? localStorage.getItem('pandapraise_user_id') : '') ||
-      'guest_user';
 
     setCheckoutBanner(null);
     setLoadingPlan(planId);
@@ -217,144 +217,97 @@ export default function PricingPage() {
     try {
       const sdkLoaded = await loadRazorpayScript();
       if (!sdkLoaded) {
-        throw new Error('Could not load Razorpay Checkout SDK. Please check your internet connection.');
+        throw new Error('Could not load Razorpay Checkout SDK. Please check your network connection.');
       }
 
-      // Convert major currency units (₹ or $) into subunits (paise or cents)
-      const amountInSubunits = amountMajorUnits * 100;
-      let orderId = '';
-      let activeKeyId = RAZORPAY_KEY_ID;
+      const amountInSubunits = amountMajorUnits * 100; // e.g. ₹399 -> 39900 paise
+      const userId = user?.id || localStorage.getItem('pandapraise_user_id') || 'guest_user';
 
-      // Step 1: Request an official Razorpay order_id from backend / Cloudflare Worker
-      try {
-        const orderRes = await fetch(`${API_BASE_URL}/api/razorpay/create-order`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: amountInSubunits,
-            currency,
-            planId,
-            userId: targetUserId,
-            billingCycle: planId === 'lifetime' ? 'one_time' : billingCycle,
-          }),
-        });
-
-        if (orderRes.ok) {
-          const orderData = await orderRes.json();
-          if (orderData.orderId) orderId = orderData.orderId;
-          if (orderData.keyId) activeKeyId = orderData.keyId;
-        }
-      } catch (err) {
-        console.warn('Order creation worker unreachable, proceeding with direct Razorpay checkout:', err);
-      }
-
-      // Step 2: Launch Official Razorpay Modal
-      const options: Record<string, any> = {
-        key: activeKeyId,
-        amount: amountInSubunits,
-        currency,
-        name: 'PandaPraise',
-        description: `${planLabel} (${
-          planId === 'lifetime'
-            ? 'Lifetime Access'
-            : billingCycle === 'annual'
-            ? 'Annual Billing'
-            : 'Monthly Billing'
-        })`,
-        ...(orderId ? { order_id: orderId } : {}),
-        notes: {
-          plan_id: planId,
-          billing_cycle: planId === 'lifetime' ? 'lifetime' : billingCycle,
+      // Step 1: Request an official order_id from backend
+      const orderEndpoint = FIREBASE_API_BASE ? `${FIREBASE_API_BASE}/createRazorpayOrder` : '/createRazorpayOrder';
+      const orderRes = await fetch(orderEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: amountInSubunits,
           currency,
-        },
-        theme: {
-          color: '#7C3AED',
+          planId,
+          userId,
+        }),
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        throw new Error(orderData.error || 'Failed to create Razorpay secure order.');
+      }
+
+      // Step 2: Open the official Razorpay Modal
+      const options = {
+        key: orderData.keyId || RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'PandaPraise',
+        description: `${planLabel} (${planId === 'lifetime' ? 'Lifetime Pass' : billingCycle})`,
+        order_id: orderData.orderId,
+        theme: { color: '#7C3AED' },
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          // Step 3: Verify HMAC signature on backend & update Firestore workspace
+          const verifyEndpoint = FIREBASE_API_BASE ? `${FIREBASE_API_BASE}/verifyRazorpayPayment` : '/verifyRazorpayPayment';
+          const verifyRes = await fetch(verifyEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              planId,
+              userId,
+            }),
+          });
+
+          if (verifyRes.ok) {
+            setCheckoutBanner({
+              type: 'success',
+              message: `Payment successful! ID: ${response.razorpay_payment_id}. Upgrading your workspace...`,
+            });
+            setTimeout(() => {
+              window.location.href = '/?upgraded=true';
+            }, 2000);
+          } else {
+            setCheckoutBanner({
+              type: 'error',
+              message: 'Payment received by Razorpay, but database verification failed. Contact support.',
+            });
+          }
+          setLoadingPlan(null);
         },
         modal: {
           ondismiss: () => {
             setLoadingPlan(null);
           },
         },
-        handler: async (response: {
-          razorpay_payment_id: string;
-          razorpay_order_id?: string;
-          razorpay_signature?: string;
-        }) => {
-          try {
-            // Step 3: Verify HMAC-SHA256 payment signature on backend
-            const verifyRes = await fetch(`${API_BASE_URL}/api/razorpay/verify-payment`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                ...response,
-                planId,
-                userId: targetUserId,
-                billingCycle: planId === 'lifetime' ? 'lifetime' : billingCycle,
-                currency,
-                amount: amountInSubunits,
-              }),
-            });
-
-            if (verifyRes.ok) {
-              setCheckoutBanner({
-                type: 'success',
-                message: `Payment verified! Payment ID: ${response.razorpay_payment_id}. Redirecting to your Pro workspace...`,
-              });
-            } else {
-              setCheckoutBanner({
-                type: 'success',
-                message: `Payment captured via Razorpay (ID: ${response.razorpay_payment_id}). Activating your ${planLabel} workspace...`,
-              });
-            }
-
-            // Persist unlocked plan locally so Billing & Plans reflects it immediately
-            localStorage.setItem(
-              'pandapraise_active_subscription',
-              JSON.stringify({
-                planId,
-                planLabel,
-                paymentId: response.razorpay_payment_id,
-                currency,
-                amount: formatMoney(amountMajorUnits),
-                activatedAt: new Date().toISOString(),
-              })
-            );
-
-            setTimeout(() => {
-              window.location.href = '/?upgraded=true';
-            }, 2200);
-          } finally {
-            setLoadingPlan(null);
-          }
-        },
       };
 
       const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', (failErr: any) => {
-        setCheckoutBanner({
-          type: 'error',
-          message:
-            failErr?.error?.description ||
-            'Payment could not be completed. Please try again with UPI or another card.',
-        });
-        setLoadingPlan(null);
-      });
-
       rzp.open();
     } catch (err: any) {
       setCheckoutBanner({
         type: 'error',
-        message: err.message || 'Unable to initialize Razorpay checkout.',
+        message: err.message || 'Checkout initialization failed.',
       });
       setLoadingPlan(null);
     }
   };
 
-  const lifetimePrice = currency === 'INR' ? 14999 : 199;
+  const lifetimePrice = currency === 'INR' ? 4999 : 149;
 
   return (
     <div className="min-h-screen bg-[#07090E] text-slate-100 font-sans antialiased selection:bg-purple-600 selection:text-white">
-      {/* ================= GLOBAL TOP NAVBAR ================= */}
+      {/* ================= NAVBAR ================= */}
       <header className="sticky top-0 z-40 backdrop-blur-md bg-[#07090E]/85 border-b border-white/10">
         <div className="max-w-7xl mx-auto h-16 px-6 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2.5">
@@ -367,11 +320,8 @@ export default function PricingPage() {
           </a>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-            <a href="/#features" className="hover:text-white transition-colors">
+            <a href="#features" className="hover:text-white transition-colors">
               Features
-            </a>
-            <a href="/#widgets" className="hover:text-white transition-colors">
-              Wall of Love
             </a>
             <a href="#comparison" className="hover:text-white transition-colors">
               Compare Plans
@@ -398,66 +348,57 @@ export default function PricingPage() {
         </div>
       </header>
 
-      {/* ================= HERO & CURRENCY / BILLING TOGGLES ================= */}
+      {/* ================= HERO SECTION ================= */}
       <section className="relative pt-16 pb-12 px-6 overflow-hidden">
-        {/* Ambient Purple Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[320px] bg-purple-600/15 blur-[130px] pointer-events-none rounded-full" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* Dynamic Region-Aware Trust Pill */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-slate-300 mb-6">
             {currency === 'INR' ? (
               <>
                 <span>🇮🇳</span>
-                <span>Built for Global-First Indian SaaS, Agencies & Creators</span>
+                <span>Built for Indian Businesses, SaaS & Creators</span>
               </>
             ) : (
               <>
                 <Globe className="w-3.5 h-3.5 text-purple-400" />
-                <span>Trusted by High-Converting SaaS Teams, Agencies & Creators Worldwide</span>
+                <span>Trusted by High-Converting SaaS Teams & Creators Worldwide</span>
               </>
             )}
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
-            Turn customer love into{' '}
-            <span className="bg-gradient-to-r from-purple-400 via-fuchsia-400 to-indigo-400 bg-clip-text text-transparent">
-              predictable revenue.
-            </span>
+            Simple, transparent pricing.
           </h1>
 
           <p className="mt-5 text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Start free forever. Upgrade when you are ready for unlimited video testimonials, automated WhatsApp & email drips, and white-label embeds.
+            Flexible monthly and annual plans for growing teams — or lock in lifetime access with our Founding Member pass.
           </p>
 
-          {/* Dynamic Payment Method Sub-bar */}
           <p className="mt-4 text-xs font-medium text-slate-400 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             {currency === 'INR' ? (
               <>
-                <span className="text-emerald-400 font-semibold">⚡ Instant Razorpay Checkout</span>
+                <span>UPI</span>
                 <span>•</span>
-                <span>UPI (GPay, PhonePe, Paytm)</span>
+                <span>RuPay</span>
                 <span>•</span>
-                <span>Cards & Netbanking</span>
+                <span>Netbanking</span>
                 <span>•</span>
-                <span className="text-purple-300">18% GST Input Tax Credit</span>
+                <span className="text-purple-300">Instant GST Invoice</span>
               </>
             ) : (
               <>
-                <span className="text-emerald-400 font-semibold">⚡ Instant Global Checkout</span>
+                <span>Global Cards</span>
                 <span>•</span>
-                <span>Visa, Mastercard, Amex</span>
+                <span>Apple Pay</span>
                 <span>•</span>
                 <span>Instant B2B Tax Receipts</span>
-                <span>•</span>
-                <span className="text-purple-300">Cancel Anytime</span>
               </>
             )}
           </p>
 
-          {/* Controls: Currency Switcher + Billing Cycle Switcher */}
+          {/* Currency and Billing Controls */}
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            {/* Currency Switcher */}
             <div className="inline-flex items-center p-1 rounded-full bg-white/5 border border-white/10">
               <button
                 type="button"
@@ -486,7 +427,6 @@ export default function PricingPage() {
               </button>
             </div>
 
-            {/* Annual vs Monthly Switcher */}
             <div className="inline-flex items-center p-1 rounded-full bg-white/5 border border-white/10">
               <button
                 type="button"
@@ -500,7 +440,7 @@ export default function PricingPage() {
               >
                 <span>Annual Billing</span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-600">
-                  Save 35%
+                  Save 50%
                 </span>
               </button>
               <button
@@ -520,7 +460,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ================= CHECKOUT STATUS NOTIFICATION BANNER ================= */}
+      {/* ================= NOTIFICATION BANNER ================= */}
       {checkoutBanner && (
         <div className="max-w-5xl mx-auto px-6 mb-6">
           <div
@@ -545,7 +485,7 @@ export default function PricingPage() {
         </div>
       )}
 
-      {/* ================= 3 MAIN SAAS TIER CARDS ================= */}
+      {/* ================= PRICING CARDS ================= */}
       <section className="max-w-7xl mx-auto px-6 pb-12">
         <div id="pricing-plans-grid" className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           {PLANS.map((plan) => {
@@ -573,7 +513,7 @@ export default function PricingPage() {
               >
                 {plan.popular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-purple-600 text-white text-[11px] font-extrabold tracking-wider uppercase shadow-lg">
-                    Most Popular • Best Value
+                    Most Popular • Best Subscription
                   </div>
                 )}
 
@@ -584,7 +524,7 @@ export default function PricingPage() {
                     </span>
                     {plan.id !== 'starter' && billingCycle === 'annual' && (
                       <span className="text-xs font-bold text-emerald-400">
-                        Save 35% Annually
+                        Save 50%
                       </span>
                     )}
                   </div>
@@ -594,14 +534,13 @@ export default function PricingPage() {
                     {plan.description}
                   </p>
 
-                  {/* Dynamic Price Display */}
                   <div className="mt-6 pb-6 border-b border-white/10">
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
                         {formatMoney(displayedMonthly)}
                       </span>
                       <span className="text-xs font-medium text-slate-400">
-                        {plan.id === 'starter' ? '/ forever' : '/ month'}
+                        {plan.id === 'starter' ? '/ forever' : '/month'}
                       </span>
                     </div>
 
@@ -610,7 +549,9 @@ export default function PricingPage() {
                         'No credit card required'
                       ) : billingCycle === 'annual' ? (
                         <span className="text-emerald-400">
-                          Billed as {formatMoney(priceObj.annualTotal)}/year
+                          {currency === 'INR'
+                            ? `₹${priceObj.annualTotal.toLocaleString('en-IN')} billed annually`
+                            : `$${priceObj.annualTotal} billed annually`}
                         </span>
                       ) : (
                         'Billed monthly • Cancel anytime'
@@ -618,7 +559,6 @@ export default function PricingPage() {
                     </p>
                   </div>
 
-                  {/* Feature Checklist */}
                   <ul className="mt-6 space-y-3 text-xs sm:text-sm text-slate-300">
                     {plan.features.map((feat, idx) => (
                       <li key={idx} className="flex items-start gap-3">
@@ -629,14 +569,13 @@ export default function PricingPage() {
                   </ul>
                 </div>
 
-                {/* Action Button */}
                 <div className="mt-8 pt-4">
                   <button
                     type="button"
                     id={`btn-checkout-${plan.id}`}
                     disabled={isBusy}
                     onClick={() =>
-                      handleCheckout(
+                      handleRealRazorpayCheckout(
                         plan.id,
                         `PandaPraise ${plan.name}`,
                         checkoutChargeAmount
@@ -666,9 +605,7 @@ export default function PricingPage() {
                   <p className="mt-3 text-[11px] text-center text-slate-500">
                     {plan.id === 'starter'
                       ? 'Instant workspace setup in 30 seconds'
-                      : currency === 'INR'
-                      ? '⚡ Instant Activation • UPI, Cards & 18% GST Invoice'
-                      : '⚡ Instant Activation • Secured by Razorpay (PCI-DSS L1)'}
+                      : '⚡ Instant Activation • UPI & RuPay • GST Invoice'}
                   </p>
                 </div>
               </div>
@@ -677,36 +614,33 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ================= VIP FOUNDING MEMBER LIFETIME PASS BANNER ================= */}
+      {/* ================= FOUNDING MEMBER LIFETIME PASS BANNER ================= */}
       <section className="max-w-7xl mx-auto px-6 pb-16">
         <div id="plan-card-lifetime" className="rounded-3xl bg-gradient-to-r from-amber-500/10 via-[#14111D] to-purple-600/10 border-2 border-amber-400/50 p-7 sm:p-9 shadow-2xl relative overflow-hidden">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div className="space-y-3 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs font-extrabold uppercase tracking-wider">
                 <Crown className="w-3.5 h-3.5" />
-                <span>Founding Member Lifetime Pass • Only 14 / 50 Passes Left</span>
+                <span>Most Popular • Lifetime Pass • Limited Deal</span>
               </div>
 
               <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
-                Hate monthly subscriptions? Pay once, own PandaPraise Pro for life.
+                Founding Member Pass
               </h3>
 
               <p className="text-sm text-slate-300 leading-relaxed">
-                Lock in lifetime access to all Pro features, unlimited verified testimonials, Chrome Extension Pro, and 3 dedicated workspaces with zero recurring charges ever.
+                Pay once. Use Panda Praise for life without recurring fees. Zero recurring monthly charges ever. Lifetime access to all present & future features.
               </p>
 
               <div className="pt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-amber-200/90">
                 <span className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-amber-400" />3 Workspaces Included
+                  <Check className="w-4 h-4 text-amber-400" />Unlimited Testimonials
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-amber-400" />Unlimited Text & Video Proofs
+                  <Check className="w-4 h-4 text-amber-400" />Wall of Love & Widgets
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-amber-400" />Chrome Extension + White-Glove Setup
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-amber-400" />Instant GST / Tax Invoice
+                  <Check className="w-4 h-4 text-amber-400" />Instant GST Invoice
                 </span>
               </div>
             </div>
@@ -719,7 +653,7 @@ export default function PricingPage() {
                 {formatMoney(lifetimePrice)}
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                Zero recurring fees • Lifetime updates
+                Zero recurring fees • Lifetime license
               </p>
 
               <button
@@ -727,7 +661,7 @@ export default function PricingPage() {
                 id="btn-checkout-lifetime"
                 disabled={loadingPlan === 'lifetime'}
                 onClick={() =>
-                  handleCheckout(
+                  handleRealRazorpayCheckout(
                     'lifetime',
                     'PandaPraise Founding Member Lifetime Pass',
                     lifetimePrice
@@ -742,7 +676,7 @@ export default function PricingPage() {
                   </>
                 ) : (
                   <>
-                    <span>Claim Lifetime Pass</span>
+                    <span>Get Lifetime Access</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -752,68 +686,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ================= DOGFOODED SOCIAL PROOF WALL OF LOVE ================= */}
-      <section className="max-w-7xl mx-auto px-6 pb-20">
-        <div className="text-center mb-10">
-          <span className="text-xs font-bold uppercase tracking-widest text-purple-400">
-            Powered by PandaPraise Wall of Love
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mt-2">
-            Why founders & agencies switch to PandaPraise
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            {
-              quote:
-                'We embedded the PandaPraise Wall of Love on our checkout page in 2 minutes. Our trial-to-paid conversion jumped 28% in the first two weeks.',
-              author: 'Aarav Mehta',
-              role: 'Founder, FinStack SaaS',
-              badge: 'Verified via Razorpay',
-            },
-            {
-              quote:
-                'The WhatsApp review request drip is a game changer for Indian & global D2C brands. Customers actually reply with video testimonials!',
-              author: 'Sarah Jenkins',
-              role: 'Growth Lead, ScaleOps Agency',
-              badge: 'Agency Plan User',
-            },
-            {
-              quote:
-                'Cleanest testimonial studio on the market. Instant GST invoices for our accounting team and zero page-speed bloat on our Framer site.',
-              author: 'Rohan Kulkarni',
-              role: 'CTO, CloudPulse',
-              badge: 'Founding Member',
-            },
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              className="rounded-2xl bg-[#0D0F17] border border-white/10 p-6 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-1 text-amber-400 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-                <p className="text-sm text-slate-300 leading-relaxed">"{item.quote}"</p>
-              </div>
-              <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-white">{item.author}</p>
-                  <p className="text-[11px] text-slate-400">{item.role}</p>
-                </div>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/30">
-                  {item.badge}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ================= FULL FEATURE COMPARISON TABLE ================= */}
+      {/* ================= COMPARISON TABLE ================= */}
       <section id="comparison" className="max-w-5xl mx-auto px-6 pb-20">
         <div className="text-center mb-10">
           <h2 className="text-2xl sm:text-3xl font-bold text-white">
@@ -905,9 +778,9 @@ export default function PricingPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span>🐼</span>
-            <span className="font-semibold text-slate-300">PandaPraise</span>
+            <span className="font-semibold text-slate-300">Panda Praise</span>
             <span>•</span>
-            <span>© {new Date().getFullYear()} PandaPraise. All rights reserved.</span>
+            <span>© 2026 Panda Praise Ltd. All rights reserved.</span>
           </div>
           <div className="flex items-center gap-6">
             <a href="/" className="hover:text-slate-300">
@@ -926,4 +799,4 @@ export default function PricingPage() {
   );
 }
 
-export { PricingPage };
+export default PricingPage;

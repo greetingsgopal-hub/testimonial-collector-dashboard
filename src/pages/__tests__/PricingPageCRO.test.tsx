@@ -50,7 +50,7 @@ describe('PricingPage Architecture & Monetization', () => {
     const monthlyToggle = container.querySelector('#billing-toggle-monthly') as HTMLButtonElement;
     expect(annualToggle).not.toBeNull();
     expect(monthlyToggle).not.toBeNull();
-    expect(annualToggle.textContent).toContain('Save 35%');
+    expect(annualToggle.textContent).toContain('Save 50%');
 
     // Switch to monthly billing
     await act(async () => {
@@ -75,7 +75,7 @@ describe('PricingPage Architecture & Monetization', () => {
 
     const proCard = container.querySelector('#plan-card-pro');
     expect(proCard).not.toBeNull();
-    expect(proCard?.textContent).toContain('Most Popular • Best Value');
+    expect(proCard?.textContent).toContain('Most Popular • Best Subscription');
     expect(proCard?.textContent).toContain('Pro');
 
     const ctaBtn = container.querySelector('#btn-checkout-pro');
@@ -94,13 +94,13 @@ describe('PricingPage Architecture & Monetization', () => {
 
     const lifetimeCard = container.querySelector('#plan-card-lifetime');
     expect(lifetimeCard).not.toBeNull();
-    expect(lifetimeCard?.textContent).toContain('Founding Member Lifetime Pass');
+    expect(lifetimeCard?.textContent).toContain('Founding Member Pass');
     expect(lifetimeCard?.textContent).toContain('One-Time Payment');
-    expect(lifetimeCard?.textContent).toContain('₹14,999');
+    expect(lifetimeCard?.textContent).toContain('₹4,999');
 
     const lifetimeBtn = container.querySelector('#btn-checkout-lifetime');
     expect(lifetimeBtn).not.toBeNull();
-    expect(lifetimeBtn?.textContent).toContain('Claim Lifetime Pass');
+    expect(lifetimeBtn?.textContent).toContain('Get Lifetime Access');
   });
 
   it('4. Renders Comparison Table and FAQ sections', async () => {
@@ -146,14 +146,14 @@ describe('PricingPage Architecture & Monetization', () => {
 
     expect(proCard?.textContent).toContain('$19');
     expect(agencyCard?.textContent).toContain('$49');
-    expect(lifetimeCard?.textContent).toContain('$199');
+    expect(lifetimeCard?.textContent).toContain('$149');
 
     // Switch back to INR
     await act(async () => {
       inrToggle.click();
     });
-    expect(proCard?.textContent).toContain('₹999');
-    expect(agencyCard?.textContent).toContain('₹2,499');
-    expect(lifetimeCard?.textContent).toContain('₹14,999');
+    expect(proCard?.textContent).toContain('₹399');
+    expect(agencyCard?.textContent).toContain('₹1,499');
+    expect(lifetimeCard?.textContent).toContain('₹4,999');
   });
 });
