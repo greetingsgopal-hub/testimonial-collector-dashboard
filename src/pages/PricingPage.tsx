@@ -205,7 +205,11 @@ export default function PricingPage() {
     try {
       authContext = useAuth();
     } catch {}
-    const targetUserId = authContext?.workspace?.id || authContext?.user?.uid || '';
+    const targetUserId =
+      authContext?.workspace?.id ||
+      authContext?.user?.uid ||
+      (typeof window !== 'undefined' ? localStorage.getItem('pandapraise_user_id') : '') ||
+      'guest_user';
 
     setCheckoutBanner(null);
     setLoadingPlan(planId);

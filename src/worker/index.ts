@@ -83,7 +83,9 @@ export default {
     // Check if the request is destined for an API endpoint or webhook
     const isApiRoute =
       pathname.startsWith('/api/') ||
-      pathname.startsWith('/api/webhook/');
+      pathname.startsWith('/api/webhook/') ||
+      pathname === '/createRazorpayOrder' ||
+      pathname === '/verifyRazorpayPayment';
 
     if (isApiRoute) {
       // 1. Handle CORS Preflight for API routes
@@ -101,7 +103,7 @@ export default {
       }
 
       // 2. Normalize endpoint name
-      const endpoint = pathname.replace(/^\/api\//, '').split('?')[0].replace(/\/$/, '');
+      const endpoint = pathname.replace(/^\/api\//, '').replace(/^\//, '').split('?')[0].replace(/\/$/, '');
 
       // Superadmin Platform Console Endpoints
       if (endpoint === 'admin/workspaces') {
@@ -190,9 +192,11 @@ export default {
           return await handleRazorpayCheckout(request, env);
 
         case 'razorpay/create-order':
+        case 'createRazorpayOrder':
           return await handleRazorpayCreateOrder(request, env);
 
         case 'razorpay/verify-payment':
+        case 'verifyRazorpayPayment':
           return await handleRazorpayVerifyPayment(request, env);
 
         case 'webhook/razorpay':
