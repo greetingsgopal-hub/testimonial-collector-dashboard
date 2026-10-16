@@ -19,7 +19,7 @@ vi.mock('../../lib/seo', () => ({
   usePageSeo: vi.fn(),
 }));
 
-describe('PricingPage CRO & Monetization Architecture', () => {
+describe('PricingPage Architecture & Monetization', () => {
   let container: HTMLDivElement;
   let root: Root;
 
@@ -37,7 +37,7 @@ describe('PricingPage CRO & Monetization Architecture', () => {
     container.remove();
   });
 
-  it('1. Renders 3-column pricing grid with dynamic billing rhythm toggle without redundant 3-pill duplication', async () => {
+  it('1. Renders 3-column pricing grid with dynamic billing rhythm toggle', async () => {
     await act(async () => {
       root.render(
         <MemoryRouter>
@@ -50,7 +50,7 @@ describe('PricingPage CRO & Monetization Architecture', () => {
     const monthlyToggle = container.querySelector('#billing-toggle-monthly') as HTMLButtonElement;
     expect(annualToggle).not.toBeNull();
     expect(monthlyToggle).not.toBeNull();
-    expect(annualToggle.textContent).toContain('Save 50%');
+    expect(annualToggle.textContent).toContain('Save 35%');
 
     // Switch to monthly billing
     await act(async () => {
@@ -64,7 +64,7 @@ describe('PricingPage CRO & Monetization Architecture', () => {
     expect(plansGrid?.children.length).toBe(3);
   });
 
-  it('2. Founding Member anchor card features glowing border, Most Popular badge, and Zero Recurring differentiator', async () => {
+  it('2. Pro plan card features Most Popular badge and upgrade CTA', async () => {
     await act(async () => {
       root.render(
         <MemoryRouter>
@@ -73,19 +73,17 @@ describe('PricingPage CRO & Monetization Architecture', () => {
       );
     });
 
-    const foundingCard = container.querySelector('#plan-card-founding');
-    expect(foundingCard).not.toBeNull();
-    expect(foundingCard?.className).toContain('border-amber-400');
-    expect(foundingCard?.textContent).toContain('Most Popular • Lifetime Pass');
-    expect(foundingCard?.textContent).toContain('₹4,999');
-    expect(foundingCard?.textContent).toContain('Zero recurring monthly charges');
+    const proCard = container.querySelector('#plan-card-pro');
+    expect(proCard).not.toBeNull();
+    expect(proCard?.textContent).toContain('Most Popular • Best Value');
+    expect(proCard?.textContent).toContain('Pro');
 
-    const ctaBtn = container.querySelector('#btn-checkout-founding');
+    const ctaBtn = container.querySelector('#btn-checkout-pro');
     expect(ctaBtn).not.toBeNull();
-    expect(ctaBtn?.textContent).toContain('Get Lifetime Access');
+    expect(ctaBtn?.textContent).toContain('Upgrade to Pro');
   });
 
-  it('3. Features localized payment trust badges right next to the checkout CTA buttons on every tier', async () => {
+  it('3. VIP Founding Member Lifetime Pass banner renders with lifetime pricing', async () => {
     await act(async () => {
       root.render(
         <MemoryRouter>
@@ -94,19 +92,18 @@ describe('PricingPage CRO & Monetization Architecture', () => {
       );
     });
 
-    const foundingCard = container.querySelector('#plan-card-founding');
-    expect(foundingCard?.textContent).toContain('⚡ Instant Activation');
-    expect(foundingCard?.textContent).toContain('UPI & RuPay');
-    expect(foundingCard?.textContent).toContain('GST Invoice');
+    const lifetimeCard = container.querySelector('#plan-card-lifetime');
+    expect(lifetimeCard).not.toBeNull();
+    expect(lifetimeCard?.textContent).toContain('Founding Member Lifetime Pass');
+    expect(lifetimeCard?.textContent).toContain('One-Time Payment');
+    expect(lifetimeCard?.textContent).toContain('₹14,999');
 
-    const annualCard = container.querySelector('#plan-card-annual');
-    expect(annualCard?.textContent).toContain('UPI & RuPay');
-
-    const monthlyCard = container.querySelector('#plan-card-monthly');
-    expect(monthlyCard?.textContent).toContain('UPI & RuPay');
+    const lifetimeBtn = container.querySelector('#btn-checkout-lifetime');
+    expect(lifetimeBtn).not.toBeNull();
+    expect(lifetimeBtn?.textContent).toContain('Claim Lifetime Pass');
   });
 
-  it('4. Integrates Chrome Extension Pro into a dedicated Optional Power-ups & Add-ons sub-grid', async () => {
+  it('4. Renders Comparison Table and FAQ sections', async () => {
     await act(async () => {
       root.render(
         <MemoryRouter>
@@ -115,17 +112,13 @@ describe('PricingPage CRO & Monetization Architecture', () => {
       );
     });
 
-    const addOnsSection = container.querySelector('#powerups-and-addons');
-    expect(addOnsSection).not.toBeNull();
-    expect(addOnsSection?.textContent).toContain('Optional Power-ups & Add-ons');
-    expect(addOnsSection?.textContent).toContain('PandaPraise Chrome Extension Pro');
-    expect(addOnsSection?.textContent).toContain('₹100');
-    expect(addOnsSection?.textContent).toContain('7-Day Free Trial');
-    expect(addOnsSection?.textContent).toContain('WhatsApp Web Clipper');
+    const comparisonSection = container.querySelector('#comparison');
+    expect(comparisonSection).not.toBeNull();
+    expect(comparisonSection?.textContent).toContain('Compare plans side-by-side');
 
-    const trialBtn = container.querySelector('#btn-checkout-extension') as HTMLButtonElement;
-    expect(trialBtn).not.toBeNull();
-    expect(trialBtn.textContent).toContain('Start 7-Day Free Trial');
+    const faqSection = container.querySelector('#faq');
+    expect(faqSection).not.toBeNull();
+    expect(faqSection?.textContent).toContain('Frequently Asked Questions');
   });
 
   it('5. Switches seamlessly between Indian Rupees (INR) and Worldwide USD pricing', async () => {
@@ -147,21 +140,20 @@ describe('PricingPage CRO & Monetization Architecture', () => {
       usdToggle.click();
     });
 
-    const foundingCard = container.querySelector('#plan-card-founding');
-    const annualCard = container.querySelector('#plan-card-annual');
-    const monthlyCard = container.querySelector('#plan-card-monthly');
+    const proCard = container.querySelector('#plan-card-pro');
+    const agencyCard = container.querySelector('#plan-card-agency');
+    const lifetimeCard = container.querySelector('#plan-card-lifetime');
 
-    expect(foundingCard?.textContent).toContain('$49');
-    expect(annualCard?.textContent).toContain('$9');
-    expect(monthlyCard?.textContent).toContain('$19');
-    expect(foundingCard?.textContent).toContain('Apple & Google Pay');
+    expect(proCard?.textContent).toContain('$19');
+    expect(agencyCard?.textContent).toContain('$49');
+    expect(lifetimeCard?.textContent).toContain('$199');
 
     // Switch back to INR
     await act(async () => {
       inrToggle.click();
     });
-    expect(foundingCard?.textContent).toContain('₹4,999');
-    expect(annualCard?.textContent).toContain('₹399');
-    expect(monthlyCard?.textContent).toContain('₹799');
+    expect(proCard?.textContent).toContain('₹999');
+    expect(agencyCard?.textContent).toContain('₹2,499');
+    expect(lifetimeCard?.textContent).toContain('₹14,999');
   });
 });

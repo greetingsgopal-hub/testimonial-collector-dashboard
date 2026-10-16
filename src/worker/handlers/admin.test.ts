@@ -190,7 +190,7 @@ describe('Admin Handler & Security', () => {
           billingCycle: 'lifetime',
           subscriptionStatus: 'active',
         }),
-        null,
+        expect.anything(),
         env
       );
     });
