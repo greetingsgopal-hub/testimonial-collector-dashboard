@@ -1,0 +1,38 @@
+name: PandaPraise CI/CD Build Check
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Create Production Environment File
+        run: |
+          touch .env
+          echo "VITE_FIREBASE_API_BASE=https://us-central1-pandapraise.cloudfunctions.net" >> .env
+          echo "VITE_RAZORPAY_KEY_ID=${{ secrets.VITE_RAZORPAY_KEY_ID || 'rzp_live_TodkFfMsbdY3vr' }}" >> .env
+          echo "VITE_SUPABASE_URL=https://placeholder.supabase.co" >> .env
+          echo "VITE_SUPABASE_ANON_KEY=placeholder-key" >> .env
+
+      - name: Build Project Bundle
+        run: npm run build
+
+      - name: CI Build Success
+        run: echo "Build compiled successfully with zero errors!"
