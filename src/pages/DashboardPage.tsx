@@ -18,6 +18,7 @@ import { SocialPostView } from '../components/dashboard/views/SocialPostView';
 import { FeedbackView } from '../components/dashboard/views/FeedbackView';
 import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { AccountBillingView } from '../components/dashboard/views/AccountBillingView';
+import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { TagsView } from '../components/dashboard/views/TagsView';
 import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
@@ -594,8 +595,15 @@ export const DashboardPage = () => {
             </div>
           )}
 
+          {/* Social integrations */}
+          {activeTab === 'integrate' && (
+            <div className="max-w-6xl mx-auto font-sans">
+              <IntegrateView />
+            </div>
+          )}
+
           {/* Accounts & Billing Management */}
-          {(activeTab === 'settings' || activeTab === 'integrate') && (
+          {activeTab === 'settings' && (
             <div className="max-w-6xl mx-auto font-sans">
               <AccountBillingView
                 workspace={workspace}

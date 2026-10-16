@@ -55,4 +55,19 @@ describe('ErrorBoundary Component', () => {
     expect(container.textContent).toContain('Panda Praise is updating');
     expect(container.textContent).toContain('Reload Application');
   });
+
+  it('3. Renders escape hatches and technical error disclosure', async () => {
+    await act(async () => {
+      root.render(
+        <ErrorBoundary>
+          <ProblemChild shouldThrow={true} />
+        </ErrorBoundary>
+      );
+    });
+
+    expect(container.textContent).toContain('Clear Cache & Reset');
+    expect(container.textContent).toContain('Dashboard');
+    expect(container.textContent).toContain('Technical Details');
+    expect(container.textContent).toContain('Test explosive crash');
+  });
 });

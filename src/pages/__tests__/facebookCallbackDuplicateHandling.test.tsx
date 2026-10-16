@@ -126,7 +126,7 @@ describe('Facebook OAuth Callback Single-Ownership Regression Suite', () => {
 
     await act(async () => {
       root.render(
-        <MemoryRouter>
+        <MemoryRouter initialEntries={['/dashboard?tab=integrate&fb_outcome=fb_token_exchange_failed&social_error=Token%20exchange%20failed']}>
           <DashboardPage />
         </MemoryRouter>
       );
