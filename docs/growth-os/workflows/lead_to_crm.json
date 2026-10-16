@@ -1,0 +1,72 @@
+{
+  "name": "lead_to_crm",
+  "nodes": [
+    {
+      "type": "n8n-nodes-base.webhook",
+      "name": "Lead Webhook",
+      "trigger": true,
+      "parameters": {
+        "path": "lead",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "responseData": {
+          "statusCode": 200,
+          "contentType": "application/json",
+          "responseBody": "{\"status\":\"received\"}"
+        }
+      }
+    },
+    {
+      "type": "n8n-nodes-base.httpRequest",
+      "name": "Create Contact in Twenty",
+      "parameters": {
+        "url": "https://api.twenty.com/v1/contacts",
+        "method": "POST",
+        "authentication": "headerAuth",
+        "headerAuth": {
+          "name": "Authorization",
+          "value": "Bearer {{$env.TWENTY_API_KEY}}"
+        },
+        "jsonParameters": true,
+        "bodyParametersJson": {
+          "email": "{{$json[\"email\"]}}",
+          "firstName": "{{$json[\"first_name\"]}}",
+          "lastName": "{{$json[\"last_name\"]}}"
+        }
+      }
+    },
+    {
+      "type": "n8n-nodes-base.httpRequest",
+      "name": "Add to Listmonk",
+      "parameters": {
+        "url": "https://listmonk.example.com/api/subscribers",
+        "method": "POST",
+        "authentication": "headerAuth",
+        "headerAuth": {
+          "name": "X-API-KEY",
+          "value": "{{$env.LISTMONK_API_KEY}}"
+        },
+        "jsonParameters": true,
+        "bodyParametersJson": {
+          "email": "{{$json[\"email\"]}}",
+          "name": "{{$json[\"first_name\"]}} {{$json[\"last_name\"]}}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Lead Webhook": {
+      "main": [[{"node":"Create Contact in Twenty","type":"main"}]]
+    },
+    "Create Contact in Twenty": {
+      "main": [[{"node":"Add to Listmonk","type":"main"}]]
+    }
+  },
+  "metadata": {
+    "integrationStatus": {
+      "Twenty CRM": "MOCKED",
+      "Listmonk": "MOCKED",
+      "n8n": "CONFIGURED"
+    }
+  }
+}

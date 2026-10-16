@@ -1,0 +1,62 @@
+{
+  "name": "signup_to_analytics",
+  "documentation": {
+    "trigger": "Webhook at /signup (POST)",
+    "inputPayload": "{ \"user_id\": string, \"email\": string }",
+    "processing": "Send Identify event to PostHog",
+    "destination": "PostHog analytics",
+    "requiredCredentials": ["POSTHOG_API_KEY"],
+    "expectedOutput": "PostHog returns 200 OK (event recorded)",
+    "failureHandling": "n8n error node (default) logs and continues"
+  },
+  "nodes": [
+    {
+      "type": "n8n-nodes-base.webhook",
+      "name": "Signup Webhook",
+      "trigger": true,
+      "parameters": {
+        "path": "signup",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "responseData": {
+          "statusCode": 200,
+          "contentType": "application/json",
+          "responseBody": "{\"status\":\"ok\"}"
+        }
+      }
+    },
+    {
+      "type": "n8n-nodes-base.httpRequest",
+      "name": "PostHog Identify",
+      "parameters": {
+        "url": "https://app.posthog.com/capture",
+        "method": "POST",
+        "authentication": "headerAuth",
+        "headerAuth": {
+          "name": "Authorization",
+          "value": "Bearer {{$env.POSTHOG_API_KEY}}"
+        },
+        "jsonParameters": true,
+        "bodyParametersJson": {
+          "api_key": "{{$env.POSTHOG_API_KEY}}",
+          "event": "user_signup",
+          "properties": {
+            "distinct_id": "{{$json[\"user_id\"]}}",
+            "email": "{{$json[\"email\"]}}"
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Signup Webhook": {
+      "main": [[{"node":"PostHog Identify","type":"main"}]]
+    }
+  },
+  "metadata": {
+    "integrationStatus": {
+      "PostHog": "MOCKED",
+      "n8n": "CONFIGURED"
+    }
+  }
+}

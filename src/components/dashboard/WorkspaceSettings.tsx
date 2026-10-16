@@ -27,6 +27,8 @@ import { usePageSeo } from '../../lib/seo';
 import { TeamRole, PLAN_LIMITS, Project } from '../../types';
 import { startRazorpayCheckout } from '../../lib/razorpay';
 import { requestAccountDeletion } from '../../lib/account';
+import { usePlanEntitlements } from '../../hooks/usePlanEntitlements';
+import { storage } from '../../lib/storage';
 
 type SettingsTab = 'general' | 'team' | 'billing' | 'branding' | 'api' | 'security';
 
@@ -37,8 +39,11 @@ export const WorkspaceSettings: React.FC = () => {
   });
 
   const { workspace, project, user, allProjects = [], updateProjectDetails, deleteProjectById, resetPassword, signOut } = useAuth();
+  const entitlements = usePlanEntitlements(workspace);
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [wsName, setWsName] = useState(workspace?.name || project?.name || 'My Workspace');
+  const [removeBranding, setRemoveBranding] = useState<boolean>(workspace?.remove_branding || false);
+  const [customCss, setCustomCss] = useState<string>(workspace?.custom_css || '');
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -174,6 +179,12 @@ export const WorkspaceSettings: React.FC = () => {
     try {
       if (project?.id && updateProjectDetails) {
         await updateProjectDetails(project.id, { name: wsName.trim() });
+      }
+      if (workspace?.id && storage.updateWorkspace) {
+        await storage.updateWorkspace(workspace.id, {
+          remove_branding: removeBranding,
+          custom_css: customCss,
+        });
       }
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
@@ -662,18 +673,60 @@ export const WorkspaceSettings: React.FC = () => {
                       />
                     </div>
                   </div>
+                  {/* Remove Branding Toggle */}
+                  <div className="flex items-center justify-between p-3.5 rounded-xl border border-gray-200 bg-gray-50/50">
+                    <div>
+                      <span className="text-xs font-bold text-gray-900 block">Remove "Powered by PandaPraise" Branding</span>
+                      <span className="text-[11px] text-gray-500">Hide the viral watermark badge from all public walls, widgets, and collection forms.</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={removeBranding}
+                        disabled={!entitlements.canRemoveBranding}
+                        onChange={(e) => setRemoveBranding(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6701e6] peer-disabled:opacity-40"></div>
+                    </label>
+                  </div>
+                  {!entitlements.canRemoveBranding && (
+                    <p className="text-xs text-amber-700 flex items-center gap-1 font-medium">
+                      <Crown size={11} className="text-amber-500" /> Branding removal requires Pro, Agency or Lifetime plan.
+                    </p>
+                  )}
+
+                  {/* Custom Domain */}
                   <div>
                     <label className="text-xs font-semibold text-gray-700 mb-1 block">Custom Domain</label>
                     <input
                       type="text"
                       defaultValue={workspace?.customDomain || ''}
                       placeholder="love.yourbrand.com"
-                      disabled={!limits.customDomain}
+                      disabled={!entitlements.canUseCustomDomain}
                       className="w-full max-w-md px-3.5 py-2 text-sm rounded-xl bg-white border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6] disabled:opacity-40 disabled:cursor-not-allowed"
                     />
-                    {!limits.customDomain && (
+                    {!entitlements.canUseCustomDomain && (
                       <p className="mt-1.5 text-xs text-amber-700 flex items-center gap-1 font-medium">
-                        <Crown size={11} className="text-amber-500" /> Available on paid plans
+                        <Crown size={11} className="text-amber-500" /> Custom Domain requires Pro, Agency or Lifetime plan.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* White-Glove Custom CSS */}
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700 mb-1 block">White-Glove Custom CSS</label>
+                    <textarea
+                      rows={3}
+                      value={customCss}
+                      onChange={(e) => setCustomCss(e.target.value)}
+                      placeholder=".pandapraise-card { border-radius: 16px; }"
+                      disabled={!entitlements.canUseCustomCss}
+                      className="w-full max-w-lg px-3.5 py-2 text-xs font-mono rounded-xl bg-white border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#6701e6] focus:border-[#6701e6] disabled:opacity-40 disabled:cursor-not-allowed"
+                    />
+                    {!entitlements.canUseCustomCss && (
+                      <p className="mt-1 text-xs text-amber-700 flex items-center gap-1 font-medium">
+                        <Crown size={11} className="text-amber-500" /> Custom CSS injection is available on Agency & Lifetime plans.
                       </p>
                     )}
                   </div>
@@ -694,31 +747,42 @@ export const WorkspaceSettings: React.FC = () => {
           {activeTab === 'api' && (
             <div className="space-y-6">
               <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-3">
-                <h3 className="text-base font-bold text-gray-900">API Keys</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-gray-900">Developer REST API Keys</h3>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-[#6701e6] border border-purple-200">
+                    Agency Exclusive
+                  </span>
+                </div>
                 <p className="text-xs text-gray-500">
-                  Use API keys to access the Panda Praise REST API programmatically.
+                  Use your secret PandaPraise API key (`X-PandaPraise-Key`) to query live testimonials via GET `/api/v1/testimonials` programmatically.
                 </p>
 
-                {limits.apiAccess ? (
+                {entitlements.canUseRestApiAndWebhooks ? (
                   <div className="space-y-3 pt-2">
                     <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-between">
                       <div>
-                        <p className="text-xs font-mono font-semibold text-gray-900">pp_live_••••••••</p>
-                        <p className="text-[11px] text-gray-500">Created on signup • Read & Write</p>
+                        <p className="text-xs font-mono font-semibold text-gray-900">
+                          {workspace?.api_key || 'pp_live_••••••••••••••••'}
+                        </p>
+                        <p className="text-[11px] text-gray-500">Active Agency API Key • Full REST Access</p>
                       </div>
-                      <button className="text-xs font-semibold text-rose-600 hover:text-rose-700 cursor-pointer">Revoke</button>
+                      <button
+                        onClick={() => handleCopy(workspace?.api_key || 'pp_live_agency_token')}
+                        className="text-xs font-semibold text-[#6701e6] hover:underline cursor-pointer"
+                      >
+                        {copied ? 'Copied!' : 'Copy Key'}
+                      </button>
                     </div>
-                    <button className="flex items-center gap-1.5 text-xs font-bold text-[#6701e6] hover:underline cursor-pointer">
-                      <Plus size={14} />
-                      Generate New API Key
-                    </button>
                   </div>
                 ) : (
                   <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                     <p className="text-xs font-medium text-amber-800 flex items-center gap-2">
                       <Crown size={14} className="text-amber-600" />
-                      API access requires a paid plan.
+                      Developer REST API access is exclusive to the Agency Plan.
                     </p>
+                    <a href="/pricing" className="mt-2 inline-block text-xs font-bold text-[#6701e6] hover:underline">
+                      Upgrade to Agency →
+                    </a>
                   </div>
                 )}
               </div>

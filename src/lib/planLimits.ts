@@ -26,7 +26,7 @@ export function checkFeatureAccess(workspace: Workspace | null, feature: keyof P
     if (value) return { allowed: true };
 
     // Find the cheapest plan that unlocks this feature
-    const upgradeTo = (['starter', 'pro'] as PlanTier[]).find(p => {
+    const upgradeTo = (['starter', 'pro', 'agency'] as PlanTier[]).find(p => {
       const v = PLAN_LIMITS[p][feature];
       return typeof v === 'boolean' ? v : false;
     });
@@ -53,7 +53,7 @@ export function checkNumericLimit(
   if (limit === -1) return { allowed: true }; // unlimited
   if (currentCount < limit) return { allowed: true };
 
-  const upgradeTo = (['starter', 'pro'] as PlanTier[]).find(p => {
+  const upgradeTo = (['starter', 'pro', 'agency'] as PlanTier[]).find(p => {
     const l = PLAN_LIMITS[p][field];
     return l === -1 || currentCount < l;
   });

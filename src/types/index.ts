@@ -5,7 +5,7 @@
 // ── Core enums ──────────────────────────────────────────────
 export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'archived';
 export type ReviewType = 'text' | 'video' | 'screenshot';
-export type PlanTier = 'free' | 'starter' | 'pro';
+export type PlanTier = 'free' | 'starter' | 'pro' | 'agency' | 'lifetime';
 export type TeamRole = 'owner' | 'admin' | 'editor' | 'viewer';
 export type BillingCycle = 'monthly' | 'annual';
 
@@ -32,10 +32,16 @@ export interface Workspace {
   stripeSubscriptionId?: string;
   subscriptionStatus?: 'active' | 'trialing' | 'past_due' | 'cancelled' | 'incomplete' | 'halted' | 'pending';
   planExpiresAt?: string;
-  // Branding
+  // Branding & Tier Enforcement
   logoUrl?: string;
   brandColor?: string;
+  remove_branding?: boolean;
   customDomain?: string;
+  custom_subdomain?: string;
+  custom_css?: string;
+  ai_shield_enabled?: boolean;
+  api_key?: string;
+  webhook_url?: string;
   // Usage tracking
   testimonialCount?: number;
   projectCount?: number;
@@ -589,26 +595,60 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     prioritySupport: false,
   },
   starter: {
-    maxTestimonials: -1,
+    maxTestimonials: 10,
     maxProjects: 1,
-    maxSeats: 2,
-    maxWidgets: 10,
-    removeBranding: true,
-    hdVideo: true,
+    maxSeats: 1,
+    maxWidgets: 1,
+    removeBranding: false,
+    hdVideo: false,
     richSnippets: false,
     translation: false,
-    apiAccess: true,
-    webhooks: true,
-    customDomain: true,
-    sentimentAnalysis: true,
+    apiAccess: false,
+    webhooks: false,
+    customDomain: false,
+    sentimentAnalysis: false,
     caseStudyGenerator: false,
-    zapierIntegration: true,
+    zapierIntegration: false,
     prioritySupport: false,
   },
   pro: {
     maxTestimonials: -1,
-    maxProjects: 5,
+    maxProjects: 1,
+    maxSeats: 3,
+    maxWidgets: -1,
+    removeBranding: true,
+    hdVideo: true,
+    richSnippets: true,
+    translation: true,
+    apiAccess: false,
+    webhooks: false,
+    customDomain: true,
+    sentimentAnalysis: true,
+    caseStudyGenerator: true,
+    zapierIntegration: true,
+    prioritySupport: true,
+  },
+  lifetime: {
+    maxTestimonials: -1,
+    maxProjects: 3,
     maxSeats: 5,
+    maxWidgets: -1,
+    removeBranding: true,
+    hdVideo: true,
+    richSnippets: true,
+    translation: true,
+    apiAccess: false,
+    webhooks: false,
+    customDomain: true,
+    sentimentAnalysis: true,
+    caseStudyGenerator: true,
+    zapierIntegration: true,
+    prioritySupport: true,
+  },
+  agency: {
+    maxTestimonials: -1,
+    maxProjects: 5,
+    maxSeats: 10,
     maxWidgets: -1,
     removeBranding: true,
     hdVideo: true,

@@ -10,7 +10,8 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { Project, PLAN_LIMITS, isAtPlanLimit } from '../../types';
+import { Project } from '../../types';
+import { usePlanEntitlements } from '../../hooks/usePlanEntitlements';
 
 interface ProjectSwitcherProps {
   onSettingsClick?: (project: Project) => void;
@@ -34,9 +35,9 @@ export const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({ onSettingsClic
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const plan = workspace?.plan || 'free';
-  const atLimit = isAtPlanLimit(plan, 'maxProjects', allProjects.length);
-  const maxProjects = PLAN_LIMITS[plan].maxProjects;
+  const entitlements = usePlanEntitlements(workspace);
+  const maxProjects = entitlements.maxWorkspaces;
+  const atLimit = allProjects.length >= maxProjects;
 
   // Close dropdown on outside click
   useEffect(() => {

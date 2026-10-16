@@ -9,9 +9,12 @@ import {
   Sparkles,
   BarChart3,
   Tag,
+  Lock,
 } from 'lucide-react';
 import { Review } from '../../types';
 import { analyzeReviewBatch, computeSentimentStats } from '../../lib/ai-sentiment';
+import { useAuth } from '../../context/AuthContext';
+import { usePlanEntitlements } from '../../hooks/usePlanEntitlements';
 
 interface SentimentDashboardProps {
   reviews: Review[];
@@ -36,6 +39,15 @@ const EMOTION_COLORS: Record<string, string> = {
 };
 
 export const SentimentDashboard: React.FC<SentimentDashboardProps> = ({ reviews }) => {
+  let workspace: any = null;
+  try {
+    const auth = useAuth();
+    workspace = auth?.workspace;
+  } catch {
+    // outside AuthProvider (e.g. isolated component test)
+  }
+  const entitlements = usePlanEntitlements(workspace);
+
   const { analyzedReviews, isPreviewMode } = useMemo(() => {
     const approved = reviews.filter(r => r.status === 'approved');
     if (approved.length > 0) {
@@ -69,6 +81,29 @@ export const SentimentDashboard: React.FC<SentimentDashboardProps> = ({ reviews 
 
   return (
     <div className="space-y-4">
+      {/* Plan Entitlement Lock Banner */}
+      {!entitlements.canUseAiShield && workspace && (
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <Lock className="w-4 h-4 text-amber-600 shrink-0" />
+            <div>
+              <p className="text-xs font-bold text-amber-900">
+                AI Sentiment & Spam Shield is gated on Starter Plan
+              </p>
+              <p className="text-[11px] text-amber-700">
+                Live automated sentiment scoring and phishing/spam protection require PandaPraise Pro, Agency, or Lifetime.
+              </p>
+            </div>
+          </div>
+          <a
+            href="/pricing"
+            className="px-3 py-1 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shrink-0 self-start sm:self-auto shadow-xs"
+          >
+            Upgrade Plan →
+          </a>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">

@@ -83,6 +83,10 @@ class DelegatingStorageAdapter implements StorageAdapter {
     if (this.adapter.updateCampaignLog) return this.adapter.updateCampaignLog(id, updates);
     throw new Error('updateCampaignLog not supported');
   }
+  updateWorkspace(id: string, updates: any) {
+    if (this.adapter.updateWorkspace) return this.adapter.updateWorkspace(id, updates);
+    return Promise.resolve({ id, ...updates } as any);
+  }
 }
 
 export const storage: StorageAdapter = new DelegatingStorageAdapter();

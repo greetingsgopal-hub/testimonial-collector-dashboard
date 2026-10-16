@@ -21,10 +21,12 @@ import {
   RefreshCw,
   Settings2,
   X,
+  Lock,
 } from 'lucide-react';
 import { Campaign, CampaignChannel, CampaignInput } from '../../types';
 import { storage } from '../../lib/storage';
 import { useAuth } from '../../context/AuthContext';
+import { usePlanEntitlements } from '../../hooks/usePlanEntitlements';
 import { interpolateTemplate } from '../../worker/lib/campaignDispatcher';
 
 interface CampaignsHubProps {
@@ -32,7 +34,8 @@ interface CampaignsHubProps {
 }
 
 export const CampaignsHub: React.FC<CampaignsHubProps> = () => {
-  const { project, user } = useAuth();
+  const { project, user, workspace } = useAuth();
+  const entitlements = usePlanEntitlements(workspace);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -127,6 +130,11 @@ export const CampaignsHub: React.FC<CampaignsHubProps> = () => {
   const activeCount = campaigns.filter((c) => c.status === 'active').length;
 
   const handleOpenCreate = () => {
+    if (!entitlements.canUseAutomatedDrips) {
+      alert('UPGRADE REQUIRED: Automated Email & WhatsApp Drips require PandaPraise Pro or Agency.');
+      window.location.href = '/pricing';
+      return;
+    }
     setEditingCampaign(null);
     setFormName('');
     setFormChannel('email');
@@ -303,6 +311,31 @@ export const CampaignsHub: React.FC<CampaignsHubProps> = () => {
           </button>
         </div>
       </div>
+
+      {/* Plan Entitlement Lock Banner */}
+      {!entitlements.canUseAutomatedDrips && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <Lock className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-amber-950 dark:text-amber-200">
+                Automated Email & WhatsApp Drips require PandaPraise Pro or Agency
+              </p>
+              <p className="text-[11px] sm:text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                Automate customer review requests on autopilot via Resend and WhatsApp Cloud API by upgrading your workspace.
+              </p>
+            </div>
+          </div>
+          <a
+            href="/pricing"
+            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shrink-0 self-start sm:self-auto shadow-xs"
+          >
+            Upgrade Plan →
+          </a>
+        </div>
+      )}
 
       {/* Test Notice Banner */}
       {testSendNotice && (

@@ -53,6 +53,16 @@ export interface WorkerEnv {
   VITE_SUPERADMIN_EMAILS?: string;
   // Cloudflare KV for distributed rate limiting across edge isolates
   RATE_LIMIT_KV?: KVNamespaceLike;
+  // Supabase Database & Auth Service
+  SUPABASE_URL?: string;
+  VITE_SUPABASE_URL?: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
+  VITE_SUPABASE_ANON_KEY?: string;
+  // AI Sentiment & LLM Analysis
+  GEMINI_API_KEY?: string;
+  // WhatsApp Cloud API
+  WHATSAPP_ACCESS_TOKEN?: string;
+  WHATSAPP_PHONE_NUMBER_ID?: string;
 }
 
 export interface KVNamespaceLike {

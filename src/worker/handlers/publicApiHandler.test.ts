@@ -132,4 +132,103 @@ describe('Public REST API & Developer Keys (Task 3.5)', () => {
       expect(data.widgets[0].embedScript).toContain('pandapraise.com/embed.js');
     });
   });
+
+  describe('handlePublicApi - Tier Enforcement Endpoints', () => {
+    it('GET /api/v1/resolve-domain rejects starter plan domains with 403', async () => {
+      const req = new Request('https://pandapraise.com/api/v1/resolve-domain?host=starter-brand.com', {
+        method: 'GET',
+      });
+      const res = await handlePublicApi(req, mockEnv);
+      expect(res.status).toBe(403);
+      const data = await res.json();
+      expect(data.error).toContain('Custom domain requires Pro or Agency plan');
+    });
+
+    it('GET /api/v1/resolve-domain accepts pro plan domains', async () => {
+      const req = new Request('https://pandapraise.com/api/v1/resolve-domain?host=pro-brand.com', {
+        method: 'GET',
+      });
+      const res = await handlePublicApi(req, mockEnv);
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.workspace).toBeDefined();
+      expect(data.workspace.plan).toBe('pro');
+    });
+
+    it('POST /api/v1/testimonials/submit runs AI sentiment and detects spam patterns', async () => {
+      const spamReq = new Request('https://pandapraise.com/api/v1/testimonials/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace_id: 'ws_pro_123',
+          author_name: 'Spammer',
+          content: 'Free crypto bonus at http://spam.xyz/casino',
+        }),
+      });
+
+      const spamRes = await handlePublicApi(spamReq, mockEnv);
+      expect(spamRes.status).toBe(200);
+      const spamData = await spamRes.json();
+      expect(spamData.ai_shield.is_spam).toBe(true);
+      expect(spamData.testimonial.status).toBe('rejected');
+
+      const legitReq = new Request('https://pandapraise.com/api/v1/testimonials/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace_id: 'ws_pro_123',
+          author_name: 'Priya Sharma',
+          content: 'I love this product, it is the best and super fast!',
+        }),
+      });
+
+      const legitRes = await handlePublicApi(legitReq, mockEnv);
+      expect(legitRes.status).toBe(200);
+      const legitData = await legitRes.json();
+      expect(legitData.ai_shield.is_spam).toBe(false);
+      expect(legitData.ai_shield.sentiment_label).toBe('positive');
+      expect(legitData.testimonial.status).toBe('pending');
+    });
+
+    it('POST /api/v1/drips/dispatch enforces Pro or Agency tier', async () => {
+      const req = new Request('https://pandapraise.com/api/v1/drips/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace_id: 'ws_test_1',
+          customer_name: 'Aarav Mehta',
+          customer_email: 'aarav@example.com',
+          channel: 'email',
+          collection_link: 'https://pandapraise.com/c/demo',
+        }),
+      });
+
+      const res = await handlePublicApi(req, mockEnv);
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.success).toBe(true);
+      expect(data.status).toBe('sent');
+    });
+
+    it('POST /api/v1/clipper/capture captures WhatsApp reviews for Pro workspaces', async () => {
+      const req = new Request('https://pandapraise.com/api/v1/clipper/capture', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-PandaPraise-Key': 'pp_live_valid_key',
+        },
+        body: JSON.stringify({
+          author_name: 'Raj Patel',
+          message_text: 'Thank you for the quick turnaround!',
+          source_platform: 'WhatsApp Web',
+        }),
+      });
+
+      const res = await handlePublicApi(req, mockEnv);
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.clipped).toBe(true);
+      expect(data.data.author_role).toContain('Verified via WhatsApp Web');
+    });
+  });
 });
