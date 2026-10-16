@@ -2,9 +2,9 @@ name: Build and test
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   pull_request:
-    branches: [main]
+    branches: [main, master]
 
 jobs:
   build:
@@ -23,3 +23,6 @@ jobs:
         run: npm test
       - name: Production build
         run: npm run build
+        env:
+          VITE_RAZORPAY_KEY_ID: ${{ secrets.VITE_RAZORPAY_KEY_ID || 'rzp_live_TodkFfMsbdY3vr' }}
+
