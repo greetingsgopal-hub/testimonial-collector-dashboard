@@ -9,23 +9,48 @@ declare global {
 /**
  * Dynamically loads the Razorpay Checkout script (https://checkout.razorpay.com/v1/checkout.js).
  */
-export async function loadRazorpayScript(): Promise<boolean> {
+export async function loadRazorpayScript(timeoutMs = 5000): Promise<boolean> {
   if (typeof window === 'undefined') return false;
   if (window.Razorpay) return true;
 
   return new Promise((resolve) => {
+    let settled = false;
+    const finish = (val: boolean) => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        clearInterval(poll);
+        resolve(val);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      finish(Boolean(window.Razorpay));
+    }, timeoutMs);
+
+    // Poll in case window.Razorpay is injected or script already in DOM
+    const poll = setInterval(() => {
+      if (window.Razorpay) {
+        finish(true);
+      }
+    }, 100);
+
     const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
     if (existingScript) {
-      existingScript.addEventListener('load', () => resolve(true));
-      existingScript.addEventListener('error', () => resolve(false));
+      if (window.Razorpay) {
+        finish(true);
+        return;
+      }
+      existingScript.addEventListener('load', () => finish(Boolean(window.Razorpay)), { once: true });
+      existingScript.addEventListener('error', () => finish(false), { once: true });
       return;
     }
 
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
+    script.onload = () => finish(Boolean(window.Razorpay));
+    script.onerror = () => finish(false);
     document.body.appendChild(script);
   });
 }
