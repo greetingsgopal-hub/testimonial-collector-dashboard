@@ -113,7 +113,7 @@ export async function handleAdminGetWorkspaces(request: Request, env: WorkerEnv)
   try {
     const projectId = env.FIREBASE_PROJECT_ID || env.VITE_FIREBASE_PROJECT_ID || 'testimonialcollectordashboard';
     const queryUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`;
-    const headers = await getAuthHeader(null, env);
+    const headers = await getAuthHeader(idToken, env);
 
     const body = {
       structuredQuery: {
@@ -263,7 +263,7 @@ export async function handleAdminUpdateWorkspacePlan(
   };
 
   try {
-    await saveDocument('workspaces', workspaceId, updateData, null, env);
+    await saveDocument('workspaces', workspaceId, updateData, idToken, env);
     console.log(`[Admin] Plan updated for workspace ${workspaceId} -> ${targetPlan} by admin ${user.email}`);
 
     // Invalidate edge cache
@@ -349,7 +349,7 @@ export async function handleAdminManageWorkspace(
       updateData.isTrialExtended = true;
     }
 
-    await saveDocument('workspaces', workspaceId, updateData, null, env);
+    await saveDocument('workspaces', workspaceId, updateData, idToken, env);
 
     if (env.RATE_LIMIT_KV) {
       await env.RATE_LIMIT_KV.delete('cache:admin:workspaces').catch(() => {});
@@ -419,7 +419,7 @@ export async function handleAdminGetTestimonials(request: Request, env: WorkerEn
   try {
     const projectId = env.FIREBASE_PROJECT_ID || env.VITE_FIREBASE_PROJECT_ID || 'testimonialcollectordashboard';
     const queryUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`;
-    const headers = await getAuthHeader(null, env);
+    const headers = await getAuthHeader(idToken, env);
 
     const body = {
       structuredQuery: {
@@ -514,7 +514,7 @@ export async function handleAdminModerateTestimonial(
     const action = body?.action; // 'approve' | 'flag_spam' | 'hide' | 'delete'
 
     if (action === 'delete') {
-      await deleteDocument('public_reviews', testimonialId, null, env);
+      await deleteDocument('public_reviews', testimonialId, idToken, env);
     } else {
       const statusMap: Record<string, string> = {
         approve: 'approved',
@@ -530,7 +530,7 @@ export async function handleAdminModerateTestimonial(
           moderatedBy: user.email,
           moderatedAt: new Date().toISOString(),
         },
-        null,
+        idToken,
         env
       );
     }
