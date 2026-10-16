@@ -9,14 +9,11 @@ import {
   Mail,
   Gift,
   X,
-  ShieldCheck,
   Globe,
   Share2,
   ChevronDown,
   ChevronRight,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { isSuperadmin } from '../../lib/admin';
 import SidebarFooter from './SidebarFooter';
 
 export type DashboardTab =
@@ -51,7 +48,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   mobileOpen = false,
   onClose,
 }) => {
-  const { user } = useAuth();
   const [postDropdownOpen, setPostDropdownOpen] = useState(true);
 
   // Close the mobile drawer on Escape
@@ -256,24 +252,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             <span>Billing & Plans</span>
           </div>
         </button>
-
-        {/* 8. Superadmin Platform Console (Visible only to authorized root admins) */}
-        {isSuperadmin(user?.email) && (
-          <div className="pt-2 mt-2 border-t border-slate-200/60">
-            <Link
-              to="/admin"
-              className="apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer bg-red-500/10 text-red-700 hover:bg-red-500/15 border border-red-500/20"
-            >
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-red-600" />
-                <span>Superadmin</span>
-              </div>
-              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-red-600 text-white">
-                Root
-              </span>
-            </Link>
-          </div>
-        )}
       </div>
 
       {/* ── Unified Bottom Profile Chip & Popover Dropdown ── */}

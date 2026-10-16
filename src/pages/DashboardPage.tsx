@@ -109,6 +109,15 @@ export const DashboardPage = () => {
   });
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
+  const impersonatedWorkspace = useMemo(() => {
+    try {
+      const raw = sessionStorage.getItem('impersonated_workspace');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
   // Modals
   const [inspectingReview, setInspectingReview] = useState<Review | null>(null);
   const [socialCardReview, setSocialCardReview] = useState<Review | null>(null);
@@ -461,6 +470,28 @@ export const DashboardPage = () => {
       {/* ── Main Content Area ── */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         
+        {/* Superadmin Impersonation Banner */}
+        {impersonatedWorkspace && (
+          <div className="bg-purple-950 text-purple-200 border-b border-purple-800 px-6 py-2.5 flex items-center justify-between text-xs z-30 font-medium">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>
+                Superadmin Mode: Viewing workspace <strong>{impersonatedWorkspace.name}</strong> ({impersonatedWorkspace.id})
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                sessionStorage.removeItem('impersonated_workspace');
+                window.location.href = '/admin';
+              }}
+              className="px-3 py-1 bg-purple-800 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+            >
+              Exit Impersonation
+            </button>
+          </div>
+        )}
+
         {/* Top Slim Header Bar */}
         <header className="h-12 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-2.5">

@@ -44,7 +44,13 @@ import { handleAffiliatesApi } from './handlers/affiliateHandler';
 import { handlePppGeoDetection } from './handlers/pppHandler';
 import { handlePublicTestimonialSubmit } from './handlers/publicSubmissionHandler';
 import { handleAccountDeletion } from './handlers/accountDeletionHandler';
-import { handleAdminGetWorkspaces, handleAdminUpdateWorkspacePlan } from './handlers/admin';
+import {
+  handleAdminGetWorkspaces,
+  handleAdminUpdateWorkspacePlan,
+  handleAdminManageWorkspace,
+  handleAdminGetTestimonials,
+  handleAdminModerateTestimonial,
+} from './handlers/admin';
 
 export default {
   async fetch(request: Request, env: WorkerEnv, _ctx: ExecutionContext): Promise<Response> {
@@ -104,6 +110,17 @@ export default {
       const adminPlanMatch = endpoint.match(/^admin\/workspaces\/([^/]+)\/plan$/);
       if (adminPlanMatch) {
         return await handleAdminUpdateWorkspacePlan(request, env, decodeURIComponent(adminPlanMatch[1]));
+      }
+      const adminManageMatch = endpoint.match(/^admin\/workspaces\/([^/]+)\/manage$/);
+      if (adminManageMatch) {
+        return await handleAdminManageWorkspace(request, env, decodeURIComponent(adminManageMatch[1]));
+      }
+      if (endpoint === 'admin/testimonials') {
+        return await handleAdminGetTestimonials(request, env);
+      }
+      const adminModerateMatch = endpoint.match(/^admin\/testimonials\/([^/]+)\/moderate$/);
+      if (adminModerateMatch) {
+        return await handleAdminModerateTestimonial(request, env, decodeURIComponent(adminModerateMatch[1]));
       }
 
       switch (endpoint) {

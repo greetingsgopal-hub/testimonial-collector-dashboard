@@ -163,6 +163,11 @@ describe('Superadmin Access & AdminPage', () => {
             new Response(JSON.stringify({ workspaces: mockWorkspaces }), { status: 200 })
           );
         }
+        if (url === '/api/admin/testimonials') {
+          return Promise.resolve(
+            new Response(JSON.stringify({ reviews: [] }), { status: 200 })
+          );
+        }
         if (url.includes('/api/admin/workspaces/ws_alpha/plan')) {
           return Promise.resolve(
             new Response(
@@ -288,7 +293,58 @@ describe('Superadmin Access & AdminPage', () => {
         })
       );
 
-      expect(container.textContent).toContain('Successfully upgraded workspace ws_alpha to PRO');
+      expect(container.textContent).toContain('Successfully updated workspace ws_alpha to PRO');
+    });
+
+    it('opens Manage Workspace modal and triggers trial extension', async () => {
+      await act(async () => {
+        root.render(
+          <MemoryRouter>
+            <AdminPage />
+          </MemoryRouter>
+        );
+      });
+
+      const workspacesTabBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+        b.textContent?.includes('Workspaces')
+      );
+      await act(async () => {
+        workspacesTabBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+
+      const manageBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+        b.textContent?.trim() === 'Manage'
+      );
+      expect(manageBtn).toBeTruthy();
+
+      await act(async () => {
+        manageBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+
+      expect(container.textContent).toContain('Manage Workspace');
+      expect(container.textContent).toContain('Extend Trial Access');
+      expect(container.textContent).toContain('Account Governance');
+    });
+
+    it('switches to Global Testimonials Feed tab', async () => {
+      await act(async () => {
+        root.render(
+          <MemoryRouter>
+            <AdminPage />
+          </MemoryRouter>
+        );
+      });
+
+      const testimonialsTabBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+        b.textContent?.includes('Global Testimonials Feed')
+      );
+      expect(testimonialsTabBtn).toBeTruthy();
+
+      await act(async () => {
+        testimonialsTabBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+
+      expect(container.textContent).toContain('Global Testimonials Feed');
     });
 
     it('switches to Razorpay Transactions tab and renders payment ledger', async () => {
@@ -331,7 +387,7 @@ describe('Superadmin Access & AdminPage', () => {
         healthTabBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       });
 
-      expect(container.textContent).toContain('Cloudflare Worker & Firestore Database Connection');
+      expect(container.textContent).toContain('Cloudflare Worker & Firestore Edge Connection');
       expect(container.textContent).toContain('Razorpay Webhook & Payment Dispatcher');
       expect(container.textContent).toContain('https://pandapraise.com/api/razorpay/verify-payment');
     });

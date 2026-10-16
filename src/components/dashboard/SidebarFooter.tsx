@@ -183,8 +183,8 @@ export default function SidebarFooter({
                 onClick={() => setIsDropdownOpen(false)}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 text-xs font-medium transition-colors cursor-pointer"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-red-600 shrink-0" />
-                <span>Superadmin Console</span>
+                <ShieldCheck className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                <span>Admin Console</span>
               </Link>
             )}
 
