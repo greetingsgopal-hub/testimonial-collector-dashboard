@@ -24,7 +24,6 @@ import {
   Gift,
   ChevronDown,
   ChevronsUpDown,
-  QrCode,
 } from 'lucide-react';
 import { loadRazorpayScript } from '../lib/razorpay';
 
@@ -80,15 +79,6 @@ export default function BillingAndPlansPage({
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
-  const [sandboxModal, setSandboxModal] = useState<{
-    orderId: string;
-    amount: number;
-    currency: string;
-    planId: string;
-  } | null>(null);
-  const [sandboxSimulating, setSandboxSimulating] = useState(false);
-  const [sandboxMethod, setSandboxMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
-
   const [isEditingBilling, setIsEditingBilling] = useState(false);
   const [billingInfo, setBillingInfo] = useState(() => {
     try {
@@ -112,116 +102,6 @@ export default function BillingAndPlansPage({
   const RAZORPAY_KEY_ID =
     (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_live_TodkFfMsbdY3vr';
 
-  const handleSimulateSandboxPayment = async () => {
-    if (!sandboxModal) return;
-    setSandboxSimulating(true);
-
-    try {
-      const activeUserId =
-        workspace?.id ||
-        workspace?.owner_id ||
-        (() => {
-          try {
-            return localStorage.getItem('pandapraise_user_id');
-          } catch {
-            return null;
-          }
-        })() ||
-        'guest_user';
-
-      const verifyEndpoint = API_BASE_URL ? `${API_BASE_URL}/verifyRazorpayPayment` : '/verifyRazorpayPayment';
-      const paymentId = `pay_sim_${Date.now()}`;
-
-      const res = await fetch(verifyEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          razorpay_order_id: sandboxModal.orderId,
-          razorpay_payment_id: paymentId,
-          razorpay_signature: `sim_sig_${Date.now()}`,
-          planId: 'pro',
-          userId: activeUserId,
-        }),
-      });
-
-      const method: PaymentMethodDetails = {
-        type: 'razorpay',
-        headline: sandboxMethod === 'upi' ? 'Razorpay UPI (success@razorpay)' : sandboxMethod === 'card' ? 'Visa •••• 1111' : 'Netbanking Mandate',
-        subtext: `ID: ${paymentId.slice(-6).toUpperCase()}`,
-      };
-
-      const newInvoice: InvoiceItem = {
-        id: `INV-${new Date().getFullYear()}-${paymentId.slice(-5).toUpperCase()}`,
-        paymentId,
-        date: new Date().toLocaleDateString('en-US', {
-          month: 'short',
-          day: '2-digit',
-          year: 'numeric',
-        }),
-        amount: '₹2,499.00',
-        status: 'Paid',
-      };
-
-      if (res.ok) {
-        const verifiedData = await res.json().catch(() => ({}));
-        if (verifiedData.paymentMethod) {
-          setPaymentMethod(verifiedData.paymentMethod);
-          try {
-            localStorage.setItem('pandapraise_rzp_payment_method', JSON.stringify(verifiedData.paymentMethod));
-          } catch {}
-        } else {
-          setPaymentMethod(method);
-          try {
-            localStorage.setItem('pandapraise_rzp_payment_method', JSON.stringify(method));
-          } catch {}
-        }
-        if (verifiedData.invoice) {
-          setInvoices((prev) => {
-            const updated = [verifiedData.invoice, ...prev];
-            try {
-              localStorage.setItem('pandapraise_rzp_invoices', JSON.stringify(updated));
-            } catch {}
-            return updated;
-          });
-        } else {
-          setInvoices((prev) => {
-            const updated = [newInvoice, ...prev];
-            try {
-              localStorage.setItem('pandapraise_rzp_invoices', JSON.stringify(updated));
-            } catch {}
-            return updated;
-          });
-        }
-      } else {
-        setPaymentMethod(method);
-        setInvoices((prev) => {
-          const updated = [newInvoice, ...prev];
-          try {
-            localStorage.setItem('pandapraise_rzp_invoices', JSON.stringify(updated));
-            localStorage.setItem('pandapraise_rzp_payment_method', JSON.stringify(method));
-          } catch {}
-          return updated;
-        });
-      }
-
-      setCurrentPlan('pro');
-      try {
-        localStorage.setItem('pandapraise_plan_active', 'pro');
-      } catch {}
-      setSandboxModal(null);
-    } catch (err: any) {
-      console.error('Simulation error:', err);
-      setCurrentPlan('pro');
-      try {
-        localStorage.setItem('pandapraise_plan_active', 'pro');
-      } catch {}
-      setSandboxModal(null);
-    } finally {
-      setSandboxSimulating(false);
-      setIsProcessingPayment(false);
-    }
-  };
-
   const initiateRazorpayPayment = async () => {
     setPaymentError(null);
     setIsProcessingPayment(true);
@@ -243,7 +123,6 @@ export default function BillingAndPlansPage({
       let currency = 'INR';
       let amountInPaise = 249900; // ₹2,499.00
       let activeKeyId = RAZORPAY_KEY_ID;
-      let isSandboxBackend = false;
 
       // 1. Call backend to create official Razorpay Order ID
       try {
@@ -267,56 +146,27 @@ export default function BillingAndPlansPage({
           amountInPaise = data.amount || amountInPaise;
           currency = data.currency || currency;
           if (data.keyId) activeKeyId = data.keyId;
-          if (data.sandbox) isSandboxBackend = true;
         } else {
-          // Fallback to secondary route if primary was not matched
-          const fallbackRes = await fetch(`${API_BASE_URL}/api/razorpay/create-order`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              amount: amountInPaise,
-              currency: 'INR',
-              planId: 'pro',
-              userId: activeUserId,
-              workspace: billingInfo.companyName,
-              taxId: billingInfo.taxId,
-            }),
-          });
-          if (fallbackRes.ok) {
-            const fbData = await fallbackRes.json();
-            orderId = fbData.orderId;
-            amountInPaise = fbData.amount || amountInPaise;
-            currency = fbData.currency || currency;
-            if (fbData.keyId) activeKeyId = fbData.keyId;
-            if (fbData.sandbox) isSandboxBackend = true;
-          }
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Server refused to generate secure payment order.');
         }
-      } catch (err) {
-        console.warn('Network error reaching backend order route:', err);
+      } catch (err: any) {
+        setPaymentError(err.message || 'Unable to connect to payment server. Please try again.');
+        setIsProcessingPayment(false);
+        return;
       }
 
-      if (isSandboxBackend) {
+      if (!orderId) {
+        setPaymentError('Failed to initialize payment session. Please try again.');
         setIsProcessingPayment(false);
-        setSandboxModal({
-          orderId: orderId || `order_sandbox_${Date.now()}`,
-          amount: 2499,
-          currency,
-          planId: 'pro',
-        });
         return;
       }
 
       // 2. Load SDK with safety timeout
-      const sdkLoaded = await loadRazorpayScript(3500);
+      const sdkLoaded = await loadRazorpayScript(4000);
       if (!sdkLoaded || !window.Razorpay) {
-        // Fallback to direct / sandbox checkout window if SDK is blocked by browser adblocker
+        setPaymentError('Razorpay payment gateway failed to load. Please disable ad-blockers or shields and try again.');
         setIsProcessingPayment(false);
-        setSandboxModal({
-          orderId: orderId || `order_direct_${Date.now()}`,
-          amount: 2499,
-          currency,
-          planId: 'pro',
-        });
         return;
       }
 
@@ -327,7 +177,7 @@ export default function BillingAndPlansPage({
         currency: currency,
         name: 'PandaPraise',
         description: 'PandaPraise Pro Subscription',
-        ...(orderId ? { order_id: orderId } : {}),
+        order_id: orderId,
         prefill: {
           name: billingInfo.companyName,
           email: billingInfo.billingEmail,
@@ -384,41 +234,17 @@ export default function BillingAndPlansPage({
                 localStorage.setItem('pandapraise_plan_active', 'pro');
               } catch {}
             } else {
-              const paymentId = response.razorpay_payment_id;
-              setCurrentPlan('pro');
-              const method: PaymentMethodDetails = {
-                type: 'razorpay',
-                headline: `Razorpay Mandate`,
-                subtext: `ID: ${paymentId.slice(-6).toUpperCase()}`,
-              };
-              setPaymentMethod(method);
-              const fallbackInvoice: InvoiceItem = {
-                id: `INV-${new Date().getFullYear()}-${paymentId.slice(-5).toUpperCase()}`,
-                paymentId,
-                date: new Date().toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: '2-digit',
-                  year: 'numeric',
-                }),
-                amount: '₹2,499.00',
-                status: 'Paid',
-              };
-              setInvoices((prev) => {
-                const updated = [fallbackInvoice, ...prev];
-                try {
-                  localStorage.setItem('pandapraise_plan_active', 'pro');
-                  localStorage.setItem('pandapraise_rzp_payment_method', JSON.stringify(method));
-                  localStorage.setItem('pandapraise_rzp_invoices', JSON.stringify(updated));
-                } catch {}
-                return updated;
-              });
+              const errData = await verifyRes.json().catch(() => ({}));
+              setPaymentError(
+                errData.error ||
+                `Payment verification failed on server. If your account was debited, please contact support with Payment ID: ${response.razorpay_payment_id}`
+              );
             }
-          } catch (verifyErr) {
+          } catch (verifyErr: any) {
             console.error('Verification error:', verifyErr);
-            setCurrentPlan('pro');
-            try {
-              localStorage.setItem('pandapraise_plan_active', 'pro');
-            } catch {}
+            setPaymentError(
+              `Payment verification encountered a network error. Please contact support with Payment ID: ${response.razorpay_payment_id}`
+            );
           } finally {
             setIsProcessingPayment(false);
           }
@@ -430,38 +256,22 @@ export default function BillingAndPlansPage({
 
         rzp.on('payment.failed', (failResponse: any) => {
           setPaymentError(
-            failResponse?.error?.description || 'Razorpay payment processing failed. Please try a different payment method.'
+            failResponse?.error?.description || 'Payment was declined or cancelled. Your card was not charged.'
           );
           setIsProcessingPayment(false);
         });
 
         rzp.open();
 
-        // Safety check: Reset isProcessingPayment if modal opened, or open fallback if blocked by browser extension
+        // Safety check: Reset isProcessingPayment if popup opened
         setTimeout(() => {
-          const rzpContainer = document.querySelector('.razorpay-container, iframe[src*="razorpay"]');
-          if (!rzpContainer && !document.querySelector('.razorpay-backdrop')) {
-            setIsProcessingPayment(false);
-            setSandboxModal({
-              orderId: orderId || `order_direct_${Date.now()}`,
-              amount: 2499,
-              currency,
-              planId: 'pro',
-            });
-          } else {
-            setIsProcessingPayment(false);
-          }
-        }, 2200);
+          setIsProcessingPayment(false);
+        }, 1500);
 
       } catch (sdkError: any) {
-        console.warn('Razorpay modal open failed, launching Direct/Sandbox fallback:', sdkError);
+        console.warn('Razorpay modal open failed:', sdkError);
+        setPaymentError('Unable to open payment gateway. Please allow popups for this site and try again.');
         setIsProcessingPayment(false);
-        setSandboxModal({
-          orderId: orderId || `order_direct_${Date.now()}`,
-          amount: 2499,
-          currency,
-          planId: 'pro',
-        });
       }
     } catch (err: any) {
       setPaymentError(err.message || 'Unable to initialize Razorpay checkout.');
@@ -983,164 +793,11 @@ export default function BillingAndPlansPage({
     </div>
   );
 
-  const sandboxModalNode = sandboxModal && (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative">
-        <div className="flex items-start justify-between pb-4 border-b border-slate-100">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse" />
-              <span className="text-[11px] font-bold tracking-wider text-purple-600 uppercase">
-                Direct / Sandbox Checkout
-              </span>
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mt-1">
-              Activate PandaPraise Pro
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Order: <span className="font-mono text-purple-600">{sandboxModal.orderId}</span>
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setSandboxModal(null);
-              setIsProcessingPayment(false);
-            }}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Amount Due Row */}
-        <div className="py-4 border-b border-slate-100 flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Total Due
-          </span>
-          <div className="text-2xl font-black text-slate-900">
-            ₹2,499.00
-          </div>
-        </div>
-
-        {/* Payment Instrument Tabs */}
-        <div className="py-4 space-y-4">
-          <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl">
-            <button
-              type="button"
-              onClick={() => setSandboxMethod('upi')}
-              className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                sandboxMethod === 'upi'
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <QrCode className="w-3.5 h-3.5" />
-              <span>Instant UPI</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSandboxMethod('card')}
-              className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                sandboxMethod === 'card'
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <CreditCard className="w-3.5 h-3.5" />
-              <span>Cards</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSandboxMethod('netbanking')}
-              className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                sandboxMethod === 'netbanking'
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Building2 className="w-3.5 h-3.5" />
-              <span>Netbanking</span>
-            </button>
-          </div>
-
-          {sandboxMethod === 'upi' && (
-            <div className="p-3.5 rounded-xl bg-purple-50/60 border border-purple-100 space-y-2">
-              <div className="flex items-center justify-between text-xs text-slate-700">
-                <span className="font-semibold">UPI Auto-Approve</span>
-                <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Direct Settlement
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-white text-xs font-mono text-purple-700 border border-purple-200">GPay</span>
-                <span className="px-2 py-0.5 rounded bg-white text-xs font-mono text-purple-700 border border-purple-200">PhonePe</span>
-                <span className="px-2 py-0.5 rounded bg-white text-xs font-mono text-purple-700 border border-purple-200">Paytm</span>
-                <span className="px-2 py-0.5 rounded bg-white text-xs font-mono text-purple-700 border border-purple-200">BHIM</span>
-              </div>
-              <p className="text-[11px] text-slate-500">
-                Instant UPI simulation & verified webhook settlement for zero friction.
-              </p>
-            </div>
-          )}
-
-          {sandboxMethod === 'card' && (
-            <div className="p-3.5 rounded-xl bg-purple-50/60 border border-purple-100 space-y-2">
-              <div className="flex items-center justify-between text-xs text-slate-700">
-                <span className="font-semibold">Test RuPay / Visa / Mastercard</span>
-                <span className="text-[11px] text-purple-700 font-mono font-semibold">CVV: 123</span>
-              </div>
-              <div className="p-2 rounded bg-white border border-purple-200 font-mono text-xs text-slate-800">
-                4111 •••• •••• 1111 (Exp: 12/28)
-              </div>
-              <p className="text-[11px] text-slate-500">
-                Instant 3D-Secure simulation with automatic OTP verification.
-              </p>
-            </div>
-          )}
-
-          {sandboxMethod === 'netbanking' && (
-            <div className="p-3.5 rounded-xl bg-purple-50/60 border border-purple-100 space-y-2">
-              <div className="text-xs text-slate-700 font-semibold">Simulated Banks</div>
-              <div className="grid grid-cols-2 gap-2 text-xs text-slate-700 font-medium">
-                <span className="p-2 rounded bg-white border border-purple-200 text-center">HDFC Bank</span>
-                <span className="p-2 rounded bg-white border border-purple-200 text-center">ICICI Bank</span>
-                <span className="p-2 rounded bg-white border border-purple-200 text-center">SBI Bank</span>
-                <span className="p-2 rounded bg-white border border-purple-200 text-center">Axis Bank</span>
-              </div>
-            </div>
-          )}
-
-          <button
-            type="button"
-            id="btn-simulate-payment"
-            disabled={sandboxSimulating}
-            onClick={handleSimulateSandboxPayment}
-            className="w-full py-3.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-md shadow-purple-200 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
-          >
-            {sandboxSimulating ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Activating Pro Workspace...</span>
-              </>
-            ) : (
-              <>
-                <span>Complete Payment & Activate Pro (₹2,499.00)</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   if (hideSidebar) {
     return (
       <div className="font-sans antialiased w-full">
         {mainContent}
         {editBillingModal}
-        {sandboxModalNode}
       </div>
     );
   }
@@ -1244,7 +901,6 @@ export default function BillingAndPlansPage({
       </div>
 
       {editBillingModal}
-      {sandboxModalNode}
     </div>
   );
 }
