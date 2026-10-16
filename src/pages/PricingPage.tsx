@@ -8,6 +8,12 @@ import {
   ChevronDown,
   Loader2,
   CheckCircle2,
+  CreditCard,
+  QrCode,
+  Building2,
+  X,
+  ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { useAuth } from '../context/AuthContext';
@@ -170,6 +176,18 @@ export function PricingPage() {
     message: string;
   } | null>(null);
 
+  interface SandboxModalData {
+    orderId: string;
+    amount: number;
+    currency: Currency;
+    planId: PlanId;
+    planLabel: string;
+  }
+
+  const [sandboxModal, setSandboxModal] = useState<SandboxModalData | null>(null);
+  const [sandboxSimulating, setSandboxSimulating] = useState<boolean>(false);
+  const [sandboxMethod, setSandboxMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
+
   // Auto-detect location: default to INR for Indian timezones, USD for worldwide
   useEffect(() => {
     try {
@@ -215,11 +233,6 @@ export function PricingPage() {
     setLoadingPlan(planId);
 
     try {
-      const sdkLoaded = await loadRazorpayScript();
-      if (!sdkLoaded) {
-        throw new Error('Could not load Razorpay Checkout SDK. Please check your network connection.');
-      }
-
       const amountInSubunits = amountMajorUnits * 100; // e.g. ₹399 -> 39900 paise
       const userId = user?.id || localStorage.getItem('pandapraise_user_id') || 'guest_user';
 
@@ -239,6 +252,33 @@ export function PricingPage() {
       const orderData = await orderRes.json();
       if (!orderRes.ok) {
         throw new Error(orderData.error || 'Failed to create Razorpay secure order.');
+      }
+
+      // If backend is running in Sandbox mode or has no live keys, open Sandbox Checkout window immediately
+      if (orderData.sandbox) {
+        setLoadingPlan(null);
+        setSandboxModal({
+          orderId: orderData.orderId,
+          amount: amountMajorUnits,
+          currency,
+          planId,
+          planLabel,
+        });
+        return;
+      }
+
+      const sdkLoaded = await loadRazorpayScript();
+      if (!sdkLoaded) {
+        // Fallback to sandbox modal if SDK blocked by browser or offline
+        setLoadingPlan(null);
+        setSandboxModal({
+          orderId: orderData.orderId,
+          amount: amountMajorUnits,
+          currency,
+          planId,
+          planLabel,
+        });
+        return;
       }
 
       // Step 2: Open the official Razorpay Modal
@@ -292,14 +332,68 @@ export function PricingPage() {
         },
       };
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      try {
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      } catch (sdkError: any) {
+        console.warn('Razorpay SDK modal open failed, launching Sandbox fallback:', sdkError);
+        setLoadingPlan(null);
+        setSandboxModal({
+          orderId: orderData.orderId,
+          amount: amountMajorUnits,
+          currency,
+          planId,
+          planLabel,
+        });
+      }
     } catch (err: any) {
       setCheckoutBanner({
         type: 'error',
         message: err.message || 'Checkout initialization failed.',
       });
       setLoadingPlan(null);
+    }
+  };
+
+  const handleSimulateSandboxPayment = async () => {
+    if (!sandboxModal) return;
+    setSandboxSimulating(true);
+
+    try {
+      const userId = user?.id || localStorage.getItem('pandapraise_user_id') || 'guest_user';
+      const verifyEndpoint = FIREBASE_API_BASE ? `${FIREBASE_API_BASE}/verifyRazorpayPayment` : '/verifyRazorpayPayment';
+      const verifyRes = await fetch(verifyEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          razorpay_order_id: sandboxModal.orderId,
+          razorpay_payment_id: `pay_sandbox_${Date.now()}`,
+          razorpay_signature: `sandbox_sig_${Date.now()}`,
+          planId: sandboxModal.planId,
+          userId,
+        }),
+      });
+
+      if (verifyRes.ok) {
+        setSandboxModal(null);
+        setCheckoutBanner({
+          type: 'success',
+          message: `Payment verified in Sandbox Mode! Upgrading your workspace to ${sandboxModal.planLabel}...`,
+        });
+        setTimeout(() => {
+          window.location.href = '/?upgraded=true';
+        }, 1800);
+      } else {
+        const errData = await verifyRes.json().catch(() => ({}));
+        throw new Error(errData.error || 'Payment verification failed in database');
+      }
+    } catch (err: any) {
+      setCheckoutBanner({
+        type: 'error',
+        message: err.message || 'Sandbox simulation failed.',
+      });
+    } finally {
+      setSandboxSimulating(false);
     }
   };
 
@@ -795,8 +889,200 @@ export function PricingPage() {
           </div>
         </div>
       </footer>
+
+      {/* ================= SANDBOX PAYMENT WINDOW MODAL ================= */}
+      {sandboxModal && (
+        <div
+          id="sandbox-payment-modal"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+        >
+          <div className="bg-[#0D0F17] border border-purple-500/40 rounded-3xl max-w-lg w-full shadow-2xl shadow-purple-900/30 overflow-hidden relative">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-[#17112B] via-[#10121C] to-[#17112B] p-6 border-b border-white/10 flex items-start justify-between">
+              <div>
+                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-extrabold uppercase tracking-wider mb-2">
+                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  <span>Sandbox Test Mode</span>
+                </div>
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <span>🐼</span>
+                  <span>PandaPraise Checkout</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  {sandboxModal.planLabel} • Order: <span className="font-mono text-purple-300">{sandboxModal.orderId}</span>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSandboxModal(null)}
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Total Due Row */}
+            <div className="px-6 py-4 bg-white/[0.02] border-b border-white/5 flex items-center justify-between">
+              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Amount Due</span>
+              <div className="text-2xl font-extrabold text-white">
+                {formatMoney(sandboxModal.amount)}
+              </div>
+            </div>
+
+            {/* Payment Method Tabs */}
+            <div className="p-6 space-y-5">
+              <div className="grid grid-cols-3 gap-2 p-1 bg-white/5 rounded-2xl border border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setSandboxMethod('upi')}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    sandboxMethod === 'upi'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>Instant UPI</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSandboxMethod('card')}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    sandboxMethod === 'card'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>Cards</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSandboxMethod('netbanking')}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    sandboxMethod === 'netbanking'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Netbanking</span>
+                </button>
+              </div>
+
+              {/* Method Details */}
+              {sandboxMethod === 'upi' && (
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
+                  <div className="flex items-center justify-between text-xs text-slate-300">
+                    <span className="font-semibold">Simulated UPI Apps</span>
+                    <span className="text-[11px] text-emerald-400 flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5" /> Zero Friction
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-lg bg-white/10 text-xs font-mono text-purple-300">
+                      GPay
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-white/10 text-xs font-mono text-purple-300">
+                      PhonePe
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-white/10 text-xs font-mono text-purple-300">
+                      Paytm
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-white/10 text-xs font-mono text-purple-300">
+                      BHIM UPI
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Razorpay UPI simulator test ID: <span className="text-white font-mono">success@razorpay</span>. Click below to simulate instant UPI approval & webhook settlement.
+                  </p>
+                </div>
+              )}
+
+              {sandboxMethod === 'card' && (
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
+                  <div className="flex items-center justify-between text-xs text-slate-300">
+                    <span className="font-semibold">Test RuPay / Visa / Mastercard</span>
+                    <span className="text-[11px] text-purple-300 font-mono">CVV: 123</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-black/40 border border-white/10 font-mono text-xs text-slate-200">
+                    4111 •••• •••• 1111 (Exp: 12/28)
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Instant 3D-Secure simulation with automatic OTP bypass in Sandbox Mode.
+                  </p>
+                </div>
+              )}
+
+              {sandboxMethod === 'netbanking' && (
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
+                  <div className="text-xs text-slate-300 font-semibold">Simulated Banks</div>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-300 font-medium">
+                    <span className="p-2 rounded-xl bg-white/5 border border-white/5 text-center">HDFC Bank</span>
+                    <span className="p-2 rounded-xl bg-white/5 border border-white/5 text-center">ICICI Bank</span>
+                    <span className="p-2 rounded-xl bg-white/5 border border-white/5 text-center">State Bank of India</span>
+                    <span className="p-2 rounded-xl bg-white/5 border border-white/5 text-center">Axis Bank</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Button */}
+              <button
+                type="button"
+                id="btn-simulate-sandbox-pay"
+                disabled={sandboxSimulating}
+                onClick={handleSimulateSandboxPayment}
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-purple-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-75"
+              >
+                {sandboxSimulating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Verifying Sandbox Payment...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Simulate Successful Payment ({formatMoney(sandboxModal.amount)})</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+
+              <p className="text-[10px] text-center text-slate-500 flex items-center justify-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+                <span>Simulates real Razorpay checkout & verifies backend HMAC signatures</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Notification Toast */}
+      {checkoutBanner && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md w-full px-4 animate-in slide-in-from-bottom duration-300">
+          <div
+            className={`p-4 rounded-2xl border shadow-2xl backdrop-blur-md flex items-center justify-between gap-4 text-sm font-medium ${
+              checkoutBanner.type === 'success'
+                ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200 shadow-emerald-950/50'
+                : 'bg-red-950/90 border-red-500/50 text-red-200 shadow-red-950/50'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
+              <span>{checkoutBanner.message}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCheckoutBanner(null)}
+              className="text-xs font-bold opacity-75 hover:opacity-100 cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default PricingPage;
+

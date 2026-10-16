@@ -379,5 +379,47 @@ describe('Razorpay Order & Verification Handler Suite', () => {
       expect(data.paymentMethod.headline).toBe('•••• 1234');
     });
   });
+
+  describe('Sandbox / Test Mode Fallback (Zero Config Required)', () => {
+    it('creates sandbox order when env secrets are missing', async () => {
+      const emptyEnv = {};
+      const req = new Request('https://pandapraise.com/api/razorpay/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 39900, currency: 'INR', planId: 'pro', userId: 'user_sandbox_1' }),
+      });
+
+      const res = await handleRazorpayCreateOrder(req, emptyEnv as any);
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.sandbox).toBe(true);
+      expect(data.orderId).toContain('order_sandbox_');
+      expect(data.amount).toBe(39900);
+      expect(data.keyId).toBe('rzp_test_sandboxPandaPraise');
+    });
+
+    it('verifies sandbox payment successfully without secret key', async () => {
+      const emptyEnv = {};
+      const req = new Request('https://pandapraise.com/api/razorpay/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          razorpay_order_id: 'order_sandbox_123',
+          razorpay_payment_id: 'pay_sandbox_456',
+          razorpay_signature: 'sandbox_signature_789',
+          planId: 'pro',
+          userId: 'user_sandbox_1',
+        }),
+      });
+
+      const res = await handleRazorpayVerifyPayment(req, emptyEnv as any);
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.verified).toBe(true);
+      expect(data.paymentMethod.headline).toContain('Sandbox Verified');
+      expect(data.planId).toBe('pro');
+    });
+  });
 });
+
 
