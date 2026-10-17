@@ -382,7 +382,7 @@ export function PricingPage() {
   const lifetimePrice = currency === 'INR' ? 4999 : 149;
 
   return (
-    <div className="min-h-screen bg-[#07090E] text-slate-100 font-sans antialiased selection:bg-purple-600 selection:text-white">
+    <div className="dark min-h-screen bg-[#07090E] text-slate-100 font-sans antialiased selection:bg-purple-600 selection:text-white">
       {/* ================= NAVBAR ================= */}
       <header className="sticky top-0 z-40 backdrop-blur-md bg-[#07090E]/85 border-b border-white/10">
         <div className="max-w-7xl mx-auto h-16 px-6 flex items-center justify-between">
@@ -587,6 +587,8 @@ export function PricingPage() {
                   <BlobCard
                     headerHeight={80}
                     className="h-full flex flex-col"
+                    cardClassName="bg-[#0D0F17]"
+                    fadeClassName="to-[#0D0F17]"
                     lightColors={["#6701e6", "#8b5cf6", "#a855f7", "#ec4899"]}
                     darkColors={["#4c00b0", "#6701e6", "#7c3aed", "#9333ea"]}
                     glowColors={["#6701e6", "#ec4899", "#8b5cf6", "#3b82f6", "#6701e6"]}
@@ -794,6 +796,8 @@ export function PricingPage() {
         <div id="plan-card-lifetime" className="relative">
           <BlobCard
             headerHeight={80}
+            cardClassName="bg-[#0D0F17]"
+            fadeClassName="to-[#0D0F17]"
             lightColors={["#f59e0b", "#fbbf24", "#d97706", "#ec4899"]}
             darkColors={["#b45309", "#d97706", "#f59e0b", "#7c3aed"]}
             glowColors={["#f59e0b", "#fbbf24", "#d97706", "#8b5cf6", "#f59e0b"]}

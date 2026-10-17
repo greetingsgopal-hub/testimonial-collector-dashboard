@@ -13,6 +13,8 @@ export interface BlobCardProps {
   darkColors?: string[];
   glowColors?: string[];
   className?: string;
+  cardClassName?: string;
+  fadeClassName?: string;
 }
 
 const DEFAULT_LIGHT = ["#ff0020", "#fc0f60", "#e8227a", "#ff85b3"];
@@ -27,6 +29,8 @@ export function BlobCard({
   darkColors = DEFAULT_DARK,
   glowColors = DEFAULT_GLOW,
   className,
+  cardClassName,
+  fadeClassName,
 }: BlobCardProps) {
   return (
     <div className={cn("relative w-full", className)}>
@@ -40,7 +44,7 @@ export function BlobCard({
         />
       </div>
 
-      <div className="relative z-10 rounded-[20px] overflow-hidden bg-background">
+      <div className={cn("relative z-10 rounded-[20px] overflow-hidden bg-background text-foreground", cardClassName)}>
         <div
           className="relative overflow-hidden rounded-t-[20px]"
           style={{ height: headerHeight }}
@@ -57,8 +61,8 @@ export function BlobCard({
             margin={60}
             blur={50}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background pointer-events-none" />
-          {header && <div className="relative z-10 p-8 pb-0">{header}</div>}
+          <div className={cn("absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background dark:to-[#0D0F17] pointer-events-none", fadeClassName)} />
+          {header && <div className="relative z-10 p-6 sm:p-8 pb-0">{header}</div>}
         </div>
 
         {children && <div>{children}</div>}

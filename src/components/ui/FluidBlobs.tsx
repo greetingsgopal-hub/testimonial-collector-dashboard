@@ -28,11 +28,14 @@ export function FluidBlobs({
   blur = 50,
   className,
 }: FluidBlobsProps) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = React.useState(false);
 
   React.useEffect(() => {
     const checkDark = () => {
+      const el = containerRef.current;
       const isDarkMode =
+        Boolean(el?.closest(".dark")) ||
         document.documentElement.classList.contains("dark") ||
         document.body.classList.contains("dark");
       setIsDark(isDarkMode);
@@ -52,6 +55,7 @@ export function FluidBlobs({
 
   return (
     <div
+      ref={containerRef}
       className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}
       style={{
         filter: `blur(${blur}px)`,
