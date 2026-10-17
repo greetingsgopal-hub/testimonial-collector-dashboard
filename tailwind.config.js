@@ -60,7 +60,6 @@ export default {
           'tertiary-fixed': '#ffddb8',
           'tertiary-container': '#885500',
         },
-        background: 'var(--background, #ffffff)',
         surface: 'var(--surface, #ffffff)',
         foreground: 'var(--foreground, #0f172a)',
       },

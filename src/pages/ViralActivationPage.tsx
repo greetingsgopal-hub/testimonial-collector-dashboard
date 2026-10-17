@@ -15,7 +15,6 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
-import { BlobCard } from '../components/ui/BlobCard';
 
 export const ViralActivationPage: React.FC = () => {
   usePageSeo({
@@ -109,21 +108,13 @@ export const ViralActivationPage: React.FC = () => {
 
       {/* Main Activation Card */}
       <main className="flex-1 max-w-2xl mx-auto px-4 sm:px-6 -mt-10 sm:-mt-12 w-full z-10">
-        <BlobCard
-          headerHeight={90}
-          lightColors={["#6701e6", "#8b5cf6", "#ec4899", "#3b82f6"]}
-          darkColors={["#4c00b0", "#6701e6", "#a855f7", "#ec4899"]}
-          glowColors={["#6701e6", "#ec4899", "#8b5cf6", "#3b82f6", "#6701e6"]}
-          header={
-            <div className="text-center">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-emerald-300 text-emerald-700 text-xs font-bold shadow-xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Live & Ready to Collect</span>
-              </div>
-            </div>
-          }
-        >
-          <div className="p-6 sm:p-10 pt-2 text-center relative overflow-hidden bg-white">
+        <div className="bg-white rounded-3xl border border-gray-200/90 shadow-xl p-6 sm:p-10 text-center relative overflow-hidden">
+          
+          {/* Status Badge */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold mb-4 shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Live & Ready to Collect</span>
+          </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold font-display text-gray-950 tracking-tight leading-snug">
             You're ready to collect testimonials!
@@ -258,7 +249,6 @@ export const ViralActivationPage: React.FC = () => {
           </div>
 
         </div>
-        </BlobCard>
       </main>
 
       {/* Share Modal Dialog (Fallback when Web Share is unsupported) */}
