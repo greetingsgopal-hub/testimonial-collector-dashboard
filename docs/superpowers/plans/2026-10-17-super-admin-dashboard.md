@@ -48,17 +48,17 @@
   - `handleAdminSuspendUser(request: Request, env: WorkerEnv, workspaceId: string): Promise<Response>`
   - `handleAdminReactivateUser(request: Request, env: WorkerEnv, workspaceId: string): Promise<Response>`
 
-- [ ] **Step 1: Write failing tests in `src/worker/handlers/admin.test.ts`**
+- [x] **Step 1: Write failing tests in `src/worker/handlers/admin.test.ts`**
   - Add test: `GET /api/admin/overview returns real workspace and payment metrics for authorized admin`
   - Add test: `GET /api/admin/overview returns 403 for regular user`
   - Add test: `POST /api/admin/workspaces/:id/suspend updates status to suspended and logs to admin_audit_logs`
   - Add test: `POST /api/admin/workspaces/:id/reactivate updates status to active`
 
-- [ ] **Step 2: Run test to verify failure**
+- [x] **Step 2: Run test to verify failure**
   - Command: `cmd.exe /c "npx vitest run src/worker/handlers/admin.test.ts"`
   - Expected: FAIL with missing handler functions.
 
-- [ ] **Step 3: Implement handlers in `src/worker/handlers/admin.ts`**
+- [x] **Step 3: Implement handlers in `src/worker/handlers/admin.ts`**
   - Implement `handleAdminGetOverview`: runs queries on `workspaces` and `payments` to compute accurate totals.
   - Implement `handleAdminGetUsers`: supports `?q=...` search and returns real customer metadata.
   - Implement `handleAdminGetUsage`: computes review statuses, collection forms, and widgets.
@@ -66,10 +66,10 @@
   - Implement `handleAdminGetEvents`: queries `admin_audit_logs` and `payments`.
   - Implement `handleAdminSuspendUser` and `handleAdminReactivateUser`: updates workspace `status` and saves audit event.
 
-- [ ] **Step 4: Wire routing in `src/worker/index.ts`**
+- [x] **Step 4: Wire routing in `src/worker/index.ts`**
   - Add route matches for `admin/overview`, `admin/users`, `admin/usage`, `admin/health`, `admin/events`, `admin/workspaces/:id/suspend`, `admin/workspaces/:id/reactivate`.
 
-- [ ] **Step 5: Run tests and verify they pass**
+- [x] **Step 5: Run tests and verify they pass**
   - Command: `cmd.exe /c "npx vitest run src/worker/handlers/admin.test.ts"`
   - Expected: PASS (all tests green).
 
@@ -86,14 +86,14 @@
 - Consumes: `workspace.status` from Firestore.
 - Produces: 403 rejection if account is suspended.
 
-- [ ] **Step 1: Update `firestore.rules`**
+- [x] **Step 1: Update `firestore.rules`**
   - Add condition to `workspaces` update: prevent suspended workspaces from mutating records.
   - Ensure `admin_audit_logs` can only be written by Cloudflare Worker service account (`allow read, write: if false;` for clients).
 
-- [ ] **Step 2: Verify `socialPublish.ts` check**
+- [x] **Step 2: Verify `socialPublish.ts` check**
   - Query workspace status before publishing: reject with `403` if workspace is suspended.
 
-- [ ] **Step 3: Run security tests**
+- [x] **Step 3: Run security tests**
   - Command: `cmd.exe /c "npx vitest run src/worker/firestore.rules.test.ts"`
   - Expected: PASS.
 
@@ -109,7 +109,7 @@
 - Consumes: `/api/admin/overview`, `/api/admin/users`, `/api/admin/usage`, `/api/admin/health`, `/api/admin/events`.
 - Produces: Production dashboard with 5 tabs, search/filter, confirmation dialog for suspend/reactivate, and zero simulated metrics.
 
-- [ ] **Step 1: Implement real data fetching in `AdminPage.tsx`**
+- [x] **Step 1: Implement real data fetching in `AdminPage.tsx`**
   - Replace mock/simulated fallback generation with clean loading, empty, and error states.
   - Implement Tab A: **Business Overview** (Metric cards for Total Users, Workspaces, Free vs Paid, Revenue, 7d/30d signups).
   - Implement Tab B: **Customer Management** (Search input, customer table, plan override, and Suspend/Reactivate modal).
@@ -117,10 +117,10 @@
   - Implement Tab D: **System Health** (Worker runtime, database connectivity, gateway bindings).
   - Implement Tab E: **Activity Log** (Audit trail table with date, admin, event, target, status).
 
-- [ ] **Step 2: Add navigation link in `DashboardPage.tsx`**
+- [x] **Step 2: Add navigation link in `DashboardPage.tsx`**
   - Show "Platform Admin" in navigation only when `isSuperadmin(user?.email)` is true.
 
-- [ ] **Step 3: Run build & tests**
+- [x] **Step 3: Run build & tests**
   - Command: `cmd.exe /c "npm run build && npm test"`
   - Expected: PASS with 0 build errors and all tests passing.
 
@@ -128,10 +128,10 @@
 
 ### Task 4: Production Deployment & Verification
 
-- [ ] **Step 1: Commit and push changes to GitHub**
+- [x] **Step 1: Commit and push changes to GitHub**
   - Push to `origin/main`.
-- [ ] **Step 2: Deploy to Cloudflare Workers**
+- [x] **Step 2: Deploy to Cloudflare Workers**
   - Command: `cmd.exe /c "npx wrangler deploy"`
-- [ ] **Step 3: Live Verification**
+- [x] **Step 3: Live Verification**
   - Verify `/api/admin/overview` with unauthenticated request returns HTTP 401.
   - Verify `/admin` route loads cleanly for authorized superadmin.
