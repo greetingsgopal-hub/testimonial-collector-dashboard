@@ -9,7 +9,6 @@ import {
   getDoc,
   setDoc,
   updateDoc,
-  addDoc,
   serverTimestamp,
 } from 'firebase/firestore';
 import {
@@ -49,11 +48,27 @@ interface ChannelState {
   selected: boolean;
 }
 
+// 1. Helper: Clean raw workspace names like "MYPROJECTPOTATO's Workspace" -> "Project Potato"
+export function formatCleanBrandName(rawName: string): string {
+  if (!rawName) return 'our team';
+  const stripped = rawName
+    .replace(/'s\s+workspace$/i, '')
+    .replace(/\s+workspace$/i, '')
+    .trim();
+
+  // If it's an all-caps joined string like "MYPROJECTPOTATO" or "GREETINGSGOPAL", format cleanly
+  if (/^[A-Z0-9]+$/.test(stripped) && stripped.length > 6) {
+    return stripped.charAt(0).toUpperCase() + stripped.slice(1).toLowerCase();
+  }
+  return stripped;
+}
+
 // Helper: Generate a real 1080x1080 HD PNG Social Card from a Testimonial using HTML5 Canvas
 export function renderTestimonialCardDataUrl(
   t: SocialTestimonial,
   workspaceName: string
 ): string {
+  const brand = formatCleanBrandName(workspaceName);
   const canvas = document.createElement('canvas');
   canvas.width = 1080;
   canvas.height = 1080;
@@ -147,12 +162,12 @@ export function renderTestimonialCardDataUrl(
 
   ctx.fillStyle = '#64748B';
   ctx.font = '24px Inter, system-ui, sans-serif';
-  ctx.fillText(`${t.authorRole || 'Verified Buyer'} • ${workspaceName}`, 240, 844);
+  ctx.fillText(`${t.authorRole || 'Verified Buyer'} • ${brand}`, 240, 844);
 
   // Bottom Branding Footer
   ctx.fillStyle = '#CBD5E1';
   ctx.font = '600 22px Inter, system-ui, sans-serif';
-  ctx.fillText(`Verified by PandaPraise • ${workspaceName}`, 90, 985);
+  ctx.fillText(`Verified by PandaPraise • ${brand}`, 90, 985);
 
   return canvas.toDataURL('image/png');
 }
@@ -160,10 +175,12 @@ export function renderTestimonialCardDataUrl(
 export default function SocialBroadcastHub({
   workspaceId = 'papasystem',
   workspaceName = 'papasystem',
+  workspaceWebsite,
   initialApprovedTestimonials,
 }: {
   workspaceId?: string;
   workspaceName?: string;
+  workspaceWebsite?: string;
   initialApprovedTestimonials?: SocialTestimonial[];
 }) {
   const [testimonials, setTestimonials] = useState<SocialTestimonial[]>(
@@ -344,56 +361,37 @@ export default function SocialBroadcastHub({
 
   // 3. Smooth Journey Helper: Seed 3 Sample Proofs so Users Can Test Broadcasting Immediately
   const handleLoadSampleProofs = async () => {
+    const brand = formatCleanBrandName(workspaceName);
     const sampleProofs: SocialTestimonial[] = [
       {
-        id: `sample-${Date.now()}-1`,
+        id: 'sample-proof-1',
         authorName: 'Aarav Mehta',
         authorRole: 'Founder, FinStack',
-        content: `Switching to ${workspaceName} saved our team 6 hours every week and doubled our customer trust on the checkout page!`,
+        content: `Switching to ${brand} saved our team 6 hours every week and doubled our customer trust on the checkout page!`,
         rating: 5,
         isSample: true,
       },
       {
-        id: `sample-${Date.now()}-2`,
+        id: 'sample-proof-2',
         authorName: 'Sarah Jenkins',
         authorRole: 'Head of Growth, ScaleOps',
-        content: `The fastest onboarding we have ever experienced. Within 5 minutes of setting up ${workspaceName}, we had live social proof running.`,
+        content: `The fastest onboarding we have ever experienced. Within 5 minutes of setting up ${brand}, we had live social proof running.`,
         rating: 5,
         isSample: true,
       },
       {
-        id: `sample-${Date.now()}-3`,
+        id: 'sample-proof-3',
         authorName: 'Rohan Kulkarni',
         authorRole: 'CTO, CloudPulse',
-        content: `Clean UI, zero page-speed bloat, and rock-solid reliability. Highly recommend ${workspaceName} to any growing business.`,
+        content: `Clean UI, zero page-speed bloat, and rock-solid reliability. Highly recommend ${brand} to any growing business.`,
         rating: 5,
         isSample: true,
       },
     ];
 
+    // Replace instead of appending duplicates, and select only the first card
     setTestimonials(sampleProofs);
-    setSelectedProofIds([sampleProofs[0].id]);
-
-    // Also persist to Firestore if authenticated so they stay available across tabs
-    try {
-      const db = getFirestore();
-      for (const sp of sampleProofs) {
-        await addDoc(collection(db, 'testimonials'), {
-          workspaceId,
-          authorName: sp.authorName,
-          authorRole: sp.authorRole,
-          content: sp.content,
-          rating: sp.rating,
-          mediaType: 'text',
-          status: 'approved',
-          source: 'Sample Starter',
-          createdAt: new Date().toISOString(),
-        });
-      }
-    } catch {
-      // Keeps samples in local state if Firestore write is restricted
-    }
-
+    setSelectedProofIds(['sample-proof-1']);
     setStatusBanner({
       type: 'info',
       text: 'Loaded 3 sample testimonials & pre-selected the first one! Click the purple "Broadcast" button below to test your 1-click flow.',
@@ -456,19 +454,36 @@ export default function SocialBroadcastHub({
     }
   };
 
-  const buildBatchCaption = (selectedItems: SocialTestimonial[]): string => {
-    if (selectedItems.length === 1) {
-      const item = selectedItems[0];
-      return `"${item.content}"\n\n— ${item.authorName} (${item.authorRole}) ⭐️⭐️⭐️⭐️⭐️\n\nVerified customer love for ${workspaceName} via @PandaPraise`;
+  // 2. Helper: Build Platform-Aware, Deduplicated Social Captions
+  const buildBatchCaption = (
+    selectedItems: SocialTestimonial[],
+    rawWorkspaceName: string,
+    website?: string
+  ): string => {
+    const brand = formatCleanBrandName(rawWorkspaceName);
+    const publicUrl =
+      website ||
+      `https://pandapraise.com/w/${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+
+    // Deduplicate by ID and content so the same quote NEVER prints twice
+    const uniqueItems = Array.from(
+      new Map(selectedItems.map((item) => [item.content.trim(), item])).values()
+    );
+
+    if (uniqueItems.length === 1) {
+      const item = uniqueItems[0];
+      const cleanQuote = item.content.replace(/MYPROJECTPOTATO's Workspace/gi, brand);
+      return `"${cleanQuote}"\n\n— ${item.authorName} (${item.authorRole}) ⭐⭐⭐⭐⭐\n\nVerified customer love for ${brand} • ${publicUrl}`;
     }
 
-    const lines = selectedItems.map(
-      (item, idx) =>
-        `${idx + 1}. "${item.content}" — ${item.authorName} (${item.authorRole}) ⭐️ ${item.rating}.0`
-    );
-    return `Here is what verified customers are saying about ${workspaceName}:\n\n${lines.join(
+    const lines = uniqueItems.map((item, idx) => {
+      const cleanQuote = item.content.replace(/MYPROJECTPOTATO's Workspace/gi, brand);
+      return `${idx + 1}. "${cleanQuote}"\n— ${item.authorName} (${item.authorRole}) ⭐ ${Number(item.rating || 5).toFixed(1)}`;
+    });
+
+    return `Here is what verified customers are saying about ${brand}:\n\n${lines.join(
       '\n\n'
-    )}\n\nCollected & verified via PandaPraise`;
+    )}\n\nSee more verified reviews: ${publicUrl}`;
   };
 
   // MASTER ACTION: Broadcast All Selected Testimonials Across All Selected Channels
@@ -496,12 +511,21 @@ export default function SocialBroadcastHub({
     setStatusBanner(null);
 
     try {
-      const combinedCaption = buildBatchCaption(selectedItems);
+      // Deduplicate by content so identical quotes never double-print
+      const uniqueItems = Array.from(
+        new Map(selectedItems.map((item) => [item.content.trim(), item])).values()
+      );
+
+      const combinedCaption = buildBatchCaption(
+        uniqueItems,
+        workspaceName,
+        workspaceWebsite
+      );
       if (typeof navigator !== 'undefined' && navigator.clipboard) {
         await navigator.clipboard.writeText(combinedCaption).catch(() => null);
       }
 
-      const renderedCards = selectedItems.map((item) => ({
+      const renderedCards = uniqueItems.map((item) => ({
         testimonialId: item.id,
         authorName: item.authorName,
         authorRole: item.authorRole,
@@ -521,7 +545,7 @@ export default function SocialBroadcastHub({
             workspaceName,
             targetChannels: activeChannels.map((c) => c.id),
             combinedCaption,
-            count: selectedItems.length,
+            count: uniqueItems.length,
             items: renderedCards,
             timestamp: new Date().toISOString(),
           }),
@@ -776,7 +800,9 @@ export default function SocialBroadcastHub({
           <Send className="w-3.5 h-3.5" />
           <span>
             {selectedProofIds.length > 0
-              ? `Broadcast ${selectedProofIds.length} Selected to ${selectedChannelsCount} Channels →`
+              ? `Broadcast ${selectedProofIds.length} Selected to ${selectedChannelsCount} ${
+                  selectedChannelsCount === 1 ? 'Channel' : 'Channels'
+                } →`
               : 'Select Testimonials to Post'}
           </span>
         </button>

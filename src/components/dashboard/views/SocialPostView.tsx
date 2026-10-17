@@ -30,10 +30,16 @@ export const SocialPostView: React.FC<SocialPostViewProps> = ({
       createdAt: r.createdAt || (r as any).created_at || new Date().toISOString(),
     }));
 
+  const effectiveWsWebsite =
+    (workspace as any)?.website ||
+    (workspace as any)?.url ||
+    (project as any)?.website;
+
   return (
     <SocialBroadcastHub
       workspaceId={effectiveWsId}
       workspaceName={effectiveWsName}
+      workspaceWebsite={effectiveWsWebsite}
       initialApprovedTestimonials={initialTestimonials}
     />
   );
