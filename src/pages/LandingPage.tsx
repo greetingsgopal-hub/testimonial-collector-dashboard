@@ -20,6 +20,7 @@ import { INITIAL_REVIEWS } from '../lib/seedData';
 import { FloatingReviewDrawer } from '../components/widgets/FloatingReviewDrawer';
 import { SocialProofToast } from '../components/widgets/SocialProofToast';
 import { MotionAccordion } from '../components/MotionAccordion';
+import { BlobCard } from '../components/ui/BlobCard';
 
 const FAQ_ITEMS = [
   {
@@ -297,6 +298,49 @@ export const LandingPage: React.FC = () => {
             <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Free forever</span>
             <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> No credit card required</span>
             <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> 2-minute setup</span>
+          </div>
+
+          {/* Hero Interactive Showcase Powered by BlobCard */}
+          <div className="w-full max-w-lg mx-auto mt-8 text-left">
+            <BlobCard
+              headerHeight={100}
+              lightColors={["#6701e6", "#8b5cf6", "#ec4899", "#3b82f6"]}
+              darkColors={["#4c00b0", "#6701e6", "#7c3aed", "#9333ea"]}
+              glowColors={["#6701e6", "#ec4899", "#8b5cf6", "#3b82f6", "#6701e6"]}
+              header={
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-purple-200 text-[#6701e6] text-xs font-bold shadow-xs">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Live Proof Showcase</span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
+                    Auto-Sync
+                  </span>
+                </div>
+              }
+            >
+              <div className="p-5 sm:p-6 bg-white rounded-b-[20px] space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#6701e6] to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-md shrink-0">
+                    🐼
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-gray-950 text-sm truncate">
+                      "Panda Praise skyrocketed our landing page conversions by 31%"
+                    </h4>
+                    <p className="text-xs text-gray-500">
+                      SaaS Founder • Verified Video & Text Testimonial
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-xs text-gray-500">
+                  <div className="flex items-center gap-1 text-amber-500 font-bold">
+                    ★★★★★ <span className="text-gray-600 font-semibold ml-1">5.0 Star Proof</span>
+                  </div>
+                  <span className="text-emerald-600 font-bold text-[11px]">Verified in 60s</span>
+                </div>
+              </div>
+            </BlobCard>
           </div>
         </div>
 

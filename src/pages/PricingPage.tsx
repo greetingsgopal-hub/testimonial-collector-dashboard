@@ -17,6 +17,7 @@ import {
 import { usePageSeo } from '../lib/seo';
 import { useAuth } from '../context/AuthContext';
 import { MotionAccordion } from '../components/MotionAccordion';
+import { BlobCard } from '../components/ui/BlobCard';
 
 declare global {
   interface Window {
@@ -576,22 +577,121 @@ export function PricingPage() {
 
             const isBusy = loadingPlan === plan.id;
 
+            if (plan.popular) {
+              return (
+                <div
+                  key={plan.id}
+                  id={`plan-card-${plan.id}`}
+                  className="relative flex flex-col justify-between transition-all"
+                >
+                  <BlobCard
+                    headerHeight={80}
+                    className="h-full flex flex-col"
+                    lightColors={["#6701e6", "#8b5cf6", "#a855f7", "#ec4899"]}
+                    darkColors={["#4c00b0", "#6701e6", "#7c3aed", "#9333ea"]}
+                    glowColors={["#6701e6", "#ec4899", "#8b5cf6", "#3b82f6", "#6701e6"]}
+                    header={
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="px-4 py-1 rounded-full bg-purple-600 text-white text-[11px] font-extrabold tracking-wider uppercase shadow-lg">
+                          Most Popular • Best Subscription
+                        </div>
+                        {billingCycle === 'annual' && (
+                          <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                            Save 50%
+                          </span>
+                        )}
+                      </div>
+                    }
+                  >
+                    <div className="p-7 pt-4 flex flex-col justify-between flex-1 bg-[#0D0F17] rounded-b-[20px]">
+                      <div>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-white/5 text-purple-300 border border-white/10">
+                            {plan.badge}
+                          </span>
+                        </div>
+
+                        <h2 className="text-2xl font-bold text-white mt-4">{plan.name}</h2>
+                        <p className="text-xs text-slate-400 mt-1.5 min-h-[34px] leading-relaxed">
+                          {plan.description}
+                        </p>
+
+                        <div className="mt-6 pb-6 border-b border-white/10">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
+                              {formatMoney(displayedMonthly)}
+                            </span>
+                            <span className="text-xs font-medium text-slate-400">
+                              /month
+                            </span>
+                          </div>
+
+                          <p className="text-xs mt-2 font-medium text-slate-400">
+                            {billingCycle === 'annual' ? (
+                              <span className="text-emerald-400">
+                                {currency === 'INR'
+                                  ? `₹${priceObj.annualTotal.toLocaleString('en-IN')} billed annually`
+                                  : `$${priceObj.annualTotal} billed annually`}
+                              </span>
+                            ) : (
+                              'Billed monthly • Cancel anytime'
+                            )}
+                          </p>
+                        </div>
+
+                        <ul className="mt-6 space-y-3 text-xs sm:text-sm text-slate-300">
+                          {plan.features.map((feat, idx) => (
+                            <li key={idx} className="flex items-start gap-3">
+                              <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5 stroke-[2.5]" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="mt-8 pt-4">
+                        <button
+                          type="button"
+                          id={`btn-checkout-${plan.id}`}
+                          disabled={isBusy}
+                          onClick={() =>
+                            handleRealRazorpayCheckout(
+                              plan.id,
+                              `PandaPraise ${plan.name}`,
+                              checkoutChargeAmount
+                            )
+                          }
+                          className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/30"
+                        >
+                          {isBusy ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>Opening Razorpay...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>{plan.ctaText}</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
+
+                        <p className="mt-3 text-[11px] text-center text-slate-500">
+                          ⚡ Instant Activation • UPI & RuPay • GST Invoice
+                        </p>
+                      </div>
+                    </div>
+                  </BlobCard>
+                </div>
+              );
+            }
+
             return (
               <div
                 key={plan.id}
                 id={`plan-card-${plan.id}`}
-                className={`relative rounded-3xl p-7 flex flex-col justify-between transition-all ${
-                  plan.popular
-                    ? 'bg-gradient-to-b from-[#151126] to-[#0D0F17] border-2 border-purple-500 shadow-2xl shadow-purple-900/20'
-                    : 'bg-[#0D0F17] border border-white/10'
-                }`}
+                className="relative rounded-3xl p-7 flex flex-col justify-between transition-all bg-[#0D0F17] border border-white/10"
               >
-                {plan.popular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-purple-600 text-white text-[11px] font-extrabold tracking-wider uppercase shadow-lg">
-                    Most Popular • Best Subscription
-                  </div>
-                )}
-
                 <div>
                   <div className="flex items-center justify-between gap-2">
                     <span className="px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-white/5 text-purple-300 border border-white/10">
@@ -691,73 +791,83 @@ export function PricingPage() {
 
       {/* ================= FOUNDING MEMBER LIFETIME PASS BANNER ================= */}
       <section className="max-w-7xl mx-auto px-6 pb-16">
-        <div id="plan-card-lifetime" className="rounded-3xl bg-gradient-to-r from-amber-500/10 via-[#14111D] to-purple-600/10 border-2 border-amber-400/50 p-7 sm:p-9 shadow-2xl relative overflow-hidden">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs font-extrabold uppercase tracking-wider">
+        <div id="plan-card-lifetime" className="relative">
+          <BlobCard
+            headerHeight={80}
+            lightColors={["#f59e0b", "#fbbf24", "#d97706", "#ec4899"]}
+            darkColors={["#b45309", "#d97706", "#f59e0b", "#7c3aed"]}
+            glowColors={["#f59e0b", "#fbbf24", "#d97706", "#8b5cf6", "#f59e0b"]}
+            header={
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs font-extrabold uppercase tracking-wider">
                 <Crown className="w-3.5 h-3.5" />
                 <span>Most Popular • Lifetime Pass • Limited Deal</span>
               </div>
+            }
+          >
+            <div className="p-7 sm:p-9 pt-4 bg-[#0D0F17] rounded-b-[20px]">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                <div className="space-y-3 max-w-2xl">
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
+                    Founding Member Pass
+                  </h3>
 
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
-                Founding Member Pass
-              </h3>
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    Pay once. Use Panda Praise for life without recurring fees. Zero recurring monthly charges ever. Lifetime access to all present & future features.
+                  </p>
 
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Pay once. Use Panda Praise for life without recurring fees. Zero recurring monthly charges ever. Lifetime access to all present & future features.
-              </p>
+                  <div className="pt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-amber-200/90">
+                    <span className="flex items-center gap-1.5">
+                      <Check className="w-4 h-4 text-amber-400" />Unlimited Testimonials
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Check className="w-4 h-4 text-amber-400" />Wall of Love & Widgets
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Check className="w-4 h-4 text-amber-400" />Instant GST Invoice
+                    </span>
+                  </div>
+                </div>
 
-              <div className="pt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-amber-200/90">
-                <span className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-amber-400" />Unlimited Testimonials
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-amber-400" />Wall of Love & Widgets
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-amber-400" />Instant GST Invoice
-                </span>
+                <div className="bg-[#0B0D14] border border-amber-400/30 rounded-2xl p-6 lg:min-w-[300px] text-center shrink-0">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400">
+                    One-Time Payment
+                  </span>
+                  <div className="text-4xl font-extrabold text-white mt-1">
+                    {formatMoney(lifetimePrice)}
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Zero recurring fees • Lifetime license
+                  </p>
+
+                  <button
+                    type="button"
+                    id="btn-checkout-lifetime"
+                    disabled={loadingPlan === 'lifetime'}
+                    onClick={() =>
+                      handleRealRazorpayCheckout(
+                        'lifetime',
+                        'PandaPraise Founding Member Lifetime Pass',
+                        lifetimePrice
+                      )
+                    }
+                    className="mt-5 w-full py-3.5 px-5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-400/20 transition-all cursor-pointer"
+                  >
+                    {loadingPlan === 'lifetime' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Opening Razorpay...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Get Lifetime Access</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-
-            <div className="bg-[#0B0D14] border border-amber-400/30 rounded-2xl p-6 lg:min-w-[300px] text-center shrink-0">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400">
-                One-Time Payment
-              </span>
-              <div className="text-4xl font-extrabold text-white mt-1">
-                {formatMoney(lifetimePrice)}
-              </div>
-              <p className="text-xs text-slate-400 mt-1">
-                Zero recurring fees • Lifetime license
-              </p>
-
-              <button
-                type="button"
-                id="btn-checkout-lifetime"
-                disabled={loadingPlan === 'lifetime'}
-                onClick={() =>
-                  handleRealRazorpayCheckout(
-                    'lifetime',
-                    'PandaPraise Founding Member Lifetime Pass',
-                    lifetimePrice
-                  )
-                }
-                className="mt-5 w-full py-3.5 px-5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-400/20 transition-all cursor-pointer"
-              >
-                {loadingPlan === 'lifetime' ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Opening Razorpay...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Get Lifetime Access</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+          </BlobCard>
         </div>
       </section>
 
