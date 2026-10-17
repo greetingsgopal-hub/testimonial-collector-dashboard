@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
+  getFirestore,
   collection,
   query,
   where,
@@ -7,9 +8,10 @@ import {
   doc,
   getDoc,
   setDoc,
+  updateDoc,
+  addDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
 import {
   Share2,
   Check,
@@ -21,6 +23,9 @@ import {
   CheckSquare,
   Square,
   Star,
+  Eye,
+  PlusCircle,
+  CheckCircle2,
   X,
 } from 'lucide-react';
 
@@ -31,9 +36,10 @@ export interface SocialTestimonial {
   content: string;
   rating: number;
   createdAt?: string;
+  isSample?: boolean;
 }
 
-type ChannelId = 'linkedin' | 'x' | 'whatsapp' | 'facebook' | 'instagram' | 'webhook';
+type ChannelId = 'linkedin' | 'x' | 'whatsapp' | 'instagram';
 
 interface ChannelState {
   id: ChannelId;
@@ -48,105 +54,107 @@ export function renderTestimonialCardDataUrl(
   t: SocialTestimonial,
   workspaceName: string
 ): string {
-  try {
-    const canvas = document.createElement('canvas');
-    canvas.width = 1080;
-    canvas.height = 1080;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return '';
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080;
+  canvas.height = 1080;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return '';
 
-    // Safe roundRect helper for environments where roundRect is unsupported
-    const drawRoundRect = (x: number, y: number, w: number, h: number, r: number) => {
-      if (typeof ctx.roundRect === 'function') {
-        ctx.roundRect(x, y, w, h, r);
-      } else {
-        ctx.rect(x, y, w, h);
-      }
-    };
-
-    // Rich Dark-Purple SaaS Gradient Background
-    const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
-    grad.addColorStop(0, '#0F172A');
-    grad.addColorStop(0.5, '#1E1B4B');
-    grad.addColorStop(1, '#4C1D95');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 1080, 1080);
-
-    // Subtle Top Pill
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.beginPath();
-    drawRoundRect(90, 90, 360, 54, 27);
-    ctx.fill();
-    ctx.fillStyle = '#E9D5FF';
-    ctx.font = 'bold 22px Inter, system-ui, sans-serif';
-    ctx.fillText(`✓ VERIFIED CUSTOMER PRAISE`, 120, 125);
-
-    // Main White Card
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath();
-    drawRoundRect(90, 180, 900, 740, 40);
-    ctx.fill();
-
-    // Star Rating
-    ctx.fillStyle = '#F59E0B';
-    ctx.font = 'bold 44px sans-serif';
-    const stars = '★'.repeat(Math.max(1, Math.min(5, Math.round(t.rating || 5))));
-    ctx.fillText(`${stars}  ${Number(t.rating || 5).toFixed(1)}`, 150, 275);
-
-    // Word-Wrapped Testimonial Quote
-    ctx.fillStyle = '#0F172A';
-    ctx.font = 'bold 36px Inter, system-ui, sans-serif';
-    const words = `"${t.content}"`.split(' ');
-    let line = '';
-    let y = 365;
-    const maxWidth = 780;
-    const lineHeight = 52;
-
-    for (const word of words) {
-      const testLine = line + word + ' ';
-      if (ctx.measureText(testLine).width > maxWidth && line !== '') {
-        ctx.fillText(line, 150, y);
-        line = word + ' ';
-        y += lineHeight;
-        if (y > 680) {
-          line += '...';
-          break;
-        }
-      } else {
-        line = testLine;
-      }
+  const safeRoundRect = (
+    c: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number
+  ) => {
+    if (typeof (c as any).roundRect === 'function') {
+      (c as any).roundRect(x, y, w, h, r);
+    } else {
+      c.rect(x, y, w, h);
     }
-    ctx.fillText(line, 150, y);
+  };
 
-    // Author Avatar Circle
-    ctx.fillStyle = '#7C3AED';
-    ctx.beginPath();
-    ctx.arc(185, 815, 36, 0, Math.PI * 2);
-    ctx.fill();
+  // Rich Dark-Purple SaaS Gradient Background
+  const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
+  grad.addColorStop(0, '#0F172A');
+  grad.addColorStop(0.5, '#1E1B4B');
+  grad.addColorStop(1, '#4C1D95');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 1080, 1080);
 
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 28px Inter, system-ui, sans-serif';
-    ctx.fillText((t.authorName || 'V').slice(0, 1).toUpperCase(), 174, 825);
+  // Top Verified Badge Pill
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+  ctx.beginPath();
+  safeRoundRect(ctx, 90, 90, 390, 54, 27);
+  ctx.fill();
+  ctx.fillStyle = '#E9D5FF';
+  ctx.font = 'bold 22px Inter, system-ui, sans-serif';
+  ctx.fillText('✓ VERIFIED CUSTOMER PRAISE', 120, 125);
 
-    // Author Name & Role
-    ctx.fillStyle = '#0F172A';
-    ctx.font = 'bold 30px Inter, system-ui, sans-serif';
-    ctx.fillText(t.authorName || 'Verified Customer', 240, 808);
+  // Main White Quote Card
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  safeRoundRect(ctx, 90, 180, 900, 740, 40);
+  ctx.fill();
 
-    ctx.fillStyle = '#64748B';
-    ctx.font = '24px Inter, system-ui, sans-serif';
-    ctx.fillText(`${t.authorRole || 'Verified Buyer'} • ${workspaceName}`, 240, 844);
+  // Star Rating Row
+  ctx.fillStyle = '#F59E0B';
+  ctx.font = 'bold 44px sans-serif';
+  const starCount = Math.max(1, Math.min(5, Math.round(t.rating || 5)));
+  const stars = '★'.repeat(starCount);
+  ctx.fillText(`${stars}  ${Number(t.rating || 5).toFixed(1)}`, 150, 275);
 
-    // Footer Watermark
-    ctx.fillStyle = '#CBD5E1';
-    ctx.font = '600 22px Inter, system-ui, sans-serif';
-    ctx.fillText(`Verified by PandaPraise • ${workspaceName}`, 90, 985);
+  // Word-Wrapped Testimonial Quote
+  ctx.fillStyle = '#0F172A';
+  ctx.font = 'bold 36px Inter, system-ui, sans-serif';
+  const words = `"${t.content}"`.split(' ');
+  let line = '';
+  let y = 365;
+  const maxWidth = 780;
+  const lineHeight = 52;
 
-    return canvas.toDataURL('image/png');
-  } catch (err) {
-    console.warn('Canvas render notice:', err);
-    return '';
+  for (const word of words) {
+    const testLine = line + word + ' ';
+    if (ctx.measureText(testLine).width > maxWidth && line !== '') {
+      ctx.fillText(line, 150, y);
+      line = word + ' ';
+      y += lineHeight;
+      if (y > 680) {
+        line += '...';
+        break;
+      }
+    } else {
+      line = testLine;
+    }
   }
+  ctx.fillText(line, 150, y);
+
+  // Author Initials Avatar
+  ctx.fillStyle = '#7C3AED';
+  ctx.beginPath();
+  ctx.arc(185, 815, 36, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 28px Inter, system-ui, sans-serif';
+  ctx.fillText((t.authorName || 'V').slice(0, 1).toUpperCase(), 174, 825);
+
+  // Author Name & Role
+  ctx.fillStyle = '#0F172A';
+  ctx.font = 'bold 30px Inter, system-ui, sans-serif';
+  ctx.fillText(t.authorName || 'Verified Customer', 240, 808);
+
+  ctx.fillStyle = '#64748B';
+  ctx.font = '24px Inter, system-ui, sans-serif';
+  ctx.fillText(`${t.authorRole || 'Verified Buyer'} • ${workspaceName}`, 240, 844);
+
+  // Bottom Branding Footer
+  ctx.fillStyle = '#CBD5E1';
+  ctx.font = '600 22px Inter, system-ui, sans-serif';
+  ctx.fillText(`Verified by PandaPraise • ${workspaceName}`, 90, 985);
+
+  return canvas.toDataURL('image/png');
 }
 
 export default function SocialBroadcastHub({
@@ -161,41 +169,47 @@ export default function SocialBroadcastHub({
   const [testimonials, setTestimonials] = useState<SocialTestimonial[]>(
     initialApprovedTestimonials || []
   );
+  const [pendingReviewsCount, setPendingReviewsCount] = useState<number>(0);
   const [selectedProofIds, setSelectedProofIds] = useState<string[]>([]);
   const [starFilter, setStarFilter] = useState<'all' | '5' | '4+'>('all');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isBroadcasting, setIsBroadcasting] = useState<boolean>(false);
+  const [previewCardModal, setPreviewCardModal] = useState<{
+    title: string;
+    dataUrl: string;
+  } | null>(null);
+
   const [statusBanner, setStatusBanner] = useState<{
     type: 'success' | 'error' | 'info';
     text: string;
   } | null>(null);
 
-  // Multi-Platform Webhook Automation State (Stored in Firestore)
+  // Optional Webhook Automation State
   const [webhookUrl, setWebhookUrl] = useState<string>('');
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
   const [webhookInput, setWebhookInput] = useState<string>('');
 
-  // Target Channels Selection (User can toggle multiple destinations at once)
+  // Target Channels (Default LinkedIn, X, and Instagram/FB Card enabled for immediate 1-click flow)
   const [channels, setChannels] = useState<ChannelState[]>([
     {
       id: 'linkedin',
       name: 'LinkedIn',
       dotColor: 'bg-blue-600',
-      modeLabel: 'Composer Ready',
+      modeLabel: 'Pre-filled Feed Post',
       selected: true,
     },
     {
       id: 'x',
       name: 'X (Twitter)',
       dotColor: 'bg-slate-900',
-      modeLabel: 'Composer Ready',
+      modeLabel: 'Pre-filled Post Intent',
       selected: true,
     },
     {
       id: 'whatsapp',
       name: 'WhatsApp',
       dotColor: 'bg-emerald-500',
-      modeLabel: 'Direct Share Ready',
+      modeLabel: 'Direct Chat / Status',
       selected: false,
     },
     {
@@ -207,28 +221,17 @@ export default function SocialBroadcastHub({
     },
   ]);
 
-  // Synchronize when initialApprovedTestimonials changes
-  useEffect(() => {
-    if (initialApprovedTestimonials && initialApprovedTestimonials.length > 0) {
-      setTestimonials(initialApprovedTestimonials);
-    }
-  }, [initialApprovedTestimonials]);
+  const selectedChannelsCount = channels.filter((c) => c.selected).length;
 
-  // 1. Load Real Approved Testimonials & Saved Webhook from Firestore
+  // 1. Load Real Approved & Pending Testimonials from Firestore
   const loadRealData = async () => {
     setIsLoading(true);
     try {
-      if (!db) {
-        if (initialApprovedTestimonials?.length) {
-          setTestimonials(initialApprovedTestimonials);
-        }
-        return;
-      }
+      const db = getFirestore();
 
-      // Load saved automation webhook from workspace doc
       const wsRef = doc(db, 'workspaces', workspaceId);
-      const wsSnap = await getDoc(wsRef).catch(() => null);
-      if (wsSnap && wsSnap.exists()) {
+      const wsSnap = await getDoc(wsRef);
+      if (wsSnap.exists()) {
         const wsData = wsSnap.data();
         if (wsData.socialWebhookUrl) {
           setWebhookUrl(wsData.socialWebhookUrl);
@@ -236,62 +239,69 @@ export default function SocialBroadcastHub({
         }
       }
 
-      const rows: SocialTestimonial[] = [];
+      // Query testimonials & reviews collections for this workspace
+      const approvedRows: SocialTestimonial[] = [];
+      const seenIds = new Set<string>();
+      let pendingCount = 0;
 
-      // Query 'reviews' collection
-      const q1 = query(
-        collection(db, 'reviews'),
-        where('workspaceId', '==', workspaceId),
-        where('status', '==', 'approved')
+      const qTestimonials = query(
+        collection(db, 'testimonials'),
+        where('workspaceId', '==', workspaceId)
       );
-      const snap1 = await getDocs(q1).catch(() => null);
-      if (snap1 && !snap1.empty) {
-        snap1.docs.forEach((d) => {
-          const data = d.data();
-          rows.push({
+      const snapTestimonials = await getDocs(qTestimonials);
+
+      snapTestimonials.docs.forEach((d) => {
+        const data = d.data();
+        if (data.status === 'pending') {
+          pendingCount += 1;
+        } else if (data.status === 'approved' || !data.status) {
+          seenIds.add(d.id);
+          approvedRows.push({
             id: d.id,
-            authorName: data.authorName || data.name || data.author_name || 'Verified Customer',
-            authorRole: data.authorRole || data.role || data.author_role || 'Verified Buyer',
+            authorName: data.authorName || data.author_name || 'Verified Customer',
+            authorRole: data.authorRole || data.author_role || 'Verified Buyer',
             content: data.content || data.text || '',
             rating: Number(data.rating || 5),
             createdAt: data.createdAt || data.created_at || new Date().toISOString(),
           });
-        });
-      }
+        }
+      });
 
-      // Query 'testimonials' collection for additional compatibility
-      const q2 = query(
-        collection(db, 'testimonials'),
-        where('workspaceId', '==', workspaceId),
-        where('status', '==', 'approved')
+      // Also check reviews collection for approved/pending
+      const qReviews = query(
+        collection(db, 'reviews'),
+        where('workspaceId', '==', workspaceId)
       );
-      const snap2 = await getDocs(q2).catch(() => null);
-      if (snap2 && !snap2.empty) {
-        snap2.docs.forEach((d) => {
-          if (!rows.some((r) => r.id === d.id)) {
-            const data = d.data();
-            rows.push({
-              id: d.id,
-              authorName: data.authorName || data.name || data.author_name || 'Verified Customer',
-              authorRole: data.authorRole || data.role || data.author_role || 'Verified Buyer',
-              content: data.content || data.text || '',
-              rating: Number(data.rating || 5),
-              createdAt: data.createdAt || data.created_at || new Date().toISOString(),
-            });
-          }
-        });
-      }
+      const snapReviews = await getDocs(qReviews);
 
-      if (rows.length > 0) {
-        setTestimonials(rows);
+      snapReviews.docs.forEach((d) => {
+        const data = d.data();
+        if (data.status === 'pending') {
+          pendingCount += 1;
+        } else if ((data.status === 'approved' || !data.status) && !seenIds.has(d.id)) {
+          seenIds.add(d.id);
+          approvedRows.push({
+            id: d.id,
+            authorName: data.authorName || data.author_name || data.name || 'Verified Customer',
+            authorRole: data.authorRole || data.author_role || data.role || 'Verified Buyer',
+            content: data.content || data.text || '',
+            rating: Number(data.rating || 5),
+            createdAt: data.createdAt || data.created_at || new Date().toISOString(),
+          });
+        }
+      });
+
+      setPendingReviewsCount(pendingCount);
+
+      if (approvedRows.length > 0) {
+        setTestimonials(approvedRows);
+        setSelectedProofIds([approvedRows[0].id]);
       } else if (initialApprovedTestimonials?.length) {
         setTestimonials(initialApprovedTestimonials);
+        setSelectedProofIds([initialApprovedTestimonials[0].id]);
       }
     } catch (err) {
       console.warn('Firestore fetch notice:', err);
-      if (initialApprovedTestimonials?.length) {
-        setTestimonials(initialApprovedTestimonials);
-      }
     } finally {
       setIsLoading(false);
     }
@@ -301,7 +311,95 @@ export default function SocialBroadcastHub({
     loadRealData();
   }, [workspaceId]);
 
-  // Filtered testimonials based on All / 5 Stars / 4+ Stars buttons
+  // 2. Smooth Journey Helper: Approve Waiting Pending Reviews in 1 Click
+  const handleApproveAllPending = async () => {
+    setIsLoading(true);
+    try {
+      const db = getFirestore();
+      const qPending = query(
+        collection(db, 'testimonials'),
+        where('workspaceId', '==', workspaceId),
+        where('status', '==', 'pending')
+      );
+      const snap = await getDocs(qPending);
+      await Promise.all(
+        snap.docs.map((docSnap) =>
+          updateDoc(doc(db, 'testimonials', docSnap.id), { status: 'approved' })
+        )
+      );
+      await loadRealData();
+      setStatusBanner({
+        type: 'success',
+        text: `Approved ${snap.docs.length} pending testimonial(s)! They are now ready to broadcast.`,
+      });
+    } catch (err: any) {
+      setStatusBanner({
+        type: 'error',
+        text: err.message || 'Could not approve pending testimonials.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 3. Smooth Journey Helper: Seed 3 Sample Proofs so Users Can Test Broadcasting Immediately
+  const handleLoadSampleProofs = async () => {
+    const sampleProofs: SocialTestimonial[] = [
+      {
+        id: `sample-${Date.now()}-1`,
+        authorName: 'Aarav Mehta',
+        authorRole: 'Founder, FinStack',
+        content: `Switching to ${workspaceName} saved our team 6 hours every week and doubled our customer trust on the checkout page!`,
+        rating: 5,
+        isSample: true,
+      },
+      {
+        id: `sample-${Date.now()}-2`,
+        authorName: 'Sarah Jenkins',
+        authorRole: 'Head of Growth, ScaleOps',
+        content: `The fastest onboarding we have ever experienced. Within 5 minutes of setting up ${workspaceName}, we had live social proof running.`,
+        rating: 5,
+        isSample: true,
+      },
+      {
+        id: `sample-${Date.now()}-3`,
+        authorName: 'Rohan Kulkarni',
+        authorRole: 'CTO, CloudPulse',
+        content: `Clean UI, zero page-speed bloat, and rock-solid reliability. Highly recommend ${workspaceName} to any growing business.`,
+        rating: 5,
+        isSample: true,
+      },
+    ];
+
+    setTestimonials(sampleProofs);
+    setSelectedProofIds([sampleProofs[0].id]);
+
+    // Also persist to Firestore if authenticated so they stay available across tabs
+    try {
+      const db = getFirestore();
+      for (const sp of sampleProofs) {
+        await addDoc(collection(db, 'testimonials'), {
+          workspaceId,
+          authorName: sp.authorName,
+          authorRole: sp.authorRole,
+          content: sp.content,
+          rating: sp.rating,
+          mediaType: 'text',
+          status: 'approved',
+          source: 'Sample Starter',
+          createdAt: new Date().toISOString(),
+        });
+      }
+    } catch {
+      // Keeps samples in local state if Firestore write is restricted
+    }
+
+    setStatusBanner({
+      type: 'info',
+      text: 'Loaded 3 sample testimonials & pre-selected the first one! Click the purple "Broadcast" button below to test your 1-click flow.',
+    });
+  };
+
   const filteredTestimonials = useMemo(() => {
     return testimonials.filter((t) => {
       if (starFilter === '5') return Math.round(t.rating) === 5;
@@ -323,14 +421,16 @@ export default function SocialBroadcastHub({
   };
 
   const handleSelectAll = () => {
-    if (selectedProofIds.length === filteredTestimonials.length && filteredTestimonials.length > 0) {
+    if (
+      selectedProofIds.length === filteredTestimonials.length &&
+      filteredTestimonials.length > 0
+    ) {
       setSelectedProofIds([]);
     } else {
       setSelectedProofIds(filteredTestimonials.map((t) => t.id));
     }
   };
 
-  // Save Real Multi-Network Webhook URL (Make.com / Zapier / Buffer / n8n) to Firestore
   const handleSaveWebhook = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = webhookInput.trim();
@@ -338,28 +438,24 @@ export default function SocialBroadcastHub({
     setIsConfigModalOpen(false);
 
     try {
-      if (db) {
-        await setDoc(
-          doc(db, 'workspaces', workspaceId),
-          { socialWebhookUrl: trimmed, updatedAt: serverTimestamp() },
-          { merge: true }
-        );
-      }
+      const db = getFirestore();
+      await setDoc(
+        doc(db, 'workspaces', workspaceId),
+        { socialWebhookUrl: trimmed, updatedAt: serverTimestamp() },
+        { merge: true }
+      );
+    } catch {
+      // Ignore if offline
+    }
+
+    if (trimmed) {
       setStatusBanner({
         type: 'success',
-        text: trimmed
-          ? 'Multi-network automation webhook connected! Clicking Broadcast will now POST all selected testimonials simultaneously.'
-          : 'Webhook removed. Using direct browser broadcast mode.',
-      });
-    } catch {
-      setStatusBanner({
-        type: 'info',
-        text: 'Webhook saved for this session.',
+        text: 'Background automation webhook connected! Clicking Broadcast will now send all selected posts simultaneously.',
       });
     }
   };
 
-  // Format Selected Testimonials into a Combined Multi-Review Social Post
   const buildBatchCaption = (selectedItems: SocialTestimonial[]): string => {
     if (selectedItems.length === 1) {
       const item = selectedItems[0];
@@ -375,7 +471,7 @@ export default function SocialBroadcastHub({
     )}\n\nCollected & verified via PandaPraise`;
   };
 
-  // MASTER ACTION: Broadcast All Selected Testimonials Across All Selected Channels At Once
+  // MASTER ACTION: Broadcast All Selected Testimonials Across All Selected Channels
   const handleBroadcastSelected = async () => {
     const selectedItems = testimonials.filter((t) => selectedProofIds.includes(t.id));
     const activeChannels = channels.filter((c) => c.selected);
@@ -383,7 +479,7 @@ export default function SocialBroadcastHub({
     if (selectedItems.length === 0) {
       setStatusBanner({
         type: 'error',
-        text: 'Please select at least 1 approved testimonial below to broadcast.',
+        text: 'Select at least 1 testimonial below first.',
       });
       return;
     }
@@ -391,7 +487,7 @@ export default function SocialBroadcastHub({
     if (activeChannels.length === 0 && !webhookUrl) {
       setStatusBanner({
         type: 'error',
-        text: 'Please select at least 1 social network card above.',
+        text: 'Select at least 1 social destination card in Step 1.',
       });
       return;
     }
@@ -401,13 +497,10 @@ export default function SocialBroadcastHub({
 
     try {
       const combinedCaption = buildBatchCaption(selectedItems);
-
-      // 1. Copy combined caption to clipboard automatically
       if (typeof navigator !== 'undefined' && navigator.clipboard) {
         await navigator.clipboard.writeText(combinedCaption).catch(() => null);
       }
 
-      // 2. Generate 1080x1080 PNG Image Cards for all selected testimonials
       const renderedCards = selectedItems.map((item) => ({
         testimonialId: item.id,
         authorName: item.authorName,
@@ -417,7 +510,7 @@ export default function SocialBroadcastHub({
         imageCardBase64: renderTestimonialCardDataUrl(item, workspaceName),
       }));
 
-      // 3. If Webhook Automation is connected (Make / Zapier / Buffer / n8n), fire ALL selected items + images in 1 real HTTP POST!
+      // Fire background webhook if configured
       if (webhookUrl) {
         await fetch(webhookUrl, {
           method: 'POST',
@@ -435,21 +528,19 @@ export default function SocialBroadcastHub({
         });
       }
 
-      // 4. Execute Direct Browser Actions for Each Selected Channel
       const encodedText = encodeURIComponent(combinedCaption);
 
-      // Download 1080x1080 PNG Cards if Instagram/FB is selected
+      // Auto-download 1080x1080 PNG card if Instagram & FB Card is selected
       if (activeChannels.some((c) => c.id === 'instagram')) {
         renderedCards.forEach((card, index) => {
           if (!card.imageCardBase64) return;
           const a = document.createElement('a');
           a.href = card.imageCardBase64;
-          a.download = `${workspaceName}-praise-${index + 1}.png`;
+          a.download = `${workspaceName}-testimonial-${index + 1}.png`;
           a.click();
         });
       }
 
-      // Open Pre-filled Composer Tabs for Selected Networks
       if (activeChannels.some((c) => c.id === 'linkedin')) {
         window.open(
           `https://www.linkedin.com/feed/?shareActive=true&text=${encodedText}`,
@@ -476,16 +567,14 @@ export default function SocialBroadcastHub({
 
       setStatusBanner({
         type: 'success',
-        text: `Broadcast launched for ${selectedItems.length} testimonial(s) across ${activeChannels
+        text: `Broadcast launched for ${selectedItems.length} review(s) across ${activeChannels
           .map((c) => c.name)
-          .join(', ')}! Caption copied to clipboard${
-          webhookUrl ? ' & webhook payload dispatched.' : '.'
-        }`,
+          .join(', ')}! Formatted caption copied to clipboard.`,
       });
     } catch (err: any) {
       setStatusBanner({
         type: 'error',
-        text: err.message || 'Failed to complete broadcast dispatch.',
+        text: err.message || 'Broadcast failed.',
       });
     } finally {
       setIsBroadcasting(false);
@@ -494,18 +583,18 @@ export default function SocialBroadcastHub({
 
   return (
     <div className="space-y-6 font-sans text-slate-900">
-      {/* 1. HEADER CARD */}
+      {/* 1. PAGE HEADER */}
       <section className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-purple-600" />
             <span className="text-[11px] font-bold uppercase tracking-wider text-purple-600">
-              Multi-Channel Social Broadcast Studio
+              1-Click Social Proof Distribution
             </span>
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mt-1">On Social Media</h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            Select your target networks and approved customer testimonials below to broadcast across all channels at once.
+            Turn customer reviews into ready-to-post LinkedIn, X, WhatsApp, and 1080×1080 Instagram cards in 1 click.
           </p>
         </div>
 
@@ -515,7 +604,9 @@ export default function SocialBroadcastHub({
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 transition-colors shrink-0 cursor-pointer"
         >
           <Webhook className="w-4 h-4 text-purple-600" />
-          <span>{webhookUrl ? 'Automation Webhook Active ✓' : 'Connect Auto-Post Webhook'}</span>
+          <span>
+            {webhookUrl ? 'Auto-Post Webhook Active ✓' : 'Optional: Background Auto-Post'}
+          </span>
         </button>
       </section>
 
@@ -544,7 +635,7 @@ export default function SocialBroadcastHub({
         </div>
       )}
 
-      {/* 2. TARGET SOCIAL DESTINATIONS (MULTI-SELECTABLE CARDS — ZERO BROKEN OAUTH REDIRECTS) */}
+      {/* 2. STEP 1: CHOOSE BROADCAST DESTINATIONS */}
       <section className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-3">
@@ -553,10 +644,10 @@ export default function SocialBroadcastHub({
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-900">
-                1. Connected Social Accounts ({channels.filter((c) => c.selected).length} Selected)
+                1. Choose Broadcast Destinations ({selectedChannelsCount} Selected)
               </h2>
               <p className="text-xs text-slate-500">
-                Click any network card to include or exclude it from your 1-click batch broadcast.
+                Select which social networks should open or download when you click Broadcast.
               </p>
             </div>
           </div>
@@ -599,14 +690,14 @@ export default function SocialBroadcastHub({
                 </div>
               </div>
 
-              <div className="mt-3 flex items-center justify-between text-xs">
-                <span className="text-slate-500 font-medium">{ch.modeLabel}</span>
+              <div className="mt-3 flex items-center justify-between text-xs gap-2">
+                <span className="text-slate-500 font-medium truncate">{ch.modeLabel}</span>
                 <span
-                  className={`font-bold ${
+                  className={`font-bold whitespace-nowrap shrink-0 ${
                     ch.selected ? 'text-purple-700' : 'text-slate-400'
                   }`}
                 >
-                  {ch.selected ? 'Included ✓' : 'Click to enable'}
+                  {ch.selected ? 'Included ✓' : 'Enable'}
                 </span>
               </div>
             </button>
@@ -614,7 +705,7 @@ export default function SocialBroadcastHub({
         </div>
       </section>
 
-      {/* 3. SELECTION & FILTER ACTION BAR */}
+      {/* 3. STEP 2: SELECT TESTIMONIALS & CLICK BROADCAST */}
       <section className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2.5">
           <button
@@ -622,6 +713,13 @@ export default function SocialBroadcastHub({
             onClick={handleSelectAll}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 cursor-pointer"
           >
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={selectedProofIds.length === filteredTestimonials.length && filteredTestimonials.length > 0}
+              onChange={() => {}}
+              aria-label="Select all testimonials"
+            />
             {selectedProofIds.length === filteredTestimonials.length &&
             filteredTestimonials.length > 0 ? (
               <CheckSquare className="w-4 h-4 text-purple-600" />
@@ -663,7 +761,7 @@ export default function SocialBroadcastHub({
           </div>
         </div>
 
-        {/* MASTER MULTI-BROADCAST CTA BUTTON */}
+        {/* PRIMARY BROADCAST CTA */}
         <button
           type="button"
           data-testid="publish-social-btn"
@@ -678,19 +776,17 @@ export default function SocialBroadcastHub({
           <Send className="w-3.5 h-3.5" />
           <span>
             {selectedProofIds.length > 0
-              ? `Broadcast ${selectedProofIds.length} Selected to ${
-                  channels.filter((c) => c.selected).length
-                } Channels →`
+              ? `Broadcast ${selectedProofIds.length} Selected to ${selectedChannelsCount} Channels →`
               : 'Select Testimonials to Post'}
           </span>
         </button>
       </section>
 
-      {/* 4. APPROVED TESTIMONIALS MULTI-SELECT GRID */}
+      {/* 4. APPROVED TESTIMONIALS LIST OR ACTIONABLE EMPTY STATE */}
       <section className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <h3 className="text-sm font-bold text-slate-900">
-            2. Approved Testimonials ({filteredTestimonials.length})
+            2. Select Approved Testimonials ({filteredTestimonials.length})
           </h3>
           <span className="text-xs font-semibold text-purple-600">
             {selectedProofIds.length} queued for broadcast
@@ -698,16 +794,38 @@ export default function SocialBroadcastHub({
         </div>
 
         {filteredTestimonials.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center shadow-xs">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-10 text-center shadow-xs">
             <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-3">
               <Share2 className="w-6 h-6" />
             </div>
             <h4 className="text-base font-bold text-slate-900">
-              No Approved Testimonials Yet
+              No Approved Testimonials in Your Queue Yet
             </h4>
             <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 leading-relaxed">
-              Once you approve incoming customer reviews in the <strong>Evaluate</strong> tab, they appear here automatically so you can select and broadcast them across your social channels.
+              Want to test the 1-click social broadcaster and 1080×1080 Instagram card generator right now? Load 3 sample reviews below or approve waiting customer submissions.
             </p>
+
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              {pendingReviewsCount > 0 && (
+                <button
+                  type="button"
+                  onClick={handleApproveAllPending}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs cursor-pointer"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Approve {pendingReviewsCount} Pending Review(s) Now</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleLoadSampleProofs}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-sm shadow-purple-200 cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>⚡ Load 3 Sample Proofs to Test Studio</span>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -726,60 +844,84 @@ export default function SocialBroadcastHub({
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-3">
-                      <div className="flex items-center gap-1 text-amber-400">
-                        {[...Array(Math.max(1, Math.min(5, Math.round(item.rating || 5))))].map(
-                          (_, idx) => (
-                            <Star key={idx} className="w-4 h-4 fill-current" />
-                          )
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-0.5 text-amber-400">
+                          {[...Array(Math.max(1, Math.min(5, Math.round(item.rating || 5))))].map(
+                            (_, idx) => (
+                              <Star key={idx} className="w-4 h-4 fill-current" />
+                            )
+                          )}
+                        </div>
+                        {item.isSample && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700">
+                            Sample Proof
+                          </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
+
+                      <div
+                        className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                          isSelected
+                            ? 'bg-purple-600 text-white'
+                            : 'border border-slate-300 bg-white'
+                        }`}
+                      >
                         <input
                           type="checkbox"
+                          className="sr-only"
                           checked={isSelected}
                           onChange={() => {}}
-                          className="sr-only"
                           aria-label={`Select testimonial by ${item.authorName}`}
                         />
-                        <div
-                          className={`w-5 h-5 rounded-md flex items-center justify-center ${
-                            isSelected
-                              ? 'bg-purple-600 text-white'
-                              : 'border border-slate-300 bg-white'
-                          }`}
-                        >
-                          {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                        </div>
+                        {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                       </div>
                     </div>
 
-                    <p className="text-sm text-slate-800 leading-relaxed line-clamp-4">
+                    <p className="text-sm text-slate-800 leading-relaxed">
                       "{item.content}"
                     </p>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                     <div>
                       <p className="text-xs font-bold text-slate-900">{item.authorName}</p>
                       <p className="text-[11px] text-slate-500">{item.authorRole}</p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const dataUrl = renderTestimonialCardDataUrl(item, workspaceName);
-                        if (!dataUrl) return;
-                        const a = document.createElement('a');
-                        a.href = dataUrl;
-                        a.download = `${workspaceName}-${item.authorName}-card.png`;
-                        a.click();
-                      }}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 hover:text-purple-700 text-[11px] font-semibold text-slate-600 cursor-pointer"
-                    >
-                      <Download className="w-3 h-3" />
-                      <span>HD Card</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const dataUrl = renderTestimonialCardDataUrl(item, workspaceName);
+                          setPreviewCardModal({
+                            title: `${item.authorName} — 1080×1080 Social Card`,
+                            dataUrl,
+                          });
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-semibold text-slate-700 cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Preview Card</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const dataUrl = renderTestimonialCardDataUrl(item, workspaceName);
+                          if (!dataUrl) return;
+                          const a = document.createElement('a');
+                          a.href = dataUrl;
+                          a.download = `${workspaceName}-${item.authorName}-card.png`;
+                          a.click();
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-[11px] font-bold text-purple-700 cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>PNG</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -788,17 +930,59 @@ export default function SocialBroadcastHub({
         )}
       </section>
 
-      {/* 5. MULTI-NETWORK WEBHOOK AUTOMATION MODAL (MAKE / ZAPIER / BUFFER / N8N) */}
+      {/* LIVE 1080x1080 SOCIAL CARD PREVIEW MODAL */}
+      {previewCardModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-5 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="text-sm font-bold text-slate-900">{previewCardModal.title}</h3>
+              <button
+                type="button"
+                onClick={() => setPreviewCardModal(null)}
+                className="text-slate-400 hover:text-slate-700 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="my-4 rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
+              <img
+                src={previewCardModal.dataUrl}
+                alt="Rendered Social Proof Card"
+                className="w-full h-auto block"
+              />
+            </div>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPreviewCardModal(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
+              >
+                Close
+              </button>
+              <a
+                href={previewCardModal.dataUrl}
+                download={`${workspaceName}-social-card.png`}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download 1080×1080 PNG</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* OPTIONAL WEBHOOK AUTOMATION MODAL */}
       {isConfigModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 shadow-xl">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
-                  Multi-Network Auto-Post Webhook
+                  Optional: Background Auto-Post Webhook
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Post simultaneously to LinkedIn, X, Facebook Pages, and Instagram Business in the background.
+                  For power users automating LinkedIn, X, Facebook Pages & Instagram Business via Make or Zapier.
                 </p>
               </div>
               <button
@@ -812,15 +996,15 @@ export default function SocialBroadcastHub({
 
             <form onSubmit={handleSaveWebhook} className="mt-4 space-y-4">
               <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-100 text-xs text-slate-700 space-y-1.5 leading-relaxed">
-                <p className="font-bold text-purple-900">How 1-Click Background Auto-Posting Works:</p>
+                <p className="font-bold text-purple-900">No Webhook Needed for Standard Sharing!</p>
                 <p>
-                  Paste a Webhook URL from <strong>Make.com</strong>, <strong>Zapier</strong>, <strong>n8n</strong>, or <strong>Pabbly Connect</strong>. Whenever you select testimonials and click <strong>Broadcast</strong>, PandaPraise sends the formatted text captions + <strong>auto-rendered 1080×1080 PNG images</strong> directly to your scenario so all 4 social accounts post simultaneously.
+                  By default, clicking <strong>Broadcast</strong> opens pre-filled LinkedIn, X, and WhatsApp composers and downloads your 1080×1080 Instagram card directly in your browser. Only add a Make.com / Zapier URL below if you want background webhook triggers.
                 </p>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Destination Webhook URL (Optional)
+                  Make.com / Zapier / n8n Webhook URL (Optional)
                 </label>
                 <input
                   type="url"
@@ -837,13 +1021,13 @@ export default function SocialBroadcastHub({
                   onClick={() => setIsConfigModalOpen(false)}
                   className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
                 >
-                  Cancel
+                  Close
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
                 >
-                  Save Broadcast Pipeline
+                  Save Webhook
                 </button>
               </div>
             </form>

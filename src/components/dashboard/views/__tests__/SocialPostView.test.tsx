@@ -69,7 +69,7 @@ describe('SocialPostView Suite', () => {
     });
 
     expect(container.textContent).toContain('On Social Media');
-    expect(container.textContent).toContain('Connected Social Accounts');
+    expect(container.textContent).toContain('Choose Broadcast Destinations');
     expect(container.textContent).toContain('LinkedIn');
     expect(container.textContent).toContain('X (Twitter)');
     expect(container.textContent).toContain('Sarah Connor');
