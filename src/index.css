@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --surface: #ffffff;
+  --foreground: #0f172a;
+}
+
+.dark, [data-theme="dark"] {
+  --surface: #0d0f17;
+  --foreground: #f8fafc;
+}
+
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;

@@ -5,7 +5,6 @@ import {
   Globe,
   Crown,
   ArrowRight,
-  ChevronDown,
   Loader2,
   CheckCircle2,
   CreditCard,
@@ -17,6 +16,7 @@ import {
 } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { useAuth } from '../context/AuthContext';
+import { MotionAccordion } from '../components/MotionAccordion';
 
 declare global {
   interface Window {
@@ -152,7 +152,6 @@ export function PricingPage() {
   const [currency, setCurrency] = useState<Currency>('INR');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('annual');
   const [loadingPlan, setLoadingPlan] = useState<PlanId | null>(null);
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [checkoutBanner, setCheckoutBanner] = useState<{
     type: 'success' | 'error';
     message: string;
@@ -818,35 +817,14 @@ export function PricingPage() {
           Frequently Asked Questions
         </h2>
 
-        <div className="space-y-3">
-          {FAQS.map((item, idx) => {
-            const isOpen = openFaqIndex === idx;
-            return (
-              <div
-                key={idx}
-                className="rounded-2xl bg-[#0D0F17] border border-white/10 overflow-hidden"
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 font-semibold text-sm text-white hover:bg-white/[0.02] transition-colors cursor-pointer"
-                >
-                  <span>{item.q}</span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${
-                      isOpen ? 'rotate-180 text-purple-400' : ''
-                    }`}
-                  />
-                </button>
-                {isOpen && (
-                  <div className="px-6 pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-3">
-                    {item.a}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <MotionAccordion
+          items={FAQS.map((item) => ({
+            question: item.q,
+            answer: item.a,
+          }))}
+          className="dark"
+          itemClassName="bg-[#0D0F17] text-white border border-white/10 hover:border-purple-500/30 transition-colors shadow-xs"
+        />
       </section>
 
       {/* ================= FOOTER ================= */}

@@ -60,6 +60,8 @@ export default {
           'tertiary-fixed': '#ffddb8',
           'tertiary-container': '#885500',
         },
+        surface: 'var(--surface, #ffffff)',
+        foreground: 'var(--foreground, #0f172a)',
       },
       fontFamily: {
         sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', 'Inter', 'system-ui', 'sans-serif'],
@@ -76,6 +78,7 @@ export default {
         'apple-badge': '0.035em',
       },
       boxShadow: {
+        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         'glow': '0 0 35px -5px rgba(79, 70, 229, 0.35)',
         'glow-sm': '0 0 20px -3px rgba(79, 70, 229, 0.25)',
         'glow-emerald': '0 0 25px -5px rgba(16, 185, 129, 0.3)',

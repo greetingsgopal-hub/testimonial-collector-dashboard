@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ArrowRight, 
-  ChevronDown, 
   Check, 
   Clock,
   X as XIcon, 
@@ -20,6 +19,7 @@ import { analytics } from '../lib/analytics';
 import { INITIAL_REVIEWS } from '../lib/seedData';
 import { FloatingReviewDrawer } from '../components/widgets/FloatingReviewDrawer';
 import { SocialProofToast } from '../components/widgets/SocialProofToast';
+import { MotionAccordion } from '../components/MotionAccordion';
 
 const FAQ_ITEMS = [
   {
@@ -68,7 +68,6 @@ export const LandingPage: React.FC = () => {
   });
 
   const { user } = useAuth();
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [activeShareTab, setActiveShareTab] = useState<'widgets' | 'walls' | 'popups' | 'images'>('widgets');
   const [interactiveWidgetTab, setInteractiveWidgetTab] = useState<'wall' | 'ticker' | 'badge' | 'card'>('wall');
   const [showHeartTab, setShowHeartTab] = useState(false);
@@ -96,10 +95,6 @@ export const LandingPage: React.FC = () => {
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const toggleFaq = (idx: number) => {
-    setOpenFaqIndex(openFaqIndex === idx ? null : idx);
-  };
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -1248,37 +1243,13 @@ export const LandingPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="space-y-3">
-          {FAQ_ITEMS.map((item, idx) => {
-            const isOpen = openFaqIndex === idx;
-            return (
-              <div
-                key={idx}
-                className="bg-white rounded-2xl overflow-hidden transition-all shadow-xs border border-gray-200"
-              >
-                <button
-                  onClick={() => toggleFaq(idx)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-gray-50/80 transition-colors cursor-pointer"
-                  aria-expanded={isOpen}
-                >
-                  <span className="text-sm sm:text-base font-semibold text-gray-900">
-                    {item.q}
-                  </span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-gray-500 shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'transform rotate-180 text-[#6701e6]' : ''
-                    }`}
-                  />
-                </button>
-                {isOpen && (
-                  <div className="px-6 pb-4 pt-1 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-gray-100 bg-gray-50/50">
-                    {item.a}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <MotionAccordion
+          items={FAQ_ITEMS.map((item) => ({
+            question: item.q,
+            answer: item.a,
+          }))}
+          itemClassName="bg-white border border-gray-200/90 hover:border-brand-500/30 transition-colors shadow-xs"
+        />
       </section>
 
       {/* ── 12. Closing Hero CTA Block (Senja Signature Purple Block) ── */}
