@@ -1,5 +1,5 @@
 import { WorkerEnv } from '../types';
-import { saveDocument } from '../lib/firestoreAdmin';
+import { saveDocument, getDocument, queryUserDocuments } from '../lib/firestoreAdmin';
 
 export interface RazorpayEnv {
   RAZORPAY_KEY_ID?: string;
@@ -221,25 +221,45 @@ export async function handleRazorpayVerifyPayment(
     const targetPlan = planId === 'lifetime' ? 'lifetime' : planId === 'agency' ? 'agency' : 'pro';
 
     // Signature is valid! Update user's workspace plan and ledger in Firestore
-    if (userId) {
+    const targetWorkspaceId = body.workspaceId || body.workspace_id;
+    if (userId || targetWorkspaceId) {
       try {
-        await saveDocument(
-          'workspaces',
-          userId,
-          {
-            plan: targetPlan,
-            updated_at: new Date().toISOString(),
-          },
-          undefined,
-          env as any
-        );
+        let wsId = targetWorkspaceId;
+        if (!wsId && userId) {
+          // Check if userId is already a direct workspace document ID
+          const directWs = await getDocument('workspaces', userId, undefined, env as any);
+          if (directWs) {
+            wsId = userId;
+          } else {
+            // Query by ownerId
+            const userWsList = await queryUserDocuments('workspaces', userId, undefined, env as any);
+            if (userWsList && userWsList.length > 0) {
+              wsId = userWsList[0].id;
+            }
+          }
+        }
+
+        if (wsId) {
+          await saveDocument(
+            'workspaces',
+            wsId,
+            {
+              plan: targetPlan,
+              subscriptionStatus: 'active',
+              updatedAt: new Date().toISOString(),
+            },
+            undefined,
+            env as any
+          );
+        }
 
         const paymentDocId = `pay_${razorpay_payment_id || Date.now()}`;
         await saveDocument(
           'payments',
           paymentDocId,
           {
-            userId,
+            userId: userId || wsId,
+            workspaceId: wsId,
             planId: targetPlan,
             payment_id: razorpay_payment_id,
             order_id: razorpay_order_id,

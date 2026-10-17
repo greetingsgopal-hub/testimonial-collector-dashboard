@@ -157,10 +157,10 @@ export const OnboardingPage: React.FC = () => {
                   name: domainName ? domainName.split('.')[0] : (firstName ? `${firstName}'s Project` : project.name),
                   websiteUrl: websiteUrl.trim(),
                 }),
-                new Promise((resolve) => setTimeout(resolve, 350)),
+                new Promise((resolve) => setTimeout(resolve, 5000)),
               ]);
             } catch (err) {
-              console.warn('[Onboarding] Non-blocking project update error:', err);
+              console.warn('[Onboarding] Project update error:', err);
             }
           }
           await new Promise((r) => setTimeout(r, 120));
