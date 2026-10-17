@@ -124,6 +124,20 @@ export async function handleSocialPublish(request: Request, env: WorkerEnv): Pro
       );
     }
 
+    // Server-Side Suspension Gating: Prevent suspended workspaces from publishing
+    if (review.workspaceId) {
+      const workspace = await getDocument('workspaces', String(review.workspaceId), idToken, env);
+      if (workspace && workspace.status === 'suspended') {
+        return new Response(
+          JSON.stringify({ error: 'Forbidden: Account or workspace is suspended.' }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+    }
+
     // 2. Fetch User's Social Connection
     const connectionId = `${user.uid}_${cleanPlatform}`;
     const connection = await getDocument('social_connections', connectionId, idToken, env);

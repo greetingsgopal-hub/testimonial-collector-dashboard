@@ -50,6 +50,13 @@ import {
   handleAdminManageWorkspace,
   handleAdminGetTestimonials,
   handleAdminModerateTestimonial,
+  handleAdminGetOverview,
+  handleAdminGetUsers,
+  handleAdminGetUsage,
+  handleAdminGetHealth,
+  handleAdminGetEvents,
+  handleAdminSuspendUser,
+  handleAdminReactivateUser,
 } from './handlers/admin';
 
 export default {
@@ -106,6 +113,21 @@ export default {
       const endpoint = pathname.replace(/^\/api\//, '').replace(/^\//, '').split('?')[0].replace(/\/$/, '');
 
       // Superadmin Platform Console Endpoints
+      if (endpoint === 'admin/overview') {
+        return await handleAdminGetOverview(request, env);
+      }
+      if (endpoint === 'admin/users') {
+        return await handleAdminGetUsers(request, env);
+      }
+      if (endpoint === 'admin/usage') {
+        return await handleAdminGetUsage(request, env);
+      }
+      if (endpoint === 'admin/health') {
+        return await handleAdminGetHealth(request, env);
+      }
+      if (endpoint === 'admin/events') {
+        return await handleAdminGetEvents(request, env);
+      }
       if (endpoint === 'admin/workspaces') {
         return await handleAdminGetWorkspaces(request, env);
       }
@@ -116,6 +138,14 @@ export default {
       const adminManageMatch = endpoint.match(/^admin\/workspaces\/([^/]+)\/manage$/);
       if (adminManageMatch) {
         return await handleAdminManageWorkspace(request, env, decodeURIComponent(adminManageMatch[1]));
+      }
+      const adminSuspendMatch = endpoint.match(/^admin\/(?:workspaces|users)\/([^/]+)\/suspend$/);
+      if (adminSuspendMatch) {
+        return await handleAdminSuspendUser(request, env, decodeURIComponent(adminSuspendMatch[1]));
+      }
+      const adminReactivateMatch = endpoint.match(/^admin\/(?:workspaces|users)\/([^/]+)\/reactivate$/);
+      if (adminReactivateMatch) {
+        return await handleAdminReactivateUser(request, env, decodeURIComponent(adminReactivateMatch[1]));
       }
       if (endpoint === 'admin/testimonials') {
         return await handleAdminGetTestimonials(request, env);

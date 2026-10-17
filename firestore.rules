@@ -37,12 +37,14 @@ service cloud.firestore {
                     !('razorpayOrderId' in request.resource.data);
       allow update: if isOwner(resource.data.ownerId) &&
                     isOwnerUnchanged() &&
+                    (!('status' in resource.data) || resource.data.status != 'suspended') &&
                     !request.resource.data.diff(resource.data).affectedKeys().hasAny([
                       'plan', 'subscriptionStatus', 'billingCycle',
                       'stripeCustomerId', 'stripeSubscriptionId',
                       'razorpayCustomerId', 'razorpaySubscriptionId',
                       'razorpayPaymentId', 'razorpayOrderId',
-                      'planExpiresAt', 'currentPeriodEnd'
+                      'planExpiresAt', 'currentPeriodEnd',
+                      'status', 'suspendedAt', 'suspendedBy', 'suspensionReason'
                     ]);
       allow delete: if isOwner(resource.data.ownerId);
     }
@@ -55,6 +57,12 @@ service cloud.firestore {
     // Stripe webhook idempotency ledger — Worker-only (service account bypasses rules).
     // Explicit deny: clients must never read or write processed-event markers.
     match /stripe_events/{eventId} {
+      allow read, write: if false;
+    }
+
+    // Admin audit logs ledger — Worker-only (service account bypasses rules).
+    // Explicit deny: clients must never read or write platform audit entries.
+    match /admin_audit_logs/{logId} {
       allow read, write: if false;
     }
 

@@ -80,6 +80,27 @@ describe('C5: Firestore rules — subscription state protection', () => {
     expect(block).toMatch(/'razorpayPaymentId'/);
     expect(block).toMatch(/'razorpayOrderId'/);
   });
+
+  it('locks workspace status and suspension metadata against client updates', () => {
+    const block = workspaceBlock();
+    expect(block).toMatch(/'status'/);
+    expect(block).toMatch(/'suspendedAt'/);
+    expect(block).toMatch(/'suspendedBy'/);
+    expect(block).toMatch(/'suspensionReason'/);
+  });
+
+  it('prevents suspended workspaces from mutating workspace documents', () => {
+    const block = workspaceBlock();
+    expect(block).toMatch(/resource\.data\.status != 'suspended'/);
+  });
+});
+
+describe('Superadmin: Firestore rules — admin_audit_logs ledger protection', () => {
+  it('has an explicit deny rule for admin_audit_logs', () => {
+    const m = rules.match(/match \/admin_audit_logs\/\{logId\} \{[\s\S]*?\n    \}/);
+    expect(m, 'admin_audit_logs match block must exist in firestore.rules').not.toBeNull();
+    expect(m![0]).toMatch(/allow read, write: if false/);
+  });
 });
 
 describe('Razorpay: Firestore rules — razorpay_events ledger protection', () => {

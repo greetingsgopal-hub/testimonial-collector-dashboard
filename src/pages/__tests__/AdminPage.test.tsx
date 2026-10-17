@@ -163,6 +163,73 @@ describe('Superadmin Access & AdminPage', () => {
             new Response(JSON.stringify({ workspaces: mockWorkspaces }), { status: 200 })
           );
         }
+        if (url === '/api/admin/overview') {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                totalWorkspaces: 3,
+                paidWorkspaces: 1,
+                revenue: { formatted: '₹2,499.00', raw: 2499 },
+                signups7d: 1,
+                signups30d: 3,
+                failedPayments: 0,
+                recentSignups: [],
+              }),
+              { status: 200 }
+            )
+          );
+        }
+        if (url === '/api/admin/usage') {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                usage: {
+                  totalReviews: 19,
+                  approvedReviews: 18,
+                  pendingReviews: 1,
+                  flaggedReviews: 0,
+                  averageRating: 4.9,
+                  ratingsBreakdown: { 5: 17, 4: 2 },
+                },
+              }),
+              { status: 200 }
+            )
+          );
+        }
+        if (url === '/api/admin/health') {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                status: 'operational',
+                runtime: 'Cloudflare Workers (workerd)',
+                database: { provider: 'Google Cloud Firestore', configured: true },
+                gateways: { razorpay: { status: 'active' } },
+              }),
+              { status: 200 }
+            )
+          );
+        }
+        if (url === '/api/admin/events') {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                events: [
+                  {
+                    id: 'pay_live_001',
+                    type: 'payment',
+                    action: 'Payment Paid',
+                    actor: 'alpha@example.com',
+                    target: 'Alpha Brand',
+                    details: '₹2,499.00 - Pro Subscription',
+                    status: 'completed',
+                    timestamp: '2026-03-01T00:00:00Z',
+                  },
+                ],
+              }),
+              { status: 200 }
+            )
+          );
+        }
         if (url === '/api/admin/testimonials') {
           return Promise.resolve(
             new Response(JSON.stringify({ reviews: [] }), { status: 200 })
@@ -172,6 +239,14 @@ describe('Superadmin Access & AdminPage', () => {
           return Promise.resolve(
             new Response(
               JSON.stringify({ success: true, workspaceId: 'ws_alpha', plan: 'pro' }),
+              { status: 200 }
+            )
+          );
+        }
+        if (url.includes('/api/admin/workspaces/ws_alpha/suspend')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({ success: true, workspaceId: 'ws_alpha', status: 'suspended' }),
               { status: 200 }
             )
           );
@@ -336,6 +411,76 @@ describe('Superadmin Access & AdminPage', () => {
       expect(container.textContent).toContain('Edge Worker');
       expect(container.textContent).toContain('Database Cluster');
       expect(container.textContent).toContain('Razorpay Webhooks');
+    });
+
+    it('switches to Product Usage tab and renders review metrics', async () => {
+      await act(async () => {
+        root.render(
+          <MemoryRouter>
+            <AdminPage />
+          </MemoryRouter>
+        );
+      });
+
+      const usageTabBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+        b.textContent?.includes('Product Usage')
+      );
+      expect(usageTabBtn).toBeTruthy();
+
+      await act(async () => {
+        usageTabBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+
+      expect(container.textContent).toContain('Total Reviews');
+      expect(container.textContent).toContain('19');
+      expect(container.textContent).toContain('Approved Reviews');
+      expect(container.textContent).toContain('18');
+      expect(container.textContent).toContain('Rating Distribution');
+    });
+
+    it('opens suspend modal and submits suspension request', async () => {
+      await act(async () => {
+        root.render(
+          <MemoryRouter>
+            <AdminPage />
+          </MemoryRouter>
+        );
+      });
+
+      const workspacesTabBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+        b.textContent?.includes('Workspaces')
+      );
+      await act(async () => {
+        workspacesTabBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+
+      // Find Suspend button
+      const suspendBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+        b.textContent === 'Suspend'
+      );
+      expect(suspendBtn).toBeTruthy();
+
+      await act(async () => {
+        suspendBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+
+      // Modal should appear
+      expect(container.textContent).toContain('Suspend Workspace');
+      expect(container.textContent).toContain('Reason for Suspension');
+
+      const confirmBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+        b.textContent?.includes('Confirm Suspension')
+      );
+      expect(confirmBtn).toBeTruthy();
+
+      await act(async () => {
+        confirmBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/suspend'),
+        expect.objectContaining({ method: 'POST' })
+      );
     });
   });
 });
