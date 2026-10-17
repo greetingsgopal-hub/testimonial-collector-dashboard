@@ -208,7 +208,7 @@ export default function ResilientAdminDashboard() {
           <div>
             <div className="flex items-center gap-3">
               <a
-                href="/"
+                href="/dashboard"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />

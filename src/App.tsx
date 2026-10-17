@@ -63,6 +63,8 @@ function AnalyticsRouteTracker() {
   return null;
 }
 
+import ScrollToTop from './components/ScrollToTop';
+
 export function App() {
   useEffect(() => {
     initAnalytics();
@@ -71,6 +73,7 @@ export function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <AnalyticsRouteTracker />
         <Suspense fallback={<RouteLoadingFallback />}>
           <Routes>

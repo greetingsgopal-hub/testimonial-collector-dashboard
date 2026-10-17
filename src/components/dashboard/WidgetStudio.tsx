@@ -624,9 +624,8 @@ export const WidgetStudio: React.FC<WidgetStudioProps> = ({ reviews, onOpenProof
               <span>Primary Tool · Instant Social Proof Capture</span>
             </div>
             <a
-              href="https://github.com/greetingsgopal-hub/testimonial-collector-dashboard/tree/main/extension"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/downloads/pandapraise-chrome-extension.zip"
+              download="pandapraise-chrome-extension.zip"
               className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-950 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 shrink-0"
             >
               <span>Get Extension →</span>

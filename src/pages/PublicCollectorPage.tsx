@@ -16,11 +16,115 @@ import {
   CheckCircle2,
   Lock,
   Sparkles,
+  Play,
+  Square as StopIcon,
+  UploadCloud,
 } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
 import { cleanBrandOrProductName, deduplicateRepeatedString, sanitizeText, validateReviewInput } from '../lib/security';
 import { CollectorLang } from '../lib/collectorI18n';
+
+const COPY_TEXT = {
+  en: {
+    verifiedSpace: 'Verified Review Space',
+    verifiedShort: 'Verified',
+    trustNotice: 'Takes less than 30 seconds · No login required',
+    encrypted: 'Encrypted',
+    heroBadge: 'Share Your Experience',
+    heroQuestion: (b: string) => `How was your experience with ${b}?`,
+    heroSubtitle: 'Your authentic story inspires our team and guides future members to make confident decisions.',
+    overallSatisfaction: 'OVERALL SATISFACTION',
+    writtenReview: 'Written Review',
+    video: 'Video',
+    videoPerk: '+2x Perk',
+    yourReview: 'Your Review',
+    charLimit: '/ 600',
+    chip1: 'What problem did it solve?',
+    chip2: 'Favorite feature?',
+    contentPlaceholder: (b: string) => `What did you love most? Share your authentic thoughts, results, or why you'd recommend ${b}...`,
+    videoSectionTitle: 'Video Testimonial (+2x Perk)',
+    videoRecordTab: 'Record Camera',
+    videoUploadTab: 'Upload Video',
+    videoLinkTab: 'Paste Link',
+    videoLinkPlaceholder: 'https://www.loom.com/share/... or YouTube link',
+    startRecordBtn: 'Start Recording',
+    stopRecordBtn: 'Stop & Save Video',
+    retakeBtn: 'Record Again',
+    uploadVideoBtn: 'Select Video File (MP4, WebM, MOV)',
+    aboutYou: 'About You',
+    verifiedBadge: 'Verified Badge',
+    fullName: 'Full Name',
+    namePlaceholder: 'e.g. Alex Rivera',
+    removePhoto: '✕ Remove photo',
+    blankAvatarSet: '✓ Blank avatar set',
+    keepAvatarBlank: 'Keep avatar blank',
+    roleLabel: 'Role / Company',
+    optional: '(Optional)',
+    rolePlaceholder: 'e.g. Product Lead @ Acme Corp',
+    emailLabel: 'Email Address',
+    emailPrivate: '(Kept private)',
+    emailPlaceholder: 'alex@acme.com',
+    livePreview: 'Live Preview',
+    livePreviewPlaceholder: 'Your feedback and review will appear here in real-time as you type above...',
+    today: 'Today',
+    consentPrefix: 'I give',
+    consentSuffix: 'permission to showcase this review on their website and marketing materials.',
+    submitBtn: 'Submit Testimonial →',
+    submittingBtn: 'Submitting feedback...',
+    poweredBy: 'Powered by',
+    compliance: 'SOC2 & GDPR Compliant',
+  },
+  hi: {
+    verifiedSpace: 'Verified Review Space',
+    verifiedShort: 'Verified',
+    trustNotice: 'Takes less than 30 seconds · No login required (30s lagenge · Koi login zaroori nahi)',
+    encrypted: 'Surakshit (Encrypted)',
+    heroBadge: 'Apna Anubhav Share Karein',
+    heroQuestion: (b: string) => `${b} ke sath aapka anubhav kaisa raha?`,
+    heroSubtitle: 'Aapka imaandar review humein behtar banata hai aur naye customers ko sahi decision lene mein madad karta hai.',
+    overallSatisfaction: 'Aapki Overall Rating',
+    writtenReview: 'Likh kar Review Dein',
+    video: 'Video Review',
+    videoPerk: '+2x Perk',
+    yourReview: 'Aapka Review',
+    charLimit: '/ 600',
+    chip1: 'Kaun si samasya solve hui?',
+    chip2: 'Sabse pasandida feature?',
+    contentPlaceholder: (b: string) => `Aapko sabse zyada kya pasand aaya? Apne results share karein ya batayein ki aap ${b} kyu recommend karenge...`,
+    videoSectionTitle: 'Video Testimonial (+2x Perk)',
+    videoRecordTab: 'Camera se Record Karein',
+    videoUploadTab: 'Video File Upload Karein',
+    videoLinkTab: 'Link Dalein (Loom / YouTube)',
+    videoLinkPlaceholder: 'https://www.loom.com/share/... ya YouTube link',
+    startRecordBtn: 'Recording Shuru Karein',
+    stopRecordBtn: 'Rok Kar Save Karein',
+    retakeBtn: 'Dobara Record Karein',
+    uploadVideoBtn: 'Video File Chunein (MP4, WebM, MOV)',
+    aboutYou: 'Aapke Baare Mein',
+    verifiedBadge: 'Verified Badge',
+    fullName: 'Poora Naam',
+    namePlaceholder: 'e.g. Alex Rivera',
+    removePhoto: '✕ Photo hatayein',
+    blankAvatarSet: '✓ Blank avatar set',
+    keepAvatarBlank: 'Avatar khali rakhein',
+    roleLabel: 'Job Title / Company',
+    optional: '(Optional)',
+    rolePlaceholder: 'Jaise: Founder @ Sharma Tech',
+    emailLabel: 'Email Address',
+    emailPrivate: '(Gupt rakha jayega)',
+    emailPlaceholder: 'alex@acme.com',
+    livePreview: 'Live Preview',
+    livePreviewPlaceholder: 'Aapka review yahan real-time mein dikhega jaise-jaise aap form bharenge...',
+    today: 'Aaj',
+    consentPrefix: 'Main',
+    consentSuffix: 'ko yeh review unki website aur marketing materials par dikhane ki anumati deta/deti hoon.',
+    submitBtn: 'Review Bhejein 🚀',
+    submittingBtn: 'Review bheja ja raha hai...',
+    poweredBy: 'Powered by',
+    compliance: 'SOC2 & GDPR Compliant',
+  },
+};
 
 const INITIAL_FORM_STATE: ReviewInput = {
   name: '',
@@ -110,6 +214,128 @@ export const PublicCollectorPage: React.FC = () => {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string>('bypass-dev-test');
 
+  // Video recording & upload states
+  const [videoInputMode, setVideoInputMode] = useState<'camera' | 'file' | 'link'>('camera');
+  const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [recordingSeconds, setRecordingSeconds] = useState<number>(0);
+  const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoPreviewRef = useRef<HTMLVideoElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const timerIntervalRef = useRef<any>(null);
+  const videoFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const t = COPY_TEXT[lang === 'hi' ? 'hi' : 'en'];
+
+  useEffect(() => {
+    return () => {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((trk) => trk.stop());
+      }
+    };
+  }, []);
+
+  const startCameraRecording = async () => {
+    setCameraError(null);
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera access is not supported by your browser.');
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+        audio: true,
+      });
+      mediaStreamRef.current = stream;
+      if (videoPreviewRef.current) {
+        videoPreviewRef.current.srcObject = stream;
+        videoPreviewRef.current.play().catch(() => {});
+      }
+
+      recordedChunksRef.current = [];
+      let mimeType = 'video/webm';
+      if (typeof MediaRecorder !== 'undefined') {
+        if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+          mimeType = 'video/webm;codecs=vp9,opus';
+        } else if (MediaRecorder.isTypeSupported('video/webm')) {
+          mimeType = 'video/webm';
+        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+          mimeType = 'video/mp4';
+        }
+      }
+
+      const recorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, { type: mimeType });
+        const videoUrl = URL.createObjectURL(blob);
+        setRecordedVideoUrl(videoUrl);
+        setFormData((prev) => ({ ...prev, videoUrl }));
+        stream.getTracks().forEach((trk) => trk.stop());
+        mediaStreamRef.current = null;
+      };
+
+      recorder.start(1000);
+      setIsRecording(true);
+      setRecordingSeconds(0);
+      timerIntervalRef.current = setInterval(() => {
+        setRecordingSeconds((prev) => prev + 1);
+      }, 1000);
+    } catch (err: any) {
+      console.error('Camera recording error:', err);
+      setCameraError(
+        lang === 'hi'
+          ? 'Camera access nahi mila. Kripya browser permissions check karein ya video file upload karein.'
+          : 'Could not access camera/microphone. Please allow browser permissions or upload a video file.'
+      );
+    }
+  };
+
+  const stopCameraRecording = () => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+  };
+
+  const handleRetakeVideo = () => {
+    setRecordedVideoUrl(null);
+    setFormData((prev) => ({ ...prev, videoUrl: '' }));
+    startCameraRecording();
+  };
+
+  const handleVideoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 50 * 1024 * 1024) {
+      setValidationError(
+        lang === 'hi'
+          ? 'Video file 50MB se chhoti honi chahiye.'
+          : 'Video file size must be under 50MB.'
+      );
+      return;
+    }
+
+    const videoUrl = URL.createObjectURL(file);
+    setRecordedVideoUrl(videoUrl);
+    setFormData((prev) => ({ ...prev, videoUrl }));
+    setValidationError(null);
+  };
+
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
   useEffect(() => {
@@ -191,6 +417,22 @@ export const PublicCollectorPage: React.FC = () => {
   const activeRating = hoverRating !== null ? hoverRating : formData.rating || 5;
 
   const getRatingBadgeText = (rating: number) => {
+    if (lang === 'hi') {
+      switch (rating) {
+        case 5:
+          return '5.0 · Zabardast! Kamaal! 🔥';
+        case 4:
+          return '4.0 · Bahut Achha! ⭐';
+        case 3:
+          return '3.0 · Thik-thak 🙂';
+        case 2:
+          return '2.0 · Behtar ho sakta tha 💬';
+        case 1:
+          return '1.0 · Nirashajanak ⚠️';
+        default:
+          return `${rating.toFixed(1)} · Zabardast! 🔥`;
+      }
+    }
     switch (rating) {
       case 5:
         return '5.0 · Outstanding! 🔥';
@@ -262,9 +504,15 @@ export const PublicCollectorPage: React.FC = () => {
     e.preventDefault();
     setValidationError(null);
 
-    const validation = validateReviewInput(formData);
+    const validationPayload: ReviewInput = {
+      ...formData,
+      role: formData.role?.trim() || 'Verified Customer',
+      content: formData.content.trim() || (submissionMode === 'video' ? 'Verified video testimonial.' : ''),
+      type: submissionMode,
+    };
+    const validation = validateReviewInput(validationPayload);
     if (!validation.valid) {
-      setValidationError(validation.error || 'Please fill in all required fields.');
+      setValidationError(validation.error || (lang === 'hi' ? 'Kripya zaroori fields bharein.' : 'Please fill in all required fields.'));
       if (typeof window !== 'undefined') {
         setTimeout(() => {
           const errEl = document.getElementById('collector-error-banner');
@@ -295,15 +543,19 @@ export const PublicCollectorPage: React.FC = () => {
         ])
       );
 
+      const defaultVideoNote = 'Verified video testimonial.';
+      const finalContent = formData.content.trim() || (submissionMode === 'video' ? defaultVideoNote : '');
+
       const sanitizedData: ReviewInput = {
         ...formData,
         type: submissionMode,
         name: sanitizeText(formData.name, 100),
         email: formData.email ? formData.email.trim().toLowerCase().slice(0, 150) : '',
-        role: sanitizeText(formData.role, 100),
+        role: sanitizeText(formData.role?.trim() || 'Verified Customer', 100),
         company: sanitizeText(formData.company, 100),
         title: sanitizeText(formData.title || '', 150),
-        content: sanitizeText(formData.content, 2500),
+        content: sanitizeText(finalContent, 2500),
+        videoUrl: formData.videoUrl || undefined,
         tags: combinedTags,
         consent: true,
       };
@@ -522,8 +774,8 @@ export const PublicCollectorPage: React.FC = () => {
               </span>
               <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/70 rounded-full px-2.5 py-0.5 shrink-0">
                 <Check className="h-3 w-3 text-emerald-600 stroke-[3]" />
-                <span className="hidden sm:inline">Verified Review Space</span>
-                <span className="sm:hidden">Verified</span>
+                <span className="hidden sm:inline">{t.verifiedSpace}</span>
+                <span className="sm:hidden">{t.verifiedShort}</span>
               </span>
             </div>
           </div>
@@ -565,13 +817,13 @@ export const PublicCollectorPage: React.FC = () => {
           {/* Soft green pill */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/70 text-xs font-medium text-emerald-800">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-            <span>Takes less than 30 seconds · No login required</span>
+            <span>{t.trustNotice}</span>
           </div>
 
           {/* Soft blue pill */}
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 border border-sky-200/70 text-xs font-semibold text-sky-800 shrink-0">
             <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />
-            <span>Encrypted</span>
+            <span>{t.encrypted}</span>
           </div>
         </div>
 
@@ -579,16 +831,15 @@ export const PublicCollectorPage: React.FC = () => {
         <section className="text-center space-y-2 pt-1" data-purpose="prompt-heading">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-3 py-1 text-xs font-bold text-emerald-700 shadow-2xs">
             <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Share Your Experience</span>
+            <span>{t.heroBadge}</span>
           </div>
 
           <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 leading-snug px-1 text-balance">
-            How was your experience with{' '}
-            <span className="text-emerald-700 font-black">{displayBrand}</span>?
+            {t.heroQuestion(displayBrand)}
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
-            Your authentic story inspires our team and guides future members to make confident decisions.
+            {t.heroSubtitle}
           </p>
         </section>
 
@@ -601,7 +852,7 @@ export const PublicCollectorPage: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                OVERALL SATISFACTION
+                {t.overallSatisfaction}
               </span>
               <span
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200/80 text-xs font-bold text-amber-900 shadow-2xs"
@@ -639,7 +890,7 @@ export const PublicCollectorPage: React.FC = () => {
             </div>
           </div>
 
-          {/* ── 5. Review Type Toggle & 6. Written Review Section ── */}
+          {/* ── 5. Review Type Toggle & 6. Review Input Section ── */}
           <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-4">
             {/* 5. Review Type Toggle */}
             <div
@@ -657,7 +908,7 @@ export const PublicCollectorPage: React.FC = () => {
                 }`}
               >
                 <FileText className="w-4 h-4 text-emerald-600" />
-                <span>Written Review</span>
+                <span>{t.writtenReview}</span>
               </button>
               <button
                 type="button"
@@ -670,21 +921,211 @@ export const PublicCollectorPage: React.FC = () => {
                 }`}
               >
                 <Video className="w-4 h-4 text-emerald-600" />
-                <span>Video</span>
+                <span>{t.video}</span>
                 <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                  +2x Perk
+                  {t.videoPerk}
                 </span>
               </button>
             </div>
+
+            {/* If in Video mode, show the rich Video Testimonial Studio */}
+            {submissionMode === 'video' && (
+              <div className="space-y-3 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 animate-fade-in">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                    <Video className="w-4 h-4 text-emerald-600" />
+                    <span>{t.videoSectionTitle}</span>
+                  </span>
+                  <div className="flex items-center gap-1 bg-white/80 p-0.5 rounded-lg border border-emerald-200/60 text-[10px] font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => setVideoInputMode('camera')}
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                        videoInputMode === 'camera'
+                          ? 'bg-emerald-600 text-white shadow-2xs font-bold'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {t.videoRecordTab}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVideoInputMode('file')}
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                        videoInputMode === 'file'
+                          ? 'bg-emerald-600 text-white shadow-2xs font-bold'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {t.videoUploadTab}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVideoInputMode('link')}
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                        videoInputMode === 'link'
+                          ? 'bg-emerald-600 text-white shadow-2xs font-bold'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {t.videoLinkTab}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sub-mode 1: Live Camera Recording */}
+                {videoInputMode === 'camera' && (
+                  <div className="space-y-3 bg-white p-3.5 rounded-xl border border-emerald-200/80 shadow-2xs">
+                    {recordedVideoUrl ? (
+                      <div className="space-y-2.5">
+                        <video
+                          src={recordedVideoUrl}
+                          controls
+                          className="w-full rounded-xl bg-black max-h-56 shadow-2xs"
+                        />
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>{lang === 'hi' ? 'Video record ho gaya (+2x Perk)' : 'Video recorded (+2x Perk applied)'}</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleRetakeVideo}
+                            className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer"
+                          >
+                            {t.retakeBtn}
+                          </button>
+                        </div>
+                      </div>
+                    ) : isRecording ? (
+                      <div className="space-y-2.5">
+                        <div className="relative rounded-xl overflow-hidden bg-black max-h-56">
+                          <video
+                            ref={videoPreviewRef}
+                            autoPlay
+                            playsInline
+                            muted
+                            className="w-full h-full object-cover max-h-56"
+                          />
+                          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-600 text-white text-[10px] font-bold shadow-md">
+                            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                            <span>{lang === 'hi' ? 'Recording' : 'Recording'} 00:{recordingSeconds < 10 ? `0${recordingSeconds}` : recordingSeconds}</span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={stopCameraRecording}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
+                        >
+                          <StopIcon className="w-4 h-4 fill-white" />
+                          <span>{t.stopRecordBtn}</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5 text-center py-3">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                          <Camera className="w-6 h-6" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-slate-800">
+                            {lang === 'hi' ? 'Camera se 30-60 second ka video testimonial banayein' : 'Record a 30-60 second video testimonial directly on your device'}
+                          </p>
+                          <p className="text-[11px] text-slate-500">
+                            {lang === 'hi' ? 'Camera aur mic permission dekar recording shuru karein' : 'Click start to open your webcam or phone camera'}
+                          </p>
+                        </div>
+                        {cameraError && (
+                          <div className="p-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+                            {cameraError}
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={startCameraRecording}
+                          className="inline-flex items-center justify-center gap-2 py-2 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                        >
+                          <Play className="w-3.5 h-3.5 fill-white" />
+                          <span>{t.startRecordBtn}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Sub-mode 2: Video File Upload */}
+                {videoInputMode === 'file' && (
+                  <div className="space-y-2.5 bg-white p-3.5 rounded-xl border border-emerald-200/80 shadow-2xs">
+                    <input
+                      type="file"
+                      ref={videoFileInputRef}
+                      onChange={handleVideoFileUpload}
+                      accept="video/mp4,video/webm,video/quicktime"
+                      className="hidden"
+                    />
+                    {recordedVideoUrl ? (
+                      <div className="space-y-2.5">
+                        <video
+                          src={recordedVideoUrl}
+                          controls
+                          className="w-full rounded-xl bg-black max-h-56 shadow-2xs"
+                        />
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>{lang === 'hi' ? 'Video file judi hui hai' : 'Video file attached'}</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => videoFileInputRef.current?.click()}
+                            className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer"
+                          >
+                            {lang === 'hi' ? 'Doosri file chunein' : 'Choose different file'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => videoFileInputRef.current?.click()}
+                        className="border-2 border-dashed border-emerald-300 hover:border-emerald-500 rounded-xl p-6 text-center cursor-pointer transition-colors bg-emerald-50/30"
+                      >
+                        <UploadCloud className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
+                        <p className="text-xs font-bold text-slate-800">
+                          {t.uploadVideoBtn}
+                        </p>
+                        <p className="text-[11px] text-slate-500 mt-1">
+                          Max file size: 50MB
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Sub-mode 3: Video Link Paste */}
+                {videoInputMode === 'link' && (
+                  <div className="space-y-1.5 bg-white p-3.5 rounded-xl border border-emerald-200/80 shadow-2xs">
+                    <label className="text-xs font-bold text-slate-700">
+                      {lang === 'hi' ? 'Loom, YouTube ya Vimeo Link Dalein' : 'Paste Loom, YouTube or Vimeo Link'}
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.videoUrl || ''}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, videoUrl: e.target.value }))}
+                      placeholder={t.videoLinkPlaceholder}
+                      className="w-full rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 shadow-2xs"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* 6. Written Review Section */}
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-900" htmlFor="testimonial-input">
-                  Your Review <span className="text-emerald-600">*</span>
+                  {t.yourReview} <span className="text-emerald-600">*</span>
                 </label>
                 <span className="text-[11px] text-slate-400 font-mono" id="char-counter">
-                  {formData.content.length} / 600
+                  {formData.content.length} {t.charLimit}
                 </span>
               </div>
 
@@ -692,17 +1133,17 @@ export const PublicCollectorPage: React.FC = () => {
               <div className="flex flex-wrap items-center gap-2 pb-1">
                 <button
                   type="button"
-                  onClick={() => handleIdeaChipClick('What problem did it solve?')}
+                  onClick={() => handleIdeaChipClick(t.chip1)}
                   className="prompt-chip rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200/80 hover:border-emerald-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:text-emerald-800 transition-colors cursor-pointer"
                 >
-                  💡 What problem did it solve?
+                  💡 {t.chip1}
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleIdeaChipClick('Favorite feature?')}
+                  onClick={() => handleIdeaChipClick(t.chip2)}
                   className="prompt-chip rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200/80 hover:border-emerald-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:text-emerald-800 transition-colors cursor-pointer"
                 >
-                  ❤️ Favorite feature?
+                  ❤️ {t.chip2}
                 </button>
               </div>
 
@@ -712,37 +1153,20 @@ export const PublicCollectorPage: React.FC = () => {
                 rows={4}
                 value={formData.content}
                 onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
-                placeholder={`What did you love most? Share your authentic thoughts, results, or why you'd recommend ${displayBrand}...`}
+                placeholder={t.contentPlaceholder(displayBrand)}
                 className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 shadow-2xs transition-all resize-none leading-relaxed"
-                required
+                required={submissionMode === 'text'}
               />
             </div>
-
-            {/* Video recording input if in video mode */}
-            {submissionMode === 'video' && (
-              <div className="space-y-1.5 p-3 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 animate-fade-in">
-                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                  <Video className="w-4 h-4 text-emerald-600" />
-                  <span>Video Recording URL (Loom, YouTube, MP4)</span>
-                </label>
-                <input
-                  type="url"
-                  value={formData.videoUrl || ''}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, videoUrl: e.target.value }))}
-                  placeholder="https://www.loom.com/share/... or YouTube link"
-                  className="w-full rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 shadow-2xs"
-                />
-              </div>
-            )}
           </div>
 
           {/* ── 7. About You Section ── */}
           <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-900">About You</span>
+              <span className="text-xs font-bold text-slate-900">{t.aboutYou}</span>
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/70 text-[11px] font-bold text-emerald-700">
                 <Check className="h-3 w-3 text-emerald-600 stroke-[3]" />
-                <span>Verified Badge</span>
+                <span>{t.verifiedBadge}</span>
               </span>
             </div>
 
@@ -802,7 +1226,7 @@ export const PublicCollectorPage: React.FC = () => {
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-700" htmlFor="name-input">
-                    Full Name <span className="text-emerald-600">*</span>
+                    {t.fullName} <span className="text-emerald-600">*</span>
                   </label>
                   {formData.avatarUrl ? (
                     <button
@@ -810,7 +1234,7 @@ export const PublicCollectorPage: React.FC = () => {
                       onClick={handleRemoveAvatar}
                       className="text-[10px] text-rose-600 hover:text-rose-700 font-semibold cursor-pointer"
                     >
-                      ✕ Remove photo
+                      {t.removePhoto}
                     </button>
                   ) : (
                     <button
@@ -822,7 +1246,7 @@ export const PublicCollectorPage: React.FC = () => {
                           : 'text-slate-400 hover:text-slate-600 underline'
                       }`}
                     >
-                      {keepAvatarBlank ? '✓ Blank avatar set' : 'Keep avatar blank'}
+                      {keepAvatarBlank ? t.blankAvatarSet : t.keepAvatarBlank}
                     </button>
                   )}
                 </div>
@@ -831,7 +1255,7 @@ export const PublicCollectorPage: React.FC = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g. Alex Rivera"
+                  placeholder={t.namePlaceholder}
                   className="w-full rounded-xl border border-slate-200/80 bg-slate-50/60 px-3.5 py-2 text-xs text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 shadow-2xs"
                   required
                 />
@@ -841,14 +1265,14 @@ export const PublicCollectorPage: React.FC = () => {
             {/* Role / Company */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-700" htmlFor="role-input">
-                Role / Company <span className="text-slate-400 font-normal">(Optional)</span>
+                {t.roleLabel} <span className="text-slate-400 font-normal">{t.optional}</span>
               </label>
               <input
                 id="role-input"
                 type="text"
                 value={formData.role || ''}
                 onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
-                placeholder="e.g. Product Lead @ Acme Corp"
+                placeholder={t.rolePlaceholder}
                 className="w-full rounded-xl border border-slate-200/80 bg-slate-50/60 px-3.5 py-2 text-xs text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 shadow-2xs"
               />
             </div>
@@ -856,14 +1280,14 @@ export const PublicCollectorPage: React.FC = () => {
             {/* Email field */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-700" htmlFor="email-input">
-                Email Address <span className="text-slate-400 font-normal">(Kept private)</span>
+                {t.emailLabel} <span className="text-slate-400 font-normal">{t.emailPrivate}</span>
               </label>
               <input
                 id="email-input"
                 type="email"
                 value={formData.email || ''}
                 onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                placeholder="alex@acme.com"
+                placeholder={t.emailPlaceholder}
                 className="w-full rounded-xl border border-slate-200/80 bg-slate-50/60 px-3.5 py-2 text-xs text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 shadow-2xs"
               />
             </div>
@@ -878,12 +1302,12 @@ export const PublicCollectorPage: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[11px] font-bold text-slate-600 tracking-wider uppercase">
-                  Live Preview
+                  {t.livePreview}
                 </span>
               </div>
               <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 rounded-full px-2 py-0.5">
                 <Check className="h-3 w-3 stroke-[3]" />
-                <span>Verified Review</span>
+                <span>{t.verifiedShort} Review</span>
               </span>
             </div>
 
@@ -901,8 +1325,7 @@ export const PublicCollectorPage: React.FC = () => {
               </div>
 
               <p className="text-xs text-slate-700 leading-relaxed italic" id="preview-body">
-                "{formData.content?.trim() ||
-                  "Your feedback and review will appear here in real-time as you type above..."}"
+                "{formData.content?.trim() || t.livePreviewPlaceholder}"
               </p>
 
               <div className="flex items-center justify-between pt-2.5 border-t border-slate-200/60">
@@ -927,7 +1350,7 @@ export const PublicCollectorPage: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium">Today</span>
+                <span className="text-[10px] text-slate-400 font-medium">{t.today}</span>
               </div>
             </article>
           </div>
@@ -942,7 +1365,7 @@ export const PublicCollectorPage: React.FC = () => {
                 className="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500/20"
               />
               <span className="text-xs text-slate-500 leading-relaxed">
-                I give <span className="font-bold text-slate-800">{displayBrand}</span> permission to showcase this review on their website and marketing materials.
+                {t.consentPrefix} <span className="font-bold text-slate-800">{displayBrand}</span> {t.consentSuffix}
               </span>
             </label>
           </div>
@@ -985,21 +1408,19 @@ export const PublicCollectorPage: React.FC = () => {
               {isSubmitting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Submitting feedback...</span>
+                  <span>{t.submittingBtn}</span>
                 </>
               ) : (
-                <span>
-                  {lang === 'hi' ? 'Review Bhejein 🚀' : 'Submit Testimonial →'}
-                </span>
+                <span>{t.submitBtn}</span>
               )}
             </button>
 
             {/* Tiny footer text */}
             <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 font-medium">
-              <span>Powered by</span>
+              <span>{t.poweredBy}</span>
               <span className="font-bold text-slate-700">PandaPraise 🐾</span>
               <span>·</span>
-              <span>SOC2 &amp; GDPR Compliant</span>
+              <span>{t.compliance}</span>
             </div>
           </div>
         </form>

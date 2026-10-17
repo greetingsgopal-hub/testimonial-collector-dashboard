@@ -30,6 +30,18 @@ export const ReferralHub: React.FC<ReferralHubProps> = ({ workspace }) => {
 
 
 
+  const clicks = Number((workspace as any)?.referralClicks || 0);
+  const signups = Number((workspace as any)?.referralSignups || 0);
+  const freeMonths = Number((workspace as any)?.freeMonthsEarned || signups);
+  const savedAmount = freeMonths * 19;
+
+  const metrics = [
+    { label: 'Referral Clicks', value: `${clicks}`, icon: Share2, color: 'text-purple-600' },
+    { label: 'Signups', value: `${signups}`, icon: Users, color: 'text-indigo-600' },
+    { label: 'Free Months Earned', value: `${freeMonths} ${freeMonths === 1 ? 'Month' : 'Months'}`, icon: Award, color: 'text-amber-500' },
+    { label: 'Saved on Subscription', value: `$${savedAmount.toFixed(2)}`, icon: Sparkles, color: 'text-emerald-500' },
+  ];
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto font-sans">
       
@@ -78,12 +90,7 @@ export const ReferralHub: React.FC<ReferralHubProps> = ({ workspace }) => {
 
       {/* ── 2. Performance Metrics Row ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: 'Referral Clicks', value: '18', icon: Share2, color: 'text-purple-600' },
-          { label: 'Signups', value: '3', icon: Users, color: 'text-indigo-600' },
-          { label: 'Free Months Earned', value: '3 Months', icon: Award, color: 'text-amber-500' },
-          { label: 'Saved on Subscription', value: '$57.00', icon: Sparkles, color: 'text-emerald-500' },
-        ].map((item) => {
+        {metrics.map((item) => {
           const Icon = item.icon;
           return (
             <div

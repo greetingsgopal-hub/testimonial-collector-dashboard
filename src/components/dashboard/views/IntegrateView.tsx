@@ -12,6 +12,7 @@ import {
   Search,
   Zap,
   X,
+  Share2,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
@@ -19,6 +20,9 @@ import { socialClient, SocialStatusResponse } from '../../../lib/socialClient';
 import { ConnectSourceModal } from './ConnectSourceModal';
 import { WebhookConfigModal } from '../WebhookConfigModal';
 import { CmsEmbedModal } from '../CmsEmbedModal';
+import { SocialMediaBroadcastHub } from '../SocialMediaBroadcastHub';
+import { storage } from '../../../lib/storage';
+import { Review } from '../../../types';
 
 // Custom Brand Icons
 const LinkedInIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
@@ -140,6 +144,12 @@ export const IntegrateView: React.FC = () => {
   const [connectModalPlatform, setConnectModalPlatform] = useState<string>('facebook');
   const [showWebhookModal, setShowWebhookModal] = useState<boolean>(false);
   const [showCmsEmbedModal, setShowCmsEmbedModal] = useState<boolean>(false);
+  const [showBroadcastStudio, setShowBroadcastStudio] = useState<boolean>(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+
+  useEffect(() => {
+    storage.getReviews().then((r) => setReviews(r || [])).catch(() => {});
+  }, []);
 
   // Instagram Integration State
   const [isInstagramConnected, setIsInstagramConnected] = useState<boolean>(() => {
@@ -517,6 +527,15 @@ export const IntegrateView: React.FC = () => {
       icon: <Zap className="w-4 h-4 text-brand-600" />,
       description: 'Connect direct social accounts to publish testimonials and trigger post-checkout review emails.',
       items: [
+        {
+          id: 'social-broadcast-hub',
+          name: '1-Click Social Broadcast Studio',
+          icon: <Share2 className="w-6 h-6 text-purple-600" />,
+          description: '1-Click branded 1080×1080 card generator and pre-filled social distribution to LinkedIn, X (Twitter), WhatsApp & Facebook.',
+          badgeType: 'active',
+          badgeLabel: 'Zero API Setup',
+          isBroadcastStudio: true,
+        },
         {
           id: 'chrome-extension',
           name: 'PandaPraise 1-Click Clipper (Chrome Extension)',
@@ -1211,12 +1230,24 @@ export const IntegrateView: React.FC = () => {
                         </button>
                       )}
 
+                      {/* Social Broadcast Studio Action */}
+                      {(item as any).isBroadcastStudio && (
+                        <button
+                          type="button"
+                          id="launch-broadcast-studio-btn"
+                          onClick={() => setShowBroadcastStudio(true)}
+                          className="apple-touch w-full py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                          <span>Launch Broadcast Studio</span>
+                        </button>
+                      )}
+
                       {/* Chrome Extension Action */}
                       {item.id === 'chrome-extension' && (
                         <a
-                          href="https://github.com/greetingsgopal-hub/testimonial-collector-dashboard/tree/main/extension"
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href="/downloads/pandapraise-chrome-extension.zip"
+                          download="pandapraise-chrome-extension.zip"
                           className="apple-touch w-full py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                         >
                           <span>Get Extension</span>
@@ -1581,6 +1612,13 @@ export const IntegrateView: React.FC = () => {
         isOpen={showCmsEmbedModal}
         onClose={() => setShowCmsEmbedModal(false)}
         spaceSlug="feedback"
+      />
+
+      {/* 1-Click Social Broadcast Studio Modal */}
+      <SocialMediaBroadcastHub
+        isOpen={showBroadcastStudio}
+        onClose={() => setShowBroadcastStudio(false)}
+        reviews={reviews}
       />
     </div>
   );
