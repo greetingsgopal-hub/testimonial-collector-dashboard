@@ -628,6 +628,8 @@ export const DashboardPage = () => {
             <div className="max-w-5xl mx-auto font-sans">
               <SocialPostView
                 reviews={effectiveReviews}
+                workspaceId={impersonatedWorkspace?.id || workspace?.id || project?.id}
+                workspaceName={impersonatedWorkspace?.name || workspace?.name || project?.name}
                 onOpenAccountsModal={() => setShowAccountsModal(true)}
               />
             </div>

@@ -98,6 +98,6 @@ describe('SocialPostView Suite', () => {
 
     // Now button should indicate queued testimonials
     const updatedBtn = container.querySelector('[data-testid="publish-social-btn"]');
-    expect(updatedBtn?.textContent).toContain('Post 1 Testimonial to Social Media');
+    expect(updatedBtn?.textContent).toContain('1 Selected');
   });
 });
