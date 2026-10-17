@@ -19,8 +19,6 @@ import {
   Send,
   RefreshCw,
   Webhook,
-  CheckSquare,
-  Square,
   Star,
   Eye,
   PlusCircle,
@@ -412,21 +410,9 @@ export default function SocialBroadcastHub({
     );
   };
 
+  // Single-selection enforcement: user can only select 1 testimonial card at a time to broadcast
   const toggleProofSelection = (id: string) => {
-    setSelectedProofIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (
-      selectedProofIds.length === filteredTestimonials.length &&
-      filteredTestimonials.length > 0
-    ) {
-      setSelectedProofIds([]);
-    } else {
-      setSelectedProofIds(filteredTestimonials.map((t) => t.id));
-    }
+    setSelectedProofIds((prev) => (prev.includes(id) ? [] : [id]));
   };
 
   const handleSaveWebhook = async (e: React.FormEvent) => {
@@ -729,30 +715,9 @@ export default function SocialBroadcastHub({
         </div>
       </section>
 
-      {/* 3. STEP 2: SELECT TESTIMONIALS & CLICK BROADCAST */}
+      {/* 3. STEP 2: SELECT TESTIMONIAL & CLICK BROADCAST */}
       <section className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            onClick={handleSelectAll}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 cursor-pointer"
-          >
-            <input
-              type="checkbox"
-              className="sr-only"
-              checked={selectedProofIds.length === filteredTestimonials.length && filteredTestimonials.length > 0}
-              onChange={() => {}}
-              aria-label="Select all testimonials"
-            />
-            {selectedProofIds.length === filteredTestimonials.length &&
-            filteredTestimonials.length > 0 ? (
-              <CheckSquare className="w-4 h-4 text-purple-600" />
-            ) : (
-              <Square className="w-4 h-4 text-slate-400" />
-            )}
-            <span>Select All</span>
-          </button>
-
           <div className="inline-flex items-center p-1 rounded-xl bg-slate-100">
             <button
               type="button"
@@ -783,6 +748,9 @@ export default function SocialBroadcastHub({
               4+ Stars
             </button>
           </div>
+          <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+            • 1 testimonial per broadcast
+          </span>
         </div>
 
         {/* PRIMARY BROADCAST CTA */}
@@ -800,7 +768,7 @@ export default function SocialBroadcastHub({
           <Send className="w-3.5 h-3.5" />
           <span>
             {selectedProofIds.length > 0
-              ? `Broadcast ${selectedProofIds.length} Selected to ${selectedChannelsCount} ${
+              ? `Broadcast 1 Selected to ${selectedChannelsCount} ${
                   selectedChannelsCount === 1 ? 'Channel' : 'Channels'
                 } →`
               : 'Select Testimonials to Post'}
@@ -811,11 +779,18 @@ export default function SocialBroadcastHub({
       {/* 4. APPROVED TESTIMONIALS LIST OR ACTIONABLE EMPTY STATE */}
       <section className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-sm font-bold text-slate-900">
-            2. Select Approved Testimonials ({filteredTestimonials.length})
-          </h3>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              2. Select Approved Testimonial ({filteredTestimonials.length})
+            </h3>
+            <p className="text-xs text-slate-500">
+              Select 1 testimonial card to broadcast across your social channels.
+            </p>
+          </div>
           <span className="text-xs font-semibold text-purple-600">
-            {selectedProofIds.length} queued for broadcast
+            {selectedProofIds.length === 1
+              ? '1 selected for broadcast'
+              : 'Click a testimonial card to select'}
           </span>
         </div>
 
