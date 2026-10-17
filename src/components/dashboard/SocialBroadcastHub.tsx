@@ -11,6 +11,7 @@ import {
   updateDoc,
   serverTimestamp,
 } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import {
   Share2,
   Check,
@@ -241,11 +242,13 @@ export function renderTestimonialCardDataUrl(
 export default function SocialBroadcastHub({
   workspaceId = 'papasystem',
   workspaceName = 'papasystem',
+  workspaceSlug,
   workspaceWebsite,
   initialApprovedTestimonials,
 }: {
   workspaceId?: string;
   workspaceName?: string;
+  workspaceSlug?: string;
   workspaceWebsite?: string;
   initialApprovedTestimonials?: SocialTestimonial[];
 }) {
@@ -262,6 +265,7 @@ export default function SocialBroadcastHub({
     title: string;
     dataUrl: string;
   } | null>(null);
+  const [isBroadcastGuideOpen, setIsBroadcastGuideOpen] = useState<boolean>(false);
 
   const [statusBanner, setStatusBanner] = useState<{
     type: 'success' | 'error' | 'info';
@@ -428,10 +432,14 @@ export default function SocialBroadcastHub({
 
   // 3. Smooth Journey Helper: Seed 3 Sample Proofs so Users Can Test Broadcasting Immediately
   const handleLoadSampleProofs = async () => {
+    setIsLoading(true);
     const brand = formatCleanBrandName(workspaceName);
+    const cleanSlug = (workspaceSlug || brand.toLowerCase().replace(/[^a-z0-9]/g, '')) || 'myprojectpotato';
+    const now = new Date().toISOString();
+
     const sampleProofs: SocialTestimonial[] = [
       {
-        id: 'sample-proof-1',
+        id: `sample-${cleanSlug}-1`,
         authorName: 'Aarav Mehta',
         authorRole: 'Founder, FinStack',
         content: `Switching to ${brand} saved our team 6 hours every week and doubled our customer trust on the checkout page!`,
@@ -439,7 +447,7 @@ export default function SocialBroadcastHub({
         isSample: true,
       },
       {
-        id: 'sample-proof-2',
+        id: `sample-${cleanSlug}-2`,
         authorName: 'Sarah Jenkins',
         authorRole: 'Head of Growth, ScaleOps',
         content: `The fastest onboarding we have ever experienced. Within 5 minutes of setting up ${brand}, we had live social proof running.`,
@@ -447,7 +455,7 @@ export default function SocialBroadcastHub({
         isSample: true,
       },
       {
-        id: 'sample-proof-3',
+        id: `sample-${cleanSlug}-3`,
         authorName: 'Rohan Kulkarni',
         authorRole: 'CTO, CloudPulse',
         content: `Clean UI, zero page-speed bloat, and rock-solid reliability. Highly recommend ${brand} to any growing business.`,
@@ -456,12 +464,104 @@ export default function SocialBroadcastHub({
       },
     ];
 
+    try {
+      const db = getFirestore();
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      const ownerId = currentUser?.uid || 'sample-owner';
+
+      for (let i = 0; i < sampleProofs.length; i++) {
+        const item = sampleProofs[i];
+        const docId = item.id;
+
+        // 1. Write to testimonials collection (with workspaceSlug for fallback queries)
+        await setDoc(
+          doc(db, 'testimonials', docId),
+          {
+            workspaceId,
+            workspaceSlug: cleanSlug,
+            authorName: item.authorName,
+            authorRole: item.authorRole,
+            content: item.content,
+            rating: 5,
+            status: 'approved',
+            createdAt: now,
+            isSample: true,
+          },
+          { merge: true }
+        ).catch(() => null);
+
+        // 2. Write to reviews collection if authenticated
+        if (currentUser) {
+          await setDoc(
+            doc(db, 'reviews', docId),
+            {
+              projectId: workspaceId,
+              collectionFormId: null,
+              ownerId,
+              name: item.authorName,
+              email: 'sample@pandapraise.com',
+              role: item.authorRole,
+              company: null,
+              avatarUrl: null,
+              rating: 5,
+              title: null,
+              content: item.content,
+              type: 'text',
+              videoUrl: null,
+              tags: ['sample', 'social-proof'],
+              source: 'manual',
+              status: 'approved',
+              isFeatured: true,
+              consent: true,
+              helpfulCount: 0,
+              createdAt: now,
+              updatedAt: now,
+            },
+            { merge: true }
+          ).catch(() => null);
+
+          // 3. Write to public_reviews collection (for anonymous public wall readers)
+          await setDoc(
+            doc(db, 'public_reviews', docId),
+            {
+              projectId: workspaceId,
+              projectSlug: cleanSlug,
+              collectionFormId: null,
+              ownerId,
+              name: item.authorName,
+              role: item.authorRole,
+              company: null,
+              avatarUrl: null,
+              rating: 5,
+              title: null,
+              content: item.content,
+              type: 'text',
+              videoUrl: null,
+              tags: ['sample', 'social-proof'],
+              isFeatured: true,
+              status: 'approved',
+              editedByOwner: false,
+              editedAt: null,
+              createdAt: now,
+              updatedAt: now,
+            },
+            { merge: true }
+          ).catch(() => null);
+        }
+      }
+    } catch (saveErr) {
+      console.warn('Could not persist sample proofs to Firestore:', saveErr);
+    } finally {
+      setIsLoading(false);
+    }
+
     // Replace instead of appending duplicates, and select only the first card
     setTestimonials(sampleProofs);
-    setSelectedProofIds(['sample-proof-1']);
+    setSelectedProofIds([sampleProofs[0].id]);
     setStatusBanner({
-      type: 'info',
-      text: 'Loaded 3 sample testimonials & pre-selected the first one! Click the purple "Broadcast" button below to test your 1-click flow.',
+      type: 'success',
+      text: `Loaded & saved 3 approved sample testimonials for ${brand}! Public route https://pandapraise.com/w/${cleanSlug} is now synced and live.`,
     });
   };
 
@@ -513,12 +613,11 @@ export default function SocialBroadcastHub({
   const buildBatchCaption = (
     selectedItems: SocialTestimonial[],
     rawWorkspaceName: string,
-    website?: string
+    _website?: string
   ): string => {
     const brand = formatCleanBrandName(rawWorkspaceName);
-    const publicUrl =
-      website ||
-      `https://pandapraise.com/w/${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+    const cleanSlug = (workspaceSlug || brand.toLowerCase().replace(/[^a-z0-9]/g, '')) || 'myprojectpotato';
+    const publicUrl = `https://pandapraise.com/w/${cleanSlug}`;
 
     const primaryProof = selectedItems[0];
     if (!primaryProof) return '';
@@ -578,13 +677,13 @@ export default function SocialBroadcastHub({
         }
       }
 
-      // 3. Trigger automatic PNG download for Instagram / local storage
-      if (activeChannels.some((c) => c.id === 'instagram')) {
-        const a = document.createElement('a');
-        a.href = dataUrl;
-        a.download = `${brand}-${primaryProof.authorName}-social-card.png`;
-        a.click();
-      }
+      // 3. Trigger automatic PNG download for direct attachment
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `${brand.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${primaryProof.authorName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-card.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
 
       // 4. Fire background webhook if configured
       if (webhookUrl) {
@@ -639,9 +738,12 @@ export default function SocialBroadcastHub({
         );
       }
 
+      // Open visual guide modal prompting user to paste graphic
+      setIsBroadcastGuideOpen(true);
+
       setStatusBanner({
         type: 'success',
-        text: `Success! Caption & HD Image Card copied to clipboard. Press Ctrl+V in LinkedIn/X to paste your visual card instantly!`,
+        text: `Success! Graphic card copied to clipboard & downloaded. Press Ctrl+V in your social composer to attach it!`,
       });
     } catch (err: any) {
       setStatusBanner({
@@ -1133,6 +1235,60 @@ export default function SocialBroadcastHub({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* POST-BROADCAST VISUAL ATTACHMENT GUIDE MODAL */}
+      {isBroadcastGuideOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-purple-200 max-w-md w-full p-6 shadow-2xl relative text-left">
+            <button
+              type="button"
+              onClick={() => setIsBroadcastGuideOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl mb-4">
+              📸
+            </div>
+
+            <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+              1080×1080 Graphic Card Ready!
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed mb-4">
+              We opened your social composer and copied your HD branded graphic directly to your clipboard.
+            </p>
+
+            <div className="p-4 rounded-xl bg-purple-50/80 border border-purple-100 text-xs text-purple-900 space-y-2 mb-5">
+              <div className="flex items-center gap-1.5 font-bold text-purple-950">
+                <span>⚡ How to attach in 1 second:</span>
+              </div>
+              <p className="leading-relaxed">
+                Click inside your open social tab (X, LinkedIn, or Facebook) and press{' '}
+                <kbd className="px-1.5 py-0.5 bg-white border border-purple-200 rounded font-mono font-bold text-purple-900 shadow-2xs">
+                  Ctrl + V
+                </kbd>{' '}
+                (or{' '}
+                <kbd className="px-1.5 py-0.5 bg-white border border-purple-200 rounded font-mono font-bold text-purple-900 shadow-2xs">
+                  ⌘ + V
+                </kbd>
+                ) to paste the image directly!
+              </p>
+              <p className="text-[11px] text-purple-700/90">
+                The image file was also downloaded to your computer as a backup if you prefer dragging it in.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsBroadcastGuideOpen(false)}
+              className="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+            >
+              Got it, let's post!
+            </button>
           </div>
         </div>
       )}

@@ -9,6 +9,9 @@ import { FloatingReviewDrawer } from '../components/widgets/FloatingReviewDrawer
 import { SocialProofToast } from '../components/widgets/SocialProofToast';
 import { filterTestimonials, parseFilterRulesFromParams } from '../lib/testimonialFilter';
 
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { getFirebaseDb } from '../lib/firebase';
+
 const DEFAULT_SETTINGS: WidgetSettings = {
   type: 'wall',
   theme: 'dark',
@@ -74,8 +77,103 @@ export const PublicWidgetPage = () => {
       }
       try {
         setIsLoading(true);
-        const all = await storage.getReviews(publicWidgetId);
+        let all = await storage.getReviews(publicWidgetId);
         
+        // Fallback 1: Try lowercase slug if different
+        if (all.length === 0 && publicWidgetId.toLowerCase() !== publicWidgetId) {
+          all = await storage.getReviews(publicWidgetId.toLowerCase());
+        }
+
+        // Fallback 2: Direct Firestore query across public_reviews & testimonials
+        if (all.length === 0) {
+          try {
+            const db = getFirebaseDb();
+            const cleanSlug = publicWidgetId.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+            const pubSnap = await getDocs(
+              query(collection(db, 'public_reviews'), where('status', '==', 'approved'))
+            );
+            const matchedPub = pubSnap.docs
+              .map((d) => ({ id: d.id, ...d.data() } as any))
+              .filter(
+                (r) =>
+                  (r.projectSlug && r.projectSlug.toLowerCase() === publicWidgetId.toLowerCase()) ||
+                  (r.projectSlug && r.projectSlug.toLowerCase() === cleanSlug) ||
+                  (r.projectId && r.projectId.toLowerCase() === publicWidgetId.toLowerCase()) ||
+                  (r.projectId && r.projectId.toLowerCase() === cleanSlug)
+              );
+
+            if (matchedPub.length > 0) {
+              all = matchedPub.map((d) => ({
+                id: d.id,
+                projectId: d.projectId || publicWidgetId,
+                collectionFormId: d.collectionFormId || '',
+                ownerId: d.ownerId || '',
+                name: d.name || 'Verified Customer',
+                email: '',
+                role: d.role || 'Verified Customer',
+                company: d.company || '',
+                avatarUrl: d.avatarUrl || '',
+                rating: Number(d.rating || 5),
+                title: d.title || '',
+                content: d.content || '',
+                type: d.type || 'text',
+                videoUrl: d.videoUrl || '',
+                tags: d.tags || ['social-proof'],
+                source: 'manual',
+                status: 'approved',
+                isFeatured: Boolean(d.isFeatured),
+                consent: true,
+                helpfulCount: 0,
+                createdAt: d.createdAt || new Date().toISOString(),
+                updatedAt: d.updatedAt || new Date().toISOString(),
+              }));
+            } else {
+              // Also check testimonials collection
+              const testSnap = await getDocs(
+                query(collection(db, 'testimonials'), where('status', '==', 'approved'))
+              );
+              const matchedTest = testSnap.docs
+                .map((d) => ({ id: d.id, ...d.data() } as any))
+                .filter(
+                  (r) =>
+                    (r.workspaceSlug && r.workspaceSlug.toLowerCase() === publicWidgetId.toLowerCase()) ||
+                    (r.workspaceSlug && r.workspaceSlug.toLowerCase() === cleanSlug) ||
+                    (r.workspaceId && r.workspaceId.toLowerCase() === publicWidgetId.toLowerCase()) ||
+                    (r.workspaceId && r.workspaceId.toLowerCase() === cleanSlug)
+                );
+              if (matchedTest.length > 0) {
+                all = matchedTest.map((d) => ({
+                  id: d.id,
+                  projectId: publicWidgetId,
+                  collectionFormId: '',
+                  ownerId: '',
+                  name: d.authorName || 'Verified Customer',
+                  email: '',
+                  role: d.authorRole || 'Customer',
+                  company: '',
+                  avatarUrl: '',
+                  rating: Number(d.rating || 5),
+                  title: '',
+                  content: d.content || '',
+                  type: 'text',
+                  videoUrl: '',
+                  tags: ['sample', 'social-proof'],
+                  source: 'manual',
+                  status: 'approved',
+                  isFeatured: true,
+                  consent: true,
+                  helpfulCount: 0,
+                  createdAt: d.createdAt || new Date().toISOString(),
+                  updatedAt: d.createdAt || new Date().toISOString(),
+                }));
+              }
+            }
+          } catch (fbErr) {
+            console.warn('[PublicWidget] Fallback query notice:', fbErr);
+          }
+        }
+
         const params = new URLSearchParams(window.location.search);
         const rules = parseFilterRulesFromParams(params);
 
@@ -112,9 +210,28 @@ export const PublicWidgetPage = () => {
   }
 
   if (reviews.length === 0) {
+    const rawBrand = publicWidgetId
+      ? publicWidgetId.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+      : 'Brand';
     return (
-      <div className="min-h-[100px] flex items-center justify-center px-6 text-center text-xs" style={{ color: muted }}>
-        No approved testimonials to display yet.
+      <div className="min-h-[360px] flex flex-col items-center justify-center px-6 py-12 text-center" style={{ background, color: foreground }}>
+        <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl mb-4">
+          ⭐
+        </div>
+        <h2 className="text-xl font-bold tracking-tight mb-2" style={{ color: foreground }}>
+          {rawBrand} Wall of Love
+        </h2>
+        <p className="max-w-md text-xs sm:text-sm leading-relaxed mb-6" style={{ color: muted }}>
+          Authentic customer reviews and testimonials are being curated and will appear here shortly.
+        </p>
+        <a
+          href="https://pandapraise.com/?ref=empty_wall"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-purple-600 hover:bg-purple-700 text-white transition-colors shadow-xs"
+        >
+          ⚡ Powered by Panda Praise
+        </a>
       </div>
     );
   }

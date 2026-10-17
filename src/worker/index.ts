@@ -37,7 +37,7 @@ import { executeAutomatedBackgroundSync } from './lib/backgroundSync';
 import { handleCampaignTriggerWebhook } from './handlers/campaignTriggerWebhook';
 import { handleCampaignTrackClick, handleCampaignDispatchTrigger } from './handlers/campaignTrackHandler';
 import { handleReferralRedirect, handleReferralStats } from './handlers/referralHandler';
-import { handleSitemapXml, handleRobotsTxt, handleSeoPagePreRender } from './handlers/seoHandler';
+import { handleSitemapXml, handleRobotsTxt, handleSeoPagePreRender, handleOgCard } from './handlers/seoHandler';
 import { handleWebhookTestDispatch } from './handlers/alertWebhooks';
 import { handlePublicApi } from './handlers/publicApiHandler';
 import { handleAffiliatesApi } from './handlers/affiliateHandler';
@@ -366,6 +366,11 @@ export default {
         case 'account/delete':
         case 'account/purge':
           return await handleAccountDeletion(request, env);
+
+        // Dynamic OpenGraph / Twitter Card Vector Image for Social Unfurling
+        case 'og/card':
+        case 'og-card':
+          return await handleOgCard(request, env);
 
         default:
           return new Response(JSON.stringify({ error: `API route '${pathname}' not found.` }), {

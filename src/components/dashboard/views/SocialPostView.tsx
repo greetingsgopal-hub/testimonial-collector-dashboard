@@ -30,6 +30,11 @@ export const SocialPostView: React.FC<SocialPostViewProps> = ({
       createdAt: r.createdAt || (r as any).created_at || new Date().toISOString(),
     }));
 
+  const effectiveWsSlug =
+    (workspace as any)?.slug ||
+    (project as any)?.slug ||
+    (effectiveWsName ? effectiveWsName.toLowerCase().replace(/[^a-z0-9]/g, '') : 'myprojectpotato');
+
   const effectiveWsWebsite =
     (workspace as any)?.website ||
     (workspace as any)?.url ||
@@ -39,6 +44,7 @@ export const SocialPostView: React.FC<SocialPostViewProps> = ({
     <SocialBroadcastHub
       workspaceId={effectiveWsId}
       workspaceName={effectiveWsName}
+      workspaceSlug={effectiveWsSlug}
       workspaceWebsite={effectiveWsWebsite}
       initialApprovedTestimonials={initialTestimonials}
     />

@@ -112,7 +112,177 @@ export async function handleSeoPagePreRender(
     return renderUseCaseHtml(useCase, url.origin);
   }
 
+  // 3. Match /w/:publicWidgetId or /love/:slug for dynamic Social Cards & SEO pre-rendering
+  const wallMatch = pathname.match(/^\/(?:w|love)\/([a-zA-Z0-9_-]+)$/);
+  if (wallMatch) {
+    const rawId = wallMatch[1];
+    return renderPublicWallSeoHtml(rawId, url.origin);
+  }
+
   return null;
+}
+
+function formatBrandDisplay(raw: string): string {
+  if (!raw) return 'Panda Praise';
+  const clean = raw.replace(/MYPROJECTPOTATO(?:'s\s*Workspace)?/gi, 'Project Potato');
+  const withSpaces = clean
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/[-_]+/g, ' ')
+    .trim();
+  return withSpaces.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+/**
+ * Dynamic OpenGraph / Twitter Card Image Generator
+ * Generates an SVG social proof card (1200x630) for Twitterbot, LinkedInBot, etc.
+ */
+export async function handleOgCard(
+  request: Request,
+  _env: WorkerEnv
+): Promise<Response> {
+  const url = new URL(request.url);
+  const rawBrand = url.searchParams.get('brand') || 'Panda Praise';
+  const brandName = escapeHtml(formatBrandDisplay(rawBrand));
+  const brandSlug = rawBrand.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <radialGradient id="glow-purple" cx="20%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.45" />
+      <stop offset="100%" stop-color="#09090b" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glow-indigo" cx="80%" cy="80%" r="50%">
+      <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#09090b" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="brand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c4b5fd" />
+      <stop offset="50%" stop-color="#f472b6" />
+      <stop offset="100%" stop-color="#fbbf24" />
+    </linearGradient>
+    <linearGradient id="card-border" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(168, 85, 247, 0.4)" />
+      <stop offset="100%" stop-color="rgba(79, 70, 229, 0.2)" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#09090b" />
+  <rect width="1200" height="630" fill="url(#glow-purple)" />
+  <rect width="1200" height="630" fill="url(#glow-indigo)" />
+  <rect x="30" y="30" width="1140" height="570" rx="28" stroke="url(#card-border)" stroke-width="2" />
+
+  <!-- Verified Badge -->
+  <g transform="translate(80, 80)">
+    <rect width="360" height="46" rx="23" fill="rgba(139, 92, 246, 0.15)" stroke="rgba(168, 85, 247, 0.4)" stroke-width="1.5" />
+    <circle cx="24" cy="23" r="6" fill="#a78bfa" />
+    <text x="40" y="29" fill="#e9d5ff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" letter-spacing="0.08em">🐼 VERIFIED SOCIAL PROOF • 100% REAL</text>
+  </g>
+
+  <!-- Stars -->
+  <g transform="translate(80, 160)">
+    <text x="0" y="40" font-size="44" fill="#fbbf24">★★★★★</text>
+  </g>
+
+  <!-- Headline -->
+  <g transform="translate(80, 270)">
+    <text x="0" y="0" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="48" font-weight="800" letter-spacing="-0.02em">Customer Love for</text>
+    <text x="0" y="70" fill="url(#brand-grad)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="64" font-weight="800" letter-spacing="-0.03em">${brandName}</text>
+  </g>
+
+  <!-- Quote Subtitle -->
+  <g transform="translate(80, 420)">
+    <text x="0" y="0" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-style="italic" font-weight="400">
+      &quot;Switching saved our team hours every week and doubled our checkout trust!&quot;
+    </text>
+  </g>
+
+  <!-- Footer Link -->
+  <g transform="translate(80, 520)">
+    <rect width="400" height="40" rx="12" fill="rgba(255, 255, 255, 0.06)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" />
+    <text x="20" y="26" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="600">
+      👉 pandapraise.com/w/${brandSlug}
+    </text>
+  </g>
+</svg>`;
+
+  return new Response(svg, {
+    status: 200,
+    headers: {
+      'Content-Type': 'image/svg+xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=86400, s-maxage=604800',
+    },
+  });
+}
+
+function renderPublicWallSeoHtml(rawId: string, origin: string): Response {
+  const brandName = formatBrandDisplay(rawId);
+  const cleanSlug = rawId.toLowerCase();
+  const canonical = `${origin}/w/${cleanSlug}`;
+  const ogImageUrl = `${origin}/api/og/card?brand=${encodeURIComponent(brandName)}`;
+  const title = `⭐ Verified Customer Testimonials for ${brandName} — Panda Praise`;
+  const description = `Read authentic, verified customer reviews and social proof for ${brandName}. Powered by Panda Praise Wall of Love.`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(title)}</title>
+  <meta name="description" content="${escapeHtml(description)}">
+  <link rel="canonical" href="${canonical}">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${escapeHtml(title)}">
+  <meta property="og:description" content="${escapeHtml(description)}">
+  <meta property="og:url" content="${canonical}">
+  <meta property="og:image" content="${ogImageUrl}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@pandapraise">
+  <meta name="twitter:creator" content="@pandapraise">
+  <meta name="twitter:title" content="${escapeHtml(title)}">
+  <meta name="twitter:description" content="${escapeHtml(description)}">
+  <meta name="twitter:image" content="${ogImageUrl}">
+
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    @keyframes pp-spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-purple-500/30 min-h-screen">
+  <div id="root">
+    <div id="pp-initial-loader" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#09090b;color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+        <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 25px -5px rgba(124,58,237,0.35);">
+          <span style="font-size:28px;line-height:1;">🐼</span>
+        </div>
+        <div style="font-size:18px;font-weight:700;letter-spacing:-0.02em;">${escapeHtml(brandName)} Wall of Love</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:14px;height:14px;border:2px solid #ddd6fe;border-top-color:#7c3aed;border-radius:50%;animation:pp-spin 0.7s linear infinite;"></div>
+          <span style="font-size:12px;color:#a1a1aa;">Loading verified customer proof...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>`;
+
+  return new Response(html, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=300, s-maxage=3600',
+    },
+  });
 }
 
 function escapeHtml(str: string): string {

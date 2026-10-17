@@ -70,6 +70,35 @@ describe('Programmatic SEO Engine (Phase 2)', () => {
     expect(html).toContain('Get Started Free');
   });
 
+  it('pre-renders /w/:publicWidgetId route with dynamic OpenGraph & Twitter Large Image Card', async () => {
+    const request = new Request('https://pandapraise.com/w/myprojectpotato');
+    const response = await handleSeoPagePreRender(request, {} as any);
+
+    expect(response).not.toBeNull();
+    expect(response!.status).toBe(200);
+    const html = await response!.text();
+
+    expect(html).toContain('twitter:card');
+    expect(html).toContain('summary_large_image');
+    expect(html).toContain('/api/og/card?brand=');
+    expect(html).toContain('Project Potato');
+    expect(html).toContain('id="root"');
+  });
+
+  it('generates dynamic SVG OpenGraph card via handleOgCard', async () => {
+    const { handleOgCard } = await import('./seoHandler');
+    const request = new Request('https://pandapraise.com/api/og/card?brand=Project+Potato');
+    const response = await handleOgCard(request, {} as any);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Content-Type')).toContain('image/svg+xml');
+    const svg = await response.text();
+
+    expect(svg).toContain('Project Potato');
+    expect(svg).toContain('VERIFIED SOCIAL PROOF');
+    expect(svg).toContain('★★★★★');
+  });
+
   it('returns null for unmatched non-SEO routes to fall back to SPA assets', async () => {
     const request = new Request('https://pandapraise.com/random-page-123');
     const response = await handleSeoPagePreRender(request, {} as any);

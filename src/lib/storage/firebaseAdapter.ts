@@ -94,6 +94,27 @@ export class FirebaseAdapter implements StorageAdapter {
       docs = bySlug.docs;
     }
 
+    if (docs.length === 0 && projectId.toLowerCase() !== projectId) {
+      const byLowerSlug = await getDocs(query(
+        collection(db, 'public_reviews'),
+        where('projectSlug', '==', projectId.toLowerCase()),
+        where('status', '==', 'approved')
+      ));
+      docs = byLowerSlug.docs;
+    }
+
+    if (docs.length === 0) {
+      const cleanSlug = projectId.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (cleanSlug && cleanSlug !== projectId.toLowerCase()) {
+        const byClean = await getDocs(query(
+          collection(db, 'public_reviews'),
+          where('projectSlug', '==', cleanSlug),
+          where('status', '==', 'approved')
+        ));
+        docs = byClean.docs;
+      }
+    }
+
     const list = docs.map((docSnap) => this.mapDocToReview(docSnap.id, docSnap.data()));
     return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
@@ -397,6 +418,17 @@ export class FirebaseAdapter implements StorageAdapter {
         if (projSnap.exists()) projectSlug = projSnap.data()?.slug || null;
       } catch (err) {
         console.warn('[FirebaseAdapter] Could not resolve project slug for public sync:', err);
+      }
+      if (!projectSlug) {
+        try {
+          const wsSnap = await getDoc(doc(db, 'workspaces', review.projectId));
+          if (wsSnap.exists()) projectSlug = wsSnap.data()?.slug || null;
+        } catch (err) {
+          console.warn('[FirebaseAdapter] Could not resolve workspace slug for public sync:', err);
+        }
+      }
+      if (!projectSlug && typeof review.projectId === 'string') {
+        projectSlug = review.projectId.toLowerCase().replace(/[^a-z0-9]/g, '');
       }
     }
 
