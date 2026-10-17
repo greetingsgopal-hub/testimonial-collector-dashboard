@@ -61,10 +61,13 @@ export function formatCleanBrandName(rawName: string): string {
   return stripped;
 }
 
+export type CardTemplateType = 'gradient' | 'light' | 'neon';
+
 // Helper: Generate a real 1080x1080 HD PNG Social Card from a Testimonial using HTML5 Canvas
 export function renderTestimonialCardDataUrl(
   t: SocialTestimonial,
-  workspaceName: string
+  workspaceName: string,
+  template: CardTemplateType = 'gradient'
 ): string {
   const brand = formatCleanBrandName(workspaceName);
   const canvas = document.createElement('canvas');
@@ -88,38 +91,78 @@ export function renderTestimonialCardDataUrl(
     }
   };
 
-  // Rich Dark-Purple SaaS Gradient Background
-  const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
-  grad.addColorStop(0, '#0F172A');
-  grad.addColorStop(0.5, '#1E1B4B');
-  grad.addColorStop(1, '#4C1D95');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 1080, 1080);
+  // 1. Background Canvas
+  if (template === 'light') {
+    ctx.fillStyle = '#F8FAFC';
+    ctx.fillRect(0, 0, 1080, 1080);
+  } else if (template === 'neon') {
+    ctx.fillStyle = '#030712';
+    ctx.fillRect(0, 0, 1080, 1080);
+  } else {
+    // Rich Dark-Purple SaaS Gradient Background
+    const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
+    grad.addColorStop(0, '#0F172A');
+    grad.addColorStop(0.5, '#1E1B4B');
+    grad.addColorStop(1, '#4C1D95');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1080, 1080);
+  }
 
-  // Top Verified Badge Pill
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+  // 2. Top Verified Badge Pill
   ctx.beginPath();
   safeRoundRect(ctx, 90, 90, 390, 54, 27);
-  ctx.fill();
-  ctx.fillStyle = '#E9D5FF';
+  if (template === 'light') {
+    ctx.fillStyle = '#EDE9FE';
+    ctx.fill();
+    ctx.fillStyle = '#6D28D9';
+  } else if (template === 'neon') {
+    ctx.fillStyle = 'rgba(168, 85, 247, 0.2)';
+    ctx.fill();
+    ctx.strokeStyle = '#A855F7';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#E9D5FF';
+  } else {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.fill();
+    ctx.fillStyle = '#E9D5FF';
+  }
   ctx.font = 'bold 22px Inter, system-ui, sans-serif';
   ctx.fillText('✓ VERIFIED CUSTOMER PRAISE', 120, 125);
 
-  // Main White Quote Card
-  ctx.fillStyle = '#FFFFFF';
+  // 3. Main Quote Card
   ctx.beginPath();
   safeRoundRect(ctx, 90, 180, 900, 740, 40);
-  ctx.fill();
+  if (template === 'light') {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+    ctx.strokeStyle = '#E2E8F0';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+  } else if (template === 'neon') {
+    ctx.fillStyle = '#0F172A';
+    ctx.fill();
+    ctx.strokeStyle = '#8B5CF6';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+  }
 
-  // Star Rating Row
+  // 4. Star Rating Row
   ctx.fillStyle = '#F59E0B';
   ctx.font = 'bold 44px sans-serif';
   const starCount = Math.max(1, Math.min(5, Math.round(t.rating || 5)));
   const stars = '★'.repeat(starCount);
   ctx.fillText(`${stars}  ${Number(t.rating || 5).toFixed(1)}`, 150, 275);
 
-  // Word-Wrapped Testimonial Quote
-  ctx.fillStyle = '#0F172A';
+  // 5. Word-Wrapped Testimonial Quote
+  if (template === 'neon') {
+    ctx.fillStyle = '#F8FAFC';
+  } else {
+    ctx.fillStyle = '#0F172A';
+  }
   ctx.font = 'bold 36px Inter, system-ui, sans-serif';
   const words = `"${t.content}"`.split(' ');
   let line = '';
@@ -143,8 +186,8 @@ export function renderTestimonialCardDataUrl(
   }
   ctx.fillText(line, 150, y);
 
-  // Author Initials Avatar
-  ctx.fillStyle = '#7C3AED';
+  // 6. Author Initials Avatar
+  ctx.fillStyle = template === 'neon' ? '#8B5CF6' : '#7C3AED';
   ctx.beginPath();
   ctx.arc(185, 815, 36, 0, Math.PI * 2);
   ctx.fill();
@@ -153,19 +196,44 @@ export function renderTestimonialCardDataUrl(
   ctx.font = 'bold 28px Inter, system-ui, sans-serif';
   ctx.fillText((t.authorName || 'V').slice(0, 1).toUpperCase(), 174, 825);
 
-  // Author Name & Role
-  ctx.fillStyle = '#0F172A';
-  ctx.font = 'bold 30px Inter, system-ui, sans-serif';
-  ctx.fillText(t.authorName || 'Verified Customer', 240, 808);
+  // 7. Author Name, Role, and Branding Footer
+  if (template === 'neon') {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 30px Inter, system-ui, sans-serif';
+    ctx.fillText(t.authorName || 'Verified Customer', 240, 808);
 
-  ctx.fillStyle = '#64748B';
-  ctx.font = '24px Inter, system-ui, sans-serif';
-  ctx.fillText(`${t.authorRole || 'Verified Buyer'} • ${brand}`, 240, 844);
+    ctx.fillStyle = '#94A3B8';
+    ctx.font = '24px Inter, system-ui, sans-serif';
+    ctx.fillText(`${t.authorRole || 'Verified Buyer'} • ${brand}`, 240, 844);
 
-  // Bottom Branding Footer
-  ctx.fillStyle = '#CBD5E1';
-  ctx.font = '600 22px Inter, system-ui, sans-serif';
-  ctx.fillText(`Verified by PandaPraise • ${brand}`, 90, 985);
+    ctx.fillStyle = '#64748B';
+    ctx.font = '600 22px Inter, system-ui, sans-serif';
+    ctx.fillText(`Verified by PandaPraise • ${brand}`, 90, 985);
+  } else if (template === 'light') {
+    ctx.fillStyle = '#0F172A';
+    ctx.font = 'bold 30px Inter, system-ui, sans-serif';
+    ctx.fillText(t.authorName || 'Verified Customer', 240, 808);
+
+    ctx.fillStyle = '#64748B';
+    ctx.font = '24px Inter, system-ui, sans-serif';
+    ctx.fillText(`${t.authorRole || 'Verified Buyer'} • ${brand}`, 240, 844);
+
+    ctx.fillStyle = '#94A3B8';
+    ctx.font = '600 22px Inter, system-ui, sans-serif';
+    ctx.fillText(`Verified by PandaPraise • ${brand}`, 90, 985);
+  } else {
+    ctx.fillStyle = '#0F172A';
+    ctx.font = 'bold 30px Inter, system-ui, sans-serif';
+    ctx.fillText(t.authorName || 'Verified Customer', 240, 808);
+
+    ctx.fillStyle = '#64748B';
+    ctx.font = '24px Inter, system-ui, sans-serif';
+    ctx.fillText(`${t.authorRole || 'Verified Buyer'} • ${brand}`, 240, 844);
+
+    ctx.fillStyle = '#CBD5E1';
+    ctx.font = '600 22px Inter, system-ui, sans-serif';
+    ctx.fillText(`Verified by PandaPraise • ${brand}`, 90, 985);
+  }
 
   return canvas.toDataURL('image/png');
 }
@@ -189,6 +257,7 @@ export default function SocialBroadcastHub({
   const [starFilter, setStarFilter] = useState<'all' | '5' | '4+'>('all');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isBroadcasting, setIsBroadcasting] = useState<boolean>(false);
+  const [cardTemplate, setCardTemplate] = useState<CardTemplateType>('gradient');
   const [previewCardModal, setPreviewCardModal] = useState<{
     title: string;
     dataUrl: string;
@@ -440,7 +509,7 @@ export default function SocialBroadcastHub({
     }
   };
 
-  // 2. Helper: Build Platform-Aware, Deduplicated Social Captions
+  // 2. Helper: Build Platform-Aware, Clean Social Captions
   const buildBatchCaption = (
     selectedItems: SocialTestimonial[],
     rawWorkspaceName: string,
@@ -451,37 +520,20 @@ export default function SocialBroadcastHub({
       website ||
       `https://pandapraise.com/w/${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
 
-    // Deduplicate by ID and content so the same quote NEVER prints twice
-    const uniqueItems = Array.from(
-      new Map(selectedItems.map((item) => [item.content.trim(), item])).values()
-    );
+    const primaryProof = selectedItems[0];
+    if (!primaryProof) return '';
+    const cleanQuote = primaryProof.content.replace(/MYPROJECTPOTATO's Workspace/gi, brand);
 
-    if (uniqueItems.length === 1) {
-      const item = uniqueItems[0];
-      const cleanQuote = item.content.replace(/MYPROJECTPOTATO's Workspace/gi, brand);
-      return `"${cleanQuote}"\n\n— ${item.authorName} (${item.authorRole}) ⭐⭐⭐⭐⭐\n\nVerified customer love for ${brand} • ${publicUrl}`;
-    }
-
-    const lines = uniqueItems.map((item, idx) => {
-      const cleanQuote = item.content.replace(/MYPROJECTPOTATO's Workspace/gi, brand);
-      return `${idx + 1}. "${cleanQuote}"\n— ${item.authorName} (${item.authorRole}) ⭐ ${Number(item.rating || 5).toFixed(1)}`;
-    });
-
-    return `Here is what verified customers are saying about ${brand}:\n\n${lines.join(
-      '\n\n'
-    )}\n\nSee more verified reviews: ${publicUrl}`;
+    return `"${cleanQuote}"\n\n— ${primaryProof.authorName} (${primaryProof.authorRole}) ⭐⭐⭐⭐⭐\n\nVerified customer love for ${brand}\n👉 Explore verified proof: ${publicUrl}`;
   };
 
-  // MASTER ACTION: Broadcast All Selected Testimonials Across All Selected Channels
+  // UPGRADED MASTER BROADCAST HANDLER WITH DIRECT IMAGE CLIPBOARD COPYING
   const handleBroadcastSelected = async () => {
     const selectedItems = testimonials.filter((t) => selectedProofIds.includes(t.id));
     const activeChannels = channels.filter((c) => c.selected);
 
     if (selectedItems.length === 0) {
-      setStatusBanner({
-        type: 'error',
-        text: 'Select at least 1 testimonial below first.',
-      });
+      setStatusBanner({ type: 'error', text: 'Select at least 1 testimonial below first.' });
       return;
     }
 
@@ -497,30 +549,44 @@ export default function SocialBroadcastHub({
     setStatusBanner(null);
 
     try {
-      // Deduplicate by content so identical quotes never double-print
-      const uniqueItems = Array.from(
-        new Map(selectedItems.map((item) => [item.content.trim(), item])).values()
-      );
+      const primaryProof = selectedItems[0];
+      const brand = formatCleanBrandName(workspaceName);
+      const combinedCaption = buildBatchCaption(selectedItems, workspaceName, workspaceWebsite);
 
-      const combinedCaption = buildBatchCaption(
-        uniqueItems,
-        workspaceName,
-        workspaceWebsite
-      );
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      // 1. Copy text caption to clipboard
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(combinedCaption).catch(() => null);
       }
 
-      const renderedCards = uniqueItems.map((item) => ({
-        testimonialId: item.id,
-        authorName: item.authorName,
-        authorRole: item.authorRole,
-        rating: item.rating,
-        content: item.content,
-        imageCardBase64: renderTestimonialCardDataUrl(item, workspaceName),
-      }));
+      // 2. Generate HD 1080x1080 PNG Blob and copy it directly to clipboard so users can paste it into LinkedIn/X/FB!
+      const dataUrl = renderTestimonialCardDataUrl(primaryProof, workspaceName, cardTemplate);
+      if (dataUrl) {
+        try {
+          const res = await fetch(dataUrl);
+          const blob = await res.blob();
+          if (
+            typeof navigator !== 'undefined' &&
+            navigator.clipboard &&
+            typeof (window as any).ClipboardItem !== 'undefined'
+          ) {
+            await navigator.clipboard.write([
+              new (window as any).ClipboardItem({ 'image/png': blob }),
+            ]);
+          }
+        } catch (clipErr) {
+          console.warn('Direct image clipboard copy fallback:', clipErr);
+        }
+      }
 
-      // Fire background webhook if configured
+      // 3. Trigger automatic PNG download for Instagram / local storage
+      if (activeChannels.some((c) => c.id === 'instagram')) {
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = `${brand}-${primaryProof.authorName}-social-card.png`;
+        a.click();
+      }
+
+      // 4. Fire background webhook if configured
       if (webhookUrl) {
         await fetch(webhookUrl, {
           method: 'POST',
@@ -528,28 +594,26 @@ export default function SocialBroadcastHub({
           body: JSON.stringify({
             event: 'social.batch_broadcast',
             workspaceId,
-            workspaceName,
+            workspaceName: brand,
             targetChannels: activeChannels.map((c) => c.id),
             combinedCaption,
-            count: uniqueItems.length,
-            items: renderedCards,
+            count: 1,
+            items: [
+              {
+                testimonialId: primaryProof.id,
+                authorName: primaryProof.authorName,
+                authorRole: primaryProof.authorRole,
+                rating: primaryProof.rating,
+                content: primaryProof.content,
+                imageCardBase64: dataUrl,
+              },
+            ],
             timestamp: new Date().toISOString(),
           }),
-        });
+        }).catch(() => null);
       }
 
       const encodedText = encodeURIComponent(combinedCaption);
-
-      // Auto-download 1080x1080 PNG card if Instagram & FB Card is selected
-      if (activeChannels.some((c) => c.id === 'instagram')) {
-        renderedCards.forEach((card, index) => {
-          if (!card.imageCardBase64) return;
-          const a = document.createElement('a');
-          a.href = card.imageCardBase64;
-          a.download = `${workspaceName}-testimonial-${index + 1}.png`;
-          a.click();
-        });
-      }
 
       if (activeChannels.some((c) => c.id === 'linkedin')) {
         window.open(
@@ -577,9 +641,7 @@ export default function SocialBroadcastHub({
 
       setStatusBanner({
         type: 'success',
-        text: `Broadcast launched for ${selectedItems.length} review(s) across ${activeChannels
-          .map((c) => c.name)
-          .join(', ')}! Formatted caption copied to clipboard.`,
+        text: `Success! Caption & HD Image Card copied to clipboard. Press Ctrl+V in LinkedIn/X to paste your visual card instantly!`,
       });
     } catch (err: any) {
       setStatusBanner({
@@ -712,6 +774,44 @@ export default function SocialBroadcastHub({
               </div>
             </button>
           ))}
+        </div>
+
+        {/* VISUAL CARD THEME PICKER */}
+        <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-700">Visual Card Template:</span>
+            <span className="text-xs text-slate-400">1080×1080 HD auto-rendered for Instagram & LinkedIn</span>
+          </div>
+
+          <div className="inline-flex items-center p-1 rounded-xl bg-slate-100">
+            <button
+              type="button"
+              onClick={() => setCardTemplate('gradient')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                cardTemplate === 'gradient' ? 'bg-purple-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              ✨ Vibrant Gradient
+            </button>
+            <button
+              type="button"
+              onClick={() => setCardTemplate('light')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                cardTemplate === 'light' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              ☀️ Minimalist Light
+            </button>
+            <button
+              type="button"
+              onClick={() => setCardTemplate('neon')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                cardTemplate === 'neon' ? 'bg-slate-900 text-purple-300 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              🌙 Dark Mode Neon
+            </button>
+          </div>
         </div>
       </section>
 
@@ -894,7 +994,7 @@ export default function SocialBroadcastHub({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const dataUrl = renderTestimonialCardDataUrl(item, workspaceName);
+                          const dataUrl = renderTestimonialCardDataUrl(item, workspaceName, cardTemplate);
                           setPreviewCardModal({
                             title: `${item.authorName} — 1080×1080 Social Card`,
                             dataUrl,
@@ -910,11 +1010,12 @@ export default function SocialBroadcastHub({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const dataUrl = renderTestimonialCardDataUrl(item, workspaceName);
+                          const dataUrl = renderTestimonialCardDataUrl(item, workspaceName, cardTemplate);
                           if (!dataUrl) return;
+                          const brand = formatCleanBrandName(workspaceName);
                           const a = document.createElement('a');
                           a.href = dataUrl;
-                          a.download = `${workspaceName}-${item.authorName}-card.png`;
+                          a.download = `${brand}-${item.authorName}-card.png`;
                           a.click();
                         }}
                         className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-[11px] font-bold text-purple-700 cursor-pointer"
