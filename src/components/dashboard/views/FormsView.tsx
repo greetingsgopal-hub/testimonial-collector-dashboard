@@ -59,7 +59,7 @@ export const FormsView: React.FC<FormsViewProps> = ({
       ? stats.averageRating.toFixed(1)
       : reviews.length > 0
       ? (reviews.reduce((sum, r) => sum + (r.rating || 5), 0) / reviews.length).toFixed(1)
-      : '5.0';
+      : '0.0';
 
   const handleCopy = () => {
     if (navigator.clipboard?.writeText) {

@@ -18,7 +18,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
   onFilterByStatus,
   onFilterByRating,
 }) => {
-  const avgRating = stats.averageRating > 0 ? Number(stats.averageRating).toFixed(1) : '5.0';
+  const avgRating = stats.approvedCount > 0 && stats.averageRating > 0 ? Number(stats.averageRating).toFixed(1) : '0.0';
   const isAwaitingFirstApproval = stats.total > 0 && stats.approvedCount === 0 && stats.pendingCount > 0;
 
   return (

@@ -29,6 +29,42 @@ import { useAuth } from '../../context/AuthContext';
 import { usePlanEntitlements } from '../../hooks/usePlanEntitlements';
 import { interpolateTemplate } from '../../worker/lib/campaignDispatcher';
 
+export function dispatchRealCampaignTest({
+  channel,
+  recipientEmail,
+  recipientPhone,
+  subject,
+  messageBody,
+  collectionUrl,
+}: {
+  channel: 'email' | 'whatsapp';
+  recipientEmail?: string;
+  recipientPhone?: string;
+  subject: string;
+  messageBody: string;
+  collectionUrl: string;
+}) {
+  const renderedBody = `${messageBody}\n\nLeave your review here: ${collectionUrl}`;
+
+  if (channel === 'whatsapp') {
+    const cleanPhone = (recipientPhone || '').replace(/[^0-9]/g, '');
+    const waUrl = `https://api.whatsapp.com/send?${
+      cleanPhone ? `phone=${cleanPhone}&` : ''
+    }text=${encodeURIComponent(renderedBody)}`;
+    if (typeof window !== 'undefined') {
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
+    }
+  } else {
+    const targetEmail = recipientEmail || 'billing@pandapraise.com';
+    const mailtoUrl = `mailto:${encodeURIComponent(targetEmail)}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(renderedBody)}`;
+    if (typeof window !== 'undefined') {
+      window.location.href = mailtoUrl;
+    }
+  }
+}
+
 interface CampaignsHubProps {
   onNavigateToProof?: () => void;
 }
@@ -242,9 +278,32 @@ export const CampaignsHub: React.FC<CampaignsHubProps> = () => {
     }
   };
 
-  const handleTriggerSimulatedTest = async (camp: Campaign) => {
-    setTestSendNotice(`Dispatched simulated test for "${camp.name}" to your account email!`);
-    setTimeout(() => setTestSendNotice(null), 4000);
+  const handleTriggerRealTest = async (camp: Campaign) => {
+    const collectionUrl = `${window.location.origin}/c/${project?.slug || 'welcome'}`;
+    const renderedBody = interpolateTemplate(camp.template.messageBody, {
+      customer_name: 'Alex',
+      company_name: project?.name || 'Panda Praise',
+      product_name: project?.name || 'Panda Praise',
+      review_url: collectionUrl,
+    });
+    const renderedSubject = interpolateTemplate(camp.template.subject || '', {
+      company_name: project?.name || 'Panda Praise',
+    });
+
+    dispatchRealCampaignTest({
+      channel: camp.channel,
+      recipientEmail: user?.email || undefined,
+      subject: renderedSubject,
+      messageBody: renderedBody,
+      collectionUrl,
+    });
+
+    setTestSendNotice(
+      camp.channel === 'whatsapp'
+        ? `Launched WhatsApp dispatcher for "${camp.name}"!`
+        : `Opened email client with pre-filled test for "${camp.name}"!`
+    );
+    setTimeout(() => setTestSendNotice(null), 5000);
   };
 
   const handleCopyText = (text: string, key: string) => {
@@ -574,9 +633,9 @@ export const CampaignsHub: React.FC<CampaignsHubProps> = () => {
                     <div className="flex items-center justify-between gap-2 pt-1">
                       <button
                         type="button"
-                        onClick={() => handleTriggerSimulatedTest(camp)}
+                        onClick={() => handleTriggerRealTest(camp)}
                         className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all"
-                        title="Simulate dispatch"
+                        title="Send real test campaign"
                       >
                         <Send className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                         <span>Send Test</span>

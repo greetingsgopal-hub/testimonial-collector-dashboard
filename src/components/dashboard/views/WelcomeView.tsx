@@ -54,9 +54,9 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
   const hasApprovedProof = approvedReviews.length > 0;
   const pendingCount = reviews.filter((r) => r.status === 'pending').length;
   const avgRating =
-    reviews.length > 0
-      ? (reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)
-      : '5.0';
+    approvedReviews.length > 0
+      ? (approvedReviews.reduce((acc, r) => acc + (r.rating || 5), 0) / approvedReviews.length).toFixed(1)
+      : '0.0';
 
   // Gamified onboarding checklist state
   const step1Done = hasProof || copied;
