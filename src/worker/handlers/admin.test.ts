@@ -51,9 +51,11 @@ describe('Admin Handler & Security', () => {
 
   describe('isAuthorizedAdmin', () => {
     it('recognizes default and custom admin emails', () => {
-      expect(isAuthorizedAdmin('hello@pandapraise.com', env)).toBe(true);
-      expect(isAuthorizedAdmin('admin@pandapraise.com', env)).toBe(true);
-      expect(isAuthorizedAdmin('founder@pandapraise.com', env)).toBe(true);
+      expect(isAuthorizedAdmin('hello@pandapraise.com', env)).toBe(false);
+      expect(isAuthorizedAdmin('admin@pandapraise.com', env)).toBe(false);
+      expect(isAuthorizedAdmin('founder@pandapraise.com', env)).toBe(false);
+      expect(isAuthorizedAdmin('greetings.gopal@gmail.com', env)).toBe(true);
+      expect(isAuthorizedAdmin('greetingsgopal@gmail.com', env)).toBe(true);
       expect(isAuthorizedAdmin('CUSTOM_ADMIN@example.com ', env)).toBe(true);
       expect(isAuthorizedAdmin('ops@pandapraise.com', env)).toBe(true);
       expect(isAuthorizedAdmin('regular_user@example.com', env)).toBe(false);
@@ -92,7 +94,7 @@ describe('Admin Handler & Security', () => {
     it('returns 200 with sorted workspaces when token belongs to superadmin', async () => {
       vi.mocked(verifyFirebaseToken).mockResolvedValueOnce({
         uid: 'admin_123',
-        email: 'admin@pandapraise.com',
+        email: 'greetings.gopal@gmail.com',
       });
 
       const mockFirestoreResponse = [
@@ -162,7 +164,7 @@ describe('Admin Handler & Security', () => {
     it('returns 400 for invalid plan name', async () => {
       vi.mocked(verifyFirebaseToken).mockResolvedValueOnce({
         uid: 'admin_1',
-        email: 'founder@pandapraise.com',
+        email: 'greetings.gopal@gmail.com',
       });
 
       const req = new Request('https://pandapraise.com/api/admin/workspaces/ws_1/plan', {
@@ -177,7 +179,7 @@ describe('Admin Handler & Security', () => {
     it('updates plan to founding_lifetime successfully', async () => {
       vi.mocked(verifyFirebaseToken).mockResolvedValueOnce({
         uid: 'admin_1',
-        email: 'founder@pandapraise.com',
+        email: 'greetings.gopal@gmail.com',
       });
 
       const req = new Request('https://pandapraise.com/api/admin/workspaces/ws_target/plan', {
@@ -230,7 +232,7 @@ describe('Admin Handler & Security', () => {
     it('returns verified business overview metrics for superadmin', async () => {
       vi.mocked(verifyFirebaseToken).mockResolvedValueOnce({
         uid: 'admin_1',
-        email: 'admin@pandapraise.com',
+        email: 'greetings.gopal@gmail.com',
       });
 
       const now = new Date();
@@ -332,7 +334,7 @@ describe('Admin Handler & Security', () => {
     it('returns filtered users when query param is passed', async () => {
       vi.mocked(verifyFirebaseToken).mockResolvedValueOnce({
         uid: 'admin_1',
-        email: 'founder@pandapraise.com',
+        email: 'greetings.gopal@gmail.com',
       });
 
       const mockWorkspaces = [
@@ -397,7 +399,7 @@ describe('Admin Handler & Security', () => {
     it('returns product usage statistics for superadmin', async () => {
       vi.mocked(verifyFirebaseToken).mockResolvedValueOnce({
         uid: 'admin_1',
-        email: 'admin@pandapraise.com',
+        email: 'greetings.gopal@gmail.com',
       });
       const mockReviews = [
         {
@@ -457,7 +459,7 @@ describe('Admin Handler & Security', () => {
     it('returns audit log and payment events for superadmin', async () => {
       vi.mocked(verifyFirebaseToken).mockResolvedValueOnce({
         uid: 'admin_1',
-        email: 'admin@pandapraise.com',
+        email: 'greetings.gopal@gmail.com',
       });
 
       const mockLogs = [
@@ -466,7 +468,7 @@ describe('Admin Handler & Security', () => {
             name: 'projects/p/databases/(default)/documents/admin_audit_logs/l1',
             fields: {
               action: { stringValue: 'workspace_suspended' },
-              adminEmail: { stringValue: 'admin@pandapraise.com' },
+              adminEmail: { stringValue: 'greetings.gopal@gmail.com' },
               timestamp: { stringValue: '2026-10-17T12:00:00Z' },
             },
           },
@@ -508,7 +510,7 @@ describe('Admin Handler & Security', () => {
     it('returns operational health metrics for superadmin', async () => {
       vi.mocked(verifyFirebaseToken).mockResolvedValueOnce({
         uid: 'admin_1',
-        email: 'admin@pandapraise.com',
+        email: 'greetings.gopal@gmail.com',
       });
       const req = new Request('https://pandapraise.com/api/admin/health', {
         headers: { Authorization: 'Bearer admin_token' },
@@ -526,7 +528,7 @@ describe('Admin Handler & Security', () => {
     it('suspends workspace and writes audit log', async () => {
       vi.mocked(verifyFirebaseToken).mockResolvedValueOnce({
         uid: 'admin_1',
-        email: 'admin@pandapraise.com',
+        email: 'greetings.gopal@gmail.com',
       });
 
       const req = new Request('https://pandapraise.com/api/admin/workspaces/ws_target/suspend', {
@@ -543,7 +545,7 @@ describe('Admin Handler & Security', () => {
         'ws_target',
         expect.objectContaining({
           status: 'suspended',
-          suspendedBy: 'admin@pandapraise.com',
+          suspendedBy: 'greetings.gopal@gmail.com',
         }),
         expect.anything(),
         env
@@ -556,7 +558,7 @@ describe('Admin Handler & Security', () => {
         expect.objectContaining({
           action: 'workspace_suspended',
           targetId: 'ws_target',
-          adminEmail: 'admin@pandapraise.com',
+          adminEmail: 'greetings.gopal@gmail.com',
         }),
         expect.anything(),
         env
@@ -566,7 +568,7 @@ describe('Admin Handler & Security', () => {
     it('reactivates workspace and writes audit log', async () => {
       vi.mocked(verifyFirebaseToken).mockResolvedValueOnce({
         uid: 'admin_1',
-        email: 'admin@pandapraise.com',
+        email: 'greetings.gopal@gmail.com',
       });
 
       const req = new Request('https://pandapraise.com/api/admin/workspaces/ws_target/reactivate', {
@@ -582,7 +584,7 @@ describe('Admin Handler & Security', () => {
         'ws_target',
         expect.objectContaining({
           status: 'active',
-          reactivatedBy: 'admin@pandapraise.com',
+          reactivatedBy: 'greetings.gopal@gmail.com',
         }),
         expect.anything(),
         env

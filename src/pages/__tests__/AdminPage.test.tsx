@@ -31,10 +31,10 @@ describe('Superadmin Access & AdminPage', () => {
   });
 
   describe('isSuperadmin helper', () => {
-    it('allows default superadmin emails', () => {
-      expect(isSuperadmin('hello@pandapraise.com')).toBe(true);
-      expect(isSuperadmin('admin@pandapraise.com')).toBe(true);
-      expect(isSuperadmin('FOUNDER@PANDAPRAISE.COM')).toBe(true);
+    it('allows only greetings.gopal@gmail.com as superadmin', () => {
+      expect(isSuperadmin('hello@pandapraise.com')).toBe(false);
+      expect(isSuperadmin('admin@pandapraise.com')).toBe(false);
+      expect(isSuperadmin('FOUNDER@PANDAPRAISE.COM')).toBe(false);
       expect(isSuperadmin('greetingsgopal@gmail.com')).toBe(true);
       expect(isSuperadmin('greetings.gopal@gmail.com')).toBe(true);
     });
@@ -98,7 +98,7 @@ describe('Superadmin Access & AdminPage', () => {
 
     it('allows authorized superadmins through', async () => {
       mockUseAuth.mockReturnValue({
-        user: { email: 'admin@pandapraise.com', uid: 'u_admin' },
+        user: { email: 'greetings.gopal@gmail.com', uid: 'u_admin' },
         isLoading: false,
       });
 
@@ -150,7 +150,7 @@ describe('Superadmin Access & AdminPage', () => {
     beforeEach(() => {
       mockUseAuth.mockReturnValue({
         user: {
-          email: 'admin@pandapraise.com',
+          email: 'greetings.gopal@gmail.com',
           uid: 'u_admin',
           getIdToken: vi.fn().mockResolvedValue('admin_bearer_token'),
         },

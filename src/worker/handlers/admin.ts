@@ -4,12 +4,14 @@ import { verifyFirebaseToken, extractBearerToken } from '../lib/firebaseAuth';
 import { getAuthHeader, fromFirestoreFields, saveDocument, deleteDocument } from '../lib/firestoreAdmin';
 
 const DEFAULT_ADMIN_EMAILS = [
+  'greetings.gopal@gmail.com',
+];
+
+const DISALLOWED_ADMIN_EMAILS = new Set([
   'hello@pandapraise.com',
   'admin@pandapraise.com',
   'founder@pandapraise.com',
-  'greetingsgopal@gmail.com',
-  'greetings.gopal@gmail.com',
-];
+]);
 
 function canonicalizeEmail(email: string): string {
   const normalized = email.trim().toLowerCase();
@@ -29,22 +31,238 @@ function canonicalizeEmail(email: string): string {
 
 /**
  * Checks whether an email has superadmin privileges.
+ * Strictly grants access to greetings.gopal@gmail.com.
  */
-export function isAuthorizedAdmin(email: string | undefined | null, env: WorkerEnv): boolean {
+export function isAuthorizedAdmin(email: string | undefined | null, env?: WorkerEnv): boolean {
   if (!email || typeof email !== 'string') return false;
 
-  const customAdmins = (env.ADMIN_EMAILS || env.VITE_SUPERADMIN_EMAILS || '')
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-
-  const rawList = [...DEFAULT_ADMIN_EMAILS, ...customAdmins];
-  const canonicalList = new Set(rawList.map(canonicalizeEmail));
-
   const targetRaw = email.trim().toLowerCase();
+  if (DISALLOWED_ADMIN_EMAILS.has(targetRaw)) {
+    return false;
+  }
+
+  const rawList = [...DEFAULT_ADMIN_EMAILS];
+  if (env?.ADMIN_EMAILS) {
+    const customAdmins = env.ADMIN_EMAILS
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter((e) => Boolean(e) && !DISALLOWED_ADMIN_EMAILS.has(e));
+    rawList.push(...customAdmins);
+  }
+
+  const canonicalList = new Set(rawList.map(canonicalizeEmail));
   const targetCanonical = canonicalizeEmail(targetRaw);
 
   return canonicalList.has(targetRaw) || canonicalList.has(targetCanonical);
+}
+
+export interface AuthUserInfo {
+  email: string;
+  lastLoginAt?: string | null;
+  createdAt?: string | null;
+  displayName?: string | null;
+}
+
+function formatTimestampToIso(ts: string | number | undefined | null): string | null {
+  if (!ts) return null;
+  if (typeof ts === 'string' && /^\d+$/.test(ts)) {
+    const num = Number(ts);
+    return isNaN(num) ? null : new Date(num).toISOString();
+  }
+  if (typeof ts === 'number') {
+    return isNaN(ts) ? null : new Date(ts).toISOString();
+  }
+  const d = new Date(ts);
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+/**
+ * Fetches all registered Firebase Auth users via Google Identity Toolkit REST API.
+ * Caches in Cloudflare KV edge storage for 60 seconds.
+ */
+export async function fetchAuthUsersMap(idToken: string | null, env: WorkerEnv): Promise<Map<string, AuthUserInfo>> {
+  const usersMap = new Map<string, AuthUserInfo>();
+
+  const cacheKey = 'cache:admin:auth_users';
+  if (env.RATE_LIMIT_KV) {
+    try {
+      const cached = await env.RATE_LIMIT_KV.get(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        for (const [uid, info] of Object.entries(parsed)) {
+          usersMap.set(uid, info as AuthUserInfo);
+        }
+        return usersMap;
+      }
+    } catch (e) {
+      console.warn('[Admin] KV auth_users cache read warning:', e);
+    }
+  }
+
+  try {
+    const projectId = env.FIREBASE_PROJECT_ID || env.VITE_FIREBASE_PROJECT_ID || 'testimonialcollectordashboard';
+    const authHeaders = await getAuthHeader(idToken, env);
+    const downloadUrl = 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/downloadAccount';
+
+    const res = await fetch(downloadUrl, {
+      method: 'POST',
+      headers: authHeaders,
+      body: JSON.stringify({
+        targetProjectId: projectId,
+        maxResults: 1000,
+      }),
+    });
+
+    if (res && typeof res.json === 'function' && res.ok) {
+      const data: any = await res.json().catch(() => null);
+      if (data && Array.isArray(data.users)) {
+        const cacheObj: Record<string, AuthUserInfo> = {};
+        for (const u of data.users) {
+          if (u.localId) {
+            const info: AuthUserInfo = {
+              email: u.email || '',
+              lastLoginAt: formatTimestampToIso(u.lastSignedInAt),
+              createdAt: formatTimestampToIso(u.createdAt),
+              displayName: u.displayName || null,
+            };
+            usersMap.set(u.localId, info);
+            cacheObj[u.localId] = info;
+          }
+        }
+        if (env.RATE_LIMIT_KV) {
+          await env.RATE_LIMIT_KV.put(cacheKey, JSON.stringify(cacheObj), { expirationTtl: 60 }).catch(() => {});
+        }
+      }
+    } else if (res) {
+      console.warn('[Admin] downloadAccount status:', res.status);
+    }
+  } catch (err) {
+    console.warn('[Admin] fetchAuthUsersMap error:', err);
+  }
+
+  return usersMap;
+}
+
+/**
+ * Enriches workspace documents with real user emails and lastLoginAt,
+ * deduplicates workspaces per owner, and appends registered auth users.
+ */
+export function enrichAndDeduplicateWorkspaces(
+  rawWorkspaces: any[],
+  authUsersMap: Map<string, AuthUserInfo>
+): any[] {
+  // 1. Remove fake orphaned documents
+  const validWorkspaces = rawWorkspaces.filter((w) => w.id !== 'FKLVoTR82FOZS6nrExo8WhHvdJi2');
+
+  // 2. Enrich with real email and lastLoginAt
+  for (const ws of validWorkspaces) {
+    const ownerLookup = ws.ownerId || (ws.owner_email && !ws.owner_email.includes('@') ? ws.owner_email : null);
+    if (ownerLookup && authUsersMap.has(ownerLookup)) {
+      const authUser = authUsersMap.get(ownerLookup)!;
+      if (authUser.email) {
+        ws.owner_email = authUser.email;
+      }
+      if (authUser.lastLoginAt) {
+        ws.lastLoginAt = authUser.lastLoginAt;
+      }
+      if (authUser.createdAt && !ws.createdAt) {
+        ws.createdAt = authUser.createdAt;
+      }
+    } else {
+      const directEmail = ws.owner_email || ws.ownerEmail || ws.email;
+      if (directEmail && directEmail.includes('@')) {
+        ws.owner_email = directEmail;
+      }
+    }
+
+    if (!ws.lastLoginAt && ws.lastSignedInAt) {
+      ws.lastLoginAt = formatTimestampToIso(ws.lastSignedInAt);
+    }
+  }
+
+  // 3. Deduplicate workspaces: group by ownerId (or lowercase email)
+  const deduplicatedByOwner = new Map<string, any>();
+  const unkeyed: any[] = [];
+
+  for (const ws of validWorkspaces) {
+    const emailKey = ws.owner_email && ws.owner_email.includes('@') ? ws.owner_email.toLowerCase() : null;
+    const key = ws.ownerId || emailKey;
+
+    if (!key) {
+      unkeyed.push(ws);
+      continue;
+    }
+
+    if (!deduplicatedByOwner.has(key)) {
+      deduplicatedByOwner.set(key, ws);
+    } else {
+      const existing = deduplicatedByOwner.get(key);
+      const wsHasPro = ws.plan === 'pro' || ws.plan === 'founding_lifetime';
+      const exHasPro = existing.plan === 'pro' || existing.plan === 'founding_lifetime';
+      const wsProofs = Number(ws.proofs_count || 0);
+      const exProofs = Number(existing.proofs_count || 0);
+
+      let wsIsBetter = false;
+      if (wsHasPro && !exHasPro) {
+        wsIsBetter = true;
+      } else if (!wsHasPro && exHasPro) {
+        wsIsBetter = false;
+      } else if (wsProofs > exProofs) {
+        wsIsBetter = true;
+      } else if (wsProofs < exProofs) {
+        wsIsBetter = false;
+      } else {
+        const wsTime = new Date(ws.updatedAt || ws.createdAt || 0).getTime();
+        const exTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
+        wsIsBetter = wsTime > exTime;
+      }
+
+      if (wsIsBetter) {
+        ws.proofs_count = Math.max(wsProofs, exProofs);
+        if (!ws.lastLoginAt && existing.lastLoginAt) ws.lastLoginAt = existing.lastLoginAt;
+        deduplicatedByOwner.set(key, ws);
+      } else {
+        existing.proofs_count = Math.max(wsProofs, exProofs);
+        if (!existing.lastLoginAt && ws.lastLoginAt) existing.lastLoginAt = ws.lastLoginAt;
+      }
+    }
+  }
+
+  const resultWorkspaces = [...deduplicatedByOwner.values(), ...unkeyed];
+
+  // 4. Include any registered users in authUsersMap that don't yet have a workspace document
+  for (const [uid, authUser] of authUsersMap.entries()) {
+    if (!authUser.email) continue;
+    const emailLower = authUser.email.toLowerCase();
+    if (emailLower === 'greetings.gopal@gmail.com' || emailLower === 'greetingsgopal@gmail.com') {
+      continue;
+    }
+
+    if (!deduplicatedByOwner.has(uid) && !deduplicatedByOwner.has(emailLower)) {
+      resultWorkspaces.push({
+        id: `user_${uid.slice(0, 12)}`,
+        name: authUser.displayName || `${authUser.email.split('@')[0]}'s Workspace`,
+        owner_email: authUser.email,
+        ownerId: uid,
+        plan: 'free',
+        status: 'active',
+        proofs_count: 0,
+        createdAt: authUser.createdAt || new Date().toISOString(),
+        lastLoginAt: authUser.lastLoginAt,
+      });
+      deduplicatedByOwner.set(uid, true);
+      deduplicatedByOwner.set(emailLower, true);
+    }
+  }
+
+  // 5. Sort descending by creation date
+  resultWorkspaces.sort((a, b) => {
+    const timeA = new Date(a.createdAt || 0).getTime();
+    const timeB = new Date(b.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
+
+  return resultWorkspaces;
 }
 
 /**
@@ -121,11 +339,14 @@ export async function handleAdminGetWorkspaces(request: Request, env: WorkerEnv)
       },
     };
 
-    const res = await fetch(queryUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    });
+    const [res, authUsersMap] = await Promise.all([
+      fetch(queryUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      }),
+      fetchAuthUsersMap(idToken, env),
+    ]);
 
     if (!res.ok) {
       const errText = await res.text();
@@ -137,13 +358,13 @@ export async function handleAdminGetWorkspaces(request: Request, env: WorkerEnv)
     }
 
     const rawList: any = await res.json();
-    const workspaces: any[] = [];
+    const rawWorkspaces: any[] = [];
     if (Array.isArray(rawList)) {
       for (const item of rawList) {
         if (item.document) {
           const parts = item.document.name.split('/');
           const id = parts[parts.length - 1];
-          workspaces.push({
+          rawWorkspaces.push({
             id,
             ...fromFirestoreFields(item.document.fields || {}),
           });
@@ -151,12 +372,7 @@ export async function handleAdminGetWorkspaces(request: Request, env: WorkerEnv)
       }
     }
 
-    // Sort descending by createdAt
-    workspaces.sort((a, b) => {
-      const timeA = new Date(a.createdAt || 0).getTime();
-      const timeB = new Date(b.createdAt || 0).getTime();
-      return timeB - timeA;
-    });
+    const workspaces = enrichAndDeduplicateWorkspaces(rawWorkspaces, authUsersMap);
 
     const payload = JSON.stringify({ workspaces });
 
@@ -675,10 +891,13 @@ export async function handleAdminGetOverview(request: Request, env: WorkerEnv): 
   const { corsHeaders, idToken } = auth;
 
   try {
-    const [workspaces, payments] = await Promise.all([
+    const [rawWorkspaces, payments, authUsersMap] = await Promise.all([
       fetchCollectionDocuments('workspaces', idToken, env, 500),
       fetchCollectionDocuments('payments', idToken, env, 500),
+      fetchAuthUsersMap(idToken, env),
     ]);
+
+    const workspaces = enrichAndDeduplicateWorkspaces(rawWorkspaces, authUsersMap);
 
     const now = Date.now();
     const sevenDaysAgo = now - 7 * 86400000;
@@ -799,7 +1018,12 @@ export async function handleAdminGetUsers(request: Request, env: WorkerEnv): Pro
   const { corsHeaders, idToken } = auth;
 
   try {
-    const workspaces = await fetchCollectionDocuments('workspaces', idToken, env, 500);
+    const [rawWorkspaces, authUsersMap] = await Promise.all([
+      fetchCollectionDocuments('workspaces', idToken, env, 500),
+      fetchAuthUsersMap(idToken, env),
+    ]);
+
+    const workspaces = enrichAndDeduplicateWorkspaces(rawWorkspaces, authUsersMap);
     const url = new URL(request.url);
     const query = (url.searchParams.get('q') || '').toLowerCase().trim();
 
@@ -811,6 +1035,7 @@ export async function handleAdminGetUsers(request: Request, env: WorkerEnv): Pro
       plan: w.plan || 'free',
       status: w.status || 'active',
       createdAt: w.createdAt || w.created_at || null,
+      lastLoginAt: w.lastLoginAt || null,
       trialEndsAt: w.trialEndsAt || null,
       proofs_count: Number(w.proofs_count || 0),
       billingCycle: w.billingCycle || 'monthly',

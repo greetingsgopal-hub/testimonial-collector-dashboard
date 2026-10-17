@@ -28,6 +28,7 @@ export interface WorkspaceItem {
   plan: 'free' | 'pro' | 'starter' | 'founding_lifetime';
   status: 'active' | 'suspended';
   created_at: string;
+  lastLoginAt?: string | null;
   proofs_count: number;
   trialEndsAt?: string | null;
   suspendedAt?: string | null;
@@ -232,6 +233,7 @@ export default function ResilientAdminDashboard() {
           plan: w.plan || 'free',
           status: w.status === 'suspended' ? 'suspended' : 'active',
           created_at: w.createdAt || w.created_at ? new Date(w.createdAt || w.created_at).toLocaleDateString() : 'N/A',
+          lastLoginAt: w.lastLoginAt ? new Date(w.lastLoginAt).toLocaleString() : 'Never',
           proofs_count: Number(w.proofs_count || 0),
           trialEndsAt: w.trialEndsAt || null,
           suspendedAt: w.suspendedAt || null,
@@ -631,6 +633,7 @@ export default function ResilientAdminDashboard() {
                     <th className="p-4">Account Status</th>
                     <th className="p-4">Collected Proofs</th>
                     <th className="p-4">Created Date</th>
+                    <th className="p-4">Last Login</th>
                     <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -666,6 +669,12 @@ export default function ResilientAdminDashboard() {
                       </td>
                       <td className="p-4 text-slate-300">{ws.proofs_count} items</td>
                       <td className="p-4 text-slate-400">{ws.created_at}</td>
+                      <td className="p-4 text-slate-400">
+                        <span className="flex items-center gap-1.5 whitespace-nowrap">
+                          <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                          <span>{ws.lastLoginAt || 'Never'}</span>
+                        </span>
+                      </td>
                       <td className="p-4 text-right space-x-2">
                         <button
                           type="button"
@@ -697,7 +706,7 @@ export default function ResilientAdminDashboard() {
                   ))}
                   {filteredWorkspaces.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="p-8 text-center text-slate-500">
+                      <td colSpan={8} className="p-8 text-center text-slate-500">
                         No workspaces found matching your filter criteria.
                       </td>
                     </tr>
