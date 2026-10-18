@@ -212,6 +212,39 @@ export default function ProofSection({
           }
         }
 
+        // 3. Also pull any client-side submissions recorded from Review Feedback Form
+        try {
+          const localKey = `pandapraise_submitted_reviews_${workspaceId}`;
+          const localStored = JSON.parse(localStorage.getItem(localKey) || '[]');
+          if (Array.isArray(localStored)) {
+            for (const item of localStored) {
+              const quoteText = String(item.content || '').trim();
+              const alreadyExists = loadedItems.some(
+                (existing) =>
+                  existing.content.replace(/[“”"]/g, '').trim() ===
+                  quoteText.replace(/[“”"]/g, '').trim()
+              );
+              if (!alreadyExists && quoteText) {
+                loadedItems.unshift({
+                  id: item.id || `local_${Math.random()}`,
+                  workspaceId,
+                  authorName: item.authorName || 'Valued Customer',
+                  authorRole: item.authorRole || 'Client',
+                  content:
+                    quoteText.startsWith('“') || quoteText.startsWith('"')
+                      ? quoteText
+                      : `“${quoteText}”`,
+                  rating: Math.max(1, Math.min(5, Number(item.rating || 5))),
+                  status: 'Approved',
+                  source: item.source || 'Review Feedback Form',
+                  tags: classifyPraiseCategories(quoteText, item.tags),
+                  createdAt: item.createdAt || new Date().toISOString(),
+                });
+              }
+            }
+          }
+        } catch {}
+
         // Fallback default sample items if no testimonials exist in Firestore yet
         if (loadedItems.length === 0) {
           const sampleReviews = [

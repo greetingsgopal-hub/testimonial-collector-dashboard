@@ -31,6 +31,7 @@ describe('UnifiedReviewFeedbackSystem Production Suite', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
