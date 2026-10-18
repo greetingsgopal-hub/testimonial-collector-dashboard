@@ -22,6 +22,8 @@ vi.mock('firebase/auth', () => ({
   TwitterAuthProvider: vi.fn(),
 }));
 
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+
 describe('ImportTestimonialsHub - 4-Way Production Import Pipeline', () => {
   let container: HTMLDivElement;
   let root: Root;
@@ -58,7 +60,7 @@ describe('ImportTestimonialsHub - 4-Way Production Import Pipeline', () => {
     expect(container.textContent).toContain('Social Auto-Scraper');
     expect(container.textContent).toContain('Screenshots Import');
     expect(container.textContent).toContain('CSV Spreadsheet');
-    expect(container.textContent).toContain('Manual Entry');
+    expect(container.textContent).not.toContain('Manual Entry');
     expect(container.textContent).toContain('Social Login Directory');
   });
 
@@ -113,87 +115,36 @@ describe('ImportTestimonialsHub - 4-Way Production Import Pipeline', () => {
     expect(container.textContent).toContain('3. Validate & Commit');
   });
 
-  it('4. Manual entry form creates approved testimonial and shifts to Proof', async () => {
-    const onShiftToProof = vi.fn();
-
+  it('4. Directory mode allows switching and searching integrations', async () => {
     await act(async () => {
       root.render(
         <ImportTestimonialsHub
           workspaceId="test-ws"
           workspaceName="Acme HVAC"
-          onShiftToProof={onShiftToProof}
+          onShiftToProof={vi.fn()}
         />
       );
     });
 
-    const manualBtn = Array.from(container.querySelectorAll('button')).find((b) =>
-      b.textContent?.includes('Manual Entry')
+    const dirBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Social Login Directory')
     );
-    expect(manualBtn).toBeDefined();
+    expect(dirBtn).toBeDefined();
 
     await act(async () => {
-      manualBtn?.click();
+      dirBtn?.click();
     });
 
-    expect(container.textContent).toContain('Add Testimonial Manually');
-
-    const nameInput = container.querySelector('input[placeholder="Customer Full Name *"]') as HTMLInputElement;
-    const roleInput = container.querySelector('input[placeholder="Role & Company (e.g. Owner, Hartley Plumbing)"]') as HTMLInputElement;
-    const contentTextarea = container.querySelector('textarea') as HTMLTextAreaElement;
-    const submitBtn = container.querySelector('button[type="submit"]') as HTMLButtonElement;
-
-    expect(nameInput).not.toBeNull();
-    expect(contentTextarea).not.toBeNull();
-    expect(submitBtn).not.toBeNull();
-
-    const nativeInputSetter = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      'value'
-    )?.set;
-    const nativeTextareaSetter = Object.getOwnPropertyDescriptor(
-      window.HTMLTextAreaElement.prototype,
-      'value'
-    )?.set;
-
-    await act(async () => {
-      nativeInputSetter?.call(nameInput, 'Sarah Connor');
-      nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-      nativeInputSetter?.call(roleInput, 'Cyberdyne Systems');
-      roleInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-      nativeTextareaSetter?.call(contentTextarea, 'Outstanding customer service and fast resolution.');
-      contentTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-
-    const form = container.querySelector('form') as HTMLFormElement;
-    await act(async () => {
-      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    });
-
-    // Advance fake timer to trigger shifting to proof callback
-    await act(async () => {
-      vi.advanceTimersByTime(1200);
-    });
-
-    expect(onShiftToProof).toHaveBeenCalledTimes(1);
-    const passedItems = onShiftToProof.mock.calls[0][0];
-    expect(passedItems.length).toBe(1);
-    expect(passedItems[0].authorName).toBe('Sarah Connor');
-    expect(passedItems[0].authorRole).toBe('Cyberdyne Systems');
-    expect(passedItems[0].content).toBe('“Outstanding customer service and fast resolution.”');
-    expect(passedItems[0].status).toBe('approved');
+    expect(container.textContent).toContain('Integrate Social Accounts & Scrape Reviews');
   });
 
-  it('5. View Proof Section button immediately shifts to Proof', async () => {
-    const onShiftToProof = vi.fn();
-
+  it('5. Purple banner does not render View Proof Section button', async () => {
     await act(async () => {
       root.render(
         <ImportTestimonialsHub
           workspaceId="test-ws"
           workspaceName="Test Workspace"
-          onShiftToProof={onShiftToProof}
+          onShiftToProof={vi.fn()}
         />
       );
     });
@@ -201,16 +152,6 @@ describe('ImportTestimonialsHub - 4-Way Production Import Pipeline', () => {
     const viewProofBtn = Array.from(container.querySelectorAll('button')).find((b) =>
       b.textContent?.includes('View Proof Section')
     );
-    expect(viewProofBtn).toBeDefined();
-
-    await act(async () => {
-      viewProofBtn?.click();
-    });
-
-    await act(async () => {
-      vi.advanceTimersByTime(1000);
-    });
-
-    expect(onShiftToProof).toHaveBeenCalledWith([]);
+    expect(viewProofBtn).toBeUndefined();
   });
 });

@@ -13,7 +13,6 @@ import {
 } from 'firebase/firestore';
 import {
   Search,
-  Sparkles,
   RefreshCw,
   Check,
   Copy,
@@ -330,16 +329,6 @@ export default function ProofSection({
     });
   }, [proofList, activeCategory, statusFilter, searchQuery]);
 
-  // Dynamic AI Case Study Headline generated from the top matching review
-  const dynamicCaseStudyHeadline = useMemo(() => {
-    const topReview = filteredProofList[0] || proofList[0];
-    if (!topReview) {
-      return `How ${workspaceName} turns customer love into automated revenue`;
-    }
-    const cleanRoleOrCompany = topReview.authorRole.split('·')[0].trim();
-    return `How ${topReview.authorName} (${cleanRoleOrCompany}) achieved faster results with ${workspaceName}`;
-  }, [filteredProofList, proofList, workspaceName]);
-
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-xs font-sans antialiased text-slate-900">
       {/* 1. HEADER ROW: "Your Proof [Count]" + Single Refresh Sync + "+ Invite customer" */}
@@ -470,23 +459,7 @@ export default function ProofSection({
         </div>
       </section>
 
-      {/* 4. HIGHLIGHTED AI CASE STUDY CARD (Matches Screenshot 1) */}
-      <section aria-label="Generated Case Study" className="mb-5">
-        <div className="p-4 sm:p-5 rounded-xl border border-purple-200 bg-[#fbf9fe] hover:border-purple-300 transition-colors">
-          <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-            {dynamicCaseStudyHeadline}
-          </h3>
-          <p className="mt-1 text-xs sm:text-sm font-medium text-[#6701e6] flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#6701e6]" />
-            <span>
-              Case study generated with Panda Praise AI · {filteredProofList.length || 1} metric
-              {filteredProofList.length === 1 ? '' : 's'}
-            </span>
-          </p>
-        </div>
-      </section>
-
-      {/* 5. ORGANIZED VERTICAL LIST OF APPROVED / IMPORTED TESTIMONIALS (Matches Screenshot 1) */}
+      {/* 4. ORGANIZED VERTICAL LIST OF APPROVED / IMPORTED TESTIMONIALS (Matches Screenshot 1) */}
       <section aria-label="Customer Testimonials" className="space-y-3.5">
         {isRefreshing && proofList.length === 0 ? (
           <div className="p-12 text-center rounded-xl border border-slate-200/80 bg-slate-50/50 text-slate-500 text-sm flex items-center justify-center gap-2">

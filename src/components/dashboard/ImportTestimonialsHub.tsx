@@ -18,7 +18,6 @@ import {
 import {
   Upload,
   FileSpreadsheet,
-  PenTool,
   Image as ImageIcon,
   RefreshCw,
   CheckCircle2,
@@ -47,7 +46,7 @@ export interface ImportedTestimonial {
   createdAt: string;
 }
 
-type ImportMode = 'social' | 'screenshots' | 'csv' | 'manual' | 'directory';
+type ImportMode = 'social' | 'screenshots' | 'csv' | 'directory';
 
 interface SocialPlatformAccount {
   id: 'google' | 'facebook' | 'twitter' | 'reddit' | 'linkedin' | 'instagram';
@@ -301,14 +300,6 @@ export default function ImportTestimonialsHub({
   const [csvStep, setCsvStep] = useState<1 | 2 | 3>(1);
   const [csvRows, setCsvRows] = useState<{ authorName: string; authorRole: string; content: string; rating: number }[]>([]);
   const [isCommittingCsv, setIsCommittingCsv] = useState<boolean>(false);
-
-  // Manual Entry State
-  const [manualAuthor, setManualAuthor] = useState<string>('');
-  const [manualRole, setManualRole] = useState<string>('');
-  const [manualContent, setManualContent] = useState<string>('');
-  const [manualRating, setManualRating] = useState<number>(5);
-  const [manualSource, setManualSource] = useState<string>('Direct Client');
-  const [isSavingManual, setIsSavingManual] = useState<boolean>(false);
 
   // Load saved social connections from Firestore on mount
   useEffect(() => {
@@ -635,7 +626,7 @@ export default function ImportTestimonialsHub({
         >
           <span>
             {activeMode === 'directory'
-              ? '← Back to Quick Import Hub (Social Sync, Screenshots, CSV, Manual)'
+              ? '← Back to Quick Import Hub (Social Sync, Screenshots, CSV)'
               : 'Explore All 30+ Integration Directories & Social Channels →'}
           </span>
         </button>
@@ -656,14 +647,6 @@ export default function ImportTestimonialsHub({
               Integrate your social accounts once to scrape reviews on a single refresh, or upload review screenshots. All imported praise shifts immediately into your <strong>Proof</strong> section.
             </p>
           </div>
-
-          <button
-            type="button"
-            onClick={() => commitTestimonialsAndShiftToProof([])}
-            className="px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs font-bold whitespace-nowrap self-start sm:self-center cursor-pointer transition-all"
-          >
-            View Proof Section →
-          </button>
         </div>
 
         {/* Mode Selector Pills */}
@@ -672,7 +655,6 @@ export default function ImportTestimonialsHub({
             { id: 'social', label: `Social Auto-Scraper (${connectedCount} Linked)`, icon: RefreshCw },
             { id: 'screenshots', label: 'Screenshots Import', icon: ImageIcon },
             { id: 'csv', label: 'CSV Spreadsheet', icon: FileSpreadsheet },
-            { id: 'manual', label: 'Manual Entry', icon: PenTool },
             { id: 'directory', label: 'Social Login Directory', icon: Globe },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -1091,102 +1073,7 @@ export default function ImportTestimonialsHub({
         </section>
       )}
 
-      {/* =================================================================== */}
-      {/* MODE 4: MANUAL ENTRY                                                */}
-      {/* =================================================================== */}
-      {activeMode === 'manual' && (
-        <section className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs max-w-2xl space-y-4">
-          <h2 className="text-lg font-bold text-slate-900">Add Testimonial Manually</h2>
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              if (!manualAuthor.trim() || !manualContent.trim()) return;
-              setIsSavingManual(true);
-              await commitTestimonialsAndShiftToProof([
-                {
-                  authorName: manualAuthor.trim(),
-                  authorRole: manualRole.trim() || 'Verified Customer',
-                  content: `“${manualContent.trim().replace(/^["“]|["”]$/g, '')}”`,
-                  rating: manualRating,
-                  mediaType: 'text',
-                  source: manualSource,
-                  status: 'approved',
-                  tags: ['Ease of use'],
-                  createdAt: new Date().toISOString(),
-                },
-              ]);
-              setIsSavingManual(false);
-            }}
-            className="space-y-4"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <input
-                type="text"
-                required
-                value={manualAuthor}
-                onChange={(e) => setManualAuthor(e.target.value)}
-                placeholder="Customer Full Name *"
-                className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
-              />
-              <input
-                type="text"
-                value={manualRole}
-                onChange={(e) => setManualRole(e.target.value)}
-                placeholder="Role & Company (e.g. Owner, Hartley Plumbing)"
-                className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
-              />
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
-                  Source / Channel
-                </label>
-                <input
-                  type="text"
-                  value={manualSource}
-                  onChange={(e) => setManualSource(e.target.value)}
-                  placeholder="e.g. WhatsApp, Email, In-Person"
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
-                  Star Rating (1-5)
-                </label>
-                <select
-                  value={manualRating}
-                  onChange={(e) => setManualRating(Number(e.target.value))}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white"
-                >
-                  <option value={5}>★★★★★ (5 Stars)</option>
-                  <option value={4}>★★★★☆ (4 Stars)</option>
-                  <option value={3}>★★★☆☆ (3 Stars)</option>
-                  <option value={2}>★★☆☆☆ (2 Stars)</option>
-                  <option value={1}>★☆☆☆☆ (1 Star)</option>
-                </select>
-              </div>
-            </div>
-
-            <textarea
-              rows={4}
-              required
-              value={manualContent}
-              onChange={(e) => setManualContent(e.target.value)}
-              placeholder="Paste the customer testimonial text here..."
-              className="w-full p-4 rounded-xl border border-slate-200 text-sm"
-            />
-
-            <button
-              type="submit"
-              disabled={isSavingManual}
-              className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold cursor-pointer transition-all"
-            >
-              {isSavingManual ? 'Saving...' : 'Save & Shift to Proof Section →'}
-            </button>
-          </form>
-        </section>
-      )}
 
       {/* =================================================================== */}
       {/* SOCIAL LOGIN & PAGE INTEGRATION MODAL                               */}

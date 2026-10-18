@@ -155,14 +155,6 @@ describe('ProofSection Component', () => {
     expect(container.textContent).not.toContain('Sam Marsh');
   });
 
-  it('renders AI case study card with dynamic headline', async () => {
-    await act(async () => {
-      root.render(<ProofSection workspaceId="testeample" workspaceName="Test Eample" />);
-    });
-
-    expect(container.textContent).toContain('Case study generated with Panda Praise AI');
-  });
-
   it('displays attached screenshot proof preview when screenshotUrl is present', async () => {
     await act(async () => {
       root.render(<ProofSection workspaceId="testeample" workspaceName="Test Eample" />);
