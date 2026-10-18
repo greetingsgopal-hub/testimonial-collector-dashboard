@@ -13,7 +13,8 @@ import { ConnectedAccountsModal } from '../components/dashboard/ConnectedAccount
 import { PublishHistoryModal } from '../components/dashboard/PublishHistoryModal';
 import { SentimentDashboard } from '../components/dashboard/SentimentDashboard';
 import { WelcomeView } from '../components/dashboard/views/WelcomeView';
-import { CollectImportView } from '../components/dashboard/views/CollectImportView';
+import { FormsView } from '../components/dashboard/views/FormsView';
+import { ImportPage } from './ImportPage';
 import { SocialPostView } from '../components/dashboard/views/SocialPostView';
 import { FeedbackView } from '../components/dashboard/views/FeedbackView';
 import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
@@ -569,10 +570,9 @@ export const DashboardPage = () => {
             />
           )}
 
-          {/* Collect or Import (Merged unified view) */}
-          {(activeTab === 'forms' || activeTab === 'import') && (
-            <CollectImportView
-              initialSubTab={activeTab === 'import' ? 'import' : 'collect'}
+          {/* Forms View (Dedicated to review collection forms, form studio & templates) */}
+          {activeTab === 'forms' && (
+            <FormsView
               onConfigureForm={() => setShowCollectionModal(true)}
               onSendInvites={handleCopyLink}
               onViewProof={() => setActiveTab('proof')}
@@ -582,6 +582,13 @@ export const DashboardPage = () => {
               reviews={effectiveReviews}
               stats={effectiveStats}
             />
+          )}
+
+          {/* Import Section (Collection form completely removed, dedicated strictly to importing praise) */}
+          {activeTab === 'import' && (
+            <div className="max-w-5xl mx-auto font-sans animate-fade-in">
+              <ImportPage onViewProof={() => setActiveTab('proof')} />
+            </div>
           )}
 
           {/* Feedback Queue (Unsatisfied 1-3 star ratings) */}
