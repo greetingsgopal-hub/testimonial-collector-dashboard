@@ -14,7 +14,7 @@ import { PublishHistoryModal } from '../components/dashboard/PublishHistoryModal
 import { SentimentDashboard } from '../components/dashboard/SentimentDashboard';
 import { WelcomeView } from '../components/dashboard/views/WelcomeView';
 import { FormsView } from '../components/dashboard/views/FormsView';
-import { ImportPage } from './ImportPage';
+import { ImportTestimonialsHub, ImportedTestimonial } from '../components/dashboard/ImportTestimonialsHub';
 import { SocialPostView } from '../components/dashboard/views/SocialPostView';
 import { FeedbackView } from '../components/dashboard/views/FeedbackView';
 import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
@@ -140,6 +140,18 @@ export const DashboardPage = () => {
     window.addEventListener('panda-praise:publish-complete', handlePublishComplete);
     return () => window.removeEventListener('panda-praise:publish-complete', handlePublishComplete);
   }, [activeProjectId]);
+
+  // Handle immediate shift navigation event from ImportTestimonialsHub
+  useEffect(() => {
+    const handleShiftNav = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.tab === 'proof') {
+        setActiveTab('proof');
+      }
+    };
+    window.addEventListener('pandapraise:navigate', handleShiftNav);
+    return () => window.removeEventListener('pandapraise:navigate', handleShiftNav);
+  }, [setActiveTab]);
 
   // Handle OAuth callback redirects in query params
   useEffect(() => {
@@ -584,10 +596,41 @@ export const DashboardPage = () => {
             />
           )}
 
-          {/* Import Section (Collection form completely removed, dedicated strictly to importing praise) */}
+          {/* Import Section - Real 4-Way Production Pipeline (Social Scraper, Screenshots OCR, CSV, Manual) */}
           {activeTab === 'import' && (
             <div className="max-w-5xl mx-auto font-sans animate-fade-in">
-              <ImportPage onViewProof={() => setActiveTab('proof')} />
+              <ImportTestimonialsHub
+                workspaceId={impersonatedWorkspace?.id || workspace?.id || project?.id || 'besteample'}
+                workspaceName={impersonatedWorkspace?.name || workspace?.name || project?.name || 'besteample'}
+                onShiftToProof={(newItems: ImportedTestimonial[]) => {
+                  if (newItems && newItems.length > 0) {
+                    const mappedReviews: Review[] = newItems.map((item) => ({
+                      id: item.id || `import-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+                      projectId: activeProjectId || '',
+                      name: item.authorName,
+                      email: '',
+                      role: item.authorRole,
+                      company: '',
+                      rating: item.rating,
+                      title: item.authorRole || `${item.source} Review`,
+                      content: item.content,
+                      type: item.mediaType === 'image' ? 'screenshot' : 'text',
+                      source: 'import',
+                      status: 'approved',
+                      isFeatured: false,
+                      consent: true,
+                      createdAt: item.createdAt || new Date().toISOString(),
+                      tags: item.tags || [],
+                      screenshotUrl: item.screenshotUrl || undefined,
+                    }));
+                    setReviews((prev) => [...mappedReviews, ...prev]);
+                    for (const rev of mappedReviews) {
+                      storage.createReview(rev, activeProjectId).catch(() => null);
+                    }
+                  }
+                  setActiveTab('proof');
+                }}
+              />
             </div>
           )}
 

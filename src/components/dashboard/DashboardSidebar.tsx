@@ -14,7 +14,6 @@ import {
   Smile,
   BarChart2,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
 import SidebarFooter from './SidebarFooter';
 
 export type DashboardTab =
@@ -49,10 +48,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   mobileOpen = false,
   onClose,
 }) => {
-  const { user } = useAuth();
-  const displayName = user?.displayName || 'Gopal Thakur';
-  const initialLetter = (displayName.trim()[0] || 'G').toUpperCase();
-
   // Close the mobile drawer on Escape
   useEffect(() => {
     if (!mobileOpen || !onClose) return;
@@ -92,17 +87,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         >
           <X className="w-4.5 h-4.5" />
         </button>
-      </div>
-
-      {/* User Profile Widget (Stitch Architecture) */}
-      <div className="px-5 py-3.5 border-b border-slate-100 flex items-center space-x-3.5">
-        <div className="w-9 h-9 rounded-full bg-[#ece8fd] text-purple-700 flex items-center justify-center font-bold text-sm shadow-2xs shrink-0">
-          {initialLetter}
-        </div>
-        <div className="min-w-0">
-          <h2 className="text-sm font-bold text-slate-900 leading-tight truncate">{displayName}</h2>
-          <p className="text-xs font-normal text-slate-400 mt-0.5">Admin</p>
-        </div>
       </div>
 
       {/* ── Navigation Items (Divided into Stitch Architecture) ── */}

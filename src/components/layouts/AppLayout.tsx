@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { Search, Sparkles } from 'lucide-react';
+import { ImportTestimonialsHub, ImportedTestimonial } from '../dashboard/ImportTestimonialsHub';
 
 export interface Testimonial {
   id: string;
@@ -12,6 +13,7 @@ export interface Testimonial {
   status: 'Approved' | 'Pending Review';
   tags?: string[];
   createdAt?: string;
+  screenshotUrl?: string | null;
 }
 
 export interface AppLayoutProps {
@@ -38,6 +40,17 @@ export default function AppLayout({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState<boolean>(false);
 
+  useEffect(() => {
+    const handleShiftNav = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.tab === 'proof') {
+        setActiveNav('proof');
+      }
+    };
+    window.addEventListener('pandapraise:navigate', handleShiftNav);
+    return () => window.removeEventListener('pandapraise:navigate', handleShiftNav);
+  }, []);
+
   // Load real testimonials from Firebase Firestore
   const loadTestimonials = async () => {
     setIsLoading(true);
@@ -57,6 +70,7 @@ export default function AppLayout({
           rating: Number(data.rating || 5),
           status: data.status === 'approved' || !data.status ? 'Approved' : 'Pending Review',
           tags: data.tags || ['Ease of use', 'Time saved'],
+          screenshotUrl: data.screenshotUrl || null,
         };
       });
 
@@ -389,6 +403,17 @@ export default function AppLayout({
                           ))}
                         </div>
 
+                        {t.screenshotUrl && (
+                          <div className="mb-3 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 relative group">
+                            <img
+                              src={t.screenshotUrl}
+                              alt={`${t.authorName} Proof`}
+                              className="w-full max-h-48 object-contain object-top rounded-xl"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+
                         <p className="text-sm text-slate-700 leading-relaxed font-normal">
                           {t.content}
                         </p>
@@ -397,6 +422,29 @@ export default function AppLayout({
                   )}
                 </section>
               </>
+            ) : activeNav === 'import' ? (
+              <ImportTestimonialsHub
+                workspaceId={workspaceId}
+                workspaceName={workspaceId}
+                onShiftToProof={(newItems: ImportedTestimonial[]) => {
+                  if (newItems && newItems.length > 0) {
+                    setTestimonials((prev) => [
+                      ...newItems.map((item) => ({
+                        id: item.id || String(Date.now()),
+                        authorName: item.authorName,
+                        authorRole: item.authorRole,
+                        content: item.content,
+                        rating: item.rating,
+                        status: 'Approved' as const,
+                        tags: item.tags,
+                        screenshotUrl: item.screenshotUrl || null,
+                      })),
+                      ...prev,
+                    ]);
+                  }
+                  setActiveNav('proof');
+                }}
+              />
             ) : (
               <div className="p-12 text-center text-slate-500">
                 <h2 className="text-xl font-bold text-slate-800 capitalize">{activeNav} Section</h2>
