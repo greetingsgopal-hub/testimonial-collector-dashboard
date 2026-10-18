@@ -250,7 +250,9 @@ describe('UnifiedReviewFeedbackSystem Production Suite', () => {
       })
     );
 
-    // Shows thank you screen
+    // Shows thank you screen with viral loop
     expect(container.textContent).toContain('Thank You for Your Feedback!');
+    expect(container.textContent).toContain('Run your own business?');
+    expect(container.textContent).toContain('Claim Your Free PandaPraise Workspace');
   });
 });

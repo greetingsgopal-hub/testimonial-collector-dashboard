@@ -16,7 +16,18 @@ import {
   CheckCircle2,
   Share2,
   Lock,
+  ArrowRight,
 } from 'lucide-react';
+
+export interface CustomerFormSubmission {
+  meta1Value: string;
+  meta2Value: string;
+  meta3Value: string;
+  meta4Value: string;
+  selectedEmojiIndex: number;
+  matrixRatings: [number | null, number | null, number | null, number | null];
+  openFeedbackText: string;
+}
 
 // ============================================================================
 // 1. CONFIGURATION & BILINGUAL DICTIONARY (English & Hinglish Support)
@@ -374,6 +385,46 @@ export function UnifiedReviewFormRenderer({
         </div>
       </div>
     </form>
+  );
+}
+
+// ============================================================================
+// 2b. CONSTANT TEMPLATE ADAPTER (Used by PublicCustomerFeedbackPage)
+// ============================================================================
+export function ConstantReviewFeedbackTemplate({
+  texts,
+  submission,
+  onChangeSubmission,
+  onSubmit,
+  isSubmitting = false,
+  showSubmitButton: _showSubmitButton = true,
+}: {
+  texts: ReviewFormConfig;
+  submission?: CustomerFormSubmission;
+  onChangeSubmission?: (next: CustomerFormSubmission) => void;
+  onSubmit?: (e?: any) => void;
+  isSubmitting?: boolean;
+  showSubmitButton?: boolean;
+}) {
+  return (
+    <UnifiedReviewFormRenderer
+      config={texts}
+      isLockedForEndUser={true}
+      isSubmitting={isSubmitting}
+      onSubmitForm={(formData) => {
+        if (onChangeSubmission && submission) {
+          onChangeSubmission({
+            ...submission,
+            selectedEmojiIndex: formData.selectedEmojiIndex,
+            matrixRatings: formData.matrixRatings,
+            openFeedbackText: formData.improvementText,
+          });
+        }
+        if (onSubmit) {
+          onSubmit(formData as any);
+        }
+      }}
+    />
   );
 }
 
@@ -796,13 +847,41 @@ export function PublicCustomerFeedbackPage({
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-[#314424] flex items-center justify-center p-6 font-sans">
-        <div className="bg-[#FBF6EA] text-[#1C2417] rounded-3xl p-8 max-w-md w-full text-center shadow-2xl space-y-3">
-          <CheckCircle2 className="w-12 h-12 text-[#314424] mx-auto" />
-          <h2 className="text-2xl font-extrabold">Thank You for Your Feedback!</h2>
-          <p className="text-xs sm:text-sm text-[#314424]/80">
-            Your review has been successfully recorded for {config.brandPillText}.
-          </p>
+      <div className="min-h-screen bg-[#314424] flex items-center justify-center p-6 font-sans antialiased select-none">
+        <div className="bg-[#FBF6EA] text-[#1C2417] rounded-3xl p-8 sm:p-10 max-w-lg w-full text-center shadow-2xl space-y-6">
+          <div className="w-16 h-16 rounded-full bg-[#314424]/10 text-[#314424] flex items-center justify-center mx-auto">
+            <CheckCircle2 className="w-9 h-9" />
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#11160E]">
+              Thank You for Your Feedback!
+            </h2>
+            <p className="text-xs sm:text-sm text-[#314424]/80 leading-relaxed max-w-sm mx-auto">
+              Your review has been successfully recorded and verified for{' '}
+              <strong className="text-[#314424]">{config.brandPillText}</strong>.
+            </p>
+          </div>
+
+          {/* CONVERT CUSTOMER TO USER: Viral Product Loop */}
+          <div className="pt-4 border-t border-[#314424]/15 space-y-3 text-left">
+            <div className="p-4 rounded-2xl bg-[#314424] text-[#FBF6EA] space-y-2 relative overflow-hidden shadow-md">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-300">
+                <Sparkles className="w-4 h-4" />
+                <span>Run your own business?</span>
+              </div>
+              <p className="text-xs text-[#FBF6EA]/90 leading-relaxed">
+                Collect automated customer testimonials and display high-converting Wall of Love widgets just like {config.brandPillText}.
+              </p>
+              <a
+                href="/signup"
+                className="mt-2 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-[#314424] text-xs font-extrabold hover:bg-slate-100 transition-all cursor-pointer shadow-sm"
+              >
+                <span>Claim Your Free PandaPraise Workspace</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     );

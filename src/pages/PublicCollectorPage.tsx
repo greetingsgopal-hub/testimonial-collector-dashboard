@@ -28,7 +28,7 @@ import { storage } from '../lib/storage';
 import { sanitizeText } from '../lib/security';
 import { MALE_ANIMATED_AVATAR, FEMALE_ANIMATED_AVATAR } from '../lib/defaultAvatars';
 import { usePageSeo } from '../lib/seo';
-import { PublicCustomerFeedbackPage } from '../components/dashboard/UnifiedReviewFeedbackSystem';
+import PublicCustomerFeedbackPage from '../components/dashboard/PublicCustomerFeedbackPage';
 
 const COPY = {
   en: {
