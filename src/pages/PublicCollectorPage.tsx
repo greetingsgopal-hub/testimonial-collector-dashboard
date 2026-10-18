@@ -24,6 +24,7 @@ import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
 import { cleanBrandOrProductName, deduplicateRepeatedString, sanitizeText, validateReviewInput } from '../lib/security';
 import { CollectorLang } from '../lib/collectorI18n';
+import { MALE_ANIMATED_AVATAR, FEMALE_ANIMATED_AVATAR } from '../lib/defaultAvatars';
 
 const COPY_TEXT = {
   en: {
@@ -38,11 +39,11 @@ const COPY_TEXT = {
     writtenReview: 'Written Review',
     video: 'Video',
     videoPerk: '+2x Perk',
-    yourReview: 'Your Review',
+    yourReview: 'Your Review (Hinglish / English)',
     charLimit: '/ 600',
     chip1: 'What problem did it solve?',
     chip2: 'Favorite feature?',
-    contentPlaceholder: (b: string) => `What did you love most? Share your authentic thoughts, results, or why you'd recommend ${b}...`,
+    contentPlaceholder: (b: string) => `What did you love most? Share your authentic thoughts in English or Hinglish about ${b}...`,
     videoSectionTitle: 'Video Testimonial (+2x Perk)',
     videoRecordTab: 'Record Camera',
     videoUploadTab: 'Upload Video',
@@ -54,17 +55,23 @@ const COPY_TEXT = {
     uploadVideoBtn: 'Select Video File (MP4, WebM, MOV)',
     aboutYou: 'About You',
     verifiedBadge: 'Verified Badge',
-    fullName: 'Full Name',
-    namePlaceholder: 'e.g. Alex Rivera',
+    fullName: 'Name',
+    namePlaceholder: 'e.g. Rahul Sharma / Alex Rivera',
     removePhoto: '✕ Remove photo',
     blankAvatarSet: '✓ Blank avatar set',
     keepAvatarBlank: 'Keep avatar blank',
-    roleLabel: 'Role / Company',
+    roleLabel: 'Designation',
     optional: '(Optional)',
-    rolePlaceholder: 'e.g. Product Lead @ Acme Corp',
+    rolePlaceholder: 'e.g. Founder, Marketing Lead, Freelancer',
     emailLabel: 'Email Address',
     emailPrivate: '(Kept private)',
     emailPlaceholder: 'alex@acme.com',
+    avatarTitle: 'Profile Picture',
+    avatarSubtitle: 'Default Animated / Upload',
+    maleAvatarBtn: '👨 Male Avatar',
+    femaleAvatarBtn: '👩 Female Avatar',
+    uploadPhotoBtn: '📷 Upload Photo',
+    deselectAvatarBtn: '✕ Deselect',
     livePreview: 'Live Preview',
     livePreviewPlaceholder: 'Your feedback and review will appear here in real-time as you type above...',
     today: 'Today',
@@ -87,11 +94,11 @@ const COPY_TEXT = {
     writtenReview: 'Likh kar Review Dein',
     video: 'Video Review',
     videoPerk: '+2x Perk',
-    yourReview: 'Aapka Review',
+    yourReview: 'Aapka Review (Hinglish / English)',
     charLimit: '/ 600',
     chip1: 'Kaun si samasya solve hui?',
     chip2: 'Sabse pasandida feature?',
-    contentPlaceholder: (b: string) => `Aapko sabse zyada kya pasand aaya? Apne results share karein ya batayein ki aap ${b} kyu recommend karenge...`,
+    contentPlaceholder: (_b: string) => `Aapko sabse zyada kya pasand aaya? Apna review Hinglish ya English mein share karein...`,
     videoSectionTitle: 'Video Testimonial (+2x Perk)',
     videoRecordTab: 'Camera se Record Karein',
     videoUploadTab: 'Video File Upload Karein',
@@ -103,17 +110,23 @@ const COPY_TEXT = {
     uploadVideoBtn: 'Video File Chunein (MP4, WebM, MOV)',
     aboutYou: 'Aapke Baare Mein',
     verifiedBadge: 'Verified Badge',
-    fullName: 'Poora Naam',
-    namePlaceholder: 'e.g. Alex Rivera',
+    fullName: 'Name (Poora Naam)',
+    namePlaceholder: 'e.g. Rahul Sharma / Alex Rivera',
     removePhoto: '✕ Photo hatayein',
     blankAvatarSet: '✓ Blank avatar set',
     keepAvatarBlank: 'Avatar khali rakhein',
-    roleLabel: 'Job Title / Company',
+    roleLabel: 'Designation (Job Title / Company)',
     optional: '(Optional)',
-    rolePlaceholder: 'Jaise: Founder @ Sharma Tech',
+    rolePlaceholder: 'Jaise: Founder, Marketing Lead, Freelancer',
     emailLabel: 'Email Address',
     emailPrivate: '(Gupt rakha jayega)',
     emailPlaceholder: 'alex@acme.com',
+    avatarTitle: 'Profile Picture',
+    avatarSubtitle: 'Animated Avatar / Photo',
+    maleAvatarBtn: '👨 Male Avatar',
+    femaleAvatarBtn: '👩 Female Avatar',
+    uploadPhotoBtn: '📷 Photo Upload Karein',
+    deselectAvatarBtn: '✕ Hatayein',
     livePreview: 'Live Preview',
     livePreviewPlaceholder: 'Aapka review yahan real-time mein dikhega jaise-jaise aap form bharenge...',
     today: 'Aaj',
@@ -1259,6 +1272,86 @@ export const PublicCollectorPage: React.FC = () => {
                   className="w-full rounded-xl border border-slate-200/80 bg-slate-50/60 px-3.5 py-2 text-xs text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 shadow-2xs"
                   required
                 />
+              </div>
+            </div>
+
+            {/* Quick Profile Picture Selector (Animated Avatars & Upload) */}
+            <div className="p-3 rounded-xl border border-slate-200/80 bg-slate-50/60 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700">
+                  {t.avatarTitle}
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  {t.avatarSubtitle}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  id="collector-avatar-male-btn"
+                  onClick={() => {
+                    if (formData.avatarUrl === MALE_ANIMATED_AVATAR) {
+                      setFormData((prev) => ({ ...prev, avatarUrl: '' }));
+                    } else {
+                      setFormData((prev) => ({ ...prev, avatarUrl: MALE_ANIMATED_AVATAR }));
+                      setKeepAvatarBlank(false);
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+                    formData.avatarUrl === MALE_ANIMATED_AVATAR
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>{t.maleAvatarBtn}</span>
+                  {formData.avatarUrl === MALE_ANIMATED_AVATAR && <Check className="w-3 h-3 text-white" />}
+                </button>
+
+                <button
+                  type="button"
+                  id="collector-avatar-female-btn"
+                  onClick={() => {
+                    if (formData.avatarUrl === FEMALE_ANIMATED_AVATAR) {
+                      setFormData((prev) => ({ ...prev, avatarUrl: '' }));
+                    } else {
+                      setFormData((prev) => ({ ...prev, avatarUrl: FEMALE_ANIMATED_AVATAR }));
+                      setKeepAvatarBlank(false);
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+                    formData.avatarUrl === FEMALE_ANIMATED_AVATAR
+                      ? 'bg-pink-600 text-white border-pink-600 shadow-2xs'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>{t.femaleAvatarBtn}</span>
+                  {formData.avatarUrl === FEMALE_ANIMATED_AVATAR && <Check className="w-3 h-3 text-white" />}
+                </button>
+
+                <button
+                  type="button"
+                  id="collector-avatar-upload-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <Camera className="w-3.5 h-3.5 text-slate-500" />
+                  <span>{t.uploadPhotoBtn}</span>
+                </button>
+
+                {Boolean(formData.avatarUrl) && (
+                  <button
+                    type="button"
+                    id="collector-avatar-deselect-btn"
+                    onClick={() => {
+                      setFormData((prev) => ({ ...prev, avatarUrl: '' }));
+                      setKeepAvatarBlank(false);
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <X className="w-3 h-3" />
+                    <span>{t.deselectAvatarBtn}</span>
+                  </button>
+                )}
               </div>
             </div>
 

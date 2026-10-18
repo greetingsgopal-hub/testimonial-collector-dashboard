@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   LayoutTemplate,
   Eye,
@@ -11,8 +11,12 @@ import {
   ExternalLink,
   Save,
   Check,
+  Camera,
+  X,
+  Sparkles,
 } from 'lucide-react';
 import { CollectionForm } from '../../types';
+import { MALE_ANIMATED_AVATAR, FEMALE_ANIMATED_AVATAR } from '../../lib/defaultAvatars';
 
 export interface FormTemplate {
   id: string;
@@ -111,9 +115,37 @@ export function CollectionFormBuilder({
     }
   }, [collectionForm]);
 
-  // Live Preview Form State
+  // Live Preview Form State (Simple Collection Form: Review, Name, Designation, Male/Female Avatar)
   const [previewRating, setPreviewRating] = useState<number>(5);
   const [previewText, setPreviewText] = useState<string>('');
+  const [previewName, setPreviewName] = useState<string>('Rahul Sharma');
+  const [previewDesignation, setPreviewDesignation] = useState<string>('Product Lead');
+  const [previewAvatarType, setPreviewAvatarType] = useState<'male' | 'female' | 'custom' | 'none'>('male');
+  const [previewCustomAvatarUrl, setPreviewCustomAvatarUrl] = useState<string | null>(null);
+  const previewFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handlePreviewFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setPreviewCustomAvatarUrl(reader.result);
+          setPreviewAvatarType('custom');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const activePreviewAvatar =
+    previewAvatarType === 'male'
+      ? MALE_ANIMATED_AVATAR
+      : previewAvatarType === 'female'
+      ? FEMALE_ANIMATED_AVATAR
+      : previewAvatarType === 'custom' && previewCustomAvatarUrl
+      ? previewCustomAvatarUrl
+      : null;
 
   const fallbackUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/c/${workspaceName.toLowerCase().replace(/[^a-z0-9]/g, '')}`
@@ -296,6 +328,37 @@ export function CollectionFormBuilder({
               </div>
             </div>
 
+            {/* Simple Form Layout Overview */}
+            <div className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/50 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                  <span>Simple Form Layout</span>
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
+                  Clean &amp; High-Converting
+                </span>
+              </div>
+              <ul className="text-[11px] text-slate-500 dark:text-slate-400 space-y-1 pl-1">
+                <li className="flex items-center gap-1.5">
+                  <Check className="w-3 h-3 text-emerald-500 shrink-0" />
+                  <span>One box for writing review (Hinglish/English)</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Check className="w-3 h-3 text-emerald-500 shrink-0" />
+                  <span>One box for Name</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Check className="w-3 h-3 text-emerald-500 shrink-0" />
+                  <span>One box for Designation</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Check className="w-3 h-3 text-emerald-500 shrink-0" />
+                  <span>Upload or select/deselect Male &amp; Female animated avatars</span>
+                </li>
+              </ul>
+            </div>
+
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <span className="text-xs text-slate-400">
                 Changes take effect live on <code className="text-purple-600 font-mono">/c/{workspaceName}</code>
@@ -388,18 +451,161 @@ export function CollectionFormBuilder({
               )}
             </div>
 
-            {/* Mock Textarea */}
-            <textarea
-              rows={3}
-              value={previewText}
-              onChange={(e) => setPreviewText(e.target.value)}
-              placeholder="Type your authentic review here to see live preview..."
-              className="w-full rounded-xl border border-current/20 p-3 text-xs bg-black/5 dark:bg-white/5 opacity-80 focus:outline-none focus:opacity-100 transition-opacity resize-none"
-            />
+            {/* 1. Box for Writing Review (Hinglish / English) */}
+            <div className="space-y-1.5 text-left mb-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold uppercase tracking-wider opacity-90 block">
+                  Write Review <span className="opacity-75 font-normal">(Hinglish / English)</span>
+                </label>
+                <span className="text-[10px] font-mono opacity-70">
+                  {previewText.length} / 600
+                </span>
+              </div>
+              <textarea
+                rows={3}
+                data-testid="preview-review-input"
+                value={previewText}
+                onChange={(e) => setPreviewText(e.target.value)}
+                placeholder="Share your authentic review in English or Hinglish... (Hinglish ya English mein likhein)"
+                className="w-full rounded-xl border border-current/20 p-3 text-xs bg-black/5 dark:bg-white/5 opacity-90 focus:outline-none focus:opacity-100 transition-opacity resize-none"
+              />
+            </div>
+
+            {/* 2. Box for Name & 3. Box for Designation */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3 text-left">
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-wider opacity-90 block">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  data-testid="preview-name-input"
+                  value={previewName}
+                  onChange={(e) => setPreviewName(e.target.value)}
+                  placeholder="e.g. Rahul Sharma / Alex Rivera"
+                  className="w-full rounded-xl border border-current/20 px-3 py-2 text-xs bg-black/5 dark:bg-white/5 opacity-90 focus:outline-none focus:opacity-100 transition-opacity"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-wider opacity-90 block">
+                  Designation
+                </label>
+                <input
+                  type="text"
+                  data-testid="preview-designation-input"
+                  value={previewDesignation}
+                  onChange={(e) => setPreviewDesignation(e.target.value)}
+                  placeholder="e.g. Founder, Marketing Lead"
+                  className="w-full rounded-xl border border-current/20 px-3 py-2 text-xs bg-black/5 dark:bg-white/5 opacity-90 focus:outline-none focus:opacity-100 transition-opacity"
+                />
+              </div>
+            </div>
+
+            {/* 4. Option to upload or select/de-select default male/female animated profile picture */}
+            <div className="p-3.5 rounded-xl border border-current/15 bg-black/5 dark:bg-white/5 text-left mb-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold uppercase tracking-wider opacity-90 block">
+                  Profile Picture
+                </label>
+                <span className="text-[10px] font-semibold opacity-75">
+                  Default Animated / Upload
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* Active Avatar Badge */}
+                <div
+                  className="relative w-11 h-11 rounded-2xl overflow-hidden border-2 border-current/20 flex items-center justify-center shrink-0 bg-black/10 dark:bg-white/10 shadow-2xs"
+                  title="Profile Picture Preview"
+                >
+                  {activePreviewAvatar ? (
+                    <img
+                      src={activePreviewAvatar}
+                      alt="Avatar Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs font-black uppercase opacity-75">
+                      {previewName ? previewName.slice(0, 2).toUpperCase() : 'PP'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Animated Avatars and Upload Options */}
+                <div className="flex flex-wrap items-center gap-1.5 flex-1">
+                  <button
+                    type="button"
+                    data-testid="preview-avatar-male-btn"
+                    onClick={() => setPreviewAvatarType((prev) => (prev === 'male' ? 'none' : 'male'))}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+                      previewAvatarType === 'male'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                        : 'border-current/20 hover:bg-black/10 dark:hover:bg-white/10 opacity-80'
+                    }`}
+                    title="Select/Deselect Male Animated Avatar"
+                  >
+                    <span>👨 Male</span>
+                    {previewAvatarType === 'male' && <Check className="w-3 h-3 text-white" />}
+                  </button>
+
+                  <button
+                    type="button"
+                    data-testid="preview-avatar-female-btn"
+                    onClick={() => setPreviewAvatarType((prev) => (prev === 'female' ? 'none' : 'female'))}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+                      previewAvatarType === 'female'
+                        ? 'bg-pink-600 text-white border-pink-600 shadow-xs'
+                        : 'border-current/20 hover:bg-black/10 dark:hover:bg-white/10 opacity-80'
+                    }`}
+                    title="Select/Deselect Female Animated Avatar"
+                  >
+                    <span>👩 Female</span>
+                    {previewAvatarType === 'female' && <Check className="w-3 h-3 text-white" />}
+                  </button>
+
+                  <input
+                    type="file"
+                    ref={previewFileInputRef}
+                    onChange={handlePreviewFileUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    data-testid="preview-avatar-upload-btn"
+                    onClick={() => previewFileInputRef.current?.click()}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-bold border border-current/20 hover:bg-black/10 dark:hover:bg-white/10 opacity-80 transition-all cursor-pointer flex items-center gap-1 ${
+                      previewAvatarType === 'custom' ? 'bg-purple-600 text-white border-purple-600' : ''
+                    }`}
+                    title="Upload Custom Photo"
+                  >
+                    <Camera className="w-3 h-3" />
+                    <span>Upload</span>
+                  </button>
+
+                  {previewAvatarType !== 'none' && (
+                    <button
+                      type="button"
+                      data-testid="preview-avatar-deselect-btn"
+                      onClick={() => {
+                        setPreviewAvatarType('none');
+                        setPreviewCustomAvatarUrl(null);
+                      }}
+                      className="px-2 py-1.5 rounded-lg text-[11px] font-bold text-rose-300 hover:text-rose-100 opacity-90 transition-all cursor-pointer flex items-center gap-0.5"
+                      title="Deselect Avatar"
+                    >
+                      <X className="w-3 h-3" />
+                      <span>Deselect</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
 
             <button
               type="button"
-              className="mt-4 w-full py-3 rounded-xl text-white font-bold text-xs shadow-md transition-all cursor-pointer hover:brightness-105"
+              className="w-full py-3 rounded-xl text-white font-bold text-xs shadow-md transition-all cursor-pointer hover:brightness-105"
               style={{ backgroundColor: primaryColor }}
             >
               Submit Testimonial →

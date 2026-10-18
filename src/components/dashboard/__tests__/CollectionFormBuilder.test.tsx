@@ -125,4 +125,53 @@ describe('CollectionFormBuilder Component Suite', () => {
     expect(clipboardSpy).toHaveBeenCalledWith('https://pandapraise.com/c/papasystem');
     expect(container.textContent).toContain('Link Copied!');
   });
+
+  it('6. Renders the simple collection form inputs: Review (Hinglish/English), Name, Designation, and animated avatar selection options', async () => {
+    await act(async () => {
+      root.render(<CollectionFormBuilder workspaceName="papasystem" />);
+    });
+
+    // 1. Box for writing review (Hinglish/English)
+    expect(container.textContent).toContain('Write Review');
+    expect(container.textContent).toContain('Hinglish / English');
+    const reviewInput = container.querySelector('[data-testid="preview-review-input"]') as HTMLTextAreaElement;
+    expect(reviewInput).not.toBeNull();
+
+    // 2. Box for Name
+    expect(container.textContent).toContain('Name');
+    const nameInput = container.querySelector('[data-testid="preview-name-input"]') as HTMLInputElement;
+    expect(nameInput).not.toBeNull();
+
+    // 3. Box for Designation
+    expect(container.textContent).toContain('Designation');
+    const designationInput = container.querySelector('[data-testid="preview-designation-input"]') as HTMLInputElement;
+    expect(designationInput).not.toBeNull();
+
+    // 4. Option to select / deselect male & female animated avatars
+    const maleBtn = container.querySelector('[data-testid="preview-avatar-male-btn"]') as HTMLButtonElement;
+    const femaleBtn = container.querySelector('[data-testid="preview-avatar-female-btn"]') as HTMLButtonElement;
+    const uploadBtn = container.querySelector('[data-testid="preview-avatar-upload-btn"]') as HTMLButtonElement;
+
+    expect(maleBtn).not.toBeNull();
+    expect(femaleBtn).not.toBeNull();
+    expect(uploadBtn).not.toBeNull();
+
+    // Toggling female avatar
+    await act(async () => {
+      femaleBtn.click();
+    });
+    expect(femaleBtn.classList.toString()).toContain('bg-pink-600');
+
+    // Deselect option is visible when avatar is active
+    const deselectBtn = container.querySelector('[data-testid="preview-avatar-deselect-btn"]') as HTMLButtonElement;
+    expect(deselectBtn).not.toBeNull();
+
+    await act(async () => {
+      deselectBtn.click();
+    });
+
+    // After deselect, deselect button disappears and defaults to initials
+    const deselectBtnAfter = container.querySelector('[data-testid="preview-avatar-deselect-btn"]');
+    expect(deselectBtnAfter).toBeNull();
+  });
 });
