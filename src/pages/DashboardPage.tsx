@@ -1,17 +1,12 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { DashboardSidebar, DashboardTab } from '../components/dashboard/DashboardSidebar';
-import { MetricsCards } from '../components/dashboard/MetricsCards';
-import { ReviewFilters } from '../components/dashboard/ReviewFilters';
-import { ReviewCard } from '../components/dashboard/ReviewCard';
-import { ReviewTable } from '../components/dashboard/ReviewTable';
 import { ReviewDetailModal } from '../components/dashboard/ReviewDetailModal';
 import { SocialCardModal } from '../components/dashboard/SocialCardModal';
 import { DatabaseConfigModal } from '../components/dashboard/DatabaseConfigModal';
 import { CollectionConfigModal } from '../components/dashboard/CollectionConfigModal';
 import { ConnectedAccountsModal } from '../components/dashboard/ConnectedAccountsModal';
 import { PublishHistoryModal } from '../components/dashboard/PublishHistoryModal';
-import { SentimentDashboard } from '../components/dashboard/SentimentDashboard';
 import { WelcomeView } from '../components/dashboard/views/WelcomeView';
 import { FormsView } from '../components/dashboard/views/FormsView';
 import { ImportTestimonialsHub, ImportedTestimonial } from '../components/dashboard/ImportTestimonialsHub';
@@ -20,10 +15,9 @@ import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { AccountBillingView } from '../components/dashboard/views/AccountBillingView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
-import { ReviewPipelineHero } from '../components/dashboard/ReviewPipelineHero';
+import ProofSection from '../components/dashboard/ProofSection';
 import { storage } from '../lib/storage';
-import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
-import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
+import { Review, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { getSampleReviews, isSampleDataCleared, setSampleDataCleared } from '../lib/mockData';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
@@ -31,15 +25,7 @@ import { EmailVerificationBanner } from '../components/auth/EmailVerificationBan
 import { PlanLimitBanner } from '../components/dashboard/PlanLimitBanner';
 import { UpgradeModal } from '../components/dashboard/UpgradeModal';
 import { ReferralHub } from '../components/dashboard/ReferralHub';
-import { 
-  Check,
-  X,
-  Trash2,
-  Archive,
-MailCheck,
-Menu,
-Sparkles
-} from 'lucide-react';
+import { Menu } from 'lucide-react';
 const TAB_LABEL_MAP: Record<string, string> = {
   welcome: 'Welcome Hub',
   forms: 'Forms',
@@ -100,18 +86,6 @@ export const DashboardPage = () => {
     featuredCount: 0,
     ratingBreakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
   });
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Filters State
-  const [filters, setFilters] = useState<FilterType>({
-    search: '',
-    status: 'all',
-    rating: 'all',
-    tag: 'all',
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
-  });
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
   const impersonatedWorkspace = useMemo(() => {
     try {
@@ -226,7 +200,6 @@ export const DashboardPage = () => {
 
   const refreshReviews = async () => {
     try {
-      setIsLoading(true);
       const [fetchedReviews, fetchedStats] = await Promise.all([
         storage.getReviews(activeProjectId),
         storage.getStats(activeProjectId),
@@ -235,8 +208,6 @@ export const DashboardPage = () => {
       setStats(fetchedStats);
     } catch (e) {
       console.error('[Dashboard] Failed to fetch project reviews:', e);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -282,12 +253,6 @@ export const DashboardPage = () => {
     }
     return stats;
   }, [isViewingSampleData, sampleReviews, stats]);
-
-  const availableTags = useMemo(() => {
-    const set = new Set<string>();
-    effectiveReviews.forEach(r => r.tags?.forEach(t => set.add(t)));
-    return Array.from(set);
-  }, [effectiveReviews]);
 
   // Moderation handlers
   const handleUpdateStatus = async (id: string, status: ReviewStatus) => {
@@ -339,13 +304,6 @@ export const DashboardPage = () => {
     await refreshReviews();
   };
 
-  const handleSeedDemoData = async () => {
-    if (storage.resetToSampleData) {
-      await storage.resetToSampleData(activeProjectId);
-      await refreshReviews();
-    }
-  };
-
   const collectionUrl = currentCollectionForm
     ? `${window.location.origin}/c/${currentCollectionForm.publicSlug}`
     : `${window.location.origin}/c/feedback`;
@@ -356,93 +314,6 @@ export const DashboardPage = () => {
       type: 'success',
       message: 'Direct intake review invite link copied to clipboard!',
     });
-  };
-
-  // Filtered & Sorted reviews
-  const filteredReviews = useMemo(() => {
-    return effectiveReviews.filter(r => {
-      if (filters.status !== 'all' && r.status !== filters.status) return false;
-      if (filters.rating !== 'all' && r.rating !== filters.rating) return false;
-      if (filters.tag !== 'all' && (!r.tags || !r.tags.includes(filters.tag))) return false;
-      if (filters.type && filters.type !== 'all' && r.type !== filters.type) return false;
-      if (filters.source && filters.source !== 'all' && r.source !== filters.source) return false;
-      if (filters.formId && filters.formId !== 'all' && r.collectionFormId !== filters.formId) return false;
-
-      if (filters.search.trim()) {
-        const q = filters.search.toLowerCase();
-        const matchesName = r.name.toLowerCase().includes(q);
-        const matchesCompany = r.company?.toLowerCase().includes(q);
-        const matchesContent = r.content.toLowerCase().includes(q);
-        const matchesTitle = r.title?.toLowerCase().includes(q);
-        const matchesRole = r.role.toLowerCase().includes(q);
-        if (!matchesName && !matchesCompany && !matchesContent && !matchesTitle && !matchesRole) {
-          return false;
-        }
-      }
-
-      return true;
-    }).sort((a, b) => {
-      if (filters.sortBy === 'createdAt') {
-        const timeA = new Date(a.createdAt).getTime();
-        const timeB = new Date(b.createdAt).getTime();
-        return filters.sortOrder === 'desc' ? timeB - timeA : timeA - timeB;
-      }
-      if (filters.sortBy === 'rating') {
-        return filters.sortOrder === 'desc' ? b.rating - a.rating : a.rating - b.rating;
-      }
-      if (filters.sortBy === 'name') {
-        return filters.sortOrder === 'desc' ? b.name.localeCompare(a.name) : a.name.localeCompare(b.name);
-      }
-      return 0;
-    });
-  }, [effectiveReviews, filters]);
-
-  // Bulk Selection for fast one-click moderation
-  const [selectedReviewIds, setSelectedReviewIds] = useState<Set<string>>(new Set());
-
-  const handleToggleSelect = useCallback((id: string) => {
-    setSelectedReviewIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const handleSelectAll = useCallback(() => {
-    if (selectedReviewIds.size === filteredReviews.length && filteredReviews.length > 0) {
-      setSelectedReviewIds(new Set());
-    } else {
-      setSelectedReviewIds(new Set(filteredReviews.map(r => r.id)));
-    }
-  }, [selectedReviewIds, filteredReviews]);
-
-  const handleBulkApprove = async () => {
-    const ids = Array.from(selectedReviewIds);
-    await Promise.all(ids.map(id => storage.updateReview(id, { status: 'approved', projectId: activeProjectId })));
-    setSelectedReviewIds(new Set());
-    await refreshReviews();
-  };
-
-  const handleBulkReject = async () => {
-    const ids = Array.from(selectedReviewIds);
-    await Promise.all(ids.map(id => storage.updateReview(id, { status: 'rejected', isFeatured: false, projectId: activeProjectId })));
-    setSelectedReviewIds(new Set());
-    await refreshReviews();
-  };
-
-  const handleBulkArchive = async () => {
-    const ids = Array.from(selectedReviewIds);
-    await Promise.all(ids.map(id => storage.updateReview(id, { status: 'archived', isFeatured: false, projectId: activeProjectId })));
-    setSelectedReviewIds(new Set());
-    await refreshReviews();
-  };
-
-  const handleBulkDelete = async () => {
-    const ids = Array.from(selectedReviewIds);
-    await Promise.all(ids.map(id => storage.deleteReview(id)));
-    setSelectedReviewIds(new Set());
-    await refreshReviews();
   };
 
   const handleUpdateCollectionForm = async (updates: Partial<CollectionForm>) => {
@@ -680,294 +551,13 @@ export const DashboardPage = () => {
             </div>
           )}
 
-          {/* MAIN MODERATION QUEUE & PROOF DASHBOARD VIEW */}
+          {/* MAIN PROOF SECTION (Matches Stitch Design Exactly - Replaces Cluttered Pipeline & KPI Strip) */}
           {activeTab === 'proof' && (
-            <div className="space-y-6 max-w-5xl mx-auto font-sans">
-              
-              {/* Stitch Header Row */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">Your Proof</h1>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                    {effectiveReviews.length}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="inline-flex items-center justify-center px-4 py-2 border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-medium rounded-lg text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-[0.98] transition-all shadow-2xs gap-1.5 cursor-pointer"
-                >
-                  <span className="text-base leading-none text-slate-500">+</span>
-                  <span>Invite customer</span>
-                </button>
-              </div>
-
-              {/* Praise Attributes & Quick Filter Chips */}
-              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-                <span className="text-slate-500 font-normal mr-1">Customers praise:</span>
-                {[
-                  { label: 'Ease of use', count: 42 },
-                  { label: 'Time saved', count: 38 },
-                  { label: 'Support', count: 29 },
-                ].map((item) => {
-                  const isActive = filters.tag === item.label;
-                  return (
-                    <button
-                      key={item.label}
-                      type="button"
-                      onClick={() => setFilters(prev => ({ ...prev, tag: isActive ? 'all' : item.label }))}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border transition-colors cursor-pointer ${
-                        isActive
-                          ? 'border-purple-400 bg-purple-50 text-purple-900 ring-2 ring-purple-300 font-semibold dark:bg-purple-950/50 dark:text-purple-200'
-                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>{item.label}</span>
-                      <span className="font-bold text-slate-900 dark:text-white">{item.count}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Highlighted AI Case Study Card (Stitch Design) */}
-              <div className="p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-900/60 bg-[#fbf9fe] dark:bg-purple-950/20 hover:border-purple-300 transition-colors">
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug">
-                  How Hartley Plumbing cut missed jobs to zero in one month
-                </h3>
-                <p className="mt-1 text-xs sm:text-sm font-medium text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                  <span>Case study generated with Panda Praise AI · 1 metric</span>
-                </p>
-              </div>
-
-              {/* Luminous Review Pipeline Hero & Command Center */}
-              <ReviewPipelineHero
-                stats={effectiveStats}
-                reviews={effectiveReviews}
-                projectName={project?.name}
-                isBatchActive={selectedReviewIds.size > 0}
-                onBatchToggle={handleSelectAll}
-                onInspectSentiment={() => {
-                  const sentimentElem = document.getElementById('sentiment-dashboard-section');
-                  if (sentimentElem) {
-                    sentimentElem.scrollIntoView({ behavior: 'smooth' });
-                  } else {
-                    setActiveTab('analyze');
-                  }
-                }}
-                onInviteCustomer={handleCopyLink}
-                onOpenSocialCard={() => {
-                  const topApproved = effectiveReviews.find(r => r.status === 'approved') || effectiveReviews[0];
-                  if (topApproved) setSocialCardReview(topApproved);
-                }}
-                onConfigure={() => setShowCollectionModal(true)}
-                onOpenHistory={() => setShowHistoryModal(true)}
-                onOpenAccounts={() => setShowAccountsModal(true)}
+            <div className="font-sans animate-fade-in">
+              <ProofSection
+                workspaceId={impersonatedWorkspace?.id || workspace?.id || project?.id || 'besteample'}
+                workspaceName={impersonatedWorkspace?.name || workspace?.name || project?.name || 'besteample'}
               />
-
-              {/* Sample Reviews Notice for New Accounts */}
-              {isViewingSampleData && (
-                <div className="apple-glass-card border-violet-500/30 bg-violet-500/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in shadow-2xs rounded-2xl">
-                  <div className="flex items-center gap-3">
-                    <span className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse shrink-0" />
-                    <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-white tracking-tight">
-                        You are viewing sample reviews
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Real customer reviews will appear here automatically as they come in.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleClearSampleData}
-                    className="apple-touch px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all cursor-pointer self-start sm:self-auto shrink-0 shadow-2xs"
-                  >
-                    Clear Sample Data
-                  </button>
-                </div>
-              )}
-
-              {/* Top KPIs & Distribution (Horizontal Luminous Strip) */}
-              <MetricsCards
-                stats={effectiveStats}
-                onFilterByStatus={(status) => setFilters(prev => ({ ...prev, status }))}
-                onFilterByRating={(rating) => setFilters(prev => ({ ...prev, rating }))}
-              />
-
-              {/* AI Sentiment Analysis */}
-              {effectiveReviews.length > 0 && (
-                <div id="sentiment-dashboard-section">
-                  <SentimentDashboard reviews={effectiveReviews} />
-                </div>
-              )}
-
-              {/* Filters, View Switcher & Export */}
-              <ReviewFilters
-                filters={filters}
-                setFilters={setFilters}
-                stats={effectiveStats}
-                viewMode={viewMode}
-                setViewMode={setViewMode}
-                onExportJSON={() => exportReviewsToJSON(effectiveReviews)}
-                onExportCSV={() => exportReviewsToCSV(effectiveReviews)}
-                onResetSeedData={handleSeedDemoData}
-                availableTags={availableTags}
-              />
-
-              {/* Bulk Selection Header Toolbar */}
-              {filteredReviews.length > 0 && (
-                <div className="flex items-center justify-between px-4 py-2.5 bg-slate-100/90 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 text-xs shadow-2xs">
-                  <label className="flex items-center gap-2.5 font-semibold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      id="bulk-select-all"
-                      checked={selectedReviewIds.size > 0 && selectedReviewIds.size === filteredReviews.length}
-                      onChange={handleSelectAll}
-                      className="w-4 h-4 rounded text-indigo-600 focus:ring-0 accent-indigo-600 cursor-pointer"
-                    />
-                    <span>
-                      {selectedReviewIds.size > 0
-                        ? `${selectedReviewIds.size} of ${filteredReviews.length} selected`
-                        : `Select all for bulk moderation (${filteredReviews.length})`}
-                    </span>
-                  </label>
-
-                  {selectedReviewIds.size > 0 && (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <button
-                        type="button"
-                        id="bulk-approve-btn"
-                        onClick={handleBulkApprove}
-                        className="apple-touch px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
-                        title="Bulk Approve Selected"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Approve ({selectedReviewIds.size})</span>
-                      </button>
-                      <button
-                        type="button"
-                        id="bulk-reject-btn"
-                        onClick={handleBulkReject}
-                        className="apple-touch px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
-                        title="Bulk Reject Selected"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                        <span>Reject</span>
-                      </button>
-                      <button
-                        type="button"
-                        id="bulk-archive-btn"
-                        onClick={handleBulkArchive}
-                        className="apple-touch px-3 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-semibold text-xs cursor-pointer shadow-xs active:scale-95 transition-all"
-                        title="Bulk Archive Selected"
-                      >
-                        <Archive className="w-3.5 h-3.5" />
-                        <span>Archive</span>
-                      </button>
-                      <button
-                        type="button"
-                        id="bulk-delete-btn"
-                        onClick={handleBulkDelete}
-                        className="apple-touch p-1.5 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer transition-colors"
-                        title="Delete Selected"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Empty State / Queue Clears Fast Delight Card */}
-              {filteredReviews.length === 0 && !isLoading && (
-                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-8 sm:p-10 flex flex-col items-center justify-center text-center gap-3 my-4 shadow-sm">
-                  <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-200/60 dark:border-indigo-800">
-                    <MailCheck className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-display">
-                    Queue Clears Fast!
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
-                    Approved items instantly populate your Wall of Love embed code & API feed.
-                  </p>
-                </div>
-              )}
-
-              {/* Content Display */}
-              {isLoading ? (
-                <div className="py-20 flex flex-col items-center justify-center text-gray-500">
-                  <div className="w-8 h-8 border-2 border-[#6701e6]/30 border-t-[#6701e6] rounded-full animate-spin mb-3" />
-                  <p className="text-xs">Loading project testimonials...</p>
-                </div>
-              ) : filteredReviews.length === 0 ? null : viewMode === 'grid' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {filteredReviews.map((review) => (
-                    <ReviewCard
-                      key={review.id}
-                      review={review}
-                      isSelected={selectedReviewIds.has(review.id)}
-                      onToggleSelect={() => handleToggleSelect(review.id)}
-                      onUpdateStatus={handleUpdateStatus}
-                      onToggleFeatured={handleToggleFeatured}
-                      onDelete={handleDeleteReview}
-                      onOpenDetails={(rev) => setInspectingReview(rev)}
-                      onOpenSocialCard={setSocialCardReview}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <ReviewTable
-                  reviews={filteredReviews}
-                  selectedIds={selectedReviewIds}
-                  onToggleSelect={handleToggleSelect}
-                  onUpdateStatus={handleUpdateStatus}
-                  onToggleFeatured={handleToggleFeatured}
-                  onDelete={handleDeleteReview}
-                  onOpenDetails={(rev) => setInspectingReview(rev)}
-                  onOpenSocialCard={setSocialCardReview}
-                />
-              )}
-
-              {/* Sticky Mobile Bulk Float Bar (Luminous Proof) */}
-              {selectedReviewIds.size > 0 && (
-                <div className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-40 animate-slide-up">
-                  <div className="rounded-2xl bg-slate-950/95 dark:bg-slate-900/95 text-white p-3.5 shadow-2xl backdrop-blur-xl border border-white/10 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 pl-1">
-                      <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">
-                        {selectedReviewIds.size}
-                      </span>
-                      <span className="text-xs font-semibold text-slate-200">Selected</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={handleBulkApprove}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold active:scale-95 transition-transform cursor-pointer shadow-sm"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Approve All</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleBulkReject}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold active:scale-95 transition-transform cursor-pointer shadow-sm"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                        <span>Reject</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedReviewIds(new Set())}
-                        className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                        title="Dismiss Selection"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
