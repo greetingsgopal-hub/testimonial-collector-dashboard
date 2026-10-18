@@ -30,7 +30,7 @@ const AffiliatePage = React.lazy(() => import('./pages/AffiliatePage').then((m) 
 const DeveloperDocsPage = React.lazy(() => import('./pages/DeveloperDocsPage').then((m) => ({ default: m.DeveloperDocsPage })));
 const AdminPage = React.lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })));
 const BillingAndPlansPage = React.lazy(() => import('./pages/BillingAndPlansPage').then((m) => ({ default: m.BillingAndPlansPage })));
-const ProofDashboard = React.lazy(() => import('./components/dashboard/ProofDashboard'));
+const AppLayout = React.lazy(() => import('./components/layouts/AppLayout'));
 import { SuperadminGuard } from './components/auth/SuperadminGuard';
 import { captureReferralCode } from './lib/referral';
 
@@ -161,7 +161,15 @@ export function App() {
               path="/proof"
               element={
                 <ProtectedRoute>
-                  <ProofDashboard />
+                  <AppLayout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/app"
+              element={
+                <ProtectedRoute>
+                  <AppLayout />
                 </ProtectedRoute>
               }
             />

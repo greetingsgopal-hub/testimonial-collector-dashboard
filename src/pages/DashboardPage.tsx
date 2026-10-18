@@ -22,7 +22,7 @@ import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { TagsView } from '../components/dashboard/views/TagsView';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
 import { ReviewPipelineHero } from '../components/dashboard/ReviewPipelineHero';
-import ProofDashboard from '../components/dashboard/ProofDashboard';
+import AppLayout from '../components/layouts/AppLayout';
 import { storage } from '../lib/storage';
 import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
@@ -666,9 +666,9 @@ export const DashboardPage = () => {
 
               {proofSubView === 'stitch' ? (
                 <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-                  <ProofDashboard
-                    workspaceId={workspace?.id || project?.id || 'besteample'}
-                    userName={user?.displayName || 'Erin Doyle'}
+                  <AppLayout
+                    workspaceId={workspace?.id || project?.id || 'papasystem'}
+                    userName={user?.displayName || 'Gopal Thakur'}
                     userRole="Admin"
                   />
                 </div>
