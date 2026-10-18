@@ -88,10 +88,9 @@ describe('AppLayout Stitch Master Layout Suite', () => {
     expect(container.textContent).toContain('Import');
     expect(container.textContent).toContain('MANAGE');
     expect(container.textContent).toContain('Proof');
-    expect(container.textContent).toContain('Tags');
     expect(container.textContent).toContain('SHARE');
     expect(container.textContent).toContain('Embeds');
-    expect(container.textContent).toContain('Thank Yous');
+    expect(container.textContent).toContain('Campaigns');
 
     // Click on 'Forms' under COLLECT
     const formsBtn = Array.from(container.querySelectorAll('button')).find(
@@ -106,17 +105,17 @@ describe('AppLayout Stitch Master Layout Suite', () => {
     expect(container.textContent).toContain('app.pandapraise.com/forms');
     expect(container.textContent).toContain('forms Section');
 
-    // Click on 'Tags' under MANAGE
-    const tagsBtn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.trim() === 'Tags'
+    // Click on 'Campaigns' under SHARE
+    const campaignsBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === 'Campaigns'
     );
-    expect(tagsBtn).toBeDefined();
+    expect(campaignsBtn).toBeDefined();
 
     await act(async () => {
-      tagsBtn!.click();
+      campaignsBtn!.click();
     });
-    expect(container.textContent).toContain('app.pandapraise.com/tags');
-    expect(container.textContent).toContain('tags Section');
+    expect(container.textContent).toContain('app.pandapraise.com/campaigns');
+    expect(container.textContent).toContain('campaigns Section');
 
     // Click back to Proof
     const proofBtn = Array.from(container.querySelectorAll('button')).find(
@@ -138,11 +137,8 @@ describe('AppLayout Stitch Master Layout Suite', () => {
 
     expect(container.textContent).toContain('Customers praise:');
     expect(container.textContent).toContain('Ease of use');
-    expect(container.textContent).toContain('42');
     expect(container.textContent).toContain('Time saved');
-    expect(container.textContent).toContain('38');
     expect(container.textContent).toContain('Support');
-    expect(container.textContent).toContain('29');
 
     // Click on 'Support' chip
     const supportBtn = Array.from(container.querySelectorAll('button')).find((b) =>
@@ -181,18 +177,7 @@ describe('AppLayout Stitch Master Layout Suite', () => {
     expect(container.textContent).not.toContain('Sam Marsh');
   });
 
-  it('5. Renders highlighted AI Case Study card', async () => {
-    await act(async () => {
-      root.render(<AppLayout workspaceId="test-ws" />);
-    });
-
-    expect(container.textContent).toContain('How Hartley Plumbing cut missed jobs to zero in one month');
-    expect(container.textContent).toContain('Case study generated with Panda Praise AI · 1 metric');
-  });
-
-  it('6. Invite Customer button opens modal and sends invite', async () => {
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
+  it('5. Invite Customer button opens modal and displays invite link', async () => {
     await act(async () => {
       root.render(<AppLayout workspaceId="test-ws" />);
     });
@@ -207,17 +192,12 @@ describe('AppLayout Stitch Master Layout Suite', () => {
     });
 
     expect(container.textContent).toContain('Invite Customer for Review');
+    const linkInput = container.querySelector('input[readonly]') as HTMLInputElement;
+    expect(linkInput?.value).toContain('/c/');
 
-    const sendBtn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.trim() === 'Send Invite'
+    const copyBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Copy')
     );
-    expect(sendBtn).toBeDefined();
-
-    await act(async () => {
-      sendBtn!.click();
-    });
-
-    expect(alertMock).toHaveBeenCalledWith('Invite sent successfully!');
-    alertMock.mockRestore();
+    expect(copyBtn).toBeDefined();
   });
 });

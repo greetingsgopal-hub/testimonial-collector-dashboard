@@ -442,6 +442,7 @@ export default function ProofSection({
           </div>
           <input
             type="text"
+            id="proof-search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="do the techs actually use it — search keywords, names, roles, or sources..."

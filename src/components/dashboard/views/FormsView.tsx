@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { Review, ReviewStats, CollectionForm } from '../../../types';
-import { QrCodeGenerator } from '../QrCodeGenerator';
+import { ReviewQrCardModal } from '../ReviewQrCardModal';
 import { CollectionFormBuilder } from '../CollectionFormBuilder';
 
 export interface FormsViewProps {
@@ -38,7 +38,7 @@ export const FormsView: React.FC<FormsViewProps> = ({
   reviews = [],
   stats,
 }) => {
-  const { project, collectionForm } = useAuth();
+  const { workspace, project, collectionForm } = useAuth();
   const [copied, setCopied] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
 
@@ -286,11 +286,13 @@ export const FormsView: React.FC<FormsViewProps> = ({
 
       {/* QR Code Modal */}
       {showQrModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 max-w-3xl w-full shadow-2xl relative my-auto max-h-[94vh] overflow-y-auto text-slate-900 dark:text-slate-100">
-            <QrCodeGenerator onClose={() => setShowQrModal(false)} />
-          </div>
-        </div>
+        <ReviewQrCardModal
+          isOpen={showQrModal}
+          onClose={() => setShowQrModal(false)}
+          workspaceId={project?.slug || collectionForm?.publicSlug || workspace?.slug || 'papasystem'}
+          workspaceName={project?.name || collectionForm?.settings?.brandName || workspace?.name || 'papasystem'}
+          userPlan={(workspace?.plan === 'free' ? 'starter' : workspace?.plan) || 'pro'}
+        />
       )}
     </div>
   );
