@@ -22,7 +22,6 @@ import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { TagsView } from '../components/dashboard/views/TagsView';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
 import { ReviewPipelineHero } from '../components/dashboard/ReviewPipelineHero';
-import AppLayout from '../components/layouts/AppLayout';
 import { storage } from '../lib/storage';
 import { Review, ReviewFilters as FilterType, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { exportReviewsToJSON, exportReviewsToCSV } from '../lib/exportUtils';
@@ -63,8 +62,7 @@ export const DashboardPage = () => {
     description: 'Panda Praise customer review management and moderation dashboard.',
   });
 
-  const { project, collectionForm, workspace, user } = useAuth();
-  const [proofSubView, setProofSubView] = useState<'moderation' | 'stitch'>('moderation');
+  const { project, collectionForm, workspace } = useAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTabState] = useState<DashboardTab>(() => {
@@ -636,44 +634,6 @@ export const DashboardPage = () => {
           {activeTab === 'proof' && (
             <div className="space-y-6 max-w-5xl mx-auto font-sans">
               
-              {/* Segmented Switcher: Moderation Queue vs Stitch Proof Studio */}
-              <div className="flex items-center justify-between pb-1">
-                <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <button
-                    type="button"
-                    onClick={() => setProofSubView('moderation')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      proofSubView === 'moderation'
-                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    ⚡ Moderation Queue
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setProofSubView('stitch')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      proofSubView === 'stitch'
-                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    🖥️ Proof Studio (Stitch Mockup)
-                  </button>
-                </div>
-              </div>
-
-              {proofSubView === 'stitch' ? (
-                <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-                  <AppLayout
-                    workspaceId={workspace?.id || project?.id || 'papasystem'}
-                    userName={user?.displayName || 'Gopal Thakur'}
-                    userRole="Admin"
-                  />
-                </div>
-              ) : (
-                <>
               {/* Luminous Review Pipeline Hero & Command Center */}
               <ReviewPipelineHero
                 stats={effectiveStats}
@@ -901,8 +861,6 @@ export const DashboardPage = () => {
                     </div>
                   </div>
                 </div>
-              )}
-                </>
               )}
             </div>
           )}
