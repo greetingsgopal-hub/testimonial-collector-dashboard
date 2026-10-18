@@ -38,16 +38,17 @@ import {
   Trash2,
   Archive,
 MailCheck,
-Menu
+Menu,
+Sparkles
 } from 'lucide-react';
 const TAB_LABEL_MAP: Record<string, string> = {
   welcome: 'Welcome Hub',
-  forms: 'Collect or Import',
-  import: 'Collect or Import',
-  proof: 'Customize',
-  widgets: 'Post on internet',
+  forms: 'Forms',
+  import: 'Import',
+  proof: 'Proof',
+  widgets: 'Embeds',
   social: 'Post on internet',
-  campaigns: 'Campaigns',
+  campaigns: 'Thank Yous',
   integrate: 'Billing & Plans',
   settings: 'Billing & Plans',
   feedback: 'Feedback',
@@ -492,9 +493,9 @@ export const DashboardPage = () => {
           </div>
         )}
 
-        {/* Top Slim Header Bar */}
-        <header className="h-12 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-20">
-          <div className="flex items-center gap-2.5">
+        {/* Top Browser Header Bar with macOS Controls & URL Pill (Stitch Design) */}
+        <header className="h-12 border-b border-slate-200/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-5 flex items-center justify-between sticky top-0 z-20 select-none">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
@@ -503,11 +504,28 @@ export const DashboardPage = () => {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <span className="text-xs font-bold text-slate-900 tracking-tight">{TAB_LABEL_MAP[activeTab] || activeTab}</span>
-            <span className="text-slate-300">•</span>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate max-w-[240px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span className="truncate font-medium text-slate-600">{project?.name || 'Main Product'}</span>
+            <div className="hidden sm:flex items-center space-x-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56] inline-block shadow-2xs" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e] inline-block shadow-2xs" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f] inline-block shadow-2xs" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-900 dark:text-white tracking-tight">{TAB_LABEL_MAP[activeTab] || activeTab}</span>
+              <span className="text-slate-300">•</span>
+              <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate max-w-[200px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="truncate font-medium text-slate-600 dark:text-slate-400">{project?.name || 'Main Product'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Centered URL Pill matching Stitch screenshot */}
+          <div className="hidden md:flex items-center justify-center">
+            <div className="bg-white/95 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-normal py-1 px-4 rounded-md shadow-2xs flex items-center gap-2 max-w-sm">
+              <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+              </svg>
+              <span className="truncate tracking-wide text-slate-600 dark:text-slate-300">app.pandapraise.com/{activeTab}</span>
             </div>
           </div>
         </header>
@@ -634,6 +652,62 @@ export const DashboardPage = () => {
           {activeTab === 'proof' && (
             <div className="space-y-6 max-w-5xl mx-auto font-sans">
               
+              {/* Stitch Header Row */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">Your Proof</h1>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    {effectiveReviews.length}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="inline-flex items-center justify-center px-4 py-2 border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-medium rounded-lg text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-[0.98] transition-all shadow-2xs gap-1.5 cursor-pointer"
+                >
+                  <span className="text-base leading-none text-slate-500">+</span>
+                  <span>Invite customer</span>
+                </button>
+              </div>
+
+              {/* Praise Attributes & Quick Filter Chips */}
+              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+                <span className="text-slate-500 font-normal mr-1">Customers praise:</span>
+                {[
+                  { label: 'Ease of use', count: 42 },
+                  { label: 'Time saved', count: 38 },
+                  { label: 'Support', count: 29 },
+                ].map((item) => {
+                  const isActive = filters.tag === item.label;
+                  return (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => setFilters(prev => ({ ...prev, tag: isActive ? 'all' : item.label }))}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border transition-colors cursor-pointer ${
+                        isActive
+                          ? 'border-purple-400 bg-purple-50 text-purple-900 ring-2 ring-purple-300 font-semibold dark:bg-purple-950/50 dark:text-purple-200'
+                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{item.count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Highlighted AI Case Study Card (Stitch Design) */}
+              <div className="p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-900/60 bg-[#fbf9fe] dark:bg-purple-950/20 hover:border-purple-300 transition-colors">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug">
+                  How Hartley Plumbing cut missed jobs to zero in one month
+                </h3>
+                <p className="mt-1 text-xs sm:text-sm font-medium text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                  <span>Case study generated with Panda Praise AI · 1 metric</span>
+                </p>
+              </div>
+
               {/* Luminous Review Pipeline Hero & Command Center */}
               <ReviewPipelineHero
                 stats={effectiveStats}
