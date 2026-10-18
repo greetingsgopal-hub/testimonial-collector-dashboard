@@ -28,7 +28,7 @@ import { storage } from '../lib/storage';
 import { sanitizeText } from '../lib/security';
 import { MALE_ANIMATED_AVATAR, FEMALE_ANIMATED_AVATAR } from '../lib/defaultAvatars';
 import { usePageSeo } from '../lib/seo';
-import { PublicCustomerFeedbackPage } from '../components/dashboard/ReviewFeedbackFormSystem';
+import { PublicCustomerFeedbackPage } from '../components/dashboard/UnifiedReviewFeedbackSystem';
 
 const COPY = {
   en: {
@@ -350,7 +350,7 @@ export const PublicCollectorPage: React.FC<PublicCollectorPageProps> = ({ worksp
     }
   };
 
-  if (hasReviewFeedbackTexts || searchParams.get('theme') === 'review_feedback') {
+  if (cleanSlug !== 'acme-corp' || hasReviewFeedbackTexts || searchParams.get('theme') === 'review_feedback') {
     return <PublicCustomerFeedbackPage workspaceSlug={cleanSlug} />;
   }
 

@@ -16,7 +16,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { Review, ReviewStats, CollectionForm } from '../../../types';
 import { ReviewQrCardModal } from '../ReviewQrCardModal';
 import FormsBuilderStudio from '../FormsBuilderStudio';
-import ReviewFeedbackFormSystem from '../ReviewFeedbackFormSystem';
+import UnifiedReviewFeedbackSystem from '../UnifiedReviewFeedbackSystem';
 
 export interface FormsViewProps {
   onConfigureForm: () => void;
@@ -293,7 +293,7 @@ export const FormsView: React.FC<FormsViewProps> = ({
         </div>
 
         {activeBuilderTab === 'review_feedback' ? (
-          <ReviewFeedbackFormSystem
+          <UnifiedReviewFeedbackSystem
             workspaceId={project?.id || projectName}
             workspaceName={projectName}
           />

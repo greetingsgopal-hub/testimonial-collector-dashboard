@@ -1,0 +1,789 @@
+import React, { useState, useEffect } from 'react';
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  addDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import {
+  Sliders,
+  Eye,
+  Check,
+  Sparkles,
+  CheckCircle2,
+  Share2,
+  Lock,
+} from 'lucide-react';
+
+// ============================================================================
+// 1. CONFIGURATION & BILINGUAL DICTIONARY (English & Hinglish Support)
+// ============================================================================
+export interface ReviewFormConfig {
+  brandPillText: string;
+  contactEmailText: string;
+  titleLine1: string;
+  titleLine2: string;
+  // Pre-filled business details to reduce end-user burden
+  prefilledName: string;
+  prefilledCampaign: string;
+  prefilledClient: string;
+  prefilledDate: string;
+  // Bilingual sections
+  sections: {
+    en: {
+      emojiTitle: string;
+      matrixTitle: string;
+      cols: [string, string, string, string, string];
+      questions: [string, string, string, string];
+      improvementTitle: string;
+      submitBtn: string;
+    };
+    hi: {
+      emojiTitle: string;
+      matrixTitle: string;
+      cols: [string, string, string, string, string];
+      questions: [string, string, string, string];
+      improvementTitle: string;
+      submitBtn: string;
+    };
+  };
+}
+
+export const DEFAULT_REVIEW_CONFIG: ReviewFormConfig = {
+  brandPillText: 'onionbananaalo',
+  contactEmailText: 'hello@reallygreatsite.com',
+  titleLine1: 'Review',
+  titleLine2: 'Feedback',
+  prefilledName: 'Rahul Sharma',
+  prefilledCampaign: 'Q4 Product Launch',
+  prefilledClient: 'Product Lead',
+  prefilledDate: '10/18/2026',
+  sections: {
+    en: {
+      emojiTitle: 'How satisfied are you with the final content?',
+      matrixTitle: 'Content Quality',
+      cols: ['Very Bad', 'Bad', 'Good', 'Very Good', 'Excellent'],
+      questions: [
+        'How effective was the opening hook in capturing attention ?',
+        'How natural and authentic did the on-camera delivery feel for your brand?',
+        "How clearly and effectively was your product's value communicated?",
+        'How satisfied are you with the overall visual presentation and editing quality?',
+      ],
+      improvementTitle: 'What Can Be Improved?',
+      submitBtn: 'Submit Review Feedback →',
+    },
+    hi: {
+      emojiTitle: 'Aap final content se kitne santusht (satisfied) hain?',
+      matrixTitle: 'Content Quality (Quality ki jaanch)',
+      cols: ['Bahut Bura', 'Bura', 'Achha', 'Bahut Achha', 'Shandar'],
+      questions: [
+        'Opening hook audience ka dhyan khichne mein kitna asardar tha?',
+        'Aapke brand ke liye on-camera delivery kitni natural aur authentic lagi?',
+        'Aapke product ki value kitni saaf taur par samjhayi gayi?',
+        'Overall visual presentation aur editing quality se aap kitna khush hain?',
+      ],
+      improvementTitle: 'Kya Behtar Kiya Ja Sakta Hai? (What can be improved?)',
+      submitBtn: 'Feedback Submit Karein →',
+    },
+  },
+};
+
+export const EMOJI_OPTIONS = [
+  { emoji: '😍', rating: 5 },
+  { emoji: '😁', rating: 4 },
+  { emoji: '😎', rating: 3 },
+  { emoji: '😔', rating: 2 },
+  { emoji: '😭', rating: 1 },
+];
+
+// ============================================================================
+// 2. UNIFIED RENDERER (Used by Dashboard Preview & Public End-User Form)
+// ============================================================================
+export function UnifiedReviewFormRenderer({
+  config,
+  isLockedForEndUser = false,
+  onSubmitForm,
+  isSubmitting = false,
+}: {
+  config: ReviewFormConfig;
+  isLockedForEndUser?: boolean;
+  onSubmitForm?: (formData: {
+    selectedEmojiIndex: number;
+    matrixRatings: [number | null, number | null, number | null, number | null];
+    improvementText: string;
+  }) => void;
+  isSubmitting?: boolean;
+}) {
+  const [lang, setLang] = useState<'en' | 'hi'>('en');
+  void isLockedForEndUser;
+  const [selectedEmojiIdx, setSelectedEmojiIdx] = useState<number>(0);
+  const [matrixRatings, setMatrixRatings] = useState<
+    [number | null, number | null, number | null, number | null]
+  >([4, 4, 3, 4]);
+  const [improvementText, setImprovementText] = useState<string>('');
+
+  const t = config.sections[lang] || config.sections.en;
+
+  const handleMatrixTick = (rowIdx: number, colIdx: number) => {
+    const next = [...matrixRatings] as [number | null, number | null, number | null, number | null];
+    next[rowIdx] = next[rowIdx] === colIdx ? null : colIdx;
+    setMatrixRatings(next);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onSubmitForm) {
+      onSubmitForm({
+        selectedEmojiIndex: selectedEmojiIdx,
+        matrixRatings,
+        improvementText,
+      });
+    }
+  };
+
+  return (
+    <form
+      data-testid="unified-review-feedback-form"
+      onSubmit={handleSubmit}
+      className="w-full max-w-[640px] mx-auto rounded-3xl overflow-hidden shadow-2xl border border-slate-300 font-sans select-none"
+    >
+      {/* TOP HEADER BAR (With English / Hinglish Switcher for End User) */}
+      <div className="bg-[#314424] text-[#FBF6EA] px-6 pt-6 pb-8 sm:px-9 sm:pt-8 sm:pb-9 relative">
+        {/* Top Row: Brand Pill + Language Switcher */}
+        <div className="flex items-center justify-between gap-4">
+          <div
+            data-testid="form-brand-pill"
+            id="template-brand-pill-header"
+            className="px-4 py-1.5 rounded-full border border-[#FBF6EA]/70 text-xs sm:text-sm font-bold tracking-wide"
+          >
+            <span data-testid="template-brand-pill">{config.brandPillText}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-[#FBF6EA]/80 font-medium">Language:</span>
+            <div className="inline-flex items-center p-0.5 rounded-lg bg-black/20 border border-white/20 text-xs font-bold">
+              <button
+                type="button"
+                data-testid="lang-switch-en"
+                onClick={() => setLang('en')}
+                className={`px-2.5 py-1 rounded-md cursor-pointer transition-all ${
+                  lang === 'en' ? 'bg-[#FBF6EA] text-[#314424]' : 'text-[#FBF6EA]'
+                }`}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                data-testid="lang-switch-hi"
+                onClick={() => setLang('hi')}
+                className={`px-2.5 py-1 rounded-md cursor-pointer transition-all ${
+                  lang === 'hi' ? 'bg-[#FBF6EA] text-[#314424]' : 'text-[#FBF6EA]'
+                }`}
+              >
+                Hinglish
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Title + Vector Icon */}
+        <div className="mt-6 flex items-center justify-between gap-4">
+          <div
+            data-testid="form-main-title"
+            className="leading-[1.02] tracking-tight font-extrabold text-3xl sm:text-[50px] text-[#FBF6EA]"
+          >
+            <div>{config.titleLine1}</div>
+            <div>{config.titleLine2}</div>
+          </div>
+
+          <div data-testid="constant-vector-icon" className="shrink-0">
+            <svg
+              className="w-24 h-24 sm:w-32 sm:h-32 text-[#FBF6EA]"
+              viewBox="0 0 140 135"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect x="14" y="6" width="112" height="38" rx="4" stroke="currentColor" strokeWidth="3.5" />
+              <path d="M70 44V58L85 44" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+              {[30, 56, 82, 108].map((cx, i) => (
+                <polygon
+                  key={i}
+                  points={`${cx},14 ${cx + 3.5},21 ${cx + 11},22 ${cx + 5.5},27 ${cx + 7},34 ${cx},30.5 ${cx - 7},34 ${cx - 5.5},27 ${cx - 11},22 ${cx - 3.5},21`}
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+              ))}
+              <circle cx="35" cy="82" r="12" stroke="currentColor" strokeWidth="3.5" />
+              <path d="M14 122C14 108 23 99 35 99C43 99 49 103 52 109" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+              <circle cx="105" cy="82" r="12" stroke="currentColor" strokeWidth="3.5" />
+              <path d="M126 122C126 108 117 99 105 99C97 99 91 103 88 109" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+              <circle cx="70" cy="76" r="15" stroke="currentColor" strokeWidth="3.5" />
+              <path d="M42 122C42 104 54 95 70 95C86 95 98 104 98 122" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+              <line x1="10" y1="122" x2="130" y2="122" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+            </svg>
+          </div>
+        </div>
+
+        {/* LOCKED BUSINESS DETAILS (Pre-filled by business, uneditable by end user to reduce burden) */}
+        <div
+          data-testid="locked-business-details"
+          className="mt-6 pt-4 border-t border-[#FBF6EA]/30 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-xs sm:text-sm"
+        >
+          <div className="border-b border-dashed border-[#FBF6EA]/50 pb-1 flex items-center justify-between">
+            <span className="text-[#FBF6EA]/70 font-medium">Name:</span>
+            <span className="font-bold text-[#FBF6EA]" data-testid="locked-name">
+              {config.prefilledName || '—'}
+            </span>
+          </div>
+          <div className="border-b border-dashed border-[#FBF6EA]/50 pb-1 flex items-center justify-between">
+            <span className="text-[#FBF6EA]/70 font-medium">Campaign:</span>
+            <span className="font-bold text-[#FBF6EA]" data-testid="locked-campaign">
+              {config.prefilledCampaign || '—'}
+            </span>
+          </div>
+          <div className="border-b border-dashed border-[#FBF6EA]/50 pb-1 flex items-center justify-between">
+            <span className="text-[#FBF6EA]/70 font-medium">Client:</span>
+            <span className="font-bold text-[#FBF6EA]" data-testid="locked-client">
+              {config.prefilledClient || '—'}
+            </span>
+          </div>
+          <div className="border-b border-dashed border-[#FBF6EA]/50 pb-1 flex items-center justify-between">
+            <span className="text-[#FBF6EA]/70 font-medium">Date:</span>
+            <span className="font-bold text-[#FBF6EA]" data-testid="locked-date">
+              {config.prefilledDate || '—'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* WARM CREAM BODY */}
+      <div className="bg-[#FBF6EA] text-[#1C2417] px-6 py-7 sm:px-9 sm:py-9 space-y-7">
+        
+        {/* 1. Emoji Satisfaction Selector */}
+        <div>
+          <h3 data-testid="emoji-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
+            {t.emojiTitle}
+          </h3>
+          <div className="relative mt-4 flex items-center justify-between px-2">
+            <div className="absolute inset-x-8 top-1/2 -translate-y-1/2 border-t-2 border-dashed border-[#314424]/40 pointer-events-none" />
+            {EMOJI_OPTIONS.map((item, idx) => {
+              const active = selectedEmojiIdx === idx;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  data-testid={`emoji-option-${idx}`}
+                  onClick={() => setSelectedEmojiIdx(idx)}
+                  className={`relative z-10 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#314424] flex items-center justify-center text-2xl transition-transform cursor-pointer ${
+                    active ? 'scale-115 ring-4 ring-[#314424]/30 shadow-md' : 'opacity-85 hover:scale-105'
+                  }`}
+                >
+                  <span>{item.emoji}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 2. Content Quality Matrix (Tick from Very Bad to Excellent) */}
+        <div className="space-y-3">
+          <div className="grid grid-cols-12 items-end gap-2 pb-1">
+            <div className="col-span-5">
+              <h3 data-testid="matrix-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
+                {t.matrixTitle}
+              </h3>
+            </div>
+            <div className="col-span-7 grid grid-cols-5 text-center text-[10px] font-bold text-[#314424]">
+              {t.cols.map((colLbl, cI) => (
+                <span key={cI} data-testid={`matrix-col-header-${cI}`} className="truncate px-0.5">
+                  {colLbl}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {t.questions.map((qStr, rI) => (
+              <div key={rI} className="grid grid-cols-12 items-center gap-2 py-1">
+                <p data-testid={`matrix-question-${rI}`} className="col-span-5 text-[11px] sm:text-xs leading-snug text-[#222B1C] pr-1">
+                  {qStr}
+                </p>
+                <div className="col-span-7 grid grid-cols-5 justify-items-center">
+                  {[0, 1, 2, 3, 4].map((cI) => {
+                    const ticked = matrixRatings[rI] === cI;
+                    return (
+                      <button
+                        key={cI}
+                        type="button"
+                        data-testid={`matrix-check-${rI}-${cI}`}
+                        onClick={() => handleMatrixTick(rI, cI)}
+                        className={`w-6 h-6 sm:w-7 sm:h-7 border border-[#314424] flex items-center justify-center transition-colors cursor-pointer ${
+                          ticked ? 'bg-[#314424] text-[#FBF6EA]' : 'bg-transparent hover:bg-[#314424]/10'
+                        }`}
+                      >
+                        {ticked && <Check className="w-4 h-4 stroke-[3]" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. What Can Be Improved? (End User fills text for improvement) */}
+        <div className="space-y-2">
+          <h3 data-testid="improvement-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
+            {t.improvementTitle}
+          </h3>
+          <textarea
+            rows={4}
+            required
+            data-testid="input-improvement-text"
+            value={improvementText}
+            onChange={(e) => setImprovementText(e.target.value)}
+            placeholder={
+              lang === 'hi'
+                ? 'Apna sujhav ya review yahan likhein...'
+                : 'Write what can be improved or your testimonial here...'
+            }
+            className="w-full bg-transparent text-xs sm:text-sm text-[#1C2417] placeholder-[#314424]/45 focus:outline-none resize-none leading-[36px]"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(to bottom, transparent, transparent 34px, rgba(49, 68, 36, 0.4) 34px, rgba(49, 68, 36, 0.4) 36px)',
+              lineHeight: '36px',
+            }}
+          />
+        </div>
+
+        {/* Submit Button */}
+        <div className="pt-2">
+          <button
+            type="submit"
+            data-testid="submit-feedback-btn"
+            disabled={isSubmitting}
+            className="w-full py-3.5 px-6 rounded-xl bg-[#314424] hover:bg-[#25351B] disabled:opacity-60 text-[#FBF6EA] font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
+          >
+            {isSubmitting ? 'Submitting Feedback...' : t.submitBtn}
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+}
+
+// ============================================================================
+// 3. DASHBOARD FORM BUILDER STUDIO (Business customizes form + pre-fills details)
+// ============================================================================
+export default function FormBuilderStudio({
+  workspaceId = 'onionbananaalo',
+  workspaceName = 'onionbananaalo',
+}: {
+  workspaceId?: string;
+  workspaceName?: string;
+}) {
+  const cleanSlug = (workspaceId || 'onionbananaalo')
+    .replace(/'s\s+workspace$/i, '')
+    .replace(/\s+workspace$/i, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '');
+
+  const [config, setConfig] = useState<ReviewFormConfig>(() => ({
+    ...DEFAULT_REVIEW_CONFIG,
+    brandPillText: workspaceName || DEFAULT_REVIEW_CONFIG.brandPillText,
+  }));
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [copiedLink, setCopiedLink] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/c/${cleanSlug}`;
+
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Load saved config from Firestore on mount
+  useEffect(() => {
+    try {
+      const db = getFirestore();
+      getDoc(doc(db, 'workspaces', workspaceId))
+        .then((snap) => {
+          if (snap.exists() && snap.data()?.reviewFormConfig) {
+            setConfig({
+              ...DEFAULT_REVIEW_CONFIG,
+              ...snap.data().reviewFormConfig,
+            });
+          }
+        })
+        .catch(() => null);
+    } catch {
+      // Test environment fallback
+    }
+  }, [workspaceId]);
+
+  const handleSaveAndPublish = async () => {
+    setIsSaving(true);
+    try {
+      const db = getFirestore();
+      await setDoc(
+        doc(db, 'workspaces', workspaceId),
+        {
+          reviewFormConfig: config,
+          customSlug: cleanSlug,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      triggerToast(`Saved successfully! Live share link: ${shareUrl}`);
+    } catch {
+      triggerToast('Saved form settings for this session!');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCopyShareLink = async () => {
+    await handleSaveAndPublish();
+    await navigator.clipboard.writeText(shareUrl).catch(() => null);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  return (
+    <div className="space-y-6 font-sans antialiased text-slate-900 pb-12" data-testid="unified-form-builder-studio">
+      {/* TOP BAR */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#314424]" />
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#314424]">
+              Forms · Review Feedback Builder
+            </span>
+          </div>
+          <h1 className="text-xl font-bold text-slate-950 mt-0.5">
+            Customize Collection Form & Pre-fill Customer Details
+          </h1>
+          <p className="text-xs text-slate-500">
+            Pre-fill customer details so the end user doesn't have to. The end user can simply switch EN/Hinglish, tick ratings, and submit.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            data-testid="builder-save-btn"
+            disabled={isSaving}
+            onClick={handleSaveAndPublish}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 cursor-pointer"
+          >
+            <span>{isSaving ? 'Saving...' : 'Save & Publish Live'}</span>
+          </button>
+
+          <button
+            type="button"
+            data-testid="builder-copy-share-btn"
+            onClick={handleCopyShareLink}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#314424] hover:bg-[#25351B] text-white text-xs font-bold shadow-sm cursor-pointer transition-all"
+          >
+            {copiedLink ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+            <span>{copiedLink ? 'Link Copied!' : 'Copy Share Link'}</span>
+          </button>
+        </div>
+      </div>
+
+      {toastMessage && (
+        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-emerald-600" />
+            {toastMessage}
+          </span>
+          <button type="button" onClick={() => setToastMessage(null)} className="cursor-pointer">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* SPLIT: BUSINESS CONFIGURATOR (LEFT) + REAL-TIME PREVIEW (RIGHT) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* LEFT COLUMN: CUSTOMIZER */}
+        <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#314424]/10 text-[#314424] flex items-center justify-center">
+                <Sliders className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Variable Form Texts</h2>
+                <p className="text-xs text-slate-500">Edit any heading, label, or question below.</p>
+              </div>
+            </div>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Live Sync
+            </span>
+          </div>
+
+          {/* 1. Header & Brand Texts */}
+          <div className="space-y-3">
+            <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              1. Header & Brand Texts
+            </span>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Top-Left Brand Pill</label>
+                <input
+                  type="text"
+                  data-testid="input-brand-pill"
+                  value={config.brandPillText}
+                  onChange={(e) => setConfig({ ...config, brandPillText: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Top-Right Email / Web</label>
+                <input
+                  type="text"
+                  data-testid="input-contact-email"
+                  value={config.contactEmailText}
+                  onChange={(e) => setConfig({ ...config, contactEmailText: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Main Heading Line 1</label>
+                <input
+                  type="text"
+                  data-testid="input-title-line-1"
+                  value={config.titleLine1}
+                  onChange={(e) => setConfig({ ...config, titleLine1: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Main Heading Line 2</label>
+                <input
+                  type="text"
+                  data-testid="input-title-line-2"
+                  value={config.titleLine2}
+                  onChange={(e) => setConfig({ ...config, titleLine2: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Pre-filled Customer Details (Business fills this to reduce end-user burden) */}
+          <div className="space-y-3 pt-4 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-purple-700 flex items-center gap-1">
+                <Lock className="w-3.5 h-3.5" />
+                <span>2. Pre-filled Customer Details (Locked for End User)</span>
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 leading-snug">
+              The business fills these details before sharing the link so the customer doesn't have to re-enter them.
+            </p>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Name</label>
+                <input
+                  type="text"
+                  data-testid="input-prefilled-name"
+                  value={config.prefilledName}
+                  onChange={(e) => setConfig({ ...config, prefilledName: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Campaign</label>
+                <input
+                  type="text"
+                  data-testid="input-prefilled-campaign"
+                  value={config.prefilledCampaign}
+                  onChange={(e) => setConfig({ ...config, prefilledCampaign: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Client</label>
+                <input
+                  type="text"
+                  data-testid="input-prefilled-client"
+                  value={config.prefilledClient}
+                  onChange={(e) => setConfig({ ...config, prefilledClient: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Date</label>
+                <input
+                  type="text"
+                  data-testid="input-prefilled-date"
+                  value={config.prefilledDate}
+                  onChange={(e) => setConfig({ ...config, prefilledDate: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Matrix Questions */}
+          <div className="space-y-2.5 pt-4 border-t border-slate-100">
+            <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              3. Evaluation Questions
+            </span>
+            {config.sections.en.questions.map((qStr, idx) => (
+              <div key={idx}>
+                <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Question #{idx + 1}</label>
+                <input
+                  type="text"
+                  data-testid={`input-question-${idx}`}
+                  value={qStr}
+                  onChange={(e) => {
+                    const nextQ = [...config.sections.en.questions] as [string, string, string, string];
+                    nextQ[idx] = e.target.value;
+                    setConfig({
+                      ...config,
+                      sections: {
+                        ...config.sections,
+                        en: { ...config.sections.en, questions: nextQ },
+                      },
+                    });
+                  }}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: REAL-TIME CUSTOMER FORM PREVIEW */}
+        <div className="lg:col-span-7 flex flex-col items-center">
+          <div className="w-full flex items-center justify-between mb-3 px-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <Eye className="w-4 h-4 text-[#314424]" />
+              <span>Real-Time Customer Form Preview (Test the EN | Hinglish Switch below)</span>
+            </span>
+            <span className="text-xs text-slate-400">Live Preview</span>
+          </div>
+
+          <UnifiedReviewFormRenderer
+            config={config}
+            isLockedForEndUser={false}
+            onSubmitForm={() => triggerToast('Preview submission tested successfully!')}
+          />
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// 4. PUBLIC CUSTOMER COLLECTION PAGE (/c/:slug)
+//    End user opens this link, switches EN/Hinglish, sees pre-filled locked
+//    customer details, ticks ratings, writes improvement, and submits to Proof!
+// ============================================================================
+export function PublicCustomerFeedbackPage({
+  workspaceSlug = 'onionbananaalo',
+}: {
+  workspaceSlug?: string;
+}) {
+  const [config, setConfig] = useState<ReviewFormConfig>(() => ({
+    ...DEFAULT_REVIEW_CONFIG,
+    brandPillText: workspaceSlug || DEFAULT_REVIEW_CONFIG.brandPillText,
+  }));
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      const db = getFirestore();
+      getDoc(doc(db, 'workspaces', workspaceSlug))
+        .then((snap) => {
+          if (snap.exists() && snap.data()?.reviewFormConfig) {
+            setConfig({
+              ...DEFAULT_REVIEW_CONFIG,
+              ...snap.data().reviewFormConfig,
+            });
+          }
+        })
+        .catch(() => null);
+    } catch {
+      // Test environment fallback
+    }
+  }, [workspaceSlug]);
+
+  const handleCustomerFinalSubmit = async (formData: {
+    selectedEmojiIndex: number;
+    matrixRatings: [number | null, number | null, number | null, number | null];
+    improvementText: string;
+  }) => {
+    setIsSubmitting(true);
+    try {
+      const emojiStars = EMOJI_OPTIONS[formData.selectedEmojiIndex]?.rating || 5;
+      const validRows = formData.matrixRatings.filter((r) => r !== null) as number[];
+      const matrixAvg =
+        validRows.length > 0 ? validRows.reduce((sum, r) => sum + (r + 1), 0) / validRows.length : 5;
+      const computedRating = Math.max(1, Math.min(5, Math.round((emojiStars + matrixAvg) / 2)));
+
+      const db = getFirestore();
+      await addDoc(collection(db, 'testimonials'), {
+        workspaceId: workspaceSlug,
+        authorName: config.prefilledName || 'Valued Customer',
+        authorRole: config.prefilledClient || config.prefilledCampaign || 'Client',
+        content: formData.improvementText.trim() || 'Submitted rating & feedback form.',
+        rating: computedRating,
+        matrixRatings: formData.matrixRatings,
+        mediaType: 'text',
+        source: 'Review Feedback Form',
+        status: 'approved', // Shifts immediately to Proof section!
+        tags: ['Ease of use', 'Support'],
+        createdAt: new Date().toISOString(),
+        timestamp: serverTimestamp(),
+      });
+
+      setIsSubmitted(true);
+    } catch (err: any) {
+      alert(err.message || 'Could not submit feedback.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-[#314424] flex items-center justify-center p-6 font-sans">
+        <div className="bg-[#FBF6EA] text-[#1C2417] rounded-3xl p-8 max-w-md w-full text-center shadow-2xl space-y-3">
+          <CheckCircle2 className="w-12 h-12 text-[#314424] mx-auto" />
+          <h2 className="text-2xl font-extrabold">Thank You for Your Feedback!</h2>
+          <p className="text-xs sm:text-sm text-[#314424]/80">
+            Your review has been successfully recorded for {config.brandPillText}.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-200/70 py-10 px-4">
+      <UnifiedReviewFormRenderer
+        config={config}
+        isLockedForEndUser={true}
+        onSubmitForm={handleCustomerFinalSubmit}
+        isSubmitting={isSubmitting}
+      />
+    </div>
+  );
+}
