@@ -15,7 +15,7 @@ import {
 import { useAuth } from '../../../context/AuthContext';
 import { Review, ReviewStats, CollectionForm } from '../../../types';
 import { ReviewQrCardModal } from '../ReviewQrCardModal';
-import { CollectionFormBuilder } from '../CollectionFormBuilder';
+import FormsBuilderStudio from '../FormsBuilderStudio';
 
 export interface FormsViewProps {
   onConfigureForm: () => void;
@@ -32,7 +32,7 @@ export const FormsView: React.FC<FormsViewProps> = ({
   onConfigureForm,
   onSendInvites: _onSendInvites,
   onViewProof,
-  onUpdateForm,
+  onUpdateForm: _onUpdateForm,
   onNavigateToCampaigns: _onNavigateToCampaigns,
   onNavigateToWidgets: _onNavigateToWidgets,
   reviews = [],
@@ -51,10 +51,11 @@ export const FormsView: React.FC<FormsViewProps> = ({
     reviews.length > 0
       ? reviews.filter((r) => r.status === 'approved').length
       : (stats?.approvedCount ?? 0);
-  const pendingCount =
+  const _pendingCount =
     reviews.length > 0
       ? reviews.filter((r) => r.status === 'pending').length
       : (stats?.pendingCount ?? 0);
+  void _pendingCount;
 
   const avgRating =
     stats?.averageRating && stats.averageRating > 0
@@ -248,40 +249,14 @@ export const FormsView: React.FC<FormsViewProps> = ({
         </div>
       </div>
 
-      {/* ── 5. Collection Form Builder (Sketch Outline: Top-Left Collection FORM, Top-Right Preview, Bottom Templates Collection) ── */}
+      {/* ── 5. Forms Builder Studio (3 Default + 1 Customizable Hero Background Template, Live Review Card Preview, Zero Flaws) ── */}
       <div id="collection-form-builder" className="pt-2">
-        <CollectionFormBuilder
+        <FormsBuilderStudio
           workspaceName={projectName}
           workspaceId={project?.id || projectName}
-          collectionForm={collectionForm}
-          onUpdateForm={onUpdateForm}
-          publicCollectionUrl={collectionUrl}
+          userPlan={(workspace?.plan === 'free' ? 'starter' : workspace?.plan) || 'pro'}
+          onNavigateToProof={onViewProof}
         />
-      </div>
-
-      {/* ── 6. Bottom Full-Width Light-Purple Banner Card ── */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200/70 dark:border-purple-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 flex items-center justify-center shrink-0">
-            <Mail className="w-5 h-5 text-purple-700 dark:text-purple-300" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              {pendingCount > 0 ? `${pendingCount} Submissions in Queue` : `${totalCount} Submissions in Queue`}
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Review, approve, and publish authentic stories to your Wall of Love.
-            </p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={onViewProof}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-sm transition-all shrink-0 cursor-pointer"
-        >
-          <span>Moderate →</span>
-        </button>
       </div>
 
       {/* QR Code Modal */}

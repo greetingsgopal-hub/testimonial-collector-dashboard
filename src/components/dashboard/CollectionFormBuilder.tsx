@@ -324,7 +324,7 @@ export function CollectionFormBuilder({
       </section>
 
       {/* ── TOP SPLIT: COLLECTION FORM (LEFT) & PREVIEW (RIGHT) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
         {/* TOP-LEFT: COLLECTION FORM */}
         <div className="lg:col-span-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-2xs space-y-5">
@@ -685,7 +685,7 @@ export function CollectionFormBuilder({
                     }`}
                   >
                     <Camera className="w-3.5 h-3.5" />
-                    <span>📷 Upload</span>
+                    <span>Upload</span>
                   </button>
 
                   {previewAvatarType && (
@@ -699,7 +699,7 @@ export function CollectionFormBuilder({
                       className="px-2 py-1 text-xs font-bold text-red-500 hover:text-red-700 cursor-pointer ml-auto flex items-center gap-0.5"
                     >
                       <X className="w-3 h-3" />
-                      <span>× Deselect</span>
+                      <span>Deselect</span>
                     </button>
                   )}
                 </div>
