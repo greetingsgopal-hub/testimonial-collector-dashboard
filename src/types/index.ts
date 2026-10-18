@@ -111,6 +111,7 @@ export interface CollectionForm {
   description: string;
   isActive: boolean;
   allowVideo: boolean;
+  allowText?: boolean;
   settings?: CollectionFormSettings;
   createdAt: string;
   updatedAt?: string;

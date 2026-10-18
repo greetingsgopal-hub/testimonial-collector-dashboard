@@ -10,10 +10,12 @@ import {
   Radio,
   Mail,
   CheckCircle2,
+  Sliders,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { Review, ReviewStats, CollectionForm } from '../../../types';
 import { QrCodeGenerator } from '../QrCodeGenerator';
+import { CollectionFormBuilder } from '../CollectionFormBuilder';
 
 export interface FormsViewProps {
   onConfigureForm: () => void;
@@ -30,7 +32,7 @@ export const FormsView: React.FC<FormsViewProps> = ({
   onConfigureForm,
   onSendInvites: _onSendInvites,
   onViewProof,
-  onUpdateForm: _onUpdateForm,
+  onUpdateForm,
   onNavigateToCampaigns: _onNavigateToCampaigns,
   onNavigateToWidgets: _onNavigateToWidgets,
   reviews = [],
@@ -138,6 +140,20 @@ export const FormsView: React.FC<FormsViewProps> = ({
 
             <button
               type="button"
+              data-testid="toolbar-builder-btn"
+              onClick={() => {
+                const el = document.getElementById('collection-form-builder');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-purple-900 hover:bg-purple-50 font-bold text-xs shadow-md transition-all cursor-pointer"
+              title="Form Builder"
+            >
+              <Sliders className="w-4 h-4 text-purple-700" />
+              <span>Form Builder</span>
+            </button>
+
+            <button
+              type="button"
               data-testid="toolbar-configure-btn"
               onClick={onConfigureForm}
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-900/80 text-white font-bold text-xs border border-white/20 shadow-md transition-all cursor-pointer"
@@ -232,7 +248,17 @@ export const FormsView: React.FC<FormsViewProps> = ({
         </div>
       </div>
 
-      {/* ── 5. Bottom Full-Width Light-Purple Banner Card ── */}
+      {/* ── 5. Collection Form Builder (Sketch Outline: Top-Left Collection FORM, Top-Right Preview, Bottom Templates Collection) ── */}
+      <div id="collection-form-builder" className="pt-2">
+        <CollectionFormBuilder
+          workspaceName={projectName}
+          collectionForm={collectionForm}
+          onUpdateForm={onUpdateForm}
+          publicCollectionUrl={collectionUrl}
+        />
+      </div>
+
+      {/* ── 6. Bottom Full-Width Light-Purple Banner Card ── */}
       <div className="p-5 sm:p-6 rounded-2xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200/70 dark:border-purple-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
         <div className="flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 flex items-center justify-center shrink-0">

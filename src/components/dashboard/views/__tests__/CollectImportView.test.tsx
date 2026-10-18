@@ -56,6 +56,9 @@ describe('CollectImportView Suite', () => {
     expect(switcher).not.toBeNull();
     expect(container.textContent).toContain('Collection Form');
     expect(container.textContent).toContain('Import Praise');
+    expect(container.textContent).toContain('Form Builder');
+    expect(container.textContent).toContain('Collection FORM');
+    expect(container.textContent).toContain('Templates Collection');
   });
 
   it('2. Switches dynamically between Collection Form and Import Praise', async () => {
