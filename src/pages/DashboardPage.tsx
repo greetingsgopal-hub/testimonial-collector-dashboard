@@ -16,11 +16,9 @@ import { WelcomeView } from '../components/dashboard/views/WelcomeView';
 import { FormsView } from '../components/dashboard/views/FormsView';
 import { ImportTestimonialsHub, ImportedTestimonial } from '../components/dashboard/ImportTestimonialsHub';
 import { SocialPostView } from '../components/dashboard/views/SocialPostView';
-import { FeedbackView } from '../components/dashboard/views/FeedbackView';
 import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { AccountBillingView } from '../components/dashboard/views/AccountBillingView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
-import { TagsView } from '../components/dashboard/views/TagsView';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
 import { ReviewPipelineHero } from '../components/dashboard/ReviewPipelineHero';
 import { storage } from '../lib/storage';
@@ -52,8 +50,6 @@ const TAB_LABEL_MAP: Record<string, string> = {
   campaigns: 'Thank Yous',
   integrate: 'Billing & Plans',
   settings: 'Billing & Plans',
-  feedback: 'Feedback',
-  tags: 'Tags',
   analyze: 'Analytics',
   referral: 'Referral Program (Give 1M / Get 1M)',
 };
@@ -69,9 +65,15 @@ export const DashboardPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTabState] = useState<DashboardTab>(() => {
     const paramTab = searchParams.get('tab') as DashboardTab;
-    if (paramTab) return paramTab;
+    if (paramTab) {
+      if (paramTab === 'tags' || paramTab === 'feedback') return 'proof';
+      return paramTab;
+    }
     const windowTab = new URLSearchParams(window.location.search).get('tab') as DashboardTab;
-    if (windowTab) return windowTab;
+    if (windowTab) {
+      if (windowTab === 'tags' || windowTab === 'feedback') return 'proof';
+      return windowTab;
+    }
     return 'welcome';
   });
 
@@ -443,10 +445,6 @@ export const DashboardPage = () => {
     await refreshReviews();
   };
 
-  const feedbackList = useMemo(() => {
-    return effectiveReviews.filter(r => r.rating <= 3);
-  }, [effectiveReviews]);
-
   const handleUpdateCollectionForm = async (updates: Partial<CollectionForm>) => {
     try {
       const targetForm = currentCollectionForm || (activeProjectId ? await storage.getCollectionForm(activeProjectId) : null);
@@ -632,22 +630,6 @@ export const DashboardPage = () => {
                 }}
               />
             </div>
-          )}
-
-          {/* Feedback Queue (Unsatisfied 1-3 star ratings) */}
-          {activeTab === 'feedback' && (
-            <FeedbackView
-              feedbackList={feedbackList}
-              onDeleteFeedback={handleDeleteReview}
-            />
-          )}
-
-          {/* Tags Organizer */}
-          {activeTab === 'tags' && (
-            <TagsView
-              tags={availableTags}
-              onAddTag={(t: string) => handleSaveTags(reviews[0]?.id || '', [...availableTags, t])}
-            />
           )}
 
           {/* AI Sentiment Analysis */}

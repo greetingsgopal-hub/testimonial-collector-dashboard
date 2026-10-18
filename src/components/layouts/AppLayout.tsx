@@ -230,17 +230,6 @@ export default function AppLayout({
                         Proof
                       </button>
                     </li>
-                    <li>
-                      <button
-                        type="button"
-                        onClick={() => setActiveNav('tags')}
-                        className={`w-full text-left block px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer ${
-                          activeNav === 'tags' ? 'text-slate-900 bg-slate-100 font-semibold' : 'text-slate-600 hover:text-slate-900'
-                        }`}
-                      >
-                        Tags
-                      </button>
-                    </li>
                   </ul>
                 </div>
 

@@ -9,9 +9,7 @@ import {
   Gift,
   X,
   Share2,
-  Tag,
   ArrowDownToLine,
-  Smile,
   BarChart2,
 } from 'lucide-react';
 import SidebarFooter from './SidebarFooter';
@@ -147,30 +145,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                     {proofCount}
                   </span>
                 ) : null}
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                onClick={() => setActiveTab('tags')}
-                className={navItemClass(activeTab === 'tags')}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Tag className="w-4 h-4 text-slate-400 shrink-0" />
-                  <span>Tags</span>
-                </div>
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                onClick={() => setActiveTab('feedback')}
-                className={navItemClass(activeTab === 'feedback')}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Smile className="w-4 h-4 text-slate-400 shrink-0" />
-                  <span>Feedback</span>
-                </div>
               </button>
             </li>
             <li>
