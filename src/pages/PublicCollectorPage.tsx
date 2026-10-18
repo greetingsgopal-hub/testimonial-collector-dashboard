@@ -25,6 +25,7 @@ import { analytics } from '../lib/analytics';
 import { cleanBrandOrProductName, deduplicateRepeatedString, sanitizeText, validateReviewInput } from '../lib/security';
 import { CollectorLang } from '../lib/collectorI18n';
 import { MALE_ANIMATED_AVATAR, FEMALE_ANIMATED_AVATAR } from '../lib/defaultAvatars';
+import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const COPY_TEXT = {
   en: {
@@ -612,6 +613,24 @@ export const PublicCollectorPage: React.FC = () => {
           },
           formConfig?.projectId
         );
+      }
+
+      try {
+        const db = getFirestore();
+        await addDoc(collection(db, 'testimonials'), {
+          workspaceId: formConfig?.projectId || cleanSlug || 'besteample',
+          authorName: sanitizedData.name,
+          authorRole: sanitizedData.role,
+          content: sanitizedData.content,
+          rating: sanitizedData.rating,
+          mediaType: submissionMode,
+          avatarUrl: sanitizedData.avatarUrl || null,
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+          timestamp: serverTimestamp(),
+        });
+      } catch {
+        // Mock / offline fallback
       }
 
       if (storage.evaluateAutoApproval) {
