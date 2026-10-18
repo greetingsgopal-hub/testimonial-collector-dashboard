@@ -20,7 +20,6 @@ import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { AccountBillingView } from '../components/dashboard/views/AccountBillingView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { TagsView } from '../components/dashboard/views/TagsView';
-import { WidgetStudio } from '../components/dashboard/WidgetStudio';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
 import { ReviewPipelineHero } from '../components/dashboard/ReviewPipelineHero';
 import { storage } from '../lib/storage';
@@ -45,9 +44,9 @@ const TAB_LABEL_MAP: Record<string, string> = {
   welcome: 'Welcome Hub',
   forms: 'Collect or Import',
   import: 'Collect or Import',
-  proof: 'Evaluate',
-  widgets: 'Widgets & Embeds · On Website',
-  social: 'Widgets & Embeds · On Social Media',
+  proof: 'Customize',
+  widgets: 'Post on internet',
+  social: 'Post on internet',
   campaigns: 'Campaigns',
   integrate: 'Billing & Plans',
   settings: 'Billing & Plans',
@@ -544,7 +543,7 @@ export const DashboardPage = () => {
               onProof={() => setActiveTab('proof')}
               onOpenWall={() => window.open(`${window.location.origin}/love/${project?.slug || 'feedback'}`, '_blank')}
               onRichSnippet={() => setActiveTab('rich-snippet')}
-              onWidgets={() => setActiveTab('widgets')}
+              onWidgets={() => setActiveTab('social')}
               reviews={effectiveReviews}
               publishComplete={publishComplete}
               isViewingSampleData={isViewingSampleData}
@@ -560,7 +559,7 @@ export const DashboardPage = () => {
               onSendInvites={handleCopyLink}
               onViewProof={() => setActiveTab('proof')}
               onNavigateToCampaigns={() => setActiveTab('campaigns')}
-              onNavigateToWidgets={() => setActiveTab('widgets')}
+              onNavigateToWidgets={() => setActiveTab('social')}
               onUpdateForm={handleUpdateCollectionForm}
               reviews={effectiveReviews}
               stats={effectiveStats}
@@ -612,19 +611,8 @@ export const DashboardPage = () => {
             </div>
           )}
 
-          {/* Post on Internet · On Website (Widgets Studio) */}
-          {activeTab === 'widgets' && (
-            <div className="max-w-5xl mx-auto font-sans">
-              <WidgetStudio
-                reviews={effectiveReviews}
-                onBack={() => setActiveTab('proof')}
-                onOpenProof={() => setActiveTab('proof')}
-              />
-            </div>
-          )}
-
-          {/* Post on Internet · On Social Media */}
-          {activeTab === 'social' && (
+          {/* Post on internet (Social Broadcast & Studio) */}
+          {(activeTab === 'social' || activeTab === 'widgets') && (
             <div className="max-w-5xl mx-auto font-sans">
               <SocialPostView
                 reviews={effectiveReviews}

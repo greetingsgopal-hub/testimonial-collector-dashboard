@@ -468,7 +468,7 @@ export function SocialBroadcastStudio({
               Visual Template & Social Studio
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 mt-1">On Social Media</h1>
+          <h1 className="text-2xl font-bold text-slate-900 mt-1">Post on internet</h1>
           <p className="text-sm text-slate-500 mt-0.5">
             Design professional Single, Double, or Triple testimonial graphics backed by your website hero screenshot.
           </p>

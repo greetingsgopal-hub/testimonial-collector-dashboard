@@ -63,12 +63,12 @@ describe('SocialPostView Suite', () => {
     container.remove();
   });
 
-  it('1. Renders On Social Media header, connected channels, and approved reviews', async () => {
+  it('1. Renders Post on internet header, connected channels, and approved reviews', async () => {
     await act(async () => {
       root.render(<SocialPostView reviews={mockReviews} />);
     });
 
-    expect(container.textContent).toContain('On Social Media');
+    expect(container.textContent).toContain('Post on internet');
     expect(container.textContent).toContain('Choose Broadcast Destinations');
     expect(container.textContent).toContain('LinkedIn');
     expect(container.textContent).toContain('X (Twitter)');

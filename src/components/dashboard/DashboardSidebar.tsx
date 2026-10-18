@@ -1,18 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Star,
   FileText,
   CheckCircle2,
   CreditCard,
-  Layers,
   Mail,
   Gift,
   X,
-  Globe,
   Share2,
-  ChevronDown,
-  ChevronRight,
 } from 'lucide-react';
 import SidebarFooter from './SidebarFooter';
 
@@ -48,8 +44,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   mobileOpen = false,
   onClose,
 }) => {
-  const [postDropdownOpen, setPostDropdownOpen] = useState(true);
-
   // Close the mobile drawer on Escape
   useEffect(() => {
     if (!mobileOpen || !onClose) return;
@@ -113,7 +107,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           </div>
         </button>
 
-        {/* 3. Evaluate (Moderation Queue) */}
+        {/* 3. Customize (Moderation Queue) */}
         <button
           onClick={() => setActiveTab('proof')}
           className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
@@ -124,7 +118,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         >
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className={`w-4 h-4 transition-colors ${activeTab === 'proof' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
-            <span>Evaluate</span>
+            <span>Customize</span>
           </div>
           {proofCount > 0 ? (
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
@@ -135,63 +129,20 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           ) : null}
         </button>
 
-        {/* 4. Post on Internet (Dropdown) */}
-        <div className="space-y-0.5 pt-0.5">
-          <button
-            type="button"
-            onClick={() => {
-              setPostDropdownOpen(!postDropdownOpen);
-              if (!postDropdownOpen && activeTab !== 'widgets' && activeTab !== 'social') {
-                setActiveTab('widgets');
-              }
-            }}
-            className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'widgets' || activeTab === 'social'
-                ? 'text-slate-900 font-bold bg-slate-200/60'
-                : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Globe className={`w-4 h-4 transition-colors ${activeTab === 'widgets' || activeTab === 'social' ? 'text-violet-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
-              <span>Widgets & Embeds</span>
-            </div>
-            {postDropdownOpen ? (
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            ) : (
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            )}
-          </button>
-
-          {postDropdownOpen && (
-            <div className="pl-6 pr-1 py-0.5 space-y-1 animate-fade-in">
-              {/* On Website */}
-              <button
-                onClick={() => setActiveTab('widgets')}
-                className={`apple-touch group w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  activeTab === 'widgets'
-                    ? 'bg-slate-900 text-white font-semibold shadow-2xs'
-                    : 'text-slate-600 hover:bg-slate-200/50 hover:text-slate-900'
-                }`}
-              >
-                <Layers className={`w-3.5 h-3.5 ${activeTab === 'widgets' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
-                <span>On Website</span>
-              </button>
-
-              {/* On Social Media */}
-              <button
-                onClick={() => setActiveTab('social')}
-                className={`apple-touch group w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  activeTab === 'social'
-                    ? 'bg-slate-900 text-white font-semibold shadow-2xs'
-                    : 'text-slate-600 hover:bg-slate-200/50 hover:text-slate-900'
-                }`}
-              >
-                <Share2 className={`w-3.5 h-3.5 ${activeTab === 'social' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
-                <span>On Social Media</span>
-              </button>
-            </div>
-          )}
-        </div>
+        {/* 4. Post on internet */}
+        <button
+          onClick={() => setActiveTab('social')}
+          className={`apple-touch group w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === 'social' || activeTab === 'widgets'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <Share2 className={`w-4 h-4 transition-colors ${activeTab === 'social' || activeTab === 'widgets' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+            <span>Post on internet</span>
+          </div>
+        </button>
 
         {/* 5. Automated Review Campaigns */}
         <button

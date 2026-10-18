@@ -1153,7 +1153,7 @@ export default function SocialBroadcastHub({
               1-Click Social Proof Distribution
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 mt-1">On Social Media</h1>
+          <h1 className="text-2xl font-bold text-slate-900 mt-1">Post on internet</h1>
           <p className="text-sm text-slate-500 mt-0.5">
             Turn customer reviews into ready-to-post LinkedIn, X, WhatsApp, and 1080×1080 Instagram cards in 1 click.
           </p>

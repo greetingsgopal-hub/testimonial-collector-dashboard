@@ -135,8 +135,8 @@ describe('AccountBillingView & BillingAndPlansPage Suite', () => {
     expect(container.textContent).toContain('PandaPraise');
     expect(container.textContent).toContain('Welcome Hub');
     expect(container.textContent).toContain('Collect or Import');
-    expect(container.textContent).toContain('Evaluate');
-    expect(container.textContent).toContain('Widgets & Embeds');
+    expect(container.textContent).toContain('Customize');
+    expect(container.textContent).toContain('Post on internet');
     expect(container.textContent).toContain('Campaigns');
     expect(container.textContent).toContain('Referrals');
     expect(container.textContent).toContain('Billing & Plans');

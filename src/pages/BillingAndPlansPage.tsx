@@ -19,10 +19,9 @@ import {
   Star,
   Inbox,
   CheckCircle2,
-  Globe,
+  Share2,
   Mail,
   Gift,
-  ChevronDown,
   ChevronsUpDown,
 } from 'lucide-react';
 import { loadRazorpayScript } from '../lib/razorpay';
@@ -825,18 +824,13 @@ export default function BillingAndPlansPage({
             </a>
             <a href="/dashboard?tab=proof" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50">
               <CheckCircle2 className="w-4 h-4 text-slate-400" />
-              <span>Evaluate</span>
+              <span>Customize</span>
             </a>
 
-            <div className="pt-1">
-              <a href="/dashboard?tab=widgets" className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-700 hover:bg-slate-50">
-                <span className="flex items-center gap-3">
-                  <Globe className="w-4 h-4 text-slate-400" />
-                  <span>Widgets & Embeds</span>
-                </span>
-                <ChevronDown className="w-4 h-4 text-slate-400" />
-              </a>
-            </div>
+            <a href="/dashboard?tab=social" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50">
+              <Share2 className="w-4 h-4 text-slate-400" />
+              <span>Post on internet</span>
+            </a>
 
             <a href="/dashboard?tab=campaigns" className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-slate-50">
               <span className="flex items-center gap-3">

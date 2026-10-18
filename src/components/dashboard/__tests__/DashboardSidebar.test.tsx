@@ -109,15 +109,15 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
     expect(container.textContent).toContain('PandaPraise');
     expect(container.textContent).toContain('Welcome Hub');
     expect(container.textContent).toContain('Collect or Import');
-    expect(container.textContent).toContain('Evaluate');
+    expect(container.textContent).toContain('Customize');
     expect(container.textContent).toContain('4'); // proof count badge
-    expect(container.textContent).toContain('Widgets & Embeds');
-    expect(container.textContent).toContain('On Website');
-    expect(container.textContent).toContain('On Social Media');
+    expect(container.textContent).toContain('Post on internet');
+    expect(container.textContent).not.toContain('Widgets & Embeds');
+    expect(container.textContent).not.toContain('On Website');
+    expect(container.textContent).not.toContain('Evaluate');
     expect(container.textContent).toContain('Campaigns');
     expect(container.textContent).toContain('Referrals');
     expect(container.textContent).toContain('Billing & Plans');
-    expect(container.textContent).not.toContain('Post on Internet');
     expect(container.textContent).not.toContain('Accounts & Billing mgmt');
     expect(container.textContent).not.toContain('Google Stars');
   });
