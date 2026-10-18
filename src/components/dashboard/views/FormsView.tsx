@@ -252,6 +252,7 @@ export const FormsView: React.FC<FormsViewProps> = ({
       <div id="collection-form-builder" className="pt-2">
         <CollectionFormBuilder
           workspaceName={projectName}
+          workspaceId={project?.id || projectName}
           collectionForm={collectionForm}
           onUpdateForm={onUpdateForm}
           publicCollectionUrl={collectionUrl}
