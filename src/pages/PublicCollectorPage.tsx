@@ -28,6 +28,7 @@ import { storage } from '../lib/storage';
 import { sanitizeText } from '../lib/security';
 import { MALE_ANIMATED_AVATAR, FEMALE_ANIMATED_AVATAR } from '../lib/defaultAvatars';
 import { usePageSeo } from '../lib/seo';
+import { PublicCustomerFeedbackPage } from '../components/dashboard/ReviewFeedbackFormSystem';
 
 const COPY = {
   en: {
@@ -135,6 +136,7 @@ export const PublicCollectorPage: React.FC<PublicCollectorPageProps> = ({ worksp
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [alreadySubmittedData, setAlreadySubmittedData] = useState<{ name?: string; submittedAt?: string } | null>(null);
+  const [hasReviewFeedbackTexts, setHasReviewFeedbackTexts] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const t = COPY[lang];
@@ -165,6 +167,7 @@ export const PublicCollectorPage: React.FC<PublicCollectorPageProps> = ({ worksp
         if (d.primaryColor) setAccentColor(d.primaryColor);
         if (d.allowText !== undefined) setAllowText(d.allowText);
         if (d.allowVideo !== undefined) setAllowVideo(d.allowVideo);
+        if (d.reviewFormTexts) setHasReviewFeedbackTexts(true);
       }
     } catch {}
 
@@ -185,6 +188,7 @@ export const PublicCollectorPage: React.FC<PublicCollectorPageProps> = ({ worksp
       getDoc(doc(db, 'workspaces', cleanSlug)).then((snap) => {
         if (!isMounted || !snap.exists()) return;
         const d = snap.data();
+        if (d.reviewFormTexts) setHasReviewFeedbackTexts(true);
         if (d.name) setWorkspaceName(d.name);
         if (d.formHeading) setFormHeading(d.formHeading);
         if (d.formSubheading) setFormSubheading(d.formSubheading);
@@ -345,6 +349,10 @@ export const PublicCollectorPage: React.FC<PublicCollectorPageProps> = ({ worksp
       setIsSubmitting(false);
     }
   };
+
+  if (hasReviewFeedbackTexts || searchParams.get('theme') === 'review_feedback') {
+    return <PublicCustomerFeedbackPage workspaceSlug={cleanSlug} />;
+  }
 
   // Already submitted state (One Link One Device Rule)
   if (alreadySubmittedData && !submitted) {
