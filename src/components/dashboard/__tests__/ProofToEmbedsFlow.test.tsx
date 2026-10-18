@@ -112,7 +112,10 @@ describe('ProofToEmbedsFlow & Editorial Place-Card Studio', () => {
     expect(container.textContent).toContain('Customize Approved Testimonial Before Posting');
     expect(container.textContent).toContain('Upload from System');
     expect(container.textContent).toContain('Download High-Res Testimonial Card (PNG)');
-    expect(container.textContent).toContain('Post to LinkedIn ↗');
+    expect(container.textContent).toContain('LinkedIn');
+    expect(container.textContent).toContain('Post to X');
+    expect(container.textContent).toContain('Widget Script');
+    expect(container.textContent).toContain('Standalone HTML');
     expect(container.textContent).toContain('Back to Proof');
   });
 

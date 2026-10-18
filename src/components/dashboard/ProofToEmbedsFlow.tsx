@@ -861,8 +861,44 @@ export function EmbedsPostStudio({
     }
   };
 
-  // Generate Live Website Embed Code for this Customized Card
-  const embedHtmlSnippet = `<div data-pandapraise-card="editorial" data-workspace="${workspaceName}" data-author="${authorName}" data-role="${locationOrRole}" data-rating="${starRating}"></div>\n<script async src="https://pandapraise.com/widget.js"></script>`;
+  const cleanWorkspaceSlug =
+    (workspaceName || 'pandapraise')
+      .replace(/'s\s+workspace$/i, '')
+      .replace(/\s+workspace$/i, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '') || 'pandapraise';
+
+  const [embedFormat, setEmbedFormat] = useState<'script' | 'html'>('script');
+
+  // Clean, multi-line formatted snippets (Zero horizontal scrollbar!)
+  const cleanScriptSnippet = `<div
+  data-pandapraise-card="editorial"
+  data-workspace="${cleanWorkspaceSlug}"
+  data-author="${authorName.replace(/"/g, '&quot;')}"
+  data-role="${locationOrRole.replace(/"/g, '&quot;')}"
+  data-rating="${starRating}"
+  data-quote="${quoteText.replace(/"/g, '&quot;')}"
+></div>
+<script async src="https://pandapraise.com/widget.js"></script>`;
+
+  const selfContainedHtmlSnippet = `<!-- PandaPraise Editorial Testimonial Card -->
+<div style="max-width:460px;margin:0 auto;padding:36px 28px;border-radius:18px;background:url('${
+    backgroundUrl.startsWith('data:')
+      ? 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1200&q=85'
+      : backgroundUrl
+  }') center/cover no-repeat;font-family:Georgia,serif;">
+  <div style="background:#F4F2EA;border-radius:16px;padding:32px;box-shadow:0 20px 50px rgba(0,0,0,0.28);color:#4B432B;">
+    <div style="color:#625834;font-size:20px;letter-spacing:4px;margin-bottom:16px;">${'★'.repeat(starRating)}</div>
+    <p style="font-style:italic;font-size:15.5px;line-height:1.68;margin:0 0 24px 0;">“${quoteText}”</p>
+    <div style="display:flex;align-items:center;gap:12px;font-weight:bold;font-size:14px;color:#5C5233;">
+      <span>${authorName}</span>
+      <span style="flex:1;height:1.5px;background:#6E6340;opacity:0.6;"></span>
+      <span>${locationOrRole}</span>
+    </div>
+  </div>
+</div>`;
+
+  const activeEmbedCode = embedFormat === 'script' ? cleanScriptSnippet : selfContainedHtmlSnippet;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 font-sans text-slate-900 pb-12">
@@ -1116,8 +1152,8 @@ export function EmbedsPostStudio({
             </div>
           </div>
 
-          {/* 3. Post on Internet & Website Embed Actions */}
-          <div className="space-y-3">
+          {/* 3. Post on Internet & Website Embed Actions (Paste inside Right Column) */}
+          <div className="space-y-3.5">
             <h2 className="text-sm font-bold text-slate-900">
               3. Post on Internet (Social Media & Website Embed)
             </h2>
@@ -1128,61 +1164,93 @@ export function EmbedsPostStudio({
               onClick={handleDownloadPng}
               className="w-full py-3 px-4 rounded-xl bg-[#6701e6] hover:bg-purple-700 text-white font-bold text-xs sm:text-sm shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-all"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4 shrink-0" />
               <span>Download High-Res Testimonial Card (PNG)</span>
             </button>
 
+            {/* 4 Non-Wrapping Social Action Buttons (Single Line Guaranteed) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
                 type="button"
                 onClick={() => handlePostToSocialNetwork('linkedin')}
-                className="py-2.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-800 cursor-pointer"
+                className="py-2.5 px-3 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 text-xs font-bold text-slate-800 flex items-center justify-center gap-1 whitespace-nowrap transition-all cursor-pointer"
               >
-                Post to LinkedIn ↗
+                <span>LinkedIn</span>
+                <span className="text-slate-400">↗</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => handlePostToSocialNetwork('x')}
-                className="py-2.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-800 cursor-pointer"
+                className="py-2.5 px-3 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 text-xs font-bold text-slate-800 flex items-center justify-center gap-1 whitespace-nowrap transition-all cursor-pointer"
               >
-                Post to X ↗
+                <span>Post to X</span>
+                <span className="text-slate-400">↗</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => handlePostToSocialNetwork('whatsapp')}
-                className="py-2.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-800 cursor-pointer"
+                className="py-2.5 px-3 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 text-xs font-bold text-slate-800 flex items-center justify-center gap-1 whitespace-nowrap transition-all cursor-pointer"
               >
-                WhatsApp ↗
+                <span>WhatsApp</span>
+                <span className="text-slate-400">↗</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => handlePostToSocialNetwork('instagram')}
-                className="py-2.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-800 cursor-pointer"
+                className="py-2.5 px-3 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 text-xs font-bold text-slate-800 flex items-center justify-center gap-1 whitespace-nowrap transition-all cursor-pointer"
               >
-                Instagram PNG
+                <span>Instagram</span>
+                <span className="text-slate-400">↓</span>
               </button>
             </div>
 
-            {/* Website HTML Embed Code Box */}
+            {/* Website HTML Embed Code Box (No Horizontal Scrollbar, Sanitized Slug) */}
             <div className="pt-2">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Or Embed This Card on Your Website
-                </span>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    Or Embed This Card on Your Website
+                  </span>
+                  <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-100 border border-slate-200 text-[10px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setEmbedFormat('script')}
+                      className={`px-2 py-0.5 rounded-md cursor-pointer ${
+                        embedFormat === 'script' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500'
+                      }`}
+                    >
+                      Widget Script
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEmbedFormat('html')}
+                      className={`px-2 py-0.5 rounded-md cursor-pointer ${
+                        embedFormat === 'html' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500'
+                      }`}
+                    >
+                      Standalone HTML
+                    </button>
+                  </div>
+                </div>
+
                 <button
                   type="button"
                   onClick={() => {
-                    navigator.clipboard.writeText(embedHtmlSnippet);
-                    showToast('Website HTML embed code copied to clipboard!');
+                    navigator.clipboard.writeText(activeEmbedCode);
+                    showToast('Website embed code copied to clipboard!');
                   }}
                   className="text-xs font-bold text-[#6701e6] hover:underline flex items-center gap-1 cursor-pointer"
                 >
-                  <Copy className="w-3 h-3" />
+                  <Copy className="w-3.5 h-3.5" />
                   <span>Copy Embed Code</span>
                 </button>
               </div>
-              <pre className="p-3 rounded-xl bg-slate-900 text-slate-200 text-[11px] font-mono overflow-x-auto">
-                {embedHtmlSnippet}
+
+              <pre className="p-3.5 rounded-xl bg-[#0F172A] text-slate-200 text-[11px] leading-relaxed font-mono whitespace-pre-wrap break-words border border-slate-800 select-all">
+                {activeEmbedCode}
               </pre>
             </div>
           </div>
