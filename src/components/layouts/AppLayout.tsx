@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ImportTestimonialsHub } from '../dashboard/ImportTestimonialsHub';
 import ProofSection from '../dashboard/ProofSection';
+import { EmbedsPostStudio } from '../dashboard/ProofToEmbedsFlow';
 
 export interface AppLayoutProps {
   workspaceId?: string;
@@ -19,6 +20,7 @@ export default function AppLayout({
   children,
 }: AppLayoutProps) {
   const [activeNav, setActiveNav] = useState<string>(initialNav);
+  const [selectedForEmbeds, setSelectedForEmbeds] = useState<any[]>([]);
 
   useEffect(() => {
     const handleShiftNav = (e: Event) => {
@@ -174,6 +176,16 @@ export default function AppLayout({
               <ProofSection
                 workspaceId={workspaceId}
                 workspaceName={workspaceId}
+                onPostOnInternet={(items) => {
+                  setSelectedForEmbeds(items);
+                  setActiveNav('embeds');
+                }}
+              />
+            ) : activeNav === 'embeds' ? (
+              <EmbedsPostStudio
+                workspaceName={workspaceId}
+                selectedTestimonials={selectedForEmbeds}
+                onBackToProof={() => setActiveNav('proof')}
               />
             ) : activeNav === 'import' ? (
               <ImportTestimonialsHub

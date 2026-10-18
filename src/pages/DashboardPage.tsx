@@ -10,11 +10,11 @@ import { PublishHistoryModal } from '../components/dashboard/PublishHistoryModal
 import { WelcomeView } from '../components/dashboard/views/WelcomeView';
 import { FormsView } from '../components/dashboard/views/FormsView';
 import { ImportTestimonialsHub, ImportedTestimonial } from '../components/dashboard/ImportTestimonialsHub';
-import { SocialPostView } from '../components/dashboard/views/SocialPostView';
 import { AccountBillingView } from '../components/dashboard/views/AccountBillingView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
 import ProofSection from '../components/dashboard/ProofSection';
+import { EmbedsPostStudio } from '../components/dashboard/ProofToEmbedsFlow';
 import { storage } from '../lib/storage';
 import { Review, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { getSampleReviews, isSampleDataCleared, setSampleDataCleared } from '../lib/mockData';
@@ -62,6 +62,7 @@ export const DashboardPage = () => {
   });
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedForEmbeds, setSelectedForEmbeds] = useState<any[]>([]);
 
   const setActiveTab = useCallback((tab: DashboardTab) => {
     setActiveTabState(tab);
@@ -525,14 +526,13 @@ export const DashboardPage = () => {
             </div>
           )}
 
-          {/* Post on internet (Social Broadcast & Studio) */}
+          {/* Post on internet (Embeds & Social Post Studio) */}
           {(activeTab === 'social' || activeTab === 'widgets') && (
-            <div className="max-w-5xl mx-auto font-sans">
-              <SocialPostView
-                reviews={effectiveReviews}
-                workspaceId={impersonatedWorkspace?.id || workspace?.id || project?.id}
-                workspaceName={impersonatedWorkspace?.name || workspace?.name || project?.name}
-                onOpenAccountsModal={() => setShowAccountsModal(true)}
+            <div className="max-w-6xl mx-auto font-sans">
+              <EmbedsPostStudio
+                workspaceName={impersonatedWorkspace?.name || workspace?.name || project?.name || 'reallygreatsite'}
+                selectedTestimonials={selectedForEmbeds}
+                onBackToProof={() => setActiveTab('proof')}
               />
             </div>
           )}
@@ -550,6 +550,10 @@ export const DashboardPage = () => {
               <ProofSection
                 workspaceId={impersonatedWorkspace?.id || workspace?.id || project?.id || 'besteample'}
                 workspaceName={impersonatedWorkspace?.name || workspace?.name || project?.name || 'besteample'}
+                onPostOnInternet={(chosen) => {
+                  setSelectedForEmbeds(chosen);
+                  setActiveTab('widgets');
+                }}
               />
             </div>
           )}

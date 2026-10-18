@@ -19,6 +19,9 @@ import {
   X,
   Loader2,
   Image as ImageIcon,
+  CheckSquare,
+  Square,
+  Share2,
 } from 'lucide-react';
 
 export interface ProofItem {
@@ -71,13 +74,16 @@ export function classifyPraiseCategories(text: string, existingTags?: string[]):
 export interface ProofSectionProps {
   workspaceId?: string;
   workspaceName?: string;
+  onPostOnInternet?: (selectedApproved: ProofItem[]) => void;
 }
 
 export default function ProofSection({
   workspaceId = 'besteample',
   workspaceName = 'besteample',
+  onPostOnInternet,
 }: ProofSectionProps) {
   const [proofList, setProofList] = useState<ProofItem[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeCategory, setActiveCategory] = useState<PraiseCategory | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'Approved' | 'Pending Review'>('all');
@@ -288,6 +294,23 @@ export default function ProofSection({
     }
   };
 
+  const toggleSelectApproved = (item: ProofItem) => {
+    if (item.status !== 'Approved') return;
+    setSelectedIds((prev) =>
+      prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id]
+    );
+  };
+
+  const selectedApprovedObjects = proofList.filter(
+    (p) => p.status === 'Approved' && selectedIds.includes(p.id)
+  );
+
+  const handleTriggerPost = (targetList: ProofItem[]) => {
+    if (onPostOnInternet) {
+      onPostOnInternet(targetList);
+    }
+  };
+
   // Dynamic Top-Ribbon Category Counts (Calculated from actual reviews)
   const categoryCounts = useMemo(() => {
     const counts: Record<PraiseCategory, number> = {
@@ -363,6 +386,26 @@ export default function ProofSection({
           >
             <span className="text-base leading-none text-slate-500">+</span>
             <span>Invite customer</span>
+          </button>
+
+          {/* PRIMARY WORKFLOW CTA: "Post on Internet" */}
+          <button
+            type="button"
+            onClick={() => {
+              const targetList =
+                selectedApprovedObjects.length > 0
+                  ? selectedApprovedObjects
+                  : proofList.filter((p) => p.status === 'Approved').slice(0, 1);
+              handleTriggerPost(targetList);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#6701e6] hover:bg-purple-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all cursor-pointer"
+          >
+            <Share2 className="w-4 h-4" />
+            <span>
+              {selectedApprovedObjects.length > 0
+                ? `Post on Internet (${selectedApprovedObjects.length} Selected) →`
+                : 'Post on Internet →'}
+            </span>
           </button>
         </div>
       </section>
@@ -494,47 +537,89 @@ export default function ProofSection({
             )}
           </div>
         ) : (
-          filteredProofList.map((item) => (
-            <article
-              key={item.id}
-              className="p-4 sm:p-5 rounded-xl border border-slate-200/80 bg-white shadow-xs hover:shadow-sm hover:border-slate-300 transition-all"
-            >
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h4 className="text-sm sm:text-base font-bold text-slate-900">
-                    {item.authorName}{' '}
-                    <span className="text-slate-400 font-normal">·</span>{' '}
-                    <span className="font-semibold text-slate-800">{item.authorRole}</span>
-                  </h4>
-                  {item.source && item.source !== 'Imported' && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500">
-                      via {item.source}
-                    </span>
-                  )}
-                </div>
+          filteredProofList.map((item) => {
+            const isSelected = selectedIds.includes(item.id);
+            const isApproved = item.status === 'Approved';
 
-                <div className="flex items-center gap-2 shrink-0">
-                  {item.status === 'Pending Review' && (
+            return (
+              <article
+                key={item.id}
+                onClick={() => isApproved && toggleSelectApproved(item)}
+                className={`p-4 sm:p-5 rounded-xl border transition-all cursor-pointer ${
+                  isSelected
+                    ? 'border-[#6701e6] bg-purple-50/25 ring-2 ring-purple-500/15 shadow-sm'
+                    : 'border-slate-200/80 bg-white shadow-xs hover:shadow-sm hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Selection Checkbox for Approved Reviews */}
                     <button
                       type="button"
-                      onClick={() => handleApproveReview(item.id)}
-                      className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white cursor-pointer transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isApproved) toggleSelectApproved(item);
+                      }}
+                      className="text-purple-600 cursor-pointer"
                     >
-                      Approve Now
+                      {isSelected ? (
+                        <CheckSquare className="w-5 h-5 text-[#6701e6]" />
+                      ) : (
+                        <Square className="w-5 h-5 text-slate-300 hover:text-slate-500" />
+                      )}
                     </button>
-                  )}
 
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${
-                      item.status === 'Approved'
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
-                        : 'bg-amber-50 text-amber-700 border-amber-200/60'
-                    }`}
-                  >
-                    {item.status}
-                  </span>
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900">
+                      {item.authorName}{' '}
+                      <span className="text-slate-400 font-normal">·</span>{' '}
+                      <span className="font-semibold text-slate-800">{item.authorRole}</span>
+                    </h4>
+                    {item.source && item.source !== 'Imported' && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500">
+                        via {item.source}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {isApproved && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTriggerPost([item]);
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-purple-50 text-[#6701e6] hover:bg-purple-100 border border-purple-200 cursor-pointer transition-colors"
+                      >
+                        <Share2 className="w-3 h-3" />
+                        <span>Post on Internet →</span>
+                      </button>
+                    )}
+
+                    {item.status === 'Pending Review' && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleApproveReview(item.id);
+                        }}
+                        className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white cursor-pointer transition-colors"
+                      >
+                        Approve Now
+                      </button>
+                    )}
+
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${
+                        item.status === 'Approved'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                          : 'bg-amber-50 text-amber-700 border-amber-200/60'
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
               {/* Star Ratings */}
               <div
@@ -566,7 +651,8 @@ export default function ProofSection({
                 </div>
               )}
             </article>
-          ))
+            );
+          })
         )}
       </section>
 
