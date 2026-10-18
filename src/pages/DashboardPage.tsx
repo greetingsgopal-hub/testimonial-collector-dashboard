@@ -11,7 +11,6 @@ import { WelcomeView } from '../components/dashboard/views/WelcomeView';
 import { FormsView } from '../components/dashboard/views/FormsView';
 import { ImportTestimonialsHub, ImportedTestimonial } from '../components/dashboard/ImportTestimonialsHub';
 import { SocialPostView } from '../components/dashboard/views/SocialPostView';
-import { AnalyzeView } from '../components/dashboard/views/AnalyzeView';
 import { AccountBillingView } from '../components/dashboard/views/AccountBillingView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
@@ -33,10 +32,9 @@ const TAB_LABEL_MAP: Record<string, string> = {
   proof: 'Proof',
   widgets: 'Embeds',
   social: 'Post on internet',
-  campaigns: 'Thank Yous',
+  campaigns: 'Campaigns',
   integrate: 'Billing & Plans',
   settings: 'Billing & Plans',
-  analyze: 'Analytics',
   referral: 'Referral Program (Give 1M / Get 1M)',
 };
 
@@ -52,12 +50,12 @@ export const DashboardPage = () => {
   const [activeTab, setActiveTabState] = useState<DashboardTab>(() => {
     const paramTab = searchParams.get('tab') as DashboardTab;
     if (paramTab) {
-      if (paramTab === 'tags' || paramTab === 'feedback') return 'proof';
+      if (paramTab === 'tags' || paramTab === 'feedback' || paramTab === 'analyze') return 'proof';
       return paramTab;
     }
     const windowTab = new URLSearchParams(window.location.search).get('tab') as DashboardTab;
     if (windowTab) {
-      if (windowTab === 'tags' || windowTab === 'feedback') return 'proof';
+      if (windowTab === 'tags' || windowTab === 'feedback' || windowTab === 'analyze') return 'proof';
       return windowTab;
     }
     return 'welcome';
@@ -501,11 +499,6 @@ export const DashboardPage = () => {
                 }}
               />
             </div>
-          )}
-
-          {/* AI Sentiment Analysis */}
-          {activeTab === 'analyze' && (
-            <AnalyzeView reviews={effectiveReviews} />
           )}
 
           {/* In-App Referral Hub ("Give 1 Month / Get 1 Month") */}

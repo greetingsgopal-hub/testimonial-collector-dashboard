@@ -61,7 +61,8 @@ describe('ImportTestimonialsHub - 4-Way Production Import Pipeline', () => {
     expect(container.textContent).toContain('Screenshots Import');
     expect(container.textContent).toContain('CSV Spreadsheet');
     expect(container.textContent).not.toContain('Manual Entry');
-    expect(container.textContent).toContain('Social Login Directory');
+    expect(container.textContent).not.toContain('Social Login Directory');
+    expect(container.textContent).not.toContain('Explore All 30+ Integration Directories');
   });
 
   it('2. Switching to Screenshots Import tab displays screenshot upload dropzone', async () => {
@@ -115,7 +116,7 @@ describe('ImportTestimonialsHub - 4-Way Production Import Pipeline', () => {
     expect(container.textContent).toContain('3. Validate & Commit');
   });
 
-  it('4. Directory mode allows switching and searching integrations', async () => {
+  it('4. Directory explore button is completely removed from the header', async () => {
     await act(async () => {
       root.render(
         <ImportTestimonialsHub
@@ -126,16 +127,10 @@ describe('ImportTestimonialsHub - 4-Way Production Import Pipeline', () => {
       );
     });
 
-    const dirBtn = Array.from(container.querySelectorAll('button')).find((b) =>
-      b.textContent?.includes('Social Login Directory')
+    const exploreBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Explore All 30+')
     );
-    expect(dirBtn).toBeDefined();
-
-    await act(async () => {
-      dirBtn?.click();
-    });
-
-    expect(container.textContent).toContain('Integrate Social Accounts & Scrape Reviews');
+    expect(exploreBtn).toBeUndefined();
   });
 
   it('5. Purple banner does not render View Proof Section button', async () => {

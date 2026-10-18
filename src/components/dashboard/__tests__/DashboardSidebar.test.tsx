@@ -115,6 +115,7 @@ describe('DashboardSidebar - Unified Sidebar Footer & Ergonomics', () => {
     expect(container.textContent).not.toContain('Widgets & Embeds');
     expect(container.textContent).not.toContain('On Website');
     expect(container.textContent).not.toContain('Evaluate');
+    expect(container.textContent).not.toContain('Analytics');
     expect(container.textContent).toContain('Campaigns');
     expect(container.textContent).toContain('Referrals');
     expect(container.textContent).toContain('Billing & Plans');

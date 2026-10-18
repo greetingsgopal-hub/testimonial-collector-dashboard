@@ -23,7 +23,6 @@ import {
   CheckCircle2,
   Search,
   Sparkles,
-  Globe,
   Trash2,
   ShieldCheck,
   Loader2,
@@ -46,7 +45,7 @@ export interface ImportedTestimonial {
   createdAt: string;
 }
 
-type ImportMode = 'social' | 'screenshots' | 'csv' | 'directory';
+type ImportMode = 'social' | 'screenshots' | 'csv';
 
 interface SocialPlatformAccount {
   id: 'google' | 'facebook' | 'twitter' | 'reddit' | 'linkedin' | 'instagram';
@@ -614,22 +613,11 @@ export default function ImportTestimonialsHub({
 
   return (
     <div className="space-y-6 font-sans text-slate-900 pb-12">
-      {/* TOP BAR LINK */}
+      {/* TOP BAR */}
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-slate-400">
           Workspace: <strong className="text-slate-700">{workspaceName}</strong>
         </span>
-        <button
-          type="button"
-          onClick={() => setActiveMode(activeMode === 'directory' ? 'social' : 'directory')}
-          className="text-xs font-bold text-purple-600 hover:text-purple-700 flex items-center gap-1 cursor-pointer"
-        >
-          <span>
-            {activeMode === 'directory'
-              ? '← Back to Quick Import Hub (Social Sync, Screenshots, CSV)'
-              : 'Explore All 30+ Integration Directories & Social Channels →'}
-          </span>
-        </button>
       </div>
 
       {/* PURPLE HERO BANNER (Matches Stitch & Panda Praise Design) */}
@@ -655,7 +643,6 @@ export default function ImportTestimonialsHub({
             { id: 'social', label: `Social Auto-Scraper (${connectedCount} Linked)`, icon: RefreshCw },
             { id: 'screenshots', label: 'Screenshots Import', icon: ImageIcon },
             { id: 'csv', label: 'CSV Spreadsheet', icon: FileSpreadsheet },
-            { id: 'directory', label: 'Social Login Directory', icon: Globe },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeMode === tab.id;
@@ -700,9 +687,9 @@ export default function ImportTestimonialsHub({
       )}
 
       {/* =================================================================== */}
-      {/* MODE 1 & 5: SOCIAL MEDIA INTEGRATION + SINGLE-REFRESH REVIEW SCRAPER */}
+      {/* MODE 1: SOCIAL MEDIA INTEGRATION + SINGLE-REFRESH REVIEW SCRAPER    */}
       {/* =================================================================== */}
-      {(activeMode === 'social' || activeMode === 'directory') && (
+      {activeMode === 'social' && (
         <section className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
             <div>

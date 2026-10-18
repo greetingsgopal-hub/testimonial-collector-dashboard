@@ -10,7 +10,6 @@ import {
   X,
   Share2,
   ArrowDownToLine,
-  BarChart2,
 } from 'lucide-react';
 import SidebarFooter from './SidebarFooter';
 
@@ -147,18 +146,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 ) : null}
               </button>
             </li>
-            <li>
-              <button
-                type="button"
-                onClick={() => setActiveTab('analyze')}
-                className={navItemClass(activeTab === 'analyze')}
-              >
-                <div className="flex items-center gap-2.5">
-                  <BarChart2 className="w-4 h-4 text-slate-400 shrink-0" />
-                  <span>Analytics</span>
-                </div>
-              </button>
-            </li>
           </ul>
         </div>
 
@@ -189,8 +176,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               >
                 <div className="flex items-center gap-2.5">
                   <Mail className="w-4 h-4 text-slate-400 shrink-0" />
-                  <span>Thank Yous</span>
-                  <span className="sr-only">Campaigns</span>
+                  <span>Campaigns</span>
                 </div>
                 <span className="px-1.5 py-0.2 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-700">
                   Auto
