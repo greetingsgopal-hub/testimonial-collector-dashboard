@@ -19,8 +19,11 @@ interface VaultProofCard {
   handle: string;
   source: 'Reddit' | 'HackerNews' | 'GoogleNews' | 'X' | 'Trustpilot';
   quote: string;
+  clean_quote?: string;
+  cleanQuote?: string;
   date: string;
   sourceUrl: string;
+  source_url?: string;
   rating: number;
   highlight?: boolean;
 }
@@ -274,7 +277,7 @@ export const HostedProofVaultPage: React.FC = () => {
 
                 {/* Quote Body */}
                 <p className="text-sm sm:text-[15px] text-slate-800 leading-relaxed font-normal">
-                  "{card.quote}"
+                  "{card.clean_quote || card.cleanQuote || card.quote}"
                 </p>
               </div>
 
@@ -282,7 +285,7 @@ export const HostedProofVaultPage: React.FC = () => {
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-medium">
                 <span>{card.date}</span>
                 <a
-                  href={card.sourceUrl}
+                  href={card.source_url || card.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-violet-600 hover:text-violet-800 font-semibold hover:underline"

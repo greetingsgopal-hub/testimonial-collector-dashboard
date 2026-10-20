@@ -176,16 +176,16 @@ export const LandingPage: React.FC = () => {
         if (Array.isArray(data.mentions) && data.mentions.length > 0) {
           setSignals(
             data.mentions.map((m: any, idx: number) => ({
-              id: m.externalId || `scan-${idx}`,
+              id: m.external_id || m.externalId || `scan-${idx}`,
               source: m.source || 'Reddit',
-              targetKeyword: m.targetKeyword || brandInput,
-              isCompetitor: Boolean(m.isCompetitor),
+              targetKeyword: m.target_keyword || m.targetKeyword || brandInput,
+              isCompetitor: Boolean(m.is_competitor ?? m.isCompetitor),
               author: m.author || 'Community User',
               category: m.category || 'PRAISE',
-              urgencyScore: m.urgencyScore || 7,
-              cleanQuote: m.cleanQuote || m.rawText,
-              aiPoachReply: m.aiPoachReply,
-              sourceUrl: m.sourceUrl || 'https://news.ycombinator.com',
+              urgencyScore: m.urgency_score ?? m.urgencyScore ?? 7,
+              cleanQuote: m.clean_quote || m.cleanQuote || m.raw_text || m.rawText || '',
+              aiPoachReply: m.ai_poach_reply || m.aiPoachReply,
+              sourceUrl: m.source_url || m.sourceUrl || 'https://news.ycombinator.com',
               timeAgo: 'Just now',
             }))
           );

@@ -139,16 +139,16 @@ export const RadarView: React.FC<RadarViewProps> = ({
         if (Array.isArray(data.mentions) && data.mentions.length > 0) {
           setMentions(
             data.mentions.map((m: any, idx: number) => ({
-              id: m.externalId || `m-scan-${idx}`,
+              id: m.external_id || m.externalId || `m-scan-${idx}`,
               source: m.source || 'Reddit',
-              targetKeyword: m.targetKeyword || workspaceName,
-              isCompetitor: Boolean(m.isCompetitor),
+              targetKeyword: m.target_keyword || m.targetKeyword || workspaceName,
+              isCompetitor: Boolean(m.is_competitor ?? m.isCompetitor),
               author: m.author || 'Web User',
               category: m.category || 'PRAISE',
-              urgencyScore: m.urgencyScore || 7,
-              cleanQuote: m.cleanQuote || m.rawText,
-              aiPoachReply: m.aiPoachReply,
-              sourceUrl: m.sourceUrl || 'https://news.ycombinator.com',
+              urgencyScore: m.urgency_score ?? m.urgencyScore ?? 7,
+              cleanQuote: m.clean_quote || m.cleanQuote || m.raw_text || m.rawText || '',
+              aiPoachReply: m.ai_poach_reply || m.aiPoachReply,
+              sourceUrl: m.source_url || m.sourceUrl || 'https://news.ycombinator.com',
               isPublishedToWall: false,
               timeAgo: 'Just now',
             }))

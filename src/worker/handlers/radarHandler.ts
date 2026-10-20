@@ -19,6 +19,15 @@ export interface ClassifiedMention extends ScrapedRawMention {
   urgencyScore: number;
   cleanQuote: string;
   aiPoachReply?: string;
+  // Snake_case aliases for direct database and client compatibility
+  external_id?: string;
+  target_keyword?: string;
+  is_competitor?: boolean;
+  raw_text?: string;
+  source_url?: string;
+  urgency_score?: number;
+  clean_quote?: string;
+  ai_poach_reply?: string;
 }
 
 export interface RadarScanRequest {
@@ -333,6 +342,14 @@ export function classifyMentionsHeuristic(
       urgencyScore,
       cleanQuote,
       aiPoachReply,
+      external_id: m.externalId,
+      target_keyword: m.targetKeyword,
+      is_competitor: m.isCompetitor,
+      raw_text: m.rawText,
+      source_url: m.sourceUrl,
+      urgency_score: urgencyScore,
+      clean_quote: cleanQuote,
+      ai_poach_reply: aiPoachReply,
     };
   });
 }
@@ -430,12 +447,22 @@ Return ONLY valid JSON matching this schema:
     return rawMentions.map((m) => {
       const aiData = classificationMap.get(m.externalId);
       if (aiData && ['PRAISE', 'POACHABLE_LEAD', 'FIRE_ALERT', 'NOISE'].includes(aiData.category)) {
+        const urgency = typeof aiData.urgencyScore === 'number' ? aiData.urgencyScore : 5;
+        const quote = aiData.cleanQuote || m.rawText.substring(0, 160);
         return {
           ...m,
           category: aiData.category as MentionCategory,
-          urgencyScore: typeof aiData.urgencyScore === 'number' ? aiData.urgencyScore : 5,
-          cleanQuote: aiData.cleanQuote || m.rawText.substring(0, 160),
+          urgencyScore: urgency,
+          cleanQuote: quote,
           aiPoachReply: aiData.aiPoachReply,
+          external_id: m.externalId,
+          target_keyword: m.targetKeyword,
+          is_competitor: m.isCompetitor,
+          raw_text: m.rawText,
+          source_url: m.sourceUrl,
+          urgency_score: urgency,
+          clean_quote: quote,
+          ai_poach_reply: aiData.aiPoachReply,
         };
       }
       // Fallback individual item to heuristic

@@ -3,6 +3,8 @@
 -- Provides storage for tracked brands, competitor monitors, and auto-scraped signals
 -- =========================================================================
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- 1. Projects Table (Brand Monitoring & Hosted Deal-Closer Vaults)
 CREATE TABLE IF NOT EXISTS public.projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -17,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
 );
 
 CREATE INDEX IF NOT EXISTS idx_projects_brand_slug ON public.projects(brand_slug);
+CREATE INDEX IF NOT EXISTS idx_projects_slug ON public.projects(brand_slug);
 
 -- 2. Mentions Table (Social Signals & Poachable Leads)
 CREATE TABLE IF NOT EXISTS public.mentions (
