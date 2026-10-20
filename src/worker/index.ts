@@ -44,6 +44,7 @@ import { handleAffiliatesApi } from './handlers/affiliateHandler';
 import { handlePppGeoDetection } from './handlers/pppHandler';
 import { handlePublicTestimonialSubmit } from './handlers/publicSubmissionHandler';
 import { handleAccountDeletion } from './handlers/accountDeletionHandler';
+import { handleRadarScan } from './handlers/radarHandler';
 import {
   handleAdminGetWorkspaces,
   handleAdminUpdateWorkspacePlan,
@@ -371,6 +372,12 @@ export default {
         case 'og/card':
         case 'og-card':
           return await handleOgCard(request, env);
+
+        // Zero-Cost Multi-Source Social Proof Radar & Competitor Lead Poacher
+        case 'radar/scan':
+        case 'radar-scan':
+        case 'scan':
+          return await handleRadarScan(request, env);
 
         default:
           return new Response(JSON.stringify({ error: `API route '${pathname}' not found.` }), {
