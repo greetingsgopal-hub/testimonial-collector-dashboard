@@ -417,9 +417,10 @@ export default {
   },
 
   /**
-   * Automated cron trigger for background polling of Facebook and Instagram praise
+   * Automated cron trigger for background polling of social praise & radar feeds (Runs every 30 minutes)
    */
   async scheduled(event: ScheduledEvent, env: WorkerEnv, ctx: ExecutionContext): Promise<void> {
+    console.log(`[RadarCron] 30m background crawl & sync triggered at ${new Date(event.scheduledTime).toISOString()} (Cron: ${event.cron})`);
     ctx.waitUntil(executeAutomatedBackgroundSync(event, env, ctx));
   },
 };

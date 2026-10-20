@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Star,
@@ -92,12 +92,68 @@ export const HostedProofVaultPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [activeFilter, setActiveFilter] = useState<'all' | 'highlights'>('all');
   const [copiedLink, setCopiedLink] = useState(false);
+  const [project, setProject] = useState<any>(null);
+  const [liveMentions, setLiveMentions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   // Format brand name from slug (e.g. acme-corp -> Acme Corp)
-  const brandName = (slug || 'Acme')
+  const defaultBrandName = (slug || 'Acme')
     .split(/[-_]/)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+
+  const brandName = project?.brand_name || defaultBrandName;
+  const ctaUrl = project?.cta_url || 'https://wa.me/';
+  const ctaLabel = project?.cta_label || 'Chat on WhatsApp / Get Started →';
+
+  // 1. Fetch live project and published mentions from Supabase on load
+  useEffect(() => {
+    async function loadVaultData() {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseKey || !slug) return;
+
+      try {
+        setLoading(true);
+        const projRes = await fetch(
+          `${supabaseUrl}/rest/v1/projects?brand_slug=eq.${encodeURIComponent(slug)}&select=*`,
+          {
+            headers: {
+              apikey: supabaseKey,
+              Authorization: `Bearer ${supabaseKey}`,
+            },
+          }
+        );
+        if (projRes.ok) {
+          const projData = await projRes.json();
+          if (Array.isArray(projData) && projData[0]) {
+            setProject(projData[0]);
+
+            const mentRes = await fetch(
+              `${supabaseUrl}/rest/v1/mentions?project_id=eq.${projData[0].id}&is_published_to_wall=eq.true&select=*`,
+              {
+                headers: {
+                  apikey: supabaseKey,
+                  Authorization: `Bearer ${supabaseKey}`,
+                },
+              }
+            );
+            if (mentRes.ok) {
+              const mentData = await mentRes.json();
+              if (Array.isArray(mentData) && mentData.length > 0) {
+                setLiveMentions(mentData);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Error loading live vault data from Supabase, using verified fallback:', e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadVaultData();
+  }, [slug]);
 
   usePageSeo({
     title: `${brandName} — Verified Customer Praise & Social Proof Vault`,
@@ -105,7 +161,24 @@ export const HostedProofVaultPage: React.FC = () => {
     canonical: `${window.location.origin}/p/${slug || ''}`,
   });
 
-  const [cards] = useState<VaultProofCard[]>(DEFAULT_SAMPLE_PROOF);
+  const cards: VaultProofCard[] =
+    liveMentions.length > 0
+      ? liveMentions.map((m: any, idx: number) => ({
+          id: m.id || m.external_id || `proof-${idx}`,
+          author: m.author || 'Verified User',
+          handle: m.author?.startsWith('u/') || m.author?.startsWith('@') ? m.author : `@${m.author || 'user'}`,
+          source: (['Reddit', 'HackerNews', 'GoogleNews', 'X', 'Trustpilot'].includes(m.source)
+            ? m.source
+            : 'Reddit') as VaultProofCard['source'],
+          quote: m.clean_quote || m.cleanQuote || m.raw_text || m.rawText || '',
+          clean_quote: m.clean_quote || m.cleanQuote,
+          date: m.created_at ? new Date(m.created_at).toLocaleDateString() : 'Recent',
+          sourceUrl: m.source_url || m.sourceUrl || '#',
+          source_url: m.source_url || m.sourceUrl,
+          rating: 5,
+          highlight: idx === 0,
+        }))
+      : DEFAULT_SAMPLE_PROOF;
 
   const filteredCards = activeFilter === 'highlights' ? cards.filter((c) => c.highlight) : cards;
 
@@ -174,17 +247,23 @@ export const HostedProofVaultPage: React.FC = () => {
 
             {/* Primary Deal Closer CTA Button */}
             <a
-              href="https://wa.me/"
+              href={ctaUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <MessageCircle className="w-4 h-4 fill-current" />
-              <span>Chat on WhatsApp / Get Started →</span>
+              <span>{ctaLabel}</span>
             </a>
           </div>
         </div>
       </header>
+
+      {loading && (
+        <div className="w-full bg-violet-600/10 border-b border-violet-500/20 py-1.5 text-center text-xs text-violet-700 font-semibold animate-pulse">
+          ⚡ Refreshing verified customer testimonials from edge network...
+        </div>
+      )}
 
       {/* ── 2. Vault Hero ── */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 pb-8 text-center">

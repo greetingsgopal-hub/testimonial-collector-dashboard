@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Target,
   Sparkles,
@@ -16,9 +16,9 @@ import {
 } from 'lucide-react';
 
 export interface RadarViewProps {
-  workspaceId: string;
-  workspaceName: string;
-  brandSlug: string;
+  workspaceId?: string;
+  workspaceName?: string;
+  brandSlug?: string;
 }
 
 interface DashboardMention {
@@ -100,8 +100,8 @@ const INITIAL_DASHBOARD_MENTIONS: DashboardMention[] = [
 ];
 
 export const RadarView: React.FC<RadarViewProps> = ({
-  workspaceName,
-  brandSlug,
+  workspaceName = 'PandaPraise',
+  brandSlug = 'pandapraise',
 }) => {
   const [competitors, setCompetitors] = useState<string[]>(['Senja', 'Testimonial.to']);
   const [newCompetitorInput, setNewCompetitorInput] = useState('');
@@ -110,32 +110,69 @@ export const RadarView: React.FC<RadarViewProps> = ({
   const [filterTab, setFilterTab] = useState<'all' | 'poachable' | 'praise' | 'alerts' | 'published'>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const handleAddCompetitor = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = newCompetitorInput.trim();
-    if (trimmed && !competitors.includes(trimmed)) {
-      setCompetitors([...competitors, trimmed]);
-      setNewCompetitorInput('');
-    }
-  };
+  // 1. Fetch live stored mentions from Supabase or trigger edge scan on load
+  useEffect(() => {
+    fetchLiveMentions();
+  }, []);
 
-  const handleRemoveCompetitor = (name: string) => {
-    setCompetitors(competitors.filter((c) => c !== name));
-  };
-
-  const handleRunScan = async () => {
+  async function fetchLiveMentions(compTarget?: string) {
     setIsScanning(true);
+    const activeCompetitor = compTarget || competitors[0];
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    // First attempt: Read from Supabase mentions table if configured
+    if (supabaseUrl && supabaseKey) {
+      try {
+        const res = await fetch(
+          `${supabaseUrl}/rest/v1/mentions?select=*&order=created_at.desc&limit=30`,
+          {
+            headers: {
+              apikey: supabaseKey,
+              Authorization: `Bearer ${supabaseKey}`,
+            },
+          }
+        );
+        if (res.ok) {
+          const dbMentions = await res.json();
+          if (Array.isArray(dbMentions) && dbMentions.length > 0) {
+            setMentions(
+              dbMentions.map((m: any, idx: number) => ({
+                id: m.external_id || m.id || `m-db-${idx}`,
+                source: m.source || 'Reddit',
+                targetKeyword: m.target_keyword || m.targetKeyword || workspaceName,
+                isCompetitor: Boolean(m.is_competitor ?? m.isCompetitor),
+                author: m.author || 'Community User',
+                category: m.category || 'PRAISE',
+                urgencyScore: m.urgency_score ?? m.urgencyScore ?? 7,
+                cleanQuote: m.clean_quote || m.cleanQuote || m.raw_text || m.rawText || '',
+                aiPoachReply: m.ai_poach_reply || m.aiPoachReply,
+                sourceUrl: m.source_url || m.sourceUrl || 'https://news.ycombinator.com',
+                isPublishedToWall: Boolean(m.is_published_to_wall),
+                timeAgo: m.created_at ? new Date(m.created_at).toLocaleDateString() : 'Recent',
+              }))
+            );
+            setIsScanning(false);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Supabase fetch failed, falling back to edge worker scan:', e);
+      }
+    }
+
+    // Second attempt: Trigger live edge scan via Cloudflare Worker /api/scan
     try {
-      const res = await fetch('/api/scan', {
+      const scanRes = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           brand: workspaceName,
-          competitor: competitors[0] || undefined,
+          competitor: activeCompetitor || undefined,
         }),
       });
-      if (res.ok) {
-        const data = await res.json();
+      if (scanRes.ok) {
+        const data = await scanRes.json();
         if (Array.isArray(data.mentions) && data.mentions.length > 0) {
           setMentions(
             data.mentions.map((m: any, idx: number) => ({
@@ -155,17 +192,62 @@ export const RadarView: React.FC<RadarViewProps> = ({
           );
         }
       }
-    } catch {
-      // In-browser fallback
+    } catch (e) {
+      console.warn('Edge scan failed or offline, preserving existing signals:', e);
     } finally {
       setIsScanning(false);
     }
+  }
+
+  const handleAddCompetitor = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = newCompetitorInput.trim();
+    if (trimmed && !competitors.includes(trimmed)) {
+      const updated = [...competitors, trimmed];
+      setCompetitors(updated);
+      setNewCompetitorInput('');
+      await fetchLiveMentions(trimmed);
+    } else {
+      setNewCompetitorInput('');
+    }
   };
 
-  const togglePublishStatus = (id: string) => {
+  const handleRemoveCompetitor = (name: string) => {
+    setCompetitors(competitors.filter((c) => c !== name));
+  };
+
+  const handleRunScan = async () => {
+    await fetchLiveMentions();
+  };
+
+  const togglePublishStatus = async (id: string) => {
+    const mention = mentions.find((m) => m.id === id);
+    if (!mention) return;
+    const nextStatus = !mention.isPublishedToWall;
+
     setMentions((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, isPublishedToWall: !m.isPublishedToWall } : m))
+      prev.map((m) => (m.id === id ? { ...m, isPublishedToWall: nextStatus } : m))
     );
+
+    // Sync to Supabase if configured
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    if (supabaseUrl && supabaseKey) {
+      try {
+        await fetch(`${supabaseUrl}/rest/v1/mentions?external_id=eq.${encodeURIComponent(id)}`, {
+          method: 'PATCH',
+          headers: {
+            apikey: supabaseKey,
+            Authorization: `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json',
+            Prefer: 'return=minimal',
+          },
+          body: JSON.stringify({ is_published_to_wall: nextStatus }),
+        });
+      } catch (err) {
+        console.warn('Failed to update Supabase publish state:', err);
+      }
+    }
   };
 
   const handleCopyPoachScript = (id: string, text: string, url: string) => {
@@ -198,12 +280,15 @@ export const RadarView: React.FC<RadarViewProps> = ({
             <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               Radar & Lead Poacher
             </h1>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Live Pipeline Active
+            </span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200">
               100% Zero-Cost Scraping
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 max-w-xl">
-            Continuously scans Reddit, Hacker News, and Google News RSS for brand praise and competitor churn signals.
+            Real-time scraping across Reddit, Hacker News, and Google News RSS.
           </p>
         </div>
 
@@ -227,12 +312,12 @@ export const RadarView: React.FC<RadarViewProps> = ({
             {isScanning ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Scanning Feeds...</span>
+                <span>🔄 Scanning Live Web...</span>
               </>
             ) : (
               <>
                 <Radio className="w-3.5 h-3.5" />
-                <span>Run Live Scan Now</span>
+                <span>⚡ Run Live Scan Now</span>
               </>
             )}
           </button>
@@ -245,7 +330,7 @@ export const RadarView: React.FC<RadarViewProps> = ({
           <div>
             <h2 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
               <Target className="w-4 h-4 text-rose-500" />
-              <span>Competitor Watchlist (Lead Poaching Engine)</span>
+              <span>Competitor Watchlist (Live Lead Poaching Engine)</span>
             </h2>
             <p className="text-xs text-slate-500">
               We monitor these brands for pricing complaints, outage frustration, and migration queries.
@@ -257,7 +342,7 @@ export const RadarView: React.FC<RadarViewProps> = ({
               type="text"
               value={newCompetitorInput}
               onChange={(e) => setNewCompetitorInput(e.target.value)}
-              placeholder="Add competitor name..."
+              placeholder="Add competitor..."
               className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium focus:border-violet-600 focus:ring-1 focus:ring-violet-600 outline-hidden bg-slate-50/50"
             />
             <button
@@ -265,7 +350,7 @@ export const RadarView: React.FC<RadarViewProps> = ({
               className="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1 px-2.5 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Add</span>
+              <span>+ Add & Scan</span>
             </button>
           </form>
         </div>
