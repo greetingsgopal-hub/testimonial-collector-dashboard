@@ -2,7 +2,7 @@
 
 An ultra-modern, clean, single-page React and Tailwind CSS application functioning as a **Testimonial Collector and Moderation Dashboard**, inspired by the open-source architecture of [reviews-kits](https://github.com/reviews-kits-team/reviews-kits).
 
-Stripped of monorepo bloat and complex microservices, Panda Praise is 100% turnkey: it works out-of-the-box in the browser, plugs into Firebase (Auth + Cloud Firestore) or any REST backend with minimal configuration, and deploys as a static React frontend on Cloudflare Workers. The social OAuth/publishing endpoints remain on Netlify Functions.
+Stripped of monorepo bloat and complex microservices, Panda Praise is 100% turnkey: it works out-of-the-box in the browser, plugs into Firebase (Auth + Cloud Firestore) or any REST backend with minimal configuration, and deploys as a unified React frontend and serverless API on Cloudflare Workers.
 
 ---
 
@@ -84,16 +84,28 @@ npm run build
 
 ---
 
-## ☁️ Deploy the Frontend to Cloudflare Workers
+## ☁️ Deploy to Cloudflare Workers
 
-1. Connect the GitHub repository to Cloudflare Workers.
-2. Build command: `npm run build`.
-3. Deploy command: `npx wrangler deploy`.
-4. `wrangler.jsonc` points Cloudflare at `dist/` and enables SPA fallback.
-5. Add the `VITE_FIREBASE_*` variables to the Cloudflare build environment.
+Panda Praise is built on a unified, high-performance Cloudflare Workers architecture:
+- **Frontend SPA**: React 18, Vite, and Tailwind CSS compiled to static assets (`dist/`), served with client-side SPA routing (`single-page-application`).
+- **Serverless API**: Co-located Cloudflare Worker (`src/worker/index.ts`) handling all `/api/*` endpoints (social OAuth, LinkedIn/Google/Meta review syncing, Razorpay/Stripe webhooks, KV rate-limiting, and GDPR account deletion).
 
-### Netlify Functions
-The `netlify/functions/` directory remains the backend for social OAuth and publishing. Configure its server-side secrets in Netlify; never put those secrets in `VITE_*` variables or the browser bundle.
+### Deployment Steps:
+1. Connect the GitHub repository or deploy directly via Wrangler CLI:
+   ```bash
+   npm run build
+   npx wrangler deploy
+   ```
+2. `wrangler.jsonc` routes traffic from both:
+   - **Custom Domain**: `https://pandapraise.com/*`
+   - **Workers.dev Preview**: Enabled via `"workers_dev": true`
+3. Configure environment secrets via Cloudflare Dashboard or Wrangler secrets (never commit raw keys in source control):
+   ```bash
+   npx wrangler secret put STRIPE_SECRET_KEY
+   npx wrangler secret put RAZORPAY_KEY_ID
+   npx wrangler secret put RAZORPAY_KEY_SECRET
+   npx wrangler secret put FIREBASE_API_KEY
+   ```
 
 ---
 

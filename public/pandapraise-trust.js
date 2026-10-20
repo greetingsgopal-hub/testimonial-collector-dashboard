@@ -387,8 +387,12 @@
     if (accept) accept.addEventListener('click', function () { set('all'); });
     if (reject) reject.addEventListener('click', function () { set('essential'); });
     if (reset)  reset.addEventListener('click', function () {
-      try { localStorage.removeItem(CONSENT_KEY); } catch (e) {}
-      if (banner) banner.hidden = false;
+      try {
+        localStorage.removeItem(CONSENT_KEY);
+        localStorage.removeItem('pp_cookie_consent');
+      } catch (e) {}
+      window.dispatchEvent(new CustomEvent('pp:reset-cookie-consent'));
+      if (banner && !banner.classList.contains('cookie-banner')) banner.hidden = false;
     });
   }
 
@@ -438,7 +442,8 @@
     holder.innerHTML = footerHTML();
     document.body.appendChild(holder.firstChild);
   }
-  if (!document.getElementById('pp-cookie') && !document.querySelector('.cookie-banner')) {
+  // Only inject standalone cookie banner if no React application or existing cookie banner is present
+  if (!document.getElementById('pp-cookie') && !document.querySelector('.cookie-banner') && !document.querySelector('aside[aria-label="Cookie preferences"]') && !document.getElementById('root')) {
     var cb = document.createElement('div');
     cb.innerHTML = cookieHTML();
     document.body.appendChild(cb.firstChild);

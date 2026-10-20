@@ -5,6 +5,7 @@
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-09-15",
   "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
@@ -13,7 +14,6 @@
   },
   "vars": {
     "FIREBASE_PROJECT_ID": "testimonialcollectordashboard",
-    "FIREBASE_API_KEY": "AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE",
     "META_APP_ID": "1093657506579806"
   },
   "observability": {

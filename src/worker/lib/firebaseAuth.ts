@@ -5,9 +5,8 @@ export interface VerifiedFirebaseUser {
   email?: string;
 }
 
-function getFirebaseApiKey(env: WorkerEnv): string {
-  const key = env.FIREBASE_API_KEY || env.VITE_FIREBASE_API_KEY || 'AIzaSyDYxcuG-fN7PnLF8QIcaUDFMfH9EgawQWE';
-  return key;
+function getFirebaseApiKey(env: WorkerEnv): string | null {
+  return env.FIREBASE_API_KEY || env.VITE_FIREBASE_API_KEY || null;
 }
 
 export async function verifyFirebaseToken(idToken: string, env: WorkerEnv): Promise<VerifiedFirebaseUser | null> {
@@ -15,6 +14,10 @@ export async function verifyFirebaseToken(idToken: string, env: WorkerEnv): Prom
 
   try {
     const apiKey = getFirebaseApiKey(env);
+    if (!apiKey) {
+      console.warn('[FirebaseAuth] FIREBASE_API_KEY not configured in environment.');
+      return null;
+    }
     const url = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`;
     const response = await fetch(url, {
       method: 'POST',
@@ -65,6 +68,10 @@ export async function deleteFirebaseAccount(idToken: string, env: WorkerEnv): Pr
 
   try {
     const apiKey = getFirebaseApiKey(env);
+    if (!apiKey) {
+      console.warn('[FirebaseAuth] FIREBASE_API_KEY not configured in environment.');
+      return false;
+    }
     const url = `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${encodeURIComponent(apiKey)}`;
     const response = await fetch(url, {
       method: 'POST',

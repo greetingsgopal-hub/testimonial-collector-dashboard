@@ -70,6 +70,7 @@ function AnalyticsRouteTracker() {
 }
 
 import ScrollToTop from './components/ScrollToTop';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export function App() {
   useEffect(() => {
@@ -77,12 +78,13 @@ export function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <ScrollToTop />
-        <AnalyticsRouteTracker />
-        <Suspense fallback={<RouteLoadingFallback />}>
-          <Routes>
+    <ErrorBoundary>
+      <AuthProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <AnalyticsRouteTracker />
+          <Suspense fallback={<RouteLoadingFallback />}>
+            <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/r/:code" element={<ReferralRedirectPage />} />
@@ -225,7 +227,8 @@ export function App() {
         <CookieConsentBanner />
       </BrowserRouter>
     </AuthProvider>
-  );
+  </ErrorBoundary>
+);
 }
 
 export default App;

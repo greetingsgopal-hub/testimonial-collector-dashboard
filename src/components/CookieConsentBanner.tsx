@@ -5,19 +5,30 @@ export const CookieConsentBanner: React.FC = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const consent = localStorage.getItem('pp_cookie_consent');
+    const consent = localStorage.getItem('pp_cookie_consent') || localStorage.getItem('pp_cookie_consent_v1');
     if (!consent) {
       setVisible(true);
     }
+
+    const handleReset = () => {
+      setVisible(true);
+    };
+
+    window.addEventListener('pp:reset-cookie-consent', handleReset);
+    return () => window.removeEventListener('pp:reset-cookie-consent', handleReset);
   }, []);
 
   const handleAccept = () => {
     localStorage.setItem('pp_cookie_consent', 'accepted');
+    localStorage.setItem('pp_cookie_consent_v1', 'all');
+    document.dispatchEvent(new CustomEvent('pp:consent', { detail: { choice: 'all' } }));
     setVisible(false);
   };
 
   const handleDecline = () => {
     localStorage.setItem('pp_cookie_consent', 'essential_only');
+    localStorage.setItem('pp_cookie_consent_v1', 'essential');
+    document.dispatchEvent(new CustomEvent('pp:consent', { detail: { choice: 'essential' } }));
     setVisible(false);
   };
 
@@ -25,8 +36,9 @@ export const CookieConsentBanner: React.FC = () => {
 
   return (
     <aside
+      id="pp-cookie"
       aria-label="Cookie preferences"
-      className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 p-5 rounded-2xl bg-zinc-950/95 text-white border border-white/10 shadow-2xl backdrop-blur-xl animate-fade-in font-sans text-xs"
+      className="cookie-banner fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 p-5 rounded-2xl bg-zinc-950/95 text-white border border-white/10 shadow-2xl backdrop-blur-xl animate-fade-in font-sans text-xs"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 text-purple-400 font-bold text-sm">

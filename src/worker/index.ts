@@ -190,7 +190,6 @@ export default {
                 razorpayConfigured: Boolean(razorpayKeyId && razorpayKeySecret),
                 stripeConfigured: Boolean(env.STRIPE_SECRET_KEY),
               },
-              detectedRazorpayKeys: Object.keys(env).filter((k) => /razor|rzp/i.test(k)),
               timestamp: new Date().toISOString(),
             }),
             { status: 200, headers: { 'Content-Type': 'application/json' } }
