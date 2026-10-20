@@ -20,6 +20,7 @@ const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage').then((m) =>
 const OnboardingPage = React.lazy(() => import('./pages/OnboardingPage').then((m) => ({ default: m.OnboardingPage })));
 const OnboardingUpgradePage = React.lazy(() => import('./pages/OnboardingUpgradePage').then((m) => ({ default: m.OnboardingUpgradePage })));
 const PricingPage = React.lazy(() => import('./pages/PricingPage').then((m) => ({ default: m.PricingPage })));
+const HostedProofVaultPage = React.lazy(() => import('./pages/HostedProofVaultPage').then((m) => ({ default: m.HostedProofVaultPage })));
 const WallOfLovePage = React.lazy(() => import('./pages/WallOfLovePage').then((m) => ({ default: m.WallOfLovePage })));
 const ViralActivationPage = React.lazy(() => import('./pages/ViralActivationPage').then((m) => ({ default: m.ViralActivationPage })));
 const VerifyEmailPage = React.lazy(() => import('./pages/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage })));
@@ -100,6 +101,7 @@ export function App() {
             <Route path="/cookie-policy" element={<CookiePolicyPage />} />
             <Route path="/cookies" element={<CookiePolicyPage />} />
             <Route path="/c/:collectionSlug" element={<PublicCollectorPage />} />
+            <Route path="/p/:slug" element={<HostedProofVaultPage />} />
             <Route path="/w/:publicWidgetId" element={<PublicWidgetPage />} />
             <Route path="/wall" element={<WallOfLovePage />} />
             <Route path="/love/:slug" element={<WallOfLovePage />} />
