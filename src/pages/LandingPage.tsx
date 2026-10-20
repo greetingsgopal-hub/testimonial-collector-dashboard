@@ -108,8 +108,8 @@ export const LandingPage: React.FC = () => {
       
       {/* ── 1. Top Announcement Bar ── */}
       <div className="bg-purple-600 text-white text-xs sm:text-sm font-medium py-2.5 px-4 text-center flex items-center justify-center gap-2">
-        <span className="px-2 py-0.5 rounded bg-white/20 text-xs font-bold uppercase tracking-wider">🔥 PROVEN ROI</span>
-        <span>Turn customer praise into +34% higher website conversions</span>
+        <span className="px-2 py-0.5 rounded bg-white/20 text-xs font-bold uppercase tracking-wider">🔥 PROVEN SOCIAL PROOF</span>
+        <span>Turn customer praise into authentic, high-converting social proof</span>
         <span className="hidden sm:inline">|</span>
         <Link to="/signup" className="underline hover:text-gray-200 font-semibold">Start Free in 2 Minutes →</Link>
       </div>
@@ -207,7 +207,7 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* ── 3. Hero Section ── */}
-      <section className="max-w-4xl mx-auto px-4 pt-16 sm:pt-20 pb-16 text-center relative z-10">
+      <section className="max-w-5xl mx-auto px-4 pt-16 sm:pt-20 pb-16 text-center relative z-10">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 border border-purple-100 text-purple-700 text-xs font-semibold mb-8 shadow-sm">
           <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
@@ -215,9 +215,11 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Headline */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-gray-900 leading-[1.1] mb-6">
-          Turn WhatsApp & DMs Into<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800">
+        <h1 className="max-w-5xl mx-auto text-center font-black tracking-tight text-gray-900 leading-[1.12] mb-6 text-3xl sm:text-5xl md:text-6xl lg:text-[68px]">
+          <span className="block whitespace-normal sm:whitespace-nowrap">
+            Turn WhatsApp &amp; DMs Into
+          </span>
+          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 whitespace-normal sm:whitespace-nowrap">
             High-Converting Social Proof
           </span>
         </h1>
@@ -1335,8 +1337,8 @@ export const LandingPage: React.FC = () => {
                 <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-900">Integrations</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Google & Meta Reviews</button></li>
-                  <li><button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">LinkedIn & 𝕏 Importer</button></li>
-                  <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Shopify & Webflow Sync</button></li>
+                  <li><button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">CSV & Chat Screenshot Importer</button></li>
+                  <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Shopify & HTML Embeds</button></li>
                   <li><button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">REST API & Webhooks</button></li>
                 </ul>
               </div>

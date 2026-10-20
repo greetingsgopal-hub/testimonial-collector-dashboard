@@ -12,11 +12,35 @@ export const ContactPage: React.FC = () => {
   });
 
   const [formSent, setFormSent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', email: '', subject: 'support', message: '' });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormSent(true);
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.error || `Server responded with status ${res.status}. Please email support@pandapraise.com directly.`);
+      }
+
+      setFormSent(true);
+    } catch (err: any) {
+      console.error('[ContactPage] Submission failed:', err);
+      setSubmitError(err.message || 'Failed to submit inquiry. Please try again or email support@pandapraise.com.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -193,12 +217,30 @@ export const ContactPage: React.FC = () => {
                   />
                 </div>
 
+                {submitError && (
+                  <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between">
+                    <span>{submitError}</span>
+                    <button
+                      type="button"
+                      onClick={() => setSubmitError(null)}
+                      className="text-rose-500 hover:text-rose-800 font-bold ml-2"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={isSubmitting}
+                  className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Submit Message</span>
+                  {isSubmitting ? (
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Send className="w-3.5 h-3.5" />
+                  )}
+                  <span>{isSubmitting ? 'Sending inquiry...' : 'Submit Message'}</span>
                 </button>
               </form>
             )}

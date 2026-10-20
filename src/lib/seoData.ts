@@ -306,7 +306,7 @@ export const USE_CASES: UseCaseLanding[] = [
     industry: 'Shopify Stores',
     path: '/best-shopify-testimonial-tools',
     metaTitle: 'Best Testimonial Tool for Shopify Stores (2026 Review)',
-    metaDescription: 'Discover the best testimonial and review tool for Shopify e-commerce. Increase checkout conversion by 34% with zero-bleed widgets.',
+    metaDescription: 'Discover the best testimonial and review tool for Shopify e-commerce. Boost checkout buyer trust and reduce cart hesitation with zero-bleed widgets.',
     heroHeadline: 'Best Testimonial Tool for Shopify',
     heroSubtitle: 'Boost store conversion and average order value by embedding verified customer praise directly on your product & cart pages.',
     recommendedLayout: 'Continuous Marquee Ticker & Product Page Spotlight',

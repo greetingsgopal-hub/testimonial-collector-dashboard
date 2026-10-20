@@ -44,6 +44,7 @@ import { handleAffiliatesApi } from './handlers/affiliateHandler';
 import { handlePppGeoDetection } from './handlers/pppHandler';
 import { handlePublicTestimonialSubmit } from './handlers/publicSubmissionHandler';
 import { handleAccountDeletion } from './handlers/accountDeletionHandler';
+import { handleContactSubmit } from './handlers/contactHandler';
 import { handleRadarScan } from './handlers/radarHandler';
 import {
   handleAdminGetWorkspaces,
@@ -366,6 +367,11 @@ export default {
         case 'account/delete':
         case 'account/purge':
           return await handleAccountDeletion(request, env);
+
+        // Contact inquiries & support ticket backend
+        case 'contact':
+        case 'contact/submit':
+          return await handleContactSubmit(request, env);
 
         // Dynamic OpenGraph / Twitter Card Vector Image for Social Unfurling
         case 'og/card':

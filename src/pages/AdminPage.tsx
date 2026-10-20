@@ -392,6 +392,37 @@ export default function ResilientAdminDashboard() {
 
   const proWorkspacesCount = workspaces.filter((w) => w.plan === 'pro').length;
 
+  const isSuperadmin = useMemo(() => {
+    if (!user?.email) return false;
+    const email = user.email.toLowerCase().trim();
+    return email === 'greetings.gopal@gmail.com' || email === 'greetingsgopal@gmail.com';
+  }, [user?.email]);
+
+  if (!loading && !isSuperadmin) {
+    return (
+      <div className="min-h-screen bg-[#0B0F19] text-slate-100 flex items-center justify-center p-6 font-sans">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-md w-full text-center space-y-4 shadow-2xl">
+          <div className="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
+            <Ban className="w-6 h-6" />
+          </div>
+          <h2 className="text-xl font-bold text-white">Superadmin Access Required</h2>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            This administration console is strictly restricted to authorized platform administrators. Your authenticated account ({user?.email || 'unauthenticated'}) does not have administrative privileges.
+          </p>
+          <div className="pt-2">
+            <a
+              href="/dashboard"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold transition shadow-lg"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Return to Workspace</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0B0F19] text-slate-100 font-sans p-6 lg:p-10">
       <div className="max-w-7xl mx-auto space-y-6">

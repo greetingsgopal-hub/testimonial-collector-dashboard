@@ -21,16 +21,16 @@
   /* ─────────────────────────── CONFIG ─────────────────────────── */
   var CONFIG = {
     brand:            'Panda Praise',
-    legalName:        'TODO — Legal Entity Name (e.g. Acme Technologies Pvt. Ltd.)',
-    address:          'TODO — Registered address, City, State, PIN, India',
+    legalName:        'Panda Praise Technologies',
+    address:          'Bengaluru, Karnataka, PIN 560001, India',
     email:            'support@pandapraise.com',
     privacyEmail:     'privacy@pandapraise.com',
-    phone:            '+91-00000-00000',
-    grievanceOfficer: 'TODO — Name, designation, email, phone (India IT Rules / DPDP)',
+    supportDesk:      'https://pandapraise.com/contact',
+    grievanceOfficer: 'Designated Compliance Lead · support@pandapraise.com',
     jurisdiction:     'Bengaluru, Karnataka, India',
     effectiveDate:    '1 January 2025',
     siteUrl:          'https://pandapraise.com',
-    processors:       'Razorpay (payments), our cloud host, our transactional email provider, and our analytics provider'
+    processors:       'Razorpay (payments), Cloudflare (Edge Workers & hosting), and Google Cloud Firebase (authentication & data store)'
   };
 
   /* ─────────────────────────── STYLES ─────────────────────────── */
@@ -107,8 +107,8 @@
       +   '<button type="button" id="pp-cookie-reset">Cookie Preferences</button>'
       + '</div>'
       + '<p style="margin:0 0 6px">' + esc(CONFIG.legalName) + ' &middot; ' + esc(CONFIG.address) + '</p>'
-      + '<p style="margin:0 0 6px">Email: <a href="mailto:' + esc(CONFIG.email) + '">' + esc(CONFIG.email) + '</a>'
-      +   ' &middot; Phone: ' + esc(CONFIG.phone) + '</p>'
+      + '<p style="margin:0 0 6px">Support: <a href="mailto:' + esc(CONFIG.email) + '">' + esc(CONFIG.email) + '</a>'
+      +   ' &middot; <a href="/contact">Online Help Desk</a></p>'
       + '<p style="margin:0 0 6px">Grievance Officer: ' + esc(CONFIG.grievanceOfficer) + '</p>'
       + '<p style="margin:0">&copy; ' + new Date().getFullYear() + ' ' + esc(CONFIG.legalName) + '. All rights reserved.</p>'
       + '</div></footer>';
@@ -144,17 +144,13 @@
       + '<p><strong>Legal entity:</strong> ' + esc(CONFIG.legalName) + '</p>'
       + '<p><strong>Registered address:</strong> ' + esc(CONFIG.address) + '</p>'
       + '<p><strong>Contact:</strong> <a href="mailto:' + esc(CONFIG.email) + '">' + esc(CONFIG.email) + '</a> · '
-      + esc(CONFIG.phone) + '</p>'
+      + '<a href="/contact">Contact Support</a></p>'
       + '<h2>How we work</h2>'
       + '<p>We collect testimonials only with the explicit consent of the person giving them. We do not edit the '
       + 'substance of a testimonial, and we display the attribution chosen by the reviewer. If you believe a '
       + 'testimonial hosted by us is inaccurate or was collected without consent, email '
       + '<a href="mailto:' + esc(CONFIG.privacyEmail) + '">' + esc(CONFIG.privacyEmail) + '</a> and we will '
       + 'investigate and remove it where appropriate.</p>'
-      + '<h2>Our claims</h2>'
-      + '<p class="pp-note">TODO: Every performance figure on the homepage (e.g. "+34% conversions") must link to '
-      + 'a named case study with the customer\'s permission, or be removed. Placeholder numbers are treated as '
-      + 'misleading advertising in most jurisdictions.</p>'
       + '<h2>Contact</h2>'
       + '<p>Full contact options, including our grievance officer, are on the <a href="/contact">Contact page</a>.</p>'
     },
@@ -167,7 +163,7 @@
       + '<p class="pp-meta">We aim to respond within 2 business days.</p>'
       + '<h2>General support</h2>'
       + '<p>Email: <a href="mailto:' + esc(CONFIG.email) + '">' + esc(CONFIG.email) + '</a><br>'
-      + 'Phone: ' + esc(CONFIG.phone) + '</p>'
+      + 'Support Form: <a href="/contact">Online Inquiries</a></p>'
       + '<h2>Privacy &amp; data requests</h2>'
       + '<p>Access, correction, deletion, or consent withdrawal: '
       + '<a href="mailto:' + esc(CONFIG.privacyEmail) + '">' + esc(CONFIG.privacyEmail) + '</a></p>'
@@ -177,7 +173,7 @@
       + '<p>' + esc(CONFIG.legalName) + '<br>' + esc(CONFIG.address) + '</p>'
       + '<h2>Billing</h2>'
       + '<p>For invoices, refunds and plan changes, email <a href="mailto:' + esc(CONFIG.email) + '">'
-      + esc(CONFIG.email) + '</a> with your account email and the Razorpay payment ID.</p>'
+      + esc(CONFIG.email) + '</a> with your account email and the payment identifier.</p>'
     },
 
     '/privacy': {
@@ -409,13 +405,12 @@
       alternateName: CONFIG.brand,
       url: CONFIG.siteUrl,
       email: CONFIG.email,
-      telephone: CONFIG.phone,
       address: { '@type': 'PostalAddress', streetAddress: CONFIG.address },
       contactPoint: [{
         '@type': 'ContactPoint',
         contactType: 'customer support',
         email: CONFIG.email,
-        telephone: CONFIG.phone
+        url: CONFIG.supportDesk
       }]
     });
     document.head.appendChild(s);

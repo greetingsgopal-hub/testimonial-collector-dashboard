@@ -204,4 +204,24 @@ describe('Priority 0: Security & Email Verification in firestore.rules', () => {
     expect(m).not.toBeNull();
     expect(m![0]).toMatch(/request\.auth\.token\.email_verified\s*==\s*true/);
   });
+
+  it('has an explicit deny rule for contact_inquiries (worker-only)', () => {
+    const m = rules.match(/match \/contact_inquiries\/\{inquiryId\} \{[\s\S]*?\n    \}/);
+    expect(m, 'contact_inquiries match block must exist in firestore.rules').not.toBeNull();
+    expect(m![0]).toMatch(/allow read, write:\s*if false;/);
+  });
+
+  it('restricts testimonials mutations to authenticated users with owner isolation', () => {
+    const m = rules.match(/match \/testimonials\/\{testimonialId\} \{[\s\S]*?\n    \}/);
+    expect(m, 'testimonials match block must exist in firestore.rules').not.toBeNull();
+    expect(m![0]).toMatch(/isAuthenticated\(\)/);
+    expect(m![0]).toMatch(/request\.auth\.uid/);
+  });
+
+  it('restricts radar_mentions mutations to authenticated users with owner isolation', () => {
+    const m = rules.match(/match \/radar_mentions\/\{mentionId\} \{[\s\S]*?\n    \}/);
+    expect(m, 'radar_mentions match block must exist in firestore.rules').not.toBeNull();
+    expect(m![0]).toMatch(/isAuthenticated\(\)/);
+    expect(m![0]).toMatch(/request\.auth\.uid/);
+  });
 });
