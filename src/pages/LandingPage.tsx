@@ -1323,9 +1323,10 @@ export const LandingPage: React.FC = () => {
                 <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-900">Resources</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
                   <li><Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing & Plans</Link></li>
+                  <li><Link to="/roadmap" className="hover:text-gray-900 transition-colors">Product Roadmap</Link></li>
+                  <li><Link to="/blog" className="hover:text-gray-900 transition-colors">Blog & Guides</Link></li>
                   <li><button onClick={() => setIsWallModalOpen(true)} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Live Wall of Love Demo</button></li>
-                  <li><button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Why Panda Praise</button></li>
-                  <li><button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">Frequently Asked Questions</button></li>
+                  <li><button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors text-left cursor-pointer">FAQ</button></li>
                 </ul>
               </div>
 
@@ -1344,11 +1345,11 @@ export const LandingPage: React.FC = () => {
               <div>
                 <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-900">Account & Legal</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-gray-600">
-                  <li><Link to="/login" className="hover:text-gray-900 transition-colors">Login</Link></li>
-                  <li><Link to="/signup" className="hover:text-gray-900 transition-colors font-semibold text-[#6701e6]">Start Free</Link></li>
+                  <li><Link to="/about" className="hover:text-gray-900 transition-colors">About Us</Link></li>
+                  <li><Link to="/contact" className="hover:text-gray-900 transition-colors">Contact Support</Link></li>
                   <li><Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link></li>
-                  <li><Link to="/privacy-policy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link></li>
-                  <li><Link to="/refund-policy" className="hover:text-gray-900 transition-colors">Refund & Cancellation Policy</Link></li>
+                  <li><Link to="/privacy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link></li>
+                  <li><Link to="/refund-policy" className="hover:text-gray-900 transition-colors">Refund Policy</Link></li>
                 </ul>
               </div>
 
@@ -1358,9 +1359,11 @@ export const LandingPage: React.FC = () => {
           {/* Copyright and Legal Row */}
           <div className="mt-8 border-t border-gray-200/80 pt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-600 text-left">
             <span>© 2026 Panda Praise Ltd. All rights reserved.</span>
-            <div className="flex items-center gap-5">
+            <div className="flex flex-wrap items-center gap-5">
+              <Link to="/about" className="hover:text-gray-900 transition-colors">About Us</Link>
+              <Link to="/contact" className="hover:text-gray-900 transition-colors">Contact</Link>
               <Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link>
-              <Link to="/privacy-policy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
+              <Link to="/privacy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
               <Link to="/refund-policy" className="hover:text-gray-900 transition-colors">Refund Policy</Link>
             </div>
           </div>

@@ -31,6 +31,10 @@ const AffiliatePage = React.lazy(() => import('./pages/AffiliatePage').then((m) 
 const DeveloperDocsPage = React.lazy(() => import('./pages/DeveloperDocsPage').then((m) => ({ default: m.DeveloperDocsPage })));
 const AdminPage = React.lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })));
 const BillingAndPlansPage = React.lazy(() => import('./pages/BillingAndPlansPage').then((m) => ({ default: m.BillingAndPlansPage })));
+const AboutPage = React.lazy(() => import('./pages/AboutPage').then((m) => ({ default: m.AboutPage })));
+const ContactPage = React.lazy(() => import('./pages/ContactPage').then((m) => ({ default: m.ContactPage })));
+const RoadmapPage = React.lazy(() => import('./pages/RoadmapPage').then((m) => ({ default: m.RoadmapPage })));
+const BlogPage = React.lazy(() => import('./pages/BlogPage').then((m) => ({ default: m.BlogPage })));
 const AppLayout = React.lazy(() => import('./components/layouts/AppLayout'));
 import { SuperadminGuard } from './components/auth/SuperadminGuard';
 import { captureReferralCode } from './lib/referral';
@@ -93,6 +97,12 @@ export function App() {
             <Route path="/partners" element={<AffiliatePage />} />
             <Route path="/developers" element={<DeveloperDocsPage />} />
             <Route path="/api-docs" element={<DeveloperDocsPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/about-us" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/contact-us" element={<ContactPage />} />
+            <Route path="/roadmap" element={<RoadmapPage />} />
+            <Route path="/blog" element={<BlogPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsPage />} />
