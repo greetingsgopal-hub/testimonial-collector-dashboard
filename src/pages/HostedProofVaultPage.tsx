@@ -12,6 +12,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { usePageSeo } from '../lib/seo';
+import { isFirebaseConfigured } from '../lib/firebase';
+import { getFirestore, collection, query, where, limit, getDocs } from 'firebase/firestore';
 
 interface VaultProofCard {
   id: string;
@@ -102,52 +104,44 @@ export const HostedProofVaultPage: React.FC = () => {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-  const brandName = project?.brand_name || defaultBrandName;
-  const ctaUrl = project?.cta_url || 'https://wa.me/';
-  const ctaLabel = project?.cta_label || 'Chat on WhatsApp / Get Started →';
+  const brandName = project?.brandName || project?.brand_name || defaultBrandName;
+  const ctaUrl = project?.ctaUrl || project?.cta_url || 'https://wa.me/';
+  const ctaLabel = project?.ctaLabel || project?.cta_label || 'Chat on WhatsApp / Get Started →';
 
-  // 1. Fetch live project and published mentions from Supabase on load
+  // 1. Fetch live project and published mentions from Firestore on load
   useEffect(() => {
     async function loadVaultData() {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      if (!supabaseUrl || !supabaseKey || !slug) return;
+      if (!isFirebaseConfigured || !slug) return;
 
       try {
         setLoading(true);
-        const projRes = await fetch(
-          `${supabaseUrl}/rest/v1/projects?brand_slug=eq.${encodeURIComponent(slug)}&select=*`,
-          {
-            headers: {
-              apikey: supabaseKey,
-              Authorization: `Bearer ${supabaseKey}`,
-            },
-          }
-        );
-        if (projRes.ok) {
-          const projData = await projRes.json();
-          if (Array.isArray(projData) && projData[0]) {
-            setProject(projData[0]);
+        const db = getFirestore();
 
-            const mentRes = await fetch(
-              `${supabaseUrl}/rest/v1/mentions?project_id=eq.${projData[0].id}&is_published_to_wall=eq.true&select=*`,
-              {
-                headers: {
-                  apikey: supabaseKey,
-                  Authorization: `Bearer ${supabaseKey}`,
-                },
-              }
-            );
-            if (mentRes.ok) {
-              const mentData = await mentRes.json();
-              if (Array.isArray(mentData) && mentData.length > 0) {
-                setLiveMentions(mentData);
-              }
-            }
-          }
+        // 1. Fetch published radar mentions from Firestore
+        const mentionsCol = collection(db, 'radar_mentions');
+        const mentionsQuery = query(
+          mentionsCol,
+          where('isPublishedToWall', '==', true),
+          limit(30)
+        );
+        const mentionsSnap = await getDocs(mentionsQuery);
+        if (!mentionsSnap.empty) {
+          const loaded = mentionsSnap.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...docSnap.data(),
+          }));
+          setLiveMentions(loaded);
+        }
+
+        // 2. Fetch project/workspace details for custom branding
+        const projectsCol = collection(db, 'projects');
+        const projectQuery = query(projectsCol, where('slug', '==', slug), limit(1));
+        const projectSnap = await getDocs(projectQuery);
+        if (!projectSnap.empty) {
+          setProject(projectSnap.docs[0].data());
         }
       } catch (e) {
-        console.warn('Error loading live vault data from Supabase, using verified fallback:', e);
+        console.warn('Error loading live vault data from Firestore, using verified fallback:', e);
       } finally {
         setLoading(false);
       }
@@ -170,12 +164,12 @@ export const HostedProofVaultPage: React.FC = () => {
           source: (['Reddit', 'HackerNews', 'GoogleNews', 'X', 'Trustpilot'].includes(m.source)
             ? m.source
             : 'Reddit') as VaultProofCard['source'],
-          quote: m.clean_quote || m.cleanQuote || m.raw_text || m.rawText || '',
-          clean_quote: m.clean_quote || m.cleanQuote,
-          date: m.created_at ? new Date(m.created_at).toLocaleDateString() : 'Recent',
-          sourceUrl: m.source_url || m.sourceUrl || '#',
-          source_url: m.source_url || m.sourceUrl,
-          rating: 5,
+          quote: m.cleanQuote || m.clean_quote || m.rawText || m.raw_text || '',
+          clean_quote: m.cleanQuote || m.clean_quote,
+          date: m.createdAt || m.created_at ? new Date(m.createdAt || m.created_at).toLocaleDateString() : 'Recent',
+          sourceUrl: m.sourceUrl || m.source_url || '#',
+          source_url: m.sourceUrl || m.source_url,
+          rating: typeof m.rating === 'number' ? m.rating : 5,
           highlight: idx === 0,
         }))
       : DEFAULT_SAMPLE_PROOF;

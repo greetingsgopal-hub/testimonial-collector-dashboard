@@ -15,6 +15,18 @@ import {
   Share2,
 } from 'lucide-react';
 
+import { isFirebaseConfigured } from '../../../lib/firebase';
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+} from 'firebase/firestore';
+
 export interface RadarViewProps {
   workspaceId?: string;
   workspaceName?: string;
@@ -110,7 +122,7 @@ export const RadarView: React.FC<RadarViewProps> = ({
   const [filterTab, setFilterTab] = useState<'all' | 'poachable' | 'praise' | 'alerts' | 'published'>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // 1. Fetch live stored mentions from Supabase or trigger edge scan on load
+  // 1. Fetch live stored mentions from Firestore or trigger edge scan on load
   useEffect(() => {
     fetchLiveMentions();
   }, []);
@@ -118,46 +130,38 @@ export const RadarView: React.FC<RadarViewProps> = ({
   async function fetchLiveMentions(compTarget?: string) {
     setIsScanning(true);
     const activeCompetitor = compTarget || competitors[0];
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-    // First attempt: Read from Supabase mentions table if configured
-    if (supabaseUrl && supabaseKey) {
+    // First attempt: Read from Firestore radar_mentions collection if configured
+    if (isFirebaseConfigured) {
       try {
-        const res = await fetch(
-          `${supabaseUrl}/rest/v1/mentions?select=*&order=created_at.desc&limit=30`,
-          {
-            headers: {
-              apikey: supabaseKey,
-              Authorization: `Bearer ${supabaseKey}`,
-            },
-          }
-        );
-        if (res.ok) {
-          const dbMentions = await res.json();
-          if (Array.isArray(dbMentions) && dbMentions.length > 0) {
-            setMentions(
-              dbMentions.map((m: any, idx: number) => ({
-                id: m.external_id || m.id || `m-db-${idx}`,
-                source: m.source || 'Reddit',
-                targetKeyword: m.target_keyword || m.targetKeyword || workspaceName,
-                isCompetitor: Boolean(m.is_competitor ?? m.isCompetitor),
-                author: m.author || 'Community User',
-                category: m.category || 'PRAISE',
-                urgencyScore: m.urgency_score ?? m.urgencyScore ?? 7,
-                cleanQuote: m.clean_quote || m.cleanQuote || m.raw_text || m.rawText || '',
-                aiPoachReply: m.ai_poach_reply || m.aiPoachReply,
-                sourceUrl: m.source_url || m.sourceUrl || 'https://news.ycombinator.com',
-                isPublishedToWall: Boolean(m.is_published_to_wall),
-                timeAgo: m.created_at ? new Date(m.created_at).toLocaleDateString() : 'Recent',
-              }))
-            );
-            setIsScanning(false);
-            return;
-          }
+        const db = getFirestore();
+        const mentionsCol = collection(db, 'radar_mentions');
+        const q = query(mentionsCol, orderBy('createdAt', 'desc'), limit(30));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const loaded = snap.docs.map((docSnap) => {
+            const data = docSnap.data();
+            return {
+              id: docSnap.id,
+              source: data.source || 'Reddit',
+              targetKeyword: data.targetKeyword || data.target_keyword || workspaceName,
+              isCompetitor: Boolean(data.isCompetitor ?? data.is_competitor),
+              author: data.author || 'Community User',
+              category: data.category || 'PRAISE',
+              urgencyScore: data.urgencyScore ?? data.urgency_score ?? 7,
+              cleanQuote: data.cleanQuote || data.clean_quote || data.rawText || data.raw_text || '',
+              aiPoachReply: data.aiPoachReply || data.ai_poach_reply,
+              sourceUrl: data.sourceUrl || data.source_url || 'https://news.ycombinator.com',
+              isPublishedToWall: Boolean(data.isPublishedToWall ?? data.is_published_to_wall),
+              timeAgo: data.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'Recent',
+            } as DashboardMention;
+          });
+          setMentions(loaded);
+          setIsScanning(false);
+          return;
         }
       } catch (e) {
-        console.warn('Supabase fetch failed, falling back to edge worker scan:', e);
+        console.warn('Firestore radar fetch fallback:', e);
       }
     }
 
@@ -174,22 +178,42 @@ export const RadarView: React.FC<RadarViewProps> = ({
       if (scanRes.ok) {
         const data = await scanRes.json();
         if (Array.isArray(data.mentions) && data.mentions.length > 0) {
-          setMentions(
-            data.mentions.map((m: any, idx: number) => ({
-              id: m.external_id || m.externalId || `m-scan-${idx}`,
-              source: m.source || 'Reddit',
-              targetKeyword: m.target_keyword || m.targetKeyword || workspaceName,
-              isCompetitor: Boolean(m.is_competitor ?? m.isCompetitor),
-              author: m.author || 'Web User',
-              category: m.category || 'PRAISE',
-              urgencyScore: m.urgency_score ?? m.urgencyScore ?? 7,
-              cleanQuote: m.clean_quote || m.cleanQuote || m.raw_text || m.rawText || '',
-              aiPoachReply: m.ai_poach_reply || m.aiPoachReply,
-              sourceUrl: m.source_url || m.sourceUrl || 'https://news.ycombinator.com',
-              isPublishedToWall: false,
-              timeAgo: 'Just now',
-            }))
-          );
+          const mappedMentions: DashboardMention[] = data.mentions.map((m: any, idx: number) => ({
+            id: m.external_id || m.externalId || `m-scan-${idx}`,
+            source: m.source || 'Reddit',
+            targetKeyword: m.target_keyword || m.targetKeyword || workspaceName,
+            isCompetitor: Boolean(m.is_competitor ?? m.isCompetitor),
+            author: m.author || 'Web User',
+            category: m.category || 'PRAISE',
+            urgencyScore: m.urgency_score ?? m.urgencyScore ?? 7,
+            cleanQuote: m.clean_quote || m.cleanQuote || m.raw_text || m.rawText || '',
+            aiPoachReply: m.ai_poach_reply || m.aiPoachReply,
+            sourceUrl: m.source_url || m.sourceUrl || 'https://news.ycombinator.com',
+            isPublishedToWall: false,
+            timeAgo: 'Just now',
+          }));
+          setMentions(mappedMentions);
+
+          // Persist to Firestore if configured
+          if (isFirebaseConfigured) {
+            try {
+              const db = getFirestore();
+              for (const m of mappedMentions) {
+                await setDoc(
+                  doc(db, 'radar_mentions', m.id),
+                  {
+                    ...m,
+                    workspaceName,
+                    brandSlug,
+                    createdAt: new Date().toISOString(),
+                  },
+                  { merge: true }
+                );
+              }
+            } catch (fsErr) {
+              console.warn('Firestore auto-save failed:', fsErr);
+            }
+          }
         }
       }
     } catch (e) {
@@ -229,23 +253,20 @@ export const RadarView: React.FC<RadarViewProps> = ({
       prev.map((m) => (m.id === id ? { ...m, isPublishedToWall: nextStatus } : m))
     );
 
-    // Sync to Supabase if configured
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    if (supabaseUrl && supabaseKey) {
+    // Sync to Firestore if configured
+    if (isFirebaseConfigured) {
       try {
-        await fetch(`${supabaseUrl}/rest/v1/mentions?external_id=eq.${encodeURIComponent(id)}`, {
-          method: 'PATCH',
-          headers: {
-            apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`,
-            'Content-Type': 'application/json',
-            Prefer: 'return=minimal',
+        const db = getFirestore();
+        await setDoc(
+          doc(db, 'radar_mentions', id),
+          {
+            isPublishedToWall: nextStatus,
+            updatedAt: new Date().toISOString(),
           },
-          body: JSON.stringify({ is_published_to_wall: nextStatus }),
-        });
+          { merge: true }
+        );
       } catch (err) {
-        console.warn('Failed to update Supabase publish state:', err);
+        console.warn('Failed to update Firestore publish state:', err);
       }
     }
   };
