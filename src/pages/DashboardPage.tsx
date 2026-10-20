@@ -9,6 +9,7 @@ import { ConnectedAccountsModal } from '../components/dashboard/ConnectedAccount
 import { PublishHistoryModal } from '../components/dashboard/PublishHistoryModal';
 import { WelcomeView } from '../components/dashboard/views/WelcomeView';
 import { FormsView } from '../components/dashboard/views/FormsView';
+import { RadarView } from '../components/dashboard/views/RadarView';
 import { ImportTestimonialsHub, ImportedTestimonial } from '../components/dashboard/ImportTestimonialsHub';
 import { AccountBillingView } from '../components/dashboard/views/AccountBillingView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
@@ -27,6 +28,7 @@ import { ReferralHub } from '../components/dashboard/ReferralHub';
 import { Menu } from 'lucide-react';
 const TAB_LABEL_MAP: Record<string, string> = {
   welcome: 'Welcome Hub',
+  radar: 'Radar & Lead Poacher',
   forms: 'Forms',
   import: 'Import',
   proof: 'Proof',
@@ -448,6 +450,17 @@ export const DashboardPage = () => {
               isViewingSampleData={isViewingSampleData}
               onClearSampleData={handleClearSampleData}
             />
+          )}
+
+          {/* Radar & Competitor Lead Poacher View */}
+          {activeTab === 'radar' && (
+            <div className="max-w-6xl mx-auto font-sans">
+              <RadarView
+                workspaceId={impersonatedWorkspace?.id || workspace?.id || project?.id || 'workspace-default'}
+                workspaceName={impersonatedWorkspace?.name || workspace?.name || project?.name || 'PandaPraise'}
+                brandSlug={project?.slug || 'feedback'}
+              />
+            </div>
           )}
 
           {/* Forms View (Dedicated to review collection forms, form studio & templates) */}

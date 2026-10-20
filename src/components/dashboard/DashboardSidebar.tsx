@@ -10,11 +10,13 @@ import {
   X,
   Share2,
   ArrowDownToLine,
+  Radio,
 } from 'lucide-react';
 import SidebarFooter from './SidebarFooter';
 
 export type DashboardTab =
   | 'welcome'
+  | 'radar'
   | 'forms'
   | 'import'
   | 'proof'
@@ -91,9 +93,24 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         {/* GROUP 1: COLLECT */}
         <div>
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 px-3">
-            COLLECT
+            COLLECT & SPY
           </p>
           <ul className="space-y-0.5">
+            <li>
+              <button
+                type="button"
+                onClick={() => setActiveTab('radar')}
+                className={navItemClass(activeTab === 'radar')}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Radio className="w-4 h-4 text-violet-600 shrink-0" />
+                  <span className="font-semibold text-slate-900">Radar & Spy</span>
+                </div>
+                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-violet-100 text-violet-700">
+                  Live
+                </span>
+              </button>
+            </li>
             <li>
               <button
                 type="button"
