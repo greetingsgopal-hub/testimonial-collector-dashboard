@@ -11,14 +11,7 @@ import {
   Sparkles,
   ExternalLink,
   Menu,
-  Star,
-  Copy,
-  CheckCircle2,
-  Target,
-  Flame,
-  ShieldAlert,
-  Share2,
-  Loader2,
+  Star
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
@@ -31,7 +24,7 @@ import { MotionAccordion } from '../components/MotionAccordion';
 const FAQ_ITEMS = [
   {
     q: 'Do I need a developer every time I receive a new testimonial?',
-    a: 'No. Praise is auto-harvested across Reddit, Hacker News, and Google News without manual intervention, and published directly to your hosted deal-closer vault or website in real time.',
+    a: 'No. The website widget is installed once with a simple one-line embed code. After installation, newly approved testimonials appear on your site automatically.',
   },
   {
     q: 'Do my customers need to create an account to leave a review?',
@@ -46,8 +39,8 @@ const FAQ_ITEMS = [
     a: 'Never. Customer emails, phone numbers, and private contact details are kept strictly private and never exposed to website visitors.',
   },
   {
-    q: 'How does Panda Praise integrate with my sales and website?',
-    a: 'Panda Praise gives you a standalone, hosted deal-closer vault at pandapraise.com/p/yourbrand to send directly in WhatsApp and DMs, plus optional one-click interactive widgets for your landing page.',
+    q: 'How does Panda Praise integrate with my website?',
+    a: 'Panda Praise embeds seamlessly using a lightweight HTML code snippet or universal iframe. Verified on custom HTML, WordPress, Webflow, Framer, Shopify, Squarespace, Wix, React, and Next.js, with platform-specific setup guides in your dashboard.',
   },
   {
     q: 'Can I import my existing reviews from other platforms?',
@@ -55,80 +48,15 @@ const FAQ_ITEMS = [
   },
 ];
 
-interface HeroSignal {
-  id: string;
-  source: 'Reddit' | 'HackerNews' | 'GoogleNews';
-  targetKeyword: string;
-  isCompetitor: boolean;
-  author: string;
-  category: 'PRAISE' | 'POACHABLE_LEAD' | 'FIRE_ALERT' | 'NOISE';
-  urgencyScore: number;
-  cleanQuote: string;
-  aiPoachReply?: string;
-  sourceUrl: string;
-  timeAgo: string;
-}
-
-const DEFAULT_SIGNALS: HeroSignal[] = [
-  {
-    id: 'sig-1',
-    source: 'HackerNews',
-    targetKeyword: 'Senja',
-    isCompetitor: true,
-    author: 'saas_founder_jack',
-    category: 'POACHABLE_LEAD',
-    urgencyScore: 9,
-    cleanQuote: 'Senja just increased pricing again and locked our widgets behind a paywall. Looking for a modern, zero-cost alternative.',
-    aiPoachReply: 'Hey @saas_founder_jack! We built PandaPraise specifically for founders tired of recurring subscription hostage fees. You get automated social proof harvesting, zero-form reviews, and hosted deal-closer vaults for $0/mo. Happy to give you VIP migration support!',
-    sourceUrl: 'https://news.ycombinator.com',
-    timeAgo: '12m ago',
-  },
-  {
-    id: 'sig-2',
-    source: 'Reddit',
-    targetKeyword: 'PandaPraise',
-    isCompetitor: false,
-    author: 'u/dev_mark',
-    category: 'PRAISE',
-    urgencyScore: 8,
-    cleanQuote: 'Switched from Senja to PandaPraise last Tuesday. The auto-harvested praise from Reddit brought us 4 inbound leads without asking customers to fill a single form.',
-    sourceUrl: 'https://reddit.com/r/SaaS',
-    timeAgo: '34m ago',
-  },
-  {
-    id: 'sig-3',
-    source: 'Reddit',
-    targetKeyword: 'Testimonial.to',
-    isCompetitor: true,
-    author: 'u/growth_dan',
-    category: 'POACHABLE_LEAD',
-    urgencyScore: 9,
-    cleanQuote: 'Anyone migrating off Testimonial.to? Their video upload limit is ridiculous for client accounts.',
-    aiPoachReply: 'Hey Dan! Check out PandaPraise — we support zero-form social proof and direct WhatsApp closing vaults without monthly limits. Take a look at pandapraise.com/p/yourbrand!',
-    sourceUrl: 'https://reddit.com',
-    timeAgo: '1h ago',
-  },
-  {
-    id: 'sig-4',
-    source: 'GoogleNews',
-    targetKeyword: 'PandaPraise',
-    isCompetitor: false,
-    author: 'Cloud Review Monitor',
-    category: 'FIRE_ALERT',
-    urgencyScore: 7,
-    cleanQuote: 'PandaPraise webhook latency spike detected during regional Cloudflare maintenance window.',
-    sourceUrl: 'https://news.google.com',
-    timeAgo: '2h ago',
-  },
-];
-
+// Feature marquee replaces the fabricated client-logo strip. When real
+// customer logos exist, they can be swapped in here without further changes.
 const MARQUEE_ITEMS = [
-  'Zero-cost praise auto-harvester',
-  'Reddit, Hacker News & Google News scanner',
-  'Competitor review spy & lead poacher',
-  'Hosted deal-closer vaults (/p/:slug)',
-  'AI founder poach reply generator',
-  'Zero-Canva viral social cards',
+  'Collect via public link, QR & widgets',
+  'Moderate before publishing',
+  'Import from Google & CSV',
+  'Embed Walls of Love',
+  'Publish to LinkedIn, Instagram & Facebook',
+  'Rich snippet SEO export',
   'Free forever plan',
 ];
 
@@ -147,63 +75,6 @@ export const LandingPage: React.FC = () => {
   const [searchQueryMock, setSearchQueryMock] = useState('do the techs actually use it');
   const [isWallModalOpen, setIsWallModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Dual Scanner & Live Signals State
-  const [brandInput, setBrandInput] = useState('PandaPraise');
-  const [competitorInput, setCompetitorInput] = useState('Senja');
-  const [isScanning, setIsScanning] = useState(false);
-  const [signals, setSignals] = useState<HeroSignal[]>(DEFAULT_SIGNALS);
-  const [activeSignalTab, setActiveSignalTab] = useState<'all' | 'poachable' | 'praise' | 'alerts'>('all');
-  const [copiedReplyId, setCopiedReplyId] = useState<string | null>(null);
-  const [socialModalMention, setSocialModalMention] = useState<HeroSignal | null>(null);
-  const [copiedModalLink, setCopiedModalLink] = useState(false);
-
-  const handleScanSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!brandInput.trim()) return;
-    setIsScanning(true);
-    try {
-      const res = await fetch('/api/scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          brand: brandInput.trim(),
-          competitor: competitorInput.trim() || undefined,
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.mentions) && data.mentions.length > 0) {
-          setSignals(
-            data.mentions.map((m: any, idx: number) => ({
-              id: m.external_id || m.externalId || `scan-${idx}`,
-              source: m.source || 'Reddit',
-              targetKeyword: m.target_keyword || m.targetKeyword || brandInput,
-              isCompetitor: Boolean(m.is_competitor ?? m.isCompetitor),
-              author: m.author || 'Community User',
-              category: m.category || 'PRAISE',
-              urgencyScore: m.urgency_score ?? m.urgencyScore ?? 7,
-              cleanQuote: m.clean_quote || m.cleanQuote || m.raw_text || m.rawText || '',
-              aiPoachReply: m.ai_poach_reply || m.aiPoachReply,
-              sourceUrl: m.source_url || m.sourceUrl || 'https://news.ycombinator.com',
-              timeAgo: 'Just now',
-            }))
-          );
-        }
-      }
-    } catch {
-      // In-browser fallback preserves state smoothly
-    } finally {
-      setIsScanning(false);
-    }
-  };
-
-  const handleCopyReply = (id: string, replyText: string, sourceUrl: string) => {
-    navigator.clipboard.writeText(replyText);
-    setCopiedReplyId(id);
-    setTimeout(() => setCopiedReplyId(null), 2500);
-    window.open(sourceUrl, '_blank', 'noopener,noreferrer');
-  };
 
   // Smart boundary check to prevent toast colliding with footer or CTAs
   const footerRef = useRef<HTMLElement>(null);
@@ -236,97 +107,58 @@ export const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-[#FFFFFF] text-[#0F172A] selection:bg-brand-500/20 selection:text-brand-900 relative pb-20 sm:pb-0 font-sans">
       
       {/* ── 1. Top Announcement Bar ── */}
-      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all text-white py-2 px-4 text-center relative z-40 flex items-center justify-center gap-2 shadow-xs text-xs sm:text-sm font-medium">
-        <Link to="/signup" className="flex items-center gap-2 hover:underline">
-          <span className="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-            ⚡ Social Proof
-          </span>
-          <span>Turn customer praise into your most trusted marketing</span>
-          <span className="hidden sm:inline text-white/90 font-bold ml-1">| Start Free in 2 Minutes →</span>
-        </Link>
+      <div className="bg-purple-600 text-white text-xs sm:text-sm font-medium py-2.5 px-4 text-center flex items-center justify-center gap-2">
+        <span className="px-2 py-0.5 rounded bg-white/20 text-xs font-bold uppercase tracking-wider">🔥 PROVEN ROI</span>
+        <span>Turn customer praise into +34% higher website conversions</span>
+        <span className="hidden sm:inline">|</span>
+        <Link to="/signup" className="underline hover:text-gray-200 font-semibold">Start Free in 2 Minutes →</Link>
       </div>
 
-      {/* Ambient background glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem]" style={{ background: 'radial-gradient(75rem 28rem at 50% -4rem, rgb(79 70 229 / 0.08), transparent)' }} />
-
-      {/* ── 2. Header / Navigation (Sticky Frozen Navbar) ── */}
-      <header className="sticky top-0 z-50 w-full bg-white/95 border-b border-gray-200/80 backdrop-blur-md shadow-xs transition-shadow">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
-          
-          {/* Logo strictly clean text "Panda Praise" */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <span className="font-bold text-xl sm:text-2xl tracking-tight text-slate-900 group-hover:text-brand-700 transition-colors">
-              Panda <span className="text-brand-600">Praise</span>
-            </span>
+      {/* ── 2. Header / Navigation ── */}
+      <header className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
+        <div className="flex items-center gap-2">
+          <Link to="/" className="text-2xl font-black tracking-tighter text-gray-900">
+            Panda<span className="text-indigo-600">Praise</span>
+          </Link>
+        </div>
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
+          <Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link>
+          <button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors cursor-pointer">Product</button>
+          <button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors cursor-pointer">Customers</button>
+          <button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors cursor-pointer">Why Panda Praise</button>
+          <button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors cursor-pointer">Resources</button>
+        </nav>
+        <div className="flex items-center gap-4">
+          <Link to={user ? "/dashboard" : "/login"} className="text-sm font-semibold text-gray-700 hover:text-gray-900">
+            Login
+          </Link>
+          <Link
+            to={user ? "/dashboard?new=true" : "/signup"}
+            onClick={() => analytics.signupStarted('header_nav')}
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/20"
+          >
+            Start for free
           </Link>
 
-          {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-            <Link to="/pricing" className="hover:text-brand-600 transition-colors">
-              Pricing
-            </Link>
-            <button
-              onClick={() => scrollToSection('collect-section')}
-              className="hover:text-brand-600 transition-colors cursor-pointer"
-            >
-              Product
-            </button>
-            <button
-              onClick={() => scrollToSection('share-section')}
-              className="hover:text-brand-600 transition-colors cursor-pointer"
-            >
-              Customers
-            </button>
-            <button
-              onClick={() => scrollToSection('comparison-section')}
-              className="hover:text-brand-600 transition-colors cursor-pointer"
-            >
-              Why Panda Praise
-            </button>
-            <button
-              onClick={() => scrollToSection('faq')}
-              className="hover:text-brand-600 transition-colors cursor-pointer"
-            >
-              Resources
-            </button>
-          </nav>
-
-          {/* Right Action Buttons */}
-          <div className="flex items-center gap-4 sm:gap-6">
-            <Link
-              to={user ? "/dashboard" : "/login"}
-              className="text-sm font-medium text-gray-600 hover:text-gray-950 transition-colors"
-            >
-              Login
-            </Link>
-            <Link
-              to={user ? "/dashboard?new=true" : "/signup"}
-              onClick={() => analytics.signupStarted('header_nav')}
-              className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all hover:scale-[1.02]"
-            >
-              Start for free
-            </Link>
-
-            {/* Mobile Hamburger Button */}
-            <button
-              type="button"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-950 hover:bg-gray-100 transition-colors cursor-pointer"
-              aria-label="Toggle navigation menu"
-              aria-expanded={isMobileMenuOpen}
-            >
-              {isMobileMenuOpen ? <XIcon className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
+          {/* Mobile Hamburger Button */}
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-950 hover:bg-gray-100 transition-colors cursor-pointer"
+            aria-label="Toggle navigation menu"
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? <XIcon className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
 
         {/* Mobile Navigation Dropdown */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden border-t border-gray-200/80 bg-white px-6 py-4 space-y-3 shadow-lg animate-fade-in">
+          <nav className="md:hidden absolute top-20 left-0 right-0 border-b border-gray-100 bg-white px-6 py-4 space-y-3 shadow-lg">
             <Link
               to="/pricing"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block py-2 text-sm font-medium text-gray-700 hover:text-[#6701e6] transition-colors"
+              className="block py-2 text-sm font-medium text-gray-700 hover:text-indigo-600"
             >
               Pricing
             </Link>
@@ -336,7 +168,7 @@ export const LandingPage: React.FC = () => {
                 scrollToSection('collect-section');
                 setIsMobileMenuOpen(false);
               }}
-              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-[#6701e6] transition-colors cursor-pointer"
+              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 cursor-pointer"
             >
               Product
             </button>
@@ -346,7 +178,7 @@ export const LandingPage: React.FC = () => {
                 scrollToSection('share-section');
                 setIsMobileMenuOpen(false);
               }}
-              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-[#6701e6] transition-colors cursor-pointer"
+              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 cursor-pointer"
             >
               Customers
             </button>
@@ -356,7 +188,7 @@ export const LandingPage: React.FC = () => {
                 scrollToSection('comparison-section');
                 setIsMobileMenuOpen(false);
               }}
-              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-[#6701e6] transition-colors cursor-pointer"
+              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 cursor-pointer"
             >
               Why Panda Praise
             </button>
@@ -366,7 +198,7 @@ export const LandingPage: React.FC = () => {
                 scrollToSection('faq');
                 setIsMobileMenuOpen(false);
               }}
-              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-[#6701e6] transition-colors cursor-pointer"
+              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 cursor-pointer"
             >
               Resources
             </button>
@@ -374,364 +206,49 @@ export const LandingPage: React.FC = () => {
         )}
       </header>
 
-      {/* ── 3. Hero Section: Dual Scanner & Live Social Proof Radar ── */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-14 text-center relative z-10 flex flex-col items-center justify-center">
-        
-        {/* Floating purple sparkle doodle */}
-        <div className="absolute left-2 sm:-left-6 top-12 hidden sm:block text-[#6701e6] opacity-75 animate-pulse" aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0 L14.6 9.4 L24 12 L14.6 14.6 L12 24 L9.4 14.6 L0 12 L9.4 9.4 Z" />
-          </svg>
+      {/* ── 3. Hero Section ── */}
+      <section className="max-w-4xl mx-auto px-4 pt-16 sm:pt-20 pb-16 text-center relative z-10">
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 border border-purple-100 text-purple-700 text-xs font-semibold mb-8 shadow-sm">
+          <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+          The Anti-Subscription Social Proof Engine
         </div>
 
-        {/* Top Eyebrow Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 border border-purple-200/80 mb-3 shadow-xs">
-          <span className="flex h-2 w-2 rounded-full bg-[#6701e6] animate-pulse" />
-          <span className="text-xs font-semibold text-[#6701e6]">Zero-Cost Social Proof Harvester & Lead Spy</span>
-        </div>
-
-        {/* Primary H1 */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-950 tracking-tight leading-[1.18] max-w-3xl mx-auto text-center">
-          <span className="block">Auto-Harvest Authentic Praise &</span>
-          <span className="block mt-1 sm:mt-1.5 text-[#6701e6]">
-            Poach Competitor Leads
+        {/* Headline */}
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-gray-900 leading-[1.1] mb-6">
+          Turn WhatsApp & DMs Into<br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800">
+            High-Converting Social Proof
           </span>
         </h1>
 
-        {/* Subheadline */}
-        <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed font-normal text-balance">
-          <span className="font-semibold text-gray-900">Stop begging customers to fill forms.</span> Automatically harvest authentic praise across Reddit, Hacker News, and Google News, spy on competitor churn, and send high-converting deal-closer vaults.
+        {/* Sub-headline */}
+        <p className="text-gray-500 text-base sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-normal">
+          Stop paying monthly hostage fees. Import raw chat screenshots, collect verified reviews, and keep your Wall of Love active forever.
         </p>
 
-        {/* ── DUAL SCANNER COMPONENT ── */}
-        <form onSubmit={handleScanSubmit} className="mt-7 w-full max-w-2xl mx-auto bg-white/95 backdrop-blur-xl border border-violet-200/90 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-xl shadow-purple-500/5 transition-all text-left">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
-            {/* Input 1: Brand */}
-            <div>
-              <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5 px-1 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-violet-600" />
-                <span>1. Your Brand (Auto-Praise)</span>
-              </label>
-              <input
-                type="text"
-                value={brandInput}
-                onChange={(e) => setBrandInput(e.target.value)}
-                placeholder="Your Brand (e.g. PandaPraise, Supabase)"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20 text-sm font-semibold text-slate-900 bg-slate-50/70 outline-hidden transition-all placeholder:text-slate-400"
-                required
-              />
-            </div>
-
-            {/* Input 2: Competitor */}
-            <div>
-              <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5 px-1 flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5 text-rose-500" />
-                <span>2. Competitor to Poach (Churn Spy)</span>
-              </label>
-              <input
-                type="text"
-                value={competitorInput}
-                onChange={(e) => setCompetitorInput(e.target.value)}
-                placeholder="Competitor (e.g. Senja, Testimonial.to)"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 text-sm font-semibold text-slate-900 bg-slate-50/70 outline-hidden transition-all placeholder:text-slate-400"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isScanning}
-            className="radar-hunt-btn w-full py-3 px-6 rounded-xl sm:rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold text-sm sm:text-base shadow-md shadow-violet-600/25 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-75"
+        {/* CTA Button Group */}
+        <div className="flex flex-col items-center gap-4">
+          <Link
+            to={user ? "/dashboard?new=true" : "/signup"}
+            onClick={() => {
+              analytics.ctaClicked('hero_primary', '/signup');
+              analytics.signupStarted('hero_primary');
+            }}
+            className="px-8 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-base transition-all duration-200 shadow-xl shadow-indigo-600/30 flex items-center gap-2 cursor-pointer group"
           >
-            {isScanning ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Scanning Reddit, HackerNews & Google News...</span>
-              </>
-            ) : (
-              <>
-                <Search className="w-4 h-4" />
-                <span>🔍 Hunt Praise & Leads</span>
-              </>
-            )}
-          </button>
-        </form>
+            <span>Start for free today</span>
+            <span className="group-hover:translate-x-1 transition-transform">→</span>
+          </Link>
 
-        {/* Microcopy reassurance */}
-        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs text-gray-500 font-medium pt-3">
-          <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Zero API fees</span>
-          <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Reddit, HN & Google News coverage</span>
-          <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> Free forever</span>
-        </div>
-
-        {/* ── LIVE SIGNAL FEED SECTION ── */}
-        <div className="mt-10 w-full max-w-4xl mx-auto">
-          {/* Section Heading & Tabs */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-5 border-b border-slate-200/90 pb-3">
-            <div className="text-left">
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Live Signal Radar Feed</span>
-              </h2>
-              <p className="text-xs text-slate-500">Classified in real-time by edge heuristic & Gemini Flash</p>
-            </div>
-
-            {/* 4 Category Tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1">
-              <button
-                type="button"
-                onClick={() => setActiveSignalTab('all')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                  activeSignalTab === 'all'
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                All Live Signals ({signals.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveSignalTab('poachable')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1 ${
-                  activeSignalTab === 'poachable'
-                    ? 'bg-rose-600 text-white shadow-xs'
-                    : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
-                }`}
-              >
-                <Target className="w-3 h-3" />
-                <span>🎯 Poachable Competitor Leads (Part B) ({signals.filter(s => s.category === 'POACHABLE_LEAD').length})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveSignalTab('praise')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1 ${
-                  activeSignalTab === 'praise'
-                    ? 'bg-violet-600 text-white shadow-xs'
-                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
-                }`}
-              >
-                <Sparkles className="w-3 h-3" />
-                <span>✨ Auto-Harvested Praise (Part A) ({signals.filter(s => s.category === 'PRAISE').length})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveSignalTab('alerts')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1 ${
-                  activeSignalTab === 'alerts'
-                    ? 'bg-amber-600 text-white shadow-xs'
-                    : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-                }`}
-              >
-                <ShieldAlert className="w-3 h-3" />
-                <span>🚨 Fire Alerts ({signals.filter(s => s.category === 'FIRE_ALERT').length})</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-            {signals
-              .filter((s) => {
-                if (activeSignalTab === 'poachable') return s.category === 'POACHABLE_LEAD';
-                if (activeSignalTab === 'praise') return s.category === 'PRAISE';
-                if (activeSignalTab === 'alerts') return s.category === 'FIRE_ALERT';
-                return true;
-              })
-              .map((signal) => (
-                <div
-                  key={signal.id}
-                  className={`rounded-2xl border p-4 sm:p-5 bg-white transition-all shadow-2xs hover:shadow-md flex flex-col justify-between ${
-                    signal.category === 'POACHABLE_LEAD'
-                      ? 'border-rose-200/90 ring-1 ring-rose-500/10'
-                      : signal.category === 'PRAISE'
-                      ? 'border-violet-200/90 ring-1 ring-violet-500/10'
-                      : 'border-slate-200/80'
-                  }`}
-                >
-                  <div>
-                    {/* Header: Platform + Urgency Pill */}
-                    <div className="flex items-center justify-between gap-2 mb-2.5">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold border uppercase tracking-wider ${
-                            signal.source === 'Reddit'
-                              ? 'bg-orange-50 text-orange-700 border-orange-200'
-                              : signal.source === 'HackerNews'
-                              ? 'bg-amber-50 text-amber-800 border-amber-200'
-                              : 'bg-blue-50 text-blue-700 border-blue-200'
-                          }`}
-                        >
-                          {signal.source}
-                        </span>
-                        <span className="text-xs font-semibold text-slate-700 truncate max-w-[140px]">
-                          {signal.author}
-                        </span>
-                      </div>
-
-                      {signal.category === 'POACHABLE_LEAD' ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                          <Flame className="w-3 h-3 text-rose-500" />
-                          Poach Lead ({signal.urgencyScore}/10)
-                        </span>
-                      ) : signal.category === 'PRAISE' ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                          <Sparkles className="w-3 h-3 text-purple-600" />
-                          Praise Verified
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                          <ShieldAlert className="w-3 h-3 text-amber-600" />
-                          Fire Alert
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Quote text */}
-                    <p className="text-sm text-slate-800 leading-snug font-normal line-clamp-3 mb-3">
-                      "{signal.cleanQuote}"
-                    </p>
-
-                    {/* Poachable Founder Script Box */}
-                    {signal.category === 'POACHABLE_LEAD' && signal.aiPoachReply && (
-                      <div className="mb-3 p-3 rounded-xl bg-rose-50/60 border border-rose-200/80 text-xs">
-                        <div className="font-bold text-rose-950 mb-1 flex items-center gap-1">
-                          <span>💡 AI Founder Poach Script:</span>
-                        </div>
-                        <p className="text-slate-700 italic leading-relaxed">
-                          "{signal.aiPoachReply}"
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions Footer */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
-                    <span className="text-slate-400 font-medium text-[11px]">{signal.timeAgo}</span>
-
-                    <div className="flex items-center gap-2">
-                      {signal.category === 'POACHABLE_LEAD' && signal.aiPoachReply && (
-                        <button
-                          type="button"
-                          onClick={() => handleCopyReply(signal.id, signal.aiPoachReply!, signal.sourceUrl)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-2xs transition-all hover:scale-105 cursor-pointer"
-                        >
-                          {copiedReplyId === signal.id ? (
-                            <>
-                              <CheckCircle2 className="w-3 h-3" />
-                              <span>Copied!</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-3 h-3" />
-                              <span>📋 Copy Reply & Open Post</span>
-                            </>
-                          )}
-                        </button>
-                      )}
-
-                      {signal.category === 'PRAISE' && (
-                        <button
-                          type="button"
-                          onClick={() => setSocialModalMention(signal)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-2xs transition-all hover:scale-105 cursor-pointer"
-                        >
-                          <Share2 className="w-3 h-3" />
-                          <span>✨ Zero-Canva Social Card</span>
-                        </button>
-                      )}
-
-                      <a
-                        href={signal.sourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                        title="View Original Post"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {/* Micro Trust Specs */}
+          <div className="flex items-center gap-6 text-xs text-gray-400 font-medium mt-2">
+            <span className="flex items-center gap-1.5">✓ Free forever</span>
+            <span className="flex items-center gap-1.5">✓ No credit card required</span>
+            <span className="flex items-center gap-1.5">✓ 2-minute setup</span>
           </div>
         </div>
-
       </section>
-
-      {/* ── Zero-Canva Social Card Modal ── */}
-      {socialModalMention && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 text-left relative">
-            <button
-              type="button"
-              onClick={() => setSocialModalMention(null)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors"
-            >
-              <XIcon className="w-5 h-5" />
-            </button>
-
-            <div className="mb-4">
-              <span className="text-xs font-bold text-violet-600 uppercase tracking-wider">
-                Zero-Canva 1-Click Social Proof Card
-              </span>
-              <h3 className="text-lg font-extrabold text-slate-900 mt-0.5">
-                Ready to Post on LinkedIn & X
-              </h3>
-            </div>
-
-            {/* Graphic Preview Card */}
-            <div className="rounded-2xl p-6 bg-gradient-to-br from-slate-900 via-purple-950 to-slate-950 text-white shadow-xl aspect-square flex flex-col justify-between border border-slate-800">
-              <div className="flex items-center justify-between">
-                <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-white/10 text-white uppercase tracking-wider">
-                  {socialModalMention.source} Verified
-                </span>
-                <div className="flex text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                  ))}
-                </div>
-              </div>
-
-              <blockquote className="text-base sm:text-lg font-medium leading-snug my-auto">
-                "{socialModalMention.cleanQuote}"
-              </blockquote>
-
-              <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-sm text-white">{socialModalMention.author}</p>
-                  <p className="text-xs text-white/60">Verified Community Praise</p>
-                </div>
-                <div className="flex items-center gap-1.5 text-xs font-bold text-violet-400">
-                  <span>🐼 PandaPraise</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="mt-5 flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(`"${socialModalMention.cleanQuote}" — ${socialModalMention.author} (via PandaPraise)`);
-                  setCopiedModalLink(true);
-                  setTimeout(() => setCopiedModalLink(false), 2500);
-                }}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
-              >
-                {copiedModalLink ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedModalLink ? 'Copied to Clipboard!' : 'Copy Quote Text'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setSocialModalMention(null)}
-                className="py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── 4. Feature Marquee (replaces fabricated client logos; real customer
              logos can be added here once genuine customers exist) ── */}
