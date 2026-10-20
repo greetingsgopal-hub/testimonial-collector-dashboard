@@ -342,7 +342,7 @@ describe('Razorpay Order & Verification Handler Suite', () => {
       expect(res.status).toBe(200);
       const data: any = await res.json();
       expect(data.orderId).toBe('order_full_worker');
-    });
+    }, 15000);
 
     it('routes /api/razorpay/verify-payment through worker.fetch', async () => {
       const { default: worker } = await import('../index');

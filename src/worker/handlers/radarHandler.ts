@@ -450,7 +450,8 @@ Return ONLY valid JSON matching this schema:
  * Handle POST /api/scan or /api/radar/scan
  */
 export async function handleRadarScan(request: Request, env: WorkerEnv): Promise<Response> {
-  const cors = getCorsHeaders(request);
+  const origin = request.headers.get('Origin');
+  const cors = getCorsHeaders(origin);
 
   if (request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed. Use POST.' }), {
