@@ -9,7 +9,6 @@ import { ConnectedAccountsModal } from '../components/dashboard/ConnectedAccount
 import { PublishHistoryModal } from '../components/dashboard/PublishHistoryModal';
 import { WelcomeView } from '../components/dashboard/views/WelcomeView';
 import { FormsView } from '../components/dashboard/views/FormsView';
-import { ImportTestimonialsHub, ImportedTestimonial } from '../components/dashboard/ImportTestimonialsHub';
 import { AccountBillingView } from '../components/dashboard/views/AccountBillingView';
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
@@ -28,7 +27,6 @@ import { Menu } from 'lucide-react';
 const TAB_LABEL_MAP: Record<string, string> = {
   welcome: 'Welcome Hub',
   forms: 'Forms',
-  import: 'Import',
   proof: 'Proof',
   widgets: 'Embeds',
   social: 'Post on internet',
@@ -51,11 +49,13 @@ export const DashboardPage = () => {
     const paramTab = searchParams.get('tab') as DashboardTab;
     if (paramTab) {
       if (paramTab === 'tags' || paramTab === 'feedback' || paramTab === 'analyze') return 'proof';
+      if ((paramTab as string) === 'import') return 'forms';
       return paramTab;
     }
     const windowTab = new URLSearchParams(window.location.search).get('tab') as DashboardTab;
     if (windowTab) {
       if (windowTab === 'tags' || windowTab === 'feedback' || windowTab === 'analyze') return 'proof';
+      if ((windowTab as string) === 'import') return 'forms';
       return windowTab;
     }
     return 'welcome';
@@ -65,11 +65,12 @@ export const DashboardPage = () => {
   const [selectedForEmbeds, setSelectedForEmbeds] = useState<any[]>([]);
 
   const setActiveTab = useCallback((tab: DashboardTab) => {
-    setActiveTabState(tab);
+    const resolvedTab = (tab as string) === 'import' ? 'forms' : tab;
+    setActiveTabState(resolvedTab);
     setSidebarOpen(false);
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
-      next.set('tab', tab);
+      next.set('tab', resolvedTab);
       return next;
     }, { replace: true });
   }, [setSearchParams]);
@@ -438,7 +439,7 @@ export const DashboardPage = () => {
             <WelcomeView
               onOpenForm={() => window.open(collectionUrl, '_blank')}
               onCollect={() => setActiveTab('forms')}
-              onImport={() => setActiveTab('import')}
+              onImport={() => setActiveTab('forms')}
               onProof={() => setActiveTab('proof')}
               onOpenWall={() => window.open(`${window.location.origin}/love/${project?.slug || 'feedback'}`, '_blank')}
               onRichSnippet={() => setActiveTab('rich-snippet')}
@@ -462,44 +463,6 @@ export const DashboardPage = () => {
               reviews={effectiveReviews}
               stats={effectiveStats}
             />
-          )}
-
-          {/* Import Section - Real 4-Way Production Pipeline (Social Scraper, Screenshots OCR, CSV, Manual) */}
-          {activeTab === 'import' && (
-            <div className="max-w-5xl mx-auto font-sans animate-fade-in">
-              <ImportTestimonialsHub
-                workspaceId={impersonatedWorkspace?.id || workspace?.id || project?.id || 'besteample'}
-                workspaceName={impersonatedWorkspace?.name || workspace?.name || project?.name || 'besteample'}
-                onShiftToProof={(newItems: ImportedTestimonial[]) => {
-                  if (newItems && newItems.length > 0) {
-                    const mappedReviews: Review[] = newItems.map((item) => ({
-                      id: item.id || `import-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-                      projectId: activeProjectId || '',
-                      name: item.authorName,
-                      email: '',
-                      role: item.authorRole,
-                      company: '',
-                      rating: item.rating,
-                      title: item.authorRole || `${item.source} Review`,
-                      content: item.content,
-                      type: item.mediaType === 'image' ? 'screenshot' : 'text',
-                      source: 'import',
-                      status: 'approved',
-                      isFeatured: false,
-                      consent: true,
-                      createdAt: item.createdAt || new Date().toISOString(),
-                      tags: item.tags || [],
-                      screenshotUrl: item.screenshotUrl || undefined,
-                    }));
-                    setReviews((prev) => [...mappedReviews, ...prev]);
-                    for (const rev of mappedReviews) {
-                      storage.createReview(rev, activeProjectId).catch(() => null);
-                    }
-                  }
-                  setActiveTab('proof');
-                }}
-              />
-            </div>
           )}
 
           {/* In-App Referral Hub ("Give 1 Month / Get 1 Month") */}

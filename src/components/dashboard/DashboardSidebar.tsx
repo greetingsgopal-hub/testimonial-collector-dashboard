@@ -9,7 +9,6 @@ import {
   Gift,
   X,
   Share2,
-  ArrowDownToLine,
 } from 'lucide-react';
 import SidebarFooter from './SidebarFooter';
 
@@ -105,18 +104,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                   <span>Forms</span>
                 </div>
                 <span className="sr-only">Collect or Import</span>
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                onClick={() => setActiveTab('import')}
-                className={navItemClass(activeTab === 'import')}
-              >
-                <div className="flex items-center gap-2.5">
-                  <ArrowDownToLine className="w-4 h-4 text-slate-400 shrink-0" />
-                  <span>Import</span>
-                </div>
               </button>
             </li>
           </ul>
