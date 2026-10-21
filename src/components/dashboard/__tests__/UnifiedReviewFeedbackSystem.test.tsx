@@ -250,10 +250,12 @@ describe('UnifiedReviewFeedbackSystem Production Suite', () => {
       })
     );
 
-    // Shows thank you screen with viral loop
+    // Shows high-growth thank you screen with reward cross-sell and viral loop
     expect(container.textContent).toContain('Thank You for Your Feedback!');
-    expect(container.textContent).toContain('Run your own business?');
-    expect(container.textContent).toContain('Claim Your Free PandaPraise Workspace');
+    expect(container.textContent).toContain('Exclusive Thank You Reward');
+    expect(container.textContent).toContain('REVIEW15');
+    expect(container.textContent).toContain('Collect reviews like this for your business');
+    expect(container.textContent).toContain('Create Your Free PandaPraise Workspace');
   });
 
   it('6. Video recording toggle enables in-browser video review mode and prompt chips', async () => {

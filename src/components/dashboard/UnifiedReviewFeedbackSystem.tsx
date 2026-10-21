@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   Share2,
   Lock,
-  ArrowRight,
   Video,
   FileText,
 } from 'lucide-react';
@@ -989,6 +988,7 @@ export function PublicCustomerFeedbackPage({
     return (
       <div className="min-h-screen bg-[#314424] flex items-center justify-center p-6 font-sans antialiased select-none">
         <div className="bg-[#FBF6EA] text-[#1C2417] rounded-3xl p-8 sm:p-10 max-w-lg w-full text-center shadow-2xl space-y-6">
+          {/* Success Icon */}
           <div className="w-16 h-16 rounded-full bg-[#314424]/10 text-[#314424] flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-9 h-9" />
           </div>
@@ -1003,24 +1003,71 @@ export function PublicCustomerFeedbackPage({
             </p>
           </div>
 
-          {/* CONVERT CUSTOMER TO USER: Viral Product Loop */}
-          <div className="pt-4 border-t border-[#314424]/15 space-y-3 text-left">
-            <div className="p-4 rounded-2xl bg-[#314424] text-[#FBF6EA] space-y-2 relative overflow-hidden shadow-md">
-              <div className="flex items-center gap-2 text-xs font-bold text-amber-300">
+          {/* HIGH-CONVERSION CROSS-SELL / REWARD BOX (Customizable by Business) */}
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-left space-y-2 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-xs font-extrabold text-amber-800 uppercase tracking-wide">
+                <span>🎁 Exclusive Thank You Reward</span>
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-900">
+                Limited Time
+              </span>
+            </div>
+            <p className="text-xs text-amber-900/90 leading-relaxed">
+              As a token of appreciation from <strong>{config.brandPillText}</strong>, enjoy <strong>15% off</strong> your next purchase:
+            </p>
+            <div className="flex items-center justify-between p-2 rounded-xl bg-amber-100/70 border border-amber-300/80">
+              <code className="font-mono font-extrabold text-xs text-amber-950 tracking-wider">
+                REVIEW15
+              </code>
+              <button
+                type="button"
+                data-testid="copy-reward-coupon-btn"
+                onClick={() => {
+                  if (navigator.clipboard) {
+                    navigator.clipboard.writeText('REVIEW15').catch(() => {});
+                  }
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-800 text-white text-[11px] font-bold hover:bg-amber-900 transition-all cursor-pointer"
+              >
+                <span>Copy Code</span>
+              </button>
+            </div>
+          </div>
+
+          {/* VIRAL DISTRIBUTION LOOP: Convert Reviewer into PandaPraise User */}
+          <div className="pt-2 border-t border-[#314424]/15 space-y-3 text-left">
+            <div className="p-4 rounded-2xl bg-[#314424] text-[#FBF6EA] space-y-2.5 relative overflow-hidden shadow-md">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300">
                 <Sparkles className="w-4 h-4" />
-                <span>Run your own business?</span>
+                <span>Collect reviews like this for your business</span>
               </div>
               <p className="text-xs text-[#FBF6EA]/90 leading-relaxed">
-                Collect automated customer testimonials and display high-converting Wall of Love widgets just like {config.brandPillText}.
+                PandaPraise helps businesses capture automated video & text testimonials in 2 minutes.
               </p>
               <a
                 href="/signup"
-                className="mt-2 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-[#314424] text-xs font-extrabold hover:bg-slate-100 transition-all cursor-pointer shadow-sm"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-[#314424] text-xs font-extrabold hover:bg-slate-100 transition-all cursor-pointer shadow-sm"
               >
-                <span>Claim Your Free PandaPraise Workspace</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <span>Create Your Free PandaPraise Workspace →</span>
               </a>
             </div>
+          </div>
+
+          {/* Branded Attribution & Growth Badge */}
+          <div className="pt-1 text-center">
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#314424]/70 hover:text-[#314424] transition-colors"
+            >
+              <span>⚡ Powered by <strong>PandaPraise</strong></span>
+              <span>•</span>
+              <span className="underline">Collect automated praise</span>
+            </a>
           </div>
         </div>
       </div>
