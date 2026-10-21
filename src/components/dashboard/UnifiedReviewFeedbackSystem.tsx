@@ -344,17 +344,22 @@ export function UnifiedReviewFormRenderer({
           </div>
         </div>
 
-        {/* 2. Content Quality Matrix (Tick from Very Bad to Excellent) */}
-        <div className="space-y-3">
-          <div className="grid grid-cols-12 items-end gap-2 pb-1">
-            <div className="col-span-5">
-              <h3 data-testid="matrix-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
-                {t.matrixTitle}
-              </h3>
-            </div>
-            <div className="col-span-7 grid grid-cols-5 text-center text-[10px] font-bold text-[#314424]">
+        {/* 2. Content Quality Matrix (Responsive Grid Collapse for Mobile & Desktop) */}
+        <div className="space-y-3.5">
+          {/* Header Row: On desktop (sm:), side-by-side; on mobile, stacked with clean labels */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-1">
+            <h3 data-testid="matrix-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
+              {t.matrixTitle}
+            </h3>
+            {/* 5 Column Headers: On desktop, neatly aligned across the 5 checkboxes; on mobile, full width with clean font sizing */}
+            <div className="grid grid-cols-5 text-center text-[10px] sm:text-xs font-bold text-[#314424] gap-1 sm:w-[58%]">
               {t.cols.map((colLbl, cI) => (
-                <span key={cI} data-testid={`matrix-col-header-${cI}`} className="truncate px-0.5">
+                <span
+                  key={cI}
+                  data-testid={`matrix-col-header-${cI}`}
+                  className="px-0.5 leading-tight truncate sm:overflow-visible"
+                  title={colLbl}
+                >
                   {colLbl}
                 </span>
               ))}
@@ -363,25 +368,40 @@ export function UnifiedReviewFormRenderer({
 
           <div className="space-y-3">
             {t.questions.map((qStr, rI) => (
-              <div key={rI} className="grid grid-cols-12 items-center gap-2 py-1">
-                <p data-testid={`matrix-question-${rI}`} className="col-span-5 text-[11px] sm:text-xs leading-snug text-[#222B1C] pr-1">
+              <div
+                key={rI}
+                className="p-3 sm:p-0 rounded-2xl bg-[#314424]/5 sm:bg-transparent space-y-2.5 sm:space-y-0 sm:grid sm:grid-cols-12 sm:items-center gap-2"
+              >
+                <p
+                  data-testid={`matrix-question-${rI}`}
+                  className="sm:col-span-5 text-xs sm:text-[11px] md:text-xs leading-snug text-[#222B1C] sm:pr-1 font-semibold sm:font-normal"
+                >
                   {qStr}
                 </p>
-                <div className="col-span-7 grid grid-cols-5 justify-items-center">
+                <div className="sm:col-span-7 grid grid-cols-5 justify-items-center gap-1">
                   {[0, 1, 2, 3, 4].map((cI) => {
                     const ticked = matrixRatings[rI] === cI;
                     return (
-                      <button
-                        key={cI}
-                        type="button"
-                        data-testid={`matrix-check-${rI}-${cI}`}
-                        onClick={() => handleMatrixTick(rI, cI)}
-                        className={`w-6 h-6 sm:w-7 sm:h-7 border border-[#314424] flex items-center justify-center transition-colors cursor-pointer ${
-                          ticked ? 'bg-[#314424] text-[#FBF6EA]' : 'bg-transparent hover:bg-[#314424]/10'
-                        }`}
-                      >
-                        {ticked && <Check className="w-4 h-4 stroke-[3]" />}
-                      </button>
+                      <div key={cI} className="flex flex-col items-center gap-1 w-full">
+                        {/* Mobile rating score tag (1 to 5) so the user never gets confused on phone view */}
+                        <span className="sm:hidden text-[9px] font-bold text-[#314424]/60">
+                          {cI + 1}
+                        </span>
+                        <button
+                          key={cI}
+                          type="button"
+                          data-testid={`matrix-check-${rI}-${cI}`}
+                          onClick={() => handleMatrixTick(rI, cI)}
+                          aria-label={`${qStr} - ${t.cols[cI]}`}
+                          className={`w-9 h-9 sm:w-7 sm:h-7 rounded-lg sm:rounded-none border border-[#314424] flex items-center justify-center transition-all cursor-pointer ${
+                            ticked
+                              ? 'bg-[#314424] text-[#FBF6EA] shadow-2xs scale-105'
+                              : 'bg-white/70 sm:bg-transparent hover:bg-[#314424]/10'
+                          }`}
+                        >
+                          {ticked && <Check className="w-4 h-4 stroke-[3]" />}
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -390,23 +410,22 @@ export function UnifiedReviewFormRenderer({
           </div>
         </div>
 
-        {/* 3. What Can Be Improved? / Testimonial Section with Video & Written Modes */}
-        <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <h3 data-testid="improvement-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
-              {t.improvementTitle}
-            </h3>
-
-            {/* Written vs Video Review Mode Switch */}
-            {(config.allowVideo ?? true) && (
-              <div className="inline-flex items-center p-1 rounded-xl bg-black/10 border border-[#314424]/20 text-xs font-bold self-start sm:self-auto">
+        {/* 3. Review / Testimonial Section with Responsive Layout & Correct Flow */}
+        <div className="space-y-3.5 pt-1">
+          {/* Top Row: Review Mode Selector (Written Review vs Video) placed FIRST */}
+          {(config.allowVideo ?? true) && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
+              <span className="text-xs font-bold text-[#314424] uppercase tracking-wider">
+                Select Review Format:
+              </span>
+              <div className="inline-flex items-center p-1 rounded-xl bg-[#314424]/10 border border-[#314424]/20 text-xs font-bold w-full sm:w-auto">
                 <button
                   type="button"
                   data-testid="toggle-written-review"
                   onClick={() => setReviewMode('text')}
-                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-all ${
+                  className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
                     reviewMode === 'text'
-                      ? 'bg-[#314424] text-[#FBF6EA] shadow-2xs'
+                      ? 'bg-[#314424] text-[#FBF6EA] shadow-xs'
                       : 'text-[#314424] hover:bg-[#314424]/10'
                   }`}
                 >
@@ -417,9 +436,9 @@ export function UnifiedReviewFormRenderer({
                   type="button"
                   data-testid="toggle-video-review"
                   onClick={() => setReviewMode('video')}
-                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-all ${
+                  className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
                     reviewMode === 'video'
-                      ? 'bg-[#314424] text-[#FBF6EA] shadow-2xs'
+                      ? 'bg-[#314424] text-[#FBF6EA] shadow-xs'
                       : 'text-[#314424] hover:bg-[#314424]/10'
                   }`}
                 >
@@ -427,12 +446,24 @@ export function UnifiedReviewFormRenderer({
                   <span>Video (+2x Perk)</span>
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Section Heading with Character Counter */}
+          <div className="flex items-center justify-between">
+            <h3 data-testid="improvement-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
+              {t.improvementTitle}
+            </h3>
+            {reviewMode === 'text' && (
+              <span className="text-[10px] font-mono text-[#314424]/60">
+                {improvementText.length} / 600
+              </span>
             )}
           </div>
 
           {/* Interactive Prompt Pills when writing review */}
           {reviewMode === 'text' && (
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <button
                 type="button"
                 data-testid="prompt-chip-solve"
@@ -461,30 +492,25 @@ export function UnifiedReviewFormRenderer({
           )}
 
           {reviewMode === 'text' ? (
-            <div className="space-y-1">
-              <div className="flex justify-end text-[10px] font-mono text-[#314424]/60 pr-1">
-                {improvementText.length} / 600
-              </div>
-              <textarea
-                rows={4}
-                required
-                maxLength={600}
-                data-testid="input-improvement-text"
-                value={improvementText}
-                onChange={(e) => setImprovementText(e.target.value)}
-                placeholder={
-                  lang === 'hi'
-                    ? 'Apna sujhav ya review yahan likhein...'
-                    : 'Write what can be improved or your testimonial here...'
-                }
-                className="w-full bg-transparent text-xs sm:text-sm text-[#1C2417] placeholder-[#314424]/45 focus:outline-none resize-none leading-[36px]"
-                style={{
-                  backgroundImage:
-                    'repeating-linear-gradient(to bottom, transparent, transparent 34px, rgba(49, 68, 36, 0.4) 34px, rgba(49, 68, 36, 0.4) 36px)',
-                  lineHeight: '36px',
-                }}
-              />
-            </div>
+            <textarea
+              rows={4}
+              required
+              maxLength={600}
+              data-testid="input-improvement-text"
+              value={improvementText}
+              onChange={(e) => setImprovementText(e.target.value)}
+              placeholder={
+                lang === 'hi'
+                  ? 'Apna sujhav ya review yahan likhein...'
+                  : 'Write what can be improved or your testimonial here...'
+              }
+              className="w-full bg-transparent text-xs sm:text-sm text-[#1C2417] placeholder-[#314424]/45 focus:outline-none resize-none leading-[36px]"
+              style={{
+                backgroundImage:
+                  'repeating-linear-gradient(to bottom, transparent, transparent 34px, rgba(49, 68, 36, 0.4) 34px, rgba(49, 68, 36, 0.4) 36px)',
+                lineHeight: '36px',
+              }}
+            />
           ) : (
             <div className="space-y-3" data-testid="unified-video-recorder-container">
               <BrowserVideoRecorder
