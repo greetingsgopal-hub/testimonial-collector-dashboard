@@ -161,13 +161,20 @@ describe('UnifiedReviewFeedbackSystem Production Suite', () => {
     });
     expect(matrixBtn.getAttribute('aria-checked')).toBe('true');
 
-    // Clicking another option in same row switches selection
+    // Clicking another option in same row switches selection and morphs scale pill
     const matrixBtn4 = container.querySelector('[data-testid="matrix-check-0-4"]') as HTMLButtonElement;
     await act(async () => {
       matrixBtn4.click();
     });
     expect(matrixBtn4.getAttribute('aria-checked')).toBe('true');
     expect(matrixBtn.getAttribute('aria-checked')).toBe('false');
+
+    // Verify dynamic scale badge morphed to Score 5: Excellent
+    expect(scaleLegend?.textContent).toContain('Score 5:');
+    expect(scaleLegend?.textContent).toContain('Excellent');
+
+    // Verify row 0 shows the interactive micro-badge
+    expect(container.querySelector('[data-testid="matrix-question-0"]')?.parentElement?.textContent).toContain('5/5 · Excellent');
 
     // Fill improvement text using native descriptor
     const textarea = container.querySelector('[data-testid="input-improvement-text"]') as HTMLTextAreaElement;

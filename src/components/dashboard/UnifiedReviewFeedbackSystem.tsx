@@ -164,6 +164,76 @@ export function UnifiedReviewFormRenderer({
 
   const t = config.sections[lang] || config.sections.en;
 
+  const [hoveredCell, setHoveredCell] = useState<{ row: number; score: number } | null>(null);
+  const [lastTouchedScore, setLastTouchedScore] = useState<number | null>(null);
+
+  // Dynamic Scale Metadata (Supports both English & Hinglish)
+  const SCALE_META = [
+    {
+      score: 1,
+      en: 'Very Bad',
+      hi: 'Bahut Bura',
+      emoji: '😭',
+      pillStyle: 'bg-rose-950/90 text-rose-100 border-rose-700/60 shadow-rose-950/20',
+      btnActive: 'bg-rose-700 text-[#FBF6EA] border-rose-800 shadow-md shadow-rose-900/25 scale-110',
+      btnTrail: 'bg-rose-700/15 text-rose-950 border-rose-700/40',
+      dotColor: 'bg-rose-400',
+    },
+    {
+      score: 2,
+      en: 'Bad',
+      hi: 'Bura',
+      emoji: '😔',
+      pillStyle: 'bg-orange-950/90 text-orange-100 border-orange-700/60 shadow-orange-950/20',
+      btnActive: 'bg-orange-700 text-[#FBF6EA] border-orange-800 shadow-md shadow-orange-900/25 scale-110',
+      btnTrail: 'bg-orange-700/15 text-orange-950 border-orange-700/40',
+      dotColor: 'bg-orange-400',
+    },
+    {
+      score: 3,
+      en: 'Good',
+      hi: 'Achha',
+      emoji: '😎',
+      pillStyle: 'bg-amber-900/90 text-amber-100 border-amber-700/60 shadow-amber-950/20',
+      btnActive: 'bg-amber-700 text-[#FBF6EA] border-amber-800 shadow-md shadow-amber-900/25 scale-110',
+      btnTrail: 'bg-amber-700/15 text-amber-950 border-amber-700/40',
+      dotColor: 'bg-amber-400',
+    },
+    {
+      score: 4,
+      en: 'Very Good',
+      hi: 'Bahut Achha',
+      emoji: '😁',
+      pillStyle: 'bg-[#3A522B] text-[#FBF6EA] border-[#26381B] shadow-md',
+      btnActive: 'bg-[#3A522B] text-[#FBF6EA] border-[#26381B] shadow-md shadow-[#314424]/30 scale-110',
+      btnTrail: 'bg-[#314424]/15 text-[#1C2417] border-[#314424]/40',
+      dotColor: 'bg-lime-400',
+    },
+    {
+      score: 5,
+      en: 'Excellent',
+      hi: 'Shandar',
+      emoji: '😍',
+      pillStyle: 'bg-[#314424] text-[#FBF6EA] border-[#1F2C16] shadow-lg shadow-[#314424]/25',
+      btnActive: 'bg-[#314424] text-[#FBF6EA] border-[#1F2C16] shadow-lg shadow-[#314424]/35 scale-110',
+      btnTrail: 'bg-[#314424]/20 text-[#1C2417] border-[#314424]/50',
+      dotColor: 'bg-emerald-400',
+    },
+  ];
+
+  // Active score driving the top-right dynamic scale pill (Hover takes priority, then last clicked)
+  const activePreviewScore = hoveredCell?.score ?? lastTouchedScore;
+  const activeScaleMeta = activePreviewScore ? SCALE_META[activePreviewScore - 1] : null;
+
+  // Calculate live average across the 4 rows when idle
+  const validRowScores = matrixRatings
+    .filter((r): r is number => r !== null && r !== undefined)
+    .map((r) => r + 1);
+  const liveAverageScore =
+    validRowScores.length > 0
+      ? (validRowScores.reduce((a, b) => a + b, 0) / validRowScores.length).toFixed(1)
+      : null;
+
   // Strict Single-Select Radio Behavior per Row
   const handleMatrixSelect = (rowIdx: number, colIdx: number) => {
     const next = [...matrixRatings] as [
@@ -350,19 +420,68 @@ export function UnifiedReviewFormRenderer({
           </div>
         </div>
 
-        {/* 2. Content Quality Matrix (Optimized 1 to 5 Grade Scale - Zero Squeezing) */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-1">
-            <h3 data-testid="matrix-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
+        {/* 2. DYNAMIC CONTENT QUALITY MATRIX (Scale Morphs as User Moves 1 -> 5) */}
+        <div
+          className="space-y-4"
+          onMouseLeave={() => setHoveredCell(null)}
+        >
+          {/* Top Header + Live Morphing Scale Pill */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2">
+            <h3 data-testid="matrix-section-title" className="text-base sm:text-lg font-extrabold text-[#11160E]">
               {t.matrixTitle}
             </h3>
-            {/* Space-Saving Minimalist Grade Legend: 1 (Lowest) to 5 (Highest) */}
-            <div data-testid="matrix-scale-legend" className="flex items-center gap-2.5 text-[11px] font-bold text-[#314424] bg-black/5 px-3 py-1 rounded-full self-start sm:self-auto">
-              <span>Scale:</span>
-              <span className="opacity-60">1 ({t.cols[0]})</span>
-              <span>→</span>
-              <span className="text-[#314424]">5 ({t.cols[4]})</span>
+
+            {/* Dynamic Scale Badge: Changes color, label & meter as user moves 1 -> 5 */}
+            <div
+              data-testid="matrix-scale-legend"
+              className={`inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border text-xs font-bold transition-all duration-200 self-start sm:self-auto ${
+                activeScaleMeta
+                  ? `${activeScaleMeta.pillStyle} scale-[1.03]`
+                  : 'bg-black/[0.06] text-[#2C3724] border-[#314424]/20'
+              }`}
+            >
+              {activeScaleMeta ? (
+                <>
+                  <span className="text-sm leading-none">{activeScaleMeta.emoji}</span>
+                  <span>
+                    Score {activeScaleMeta.score}:{' '}
+                    <strong className="underline decoration-current/40 underline-offset-2">
+                      {lang === 'hi' ? activeScaleMeta.hi : activeScaleMeta.en}
+                    </strong>
+                  </span>
+                  {/* 5-Pip Live Meter inside the Scale Pill */}
+                  <div className="flex items-center gap-1 ml-1">
+                    {[1, 2, 3, 4, 5].map((pip) => (
+                      <span
+                        key={pip}
+                        className={`h-1.5 rounded-full transition-all duration-200 ${
+                          pip <= activeScaleMeta.score
+                            ? `w-3 ${activeScaleMeta.dotColor}`
+                            : 'w-1.5 bg-white/25'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="font-extrabold text-[#11160E]">Scale:</span>
+                  <span className="opacity-75">
+                    1 ({lang === 'hi' ? 'Bahut Bura' : 'Very Bad'})
+                  </span>
+                  <span className="opacity-50">→</span>
+                  <span className="font-extrabold text-[#314424]">
+                    5 ({lang === 'hi' ? 'Shandar' : 'Excellent'})
+                  </span>
+                  {liveAverageScore && (
+                    <span className="ml-1 px-2 py-0.5 rounded-full bg-[#314424] text-[#FBF6EA] text-[10px] font-extrabold">
+                      Avg {liveAverageScore} ★
+                    </span>
+                  )}
+                </>
+              )}
             </div>
+
             {/* Screen-reader & testing accessibility for column definitions */}
             <div className="sr-only">
               {t.cols.map((colLbl, cI) => (
@@ -373,46 +492,85 @@ export function UnifiedReviewFormRenderer({
             </div>
           </div>
 
-          <div className="space-y-4">
-            {t.questions.map((qStr, rI) => (
-              <div
-                key={rI}
-                className="p-3.5 sm:p-2.5 rounded-2xl bg-black/5 sm:bg-transparent border sm:border-none border-[#314424]/20 space-y-3 sm:space-y-0 sm:grid sm:grid-cols-12 sm:items-center gap-2"
-              >
-                <p
-                  data-testid={`matrix-question-${rI}`}
-                  className="sm:col-span-7 text-xs sm:text-sm font-medium text-[#222B1C] leading-snug"
-                >
-                  {qStr}
-                </p>
+          {/* 4 Question Rows with Hover Wave & Tactile Score Pills */}
+          <div className="space-y-3.5">
+            {t.questions.map((qStr, rI) => {
+              const selectedZeroIdx = matrixRatings[rI]; // 0..4
+              const selectedScore = selectedZeroIdx !== null && selectedZeroIdx !== undefined ? selectedZeroIdx + 1 : null;
+              const rowHoveredScore = hoveredCell?.row === rI ? hoveredCell.score : null;
+              const effectiveRowScore = rowHoveredScore ?? selectedScore;
+              const rowMeta = effectiveRowScore ? SCALE_META[effectiveRowScore - 1] : null;
 
-                {/* 5 Compact Rating Grades (1, 2, 3, 4, 5) */}
-                <div className="sm:col-span-5 grid grid-cols-5 gap-2 justify-items-center">
-                  {[0, 1, 2, 3, 4].map((cI) => {
-                    const isChecked = matrixRatings[rI] === cI;
-                    return (
-                      <button
-                        key={cI}
-                        type="button"
-                        data-testid={`matrix-check-${rI}-${cI}`}
-                        onClick={() => handleMatrixSelect(rI, cI)}
-                        title={`${cI + 1} - ${t.cols[cI]}`}
-                        aria-label={`${qStr} - Grade ${cI + 1}: ${t.cols[cI]}`}
-                        role="radio"
-                        aria-checked={isChecked}
-                        className={`w-10 h-10 sm:w-9 sm:h-9 rounded-xl border border-[#314424] flex items-center justify-center transition-all cursor-pointer font-bold text-xs ${
-                          isChecked
-                            ? 'bg-[#314424] text-[#FBF6EA] shadow-md ring-2 ring-[#314424]/30 scale-105'
-                            : 'bg-white/70 hover:bg-[#314424]/10 text-[#1C2417]'
-                        }`}
-                      >
-                        {cI + 1}
-                      </button>
-                    );
-                  })}
+              return (
+                <div
+                  key={rI}
+                  className="p-3.5 sm:px-4 sm:py-3 rounded-2xl bg-black/[0.03] sm:bg-transparent border sm:border-transparent border-[#314424]/15 hover:bg-black/[0.03] hover:border-[#314424]/15 transition-all space-y-2.5 sm:space-y-0 sm:grid sm:grid-cols-12 sm:items-center gap-3"
+                >
+                  {/* Question Text + Live Row Grade Tag */}
+                  <div className="sm:col-span-7 space-y-1 pr-2">
+                    <p
+                      data-testid={`matrix-question-${rI}`}
+                      className="text-xs sm:text-[13.5px] font-medium text-[#1C2417] leading-snug"
+                    >
+                      {qStr}
+                    </p>
+                    {rowMeta && (
+                      <div className="inline-flex items-center gap-1 text-[11px] font-bold text-[#314424] transition-all">
+                        <span>{rowMeta.emoji}</span>
+                        <span>
+                          {rowMeta.score}/5 · {lang === 'hi' ? rowMeta.hi : rowMeta.en}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 5 Interactive Score Buttons (1 to 5) */}
+                  <div className="sm:col-span-5 grid grid-cols-5 gap-2 justify-items-center">
+                    {[0, 1, 2, 3, 4].map((cI) => {
+                      const scoreNum = cI + 1;
+                      const meta = SCALE_META[cI];
+                      const isExactActive = effectiveRowScore === scoreNum;
+                      const isInTrail =
+                        effectiveRowScore !== null && scoreNum < effectiveRowScore;
+
+                      return (
+                        <button
+                          key={cI}
+                          type="button"
+                          data-testid={`matrix-check-${rI}-${cI}`}
+                          onMouseEnter={() => setHoveredCell({ row: rI, score: scoreNum })}
+                          onFocus={() => setHoveredCell({ row: rI, score: scoreNum })}
+                          onClick={() => {
+                            handleMatrixSelect(rI, cI);
+                            setLastTouchedScore(scoreNum);
+                            setHoveredCell({ row: rI, score: scoreNum });
+                          }}
+                          aria-label={`${scoreNum} - ${lang === 'hi' ? meta.hi : meta.en}`}
+                          role="radio"
+                          aria-checked={isExactActive}
+                          className={`w-11 h-11 sm:w-10 sm:h-10 rounded-xl border flex flex-col items-center justify-center transition-all duration-150 cursor-pointer select-none ${
+                            isExactActive
+                              ? meta.btnActive
+                              : isInTrail
+                              ? meta.btnTrail
+                              : 'bg-transparent border-[#314424]/60 text-[#1C2417] hover:border-[#314424]'
+                          }`}
+                        >
+                          <span className="text-xs sm:text-sm font-extrabold leading-none">
+                            {scoreNum}
+                          </span>
+                          {isExactActive && (
+                            <span className="text-[9px] leading-none mt-0.5">
+                              {meta.emoji}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
