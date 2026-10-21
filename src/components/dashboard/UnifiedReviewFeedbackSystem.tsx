@@ -15,7 +15,6 @@ import {
   Sparkles,
   CheckCircle2,
   Share2,
-  Lock,
   Video,
   FileText,
 } from 'lucide-react';
@@ -135,6 +134,8 @@ export function UnifiedReviewFormRenderer({
     mediaType?: 'text' | 'video';
     videoUrl?: string;
     videoDurationSeconds?: number;
+    authorName?: string;
+    authorRole?: string;
   }) => void;
   isSubmitting?: boolean;
 }) {
@@ -148,6 +149,18 @@ export function UnifiedReviewFormRenderer({
   const [reviewMode, setReviewMode] = useState<'text' | 'video'>('text');
   const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null);
   const [videoDuration, setVideoDuration] = useState<number>(0);
+
+  // Name and Designation are fillable / variable inputs for the person submitting
+  const [authorName, setAuthorName] = useState<string>(config.prefilledName || '');
+  const [authorRole, setAuthorRole] = useState<string>(config.prefilledClient || '');
+
+  useEffect(() => {
+    setAuthorName(config.prefilledName || '');
+  }, [config.prefilledName]);
+
+  useEffect(() => {
+    setAuthorRole(config.prefilledClient || '');
+  }, [config.prefilledClient]);
 
   const t = config.sections[lang] || config.sections.en;
 
@@ -167,6 +180,8 @@ export function UnifiedReviewFormRenderer({
         mediaType: reviewMode === 'video' || recordedVideoUrl ? 'video' : 'text',
         videoUrl: recordedVideoUrl || undefined,
         videoDurationSeconds: videoDuration || undefined,
+        authorName: authorName.trim() || config.prefilledName || 'Valued Customer',
+        authorRole: authorRole.trim() || config.prefilledClient || 'Verified Client',
       });
     }
   };
@@ -256,31 +271,43 @@ export function UnifiedReviewFormRenderer({
           </div>
         </div>
 
-        {/* LOCKED BUSINESS DETAILS (Pre-filled by business, uneditable by end user to reduce burden) */}
+        {/* FORM DETAILS: Name & Designation are variable and fillable by the submitter; Campaign & Date remain preset */}
         <div
           data-testid="locked-business-details"
           className="mt-6 pt-4 border-t border-[#FBF6EA]/30 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-xs sm:text-sm"
         >
-          <div className="border-b border-dashed border-[#FBF6EA]/50 pb-1 flex items-center justify-between">
-            <span className="text-[#FBF6EA]/70 font-medium">Name:</span>
-            <span className="font-bold text-[#FBF6EA]" data-testid="locked-name">
-              {config.prefilledName || '—'}
-            </span>
+          <div className="border-b border-dashed border-[#FBF6EA]/50 pb-1 flex items-center justify-between gap-2">
+            <label htmlFor="form-submitter-name" className="text-[#FBF6EA]/80 font-medium shrink-0">Name:</label>
+            <input
+              id="form-submitter-name"
+              type="text"
+              data-testid="input-customer-name"
+              value={authorName}
+              onChange={(e) => setAuthorName(e.target.value)}
+              placeholder="Your Name..."
+              className="w-full text-right bg-transparent font-bold text-[#FBF6EA] placeholder-[#FBF6EA]/40 focus:outline-none focus:bg-white/10 px-1.5 py-0.5 rounded transition-all text-xs sm:text-sm truncate"
+            />
           </div>
           <div className="border-b border-dashed border-[#FBF6EA]/50 pb-1 flex items-center justify-between">
-            <span className="text-[#FBF6EA]/70 font-medium">Campaign:</span>
+            <span className="text-[#FBF6EA]/70 font-medium shrink-0">Campaign:</span>
             <span className="font-bold text-[#FBF6EA]" data-testid="locked-campaign">
               {config.prefilledCampaign || '—'}
             </span>
           </div>
-          <div className="border-b border-dashed border-[#FBF6EA]/50 pb-1 flex items-center justify-between">
-            <span className="text-[#FBF6EA]/70 font-medium">Client:</span>
-            <span className="font-bold text-[#FBF6EA]" data-testid="locked-client">
-              {config.prefilledClient || '—'}
-            </span>
+          <div className="border-b border-dashed border-[#FBF6EA]/50 pb-1 flex items-center justify-between gap-2">
+            <label htmlFor="form-submitter-designation" className="text-[#FBF6EA]/80 font-medium shrink-0">Designation:</label>
+            <input
+              id="form-submitter-designation"
+              type="text"
+              data-testid="input-customer-designation"
+              value={authorRole}
+              onChange={(e) => setAuthorRole(e.target.value)}
+              placeholder="Your Role / Title..."
+              className="w-full text-right bg-transparent font-bold text-[#FBF6EA] placeholder-[#FBF6EA]/40 focus:outline-none focus:bg-white/10 px-1.5 py-0.5 rounded transition-all text-xs sm:text-sm truncate"
+            />
           </div>
           <div className="border-b border-dashed border-[#FBF6EA]/50 pb-1 flex items-center justify-between">
-            <span className="text-[#FBF6EA]/70 font-medium">Date:</span>
+            <span className="text-[#FBF6EA]/70 font-medium shrink-0">Date:</span>
             <span className="font-bold text-[#FBF6EA]" data-testid="locked-date">
               {config.prefilledDate || '—'}
             </span>
@@ -751,21 +778,21 @@ export default function FormBuilderStudio({
             </div>
           </div>
 
-          {/* 2. Pre-filled Customer Details (Business fills this to reduce end-user burden) */}
+          {/* 2. Form Details (Name & Designation are Customer Fillable) */}
           <div className="space-y-3 pt-4 border-t border-slate-100">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-purple-700 flex items-center gap-1">
-                <Lock className="w-3.5 h-3.5" />
-                <span>2. Pre-filled Customer Details (Locked for End User)</span>
+                <Sliders className="w-3.5 h-3.5" />
+                <span>2. Form Details (Name & Designation are Customer Fillable)</span>
               </span>
             </div>
             <p className="text-[11px] text-slate-500 leading-snug">
-              The business fills these details before sharing the link so the customer doesn't have to re-enter them.
+              The submitter enters their own Name and Designation directly on the form. Campaign and Date remain fixed.
             </p>
 
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Name</label>
+                <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Default Name (Optional)</label>
                 <input
                   type="text"
                   data-testid="input-prefilled-name"
@@ -785,7 +812,7 @@ export default function FormBuilderStudio({
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Client</label>
+                <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Default Designation (Optional)</label>
                 <input
                   type="text"
                   data-testid="input-prefilled-client"
@@ -929,6 +956,8 @@ export function PublicCustomerFeedbackPage({
     mediaType?: 'text' | 'video';
     videoUrl?: string;
     videoDurationSeconds?: number;
+    authorName?: string;
+    authorRole?: string;
   }) => {
     setIsSubmitting(true);
     try {
@@ -940,10 +969,13 @@ export function PublicCustomerFeedbackPage({
 
       const isVideo = formData.mediaType === 'video' || !!formData.videoUrl;
 
+      const submittedName = formData.authorName?.trim() || config.prefilledName || 'Valued Customer';
+      const submittedRole = formData.authorRole?.trim() || config.prefilledClient || 'Verified Client';
+
       const submissionData = {
         workspaceId: workspaceSlug,
-        authorName: config.prefilledName || 'Valued Customer',
-        authorRole: config.prefilledClient || config.prefilledCampaign || 'Client',
+        authorName: submittedName,
+        authorRole: submittedRole,
         content: formData.improvementText.trim() || (isVideo ? 'Recorded video testimonial (+2x Perk)' : 'Submitted rating & feedback form.'),
         rating: computedRating,
         matrixRatings: formData.matrixRatings,

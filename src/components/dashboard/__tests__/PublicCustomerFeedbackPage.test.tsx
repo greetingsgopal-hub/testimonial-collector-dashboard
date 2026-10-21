@@ -45,7 +45,7 @@ describe('PublicCustomerFeedbackPage Standalone Suite', () => {
     });
 
     expect(container.querySelector('[data-testid="template-brand-pill"]')?.textContent).toBe('onionbananaalo');
-    expect(container.querySelector('[data-testid="locked-name"]')?.textContent).toBe('Rahul Sharma');
+    expect((container.querySelector('[data-testid="input-customer-name"]') as HTMLInputElement)?.value).toBe('Rahul Sharma');
     expect(container.querySelector('[data-testid="locked-campaign"]')?.textContent).toBe('Q4 Product Launch');
   });
 
@@ -82,8 +82,8 @@ describe('PublicCustomerFeedbackPage Standalone Suite', () => {
 
     // Verify success screen elements
     expect(container.textContent).toContain('Thank You for Your Feedback!');
-    expect(container.textContent).toContain('Run your own business?');
-    expect(container.textContent).toContain('Claim Your Free PandaPraise Workspace');
+    expect(container.textContent).toContain('Collect reviews like this for your business');
+    expect(container.textContent).toContain('Create Your Free PandaPraise Workspace');
 
     // Verify that form inputs and textareas are completely unmounted (no caret bug)
     expect(container.querySelector('textarea')).toBeNull();

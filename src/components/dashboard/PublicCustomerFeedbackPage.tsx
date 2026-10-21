@@ -83,6 +83,8 @@ export default function PublicCustomerFeedbackPage({
     mediaType?: 'text' | 'video';
     videoUrl?: string;
     videoDurationSeconds?: number;
+    authorName?: string;
+    authorRole?: string;
   }) => {
     setIsSubmitting(true);
     try {
@@ -108,10 +110,22 @@ export default function PublicCustomerFeedbackPage({
         !!formData?.videoUrl ||
         !!submission.videoUrl;
 
+      const submittedName =
+        formData?.authorName?.trim() ||
+        submission.meta1Value ||
+        config.prefilledName ||
+        'Valued Customer';
+
+      const submittedRole =
+        formData?.authorRole?.trim() ||
+        submission.meta3Value ||
+        config.prefilledClient ||
+        'Verified Client';
+
       const submissionData = {
         workspaceId: workspaceSlug,
-        authorName: config.prefilledName || submission.meta1Value || 'Valued Customer',
-        authorRole: config.prefilledClient || config.prefilledCampaign || 'Verified Client',
+        authorName: submittedName,
+        authorRole: submittedRole,
         content: activeText.trim() || (isVideo ? 'Recorded video testimonial (+2x Perk)' : 'Submitted feedback form.'),
         rating: computedRating,
         matrixRatings: activeMatrix,

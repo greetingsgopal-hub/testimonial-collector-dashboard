@@ -62,16 +62,17 @@ describe('UnifiedReviewFeedbackSystem Production Suite', () => {
     // Vector Icon
     expect(container.querySelector('[data-testid="constant-vector-icon"]')).not.toBeNull();
 
-    // Locked pre-filled business details
-    const nameEl = container.querySelector('[data-testid="locked-name"]');
+    // Fillable Name and Designation inputs, locked Campaign & Date
+    const nameInput = container.querySelector('[data-testid="input-customer-name"]') as HTMLInputElement;
     const campaignEl = container.querySelector('[data-testid="locked-campaign"]');
-    const clientEl = container.querySelector('[data-testid="locked-client"]');
+    const designationInput = container.querySelector('[data-testid="input-customer-designation"]') as HTMLInputElement;
     const dateEl = container.querySelector('[data-testid="locked-date"]');
 
-    expect(nameEl?.textContent).toBe('Rahul Sharma');
+    expect(nameInput?.value).toBe('Rahul Sharma');
     expect(campaignEl?.textContent).toBe('Q4 Product Launch');
-    expect(clientEl?.textContent).toBe('Product Lead');
+    expect(designationInput?.value).toBe('Product Lead');
     expect(dateEl?.textContent).toBe('10/18/2026');
+    expect(container.textContent).toContain('Designation:');
   });
 
   it('2. Bilingual switcher toggles between English and Hinglish smoothly', async () => {
@@ -203,8 +204,8 @@ describe('UnifiedReviewFeedbackSystem Production Suite', () => {
     });
 
     // Verify right-side live preview updated
-    const previewName = container.querySelector('[data-testid="locked-name"]');
-    expect(previewName?.textContent).toBe('Priya Patel');
+    const previewName = container.querySelector('[data-testid="input-customer-name"]') as HTMLInputElement;
+    expect(previewName?.value).toBe('Priya Patel');
 
     // Click Save & Publish
     const saveBtn = container.querySelector('[data-testid="builder-save-btn"]') as HTMLButtonElement;
@@ -305,6 +306,60 @@ describe('UnifiedReviewFeedbackSystem Production Suite', () => {
     expect(mockSubmit).toHaveBeenCalledWith(
       expect.objectContaining({
         mediaType: 'video',
+      })
+    );
+  });
+
+  it('7. Submitter can edit Name and Designation directly on the form and submit', async () => {
+    const mockSubmit = vi.fn();
+
+    await act(async () => {
+      root.render(
+        <UnifiedReviewFormRenderer
+          config={DEFAULT_REVIEW_CONFIG}
+          isLockedForEndUser={true}
+          onSubmitForm={mockSubmit}
+        />
+      );
+    });
+
+    const nameInput = container.querySelector('[data-testid="input-customer-name"]') as HTMLInputElement;
+    const designationInput = container.querySelector('[data-testid="input-customer-designation"]') as HTMLInputElement;
+    const textarea = container.querySelector('[data-testid="input-improvement-text"]') as HTMLTextAreaElement;
+
+    const nativeInputSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      'value'
+    )?.set;
+    const nativeTextareaSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLTextAreaElement.prototype,
+      'value'
+    )?.set;
+
+    await act(async () => {
+      nativeInputSetter?.call(nameInput, 'Amitabh Verma');
+      nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      nameInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+      nativeInputSetter?.call(designationInput, 'Senior Cloud Architect');
+      designationInput.dispatchEvent(new Event('input', { bubbles: true }));
+      designationInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+      nativeTextareaSetter?.call(textarea, 'Incredible reliability and throughput.');
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      textarea.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    const form = container.querySelector('form') as HTMLFormElement;
+    await act(async () => {
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+
+    expect(mockSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        authorName: 'Amitabh Verma',
+        authorRole: 'Senior Cloud Architect',
+        improvementText: 'Incredible reliability and throughput.',
       })
     );
   });
