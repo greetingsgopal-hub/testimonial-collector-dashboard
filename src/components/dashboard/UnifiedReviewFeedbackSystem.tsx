@@ -17,7 +17,10 @@ import {
   Share2,
   Lock,
   ArrowRight,
+  Video,
+  FileText,
 } from 'lucide-react';
+import { BrowserVideoRecorder } from './VideoTestimonialPipeline';
 
 export interface CustomerFormSubmission {
   meta1Value: string;
@@ -27,6 +30,9 @@ export interface CustomerFormSubmission {
   selectedEmojiIndex: number;
   matrixRatings: [number | null, number | null, number | null, number | null];
   openFeedbackText: string;
+  mediaType?: 'text' | 'video';
+  videoUrl?: string;
+  videoDurationSeconds?: number;
 }
 
 // ============================================================================
@@ -42,6 +48,7 @@ export interface ReviewFormConfig {
   prefilledCampaign: string;
   prefilledClient: string;
   prefilledDate: string;
+  allowVideo?: boolean;
   // Bilingual sections
   sections: {
     en: {
@@ -72,6 +79,7 @@ export const DEFAULT_REVIEW_CONFIG: ReviewFormConfig = {
   prefilledCampaign: 'Q4 Product Launch',
   prefilledClient: 'Product Lead',
   prefilledDate: '10/18/2026',
+  allowVideo: true,
   sections: {
     en: {
       emojiTitle: 'How satisfied are you with the final content?',
@@ -125,6 +133,9 @@ export function UnifiedReviewFormRenderer({
     selectedEmojiIndex: number;
     matrixRatings: [number | null, number | null, number | null, number | null];
     improvementText: string;
+    mediaType?: 'text' | 'video';
+    videoUrl?: string;
+    videoDurationSeconds?: number;
   }) => void;
   isSubmitting?: boolean;
 }) {
@@ -135,6 +146,9 @@ export function UnifiedReviewFormRenderer({
     [number | null, number | null, number | null, number | null]
   >([4, 4, 3, 4]);
   const [improvementText, setImprovementText] = useState<string>('');
+  const [reviewMode, setReviewMode] = useState<'text' | 'video'>('text');
+  const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null);
+  const [videoDuration, setVideoDuration] = useState<number>(0);
 
   const t = config.sections[lang] || config.sections.en;
 
@@ -151,6 +165,9 @@ export function UnifiedReviewFormRenderer({
         selectedEmojiIndex: selectedEmojiIdx,
         matrixRatings,
         improvementText,
+        mediaType: reviewMode === 'video' || recordedVideoUrl ? 'video' : 'text',
+        videoUrl: recordedVideoUrl || undefined,
+        videoDurationSeconds: videoDuration || undefined,
       });
     }
   };
@@ -347,29 +364,124 @@ export function UnifiedReviewFormRenderer({
           </div>
         </div>
 
-        {/* 3. What Can Be Improved? (End User fills text for improvement) */}
-        <div className="space-y-2">
-          <h3 data-testid="improvement-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
-            {t.improvementTitle}
-          </h3>
-          <textarea
-            rows={4}
-            required
-            data-testid="input-improvement-text"
-            value={improvementText}
-            onChange={(e) => setImprovementText(e.target.value)}
-            placeholder={
-              lang === 'hi'
-                ? 'Apna sujhav ya review yahan likhein...'
-                : 'Write what can be improved or your testimonial here...'
-            }
-            className="w-full bg-transparent text-xs sm:text-sm text-[#1C2417] placeholder-[#314424]/45 focus:outline-none resize-none leading-[36px]"
-            style={{
-              backgroundImage:
-                'repeating-linear-gradient(to bottom, transparent, transparent 34px, rgba(49, 68, 36, 0.4) 34px, rgba(49, 68, 36, 0.4) 36px)',
-              lineHeight: '36px',
-            }}
-          />
+        {/* 3. What Can Be Improved? / Testimonial Section with Video & Written Modes */}
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <h3 data-testid="improvement-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
+              {t.improvementTitle}
+            </h3>
+
+            {/* Written vs Video Review Mode Switch */}
+            {(config.allowVideo ?? true) && (
+              <div className="inline-flex items-center p-1 rounded-xl bg-black/10 border border-[#314424]/20 text-xs font-bold self-start sm:self-auto">
+                <button
+                  type="button"
+                  data-testid="toggle-written-review"
+                  onClick={() => setReviewMode('text')}
+                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-all ${
+                    reviewMode === 'text'
+                      ? 'bg-[#314424] text-[#FBF6EA] shadow-2xs'
+                      : 'text-[#314424] hover:bg-[#314424]/10'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Written Review</span>
+                </button>
+                <button
+                  type="button"
+                  data-testid="toggle-video-review"
+                  onClick={() => setReviewMode('video')}
+                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-all ${
+                    reviewMode === 'video'
+                      ? 'bg-[#314424] text-[#FBF6EA] shadow-2xs'
+                      : 'text-[#314424] hover:bg-[#314424]/10'
+                  }`}
+                >
+                  <Video className="w-3.5 h-3.5" />
+                  <span>Video (+2x Perk)</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Interactive Prompt Pills when writing review */}
+          {reviewMode === 'text' && (
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                data-testid="prompt-chip-solve"
+                onClick={() =>
+                  setImprovementText((prev) =>
+                    prev ? `${prev} It solved our team's main bottleneck.` : "It solved our team's main bottleneck."
+                  )
+                }
+                className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#314424]/5 border border-[#314424]/20 text-[#314424] hover:bg-[#314424]/10 cursor-pointer transition-all"
+              >
+                💡 What problem did it solve?
+              </button>
+              <button
+                type="button"
+                data-testid="prompt-chip-feature"
+                onClick={() =>
+                  setImprovementText((prev) =>
+                    prev ? `${prev} Favorite feature is the instant 1-click proof.` : 'Favorite feature is the instant 1-click proof.'
+                  )
+                }
+                className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#314424]/5 border border-[#314424]/20 text-[#314424] hover:bg-[#314424]/10 cursor-pointer transition-all"
+              >
+                ❤️ Favorite feature?
+              </button>
+            </div>
+          )}
+
+          {reviewMode === 'text' ? (
+            <div className="space-y-1">
+              <div className="flex justify-end text-[10px] font-mono text-[#314424]/60 pr-1">
+                {improvementText.length} / 600
+              </div>
+              <textarea
+                rows={4}
+                required
+                maxLength={600}
+                data-testid="input-improvement-text"
+                value={improvementText}
+                onChange={(e) => setImprovementText(e.target.value)}
+                placeholder={
+                  lang === 'hi'
+                    ? 'Apna sujhav ya review yahan likhein...'
+                    : 'Write what can be improved or your testimonial here...'
+                }
+                className="w-full bg-transparent text-xs sm:text-sm text-[#1C2417] placeholder-[#314424]/45 focus:outline-none resize-none leading-[36px]"
+                style={{
+                  backgroundImage:
+                    'repeating-linear-gradient(to bottom, transparent, transparent 34px, rgba(49, 68, 36, 0.4) 34px, rgba(49, 68, 36, 0.4) 36px)',
+                  lineHeight: '36px',
+                }}
+              />
+            </div>
+          ) : (
+            <div className="space-y-3" data-testid="unified-video-recorder-container">
+              <BrowserVideoRecorder
+                onVideoRecorded={(blobUrl, duration) => {
+                  setRecordedVideoUrl(blobUrl);
+                  setVideoDuration(duration);
+                }}
+              />
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-[#314424]">
+                  Accompanying Note (Optional):
+                </label>
+                <input
+                  type="text"
+                  data-testid="input-improvement-text"
+                  value={improvementText}
+                  onChange={(e) => setImprovementText(e.target.value)}
+                  placeholder="Add a quick note or highlight with your video..."
+                  className="w-full px-3 py-2 rounded-xl bg-white/60 border border-[#314424]/30 text-xs text-[#1C2417] focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Submit Button */}
@@ -418,6 +530,9 @@ export function ConstantReviewFeedbackTemplate({
             selectedEmojiIndex: formData.selectedEmojiIndex,
             matrixRatings: formData.matrixRatings,
             openFeedbackText: formData.improvementText,
+            mediaType: formData.mediaType,
+            videoUrl: formData.videoUrl,
+            videoDurationSeconds: formData.videoDurationSeconds,
           });
         }
         if (onSubmit) {
@@ -721,6 +836,24 @@ export default function FormBuilderStudio({
               </div>
             ))}
           </div>
+
+          {/* 4. Video Recording Setting */}
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <div>
+              <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <Video className="w-3.5 h-3.5 text-purple-600" />
+                <span>Video Testimonials (+2x Perk)</span>
+              </label>
+              <p className="text-[11px] text-slate-500">Allow customers to record in-browser video reviews.</p>
+            </div>
+            <input
+              type="checkbox"
+              data-testid="toggle-allow-video-checkbox"
+              checked={config.allowVideo ?? true}
+              onChange={(e) => setConfig({ ...config, allowVideo: e.target.checked })}
+              className="w-4 h-4 rounded text-[#314424] focus:ring-[#314424] cursor-pointer"
+            />
+          </div>
         </div>
 
         {/* RIGHT COLUMN: REAL-TIME CUSTOMER FORM PREVIEW */}
@@ -794,6 +927,9 @@ export function PublicCustomerFeedbackPage({
     selectedEmojiIndex: number;
     matrixRatings: [number | null, number | null, number | null, number | null];
     improvementText: string;
+    mediaType?: 'text' | 'video';
+    videoUrl?: string;
+    videoDurationSeconds?: number;
   }) => {
     setIsSubmitting(true);
     try {
@@ -803,17 +939,21 @@ export function PublicCustomerFeedbackPage({
         validRows.length > 0 ? validRows.reduce((sum, r) => sum + (r + 1), 0) / validRows.length : 5;
       const computedRating = Math.max(1, Math.min(5, Math.round((emojiStars + matrixAvg) / 2)));
 
+      const isVideo = formData.mediaType === 'video' || !!formData.videoUrl;
+
       const submissionData = {
         workspaceId: workspaceSlug,
         authorName: config.prefilledName || 'Valued Customer',
         authorRole: config.prefilledClient || config.prefilledCampaign || 'Client',
-        content: formData.improvementText.trim() || 'Submitted rating & feedback form.',
+        content: formData.improvementText.trim() || (isVideo ? 'Recorded video testimonial (+2x Perk)' : 'Submitted rating & feedback form.'),
         rating: computedRating,
         matrixRatings: formData.matrixRatings,
-        mediaType: 'text',
+        mediaType: isVideo ? 'video' : 'text',
+        videoUrl: formData.videoUrl || undefined,
+        videoDurationSeconds: formData.videoDurationSeconds || undefined,
         source: 'Review Feedback Form',
         status: 'approved', // Shifts immediately to Proof section!
-        tags: ['Ease of use', 'Support'],
+        tags: ['Ease of use', 'Support', ...(isVideo ? ['Video Proof'] : [])],
         createdAt: new Date().toISOString(),
       };
 

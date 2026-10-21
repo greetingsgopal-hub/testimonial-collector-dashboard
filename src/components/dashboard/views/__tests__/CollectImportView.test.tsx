@@ -58,7 +58,7 @@ describe('CollectImportView Suite', () => {
     expect(container.textContent).toContain('Import Praise');
     expect(container.textContent).toContain('Form Builder');
     expect(container.textContent).toContain('Review Feedback');
-    expect(container.textContent).toContain('Multi-Theme Forms Studio');
+    expect(container.textContent).not.toContain('Multi-Theme Forms Studio');
   });
 
   it('2. Switches dynamically between Collection Form and Import Praise', async () => {

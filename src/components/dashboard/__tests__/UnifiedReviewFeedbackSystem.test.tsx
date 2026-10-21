@@ -255,4 +255,55 @@ describe('UnifiedReviewFeedbackSystem Production Suite', () => {
     expect(container.textContent).toContain('Run your own business?');
     expect(container.textContent).toContain('Claim Your Free PandaPraise Workspace');
   });
+
+  it('6. Video recording toggle enables in-browser video review mode and prompt chips', async () => {
+    const mockSubmit = vi.fn();
+
+    await act(async () => {
+      root.render(
+        <UnifiedReviewFormRenderer
+          config={DEFAULT_REVIEW_CONFIG}
+          isLockedForEndUser={true}
+          onSubmitForm={mockSubmit}
+        />
+      );
+    });
+
+    // Check mode buttons exist
+    const writtenBtn = container.querySelector('[data-testid="toggle-written-review"]') as HTMLButtonElement;
+    const videoBtn = container.querySelector('[data-testid="toggle-video-review"]') as HTMLButtonElement;
+    expect(writtenBtn).not.toBeNull();
+    expect(videoBtn).not.toBeNull();
+    expect(videoBtn.textContent).toContain('Video (+2x Perk)');
+
+    // Click prompt chip
+    const promptSolveBtn = container.querySelector('[data-testid="prompt-chip-solve"]') as HTMLButtonElement;
+    expect(promptSolveBtn).not.toBeNull();
+    await act(async () => {
+      promptSolveBtn.click();
+    });
+    const textarea = container.querySelector('[data-testid="input-improvement-text"]') as HTMLTextAreaElement;
+    expect(textarea.value).toContain("It solved our team's main bottleneck.");
+
+    // Switch to Video mode
+    await act(async () => {
+      videoBtn.click();
+    });
+
+    // Unified video recorder container should be visible
+    expect(container.querySelector('[data-testid="unified-video-recorder-container"]')).not.toBeNull();
+    expect(container.textContent).toContain('Browser Video Recorder (+2x Perk)');
+
+    // Submit form in video mode
+    const form = container.querySelector('form') as HTMLFormElement;
+    await act(async () => {
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+
+    expect(mockSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mediaType: 'video',
+      })
+    );
+  });
 });

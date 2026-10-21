@@ -80,6 +80,9 @@ export default function PublicCustomerFeedbackPage({
     selectedEmojiIndex?: number;
     matrixRatings?: [number | null, number | null, number | null, number | null];
     improvementText?: string;
+    mediaType?: 'text' | 'video';
+    videoUrl?: string;
+    videoDurationSeconds?: number;
   }) => {
     setIsSubmitting(true);
     try {
@@ -99,17 +102,25 @@ export default function PublicCustomerFeedbackPage({
         validRows.length > 0 ? validRows.reduce((sum, r) => sum + (r + 1), 0) / validRows.length : 5;
       const computedRating = Math.max(1, Math.min(5, Math.round((emojiStars + matrixAvg) / 2)));
 
+      const isVideo =
+        formData?.mediaType === 'video' ||
+        submission.mediaType === 'video' ||
+        !!formData?.videoUrl ||
+        !!submission.videoUrl;
+
       const submissionData = {
         workspaceId: workspaceSlug,
         authorName: config.prefilledName || submission.meta1Value || 'Valued Customer',
         authorRole: config.prefilledClient || config.prefilledCampaign || 'Verified Client',
-        content: activeText.trim() || 'Submitted feedback form.',
+        content: activeText.trim() || (isVideo ? 'Recorded video testimonial (+2x Perk)' : 'Submitted feedback form.'),
         rating: computedRating,
         matrixRatings: activeMatrix,
-        mediaType: 'text',
+        mediaType: isVideo ? 'video' : 'text',
+        videoUrl: formData?.videoUrl || submission.videoUrl || undefined,
+        videoDurationSeconds: formData?.videoDurationSeconds || submission.videoDurationSeconds || undefined,
         source: 'Review Feedback Form',
         status: 'approved', // Shifts straight into Proof section
-        tags: ['Ease of use', 'Support'],
+        tags: ['Ease of use', 'Support', ...(isVideo ? ['Video Proof'] : [])],
         createdAt: new Date().toISOString(),
       };
 

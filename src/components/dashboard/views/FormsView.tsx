@@ -15,7 +15,6 @@ import {
 import { useAuth } from '../../../context/AuthContext';
 import { Review, ReviewStats, CollectionForm } from '../../../types';
 import { ReviewQrCardModal } from '../ReviewQrCardModal';
-import FormsBuilderStudio from '../FormsBuilderStudio';
 import UnifiedReviewFeedbackSystem from '../UnifiedReviewFeedbackSystem';
 
 export interface FormsViewProps {
@@ -42,7 +41,6 @@ export const FormsView: React.FC<FormsViewProps> = ({
   const { workspace, project, collectionForm } = useAuth();
   const [copied, setCopied] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
-  const [activeBuilderTab, setActiveBuilderTab] = useState<'review_feedback' | 'forms_studio'>('review_feedback');
 
   const publicSlug = collectionForm?.publicSlug || project?.slug || 'feedback';
   const collectionUrl = `${window.location.origin}/c/${publicSlug}`;
@@ -251,60 +249,12 @@ export const FormsView: React.FC<FormsViewProps> = ({
         </div>
       </div>
 
-      {/* ── 5. Form Template Systems (Review Feedback Constant Template + Multi-Theme Studio) ── */}
-      <div id="collection-form-builder" className="pt-2 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs">
-          <div className="flex items-center gap-2.5">
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Template System:
-            </span>
-            <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold">
-              <button
-                type="button"
-                data-testid="toggle-review-feedback-template"
-                onClick={() => setActiveBuilderTab('review_feedback')}
-                className={`px-3.5 py-1.5 rounded-lg cursor-pointer transition-all ${
-                  activeBuilderTab === 'review_feedback'
-                    ? 'bg-[#314424] text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                🌲 Review Feedback (Default)
-              </button>
-              <button
-                type="button"
-                data-testid="toggle-forms-studio-template"
-                onClick={() => setActiveBuilderTab('forms_studio')}
-                className={`px-3.5 py-1.5 rounded-lg cursor-pointer transition-all ${
-                  activeBuilderTab === 'forms_studio'
-                    ? 'bg-purple-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                ✨ Multi-Theme Forms Studio
-              </button>
-            </div>
-          </div>
-          <span className="text-[11px] text-slate-500 font-medium">
-            {activeBuilderTab === 'review_feedback'
-              ? 'Constant forest-green template with variable text inputs & real-time sync'
-              : 'Choose from 3 default presets or 4th customizable hero background'}
-          </span>
-        </div>
-
-        {activeBuilderTab === 'review_feedback' ? (
-          <UnifiedReviewFeedbackSystem
-            workspaceId={project?.id || projectName}
-            workspaceName={projectName}
-          />
-        ) : (
-          <FormsBuilderStudio
-            workspaceName={projectName}
-            workspaceId={project?.id || projectName}
-            userPlan={(workspace?.plan === 'free' ? 'starter' : workspace?.plan) || 'pro'}
-            onNavigateToProof={onViewProof}
-          />
-        )}
+      {/* ── 5. Form Template System: Review Feedback (Default) ── */}
+      <div id="collection-form-builder" className="pt-2">
+        <UnifiedReviewFeedbackSystem
+          workspaceId={project?.id || projectName}
+          workspaceName={projectName}
+        />
       </div>
 
       {/* ── 6. Bottom Full-Width Light-Purple Banner Card ── */}
