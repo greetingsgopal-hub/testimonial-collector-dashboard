@@ -9,7 +9,8 @@ import {
   BrainCircuit, 
   ArrowRight,
   Zap,
-  TrendingUp
+  TrendingUp,
+  Video
 } from 'lucide-react';
 import { Review, ReviewStats } from '../../types';
 
@@ -44,6 +45,7 @@ export const ReviewPipelineHero: React.FC<ReviewPipelineHeroProps> = ({
   const positiveReviews = reviews.filter((r) => r.rating >= 4);
   const neutralReviews = reviews.filter((r) => r.rating === 3);
   const delightCount = reviews.filter((r) => r.rating === 5).length;
+  const videoReviewCount = reviews.filter((r) => r.type === 'video' || Boolean(r.videoUrl)).length;
   const sentimentPct = reviews.length > 0 
     ? Math.round((positiveReviews.length / reviews.length) * 100) 
     : 100;
@@ -66,6 +68,13 @@ export const ReviewPipelineHero: React.FC<ReviewPipelineHeroProps> = ({
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                 <span>{stats.pendingCount} Awaiting Moderation</span>
               </span>
+
+              {videoReviewCount > 0 && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-100 dark:bg-pink-950/60 text-pink-900 dark:text-pink-200 text-xs font-bold border border-pink-200/80 dark:border-pink-800 animate-fade-in">
+                  <Video className="w-3.5 h-3.5 text-pink-600 dark:text-pink-400" />
+                  <span>{videoReviewCount} Video Proof{videoReviewCount === 1 ? '' : 's'}</span>
+                </span>
+              )}
 
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-200 text-xs font-bold border border-purple-200/80 dark:border-purple-800">
                 <Zap className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />

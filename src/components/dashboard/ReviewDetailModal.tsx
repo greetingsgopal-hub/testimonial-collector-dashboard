@@ -378,22 +378,34 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
             </div>
           )}
 
-          {/* Video Attachment */}
+          {/* Video Attachment & Inline Player */}
           {review.type === 'video' && sanitizeUrl(review.videoUrl) && (
-            <div className="p-3.5 rounded-xl bg-pink-50 border border-pink-200 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-pink-700 text-xs font-semibold">
-                <Video className="w-4 h-4" />
-                <span>Video Testimonial attached</span>
+            <div className="space-y-3 p-3.5 rounded-xl bg-pink-50 dark:bg-pink-950/30 border border-pink-200 dark:border-pink-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-pink-700 dark:text-pink-300 text-xs font-semibold">
+                  <Video className="w-4 h-4" />
+                  <span>Video Testimonial Attached</span>
+                </div>
+                <a
+                  href={sanitizeUrl(review.videoUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-pink-700 hover:text-pink-900 bg-white dark:bg-slate-800 border border-pink-200 px-3 py-1.5 rounded-lg transition-colors font-medium"
+                >
+                  <span>Open Video Link</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
               </div>
-              <a
-                href={sanitizeUrl(review.videoUrl)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-pink-700 hover:text-pink-900 bg-white border border-pink-200 px-3 py-1.5 rounded-lg transition-colors"
-              >
-                <span>Open Video Link</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
+              {review.videoUrl && (review.videoUrl.startsWith('blob:') || review.videoUrl.startsWith('data:video') || /\.(mp4|webm|mov|m4v)($|\?)/i.test(review.videoUrl)) && (
+                <div className="rounded-lg overflow-hidden bg-black border border-pink-200/60 dark:border-pink-900 shadow-xs">
+                  <video
+                    src={sanitizeUrl(review.videoUrl)}
+                    controls
+                    preload="metadata"
+                    className="w-full max-h-64 object-contain mx-auto"
+                  />
+                </div>
+              )}
             </div>
           )}
 

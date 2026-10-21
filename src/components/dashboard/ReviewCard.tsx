@@ -172,19 +172,31 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           "{review.content}"
         </p>
 
-        {/* Video Link Pill if video */}
+        {/* Video Player or Link Pill if video */}
         {review.type === 'video' && sanitizeUrl(review.videoUrl) && (
-          <div className="mb-3">
-            <a
-              href={sanitizeUrl(review.videoUrl)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="apple-touch inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 hover:bg-pink-100 text-xs font-semibold border border-pink-200/80 dark:border-pink-800 transition-colors"
-            >
-              <Video className="w-3.5 h-3.5" />
-              <span>Watch Video Testimonial</span>
-              <ExternalLink className="w-3 h-3 ml-0.5" />
-            </a>
+          <div className="mb-3 space-y-2">
+            {review.videoUrl && (review.videoUrl.startsWith('blob:') || review.videoUrl.startsWith('data:video') || /\.(mp4|webm|mov|m4v)($|\?)/i.test(review.videoUrl)) ? (
+              <div className="rounded-xl overflow-hidden bg-black border border-slate-200/80 dark:border-slate-800 relative shadow-2xs">
+                <video
+                  src={sanitizeUrl(review.videoUrl)}
+                  controls
+                  preload="metadata"
+                  className="w-full max-h-56 object-contain bg-slate-950 mx-auto"
+                />
+              </div>
+            ) : null}
+            <div>
+              <a
+                href={sanitizeUrl(review.videoUrl)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="apple-touch inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 hover:bg-pink-100 text-xs font-semibold border border-pink-200/80 dark:border-pink-800 transition-colors"
+              >
+                <Video className="w-3.5 h-3.5" />
+                <span>Watch Video Testimonial</span>
+                <ExternalLink className="w-3 h-3 ml-0.5" />
+              </a>
+            </div>
           </div>
         )}
 
