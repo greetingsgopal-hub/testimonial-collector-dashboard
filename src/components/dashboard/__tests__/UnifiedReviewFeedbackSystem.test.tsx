@@ -141,11 +141,32 @@ describe('UnifiedReviewFeedbackSystem Production Suite', () => {
       emoji1.click();
     });
 
-    // Tick matrix rating for row 0 col 2 (Good)
+    // Verify mobile legend is present for responsive mobile view
+    const mobileLegend = container.querySelector('[data-testid="matrix-mobile-legend"]');
+    expect(mobileLegend).not.toBeNull();
+    expect(mobileLegend?.textContent).toContain('1= Very Bad');
+    expect(mobileLegend?.textContent).toContain('1 to 5 scale');
+
+    // Strict single-select radio behavior: Click row 0 col 2 (Good)
     const matrixBtn = container.querySelector('[data-testid="matrix-check-0-2"]') as HTMLButtonElement;
     await act(async () => {
       matrixBtn.click();
     });
+    expect(matrixBtn.getAttribute('aria-checked')).toBe('true');
+
+    // Clicking again should NOT deselect (strict radio behavior)
+    await act(async () => {
+      matrixBtn.click();
+    });
+    expect(matrixBtn.getAttribute('aria-checked')).toBe('true');
+
+    // Clicking another option in same row switches selection
+    const matrixBtn4 = container.querySelector('[data-testid="matrix-check-0-4"]') as HTMLButtonElement;
+    await act(async () => {
+      matrixBtn4.click();
+    });
+    expect(matrixBtn4.getAttribute('aria-checked')).toBe('true');
+    expect(matrixBtn.getAttribute('aria-checked')).toBe('false');
 
     // Fill improvement text using native descriptor
     const textarea = container.querySelector('[data-testid="input-improvement-text"]') as HTMLTextAreaElement;

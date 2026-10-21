@@ -164,9 +164,15 @@ export function UnifiedReviewFormRenderer({
 
   const t = config.sections[lang] || config.sections.en;
 
-  const handleMatrixTick = (rowIdx: number, colIdx: number) => {
-    const next = [...matrixRatings] as [number | null, number | null, number | null, number | null];
-    next[rowIdx] = next[rowIdx] === colIdx ? null : colIdx;
+  // Strict Single-Select Radio Behavior per Row
+  const handleMatrixSelect = (rowIdx: number, colIdx: number) => {
+    const next = [...matrixRatings] as [
+      number | null,
+      number | null,
+      number | null,
+      number | null
+    ];
+    next[rowIdx] = colIdx; // Overwrites selection so only one option per row can be ticked
     setMatrixRatings(next);
   };
 
@@ -344,20 +350,19 @@ export function UnifiedReviewFormRenderer({
           </div>
         </div>
 
-        {/* 2. Content Quality Matrix (Responsive Grid Collapse for Mobile & Desktop) */}
-        <div className="space-y-3.5">
-          {/* Header Row: On desktop (sm:), side-by-side; on mobile, stacked with clean labels */}
+        {/* 2. RESPONSIVE CONTENT QUALITY MATRIX (Fixed Mobile Squeezing & Radio Button Behavior) */}
+        <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-1">
             <h3 data-testid="matrix-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
               {t.matrixTitle}
             </h3>
-            {/* 5 Column Headers: On desktop, neatly aligned across the 5 checkboxes; on mobile, full width with clean font sizing */}
-            <div className="grid grid-cols-5 text-center text-[10px] sm:text-xs font-bold text-[#314424] gap-1 sm:w-[58%]">
+            {/* Desktop Column Header Legend */}
+            <div className="hidden sm:grid grid-cols-5 text-center text-[11px] font-bold text-[#314424] w-full max-w-[280px] gap-1">
               {t.cols.map((colLbl, cI) => (
                 <span
                   key={cI}
                   data-testid={`matrix-col-header-${cI}`}
-                  className="px-0.5 leading-tight truncate sm:overflow-visible"
+                  className="truncate px-0.5"
                   title={colLbl}
                 >
                   {colLbl}
@@ -366,42 +371,64 @@ export function UnifiedReviewFormRenderer({
             </div>
           </div>
 
-          <div className="space-y-3">
+          {/* Mobile Rating Scale Legend (1 = Very Bad -> 5 = Excellent) */}
+          <div
+            data-testid="matrix-mobile-legend"
+            className="sm:hidden flex items-center justify-between px-3 py-2 rounded-xl bg-[#314424]/10 text-[11px] font-bold text-[#314424]"
+          >
+            <span className="flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#314424] text-[#FBF6EA] text-[10px] flex items-center justify-center font-bold">1</span>
+              <span className="truncate max-w-[100px]">= {t.cols[0]}</span>
+            </span>
+            <span className="text-[#314424]/50 text-[10px] font-medium tracking-wide">← 1 to 5 scale →</span>
+            <span className="flex items-center gap-1.5">
+              <span className="truncate max-w-[100px]">{t.cols[4]} =</span>
+              <span className="w-5 h-5 rounded-full bg-[#314424] text-[#FBF6EA] text-[10px] flex items-center justify-center font-bold">5</span>
+            </span>
+          </div>
+
+          <div className="space-y-4">
             {t.questions.map((qStr, rI) => (
               <div
                 key={rI}
-                className="p-3 sm:p-0 rounded-2xl bg-[#314424]/5 sm:bg-transparent space-y-2.5 sm:space-y-0 sm:grid sm:grid-cols-12 sm:items-center gap-2"
+                className="p-3.5 sm:p-2 rounded-2xl bg-black/5 sm:bg-transparent border sm:border-none border-[#314424]/20 space-y-3 sm:space-y-0 sm:grid sm:grid-cols-12 sm:items-center gap-2"
               >
                 <p
                   data-testid={`matrix-question-${rI}`}
-                  className="sm:col-span-5 text-xs sm:text-[11px] md:text-xs leading-snug text-[#222B1C] sm:pr-1 font-semibold sm:font-normal"
+                  className="sm:col-span-7 text-xs sm:text-sm font-medium text-[#222B1C] leading-snug"
                 >
                   {qStr}
                 </p>
-                <div className="sm:col-span-7 grid grid-cols-5 justify-items-center gap-1">
+
+                {/* 5 Rating Radio Options (1 to 5 with Legend helper on mobile) */}
+                <div className="sm:col-span-5 grid grid-cols-5 gap-1.5 justify-items-center">
                   {[0, 1, 2, 3, 4].map((cI) => {
-                    const ticked = matrixRatings[rI] === cI;
+                    const isChecked = matrixRatings[rI] === cI;
                     return (
-                      <div key={cI} className="flex flex-col items-center gap-1 w-full">
-                        {/* Mobile rating score tag (1 to 5) so the user never gets confused on phone view */}
-                        <span className="sm:hidden text-[9px] font-bold text-[#314424]/60">
-                          {cI + 1}
-                        </span>
-                        <button
-                          key={cI}
-                          type="button"
-                          data-testid={`matrix-check-${rI}-${cI}`}
-                          onClick={() => handleMatrixTick(rI, cI)}
-                          aria-label={`${qStr} - ${t.cols[cI]}`}
-                          className={`w-9 h-9 sm:w-7 sm:h-7 rounded-lg sm:rounded-none border border-[#314424] flex items-center justify-center transition-all cursor-pointer ${
-                            ticked
-                              ? 'bg-[#314424] text-[#FBF6EA] shadow-2xs scale-105'
-                              : 'bg-white/70 sm:bg-transparent hover:bg-[#314424]/10'
+                      <button
+                        key={cI}
+                        type="button"
+                        data-testid={`matrix-check-${rI}-${cI}`}
+                        onClick={() => handleMatrixSelect(rI, cI)}
+                        title={t.cols[cI]}
+                        aria-label={`${qStr} - ${t.cols[cI]}`}
+                        role="radio"
+                        aria-checked={isChecked}
+                        className={`w-11 h-10 sm:w-9 sm:h-9 rounded-xl border border-[#314424] flex flex-col items-center justify-center transition-all cursor-pointer ${
+                          isChecked
+                            ? 'bg-[#314424] text-[#FBF6EA] shadow-sm font-bold ring-2 ring-[#314424]/30'
+                            : 'bg-white/80 hover:bg-[#314424]/10 text-[#1C2417]'
+                        }`}
+                      >
+                        <span className="text-[9px] opacity-70 sm:hidden">{cI + 1}</span>
+                        <div
+                          className={`w-3.5 h-3.5 rounded-full border border-current flex items-center justify-center ${
+                            isChecked ? 'bg-[#FBF6EA] text-[#314424]' : ''
                           }`}
                         >
-                          {ticked && <Check className="w-4 h-4 stroke-[3]" />}
-                        </button>
-                      </div>
+                          {isChecked && <div className="w-1.5 h-1.5 rounded-full bg-current" />}
+                        </div>
+                      </button>
                     );
                   })}
                 </div>
