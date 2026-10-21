@@ -350,48 +350,34 @@ export function UnifiedReviewFormRenderer({
           </div>
         </div>
 
-        {/* 2. RESPONSIVE CONTENT QUALITY MATRIX (Fixed Mobile Squeezing & Radio Button Behavior) */}
+        {/* 2. Content Quality Matrix (Optimized 1 to 5 Grade Scale - Zero Squeezing) */}
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-1">
             <h3 data-testid="matrix-section-title" className="text-sm sm:text-base font-extrabold text-[#11160E]">
               {t.matrixTitle}
             </h3>
-            {/* Desktop Column Header Legend */}
-            <div className="hidden sm:grid grid-cols-5 text-center text-[11px] font-bold text-[#314424] w-full max-w-[280px] gap-1">
+            {/* Space-Saving Minimalist Grade Legend: 1 (Lowest) to 5 (Highest) */}
+            <div data-testid="matrix-scale-legend" className="flex items-center gap-2.5 text-[11px] font-bold text-[#314424] bg-black/5 px-3 py-1 rounded-full self-start sm:self-auto">
+              <span>Scale:</span>
+              <span className="opacity-60">1 ({t.cols[0]})</span>
+              <span>→</span>
+              <span className="text-[#314424]">5 ({t.cols[4]})</span>
+            </div>
+            {/* Screen-reader & testing accessibility for column definitions */}
+            <div className="sr-only">
               {t.cols.map((colLbl, cI) => (
-                <span
-                  key={cI}
-                  data-testid={`matrix-col-header-${cI}`}
-                  className="truncate px-0.5"
-                  title={colLbl}
-                >
+                <span key={cI} data-testid={`matrix-col-header-${cI}`}>
                   {colLbl}
                 </span>
               ))}
             </div>
           </div>
 
-          {/* Mobile Rating Scale Legend (1 = Very Bad -> 5 = Excellent) */}
-          <div
-            data-testid="matrix-mobile-legend"
-            className="sm:hidden flex items-center justify-between px-3 py-2 rounded-xl bg-[#314424]/10 text-[11px] font-bold text-[#314424]"
-          >
-            <span className="flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#314424] text-[#FBF6EA] text-[10px] flex items-center justify-center font-bold">1</span>
-              <span className="truncate max-w-[100px]">= {t.cols[0]}</span>
-            </span>
-            <span className="text-[#314424]/50 text-[10px] font-medium tracking-wide">← 1 to 5 scale →</span>
-            <span className="flex items-center gap-1.5">
-              <span className="truncate max-w-[100px]">{t.cols[4]} =</span>
-              <span className="w-5 h-5 rounded-full bg-[#314424] text-[#FBF6EA] text-[10px] flex items-center justify-center font-bold">5</span>
-            </span>
-          </div>
-
           <div className="space-y-4">
             {t.questions.map((qStr, rI) => (
               <div
                 key={rI}
-                className="p-3.5 sm:p-2 rounded-2xl bg-black/5 sm:bg-transparent border sm:border-none border-[#314424]/20 space-y-3 sm:space-y-0 sm:grid sm:grid-cols-12 sm:items-center gap-2"
+                className="p-3.5 sm:p-2.5 rounded-2xl bg-black/5 sm:bg-transparent border sm:border-none border-[#314424]/20 space-y-3 sm:space-y-0 sm:grid sm:grid-cols-12 sm:items-center gap-2"
               >
                 <p
                   data-testid={`matrix-question-${rI}`}
@@ -400,8 +386,8 @@ export function UnifiedReviewFormRenderer({
                   {qStr}
                 </p>
 
-                {/* 5 Rating Radio Options (1 to 5 with Legend helper on mobile) */}
-                <div className="sm:col-span-5 grid grid-cols-5 gap-1.5 justify-items-center">
+                {/* 5 Compact Rating Grades (1, 2, 3, 4, 5) */}
+                <div className="sm:col-span-5 grid grid-cols-5 gap-2 justify-items-center">
                   {[0, 1, 2, 3, 4].map((cI) => {
                     const isChecked = matrixRatings[rI] === cI;
                     return (
@@ -410,24 +396,17 @@ export function UnifiedReviewFormRenderer({
                         type="button"
                         data-testid={`matrix-check-${rI}-${cI}`}
                         onClick={() => handleMatrixSelect(rI, cI)}
-                        title={t.cols[cI]}
-                        aria-label={`${qStr} - ${t.cols[cI]}`}
+                        title={`${cI + 1} - ${t.cols[cI]}`}
+                        aria-label={`${qStr} - Grade ${cI + 1}: ${t.cols[cI]}`}
                         role="radio"
                         aria-checked={isChecked}
-                        className={`w-11 h-10 sm:w-9 sm:h-9 rounded-xl border border-[#314424] flex flex-col items-center justify-center transition-all cursor-pointer ${
+                        className={`w-10 h-10 sm:w-9 sm:h-9 rounded-xl border border-[#314424] flex items-center justify-center transition-all cursor-pointer font-bold text-xs ${
                           isChecked
-                            ? 'bg-[#314424] text-[#FBF6EA] shadow-sm font-bold ring-2 ring-[#314424]/30'
-                            : 'bg-white/80 hover:bg-[#314424]/10 text-[#1C2417]'
+                            ? 'bg-[#314424] text-[#FBF6EA] shadow-md ring-2 ring-[#314424]/30 scale-105'
+                            : 'bg-white/70 hover:bg-[#314424]/10 text-[#1C2417]'
                         }`}
                       >
-                        <span className="text-[9px] opacity-70 sm:hidden">{cI + 1}</span>
-                        <div
-                          className={`w-3.5 h-3.5 rounded-full border border-current flex items-center justify-center ${
-                            isChecked ? 'bg-[#FBF6EA] text-[#314424]' : ''
-                          }`}
-                        >
-                          {isChecked && <div className="w-1.5 h-1.5 rounded-full bg-current" />}
-                        </div>
+                        {cI + 1}
                       </button>
                     );
                   })}

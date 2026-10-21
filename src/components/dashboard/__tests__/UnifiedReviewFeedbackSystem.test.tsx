@@ -141,11 +141,12 @@ describe('UnifiedReviewFeedbackSystem Production Suite', () => {
       emoji1.click();
     });
 
-    // Verify mobile legend is present for responsive mobile view
-    const mobileLegend = container.querySelector('[data-testid="matrix-mobile-legend"]');
-    expect(mobileLegend).not.toBeNull();
-    expect(mobileLegend?.textContent).toContain('1= Very Bad');
-    expect(mobileLegend?.textContent).toContain('1 to 5 scale');
+    // Verify space-saving minimal grade scale legend
+    const scaleLegend = container.querySelector('[data-testid="matrix-scale-legend"]');
+    expect(scaleLegend).not.toBeNull();
+    expect(scaleLegend?.textContent).toContain('Scale:');
+    expect(scaleLegend?.textContent).toContain('1 (Very Bad)');
+    expect(scaleLegend?.textContent).toContain('5 (Excellent)');
 
     // Strict single-select radio behavior: Click row 0 col 2 (Good)
     const matrixBtn = container.querySelector('[data-testid="matrix-check-0-2"]') as HTMLButtonElement;
