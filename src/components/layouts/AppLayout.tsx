@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ImportTestimonialsHub } from '../dashboard/ImportTestimonialsHub';
 import ProofSection from '../dashboard/ProofSection';
-import { EmbedsPostStudio } from '../dashboard/ProofToEmbedsFlow';
+import { AutoSyncedEmbedsStudio } from '../dashboard/UnifiedDashboardPipeline';
 
 export interface AppLayoutProps {
   workspaceId?: string;
@@ -182,10 +182,10 @@ export default function AppLayout({
                 }}
               />
             ) : activeNav === 'embeds' ? (
-              <EmbedsPostStudio
+              <AutoSyncedEmbedsStudio
+                workspaceId={workspaceId}
                 workspaceName={workspaceId}
-                selectedTestimonials={selectedForEmbeds}
-                onBackToProof={() => setActiveNav('proof')}
+                preselectedTestimonials={selectedForEmbeds}
               />
             ) : activeNav === 'import' ? (
               <ImportTestimonialsHub

@@ -3,10 +3,8 @@ import {
   getFirestore,
   doc,
   getDoc,
-  collection,
-  addDoc,
-  serverTimestamp,
 } from 'firebase/firestore';
+import { submitCustomerTestimonialToPipeline } from '../../services/testimonialSyncEngine';
 import { CheckCircle2, Sparkles } from 'lucide-react';
 import {
   ConstantReviewFeedbackTemplate,
@@ -146,12 +144,18 @@ export default function PublicCustomerFeedbackPage({
         localStorage.setItem(localKey, JSON.stringify(existing));
       } catch {}
 
-      // 2. Direct Firestore Write to testimonials collection
+      // 2. Direct Firestore Write via unified sync engine
       try {
-        const db = getFirestore();
-        await addDoc(collection(db, 'testimonials'), {
-          ...submissionData,
-          timestamp: serverTimestamp(),
+        await submitCustomerTestimonialToPipeline({
+          rawWorkspaceSlugOrId: workspaceSlug,
+          authorName: submittedName,
+          authorRole: submittedRole,
+          content: activeText.trim() || (isVideo ? 'Recorded video testimonial (+2x Perk)' : 'Submitted feedback form.'),
+          rating: computedRating,
+          mediaType: isVideo ? 'video' : 'text',
+          videoDataUrl: formData?.videoUrl || submission.videoUrl || null,
+          matrixRatings: activeMatrix,
+          source: 'Review Feedback Form',
         });
       } catch (firestoreErr) {
         console.warn('Firestore testimonials write notice:', firestoreErr);

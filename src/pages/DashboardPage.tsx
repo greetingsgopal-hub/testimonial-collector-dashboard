@@ -13,7 +13,7 @@ import { AccountBillingView } from '../components/dashboard/views/AccountBilling
 import { IntegrateView } from '../components/dashboard/views/IntegrateView';
 import { CampaignsHub } from '../components/dashboard/CampaignsHub';
 import ProofSection from '../components/dashboard/ProofSection';
-import { EmbedsPostStudio } from '../components/dashboard/ProofToEmbedsFlow';
+import { AutoSyncedEmbedsStudio } from '../components/dashboard/UnifiedDashboardPipeline';
 import { storage } from '../lib/storage';
 import { Review, ReviewStatus, ReviewStats, CollectionForm } from '../types';
 import { getSampleReviews, isSampleDataCleared, setSampleDataCleared } from '../lib/mockData';
@@ -29,6 +29,7 @@ const TAB_LABEL_MAP: Record<string, string> = {
   forms: 'Forms',
   proof: 'Proof',
   widgets: 'Embeds',
+  embeds: 'Embeds',
   social: 'Post on internet',
   campaigns: 'Campaigns',
   integrate: 'Billing & Plans',
@@ -50,12 +51,14 @@ export const DashboardPage = () => {
     if (paramTab) {
       if (paramTab === 'tags' || paramTab === 'feedback' || paramTab === 'analyze') return 'proof';
       if ((paramTab as string) === 'import') return 'forms';
+      if ((paramTab as string) === 'embeds') return 'widgets';
       return paramTab;
     }
     const windowTab = new URLSearchParams(window.location.search).get('tab') as DashboardTab;
     if (windowTab) {
       if (windowTab === 'tags' || windowTab === 'feedback' || windowTab === 'analyze') return 'proof';
       if ((windowTab as string) === 'import') return 'forms';
+      if ((windowTab as string) === 'embeds') return 'widgets';
       return windowTab;
     }
     return 'welcome';
@@ -490,12 +493,12 @@ export const DashboardPage = () => {
           )}
 
           {/* Post on internet (Embeds & Social Post Studio) */}
-          {(activeTab === 'social' || activeTab === 'widgets') && (
+          {(activeTab === 'social' || activeTab === 'widgets' || (activeTab as string) === 'embeds') && (
             <div className="max-w-6xl mx-auto font-sans">
-              <EmbedsPostStudio
+              <AutoSyncedEmbedsStudio
+                workspaceId={impersonatedWorkspace?.id || workspace?.id || project?.id || 'reallygreatsite'}
                 workspaceName={impersonatedWorkspace?.name || workspace?.name || project?.name || 'reallygreatsite'}
-                selectedTestimonials={selectedForEmbeds}
-                onBackToProof={() => setActiveTab('proof')}
+                preselectedTestimonials={selectedForEmbeds}
               />
             </div>
           )}

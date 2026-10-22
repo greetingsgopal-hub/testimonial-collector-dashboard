@@ -2,12 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import {
   getFirestore,
-  collection,
-  addDoc,
   doc,
   getDoc,
-  serverTimestamp,
 } from 'firebase/firestore';
+import { submitCustomerTestimonialToPipeline } from '../services/testimonialSyncEngine';
 import {
   Star,
   Video,
@@ -311,22 +309,17 @@ export const PublicCollectorPage: React.FC<PublicCollectorPageProps> = ({ worksp
         console.warn('Storage createReview fallback notice:', err);
       }
 
-      // 2. Submit to Firestore testimonials collection
+      // 2. Submit to Firestore testimonials collection via unified pipeline
       try {
-        const db = getFirestore();
-        await addDoc(collection(db, 'testimonials'), {
-          workspaceId: cleanSlug,
+        await submitCustomerTestimonialToPipeline({
+          rawWorkspaceSlugOrId: cleanSlug,
           authorName: sanitizedName,
           authorRole: sanitizedRole,
           content: sanitizedContent,
           rating,
           mediaType: mode,
-          avatarUrl: finalAvatar,
-          videoUrl: recordedVideoUrl || videoLinkUrl || null,
-          status: 'pending',
-          verified: true,
-          createdAt: new Date().toISOString(),
-          timestamp: serverTimestamp(),
+          videoDataUrl: recordedVideoUrl || videoLinkUrl || null,
+          source: 'Collector Form',
         });
       } catch (err) {
         console.warn('Firestore testimonials direct write notice:', err);

@@ -16,6 +16,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { Review, ReviewStats, CollectionForm } from '../../../types';
 import { ReviewQrCardModal } from '../ReviewQrCardModal';
 import UnifiedReviewFeedbackSystem from '../UnifiedReviewFeedbackSystem';
+import { CollectionPulseBar } from '../UnifiedDashboardPipeline';
 
 export interface FormsViewProps {
   onConfigureForm: () => void;
@@ -34,7 +35,7 @@ export const FormsView: React.FC<FormsViewProps> = ({
   onViewProof,
   onUpdateForm: _onUpdateForm,
   onNavigateToCampaigns: _onNavigateToCampaigns,
-  onNavigateToWidgets: _onNavigateToWidgets,
+  onNavigateToWidgets,
   reviews = [],
   stats,
 }) => {
@@ -78,6 +79,14 @@ export const FormsView: React.FC<FormsViewProps> = ({
 
   return (
     <div className="space-y-6 font-sans">
+      {/* ── 1. Live Collection Pulse KPI Strip & Review Watcher ── */}
+      <CollectionPulseBar
+        workspaceId={workspace?.id || project?.id || 'feedback'}
+        workspaceName={workspace?.name || projectName}
+        onGoToProof={onViewProof}
+        onGoToEmbeds={onNavigateToWidgets ? () => onNavigateToWidgets() : undefined}
+      />
+
       {/* ── 2. Full-Width Purple-to-Violet Hero Card ── */}
       <div className="relative rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 text-white p-6 sm:p-8 overflow-hidden shadow-xl">
         <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
