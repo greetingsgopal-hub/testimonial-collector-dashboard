@@ -25,7 +25,7 @@ export default function PublicCustomerFeedbackPage({
     meta3Value: '',
     meta4Value: new Date().toLocaleDateString(),
     selectedEmojiIndex: 0,
-    matrixRatings: [4, 4, 4, 4],
+    matrixRatings: [4, 4, 4],
     openFeedbackText: '',
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -38,6 +38,12 @@ export default function PublicCustomerFeedbackPage({
       if (cached) {
         const parsed = JSON.parse(cached);
         if (parsed && parsed.brandPillText) {
+          if (parsed.sections?.en?.questions) {
+            parsed.sections.en.questions = parsed.sections.en.questions.slice(0, 3);
+          }
+          if (parsed.sections?.hi?.questions) {
+            parsed.sections.hi.questions = parsed.sections.hi.questions.slice(0, 3);
+          }
           setConfig(parsed);
           setSubmission((prev) => ({
             ...prev,
@@ -55,10 +61,23 @@ export default function PublicCustomerFeedbackPage({
         .then((snap) => {
           if (snap.exists() && snap.data()?.reviewFormConfig) {
             const remoteConfig = snap.data().reviewFormConfig;
-            setConfig({
+            const merged = {
               ...DEFAULT_REVIEW_CONFIG,
               ...remoteConfig,
-            });
+              sections: {
+                en: {
+                  ...DEFAULT_REVIEW_CONFIG.sections.en,
+                  ...(remoteConfig.sections?.en || {}),
+                  questions: (remoteConfig.sections?.en?.questions || DEFAULT_REVIEW_CONFIG.sections.en.questions).slice(0, 3),
+                },
+                hi: {
+                  ...DEFAULT_REVIEW_CONFIG.sections.hi,
+                  ...(remoteConfig.sections?.hi || {}),
+                  questions: (remoteConfig.sections?.hi?.questions || DEFAULT_REVIEW_CONFIG.sections.hi.questions).slice(0, 3),
+                },
+              },
+            };
+            setConfig(merged);
             // Pre-fill the submission form with the business-configured details
             setSubmission((prev) => ({
               ...prev,
@@ -76,7 +95,7 @@ export default function PublicCustomerFeedbackPage({
 
   const handleCustomerFinalSubmit = async (formData?: {
     selectedEmojiIndex?: number;
-    matrixRatings?: [number | null, number | null, number | null, number | null];
+    matrixRatings?: (number | null)[];
     improvementText?: string;
     mediaType?: 'text' | 'video';
     videoUrl?: string;

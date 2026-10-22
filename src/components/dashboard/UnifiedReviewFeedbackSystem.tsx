@@ -25,7 +25,7 @@ export interface CustomerFormSubmission {
   meta3Value: string;
   meta4Value: string;
   selectedEmojiIndex: number;
-  matrixRatings: [number | null, number | null, number | null, number | null];
+  matrixRatings: (number | null)[];
   openFeedbackText: string;
   mediaType?: 'text' | 'video';
   videoUrl?: string;
@@ -52,7 +52,7 @@ export interface ReviewFormConfig {
       emojiTitle: string;
       matrixTitle: string;
       cols: [string, string, string, string, string];
-      questions: [string, string, string, string];
+      questions: string[];
       improvementTitle: string;
       submitBtn: string;
     };
@@ -60,7 +60,7 @@ export interface ReviewFormConfig {
       emojiTitle: string;
       matrixTitle: string;
       cols: [string, string, string, string, string];
-      questions: [string, string, string, string];
+      questions: string[];
       improvementTitle: string;
       submitBtn: string;
     };
@@ -86,7 +86,6 @@ export const DEFAULT_REVIEW_CONFIG: ReviewFormConfig = {
         'How effective was the opening hook in capturing attention ?',
         'How natural and authentic did the on-camera delivery feel for your brand?',
         "How clearly and effectively was your product's value communicated?",
-        'How satisfied are you with the overall visual presentation and editing quality?',
       ],
       improvementTitle: 'What Can Be Improved?',
       submitBtn: 'Submit Review Feedback →',
@@ -99,7 +98,6 @@ export const DEFAULT_REVIEW_CONFIG: ReviewFormConfig = {
         'Opening hook audience ka dhyan khichne mein kitna asardar tha?',
         'Aapke brand ke liye on-camera delivery kitni natural aur authentic lagi?',
         'Aapke product ki value kitni saaf taur par samjhayi gayi?',
-        'Overall visual presentation aur editing quality se aap kitna khush hain?',
       ],
       improvementTitle: 'Kya Behtar Kiya Ja Sakta Hai? (What can be improved?)',
       submitBtn: 'Feedback Submit Karein →',
@@ -128,7 +126,7 @@ export function UnifiedReviewFormRenderer({
   isLockedForEndUser?: boolean;
   onSubmitForm?: (formData: {
     selectedEmojiIndex: number;
-    matrixRatings: [number | null, number | null, number | null, number | null];
+    matrixRatings: (number | null)[];
     improvementText: string;
     mediaType?: 'text' | 'video';
     videoUrl?: string;
@@ -141,9 +139,7 @@ export function UnifiedReviewFormRenderer({
   const [lang, setLang] = useState<'en' | 'hi'>('en');
   void isLockedForEndUser;
   const [selectedEmojiIdx, setSelectedEmojiIdx] = useState<number>(0);
-  const [matrixRatings, setMatrixRatings] = useState<
-    [number | null, number | null, number | null, number | null]
-  >([4, 4, 3, 4]);
+  const [matrixRatings, setMatrixRatings] = useState<(number | null)[]>([4, 4, 4]);
   const [improvementText, setImprovementText] = useState<string>('');
   const [reviewMode, setReviewMode] = useState<'text' | 'video'>('text');
   const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null);
@@ -235,12 +231,7 @@ export function UnifiedReviewFormRenderer({
 
   // Strict Single-Select Radio Behavior per Row
   const handleMatrixSelect = (rowIdx: number, colIdx: number) => {
-    const next = [...matrixRatings] as [
-      number | null,
-      number | null,
-      number | null,
-      number | null
-    ];
+    const next = [...matrixRatings];
     next[rowIdx] = colIdx; // Overwrites selection so only one option per row can be ticked
     setMatrixRatings(next);
   };
@@ -491,9 +482,9 @@ export function UnifiedReviewFormRenderer({
             </div>
           </div>
 
-          {/* 4 Question Rows with Hover Wave & Tactile Score Pills */}
+          {/* 3 Question Rows with Hover Wave & Tactile Score Pills */}
           <div className="space-y-3.5">
-            {t.questions.map((qStr, rI) => {
+            {(t.questions || []).slice(0, 3).map((qStr, rI) => {
               const selectedZeroIdx = matrixRatings[rI]; // 0..4
               const selectedScore = selectedZeroIdx !== null && selectedZeroIdx !== undefined ? selectedZeroIdx + 1 : null;
               const rowHoveredScore = hoveredCell?.row === rI ? hoveredCell.score : null;
@@ -1028,7 +1019,7 @@ export default function FormBuilderStudio({
             <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
               3. Evaluation Questions
             </span>
-            {config.sections.en.questions.map((qStr, idx) => (
+            {(config.sections.en.questions || []).slice(0, 3).map((qStr, idx) => (
               <div key={idx}>
                 <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Question #{idx + 1}</label>
                 <input
@@ -1036,7 +1027,7 @@ export default function FormBuilderStudio({
                   data-testid={`input-question-${idx}`}
                   value={qStr}
                   onChange={(e) => {
-                    const nextQ = [...config.sections.en.questions] as [string, string, string, string];
+                    const nextQ = [...(config.sections.en.questions || []).slice(0, 3)];
                     nextQ[idx] = e.target.value;
                     setConfig({
                       ...config,
@@ -1116,6 +1107,12 @@ export function PublicCustomerFeedbackPage({
       if (cached) {
         const parsed = JSON.parse(cached);
         if (parsed && parsed.brandPillText) {
+          if (parsed.sections?.en?.questions) {
+            parsed.sections.en.questions = parsed.sections.en.questions.slice(0, 3);
+          }
+          if (parsed.sections?.hi?.questions) {
+            parsed.sections.hi.questions = parsed.sections.hi.questions.slice(0, 3);
+          }
           setConfig(parsed);
         }
       }
@@ -1126,10 +1123,24 @@ export function PublicCustomerFeedbackPage({
       getDoc(doc(db, 'workspaces', workspaceSlug))
         .then((snap) => {
           if (snap.exists() && snap.data()?.reviewFormConfig) {
-            setConfig({
+            const remote = snap.data().reviewFormConfig;
+            const merged = {
               ...DEFAULT_REVIEW_CONFIG,
-              ...snap.data().reviewFormConfig,
-            });
+              ...remote,
+              sections: {
+                en: {
+                  ...DEFAULT_REVIEW_CONFIG.sections.en,
+                  ...(remote.sections?.en || {}),
+                  questions: (remote.sections?.en?.questions || DEFAULT_REVIEW_CONFIG.sections.en.questions).slice(0, 3),
+                },
+                hi: {
+                  ...DEFAULT_REVIEW_CONFIG.sections.hi,
+                  ...(remote.sections?.hi || {}),
+                  questions: (remote.sections?.hi?.questions || DEFAULT_REVIEW_CONFIG.sections.hi.questions).slice(0, 3),
+                },
+              },
+            };
+            setConfig(merged);
           }
         })
         .catch(() => null);
@@ -1140,7 +1151,7 @@ export function PublicCustomerFeedbackPage({
 
   const handleCustomerFinalSubmit = async (formData: {
     selectedEmojiIndex: number;
-    matrixRatings: [number | null, number | null, number | null, number | null];
+    matrixRatings: (number | null)[];
     improvementText: string;
     mediaType?: 'text' | 'video';
     videoUrl?: string;

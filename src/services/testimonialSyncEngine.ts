@@ -201,7 +201,7 @@ export async function submitCustomerTestimonialToPipeline(params: {
     mediaType: params.mediaType,
     media_type: params.mediaType,
     videoDataUrl: params.videoDataUrl || null,
-    matrixRatings: params.matrixRatings || [4, 4, 4, 4],
+    matrixRatings: params.matrixRatings || [4, 4, 4],
     source: params.source || 'Collection Form',
     // Auto-approve so it flows straight into Collection Pulse -> Proof -> Embeds automatically!
     status: 'approved',
