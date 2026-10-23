@@ -14,7 +14,8 @@
   },
   "vars": {
     "FIREBASE_PROJECT_ID": "testimonialcollectordashboard",
-    "META_APP_ID": "1093657506579806"
+    "META_APP_ID": "1093657506579806",
+    "PROSPECT_RESEARCH_ENABLED": "true"
   },
   "observability": {
     "enabled": true
