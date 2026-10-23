@@ -28,5 +28,7 @@ dist-ssr
 .env.local
 .env.production
 
-# Local Netlify folder
+# Local Netlify & Cloudflare folders
 .netlify
+.wrangler
+.letta
