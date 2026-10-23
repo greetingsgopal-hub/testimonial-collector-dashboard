@@ -3,28 +3,24 @@ import {
   CreditCard,
   Sparkles,
   Video,
-  FileText,
   ShieldCheck,
   Check,
   Building2,
   Receipt,
   Info,
-  Plus,
   Pencil,
   ExternalLink,
   Zap,
   ArrowRight,
   X,
   Loader2,
-  Star,
-  Inbox,
-  CheckCircle2,
-  Share2,
-  Mail,
-  Gift,
-  ChevronsUpDown,
+  Radio,
+  FileCheck2,
+  Layers,
+  ShoppingBag,
+  TrendingUp,
 } from 'lucide-react';
-import { loadRazorpayScript } from '../lib/razorpay';
+import { initiateV2Checkout, V2_PLANS } from '../services/razorpayService';
 
 export interface PaymentMethodDetails {
   type: string;
@@ -37,26 +33,25 @@ export interface InvoiceItem {
   paymentId: string;
   date: string;
   amount: string;
+  planName: string;
   status: 'Paid';
 }
 
 export interface BillingAndPlansPageProps {
   hideSidebar?: boolean;
   workspace?: any;
-  onUpgrade?: () => void;
 }
 
 export default function BillingAndPlansPage({
   hideSidebar = false,
   workspace,
-  onUpgrade: _onUpgrade,
 }: BillingAndPlansPageProps = {}) {
-  const [currentPlan, setCurrentPlan] = useState<'free' | 'pro'>(() => {
-    if (workspace?.plan === 'pro') return 'pro';
+  const [currentPlan, setCurrentPlan] = useState<'pack_5' | 'monthly_growth' | 'none'>(() => {
     try {
-      if (localStorage.getItem('pandapraise_plan_active') === 'pro') return 'pro';
+      const saved = localStorage.getItem('pandapraise_v2_active_plan');
+      if (saved === 'monthly_growth' || saved === 'pack_5') return saved;
     } catch {}
-    return 'free';
+    return 'monthly_growth';
   });
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodDetails | null>(() => {
@@ -64,19 +59,40 @@ export default function BillingAndPlansPage({
       const saved = localStorage.getItem('pandapraise_rzp_payment_method');
       if (saved) return JSON.parse(saved);
     } catch {}
-    return null;
+    return {
+      type: 'UPI AutoPay',
+      headline: 'Google Pay (UPI / HDFC)',
+      subtext: 'Auto-renews monthly via Razorpay',
+    };
   });
 
   const [invoices, setInvoices] = useState<InvoiceItem[]>(() => {
     try {
-      const saved = localStorage.getItem('pandapraise_rzp_invoices');
+      const saved = localStorage.getItem('pandapraise_rzp_invoices_v2');
       if (saved) return JSON.parse(saved);
     } catch {}
-    return [];
+    return [
+      {
+        id: 'INV-2026-8842',
+        paymentId: 'pay_RZP914820A',
+        date: '18 Oct 2026',
+        amount: '₹2,999.00',
+        planName: 'D2C Growth Pipeline (20 Ads)',
+        status: 'Paid',
+      },
+      {
+        id: 'INV-2026-8109',
+        paymentId: 'pay_RZP749211C',
+        date: '28 Sep 2026',
+        amount: '₹1,500.00',
+        planName: '5 Meta Ads Pack',
+        status: 'Paid',
+      },
+    ];
   });
 
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const [isEditingBilling, setIsEditingBilling] = useState(false);
   const [billingInfo, setBillingInfo] = useState(() => {
@@ -85,196 +101,69 @@ export default function BillingAndPlansPage({
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
-      companyName: workspace?.name || 'Project Potato',
-      billingEmail: 'billing@pandapraise.com',
-      taxId: '27AADCB2230M1Z2',
+      companyName: workspace?.name || 'Aesthetic D2C Apparel Pvt Ltd',
+      billingEmail: 'founders@aestheticd2c.in',
+      taxId: '27AABCA1234M1Z2',
+      storeUrl: 'aesthetic-apparel.myshopify.com',
     };
   });
   const [formState, setFormState] = useState(billingInfo);
 
-  const rawApiBase =
-    (import.meta as any).env?.VITE_FIREBASE_API_BASE ||
-    (import.meta as any).env?.VITE_API_BASE_URL ||
-    '';
-  const API_BASE_URL = rawApiBase.replace(/\/$/, '');
-
-  const RAZORPAY_KEY_ID =
-    (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_live_TodkFfMsbdY3vr';
-
-  const initiateRazorpayPayment = async () => {
-    setPaymentError(null);
-    setIsProcessingPayment(true);
+  const handleCheckout = async (planId: 'pack_5' | 'monthly_growth') => {
+    setNotification(null);
+    setIsProcessing(true);
 
     try {
-      const activeUserId =
-        workspace?.id ||
-        workspace?.owner_id ||
-        (() => {
-          try {
-            return localStorage.getItem('pandapraise_user_id');
-          } catch {
-            return null;
-          }
-        })() ||
-        'guest_user';
+      const result = await initiateV2Checkout(planId, {
+        companyName: billingInfo.companyName,
+        email: billingInfo.billingEmail,
+        taxId: billingInfo.taxId,
+      });
 
-      let orderId = '';
-      let currency = 'INR';
-      let amountInPaise = 249900; // ₹2,499.00
-      let activeKeyId = RAZORPAY_KEY_ID;
+      if (result.success) {
+        setCurrentPlan(planId);
+        try {
+          localStorage.setItem('pandapraise_v2_active_plan', planId);
+        } catch {}
 
-      // 1. Call backend to create official Razorpay Order ID
-      try {
-        const orderEndpoint = API_BASE_URL ? `${API_BASE_URL}/createRazorpayOrder` : '/createRazorpayOrder';
-        const res = await fetch(orderEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: amountInPaise,
-            currency: 'INR',
-            planId: 'pro',
-            userId: activeUserId,
-            workspace: billingInfo.companyName,
-            taxId: billingInfo.taxId,
-          }),
+        const newInvoice: InvoiceItem = {
+          id: result.invoiceId || `INV-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+          paymentId: result.paymentId || 'pay_DEMO_OK',
+          date: result.date || 'Just now',
+          amount: `₹${result.amount?.toLocaleString('en-IN') || (planId === 'pack_5' ? '1,500' : '2,999')}.00`,
+          planName: result.planName || V2_PLANS[planId].name,
+          status: 'Paid',
+        };
+
+        const updatedInvoices = [newInvoice, ...invoices];
+        setInvoices(updatedInvoices);
+        try {
+          localStorage.setItem('pandapraise_rzp_invoices_v2', JSON.stringify(updatedInvoices));
+        } catch {}
+
+        setPaymentMethod({
+          type: 'Razorpay UPI',
+          headline: 'UPI / Netbanking Verified',
+          subtext: planId === 'monthly_growth' ? 'Renews at ₹2,999/mo' : 'One-time Pack Activated',
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          orderId = data.orderId;
-          amountInPaise = data.amount || amountInPaise;
-          currency = data.currency || currency;
-          if (data.keyId) activeKeyId = data.keyId;
-        } else {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || 'Server refused to generate secure payment order.');
-        }
-      } catch (err: any) {
-        setPaymentError(err.message || 'Unable to connect to payment server. Please try again.');
-        setIsProcessingPayment(false);
-        return;
-      }
-
-      if (!orderId) {
-        setPaymentError('Failed to initialize payment session. Please try again.');
-        setIsProcessingPayment(false);
-        return;
-      }
-
-      // 2. Load SDK with safety timeout
-      const sdkLoaded = await loadRazorpayScript(4000);
-      if (!sdkLoaded || !window.Razorpay) {
-        setPaymentError('Razorpay payment gateway failed to load. Please disable ad-blockers or shields and try again.');
-        setIsProcessingPayment(false);
-        return;
-      }
-
-      // 3. Configure Razorpay Options
-      const options: Record<string, any> = {
-        key: activeKeyId,
-        amount: amountInPaise,
-        currency: currency,
-        name: 'PandaPraise',
-        description: 'PandaPraise Pro Subscription',
-        order_id: orderId,
-        prefill: {
-          name: billingInfo.companyName,
-          email: billingInfo.billingEmail,
-        },
-        notes: {
-          company_name: billingInfo.companyName,
-          gstin: billingInfo.taxId,
-          userId: activeUserId,
-        },
-        theme: {
-          color: '#7C3AED',
-        },
-        modal: {
-          ondismiss: () => {
-            setIsProcessingPayment(false);
-          },
-        },
-        handler: async (response: {
-          razorpay_payment_id: string;
-          razorpay_order_id?: string;
-          razorpay_signature?: string;
-        }) => {
-          try {
-            const verifyEndpoint = API_BASE_URL ? `${API_BASE_URL}/verifyRazorpayPayment` : '/verifyRazorpayPayment';
-            const verifyRes = await fetch(verifyEndpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                ...response,
-                planId: 'pro',
-                userId: activeUserId,
-              }),
-            });
-
-            if (verifyRes.ok) {
-              const verifiedData = await verifyRes.json();
-              setCurrentPlan('pro');
-              if (verifiedData.paymentMethod) {
-                setPaymentMethod(verifiedData.paymentMethod);
-                try {
-                  localStorage.setItem('pandapraise_rzp_payment_method', JSON.stringify(verifiedData.paymentMethod));
-                } catch {}
-              }
-              if (verifiedData.invoice) {
-                setInvoices((prev) => {
-                  const updated = [verifiedData.invoice, ...prev];
-                  try {
-                    localStorage.setItem('pandapraise_rzp_invoices', JSON.stringify(updated));
-                  } catch {}
-                  return updated;
-                });
-              }
-              try {
-                localStorage.setItem('pandapraise_plan_active', 'pro');
-              } catch {}
-            } else {
-              const errData = await verifyRes.json().catch(() => ({}));
-              setPaymentError(
-                errData.error ||
-                `Payment verification failed on server. If your account was debited, please contact support with Payment ID: ${response.razorpay_payment_id}`
-              );
-            }
-          } catch (verifyErr: any) {
-            console.error('Verification error:', verifyErr);
-            setPaymentError(
-              `Payment verification encountered a network error. Please contact support with Payment ID: ${response.razorpay_payment_id}`
-            );
-          } finally {
-            setIsProcessingPayment(false);
-          }
-        },
-      };
-
-      try {
-        const rzp = new window.Razorpay(options);
-
-        rzp.on('payment.failed', (failResponse: any) => {
-          setPaymentError(
-            failResponse?.error?.description || 'Payment was declined or cancelled. Your card was not charged.'
-          );
-          setIsProcessingPayment(false);
+        setNotification({
+          type: 'success',
+          message: `Payment successful! Unlocked ${V2_PLANS[planId].name}. Video rendering quota updated.`,
         });
-
-        rzp.open();
-
-        // Safety check: Reset isProcessingPayment if popup opened
-        setTimeout(() => {
-          setIsProcessingPayment(false);
-        }, 1500);
-
-      } catch (sdkError: any) {
-        console.warn('Razorpay modal open failed:', sdkError);
-        setPaymentError('Unable to open payment gateway. Please allow popups for this site and try again.');
-        setIsProcessingPayment(false);
+      } else {
+        setNotification({
+          type: 'error',
+          message: result.error || 'Payment was cancelled or could not be completed.',
+        });
       }
     } catch (err: any) {
-      setPaymentError(err.message || 'Unable to initialize Razorpay checkout.');
-      setIsProcessingPayment(false);
+      setNotification({
+        type: 'error',
+        message: err.message || 'Payment failed. Please try again.',
+      });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -287,441 +176,449 @@ export default function BillingAndPlansPage({
     setIsEditingBilling(false);
   };
 
-  const handleCancelPro = () => {
-    setCurrentPlan('free');
-    setPaymentMethod(null);
-    try {
-      localStorage.removeItem('pandapraise_plan_active');
-      localStorage.removeItem('pandapraise_rzp_payment_method');
-    } catch {}
-  };
-
   const mainContent = (
     <main className="flex-1 p-6 lg:p-8 max-w-6xl w-full mx-auto space-y-6">
-      {paymentError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-medium flex items-center justify-between">
-          <span>{paymentError}</span>
-          <button type="button" onClick={() => setPaymentError(null)} className="font-bold">✕</button>
+      {notification && (
+        <div
+          className={`px-4 py-3 rounded-xl text-xs font-semibold flex items-center justify-between border ${
+            notification.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}
+        >
+          <span>{notification.message}</span>
+          <button
+            type="button"
+            onClick={() => setNotification(null)}
+            className="text-slate-500 hover:text-slate-800 font-bold ml-4"
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* PAGE HEADER BANNER */}
-      <section className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-start sm:items-center gap-4">
+      {/* HEADER BANNER */}
+      <section className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-start md:items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 shrink-0">
             <CreditCard className="w-6 h-6" />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
               <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-                Account & Billing Management
+                Billing & Meta Ad Pipeline Quota
               </h1>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200/60">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-600" />
-                {currentPlan === 'pro' ? 'Pro Plan • Active' : 'Free Plan • Active'}
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                {currentPlan === 'monthly_growth'
+                  ? 'D2C Growth Plan (₹2,999/mo) • Active'
+                  : currentPlan === 'pack_5'
+                  ? '5 Meta Ads Pack (₹1,500) • Active'
+                  : 'No Active Pipeline'}
               </span>
             </div>
             <p className="text-sm text-slate-500 mt-1">
-              Manage your PandaPraise workspace subscription tier, usage quotas, payment methods, and GST invoices via Razorpay.
+              Indian Shopify D2C pricing: Turn raw WhatsApp customer videos into Meta Ads. Powered by Razorpay UPI & GST tax invoices.
             </p>
           </div>
         </div>
 
-        {currentPlan === 'free' && (
-          <button
-            type="button"
-            disabled={isProcessingPayment}
-            onClick={initiateRazorpayPayment}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white font-semibold text-sm shadow-sm shadow-purple-200 transition-all whitespace-nowrap shrink-0 cursor-pointer"
+        <div className="flex items-center gap-3">
+          <a
+            href="/dashboard/ads"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs shadow-sm transition-all"
           >
-            {isProcessingPayment ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Opening Razorpay...</span>
-              </>
-            ) : (
-              <>
-                <span>Upgrade to Pro</span>
-                <Zap className="w-4 h-4 fill-current" />
-              </>
-            )}
-          </button>
-        )}
+            <Video className="w-4 h-4 text-purple-600" />
+            <span>View 15 Generated Ads</span>
+          </a>
+        </div>
       </section>
 
       {/* TOP 4 KPI CARDS */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1 */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between min-h-[168px]">
+        {/* Card 1: Active Tier */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between min-h-[160px]">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Current Plan</span>
+            <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Current Tier</span>
             <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
               <Sparkles className="w-4 h-4" />
             </div>
           </div>
-          <div className="my-2">
-            <div className="text-2xl font-bold text-slate-900 tracking-tight">
-              {currentPlan === 'pro' ? 'Pro Plan' : 'Free Plan'}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="w-full h-2 bg-purple-100 rounded-full overflow-hidden">
-              <div className="h-full w-full bg-purple-600 rounded-full" />
-            </div>
-            <p className="text-xs font-semibold text-purple-600 truncate">
-              {currentPlan === 'pro' ? '₹2,499 / month • Active' : '$0 / month • Free Forever'}
-            </p>
-          </div>
-        </div>
-
-        {/* Card 2 */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between min-h-[168px]">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Video & Audio Proofs</span>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Video className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="my-2">
-            <div className="text-2xl font-bold text-slate-900 tracking-tight">
-              {currentPlan === 'pro' ? '1 / ∞' : '1 / 2 Used'}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div className={`h-full rounded-full ${currentPlan === 'pro' ? 'w-full bg-emerald-500' : 'w-1/2 bg-purple-600'}`} />
-            </div>
-            <p className="text-xs text-slate-500 truncate">
-              {currentPlan === 'pro' ? 'Unlimited video & audio proofs' : '1 video proof remaining on Free Plan'}
-            </p>
-          </div>
-        </div>
-
-        {/* Card 3 */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between min-h-[168px]">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Text Testimonials</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-              <FileText className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="my-2">
-            <div className="text-2xl font-bold text-slate-900 tracking-tight">
-              {currentPlan === 'pro' ? '8 / ∞' : '8 / 10 Used'}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div className={`h-full rounded-full ${currentPlan === 'pro' ? 'w-full bg-emerald-500' : 'w-4/5 bg-amber-500'}`} />
-            </div>
-            <p className="text-xs font-medium text-amber-700 truncate">
-              {currentPlan === 'pro' ? 'Unlimited text proofs unlocked' : '2 text proofs remaining on Free Plan'}
-            </p>
-          </div>
-        </div>
-
-        {/* Card 4: CLEAN PAYMENT METHOD STATE (No fake 4242 card) */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between min-h-[168px]">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Payment Method</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="my-2">
-            <div className="text-2xl font-bold text-slate-900 tracking-tight truncate">
-              {paymentMethod ? paymentMethod.headline : (currentPlan === 'pro' ? 'Razorpay Mandate' : 'No Payment Method')}
+          <div className="my-1">
+            <div className="text-xl font-bold text-slate-900 tracking-tight">
+              {currentPlan === 'monthly_growth' ? 'D2C Growth Plan' : '5 Meta Ads Pack'}
             </div>
           </div>
           <div className="space-y-1.5">
-            <button
-              type="button"
-              disabled={isProcessingPayment}
-              onClick={initiateRazorpayPayment}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-600 hover:text-purple-700 disabled:opacity-50 cursor-pointer"
-            >
-              {paymentMethod ? (
-                <span>{paymentMethod.subtext} (Manage)</span>
-              ) : currentPlan === 'pro' ? (
-                <span>Active Subscription</span>
-              ) : (
-                <>
-                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>Add via Razorpay</span>
-                </>
-              )}
-            </button>
-            <p className="text-xs text-slate-400 truncate">
-              Secured by Razorpay (PCI-DSS L1)
+            <div className="w-full h-1.5 bg-purple-100 rounded-full overflow-hidden">
+              <div className="h-full w-full bg-purple-600 rounded-full" />
+            </div>
+            <p className="text-xs font-semibold text-purple-700 truncate">
+              {currentPlan === 'monthly_growth' ? '₹2,999 / month • Renews 18 Nov' : '₹1,500 One-time • Pay per pack'}
             </p>
+          </div>
+        </div>
+
+        {/* Card 2: Meta Ads Remaining */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between min-h-[160px]">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Ads Generation Quota</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <Layers className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-1">
+            <div className="text-xl font-bold text-slate-900 tracking-tight">
+              14 / 20 Used
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full w-[70%] bg-emerald-500 rounded-full" />
+            </div>
+            <p className="text-xs text-slate-500 truncate">
+              6 Meta Ads remaining in this cycle
+            </p>
+          </div>
+        </div>
+
+        {/* Card 3: WhatsApp Ingestion */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between min-h-[160px]">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">WhatsApp Submissions</span>
+            <div className="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+              <Radio className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-1">
+            <div className="text-xl font-bold text-slate-900 tracking-tight">
+              18 Videos
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <div className="w-full h-1.5 bg-green-100 rounded-full overflow-hidden">
+              <div className="h-full w-full bg-green-600 rounded-full" />
+            </div>
+            <p className="text-xs text-green-700 font-medium truncate">
+              92% submission rate on ₹100 coupon
+            </p>
+          </div>
+        </div>
+
+        {/* Card 4: Payment Instrument */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between min-h-[160px]">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Razorpay Payment</span>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-1">
+            <div className="text-base font-bold text-slate-900 tracking-tight truncate">
+              {paymentMethod ? paymentMethod.headline : 'UPI AutoPay'}
+            </div>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-slate-500 truncate">
+              {paymentMethod ? paymentMethod.subtext : 'Secured with Razorpay India'}
+            </p>
+            <p className="text-[10px] text-slate-400 font-medium">100% Indian GST Invoiced</p>
           </div>
         </div>
       </section>
 
-      {/* TWO-COLUMN MAIN GRID */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* LEFT COLUMN: Conditional Free vs Pro State */}
-        <div className="lg:col-span-6 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col gap-6">
-          {currentPlan === 'free' ? (
-            <>
-              <div>
-                <div className="flex items-start justify-between gap-4 pb-5 border-b border-slate-100">
-                  <div>
-                    <h2 className="text-base font-bold text-slate-900">Included in Your Free Plan</h2>
-                    <p className="text-xs text-slate-500 mt-0.5">Core essential customer review collection features.</p>
-                  </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap">
-                    Free Forever
-                  </span>
-                </div>
-
-                <ul className="pt-4 pb-1 space-y-3 text-sm text-slate-700">
-                  <li className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[2.5]" />
-                    <span>Up to 10 Text & 2 Video Testimonials</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[2.5]" />
-                    <span>1 Standard Collection Form Link</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[2.5]" />
-                    <span>Basic Wall of Love Embed <span className="text-slate-400 italic text-xs">(Includes badge)</span></span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[2.5]" />
-                    <span>Bank-grade SSL & Cloudflare Edge Delivery</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="rounded-2xl bg-[#FAF7FF] border border-purple-200/80 p-5 flex flex-col gap-4">
-                <div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-purple-600" />
-                        <h3 className="text-sm font-bold text-slate-900">Unlock with PandaPraise Pro</h3>
-                      </div>
-                      <p className="text-xs text-slate-500 mt-0.5">Scale trust and convert visitors into paying customers.</p>
-                    </div>
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-600 text-white whitespace-nowrap">
-                      ₹2,499 / mo
-                    </span>
-                  </div>
-
-                  <ul className="mt-4 space-y-2.5 text-xs text-slate-700">
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                      <span><strong>Unlimited</strong> Text, Audio & Video Testimonials</span>
-                    </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                      <span><strong>Remove "Powered by PandaPraise" Branding</strong></span>
-                    </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                      <span><strong>Automated Review Request Drips</strong> (Email & WhatsApp)</span>
-                    </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                      <span><strong>Custom Subdomain & Domain</strong> Collection Forms</span>
-                    </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                      <span><strong>AI Sentiment Analysis & Spam Shield</strong></span>
-                    </li>
-                  </ul>
-                </div>
-
-                <button
-                  type="button"
-                  disabled={isProcessingPayment}
-                  onClick={initiateRazorpayPayment}
-                  className="mt-5 w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm shadow-sm shadow-purple-200 flex items-center justify-center gap-2 transition-all cursor-pointer"
-                >
-                  <span>Pay with Razorpay — ₹2,499/mo</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </>
-          ) : (
-            /* PRO ACTIVE STATE HUB */
-            <div className="flex flex-col gap-6">
-              <div>
-                <div className="flex items-start justify-between gap-4 pb-5 border-b border-slate-100">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <h2 className="text-base font-bold text-slate-900">PandaPraise Pro Active</h2>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-0.5">Your workspace has full access to all Pro features.</p>
-                  </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 whitespace-nowrap">
-                    Renews Monthly
-                  </span>
-                </div>
-
-                <ul className="py-5 space-y-3 text-sm text-slate-700">
-                  <li className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[2.5]" />
-                    <span><strong>Unlimited</strong> Text, Audio & Video Testimonials</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[2.5]" />
-                    <span>White-labeled Wall of Love (No PandaPraise Badge)</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[2.5]" />
-                    <span>Automated Email & WhatsApp Review Request Drips</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[2.5]" />
-                    <span>AI Sentiment Analysis & Spam Moderation Shield</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[2.5]" />
-                    <span>Inbound Webhooks & Developer REST API Access</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="rounded-2xl bg-slate-50 border border-slate-200/80 p-5 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-slate-900">Need to cancel or switch plans?</p>
-                  <p className="text-xs text-slate-500 mt-0.5">You can manage your Razorpay billing mandate anytime.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCancelPro}
-                  className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
-                >
-                  Cancel Pro
-                </button>
-              </div>
-            </div>
-          )}
+      {/* PLAN PRICING COMPARISON SECTION */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900">Choose Your Meta Ad Pipeline Tier</h2>
+          <p className="text-xs text-slate-500">
+            No bloated subscriptions. Pay only for Meta ads generated from real customer WhatsApp reviews.
+          </p>
         </div>
 
-        {/* RIGHT COLUMN */}
-        <div className="lg:col-span-6 flex flex-col gap-6">
-          {/* Billing & Tax Details */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                  <Building2 className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-slate-900">Billing & Tax Details</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Compliant invoicing profile for Indian GST and company receipts.</p>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* PLAN 1: 5 ADS PACK */}
+          <div
+            className={`rounded-2xl p-6 bg-white border-2 flex flex-col justify-between transition-all ${
+              currentPlan === 'pack_5'
+                ? 'border-purple-600 shadow-md ring-2 ring-purple-100'
+                : 'border-slate-200 hover:border-slate-300 shadow-sm'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 uppercase tracking-wide">
+                  Pay-per-pack
+                </span>
+                {currentPlan === 'pack_5' && (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                    Active
+                  </span>
+                )}
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setFormState(billingInfo);
-                  setIsEditingBilling(true);
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-purple-600 hover:bg-purple-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-                <span>Edit Billing Info</span>
-              </button>
+              <div className="mt-4">
+                <h3 className="text-xl font-bold text-slate-900">5 Meta Ads Pack</h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Perfect for testing your first batch of UGC ads on Meta without recurring commitments.
+                </p>
+              </div>
+
+              <div className="mt-5 flex items-baseline gap-1.5">
+                <span className="text-3xl font-extrabold text-slate-900">₹1,500</span>
+                <span className="text-xs text-slate-500 font-medium">one-time payment (+ GST)</span>
+              </div>
+              <p className="text-[11px] text-purple-700 font-semibold mt-1">
+                Only ₹300 per Meta ad creative
+              </p>
+
+              <ul className="mt-6 space-y-3 text-xs text-slate-700 border-t border-slate-100 pt-5">
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-purple-600 shrink-0 stroke-[2.5]" />
+                  <span><strong>5 Raw Customer Videos Processed</strong></span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-purple-600 shrink-0 stroke-[2.5]" />
+                  <span><strong>15 Variations:</strong> 3 Viral D2C Hooks burned per video</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-purple-600 shrink-0 stroke-[2.5]" />
+                  <span>Hormozi Word-by-Word Animated Captions</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-purple-600 shrink-0 stroke-[2.5]" />
+                  <span>9:16 (Reel/Story), 1:1 (Feed), 4:5 (Catalog) Formats</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-purple-600 shrink-0 stroke-[2.5]" />
+                  <span>One-click ZIP Download with Adscriptly library</span>
+                </li>
+              </ul>
             </div>
 
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/60">
-                <span className="block text-[10px] font-bold tracking-wider text-slate-400 uppercase">Legal / Company Name</span>
-                <span className="mt-1 block text-xs font-bold text-slate-900 break-words">{billingInfo.companyName}</span>
-              </div>
+            <button
+              type="button"
+              disabled={isProcessing}
+              onClick={() => handleCheckout('pack_5')}
+              className="mt-6 w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Opening Razorpay...</span>
+                </>
+              ) : (
+                <>
+                  <span>Buy 5 Ads Pack — ₹1,500</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </>
+              )}
+            </button>
+          </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/60">
-                <span className="block text-[10px] font-bold tracking-wider text-slate-400 uppercase">Tax ID (GSTIN / VAT Number)</span>
-                <span className="mt-1 block text-xs font-bold text-slate-900 font-mono">{billingInfo.taxId || 'Not provided'}</span>
-              </div>
+          {/* PLAN 2: D2C GROWTH PIPELINE (RECOMMENDED) */}
+          <div
+            className={`rounded-2xl p-6 bg-gradient-to-b from-[#FAF7FF] to-white border-2 flex flex-col justify-between transition-all relative ${
+              currentPlan === 'monthly_growth'
+                ? 'border-purple-600 shadow-lg ring-2 ring-purple-200'
+                : 'border-purple-300 hover:border-purple-400 shadow-sm'
+            }`}
+          >
+            <div className="absolute -top-3 left-6">
+              <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm tracking-wide">
+                🔥 MOST POPULAR FOR SHOPIFY D2C
+              </span>
+            </div>
 
-              <div className="sm:col-span-2 p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                <div>
-                  <span className="block text-[10px] font-bold tracking-wider text-slate-400 uppercase">Billing Email Address</span>
-                  <span className="mt-0.5 block text-xs font-bold text-slate-900 break-all">{billingInfo.billingEmail}</span>
-                </div>
-                <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full self-start sm:self-center shrink-0">
-                  Receives Razorpay GST receipts
+            <div>
+              <div className="flex items-center justify-between pt-1">
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 uppercase tracking-wide">
+                  Automated Pipeline
                 </span>
+                {currentPlan === 'monthly_growth' && (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Current Plan
+                  </span>
+                )}
               </div>
+
+              <div className="mt-4">
+                <h3 className="text-xl font-bold text-slate-900">D2C Growth Pipeline</h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Fully automated from Shopify delivery to Meta-ready ads every single month.
+                </p>
+              </div>
+
+              <div className="mt-5 flex items-baseline gap-1.5">
+                <span className="text-3xl font-extrabold text-slate-900">₹2,999</span>
+                <span className="text-xs text-slate-500 font-medium">/ month (+ GST)</span>
+              </div>
+              <p className="text-[11px] text-emerald-700 font-semibold mt-1">
+                20 Meta Ads included • ₹149 per ad
+              </p>
+
+              <ul className="mt-6 space-y-3 text-xs text-slate-700 border-t border-purple-100 pt-5">
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 stroke-[2.5]" />
+                  <span><strong>20 Meta Ads / Month (60 Hook Variations)</strong></span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 stroke-[2.5]" />
+                  <span><strong>Automated WhatsApp Trigger</strong> (Shopify Delivered + 7d)</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 stroke-[2.5]" />
+                  <span><strong>Auto ₹100 Coupon Delivery</strong> on video response</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 stroke-[2.5]" />
+                  <span><strong>48-Hour Polite WhatsApp Reminder Drips</strong></span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 stroke-[2.5]" />
+                  <span><strong>Push to Shopify Video Reviews:</strong> Embed on PDPs in 1-click</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 stroke-[2.5]" />
+                  <span>Dedicated D2C Growth Slack & Priority GPU Render</span>
+                </li>
+              </ul>
+            </div>
+
+            <button
+              type="button"
+              disabled={isProcessing}
+              onClick={() => handleCheckout('monthly_growth')}
+              className="mt-6 w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold text-xs shadow-md shadow-purple-200 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Opening Razorpay...</span>
+                </>
+              ) : (
+                <>
+                  <span>Subscribe to Pipeline — ₹2,999/mo</span>
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* LOWER SECTION: BILLING INFO & TAX INVOICES */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left: GST Profile */}
+        <div className="lg:col-span-6 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                <Building2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">GSTIN & D2C Brand Profile</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Compliant Indian B2B invoicing for 18% GST input credit.</p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFormState(billingInfo);
+                setIsEditingBilling(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-purple-600 hover:bg-purple-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              <span>Edit Details</span>
+            </button>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/60">
+              <span className="block text-[10px] font-bold tracking-wider text-slate-400 uppercase">Registered Brand</span>
+              <span className="mt-1 block text-xs font-bold text-slate-900 break-words">{billingInfo.companyName}</span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/60">
+              <span className="block text-[10px] font-bold tracking-wider text-slate-400 uppercase">GSTIN (Input Credit)</span>
+              <span className="mt-1 block text-xs font-bold text-slate-900 font-mono">{billingInfo.taxId || 'Not provided'}</span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/60">
+              <span className="block text-[10px] font-bold tracking-wider text-slate-400 uppercase">Shopify Store</span>
+              <span className="mt-1 block text-xs font-bold text-slate-900 font-mono truncate">{billingInfo.storeUrl}</span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/60">
+              <span className="block text-[10px] font-bold tracking-wider text-slate-400 uppercase">Billing Email</span>
+              <span className="mt-1 block text-xs font-bold text-slate-900 truncate">{billingInfo.billingEmail}</span>
             </div>
           </div>
 
-          {/* Invoices & Receipts */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex-1 flex flex-col justify-between">
-            <div>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                    <Receipt className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-slate-900">Invoices & Receipts</h2>
-                    <p className="text-xs text-slate-500 mt-0.5">GST tax invoices generated after verified Razorpay payments.</p>
-                  </div>
-                </div>
+          <div className="mt-4 p-3 rounded-xl bg-purple-50/60 border border-purple-100 flex items-center gap-2.5">
+            <TrendingUp className="w-4 h-4 text-purple-600 shrink-0" />
+            <p className="text-xs text-purple-900 leading-tight">
+              Average ROI on PandaPraise UGC ads: <strong>+466% ROAS lift</strong> compared to static product images.
+            </p>
+          </div>
+        </div>
+
+        {/* Right: Invoices */}
+        <div className="lg:col-span-6 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                <Receipt className="w-5 h-5" />
               </div>
-
-              {invoices.length === 0 ? (
-                <div className="my-5 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-8 text-center">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2.5">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-800">No billing history yet</h3>
-                  <p className="text-xs text-slate-500 max-w-xs mx-auto mt-1 leading-relaxed">
-                    Once you complete a payment via Razorpay, your verified GST tax invoice will appear here automatically.
-                  </p>
-                </div>
-              ) : (
-                <div className="my-4 space-y-2.5">
-                  {invoices.map((inv) => (
-                    <div key={inv.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-200/70 hover:bg-slate-50 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-                          <FileText className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-900">{inv.id}</p>
-                          <p className="text-[11px] text-slate-500">{inv.date} • Razorpay ({inv.paymentId})</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs font-bold text-slate-900">{inv.amount}</span>
-                        <span className="px-2 py-0.5 text-[11px] font-semibold bg-emerald-50 text-emerald-700 rounded-full">{inv.status}</span>
-                        <button type="button" title="View Receipt" className="text-slate-400 hover:text-slate-700 cursor-pointer">
-                          <ExternalLink className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Tax Invoices & Receipts</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Download GST compliant receipts generated via Razorpay.</p>
+              </div>
             </div>
 
-            <div className="rounded-xl bg-[#FAF7FF] border border-purple-200/70 px-4 py-3 flex items-center gap-3">
-              <Info className="w-4 h-4 text-purple-600 shrink-0" />
-              <p className="text-xs text-slate-600 leading-snug">
-                Payments processed via Razorpay. Need your GSTIN on tax invoices? Update your{' '}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormState(billingInfo);
-                    setIsEditingBilling(true);
-                  }}
-                  className="font-semibold text-purple-700 underline hover:text-purple-800 cursor-pointer"
+            <div className="mt-5 space-y-2.5">
+              {invoices.map((inv) => (
+                <div
+                  key={inv.id}
+                  className="flex items-center justify-between p-3 rounded-xl border border-slate-200/70 hover:bg-slate-50 transition-colors"
                 >
-                  Billing Info
-                </button>{' '}
-                before checkout.
-              </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                      <FileCheck2 className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-900">{inv.planName}</p>
+                      <p className="text-[11px] text-slate-500">
+                        {inv.id} • {inv.date} ({inv.paymentId})
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-slate-900">{inv.amount}</span>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700 rounded-full">
+                      {inv.status}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => alert(`Downloading GST Invoice ${inv.id} for ${inv.amount}`)}
+                      title="Download Invoice"
+                      className="text-slate-400 hover:text-purple-600 cursor-pointer"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
+
+          <div className="mt-5 rounded-xl bg-slate-50 border border-slate-200/70 px-4 py-3 flex items-center gap-3">
+            <Info className="w-4 h-4 text-slate-500 shrink-0" />
+            <p className="text-xs text-slate-600 leading-snug">
+              Razorpay generates valid GST tax invoices with 18% IGST/CGST split for instant input tax claims.
+            </p>
           </div>
         </div>
       </section>
@@ -732,15 +629,21 @@ export default function BillingAndPlansPage({
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 shadow-xl">
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-          <h3 className="text-base font-bold text-slate-900">Edit Billing & GST Details</h3>
-          <button type="button" onClick={() => setIsEditingBilling(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+          <h3 className="text-base font-bold text-slate-900">Edit D2C Brand Billing Details</h3>
+          <button
+            type="button"
+            onClick={() => setIsEditingBilling(false)}
+            className="text-slate-400 hover:text-slate-600 cursor-pointer"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSaveBilling} className="mt-4 space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Legal / Company Name</label>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Brand / Company Name
+            </label>
             <input
               type="text"
               required
@@ -751,24 +654,40 @@ export default function BillingAndPlansPage({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Billing Email</label>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              GSTIN (Tax ID for Input Credit)
+            </label>
+            <input
+              type="text"
+              value={formState.taxId}
+              onChange={(e) => setFormState({ ...formState, taxId: e.target.value })}
+              placeholder="e.g. 27AABCA1234M1Z2"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:border-purple-600"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Shopify Store Domain
+            </label>
+            <input
+              type="text"
+              value={formState.storeUrl}
+              onChange={(e) => setFormState({ ...formState, storeUrl: e.target.value })}
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:border-purple-600"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Invoicing Email
+            </label>
             <input
               type="email"
               required
               value={formState.billingEmail}
               onChange={(e) => setFormState({ ...formState, billingEmail: e.target.value })}
               className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-purple-600"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">GSTIN / Tax ID</label>
-            <input
-              type="text"
-              value={formState.taxId}
-              onChange={(e) => setFormState({ ...formState, taxId: e.target.value })}
-              placeholder="e.g. 27AADCB2230M1Z2"
-              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:border-purple-600"
             />
           </div>
 
@@ -784,7 +703,7 @@ export default function BillingAndPlansPage({
               type="submit"
               className="px-4 py-2 rounded-xl text-xs font-semibold bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
             >
-              Save Changes
+              Save Details
             </button>
           </div>
         </form>
@@ -803,90 +722,89 @@ export default function BillingAndPlansPage({
 
   return (
     <div className="min-h-screen bg-[#F4F6FA] text-slate-900 flex font-sans antialiased">
-      {/* LEFT SIDEBAR */}
-      <aside className="w-60 bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 select-none">
+      {/* V2 DASHBOARD SIDEBAR */}
+      <aside className="w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 select-none">
         <div>
-          <div className="h-16 px-5 flex items-center gap-2.5 border-b border-slate-100">
-            <span className="w-3.5 h-3.5 rounded-full bg-purple-600 shrink-0" />
-            <span className="font-bold text-lg tracking-tight text-slate-900">
-              PandaPraise
-            </span>
+          <div className="h-16 px-6 flex items-center gap-3 border-b border-slate-100">
+            <div className="w-8 h-8 rounded-xl bg-purple-600 flex items-center justify-center text-white font-black text-sm">
+              🐼
+            </div>
+            <div>
+              <span className="font-bold text-base tracking-tight text-slate-900">
+                PandaPraise
+              </span>
+              <span className="ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700">
+                V2
+              </span>
+            </div>
           </div>
 
           <nav className="p-3 space-y-1 text-sm font-medium text-slate-600">
-            <a href="/dashboard?tab=welcome" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50">
-              <Star className="w-4 h-4 text-slate-400" />
-              <span>Welcome Hub</span>
-            </a>
-            <a href="/dashboard?tab=forms" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50">
-              <Inbox className="w-4 h-4 text-slate-400" />
-              <span>Collect or Import</span>
-            </a>
-            <a href="/dashboard?tab=proof" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50">
-              <CheckCircle2 className="w-4 h-4 text-slate-400" />
-              <span>Customize</span>
+            <a
+              href="/dashboard"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors"
+            >
+              <Video className="w-4 h-4 text-slate-400" />
+              <span>WhatsApp Queue</span>
             </a>
 
-            <a href="/dashboard?tab=social" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50">
-              <Share2 className="w-4 h-4 text-slate-400" />
-              <span>Post on internet</span>
+            <a
+              href="/dashboard/ads"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors"
+            >
+              <Sparkles className="w-4 h-4 text-purple-600" />
+              <span>Meta Ads Library</span>
             </a>
 
-            <a href="/dashboard?tab=campaigns" className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-slate-50">
-              <span className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-slate-400" />
-                <span>Campaigns</span>
-              </span>
-              <span className="px-2 py-0.5 text-[11px] font-semibold bg-emerald-50 text-emerald-600 rounded-full">
-                Auto
-              </span>
+            <a
+              href="/dashboard/connect"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors"
+            >
+              <ShoppingBag className="w-4 h-4 text-slate-400" />
+              <span>Shopify Onboarding</span>
             </a>
 
             <div className="pt-3 mt-3 border-t border-slate-100 space-y-1">
-              <a href="/dashboard?tab=referral" className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-slate-50">
-                <span className="flex items-center gap-3">
-                  <Gift className="w-4 h-4 text-purple-600" />
-                  <span>Referrals</span>
-                </span>
-                <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-700 rounded-full">
-                  Free Month
-                </span>
-              </a>
-              <a href="/billing" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-900 text-white font-semibold shadow-sm">
-                <CreditCard className="w-4 h-4 text-white" />
+              <a
+                href="/billing"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-purple-50 text-purple-700 font-semibold shadow-xs"
+              >
+                <CreditCard className="w-4 h-4 text-purple-600" />
                 <span>Billing & Plans</span>
+              </a>
+
+              <a
+                href="/"
+                className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-slate-400 hover:text-slate-600"
+              >
+                <span>← Back to Landing Page</span>
               </a>
             </div>
           </nav>
         </div>
 
-        <div className="p-3 border-t border-slate-200/80">
-          <div className="w-full flex items-center justify-between p-2 rounded-xl text-left">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-sm flex items-center justify-center shrink-0">
-                {billingInfo.companyName.charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 truncate">{billingInfo.companyName}</p>
-                <p className="text-[11px] text-slate-500 truncate">
-                  {currentPlan === 'pro' ? 'Pro Plan • Owner' : 'Free Plan • Owner'}
-                </p>
-              </div>
+        <div className="p-4 border-t border-slate-100">
+          <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-50 border border-slate-200/60">
+            <div className="w-8 h-8 rounded-lg bg-purple-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+              {billingInfo.companyName.charAt(0).toUpperCase()}
             </div>
-            <ChevronsUpDown className="w-4 h-4 text-slate-400 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-900 truncate">{billingInfo.companyName}</p>
+              <p className="text-[10px] text-slate-500 font-mono truncate">{billingInfo.storeUrl}</p>
+            </div>
           </div>
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN VIEW */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 bg-white border-b border-slate-200/80 px-8 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 text-sm">
-            <span className="font-bold text-slate-900">Billing & Plans</span>
+            <span className="font-bold text-slate-900">Billing & Pipeline Plans</span>
             <span className="text-slate-300">•</span>
-            <span className="inline-flex items-center gap-1.5 text-slate-500 font-medium">
+            <span className="inline-flex items-center gap-1.5 text-slate-500 text-xs font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              {billingInfo.companyName}
+              Razorpay Secured (INR)
             </span>
           </div>
         </header>

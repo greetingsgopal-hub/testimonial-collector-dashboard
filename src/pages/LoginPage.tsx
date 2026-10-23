@@ -17,7 +17,7 @@ export const LoginPage: React.FC = () => {
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const { signIn, signInWithGoogle, authError } = useAuth();
+  const { signIn, signInWithGoogle, enableDemoMode, authError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -128,6 +128,26 @@ export const LoginPage: React.FC = () => {
             </button>
 
             {/* Clear Divider */}
+            <div className="relative flex items-center justify-center">
+              <div className="border-t border-gray-200 w-full" />
+              <span className="bg-white px-3 text-[11px] text-gray-400 font-semibold uppercase tracking-wider absolute">
+                Or explore live demo
+              </span>
+            </div>
+
+            <button
+              id="demo-login-btn"
+              type="button"
+              onClick={() => {
+                enableDemoMode();
+                navigate(redirectPath, { replace: true });
+              }}
+              className="w-full py-2.5 px-4 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold text-sm border border-purple-200 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-purple-600" />
+              <span>1-Click Live Demo Access (Instant)</span>
+            </button>
+
             <div className="relative flex items-center justify-center">
               <div className="border-t border-gray-200 w-full" />
               <span className="bg-white px-3 text-[11px] text-gray-400 font-semibold uppercase tracking-wider absolute">

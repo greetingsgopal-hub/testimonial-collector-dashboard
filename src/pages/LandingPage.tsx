@@ -4,15 +4,13 @@ import {
   ArrowRight, 
   Check, 
   Clock,
-  X as XIcon, 
   Search, 
   MessageSquare,
   Gift,
   Sparkles,
-  ExternalLink,
-  Menu,
-  Star
+  ExternalLink
 } from 'lucide-react';
+
 import { useAuth } from '../context/AuthContext';
 import { usePageSeo } from '../lib/seo';
 import { analytics } from '../lib/analytics';
@@ -20,6 +18,8 @@ import { INITIAL_REVIEWS } from '../lib/seedData';
 import { FloatingReviewDrawer } from '../components/widgets/FloatingReviewDrawer';
 import { SocialProofToast } from '../components/widgets/SocialProofToast';
 import { MotionAccordion } from '../components/MotionAccordion';
+import { BeforeAfterVideoPlayer } from '../components/meta-ads/BeforeAfterVideoPlayer';
+
 
 const FAQ_ITEMS = [
   {
@@ -48,22 +48,10 @@ const FAQ_ITEMS = [
   },
 ];
 
-// Feature marquee replaces the fabricated client-logo strip. When real
-// customer logos exist, they can be swapped in here without further changes.
-const MARQUEE_ITEMS = [
-  'Collect via public link, QR & widgets',
-  'Moderate before publishing',
-  'Import from Google & CSV',
-  'Embed Walls of Love',
-  'Publish to LinkedIn, Instagram & Facebook',
-  'Rich snippet SEO export',
-  'Free forever plan',
-];
-
 export const LandingPage: React.FC = () => {
   usePageSeo({
-    title: 'Panda Praise — Collect, Manage and Share Testimonials',
-    description: 'The easiest way to collect testimonials and add them to your website. Get started for free with Panda Praise.',
+    title: 'Panda Praise V2 — WhatsApp Customer Videos to Meta Ads',
+    description: 'Turn authentic WhatsApp customer videos into high-converting Meta Ads in 24 hours. Built for Indian Shopify D2C brands.',
     canonical: `${window.location.origin}/`,
   });
 
@@ -74,7 +62,7 @@ export const LandingPage: React.FC = () => {
   const [showSocialToast, setShowSocialToast] = useState(false);
   const [searchQueryMock, setSearchQueryMock] = useState('do the techs actually use it');
   const [isWallModalOpen, setIsWallModalOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
 
   // Smart boundary check to prevent toast colliding with footer or CTAs
   const footerRef = useRef<HTMLElement>(null);
@@ -107,334 +95,301 @@ export const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-[#FFFFFF] text-[#0F172A] selection:bg-brand-500/20 selection:text-brand-900 relative pb-20 sm:pb-0 font-sans">
       
       {/* ── 1. Top Announcement Bar ── */}
-      <div className="bg-purple-600 text-white text-xs sm:text-sm font-medium py-2.5 px-4 text-center flex items-center justify-center gap-2">
-        <span className="px-2 py-0.5 rounded bg-white/20 text-xs font-bold uppercase tracking-wider">🔥 PROVEN SOCIAL PROOF</span>
-        <span>Turn customer praise into authentic, high-converting social proof</span>
+      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white text-xs sm:text-sm font-medium py-2.5 px-4 text-center flex items-center justify-center gap-2">
+        <span className="px-2 py-0.5 rounded bg-black/25 text-xs font-bold uppercase tracking-wider">⚡ REAL CUSTOMER VIDEOS</span>
+        <span>Real Customer UGC Beats AI Actors Every Single Time (2.3%+ Meta CTR)</span>
         <span className="hidden sm:inline">|</span>
-        <Link to="/signup" className="underline hover:text-gray-200 font-semibold">Start Free in 2 Minutes →</Link>
+        <Link to="/signup" className="underline hover:text-emerald-100 font-bold">Get 5 Ads for ₹1,500 →</Link>
       </div>
 
       {/* ── 2. Header / Navigation ── */}
       <header className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <Link to="/" className="text-2xl font-black tracking-tighter text-gray-900">
-            Panda<span className="text-indigo-600">Praise</span>
+          <Link to="/" className="text-2xl font-black tracking-tighter text-gray-900 flex items-center gap-2">
+            <span>🐼</span>
+            <span>Panda<span className="text-emerald-600">Praise</span> <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase ml-1">V2</span></span>
           </Link>
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-          <Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link>
-          <button onClick={() => scrollToSection('collect-section')} className="hover:text-gray-900 transition-colors cursor-pointer">Product</button>
-          <button onClick={() => scrollToSection('share-section')} className="hover:text-gray-900 transition-colors cursor-pointer">Customers</button>
-          <button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors cursor-pointer">Why Panda Praise</button>
-          <button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors cursor-pointer">Resources</button>
+          <button onClick={() => scrollToSection('pipeline-section')} className="hover:text-gray-900 transition-colors cursor-pointer">How It Works</button>
+          <button onClick={() => scrollToSection('comparison-section')} className="hover:text-gray-900 transition-colors cursor-pointer">Before vs After</button>
+          <button onClick={() => scrollToSection('pricing-section')} className="hover:text-gray-900 transition-colors cursor-pointer">Pricing (INR)</button>
+          <button onClick={() => scrollToSection('faq')} className="hover:text-gray-900 transition-colors cursor-pointer">FAQ</button>
         </nav>
         <div className="flex items-center gap-4">
           <Link to={user ? "/dashboard" : "/login"} className="text-sm font-semibold text-gray-700 hover:text-gray-900">
             Login
           </Link>
           <Link
-            to={user ? "/dashboard?new=true" : "/signup"}
+            to={user ? "/dashboard" : "/signup"}
             onClick={() => analytics.signupStarted('header_nav')}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/20"
+            className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-500 transition shadow-lg shadow-emerald-600/20"
           >
-            Start for free
+            Connect Shopify
           </Link>
-
-          {/* Mobile Hamburger Button */}
-          <button
-            type="button"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-950 hover:bg-gray-100 transition-colors cursor-pointer"
-            aria-label="Toggle navigation menu"
-            aria-expanded={isMobileMenuOpen}
-          >
-            {isMobileMenuOpen ? <XIcon className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
         </div>
-
-        {/* Mobile Navigation Dropdown */}
-        {isMobileMenuOpen && (
-          <nav className="md:hidden absolute top-20 left-0 right-0 border-b border-gray-100 bg-white px-6 py-4 space-y-3 shadow-lg">
-            <Link
-              to="/pricing"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block py-2 text-sm font-medium text-gray-700 hover:text-indigo-600"
-            >
-              Pricing
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                scrollToSection('collect-section');
-                setIsMobileMenuOpen(false);
-              }}
-              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 cursor-pointer"
-            >
-              Product
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                scrollToSection('share-section');
-                setIsMobileMenuOpen(false);
-              }}
-              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 cursor-pointer"
-            >
-              Customers
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                scrollToSection('comparison-section');
-                setIsMobileMenuOpen(false);
-              }}
-              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 cursor-pointer"
-            >
-              Why Panda Praise
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                scrollToSection('faq');
-                setIsMobileMenuOpen(false);
-              }}
-              className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 cursor-pointer"
-            >
-              Resources
-            </button>
-          </nav>
-        )}
       </header>
 
       {/* ── 3. Hero Section ── */}
-      <section className="max-w-5xl mx-auto px-4 pt-16 sm:pt-20 pb-16 text-center relative z-10">
+      <section className="max-w-5xl mx-auto px-4 pt-16 sm:pt-20 pb-8 text-center relative z-10">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 border border-purple-100 text-purple-700 text-xs font-semibold mb-8 shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
-          The Anti-Subscription Social Proof Engine
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold mb-8 shadow-sm">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Built for Indian Shopify D2C Brands Spending ₹2L+/mo on Meta
         </div>
 
         {/* Headline */}
-        <h1 className="max-w-5xl mx-auto text-center font-black tracking-tight text-gray-900 leading-[1.12] mb-6 text-3xl sm:text-5xl md:text-6xl lg:text-[68px]">
-          <span className="block whitespace-normal sm:whitespace-nowrap">
-            Turn WhatsApp &amp; DMs Into
-          </span>
-          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 whitespace-normal sm:whitespace-nowrap">
-            High-Converting Social Proof
+        <h1 className="max-w-4xl mx-auto text-center font-black tracking-tight text-gray-950 leading-[1.08] mb-6 text-3xl sm:text-5xl md:text-6xl lg:text-[64px]">
+          <span>Turn WhatsApp Customer Videos into </span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-700">
+            Meta Ads in 24 Hours.
           </span>
         </h1>
 
         {/* Sub-headline */}
-        <p className="text-gray-500 text-base sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-normal">
-          Stop paying monthly hostage fees. Import raw chat screenshots, collect verified reviews, and keep your Wall of Love active forever.
+        <p className="text-gray-600 text-base sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-normal">
+          Real customer videos beat AI actors every single time. Connect your Shopify store and WhatsApp. We automatically collect authentic video reviews, burn viral hooks and Hormozi captions, and deliver 5 Meta-ready ads to your dashboard.
         </p>
 
         {/* CTA Button Group */}
         <div className="flex flex-col items-center gap-4">
           <Link
-            to={user ? "/dashboard?new=true" : "/signup"}
+            to={user ? "/dashboard" : "/signup"}
             onClick={() => {
               analytics.ctaClicked('hero_primary', '/signup');
               analytics.signupStarted('hero_primary');
             }}
-            className="px-8 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-base transition-all duration-200 shadow-xl shadow-indigo-600/30 flex items-center gap-2 cursor-pointer group"
+            className="px-8 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base sm:text-lg transition-all duration-200 shadow-xl shadow-emerald-600/30 flex items-center gap-2 cursor-pointer group"
           >
-            <span>Start for free today</span>
-            <span className="group-hover:translate-x-1 transition-transform">→</span>
+            <span>Connect Your Shopify Store (Get 5 Ads for ₹1,500)</span>
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
 
           {/* Micro Trust Specs */}
-          <div className="flex items-center gap-6 text-xs text-gray-400 font-medium mt-2">
-            <span className="flex items-center gap-1.5">✓ Free forever</span>
-            <span className="flex items-center gap-1.5">✓ No credit card required</span>
-            <span className="flex items-center gap-1.5">✓ 2-minute setup</span>
+          <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 text-xs text-gray-500 font-semibold mt-2">
+            <span className="flex items-center gap-1.5 text-emerald-700">✓ No monthly widget lock-in</span>
+            <span className="flex items-center gap-1.5 text-emerald-700">✓ Ready in 24 hours</span>
+            <span className="flex items-center gap-1.5 text-emerald-700">✓ 9:16, 1:1 & 4:5 ratios included</span>
+          </div>
+        </div>
+
+        {/* ── Interactive Before / After Video Player ── */}
+        <div className="mt-12">
+          <BeforeAfterVideoPlayer />
+        </div>
+      </section>
+
+
+      {/* ── 4. The 3-Step Automated Pipeline Section ── */}
+      <section id="pipeline-section" className="py-20 bg-slate-900 text-white relative overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1.5 rounded-full">
+              Automated UGC Machine
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight mt-4 text-white">
+              Shopify Order ➔ WhatsApp ➔ 5 Meta Ads.
+            </h2>
+            <p className="text-slate-400 text-base sm:text-lg mt-3">
+              Zero manual follow-ups. Zero expensive freelance video editors.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Step 1 */}
+            <div className="bg-slate-800/60 border border-slate-700/80 p-8 rounded-3xl relative flex flex-col justify-between">
+              <div className="absolute -top-4 -left-2 w-10 h-10 rounded-2xl bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-lg shadow-lg shadow-emerald-500/30">
+                1
+              </div>
+              <div className="pt-2">
+                <span className="text-xs font-bold uppercase text-emerald-400 tracking-wider">Step 01 • Connect</span>
+                <h3 className="text-xl font-bold text-white mt-1">Plug In Shopify &amp; WhatsApp</h3>
+                <p className="text-sm text-slate-400 mt-3 leading-relaxed">
+                  Enter your store URL and WhatsApp Business number. Our system syncs automatically with Shopify delivery webhooks.
+                </p>
+              </div>
+              <div className="mt-6 p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs font-mono text-emerald-300">
+                ⚡ Trigger: Order Delivered + 7 Days
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="bg-slate-800/60 border border-slate-700/80 p-8 rounded-3xl relative flex flex-col justify-between">
+              <div className="absolute -top-4 -left-2 w-10 h-10 rounded-2xl bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-lg shadow-lg shadow-emerald-500/30">
+                2
+              </div>
+              <div className="pt-2">
+                <span className="text-xs font-bold uppercase text-emerald-400 tracking-wider">Step 02 • Collect</span>
+                <h3 className="text-xl font-bold text-white mt-1">Frictionless WhatsApp Video</h3>
+                <p className="text-sm text-slate-400 mt-3 leading-relaxed">
+                  Customers don't open email surveys. They send a 20-second video on WhatsApp to unlock flat ₹100 off their next purchase.
+                </p>
+              </div>
+              <div className="mt-6 p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300">
+                💬 <em>"Loved your kurta? Send a 20s video review &amp; get ₹100 coupon."</em>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="bg-slate-800/60 border border-slate-700/80 p-8 rounded-3xl relative flex flex-col justify-between">
+              <div className="absolute -top-4 -left-2 w-10 h-10 rounded-2xl bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-lg shadow-lg shadow-emerald-500/30">
+                3
+              </div>
+              <div className="pt-2">
+                <span className="text-xs font-bold uppercase text-emerald-400 tracking-wider">Step 03 • Render</span>
+                <h3 className="text-xl font-bold text-white mt-1">1-Click Meta Ad Generator</h3>
+                <p className="text-sm text-slate-400 mt-3 leading-relaxed">
+                  Our pipeline automatically burns 3 proven viral D2C hooks and animated Hormozi captions in 9:16, 1:1, and 4:5.
+                </p>
+              </div>
+              <div className="mt-6 p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs font-bold text-emerald-400 flex items-center justify-between">
+                <span>📦 5 Meta Ads Ready</span>
+                <span>CRF 18 HD</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── 4. Feature Marquee (replaces fabricated client logos; real customer
-             logos can be added here once genuine customers exist) ── */}
-      <section className="relative w-full overflow-hidden py-8 border-y border-gray-200/70 bg-white/60">
-        <div className="marquee-track flex items-center gap-12 sm:gap-16">
-          {MARQUEE_ITEMS.map((item, idx) => (
-            <div
-              key={`marquee-a-${idx}`}
-              className="shrink-0 flex items-center justify-center gap-2 text-gray-600 hover:text-gray-950 transition-colors select-none cursor-default"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#6701e6] opacity-60" aria-hidden="true" />
-              <span className="text-sm font-semibold tracking-wide">{item}</span>
-            </div>
-          ))}
-          {MARQUEE_ITEMS.map((item, idx) => (
-            <div
-              key={`marquee-b-${idx}`}
-              aria-hidden="true"
-              className="shrink-0 flex items-center justify-center gap-2 text-gray-600 hover:text-gray-950 transition-colors select-none cursor-default"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#6701e6] opacity-60" aria-hidden="true" />
-              <span className="text-sm font-semibold tracking-wide">{item}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 5. Before / After Comparison Cards ("The Proof Advantage") ── */}
-      <section id="comparison-section" aria-labelledby="comparison-heading" className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 px-2">
-          <p className="text-xs font-semibold tracking-wider uppercase text-brand-600 mb-2">
-            The Proof Advantage
-          </p>
-          <h2 id="comparison-heading" className="text-3xl sm:text-4xl font-bold text-slate-950 tracking-tight max-w-xl mx-auto text-balance leading-tight">
-            Why Winning Brands Rely on Social Proof
+      {/* ── 5. Indian D2C Comparison Table ("Why Real UGC Wins") ── */}
+      <section id="comparison-section" className="max-w-6xl mx-auto px-6 py-24">
+        <div className="text-center max-w-3xl mx-auto mb-14">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+            Performance Truth
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight mt-3">
+            Real Customer UGC vs. Fake AI Actors
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 mt-3 sm:mt-4 max-w-xl mx-auto text-balance leading-relaxed">
-            See the undeniable impact verified customer praise has on your conversion rates.
+          <p className="text-slate-600 mt-2 text-sm sm:text-base">
+            Indian shoppers can spot generic AI avatars from a mile away. Real customer reviews drive genuine purchases.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          {/* Card 1: You Without Social Proof */}
-          <div className="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col justify-between">
-            <div>
-              {/* Modern High-Friction Preview (Without Social Proof) */}
-              <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-gradient-to-b from-slate-50 to-slate-100 border border-slate-200/90 shadow-inner p-4 flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
-                    Low-Trust Checkout
-                  </span>
-                  <span className="text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                    High Friction
-                  </span>
-                </div>
-                <div className="bg-white rounded-xl p-3 border border-slate-200/80 shadow-2xs space-y-1.5">
-                  <div className="flex items-center justify-between text-xs text-slate-500">
-                    <span className="font-medium">Customer Reviews</span>
-                    <span className="text-slate-400">0 Reviews</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400 italic">"No customer ratings found. Buyers hesitate to complete checkout."</p>
-                </div>
-                <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-200/60">
-                  <span>Conversion Rate: <strong className="text-slate-800">0.9%</strong></span>
-                  <span className="text-rose-600 font-semibold">78% Cart Abandonment</span>
-                </div>
-              </div>
-
-              <h3 className="text-xl font-semibold text-slate-900 text-center mb-6">
-                You Without Social Proof
-              </h3>
-              <ul className="space-y-3.5 text-xs sm:text-sm text-gray-600 max-w-sm mx-auto">
-                <li className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
-                    <XIcon className="w-3 h-3 text-rose-500" />
-                  </div>
-                  <span>Struggling to build trust with new visitors</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
-                    <XIcon className="w-3 h-3 text-rose-500" />
-                  </div>
-                  <span>Watching sales trickle in slowly</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
-                    <XIcon className="w-3 h-3 text-rose-500" />
-                  </div>
-                  <span>Working overtime to prove product value</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
-                    <XIcon className="w-3 h-3 text-rose-500" />
-                  </div>
-                  <span>Blending in with generic competitors</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
-                    <XIcon className="w-3 h-3 text-rose-500" />
-                  </div>
-                  <span>Losing high-intent leads to buyer hesitation</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Card 2: You With Social Proof */}
-          <div className="bg-white border-2 border-indigo-100 rounded-3xl p-6 sm:p-8 shadow-lg shadow-indigo-500/5 flex flex-col justify-between relative ring-1 ring-indigo-500/10">
-            <div>
-              {/* Modern Verified Proof Showcase (With Social Proof) */}
-              <div className="rounded-2xl overflow-hidden mb-6 aspect-[16/9] bg-gradient-to-br from-indigo-50/70 via-purple-50/40 to-white border border-indigo-200/80 shadow-inner p-4 flex flex-col justify-between relative">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-100/80 px-2 py-0.5 rounded-full border border-indigo-200">
-                    Verified Social Proof
-                  </span>
-                  <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 shadow-2xs">
-                    <Sparkles className="w-3 h-3 text-emerald-500" />
-                    Sample preview
-                  </span>
-                </div>
-                <div className="bg-white rounded-xl p-3 border border-indigo-100 shadow-sm space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      ))}
-                      <span className="text-xs font-bold text-slate-900 ml-1">5.0</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
-                      ✓ 2-Sec Verified
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-700 font-medium leading-snug">
-                    "Adding Panda Praise reviews to our pricing page doubled our signups in week one."
-                  </p>
-                </div>
-                <div className="flex items-center justify-between text-[11px] text-slate-600 font-medium pt-1 border-t border-indigo-100/60">
-                  <span>Conversion Rate: <strong className="text-emerald-700">4.2%</strong></span>
-                  <span className="text-indigo-600 font-bold">140+ Verified Reviews</span>
-                </div>
-              </div>
-
-              <h3 className="text-xl font-semibold text-slate-900 text-center mb-6">
-                You With Social Proof
-              </h3>
-              <ul className="space-y-3.5 text-xs sm:text-sm text-gray-800 max-w-sm mx-auto font-medium">
-                <li className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
-                    <Check className="w-3 h-3 text-emerald-600" />
-                  </div>
-                  <span>Win customer trust instantly with authentic praise</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
-                    <Check className="w-3 h-3 text-emerald-600" />
-                  </div>
-                  <span>Skyrocket website conversion rates and sales</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
-                    <Check className="w-3 h-3 text-emerald-600" />
-                  </div>
-                  <span>Turn your happiest customers into active advocates</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
-                    <Check className="w-3 h-3 text-emerald-600" />
-                  </div>
-                  <span>Stand out effortlessly against competitors</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
-                    <Check className="w-3 h-3 text-emerald-600" />
-                  </div>
-                  <span>Market with unshakeable confidence & social proof</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
+                <th className="py-4 px-6 font-bold">Feature</th>
+                <th className="py-4 px-6 font-bold text-rose-600">Old Way / AI Actors</th>
+                <th className="py-4 px-6 font-bold text-emerald-700 bg-emerald-50/50">PandaPraise V2 UGC</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              <tr>
+                <td className="py-4 px-6 font-semibold text-gray-900">Shopper Trust &amp; Authenticity</td>
+                <td className="py-4 px-6 text-gray-600">Uncanny valley, robotic lip-sync</td>
+                <td className="py-4 px-6 font-bold text-emerald-700 bg-emerald-50/30">100% Real buyers holding actual products</td>
+              </tr>
+              <tr>
+                <td className="py-4 px-6 font-semibold text-gray-900">Average Meta CTR</td>
+                <td className="py-4 px-6 text-rose-600 font-bold">0.6% – 0.9% (High ad fatigue)</td>
+                <td className="py-4 px-6 font-black text-emerald-700 bg-emerald-50/30">2.1% – 2.8% (Scroll-stopping hook)</td>
+              </tr>
+              <tr>
+                <td className="py-4 px-6 font-semibold text-gray-900">Cost Per Creative</td>
+                <td className="py-4 px-6 text-gray-600">₹1,500 – ₹3,000 per video editing agency</td>
+                <td className="py-4 px-6 font-bold text-emerald-700 bg-emerald-50/30">₹300 per ad (₹1,500 for 5 ads)</td>
+              </tr>
+              <tr>
+                <td className="py-4 px-6 font-semibold text-gray-900">Turnaround Time</td>
+                <td className="py-4 px-6 text-gray-600">5 to 7 days back-and-forth</td>
+                <td className="py-4 px-6 font-bold text-emerald-700 bg-emerald-50/30">Under 24 hours on autopilot</td>
+              </tr>
+              <tr>
+                <td className="py-4 px-6 font-semibold text-gray-900">Captions &amp; Aspect Ratios</td>
+                <td className="py-4 px-6 text-gray-600">Manual SRT files or extra fees</td>
+                <td className="py-4 px-6 font-bold text-emerald-700 bg-emerald-50/30">Pre-burnt Hormozi captions in 9:16, 1:1, 4:5</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
+
+      {/* ── 6. Transparent INR Pricing Section ── */}
+      <section id="pricing-section" className="py-24 bg-gray-50 border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+              Clear Indian Pricing (INR)
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-950 tracking-tight mt-3">
+              Pay As You Grow. Zero Lock-In.
+            </h2>
+            <p className="text-slate-600 mt-2 text-base">
+              No free plan. No useless widget fees. Pay only for ready-to-run Meta ad creatives that generate sales.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch max-w-4xl mx-auto">
+            {/* Plan 1: Starter Pack */}
+            <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-bold uppercase text-gray-500 tracking-wider">Pay-As-You-Go</span>
+                <h3 className="text-2xl font-black text-gray-900 mt-1">5 Meta Ads Pack</h3>
+                <p className="text-xs text-gray-500 mt-2">
+                  Ideal for testing your first batch of WhatsApp UGC on Meta Ads.
+                </p>
+                <div className="mt-6 flex items-baseline gap-2">
+                  <span className="text-4xl font-black text-gray-950">₹1,500</span>
+                  <span className="text-xs text-gray-500 font-bold">one-time payment</span>
+                </div>
+                <div className="text-xs text-emerald-700 font-bold mt-1">₹300 per finished ad</div>
+
+                <ul className="mt-6 space-y-3 text-xs sm:text-sm text-gray-700 border-t border-gray-100 pt-6">
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> 5 Meta-Ready Ad Creatives</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> 3 Viral D2C Hook Variations</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Hormozi-Style Animated Subtitles</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> 9:16 (Reels), 1:1 (Feed), 4:5 Multi-Export</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-600" /> Instant Razorpay / UPI Checkout</li>
+                </ul>
+              </div>
+
+              <Link
+                to="/signup?plan=pack"
+                className="mt-8 w-full py-3.5 rounded-xl bg-gray-900 hover:bg-black text-white font-bold text-sm text-center transition-all block"
+              >
+                Buy 5 Ads for ₹1,500
+              </Link>
+            </div>
+
+            {/* Plan 2: Growth Monthly Subscription */}
+            <div className="bg-gradient-to-b from-slate-950 to-slate-900 p-8 rounded-3xl border-2 border-emerald-500 shadow-xl text-white flex flex-col justify-between relative">
+              <span className="absolute -top-3 right-6 bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider py-1 px-3 rounded-full shadow-md">
+                Most Popular for D2C Brands
+              </span>
+              <div>
+                <span className="text-xs font-bold uppercase text-emerald-400 tracking-wider">Automated Growth</span>
+                <h3 className="text-2xl font-black text-white mt-1">D2C Scale Pipeline</h3>
+                <p className="text-xs text-slate-400 mt-2">
+                  Automated Shopify WhatsApp triggers + monthly batch of ready-to-scale ads.
+                </p>
+                <div className="mt-6 flex items-baseline gap-2">
+                  <span className="text-4xl font-black text-white">₹2,999</span>
+                  <span className="text-xs text-slate-400 font-bold">/ month</span>
+                </div>
+                <div className="text-xs text-emerald-400 font-bold mt-1">Includes 20 Meta Ads every month</div>
+
+                <ul className="mt-6 space-y-3 text-xs sm:text-sm text-slate-300 border-t border-slate-800 pt-6">
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> <strong>20 Meta-Ready Ads / month</strong></li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Automated Shopify Delivered + 7d trigger</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Automated 48h WhatsApp reminder nagger</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Up to 500 WhatsApp customer triggers/mo</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> One-click Push to Shopify Product Page</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Priority 12-Hour Render Queue</li>
+                </ul>
+              </div>
+
+              <Link
+                to="/signup?plan=growth"
+                className="mt-8 w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm text-center transition-all block shadow-lg shadow-emerald-500/30"
+              >
+                Start Growth Plan (₹2,999/mo)
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* ── 6. FEATURE 1: "COLLECT" (Two-Column Alternating: Text LEFT, Visual RIGHT) ── */}
       <section id="collect-section" className="border-t border-gray-200/80 bg-gradient-to-b from-white via-amber-50/20 to-white py-20 sm:py-24">

@@ -35,6 +35,11 @@ const AboutPage = React.lazy(() => import('./pages/AboutPage').then((m) => ({ de
 const ContactPage = React.lazy(() => import('./pages/ContactPage').then((m) => ({ default: m.ContactPage })));
 const RoadmapPage = React.lazy(() => import('./pages/RoadmapPage').then((m) => ({ default: m.RoadmapPage })));
 const BlogPage = React.lazy(() => import('./pages/BlogPage').then((m) => ({ default: m.BlogPage })));
+const WhatsAppShopifyOnboardingPage = React.lazy(() => import('./pages/WhatsAppShopifyOnboardingPage').then((m) => ({ default: m.WhatsAppShopifyOnboardingPage })));
+const VideoCollectionDashboardPage = React.lazy(() => import('./pages/VideoCollectionDashboardPage').then((m) => ({ default: m.VideoCollectionDashboardPage })));
+const MetaAdsLibraryPage = React.lazy(() => import('./pages/MetaAdsLibraryPage').then((m) => ({ default: m.MetaAdsLibraryPage })));
+const VideoStudioPage = React.lazy(() => import('./pages/VideoStudioPage').then((m) => ({ default: m.VideoStudioPage })));
+
 const AppLayout = React.lazy(() => import('./components/layouts/AppLayout'));
 import { SuperadminGuard } from './components/auth/SuperadminGuard';
 import { captureReferralCode } from './lib/referral';
@@ -156,7 +161,39 @@ export function App() {
               }
             />
             <Route
-              path="/dashboard"
+              path="/dashboard/connect"
+              element={
+                <ProtectedRoute>
+                  <WhatsAppShopifyOnboardingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/collection"
+              element={
+                <ProtectedRoute>
+                  <VideoCollectionDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/studio"
+              element={
+                <ProtectedRoute>
+                  <VideoStudioPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/ads"
+              element={
+                <ProtectedRoute>
+                  <MetaAdsLibraryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/legacy"
               element={
                 <ProtectedRoute>
                   <DashboardPage />
@@ -164,13 +201,23 @@ export function App() {
               }
             />
             <Route
-              path="/dashboard/*"
+              path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <DashboardPage />
+                  <VideoCollectionDashboardPage />
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/dashboard/*"
+              element={
+                <ProtectedRoute>
+                  <VideoCollectionDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path="/proof"
               element={
