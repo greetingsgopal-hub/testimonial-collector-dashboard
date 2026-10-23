@@ -1,0 +1,77 @@
+{
+  "name": "PandaPraise - Ask Video Review on Day 7",
+  "trigger": {
+    "type": "shopify/fulfillment/order_fulfilled",
+    "description": "When order is fulfilled/delivered"
+  },
+  "conditions": [
+    {
+      "field": "order.tags",
+      "operator": "NOT_CONTAINS",
+      "value": "video_asked"
+    }
+  ],
+  "actions": [
+    {
+      "type": "delay",
+      "duration": "7_days",
+      "description": "Wait 7 days for customer to use product"
+    },
+    {
+      "type": "http_request",
+      "method": "POST",
+      "url": "https://pandapraise.com/api/v1/whatsapp/send-template",
+      "headers": {
+        "Content-Type": "application/json",
+        "x-api-key": "{{YOUR_PANDAPRAISE_API_KEY}}"
+      },
+      "body": {
+        "customer_phone": "{{order.customer.phone}}",
+        "customer_name": "{{order.customer.firstName}}",
+        "product_name": "{{order.lineItems.first.productTitle}}",
+        "store_name": "{{shop.name}}",
+        "reward_amount": "100",
+        "order_id": "{{order.id}}",
+        "template_name": "video_review_reward_7day"
+      }
+    },
+    {
+      "type": "add_tags",
+      "tags": ["video_asked", "pandapraise_pending"]
+    }
+  ],
+  "second_flow": {
+    "name": "PandaPraise - Reminder 48h Later",
+    "trigger": {
+      "type": "tag_added",
+      "tag": "pandapraise_pending"
+    },
+    "actions": [
+      {
+        "type": "delay",
+        "duration": "2_days"
+      },
+      {
+        "type": "condition",
+        "field": "order.tags",
+        "operator": "CONTAINS",
+        "value": "video_received",
+        "if_true": "STOP",
+        "if_false": {
+          "type": "http_request",
+          "method": "POST",
+          "url": "https://pandapraise.com/api/v1/whatsapp/send-template",
+          "headers": {
+            "Content-Type": "application/json",
+            "x-api-key": "{{YOUR_PANDAPRAISE_API_KEY}}"
+          },
+          "body": {
+            "customer_phone": "{{order.customer.phone}}",
+            "customer_name": "{{order.customer.firstName}}",
+            "template_name": "video_reminder_48h"
+          }
+        }
+      }
+    ]
+  }
+}
