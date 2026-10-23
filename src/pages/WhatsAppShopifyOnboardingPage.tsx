@@ -185,16 +185,69 @@ export const WhatsAppShopifyOnboardingPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Zap className="w-4 h-4 text-emerald-400" />
-                Customer WhatsApp Experience
+                Customer WhatsApp Experience (3 Templates)
               </span>
-              <span className="text-[10px] text-slate-500 font-mono">Live Preview</span>
+              <span className="text-[10px] text-emerald-400 font-mono font-bold">40% Reply Rate</span>
             </div>
 
             <WhatsAppTemplatePreview
               storeName="Ananya D2C"
               sampleProduct="Floral Anarkali Kurta"
-              discountAmount={discountAmount}
+              discountAmount={discountAmount.replace(/[^0-9]/g, '') || '100'}
             />
+          </div>
+        </div>
+
+        {/* ── 10-MINUTE META SETUP & COPY-PASTE GUIDE ── */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                10-Minute Fast Track
+              </span>
+              <h2 className="text-xl font-black text-white mt-2">
+                How to set up WhatsApp Templates in Meta WhatsApp Manager
+              </h2>
+            </div>
+            <span className="text-xs text-slate-400">
+              Official WhatsApp Cloud API • ~30 paise / message
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+              <span className="text-emerald-400 font-bold block text-sm">Step 1 • Meta Manager</span>
+              <p className="text-slate-300 leading-relaxed">
+                Open <strong>Meta Business Manager</strong> ➔ <strong>WhatsApp Manager</strong> ➔ <strong>Message Templates</strong>. Click <strong>Create New</strong>.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+              <span className="text-emerald-400 font-bold block text-sm">Step 2 • Paste Hinglish Copy</span>
+              <p className="text-slate-300 leading-relaxed">
+                Select Category: <strong>Marketing</strong>, Language: <strong>English / Hindi mix</strong>. Copy each template using the <strong>Copy Meta Template</strong> button above.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+              <span className="text-emerald-400 font-bold block text-sm">Step 3 • Shopify Flow Setup</span>
+              <p className="text-slate-300 leading-relaxed">
+                Order Fulfilled ➔ Delay 7 days ➔ Send Template 1 (Collection) ➔ If no reply in 48h, send Template 2 (Nudge) ➔ On reply, send Template 3 (Rights).
+              </p>
+            </div>
+          </div>
+
+          {/* Pro-Tip Box */}
+          <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/30 flex items-start gap-3 text-xs">
+            <span className="text-lg">🔥</span>
+            <div>
+              <strong className="text-purple-300 block font-bold">
+                Pro Tip: "Can you complain about one thing and praise one thing?"
+              </strong>
+              <p className="text-purple-200/80 mt-1 leading-relaxed">
+                Don't just ask "Can you give a review?". Indian shoppers love critiquing products. Asking for <em>1 acchi baat, 1 kharab baat</em> gets <strong>2x more video replies</strong> than formal English requests!
+              </p>
+            </div>
           </div>
         </div>
       </div>
