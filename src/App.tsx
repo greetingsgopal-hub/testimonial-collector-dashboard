@@ -30,6 +30,7 @@ const UseCasePage = React.lazy(() => import('./pages/UseCasePage').then((m) => (
 const AffiliatePage = React.lazy(() => import('./pages/AffiliatePage').then((m) => ({ default: m.AffiliatePage })));
 const DeveloperDocsPage = React.lazy(() => import('./pages/DeveloperDocsPage').then((m) => ({ default: m.DeveloperDocsPage })));
 const AdminPage = React.lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })));
+const ProspectResearchPage = React.lazy(() => import('./features/prospectResearch/ProspectResearchPage').then((m) => ({ default: m.ProspectResearchPage })));
 const BillingAndPlansPage = React.lazy(() => import('./pages/BillingAndPlansPage').then((m) => ({ default: m.BillingAndPlansPage })));
 const AboutPage = React.lazy(() => import('./pages/AboutPage').then((m) => ({ default: m.AboutPage })));
 const ContactPage = React.lazy(() => import('./pages/ContactPage').then((m) => ({ default: m.ContactPage })));
@@ -216,6 +217,14 @@ export function App() {
               element={
                 <SuperadminGuard>
                   <AdminPage />
+                </SuperadminGuard>
+              }
+            />
+            <Route
+              path="/admin/prospect-research"
+              element={
+                <SuperadminGuard>
+                  <ProspectResearchPage />
                 </SuperadminGuard>
               }
             />

@@ -3,6 +3,8 @@ import { WorkerEnv } from '../types';
 export interface VerifiedFirebaseUser {
   uid: string;
   email?: string;
+  // Optional so existing callers are unaffected; stricter endpoints require true.
+  emailVerified?: boolean;
 }
 
 function getFirebaseApiKey(env: WorkerEnv): string | null {
@@ -45,6 +47,7 @@ export async function verifyFirebaseToken(idToken: string, env: WorkerEnv): Prom
       return {
         uid: user.localId,
         email: user.email,
+        emailVerified: user.emailVerified === true,
       };
     }
     return null;

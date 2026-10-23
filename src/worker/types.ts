@@ -60,6 +60,8 @@ export interface WorkerEnv {
   VITE_SUPABASE_ANON_KEY?: string;
   // AI Sentiment & LLM Analysis
   GEMINI_API_KEY?: string;
+  // Internal Prospect Research tool (superadmin-only) feature flag
+  PROSPECT_RESEARCH_ENABLED?: string;
   // WhatsApp Cloud API
   WHATSAPP_ACCESS_TOKEN?: string;
   WHATSAPP_PHONE_NUMBER_ID?: string;

@@ -46,6 +46,7 @@ import { handlePublicTestimonialSubmit } from './handlers/publicSubmissionHandle
 import { handleAccountDeletion } from './handlers/accountDeletionHandler';
 import { handleContactSubmit } from './handlers/contactHandler';
 import { handleRadarScan } from './handlers/radarHandler';
+import { handleProspectResearch } from './handlers/prospectResearch';
 import {
   handleAdminGetWorkspaces,
   handleAdminUpdateWorkspacePlan,
@@ -155,6 +156,10 @@ export default {
       const adminModerateMatch = endpoint.match(/^admin\/testimonials\/([^/]+)\/moderate$/);
       if (adminModerateMatch) {
         return await handleAdminModerateTestimonial(request, env, decodeURIComponent(adminModerateMatch[1]));
+      }
+      // Internal Prospect Research tool (superadmin-only, feature-flagged)
+      if (endpoint === 'admin/prospect-research') {
+        return await handleProspectResearch(request, env);
       }
 
       switch (endpoint) {

@@ -437,6 +437,13 @@ export default function ResilientAdminDashboard() {
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Return to Workspace</span>
               </a>
+              <a
+                href="/admin/prospect-research"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-colors"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>Prospect Research</span>
+              </a>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
                 ADMIN CONSOLE
               </span>
