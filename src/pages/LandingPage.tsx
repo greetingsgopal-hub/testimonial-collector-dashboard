@@ -174,7 +174,7 @@ export const LandingPage: React.FC = () => {
             Your customers already made your best ad.
           </h1>
           <h2 className="text-2xl sm:text-4xl lg:text-[50px] font-semibold tracking-[-0.025em] text-[#0068f9] mt-3 leading-[1.12]">
-            You just have it lost on WhatsApp.
+            You just haven't unlocked it yet.
           </h2>
 
           {/* Subtext (18px weight 400 #121722 max-width ~640px) */}
