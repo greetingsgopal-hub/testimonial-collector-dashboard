@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   Check,
-  Play,
   ChevronDown,
   ChevronUp,
   Loader2,
+  CheckCircle2,
+  MessageSquare,
+  Sparkles,
+  Smartphone,
 } from 'lucide-react';
-import { BeforeAfterVideoPlayer } from '../components/meta-ads/BeforeAfterVideoPlayer';
 import { initiateV2Checkout } from '../services/razorpayService';
 
 export const LandingPage: React.FC = () => {
@@ -16,9 +18,6 @@ export const LandingPage: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState<string | null>(null);
-
-  // Workflow Loom simulation video player state
-  const [isLoomPlaying, setIsLoomPlaying] = useState(false);
 
   // Dock-style product tabs
   const [activeTab, setActiveTab] = useState<'raw' | 'captions' | 'hooks' | 'meta5'>('meta5');
@@ -105,7 +104,7 @@ export const LandingPage: React.FC = () => {
               How it works
             </button>
             <button onClick={() => scrollTo('demo')} className="hover:text-[#0068f9] transition-colors cursor-pointer">
-              Demo
+              Transformation
             </button>
             <button onClick={() => scrollTo('metrics')} className="hover:text-[#0068f9] transition-colors cursor-pointer">
               Customers
@@ -131,10 +130,10 @@ export const LandingPage: React.FC = () => {
             </Link>
 
             <Link
-              to="/dashboard/ads"
+              to="/dashboard/shopify-whatsapp"
               className="hidden lg:inline-flex text-[14px] font-medium text-[#121722] bg-white border border-[#efefef] hover:border-[#d6e4f1] rounded-[48px] px-5 py-2.5 transition-colors"
             >
-              Ad Library
+              Shopify Flow
             </Link>
 
             <button
@@ -198,7 +197,7 @@ export const LandingPage: React.FC = () => {
               onClick={() => scrollTo('demo')}
               className="w-full sm:w-auto px-6 py-3.5 rounded-[48px] bg-white hover:bg-[#fbfaf7] text-[#121722] font-medium text-[15px] sm:text-[16px] border border-[#efefef] hover:border-[#d6e4f1] transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>See Live Ads Running Now</span>
+              <span>See Before / After Transformation</span>
             </button>
           </div>
 
@@ -218,15 +217,15 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* ── DOCK PRODUCT FEATURE CARD WITH TAB BAR ── */}
+          {/* ── DOCK PRODUCT FEATURE CARD (PURE LIGHT UI INTERFACE — NO 3D SCI-FI RENDERS) ── */}
           <div className="mt-16 max-w-[1040px] mx-auto text-left">
             
             {/* Dock Tab Bar (horizontal row, pill background for active tab) */}
             <div className="flex items-center justify-center gap-2 sm:gap-4 overflow-x-auto pb-4 mb-4">
               {[
-                { id: 'raw', label: '1. Raw WhatsApp Review' },
-                { id: 'captions', label: '2. Auto-Captions' },
-                { id: 'hooks', label: '3. Hook Angles' },
+                { id: 'raw', label: '1. WhatsApp Inbound' },
+                { id: 'captions', label: '2. Hormozi Captions' },
+                { id: 'hooks', label: '3. Tested Indian Hooks' },
                 { id: 'meta5', label: '4. 5 Meta Formats' },
               ].map((tab) => (
                 <button
@@ -244,52 +243,77 @@ export const LandingPage: React.FC = () => {
               ))}
             </div>
 
-            {/* Product Screenshot / Video Hero Container (16px radius, #efefef border, soft shadow) */}
-            <div className="rounded-[16px] border border-[#efefef] bg-white p-4 sm:p-6 shadow-[rgba(0,0,0,0.04)_0px_20px_20px_-8px]">
-              <div className="rounded-[16px] overflow-hidden bg-gradient-to-b from-[#f4f0ff] to-[#ffffff] border border-[#efefef] p-4 sm:p-6 flex flex-col md:flex-row gap-6 items-center">
+            {/* Pure Product Interface Card (Clean White, 16px radius, hairline border, Dock micro-shadow) */}
+            <div className="rounded-[16px] border border-[#efefef] bg-white p-6 sm:p-8 shadow-[rgba(0,0,0,0.04)_0px_20px_20px_-8px]">
+              
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
-                {/* Left: Video Preview Window */}
-                <div className="w-full md:w-1/2 aspect-[9/14] max-w-[320px] mx-auto rounded-[16px] bg-black overflow-hidden relative shadow-[0_10px_25px_rgba(0,0,0,0.15)]">
-                  <video
-                    src="/demo_meta_ad.mp4"
-                    loop
-                    muted
-                    autoPlay
-                    playsInline
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Dynamic simulated overlay */}
-                  <div className="absolute top-4 left-4 right-4 bg-white/90 backdrop-blur-md p-3 rounded-[12px] border border-white/40 text-left shadow-sm">
-                    <span className="text-[10px] font-semibold text-[#0068f9] uppercase tracking-wider block">
-                      {HOOKS[activeHookIndex].badge}
+                {/* Left Side: Authentic WhatsApp Review Message Thread Card */}
+                <div className="lg:col-span-6 rounded-[16px] bg-[#fbfaf7] border border-[#efefef] p-5 space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#efefef]">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-[#046645]/15 text-[#046645] flex items-center justify-center font-bold text-xs">
+                        <MessageSquare className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="text-[13px] font-semibold text-[#121722] block">
+                          WhatsApp Business Inbox
+                        </span>
+                        <span className="text-[11px] text-[#777c86]">Order #1042 • Ananya Kurta</span>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-[100px] bg-[#d5ecff] text-[#0068f9] text-[11px] font-medium">
+                      Delivered + 7 Days
                     </span>
-                    <p className="text-[12px] font-bold text-[#121722] mt-0.5 leading-snug">
-                      {HOOKS[activeHookIndex].title}
+                  </div>
+
+                  {/* Outbound Template Message */}
+                  <div className="rounded-[12px] bg-white border border-[#efefef] p-3 text-[13px] text-[#121722] space-y-1">
+                    <span className="text-[11px] text-[#777c86] block font-mono">Template: video_review_reward_7day</span>
+                    <p className="leading-relaxed">
+                      "Hey Anjali! 🐼 Your Chanderi Kurta was delivered 7 days back — how is it? Send a quick 20 sec video (1 acchi baat, 1 kharab baat) &amp; get ₹100 OFF your next order!"
                     </p>
                   </div>
-                  <div className="absolute bottom-4 right-4 px-2.5 py-1 rounded-[100px] bg-[#0068f9] text-white text-[10px] font-semibold">
-                    {HOOKS[activeHookIndex].ctr}
+
+                  {/* Inbound Customer Video Review Bubble */}
+                  <div className="rounded-[12px] bg-[#f4f0ff] border border-[#d6e4f1] p-3.5 space-y-2">
+                    <div className="flex items-center justify-between text-[12px]">
+                      <span className="font-semibold text-[#6736eb] flex items-center gap-1.5">
+                        <Smartphone className="w-3.5 h-3.5" />
+                        Inbound Customer Video (0:19)
+                      </span>
+                      <span className="text-[#777c86] text-[11px]">Received 14:02</span>
+                    </div>
+                    <div className="p-2.5 bg-white rounded-[8px] border border-[#efefef] text-[12px] text-[#121722]">
+                      <p className="font-medium text-[#121722]">
+                        “Kurta fitting is very nice, fabric is pure cotton linen. Best thing is actual deep side pockets!”
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-[#046645] font-medium pt-1">
+                      <span>✓ Rights Released: "YES, USE AS AD ❤️"</span>
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">₹100 Code Sent</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Right: Explanation & Hook Toggle */}
-                <div className="w-full md:w-1/2 space-y-5">
+                {/* Right Side: What PandaPraise Generates in 24 Hours */}
+                <div className="lg:col-span-6 space-y-5">
                   <div>
                     <span className="text-[13px] font-semibold text-[#0068f9] uppercase tracking-[0.077em]">
-                      Interactive Demo
+                      24-Hour Done-For-You Pipeline
                     </span>
-                    <h3 className="text-[24px] font-semibold text-[#121722] mt-1 leading-[1.33]">
-                      What happens in 24 hours
+                    <h3 className="text-[24px] font-semibold text-[#121722] mt-1 leading-[1.3]">
+                      5 Meta Ads ready to scale
                     </h3>
                     <p className="text-[15px] text-[#777c86] mt-2 leading-[1.56]">
-                      When your customer sends a video on WhatsApp, our editor cuts the filler, punches up audio, adds word-by-word kinetic captions, and exports 5 creative variations ready for Meta Ads Manager.
+                      We take that 19-second raw WhatsApp review and burn 3 pattern-interrupting hooks, apply word-by-word kinetic captions, and export all 3 Meta ratios.
                     </p>
                   </div>
 
                   {/* Hook selector buttons */}
-                  <div className="space-y-2 pt-2">
+                  <div className="space-y-2 pt-1">
                     <span className="text-[13px] font-medium text-[#777c86] block">
-                      Try 3 tested Indian hooks:
+                      Active Hook Variations:
                     </span>
                     {HOOKS.map((hook, idx) => (
                       <button
@@ -298,14 +322,29 @@ export const LandingPage: React.FC = () => {
                         onClick={() => setActiveHookIndex(idx)}
                         className={`w-full text-left p-3 rounded-[12px] border transition-colors cursor-pointer flex items-center justify-between text-[13px] ${
                           activeHookIndex === idx
-                            ? 'bg-white border-[#0068f9] text-[#121722] font-semibold shadow-xs'
-                            : 'bg-[#fbfaf7] border-[#efefef] text-[#777c86] hover:text-[#121722]'
+                            ? 'bg-[#fbfaf7] border-[#0068f9] text-[#121722] font-semibold'
+                            : 'bg-white border-[#efefef] text-[#777c86] hover:text-[#121722]'
                         }`}
                       >
-                        <span>{hook.title}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-[#f4f0ff] text-[#0068f9] flex items-center justify-center text-[11px] font-bold">
+                            {idx + 1}
+                          </span>
+                          <span>{hook.title}</span>
+                        </div>
                         <span className="text-[#0068f9] font-medium text-[12px]">{hook.ctr}</span>
                       </button>
                     ))}
+                  </div>
+
+                  {/* Multi-Ratio Badges */}
+                  <div className="p-3.5 rounded-[12px] bg-[#fbfaf7] border border-[#efefef] flex items-center justify-between text-[13px]">
+                    <span className="text-[#777c86]">Deliverables:</span>
+                    <div className="flex items-center gap-2 text-[12px] font-mono text-[#121722]">
+                      <span className="px-2 py-0.5 rounded bg-white border border-[#efefef]">9:16 Reel</span>
+                      <span className="px-2 py-0.5 rounded bg-white border border-[#efefef]">1:1 Feed</span>
+                      <span className="px-2 py-0.5 rounded bg-white border border-[#efefef]">4:5 Carousel</span>
+                    </div>
                   </div>
 
                   <div className="pt-2">
@@ -321,6 +360,7 @@ export const LandingPage: React.FC = () => {
                 </div>
 
               </div>
+
             </div>
 
           </div>
@@ -468,56 +508,80 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── BEFORE / AFTER SPLIT SCREEN (DEMO SECTION) ── */}
+      {/* ── BEFORE / AFTER SIDE-BY-SIDE TRANSFORMATION (PURE CLEAN DOCK INTERFACE) ── */}
       <section id="demo" className="py-20 bg-white border-y border-[#efefef]">
         <div className="max-w-[1200px] mx-auto px-6 text-center">
           <span className="text-[13px] font-semibold text-[#0068f9] uppercase tracking-[0.077em]">
             Side-By-Side Comparison
           </span>
           <h2 className="text-[32px] sm:text-[40px] font-semibold text-[#121722] tracking-[-0.02em] mt-1 leading-[1.2]">
-            See the Transformation
+            See the 24-Hour Transformation
           </h2>
           <p className="text-[16px] text-[#777c86] mt-2 max-w-lg mx-auto">
-            Left: Raw WhatsApp review • Right: Same video with Indian hook, kinetic captions, and 9:16 crop.
+            What your customer sends on WhatsApp vs what we deliver back for Meta Ads Manager.
           </p>
 
-          <div className="mt-12 rounded-[16px] overflow-hidden border border-[#efefef] p-4 sm:p-6 bg-[#fbfaf7] shadow-[0_1px_1px_rgba(0,0,0,0.07)]">
-            <BeforeAfterVideoPlayer />
-          </div>
-        </div>
-      </section>
-
-      {/* ── LOOM WORKFLOW WALKTHROUGH ── */}
-      <section className="py-20 max-w-[1040px] mx-auto px-6 text-center">
-        <div className="rounded-[16px] bg-white border border-[#efefef] p-6 shadow-[rgba(0,0,0,0.04)_0px_20px_20px_-8px] text-left">
-          <div className="flex items-center justify-between pb-4 border-b border-[#efefef] text-[13px]">
-            <span className="font-semibold text-[#121722]">Workflow Demo: WhatsApp ➔ Engine ➔ Meta Ad in 24h</span>
-            <span className="px-3 py-1 rounded-[100px] bg-[#f4f0ff] text-[#0068f9] font-medium text-[12px]">
-              Loom Walkthrough
-            </span>
-          </div>
-
-          <div className="relative mt-4 aspect-video bg-black rounded-[12px] overflow-hidden flex items-center justify-center group">
-            <video
-              src="/demo_meta_ad.mp4"
-              loop
-              playsInline
-              controls
-              className="w-full h-full object-cover"
-              onPlay={() => setIsLoomPlaying(true)}
-              onPause={() => setIsLoomPlaying(false)}
-            />
-            {!isLoomPlaying && (
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
-                <div className="w-14 h-14 rounded-full bg-[#0068f9] text-white flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-                  <Play className="w-5 h-5 fill-current ml-0.5" />
-                </div>
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+            
+            {/* Left: What Customer Sends */}
+            <div className="rounded-[16px] bg-[#fbfaf7] border border-[#efefef] p-6 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#efefef]">
+                <span className="text-[13px] font-semibold uppercase tracking-wider text-[#777c86]">
+                  Raw WhatsApp Video (What Customer Sends)
+                </span>
+                <span className="px-2.5 py-0.5 rounded-[100px] bg-rose-50 text-rose-700 text-[11px] font-semibold border border-rose-200">
+                  0.42% CTR
+                </span>
               </div>
-            )}
+              <div className="p-4 rounded-[12px] bg-white border border-[#efefef] space-y-2">
+                <span className="text-[11px] text-[#777c86] block font-mono">19-second raw recording</span>
+                <p className="text-[14px] text-[#121722] leading-relaxed">
+                  "Haanji, product accha hai, fitting mast hai. Maine kal shaam ko pehna tha..."
+                </p>
+              </div>
+              <ul className="space-y-2 text-[13px] text-[#777c86] pt-1">
+                <li className="flex items-center gap-2">✕ No hook in first 3 seconds (users swipe past)</li>
+                <li className="flex items-center gap-2">✕ No captions (85% watch Reels with audio OFF)</li>
+                <li className="flex items-center gap-2">✕ Wrong framing &amp; uneven room audio</li>
+              </ul>
+            </div>
+
+            {/* Right: What PandaPraise Delivers */}
+            <div className="rounded-[16px] bg-white border-2 border-[#0068f9] p-6 space-y-4 shadow-[rgba(0,0,0,0.04)_0px_20px_20px_-8px]">
+              <div className="flex items-center justify-between pb-3 border-b border-[#efefef]">
+                <span className="text-[13px] font-semibold uppercase tracking-wider text-[#0068f9] flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-[#0068f9]" />
+                  PandaPraise Meta-Ready UGC Ad
+                </span>
+                <span className="px-2.5 py-0.5 rounded-[100px] bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+                  2.42% CTR (+466% ROAS)
+                </span>
+              </div>
+              <div className="p-4 rounded-[12px] bg-[#fbfaf7] border border-[#efefef] space-y-2">
+                <span className="text-[11px] font-bold text-[#0068f9] uppercase tracking-wide block">
+                  Burned Hook: "POV: Kurta with real pockets?? 🔥"
+                </span>
+                <p className="text-[14px] font-bold text-[#121722] leading-relaxed">
+                  "FITTING IS MAST. FABRIC IS PURE COTTON LINEN."
+                </p>
+                <span className="inline-block text-[11px] font-medium text-[#046645] bg-emerald-50 px-2 py-0.5 rounded">
+                  End CTA: ₹100 OFF with code ANJALI100
+                </span>
+              </div>
+              <ul className="space-y-2 text-[13px] text-[#121722] font-medium pt-1">
+                <li className="flex items-center gap-2 text-[#046645]">
+                  <CheckCircle2 className="w-4 h-4" /> 3 Indian D2C hooks tested for maximum thumb-stop
+                </li>
+                <li className="flex items-center gap-2 text-[#046645]">
+                  <CheckCircle2 className="w-4 h-4" /> Word-by-word bold kinetic subtitles with yellow highlight
+                </li>
+                <li className="flex items-center gap-2 text-[#046645]">
+                  <CheckCircle2 className="w-4 h-4" /> Delivered in 9:16 Reel, 1:1 Square, and 4:5 Feed
+                </li>
+              </ul>
+            </div>
+
           </div>
-          <p className="mt-3 text-[13px] text-[#777c86] text-center">
-            Watch the screen recording: Customer WhatsApp video auto-receives 3 hooks and crops in 9:16, 1:1, and 4:5.
-          </p>
         </div>
       </section>
 
@@ -757,7 +821,7 @@ export const LandingPage: React.FC = () => {
                 <span className="font-semibold text-[#121722] block mb-3">Product</span>
                 <ul className="space-y-2 text-[#777c86]">
                   <li><button onClick={() => scrollTo('how-it-works')} className="hover:text-[#0068f9] cursor-pointer">How it works</button></li>
-                  <li><button onClick={() => scrollTo('demo')} className="hover:text-[#0068f9] cursor-pointer">Live Demo</button></li>
+                  <li><button onClick={() => scrollTo('demo')} className="hover:text-[#0068f9] cursor-pointer">Transformation</button></li>
                   <li><Link to="/dashboard/ads" className="hover:text-[#0068f9]">Ad Library</Link></li>
                   <li><Link to="/dashboard/shopify-whatsapp" className="hover:text-[#0068f9]">Shopify Flow</Link></li>
                 </ul>
