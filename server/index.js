@@ -6,6 +6,9 @@ import billingRouter from './routes/billing.js';
 import whatsappRouter from './routes/whatsapp.js';
 import videosRouter from './routes/videos.js';
 
+import metaAdsRouter from './routes/metaAds.js';
+import payoutRouter from './routes/payout.js';
+
 const app = express();
 
 app.use(express.json());
@@ -15,6 +18,8 @@ app.use('/auth', shopifyRouter);
 app.use('/api/billing', billingRouter);
 app.use('/api/whatsapp', whatsappRouter);
 app.use('/api/videos', videosRouter);
+app.use('/api/meta', metaAdsRouter);
+app.use('/api/payout', payoutRouter);
 
 // Health check
 app.get('/health', (req, res) => {

@@ -8,6 +8,8 @@ import authRouter from './routes/auth.js';
 import whatsappRouter from './routes/whatsapp.js';
 import videosRouter from './routes/videos.js';
 import auditRouter from './routes/audit.js';
+import metaAdsRouter from './routes/metaAds.js';
+import payoutRouter from './routes/payout.js';
 import { verifyJWT, requireRole, requireStore } from './middleware/auth.js';
 import { securityMiddleware, audit, requireMFA } from './middleware/security.js';
 
@@ -37,12 +39,22 @@ app.use('/api', billingWebhookRouter);
 app.use('/api/whatsapp', whatsappRouter);
 app.use('/api/videos', videosRouter);
 app.use('/api/audit', auditRouter);
+app.use('/api/meta', metaAdsRouter);
+app.use('/api/payout', payoutRouter);
 
 // Protected test routes
 app.get('/api/merchant/inbox', verifyJWT, requireStore, (req, res) => res.json({ ok: true, store: req.effectiveStore, videos: 3 }));
 app.get('/api/admin/team', requireMFA, verifyJWT, requireRole(['super_admin']), audit('RBAC_ROLE_CHANGE'), (req, res) => res.json({ ok: true, org: req.user.orgId }));
 
-app.get('/api/health', (req, res) => res.json({ shopify: 'ok', razorpay: 'ok', whatsapp: 'ok', db: 'ok', latency: '24ms' }));
+app.get('/api/health', (req, res) => res.json({
+  shopify: 'ok',
+  razorpay: 'ok',
+  whatsapp: 'ok',
+  meta: 'ok',
+  upi: 'ok',
+  db: 'ok',
+  latency: '24ms'
+}));
 
 export { app };
 

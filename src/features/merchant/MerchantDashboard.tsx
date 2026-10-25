@@ -29,6 +29,7 @@ import {
   ToastItem,
   INITIAL_MERCHANT_REVIEWS,
 } from './merchantData';
+import { PushToAdsButton, UpiPayoutButton } from '../../components/PushToAdsButton';
 
 type MainTab = 'inbox' | 'library' | 'billing';
 type StatusFilter = 'all' | 'pending' | 'ready';
@@ -1016,7 +1017,7 @@ export const MerchantDashboard: React.FC = () => {
               </div>
 
               {/* Drawer Actions */}
-              <div className="flex gap-2 pb-6">
+              <div className="flex flex-wrap gap-2 pb-6">
                 <button
                   type="button"
                   onClick={() => {
@@ -1027,13 +1028,8 @@ export const MerchantDashboard: React.FC = () => {
                 >
                   Approve &amp; Download
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleTriggerReward(selectedReview)}
-                  className="px-3 py-2.5 rounded-[8px] bg-white/[0.06] border border-white/[0.08] text-[13px] text-[#25D366] hover:bg-white/[0.1] transition font-mono font-medium"
-                >
-                  ₹200 Reward
-                </button>
+                <PushToAdsButton video={selectedReview} />
+                <UpiPayoutButton video={selectedReview} />
               </div>
             </div>
           </div>
