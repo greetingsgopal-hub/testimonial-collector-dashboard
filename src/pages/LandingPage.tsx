@@ -527,96 +527,115 @@ export function LandingPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 items-stretch">
+        <div className="grid md:grid-cols-3 gap-5 items-stretch">
           {[
             {
-              price: '₹1500',
+              price: '₹1,500',
               name: 'Starter',
               ads: '5 ads',
               per: '₹300 / ad',
-              features: ['3 hooks per video', '9:16 + 4:5', '24h delivery'],
+              features: ['3 hooks per video', '9:16 + 4:5 exports', '24h turnaround SLA'],
               popular: false,
             },
             {
-              price: '₹2999',
+              price: '₹2,999',
               name: 'Growth',
               ads: '20 ads',
               per: '₹149 / ad',
               features: [
-                '5 hooks + 3 CTAs',
-                '9:16 + 4:5 + 1:1',
-                '12h delivery',
-                'Ad copy + headline',
+                '5 hooks + 3 viral CTAs',
+                '9:16 + 4:5 + 1:1 auto ratios',
+                '12h priority delivery',
+                'Ad copy + headline included',
               ],
               popular: true,
             },
             {
-              price: '₹6999',
+              price: '₹6,999',
               name: 'Scale',
               ads: '50 ads',
               per: '₹139 / ad',
               features: [
                 '10 hooks + variations',
-                'All ratios + SRT files',
-                '6h delivery',
-                'Dedicated editor',
-                'Meta upload',
+                'All ratios + burned SRT files',
+                '6h rapid delivery',
+                'Dedicated ad editor',
+                'Meta upload & tags',
               ],
               popular: false,
             },
           ].map((p) => (
             <div
               key={p.name}
-              className={`relative rounded-[20px] border p-[1px] ${
-                p.popular ? 'border-[#FFE600] bg-[#FFE600]' : 'border-white/10 bg-white/10'
+              className={`relative rounded-[22px] border p-[1px] flex flex-col transition-all duration-300 ${
+                p.popular
+                  ? 'border-[#FFE600] bg-[#FFE600] md:-translate-y-2 md:shadow-[0_20px_60px_rgba(255,230,0,0.28)]'
+                  : 'border-white/10 bg-white/10 hover:border-white/20'
               }`}
             >
               <div
-                className={`rounded-[19px] h-full p-6 flex flex-col ${
+                className={`rounded-[21px] h-full p-6 sm:p-7 flex flex-col justify-between ${
                   p.popular ? 'bg-[#FFE600] text-black' : 'bg-[#141416] text-[#F8F6F1]'
                 }`}
               >
                 {p.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-[#FFE600] text-[10px] font-bold tracking-widest px-3 py-1 rounded-full">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-black text-[#FFE600] text-[10px] font-black tracking-widest px-3.5 py-1 rounded-full shadow-lg border border-black uppercase whitespace-nowrap">
                     MOST POPULAR
                   </div>
                 )}
-                <div className="flex items-baseline justify-between">
-                  <div className="serif text-[36px] tracking-[-0.02em]">{p.price}</div>
+                
+                <div>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="font-sans font-black text-[38px] md:text-[44px] tracking-tight leading-none">
+                      {p.price}
+                    </div>
+                    <div
+                      className={`text-[11px] font-bold tracking-widest uppercase px-3 py-1 rounded-full ${
+                        p.popular ? 'bg-black text-[#FFE600]' : 'bg-white/10 text-white/90 border border-white/10'
+                      }`}
+                    >
+                      {p.ads}
+                    </div>
+                  </div>
+                  
+                  <div className={`text-[12px] mt-2 font-medium ${p.popular ? 'text-black/70' : 'text-white/50'}`}>
+                    {p.name} • {p.per}
+                  </div>
+
                   <div
-                    className={`text-[11px] font-bold tracking-widest px-2 py-1 rounded-full ${
-                      p.popular ? 'bg-black text-[#FFE600]' : 'bg-white/10'
+                    className={`mt-6 space-y-3 text-[13px] ${
+                      p.popular ? 'text-black/80 font-medium' : 'text-white/70'
                     }`}
                   >
-                    {p.ads}
+                    {p.features.map((t) => (
+                      <div key={t} className="flex items-center gap-2.5">
+                        <span
+                          className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                            p.popular ? 'bg-black/15 text-black' : 'bg-[#FFE600]/20 text-[#FFE600]'
+                          }`}
+                        >
+                          ✓
+                        </span>
+                        <span>{t}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="text-[12px] opacity-60 mt-1">
-                  {p.name} • {p.per}
-                </div>
-                <div
-                  className={`mt-6 space-y-2.5 text-[13px] ${
-                    p.popular ? 'text-black/70' : 'text-white/60'
-                  }`}
-                >
-                  {p.features.map((t) => (
-                    <div key={t} className="flex gap-2">
-                      <span>✓</span> {t}
-                    </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() => showToast(`Razorpay: ${p.name} ${p.price} — checkout opening...`)}
-                  className={`mt-auto pt-6 w-full h-[44px] rounded-full font-bold text-[13px] transition ${
-                    p.popular
-                      ? 'bg-black text-[#FFE600] hover:bg-black/90'
-                      : 'bg-white text-black hover:bg-white/90'
-                  }`}
-                >
-                  Buy {p.name} → Pay via Razorpay
-                </button>
-                <div className="mt-3 text-[10px] opacity-50 text-center">
-                  GST invoice • 7-day re-edit • No actors
+
+                <div className="mt-8 pt-2">
+                  <button
+                    onClick={() => showToast(`Razorpay: ${p.name} ${p.price} — opening checkout...`)}
+                    className={`w-full h-[48px] rounded-full font-bold text-[13px] tracking-wide flex items-center justify-center transition-all transform hover:scale-[1.01] active:scale-95 ${
+                      p.popular
+                        ? 'bg-black text-[#FFE600] hover:bg-[#111] shadow-[0_4px_20px_rgba(0,0,0,0.3)]'
+                        : 'bg-white text-black hover:bg-white/90 shadow-[0_4px_20px_rgba(255,255,255,0.1)]'
+                    }`}
+                  >
+                    Buy {p.name} → Pay via Razorpay
+                  </button>
+                  <div className={`mt-3 text-[11px] text-center font-medium ${p.popular ? 'text-black/60' : 'text-white/40'}`}>
+                    GST invoice • 7-day re-edit • No actors
+                  </div>
                 </div>
               </div>
             </div>
