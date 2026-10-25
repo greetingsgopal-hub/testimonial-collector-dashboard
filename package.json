@@ -17,6 +17,7 @@
     "firebase": "^12.19.0",
     "hono": "^4.13.13",
     "jsonwebtoken": "^9.0.3",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^1.16.0",
     "mongoose": "^9.11.4",
     "motion": "^14.5.0",
