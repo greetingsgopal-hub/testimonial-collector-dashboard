@@ -27,7 +27,7 @@ export interface MetaAdCopy {
 
 export interface MetaAdCreative {
   id: string;
-  reviewId: string;
+  reviewId?: string;
   customerName: string;
   customerCity?: string;
   productName: string;
@@ -35,12 +35,18 @@ export interface MetaAdCreative {
   imageUrl?: string;
   formats: MetaAdFormat[];
   activeFormat: MetaAdFormat;
+  format?: string;
   hooks: MetaAdHook[];
-  selectedHookIndex: number;
+  hook?: { headline: string; label?: string };
+  selectedHookIndex?: number;
   copy: MetaAdCopy;
+  primaryText?: string;
+  ctaButton?: string;
   metricsEstimate: {
     estCtr: string;
     targetRoas: string;
   };
   createdAt: string;
 }
+
+

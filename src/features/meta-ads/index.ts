@@ -8,4 +8,6 @@ export { BeforeAfterVideoPlayer } from '../../components/meta-ads/BeforeAfterVid
 export { WhatsAppTemplatePreview } from '../../components/meta-ads/WhatsAppTemplatePreview';
 export { MetaAdGeneratorStudio } from './components/MetaAdGeneratorStudio';
 export type { MetaAdGeneratorStudioProps } from './components/MetaAdGeneratorStudio';
+export { MetaAdStudio } from './components/MetaAdStudio';
+
 

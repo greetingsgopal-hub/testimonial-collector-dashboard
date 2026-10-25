@@ -81,3 +81,87 @@ export function generateMetaAdCreative(
     createdAt: new Date().toISOString(),
   };
 }
+
+export interface ReviewVariationInput {
+  id?: string;
+  originalText?: string;
+  cleanedText?: string;
+  author?: string;
+  rating?: number;
+  intentScore?: number;
+  intentCategory?: string;
+  isCodMentioned?: boolean;
+  isDeliveryMentioned?: boolean;
+  extractedKeywords?: string[];
+}
+
+/**
+ * Generates 3 high-converting Meta Ad variations (Pattern-Interrupt Hook, Story Copy, CTA)
+ * tailored for Indian D2C buyers.
+ */
+export function generateMetaAdVariations(
+  reviewInput: ReviewVariationInput,
+  productTitle: string = 'Handloom Cotton Kurti'
+): MetaAdCreative[] {
+  const author = reviewInput.author || 'Verified Customer';
+  const text = reviewInput.cleanedText || reviewInput.originalText || '';
+  const codBadge = reviewInput.isCodMentioned ? '🚚 Cash on Delivery (COD) Available' : '🚚 Fast Pan-India Delivery';
+
+  const formats = ['9:16', '1:1', '4:5'];
+
+  const hooks = [
+    {
+      headline: `Don't buy ${productTitle} until you read what happened to ${author.split(' ')[0]} ⚠️`,
+      angle: 'Pattern Interrupt',
+    },
+    {
+      headline: `I honestly thought Instagram brands were all hype... until this arrived 🤐`,
+      angle: 'Skeptic to Believer',
+    },
+    {
+      headline: `POV: You finally found the perfect ${productTitle} with deep pockets 🔥`,
+      angle: 'Relatable POV',
+    },
+  ];
+
+  return hooks.map((hook, idx) => {
+    const fmt = formats[idx % formats.length];
+    const primaryText = `"${text}"\n\n— ${author} ⭐⭐⭐⭐⭐\n\nUpgrade your daily wardrobe with the ${productTitle}. Handcrafted pure cotton with modern comfort.\n\n${codBadge}\n⚡ Dispatches within 24 Hours\n🔄 7-Day Easy Exchange Guarantee`;
+
+    return {
+      id: `creative-var-${idx + 1}-${Date.now()}`,
+      format: fmt,
+      activeFormat: fmt as any,
+      formats: [fmt as any],
+      hook: {
+        headline: hook.headline,
+        label: hook.angle,
+      },
+      hooks: [
+        {
+          type: 'curiosity_negative',
+          label: hook.angle,
+          hookText: hook.headline,
+          onScreenDurationSec: 3,
+        },
+      ],
+      primaryText,
+      copy: {
+        primaryText,
+        headline: hook.headline,
+        description: 'Rated 4.9/5 by 10,000+ D2C shoppers across India',
+        callToAction: 'Shop Now',
+        trustBadges: ['Cash on Delivery', '7-Day Exchange', 'Free Shipping'],
+      },
+      ctaButton: 'Shop Now',
+      productName: productTitle,
+      customerName: author,
+      metricsEstimate: {
+        estCtr: '2.84%',
+        targetRoas: '4.8x',
+      },
+      createdAt: new Date().toISOString(),
+    };
+  });
+}
+
