@@ -172,6 +172,14 @@ export function App() {
               }
             />
             <Route
+              path="/whatsapp-api"
+              element={<WhatsAppShopifyOnboardingPage />}
+            />
+            <Route
+              path="/step-1"
+              element={<WhatsAppShopifyOnboardingPage />}
+            />
+            <Route
               path="/dashboard/collection"
               element={
                 <ProtectedRoute>
