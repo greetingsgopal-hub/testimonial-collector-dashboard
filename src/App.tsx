@@ -235,6 +235,14 @@ export function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/merchant"
+              element={
+                <ProtectedRoute>
+                  <VideoCollectionDashboardPage />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/dashboard/*"
