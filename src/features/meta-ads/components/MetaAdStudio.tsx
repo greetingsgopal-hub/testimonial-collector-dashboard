@@ -3,6 +3,8 @@ import { parseReviewInput } from '../../reviews/reviewParser';
 import { generateMetaAdVariations } from '../adGenerator';
 import { MetaAdCreative } from '../types';
 import { AdCanvasRenderer } from './AdCanvasRenderer';
+import { CampaignDeployCard } from './CampaignDeployCard';
+import { summarizeMerchantAnalytics } from '../../analytics/roasTracker';
 
 interface MetaAdStudioProps {
   sampleReviewText?: string;
@@ -18,6 +20,20 @@ export const MetaAdStudio: React.FC<MetaAdStudioProps> = ({
   const [adCreatives, setAdCreatives] = useState<MetaAdCreative[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [deployingAdId, setDeployingAdId] = useState<string | null>(null);
+
+  const analyticsSummary = summarizeMerchantAnalytics([
+    {
+      adId: 'sample-ad-1',
+      reviewId: 'rev-sample-1',
+      productTitle: productTitle,
+      impressions: 14200,
+      clicks: 432,
+      ordersCount: 38,
+      totalRevenueInr: 75620,
+      adSpendInr: 13500,
+    },
+  ]);
 
   const handleGenerateAds = () => {
     setIsGenerating(true);
@@ -52,9 +68,14 @@ export const MetaAdStudio: React.FC<MetaAdStudioProps> = ({
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <span className="inline-block px-3 py-1 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 text-xs font-semibold rounded-full mb-2">
-              Meta Ads Studio AI
-            </span>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-block px-3 py-1 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 text-xs font-semibold rounded-full">
+                Meta Ads Studio AI
+              </span>
+              <span className="inline-block px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-md">
+                ROAS Tracker: {analyticsSummary.overallRoas} ({analyticsSummary.revenueFormatted} Attributed)
+              </span>
+            </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
               Review-to-Meta-Ad Creative Generator
             </h3>
@@ -121,13 +142,30 @@ export const MetaAdStudio: React.FC<MetaAdStudioProps> = ({
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-gray-100 dark:border-gray-800">
+              <div className="pt-3 border-t border-gray-100 dark:border-gray-800 space-y-2">
                 <button
                   onClick={() => handleCopyAd(ad)}
-                  className="w-full py-2.5 px-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold text-xs rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full py-2 px-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold text-xs rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   {copiedId === ad.id ? '✓ Copied to Clipboard!' : 'Copy Ad Bundle 📋'}
                 </button>
+
+                <button
+                  onClick={() => setDeployingAdId(deployingAdId === ad.id ? null : ad.id)}
+                  className="w-full py-2 px-4 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold text-xs rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-950 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  {deployingAdId === ad.id ? 'Hide Deploy Form' : '🚀 Push to Meta Ads Manager'}
+                </button>
+
+                {deployingAdId === ad.id && (
+                  <div className="pt-2 animate-fade-in">
+                    <CampaignDeployCard
+                      ad={ad}
+                      shopDomain="store.myshopify.com"
+                      productUrl="https://store.in/products/bestseller"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ))}

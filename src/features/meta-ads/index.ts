@@ -1,5 +1,6 @@
 export * from './types';
 export * from './adGenerator';
+export * from './metaMarketingApi';
 
 // Re-export UI components for convenient consumption
 export { AdCard } from '../../components/meta-ads/AdCard';
@@ -10,3 +11,4 @@ export { MetaAdGeneratorStudio } from './components/MetaAdGeneratorStudio';
 export type { MetaAdGeneratorStudioProps } from './components/MetaAdGeneratorStudio';
 export { MetaAdStudio } from './components/MetaAdStudio';
 export { AdCanvasRenderer } from './components/AdCanvasRenderer';
+export { CampaignDeployCard } from './components/CampaignDeployCard';
