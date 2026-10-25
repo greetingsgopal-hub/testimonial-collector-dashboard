@@ -3,6 +3,7 @@ import cors from 'cors';
 import { connectDB } from './config/db.js';
 import shopifyRouter from './routes/shopify.js';
 import billingRouter from './routes/billing.js';
+import billingWebhookRouter from './routes/billing.webhook.js';
 import authRouter from './routes/auth.js';
 import { verifyJWT, requireRole, requireStore } from './middleware/auth.js';
 
@@ -22,6 +23,7 @@ app.use('/', shopifyRouter);
 app.use('/auth', shopifyRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/billing', billingRouter);
+app.use('/api', billingWebhookRouter);
 
 // Protected test routes
 app.get('/api/merchant/inbox', verifyJWT, requireStore, (req,res)=> res.json({ ok:true, store: req.effectiveStore, videos: 3 }));
