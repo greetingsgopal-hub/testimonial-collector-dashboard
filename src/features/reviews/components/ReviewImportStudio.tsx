@@ -3,7 +3,11 @@ import { parseReviewInput } from '../reviewParser';
 import { filterAndRankReviews } from '../intentFilter';
 import { ParsedHighIntentReview } from '../types';
 
-export const ReviewImportStudio: React.FC = () => {
+export interface ReviewImportStudioProps {
+  onSelectReview?: (review: ParsedHighIntentReview) => void;
+}
+
+export const ReviewImportStudio: React.FC<ReviewImportStudioProps> = ({ onSelectReview }) => {
   const [rawInput, setRawInput] = useState('');
   const [processedReviews, setProcessedReviews] = useState<ParsedHighIntentReview[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -87,8 +91,14 @@ export const ReviewImportStudio: React.FC = () => {
                 </div>
 
                 <button
-                  onClick={() => alert(`Ready to generate Meta Ad creative for review: "${rev.cleanedText.substring(0, 30)}..."`)}
-                  className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity self-start md:self-center"
+                  onClick={() => {
+                    if (onSelectReview) {
+                      onSelectReview(rev);
+                    } else {
+                      alert(`Ready to generate Meta Ad creative for review: "${rev.cleanedText.substring(0, 30)}..."`);
+                    }
+                  }}
+                  className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity self-start md:self-center cursor-pointer"
                 >
                   Generate Meta Ad ⚡
                 </button>
