@@ -5,13 +5,13 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
-  Loader2,
   CheckCircle2,
   MessageSquare,
   Sparkles,
   Smartphone,
 } from 'lucide-react';
 import { initiateV2Checkout } from '../services/razorpayService';
+import { Navbar } from '../components/Navbar';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -89,74 +89,7 @@ export const LandingPage: React.FC = () => {
       )}
 
       {/* ── DOCK TOP NAVIGATION BAR ── */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#efefef]">
-        <div className="max-w-[1200px] mx-auto px-6 h-18 flex items-center justify-between">
-          
-          {/* Logo Left */}
-          <Link to="/" className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-[#121722]">
-            <span className="text-2xl">🐼</span>
-            <span className="font-bold">PandaPraise</span>
-          </Link>
-
-          {/* Nav Links Center */}
-          <nav className="hidden md:flex items-center gap-8 text-[15px] font-medium text-[#121722]">
-            <button onClick={() => scrollTo('how-it-works')} className="hover:text-[#0068f9] transition-colors cursor-pointer">
-              How it works
-            </button>
-            <button onClick={() => scrollTo('demo')} className="hover:text-[#0068f9] transition-colors cursor-pointer">
-              Transformation
-            </button>
-            <button onClick={() => scrollTo('metrics')} className="hover:text-[#0068f9] transition-colors cursor-pointer">
-              Customers
-            </button>
-            <button onClick={() => scrollTo('why-not-vn')} className="hover:text-[#0068f9] transition-colors cursor-pointer">
-              Why not VN?
-            </button>
-            <button onClick={() => scrollTo('pricing')} className="hover:text-[#0068f9] transition-colors cursor-pointer">
-              Pricing
-            </button>
-            <button onClick={() => scrollTo('faq')} className="hover:text-[#0068f9] transition-colors cursor-pointer">
-              FAQ
-            </button>
-          </nav>
-
-          {/* Auth Actions Right */}
-          <div className="flex items-center gap-3">
-            <Link
-              to="/login"
-              className="hidden sm:inline-flex text-[14px] font-medium text-[#121722] hover:text-[#0068f9] px-2.5 py-1.5 transition-colors"
-            >
-              Log in
-            </Link>
-
-            <Link
-              to="/dashboard/shopify-whatsapp"
-              className="hidden lg:inline-flex text-[14px] font-medium text-[#121722] bg-white border border-[#efefef] hover:border-[#d6e4f1] rounded-[48px] px-5 py-2.5 transition-colors"
-            >
-              Shopify Flow
-            </Link>
-
-            <button
-              type="button"
-              disabled={isProcessingPayment}
-              onClick={() => handleRazorpayBuy('pack_5')}
-              className="px-5 py-2.5 rounded-[48px] bg-[#0068f9] hover:bg-[#024bb1] disabled:opacity-50 text-white font-medium text-[14px] sm:text-[15px] transition-colors flex items-center gap-2 cursor-pointer"
-            >
-              {isProcessingPayment ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Processing...</span>
-                </>
-              ) : (
-                <>
-                  <span>Get 5 Ads for ₹1,500</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* ── HERO SECTION (DOCK CREAM TO BLUE GRADIENT) ── */}
       <section className="relative pt-20 pb-24 border-b border-[#efefef] bg-gradient-to-b from-[#faf9f7] via-[#faf9f7] to-[#d5ecff]/40">
@@ -218,7 +151,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* ── DOCK PRODUCT FEATURE CARD (PURE LIGHT UI INTERFACE — NO 3D SCI-FI RENDERS) ── */}
-          <div className="mt-16 max-w-[1040px] mx-auto text-left">
+          <div id="transformation" className="mt-16 max-w-[1040px] mx-auto text-left">
             
             {/* Dock Tab Bar (horizontal row, pill background for active tab) */}
             <div className="flex items-center justify-center gap-2 sm:gap-4 overflow-x-auto pb-4 mb-4">
@@ -369,7 +302,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── DOCK CUSTOMER STAT CARDS (SOCIAL PROOF) ── */}
-      <section id="metrics" className="max-w-[1200px] mx-auto px-6 py-20">
+      <section id="customers" className="max-w-[1200px] mx-auto px-6 py-20">
         <div className="text-center max-w-xl mx-auto mb-14">
           <span className="text-[13px] font-semibold text-[#0068f9] uppercase tracking-[0.077em]">
             Real Results
@@ -586,7 +519,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── WHY NOT VN / CAPCUT COMPARISON TABLE ── */}
-      <section id="why-not-vn" className="py-20 bg-[#fbfaf7] border-y border-[#efefef]">
+      <section id="why-video-editor" className="py-20 bg-[#fbfaf7] border-y border-[#efefef]">
         <div className="max-w-[960px] mx-auto px-6">
           <div className="text-center mb-12">
             <span className="text-[13px] font-semibold text-[#0068f9] uppercase tracking-[0.077em]">
@@ -650,7 +583,7 @@ export const LandingPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           
           {/* Tier 1: Starter */}
-          <div className="rounded-[16px] bg-white border border-[#efefef] p-7 shadow-[0_1px_1px_rgba(0,0,0,0.07)] flex flex-col justify-between">
+          <div id="checkout" className="rounded-[16px] bg-white border border-[#efefef] p-7 shadow-[0_1px_1px_rgba(0,0,0,0.07)] flex flex-col justify-between">
             <div>
               <span className="text-[13px] font-semibold uppercase tracking-[0.077em] text-[#777c86]">Pay-As-You-Go</span>
               <h3 className="text-[24px] font-semibold text-[#121722] mt-1">Starter</h3>
