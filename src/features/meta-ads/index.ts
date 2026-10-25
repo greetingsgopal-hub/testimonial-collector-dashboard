@@ -9,5 +9,4 @@ export { WhatsAppTemplatePreview } from '../../components/meta-ads/WhatsAppTempl
 export { MetaAdGeneratorStudio } from './components/MetaAdGeneratorStudio';
 export type { MetaAdGeneratorStudioProps } from './components/MetaAdGeneratorStudio';
 export { MetaAdStudio } from './components/MetaAdStudio';
-
-
+export { AdCanvasRenderer } from './components/AdCanvasRenderer';

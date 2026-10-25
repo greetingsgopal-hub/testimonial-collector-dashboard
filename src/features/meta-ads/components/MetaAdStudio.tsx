@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { parseReviewInput } from '../../reviews/reviewParser';
 import { generateMetaAdVariations } from '../adGenerator';
 import { MetaAdCreative } from '../types';
+import { AdCanvasRenderer } from './AdCanvasRenderer';
 
 interface MetaAdStudioProps {
   sampleReviewText?: string;
@@ -20,19 +22,15 @@ export const MetaAdStudio: React.FC<MetaAdStudioProps> = ({
   const handleGenerateAds = () => {
     setIsGenerating(true);
     try {
-      const generated = generateMetaAdVariations({
+      const parsedReview = parseReviewInput({
         id: 'rev-sample-1',
-        originalText: sampleReviewText,
-        cleanedText: sampleReviewText,
+        body: sampleReviewText,
         author: customerName,
+        productTitle: productTitle,
         rating: 5,
-        intentScore: 92,
-        intentCategory: 'quality',
-        isCodMentioned: sampleReviewText.toLowerCase().includes('cod'),
-        isDeliveryMentioned: sampleReviewText.toLowerCase().includes('delivery') || sampleReviewText.toLowerCase().includes('fast'),
-        extractedKeywords: ['fabric quality', 'premium cotton', 'fast delivery']
-      }, productTitle);
+      });
 
+      const generated = generateMetaAdVariations(parsedReview, productTitle);
       setAdCreatives(generated);
     } catch (err) {
       console.error('Failed to generate ad variations:', err);
@@ -42,7 +40,7 @@ export const MetaAdStudio: React.FC<MetaAdStudioProps> = ({
   };
 
   const handleCopyAd = (ad: MetaAdCreative) => {
-    const headline = ad.hook?.headline || ad.hooks?.[0]?.hookText || '';
+    const headline = ad.hook?.headline || ad.headline || '';
     const fullText = `[HOOK: ${headline}]\n\n${ad.primaryText}\n\nCTA: ${ad.ctaButton}`;
     navigator.clipboard.writeText(fullText);
     setCopiedId(ad.id);
@@ -84,23 +82,33 @@ export const MetaAdStudio: React.FC<MetaAdStudioProps> = ({
           {adCreatives.map((ad, idx) => (
             <div 
               key={ad.id}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden"
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden space-y-4"
             >
-              <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                Variation {idx + 1} ({ad.format?.toUpperCase() || '9:16'})
+              <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider z-10">
+                Variation {idx + 1} ({ad.format})
+              </div>
+
+              {/* HTML5 Canvas Visual Ad Renderer */}
+              <div className="pt-3">
+                <AdCanvasRenderer ad={ad} reviewQuote={sampleReviewText} />
               </div>
 
               <div className="space-y-4 pt-2">
                 <div>
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Pattern Hook</span>
                   <p className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
-                    "{ad.hook?.headline || ad.hooks?.[0]?.hookText}"
+                    "{ad.hook?.headline || ad.headline}"
                   </p>
+                  {ad.hook?.subheadline && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      {ad.hook.subheadline}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Primary Ad Copy</span>
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 whitespace-pre-line bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-100 dark:border-gray-800">
+                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 whitespace-pre-line bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-100 dark:border-gray-800 max-h-48 overflow-y-auto">
                     {ad.primaryText}
                   </p>
                 </div>
@@ -113,7 +121,7 @@ export const MetaAdStudio: React.FC<MetaAdStudioProps> = ({
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+              <div className="pt-3 border-t border-gray-100 dark:border-gray-800">
                 <button
                   onClick={() => handleCopyAd(ad)}
                   className="w-full py-2.5 px-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold text-xs rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 cursor-pointer"

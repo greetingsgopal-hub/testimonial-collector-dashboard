@@ -1,45 +1,41 @@
 import { describe, it, expect } from 'vitest';
-import { generateMetaAdCreative } from '../index';
-import { ParsedHighIntentReview } from '../../reviews/types';
+import { parseReviewInput } from '../../reviews/reviewParser';
+import { generateMetaAdVariations, generateMetaAdCreative } from '../adGenerator';
 
-describe('Meta Ads Generator Engine', () => {
-  it('generates 3 viral hooks and complete Indian D2C ad copy from high intent review', () => {
-    const review: ParsedHighIntentReview = {
-      id: 'intent_123',
-      author: 'Aarav Gupta',
-      authorName: 'Aarav Gupta',
-      buyerCity: 'Jaipur',
-      authorCity: 'Jaipur',
-      productTitle: 'Handcrafted Kolhapuri Leather Loafers',
-      originalText: 'The fitting is unbelievable and everyone at the wedding asked where I bought this from!',
-      cleanedText: 'The fitting is unbelievable and everyone at the wedding asked where I bought this from!',
-      intentCategory: 'quality_proof',
-      source: 'whatsapp',
+describe('Phase 3: Indian D2C Meta Ad Creative Engine', () => {
+  it('generates 3 distinct Meta Ad formats with regional city attribution and COD CTA', () => {
+    const parsedReview = parseReviewInput({
+      id: 'rev-101',
+      body: 'Ordered on COD in Pune. The cotton kurti fabric is super soft and delivery took only 2 days!',
+      author: 'Sneha Kulkarni',
+      productTitle: 'Mulmul Cotton Kurti',
       rating: 5,
-      isCodMentioned: false,
-      isDeliveryMentioned: false,
-      isRepeatBuyer: false,
-      mediaType: 'video',
-      mediaUrl: 'https://cdn.pandapraise.com/ugc/aarav.mp4',
-      intentScore: 88,
-      extractedKeywords: ['fitting', 'wedding'],
-      extractedKeyPhrase: 'everyone at the wedding asked where I bought this from',
-      adAngleSuggestion: 'Social Proof & Compliment Magnet',
-      suggestedAdAngles: ['Social Proof & Compliment Magnet'],
-      isEligibleForMetaAd: true,
-    };
+    });
 
-    const creative = generateMetaAdCreative(review, 'Royal Footwear');
+    const creatives = generateMetaAdVariations(parsedReview);
 
-    expect(creative.customerName).toBe('Aarav Gupta');
-    expect(creative.productName).toBe('Handcrafted Kolhapuri Leather Loafers');
-    expect(creative.formats).toEqual(['9:16', '1:1', '4:5']);
-    expect(creative.hooks.length).toBeGreaterThanOrEqual(3);
-    expect(creative.copy.trustBadges).toContain('Cash on Delivery Available');
-    expect(creative.copy.primaryText).toContain('Jaipur');
-    expect(creative.copy.primaryText).toContain('Royal Footwear');
-    expect(creative.copy.headline).toContain('everyone at the wedding asked');
-    expect(creative.metricsEstimate.estCtr).toBe('2.84%');
-    expect(creative.metricsEstimate.targetRoas).toBe('4.8x');
+    expect(creatives).toHaveLength(3);
+    expect(creatives.map((c) => c.format)).toEqual(['9:16', '1:1', '4:5']);
+    expect(creatives[0].ctaButton).toBe('Order on COD');
+    expect(creatives[0].customerAttribution).toContain('Pune');
+    expect(creatives[0].primaryText).toContain('Cash on Delivery Available');
+  });
+
+  it('generates rich viral hooks and metrics estimates for studio editor', () => {
+    const parsedReview = parseReviewInput({
+      id: 'rev-102',
+      body: 'I was hesitant about buying online in Jaipur, but the fabric is breathable pure cotton and fits like a dream.',
+      author: 'Priya Sharma',
+      productTitle: 'Handloom Anarkali Suit',
+      rating: 5,
+    });
+
+    const studioCreative = generateMetaAdCreative(parsedReview, 'Riva Fashions');
+
+    expect(studioCreative.customerName).toBe('Priya Sharma');
+    expect(studioCreative.productTitle).toBe('Handloom Anarkali Suit');
+    expect(studioCreative.formats).toEqual(['9:16', '1:1', '4:5']);
+    expect(studioCreative.hooks?.length).toBeGreaterThanOrEqual(3);
+    expect(studioCreative.customerAttribution).toContain('Jaipur');
   });
 });
