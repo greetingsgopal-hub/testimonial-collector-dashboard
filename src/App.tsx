@@ -42,6 +42,7 @@ const MetaAdsLibraryPage = React.lazy(() => import('./pages/MetaAdsLibraryPage')
 const VideoStudioPage = React.lazy(() => import('./pages/VideoStudioPage').then((m) => ({ default: m.VideoStudioPage })));
 const ReviewToMetaAdsStudioPage = React.lazy(() => import('./pages/ReviewToMetaAdsStudioPage').then((m) => ({ default: m.ReviewToMetaAdsStudioPage })));
 const AccessSystemPage = React.lazy(() => import('./pages/AccessSystemPage'));
+const ShopifyRazorpayIntegrationPage = React.lazy(() => import('./pages/ShopifyRazorpayIntegrationPage'));
 
 
 const AppLayout = React.lazy(() => import('./components/layouts/AppLayout'));
@@ -132,6 +133,10 @@ export function App() {
             <Route path="/__/auth/action" element={<VerifyEmailPage />} />
             <Route path="/access-system" element={<AccessSystemPage />} />
             <Route path="/auth-system" element={<AccessSystemPage />} />
+            <Route path="/shopify-razorpay" element={<ShopifyRazorpayIntegrationPage />} />
+            <Route path="/integration" element={<ShopifyRazorpayIntegrationPage />} />
+            <Route path="/integrations" element={<ShopifyRazorpayIntegrationPage />} />
+            <Route path="/integrations/shopify-razorpay" element={<ShopifyRazorpayIntegrationPage />} />
 
             {/* Protected Routes */}
             <Route
