@@ -1,0 +1,19 @@
+{
+  "name": "video_review_reward_7day",
+  "language": "en",
+  "category": "MARKETING",
+  "components": [
+    {
+      "type": "BODY",
+      "text": "Hi {{1}}! Loved your recent purchase {{3}}? Send us a 15-sec video review and get {{2}} off your next order. Just reply with your video now!"
+    },
+    {
+      "type": "FOOTER",
+      "text": "PandaPraise • Kalyan Silks"
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [{ "type": "QUICK_REPLY", "text": "Send Video" }]
+    }
+  ]
+}
