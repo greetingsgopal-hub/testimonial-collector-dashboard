@@ -12,6 +12,7 @@
   "dependencies": {
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
+    "dotenv": "^18.0.9",
     "firebase": "^12.19.0",
     "hono": "^4.13.13",
     "lucide-react": "^1.16.0",
