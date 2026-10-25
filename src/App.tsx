@@ -40,6 +40,8 @@ const WhatsAppShopifyOnboardingPage = React.lazy(() => import('./pages/WhatsAppS
 const VideoCollectionDashboardPage = React.lazy(() => import('./pages/VideoCollectionDashboardPage').then((m) => ({ default: m.VideoCollectionDashboardPage })));
 const MetaAdsLibraryPage = React.lazy(() => import('./pages/MetaAdsLibraryPage').then((m) => ({ default: m.MetaAdsLibraryPage })));
 const VideoStudioPage = React.lazy(() => import('./pages/VideoStudioPage').then((m) => ({ default: m.VideoStudioPage })));
+const ReviewToMetaAdsStudioPage = React.lazy(() => import('./pages/ReviewToMetaAdsStudioPage').then((m) => ({ default: m.ReviewToMetaAdsStudioPage })));
+
 
 const AppLayout = React.lazy(() => import('./components/layouts/AppLayout'));
 import { SuperadminGuard } from './components/auth/SuperadminGuard';
@@ -190,6 +192,22 @@ export function App() {
               element={
                 <ProtectedRoute>
                   <MetaAdsLibraryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/review-to-meta-ads"
+              element={
+                <ProtectedRoute>
+                  <ReviewToMetaAdsStudioPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/studio"
+              element={
+                <ProtectedRoute>
+                  <ReviewToMetaAdsStudioPage />
                 </ProtectedRoute>
               }
             />
