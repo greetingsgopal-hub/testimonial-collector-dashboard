@@ -4,7 +4,8 @@ import {
   processShopifyOrderWebhook, 
   generateWhatsAppVerificationMessage 
 } from '../shopifyWebhookHandler';
-import { buildShopifyAuthUrl, isValidShopifyDomain } from '../shopifyAuth';
+import { buildShopifyAuthUrl, isValidShopifyDomain, sanitizeShopDomain, verifyShopifyHmac } from '../shopifyAuth';
+
 
 describe('Shopify Pipeline & WhatsApp/COD Logic', () => {
   it('normalizes Indian phone numbers correctly', () => {
@@ -73,5 +74,40 @@ describe('Shopify Pipeline & WhatsApp/COD Logic', () => {
     });
     expect(authUrl).toContain('my-brand.myshopify.com');
     expect(authUrl).toContain('client_id=test_client_id');
+  });
+
+  it('sanitizes shop domains and rejects invalid formats', () => {
+    expect(sanitizeShopDomain('https://Aesthetic-D2C.myshopify.com/')).toBe('aesthetic-d2c.myshopify.com');
+    expect(sanitizeShopDomain('bad-domain.com')).toBeNull();
+  });
+
+  it('verifies Shopify HMAC signature using Web Crypto', async () => {
+    const secret = 'hpt_secret_test_key_123';
+    // Compute HMAC for { code: '123', shop: 'test.myshopify.com' }
+    // Sorted message: 'code=123&shop=test.myshopify.com'
+    const encoder = new TextEncoder();
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const sig = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode('code=123&shop=test.myshopify.com'));
+    const hmacHex = Array.from(new Uint8Array(sig))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    const isValid = await verifyShopifyHmac(
+      { code: '123', shop: 'test.myshopify.com', hmac: hmacHex },
+      secret
+    );
+    expect(isValid).toBe(true);
+
+    const isTampered = await verifyShopifyHmac(
+      { code: 'tampered', shop: 'test.myshopify.com', hmac: hmacHex },
+      secret
+    );
+    expect(isTampered).toBe(false);
   });
 });

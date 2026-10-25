@@ -285,6 +285,28 @@ service cloud.firestore {
     match /contact_inquiries/{inquiryId} {
       allow read, write: if false;
     }
+
+    // 11. Multi-tenant Shopify Store Isolation (Meta Ads Pipeline)
+    function isStoreOwner(shopDomain) {
+      return isAuthenticated() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /shopify_stores/{shopDomain} {
+      // Never allow client-side reads of raw access tokens unless owner
+      allow read: if isStoreOwner(shopDomain);
+      // Writes are handled server-side via Cloudflare Worker Admin/REST or authenticated owner
+      allow write: if isAuthenticated() && request.resource.data.ownerUid == request.auth.uid;
+
+      // Subcollection for synced high-intent reviews
+      match /reviews/{reviewId} {
+        allow read, write: if isStoreOwner(shopDomain);
+      }
+
+      // Subcollection for generated Meta Ad Creatives
+      match /meta_ads/{adId} {
+        allow read, write: if isStoreOwner(shopDomain);
+      }
+    }
   }
 }
 
