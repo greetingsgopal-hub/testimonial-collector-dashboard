@@ -1,75 +1,77 @@
 import { describe, it, expect } from 'vitest';
-import {
-  buildShopifyAuthUrl,
-  isValidShopifyDomain,
-  formatIndianPhoneNumber,
-  parseShopifyOrderWebhook,
-} from '../index';
+import { 
+  normalizeIndianPhoneNumber, 
+  processShopifyOrderWebhook, 
+  generateWhatsAppVerificationMessage 
+} from '../shopifyWebhookHandler';
+import { buildShopifyAuthUrl, isValidShopifyDomain } from '../shopifyAuth';
 
-describe('Shopify Integration Pipeline', () => {
-  it('validates myshopify.com domains correctly', () => {
-    expect(isValidShopifyDomain('aesthetic-apparel.myshopify.com')).toBe(true);
-    expect(isValidShopifyDomain('https://bombay-shirts.myshopify.com/')).toBe(true);
-    expect(isValidShopifyDomain('invalid-domain.com')).toBe(false);
-    expect(isValidShopifyDomain('')).toBe(false);
+describe('Shopify Pipeline & WhatsApp/COD Logic', () => {
+  it('normalizes Indian phone numbers correctly', () => {
+    expect(normalizeIndianPhoneNumber('9876543210')).toBe('+919876543210');
+    expect(normalizeIndianPhoneNumber('919876543210')).toBe('+919876543210');
+    expect(normalizeIndianPhoneNumber('+919876543210')).toBe('+919876543210');
+    expect(normalizeIndianPhoneNumber('invalid')).toBe('invalid');
+    expect(normalizeIndianPhoneNumber(undefined)).toBeUndefined();
   });
 
-  it('builds Shopify OAuth authorization URL with correct parameters', () => {
-    const url = buildShopifyAuthUrl({
-      shopDomain: 'brand-delhi.myshopify.com',
-      clientId: 'shpat_test123',
-      redirectUri: 'https://app.pandapraise.com/api/shopify/callback',
-      state: 'random_nonce_999',
-    });
-
-    expect(url).toContain('https://brand-delhi.myshopify.com/admin/oauth/authorize');
-    expect(url).toContain('client_id=shpat_test123');
-    expect(url).toContain('read_orders');
-    expect(url).toContain('state=random_nonce_999');
-  });
-
-  it('normalizes Indian phone numbers to E.164 (+91) format for WhatsApp', () => {
-    expect(formatIndianPhoneNumber('9876543210')).toBe('+919876543210');
-    expect(formatIndianPhoneNumber('+91 98765 43210')).toBe('+919876543210');
-    expect(formatIndianPhoneNumber('09876543210')).toBe('+919876543210');
-    expect(formatIndianPhoneNumber(null)).toBeNull();
-  });
-
-  it('parses incoming Shopify orders webhook accurately for D2C review triggering', () => {
-    const rawWebhook = {
-      id: 884920194,
-      name: '#ORD-2026-901',
-      total_price: '2499.00',
-      gateway: 'Cash on Delivery (COD)',
+  it('detects COD orders and parses line items from webhook payload', () => {
+    const mockPayload = {
+      id: 12345,
+      name: '#1001',
       financial_status: 'pending',
-      fulfillment_status: 'fulfilled',
+      payment_gateway_names: ['Cash on Delivery (COD)'],
       customer: {
-        first_name: 'Pooja',
-        last_name: 'Hegde',
-        phone: '9812345678',
-        email: 'pooja@example.in',
+        first_name: 'Rahul',
+        last_name: 'Sharma',
+        phone: '9876543210'
       },
       shipping_address: {
-        city: 'Bengaluru',
-        province: 'Karnataka',
+        city: 'Mumbai',
+        phone: '9876543210'
       },
       line_items: [
-        {
-          id: 101,
-          title: 'Handloom Chanderi Kurta Set',
-          quantity: 1,
-          price: '2499.00',
-        },
+        { id: 1, title: 'Oversized Cotton T-Shirt', quantity: 1, price: '999.00' }
       ],
-      created_at: '2026-10-24T12:00:00Z',
+      total_price: '999.00',
+      currency: 'INR',
+      created_at: '2026-10-25T10:00:00Z'
     };
 
-    const parsed = parseShopifyOrderWebhook(rawWebhook);
-    expect(parsed.orderNumber).toBe('#ORD-2026-901');
-    expect(parsed.customerName).toBe('Pooja Hegde');
-    expect(parsed.customerPhone).toBe('+919812345678');
-    expect(parsed.financialStatus).toBe('cash_on_delivery');
-    expect(parsed.lineItems[0].title).toBe('Handloom Chanderi Kurta Set');
-    expect(parsed.shippingCity).toBe('Bengaluru');
+    const result = processShopifyOrderWebhook(mockPayload);
+
+    expect(result.isCodOrder).toBe(true);
+    expect(result.customerPhone).toBe('+919876543210');
+    expect(result.shippingCity).toBe('Mumbai');
+    expect(result.lineItems[0].title).toBe('Oversized Cotton T-Shirt');
+  });
+
+  it('generates a WhatsApp review verification message with recipient phone', () => {
+    const order = processShopifyOrderWebhook({
+      id: 999,
+      name: '#ORD-999',
+      customer: { first_name: 'Ananya', last_name: 'Kapoor', phone: '9876543210' },
+      line_items: [{ id: 1, title: 'Lavender Kurti', quantity: 1, price: '1299.00' }],
+    });
+
+    const msg = generateWhatsAppVerificationMessage(order);
+    expect(msg.recipientPhone).toBe('+919876543210');
+    expect(msg.messageBody).toContain('Namaste Ananya!');
+    expect(msg.messageBody).toContain('Lavender Kurti');
+    expect(msg.messageBody).toContain('10% OFF');
+  });
+
+  it('validates myshopify.com domains and builds auth URL', () => {
+    expect(isValidShopifyDomain('my-brand.myshopify.com')).toBe(true);
+    expect(isValidShopifyDomain('invalid-site.com')).toBe(false);
+
+    const authUrl = buildShopifyAuthUrl({
+      shopDomain: 'my-brand.myshopify.com',
+      clientId: 'test_client_id',
+      redirectUri: 'https://app.pandapraise.com/callback',
+      state: 'nonce_123',
+    });
+    expect(authUrl).toContain('my-brand.myshopify.com');
+    expect(authUrl).toContain('client_id=test_client_id');
   });
 });

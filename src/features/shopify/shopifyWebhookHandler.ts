@@ -1,52 +1,78 @@
-import { ShopifyOrderEvent, ShopifyLineItem } from './types';
-import { formatIndianPhoneNumber } from './shopifyAuth';
+import { ShopifyOrderEvent } from './types';
 
 /**
- * Parses incoming raw Shopify Webhook payloads (orders/fulfilled, orders/updated)
- * into a normalized ShopifyOrderEvent structured for WhatsApp UGC triggers.
+ * Normalizes an Indian phone number to E.164 format (+91XXXXXXXXXX)
  */
-export function parseShopifyOrderWebhook(payload: Record<string, any>): ShopifyOrderEvent {
-  const customer = payload.customer || {};
-  const shippingAddress = payload.shipping_address || {};
-  const billingAddress = payload.billing_address || {};
+export function normalizeIndianPhoneNumber(phone?: string): string | undefined {
+  if (!phone) return undefined;
+  let cleaned = phone.replace(/\D/g, '');
+  
+  if (cleaned.length === 10) {
+    return `+91${cleaned}`;
+  } else if (cleaned.length === 12 && cleaned.startsWith('91')) {
+    return `+${cleaned}`;
+  } else if (cleaned.length === 13 && cleaned.startsWith('+91')) {
+    return cleaned;
+  }
+  return phone;
+}
 
-  // Extract best available contact phone
-  const rawPhone = customer.phone || shippingAddress.phone || billingAddress.phone || payload.phone;
-  const customerPhone = formatIndianPhoneNumber(rawPhone) || undefined;
+/**
+ * Processes an incoming Shopify order webhook payload
+ */
+export function processShopifyOrderWebhook(payload: any): ShopifyOrderEvent {
+  const isCod = payload.financial_status === 'pending' || 
+    payload.payment_gateway_names?.some((gw: string) => gw.toLowerCase().includes('cod') || gw.toLowerCase().includes('cash')) ||
+    payload.gateway?.toLowerCase().includes('cod');
 
-  // Extract customer name
-  const firstName = customer.first_name || shippingAddress.first_name || 'Valued';
-  const lastName = customer.last_name || shippingAddress.last_name || 'Customer';
-  const customerName = `${firstName} ${lastName}`.trim();
+  const rawPhone = payload.shipping_address?.phone || payload.customer?.phone || payload.phone;
+  const normalizedPhone = normalizeIndianPhoneNumber(rawPhone);
 
-  // Extract line items
-  const lineItems: ShopifyLineItem[] = (payload.line_items || []).map((item: any) => ({
-    id: item.id,
-    title: item.title || item.name || 'Product',
-    sku: item.sku || undefined,
-    quantity: item.quantity || 1,
-    price: item.price || '0',
-    imageUrl: item.image?.src || item.featured_image?.url || undefined,
+  const lineItems = (payload.line_items || []).map((item: any) => ({
+    id: String(item.id),
+    title: item.title,
+    variantTitle: item.variant_title,
+    quantity: item.quantity,
+    price: item.price,
+    sku: item.sku
   }));
 
-  // Financial status check (COD vs Prepaid)
-  const gateway = (payload.gateway || '').toLowerCase();
-  const paymentDetails = payload.payment_gateway_names || [];
-  const isCod = gateway.includes('cod') || paymentDetails.some((g: string) => g.toLowerCase().includes('cash on delivery') || g.toLowerCase().includes('cod'));
-
   return {
-    orderId: payload.id,
-    orderNumber: payload.name || `#${payload.order_number || payload.id}`,
-    customerName,
-    customerPhone,
-    customerEmail: customer.email || payload.email || undefined,
-    shippingCity: shippingAddress.city || undefined,
-    shippingState: shippingAddress.province || undefined,
-    totalPrice: payload.total_price || '0',
+    orderId: String(payload.id || payload.order_number),
+    orderNumber: String(payload.name || `#${payload.order_number || payload.id}`),
+    customerName: `${payload.customer?.first_name || ''} ${payload.customer?.last_name || ''}`.trim() || 'Verified Buyer',
+    customerEmail: payload.customer?.email || payload.email,
+    customerPhone: normalizedPhone,
+    shippingCity: payload.shipping_address?.city || 'India',
+    lineItems,
+    totalPrice: payload.total_price || '0.00',
+    currency: payload.currency || 'INR',
+    isCodOrder: isCod,
     financialStatus: isCod ? 'cash_on_delivery' : (payload.financial_status === 'paid' ? 'paid' : 'pending'),
     fulfillmentStatus: payload.fulfillment_status === 'fulfilled' ? 'fulfilled' : 'delivered',
-    lineItems,
-    deliveredAt: payload.delivered_at || payload.updated_at,
-    createdAt: payload.created_at || new Date().toISOString(),
+    createdAt: payload.created_at || new Date().toISOString()
+  };
+}
+
+/**
+ * Backward-compatible alias for existing callers
+ */
+export const parseShopifyOrderWebhook = processShopifyOrderWebhook;
+
+/**
+ * Generates a WhatsApp verification request message template tailored for Indian D2C brands
+ */
+export function generateWhatsAppVerificationMessage(order: ShopifyOrderEvent): {
+  recipientPhone?: string;
+  messageBody: string;
+} {
+  const firstName = order.customerName.split(' ')[0];
+  const firstItem = order.lineItems[0]?.title || 'your order';
+
+  const messageBody = `Namaste ${firstName}! 🙏\n\nYour order for *${firstItem}* has been delivered successfully. As a special thank you from our brand, how did you like the quality?\n\nReply with a quick review or photo and get an extra 10% OFF on your next prepaid order! ✨`;
+
+  return {
+    recipientPhone: order.customerPhone,
+    messageBody
   };
 }

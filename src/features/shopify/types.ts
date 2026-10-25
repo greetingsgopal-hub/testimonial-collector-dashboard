@@ -18,6 +18,7 @@ export interface ShopifyStoreConfig {
 export interface ShopifyLineItem {
   id: string | number;
   title: string;
+  variantTitle?: string;
   sku?: string;
   quantity: number;
   price: string;
@@ -33,8 +34,10 @@ export interface ShopifyOrderEvent {
   shippingCity?: string;
   shippingState?: string;
   totalPrice: string;
-  financialStatus: 'paid' | 'pending' | 'cash_on_delivery';
-  fulfillmentStatus: 'fulfilled' | 'delivered' | 'partial';
+  currency?: string;
+  isCodOrder?: boolean;
+  financialStatus?: 'paid' | 'pending' | 'cash_on_delivery';
+  fulfillmentStatus?: 'fulfilled' | 'delivered' | 'partial';
   lineItems: ShopifyLineItem[];
   deliveredAt?: string;
   createdAt: string;
