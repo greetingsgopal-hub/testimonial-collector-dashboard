@@ -38,10 +38,18 @@ router.get('/auth/shopify/callback', async (req, res) => {
 
 router.post('/webhook/orders/create', express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }), async (req, res) => {
   const hmac = req.headers['x-shopify-hmac-sha256'];
-  const gen = crypto.createHmac('sha256', config.shopify.webhookSecret).update(req.rawBody).digest('base64');
+  const rawBody = req.rawBody || Buffer.from(typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
+  const gen = crypto.createHmac('sha256', config.shopify.webhookSecret).update(rawBody).digest('base64');
   if (gen !== hmac) return res.status(401).send('HMAC fail');
-  // If fulfilled, queue WhatsApp DM after 7 days (for test 2 min)
-  // await queue.add('whatsapp-dm', { order: req.body }, { delay: 7*24*60*60*1000 });
+  
+  // If fulfilled, queue WhatsApp DM
+  try {
+    const { scheduleWhatsAppDM } = await import('../jobs/whatsappQueue.js');
+    await scheduleWhatsAppDM(req.body);
+  } catch (err) {
+    console.warn('Queue notice:', err.message);
+  }
+  
   res.status(200).send('ok');
 });
 

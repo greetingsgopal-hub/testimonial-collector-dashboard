@@ -8,7 +8,7 @@ import { verifyJWT, requireRole, requireStore } from './middleware/auth.js';
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }));
 
 try {
   if (process.env.AUTO_CONNECT_DB === 'true') {
@@ -18,6 +18,7 @@ try {
   console.warn('DB connect deferred:', e.message);
 }
 
+app.use('/', shopifyRouter);
 app.use('/auth', shopifyRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/billing', billingRouter);
