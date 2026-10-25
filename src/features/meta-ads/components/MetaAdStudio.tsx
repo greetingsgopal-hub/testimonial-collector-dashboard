@@ -5,6 +5,7 @@ import { MetaAdCreative } from '../types';
 import { AdCanvasRenderer } from './AdCanvasRenderer';
 import { CampaignDeployCard } from './CampaignDeployCard';
 import { summarizeMerchantAnalytics } from '../../analytics/roasTracker';
+import { Sparkles, TrendingUp, Copy, Check, Send } from 'lucide-react';
 
 interface MetaAdStudioProps {
   sampleReviewText?: string;
@@ -32,6 +33,16 @@ export const MetaAdStudio: React.FC<MetaAdStudioProps> = ({
       ordersCount: 38,
       totalRevenueInr: 75620,
       adSpendInr: 13500,
+    },
+    {
+      adId: 'sample-ad-2',
+      reviewId: 'rev-sample-2',
+      productTitle: 'Handcrafted Kolhapuri Loafers',
+      impressions: 18900,
+      clicks: 567,
+      ordersCount: 44,
+      totalRevenueInr: 105600,
+      adSpendInr: 18800,
     },
   ]);
 
@@ -64,97 +75,158 @@ export const MetaAdStudio: React.FC<MetaAdStudioProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="inline-block px-3 py-1 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 text-xs font-semibold rounded-full">
+    <div className="space-y-8">
+      {/* Top Studio Hero & Live ROAS Command Bar */}
+      <div className="relative overflow-hidden rounded-3xl border border-gray-800 bg-gradient-to-b from-gray-900/90 via-gray-950/80 to-gray-950 p-6 md:p-10 shadow-2xl backdrop-blur-2xl">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
+          <div className="space-y-2 max-w-2xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5" />
                 Meta Ads Studio AI
               </span>
-              <span className="inline-block px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-md">
-                ROAS Tracker: {analyticsSummary.overallRoas} ({analyticsSummary.revenueFormatted} Attributed)
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-xs font-bold font-mono">
+                <TrendingUp className="w-3.5 h-3.5 text-teal-400" />
+                Live Attribution: {analyticsSummary.overallRoas} ROAS
               </span>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+
+            <h3 className="text-2xl md:text-4xl font-black text-white tracking-tight">
               Review-to-Meta-Ad Creative Generator
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Transforming review for <span className="font-semibold text-emerald-600">"{productTitle}"</span> by {customerName}
+
+            <p className="text-sm md:text-base text-gray-400 leading-relaxed">
+              Transforming review for <span className="font-semibold text-emerald-400">"{productTitle}"</span> by <span className="text-white font-semibold">{customerName}</span> into high-converting creatives for Indian D2C shoppers.
             </p>
           </div>
 
           <button
             onClick={handleGenerateAds}
             disabled={isGenerating}
-            className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-sm rounded-xl shadow-md disabled:opacity-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="px-7 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-xl shadow-emerald-950/40 transition-all flex items-center justify-center gap-2.5 disabled:opacity-50 cursor-pointer shrink-0"
           >
-            {isGenerating ? 'Generating Creatives...' : '⚡ Generate 3 Meta Ad Variations'}
+            {isGenerating ? 'Synthesizing Creatives...' : '⚡ Generate 3 Meta Ad Variations'}
           </button>
         </div>
 
-        <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800 text-sm text-gray-700 dark:text-gray-300 italic">
-          "{sampleReviewText}"
+        {/* Live Performance Ticker Strip */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 rounded-2xl bg-gray-950/80 border border-gray-800/80 mb-6">
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Attributed Revenue</span>
+            <p className="text-lg md:text-xl font-black text-white font-mono">{analyticsSummary.revenueFormatted}</p>
+          </div>
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Blended UGC ROAS</span>
+            <p className="text-lg md:text-xl font-black text-emerald-400 font-mono">{analyticsSummary.overallRoas}</p>
+          </div>
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Attributed Orders</span>
+            <p className="text-lg md:text-xl font-black text-teal-300 font-mono">{analyticsSummary.orders} Orders</p>
+          </div>
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Est. Average CTR</span>
+            <p className="text-lg md:text-xl font-black text-amber-400 font-mono">3.04%</p>
+          </div>
+        </div>
+
+        {/* Active Customer Review In-Focus Pill */}
+        <div className="p-4 rounded-2xl bg-gray-900/50 border border-gray-800/80 flex items-start gap-3">
+          <span className="text-xl">💬</span>
+          <div className="space-y-1">
+            <p className="text-xs md:text-sm text-gray-200 font-medium italic">
+              "{sampleReviewText}"
+            </p>
+            <p className="text-[11px] text-gray-400 font-semibold">
+              — <span className="text-white">{customerName}</span> for <span className="text-emerald-400 font-bold">{productTitle}</span>
+            </p>
+          </div>
         </div>
       </div>
 
+      {/* Generated 3 Variations Deck */}
       {adCreatives.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {adCreatives.map((ad, idx) => (
             <div 
               key={ad.id}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden space-y-4"
+              className="group relative overflow-hidden rounded-3xl border border-gray-800 bg-gradient-to-b from-gray-900/90 via-gray-950/80 to-gray-950 p-6 shadow-2xl backdrop-blur-2xl hover:border-emerald-500/50 hover:shadow-2xl hover:shadow-emerald-950/20 transition-all duration-300 flex flex-col justify-between space-y-6"
             >
-              <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider z-10">
-                Variation {idx + 1} ({ad.format})
+              {/* Header Badges */}
+              <div className="flex items-center justify-between">
+                <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black tracking-wider uppercase">
+                  Variation {idx + 1} ({ad.format})
+                </span>
+                <span className="text-[11px] font-mono text-gray-400 bg-gray-900 px-2.5 py-0.5 rounded-md border border-gray-800">
+                  {ad.templateStyle?.replace(/_/g, ' ')}
+                </span>
               </div>
 
               {/* HTML5 Canvas Visual Ad Renderer */}
-              <div className="pt-3">
+              <div className="rounded-2xl overflow-hidden border border-gray-800/80 bg-gray-950 p-1">
                 <AdCanvasRenderer ad={ad} reviewQuote={sampleReviewText} />
               </div>
 
-              <div className="space-y-4 pt-2">
+              {/* Ad Copy Stack */}
+              <div className="space-y-4">
+                {/* Pattern Interrupt Hook */}
                 <div>
-                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Pattern Hook</span>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-1">
+                    Pattern Hook
+                  </span>
+                  <p className="text-sm font-black text-white leading-snug">
                     "{ad.hook?.headline || ad.headline}"
                   </p>
                   {ad.hook?.subheadline && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    <p className="text-xs text-gray-400 mt-1">
                       {ad.hook.subheadline}
                     </p>
                   )}
                 </div>
 
+                {/* Primary Text Copy Box */}
                 <div>
-                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Primary Ad Copy</span>
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 whitespace-pre-line bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-100 dark:border-gray-800 max-h-48 overflow-y-auto">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block mb-1">
+                    Primary Ad Copy
+                  </span>
+                  <div className="p-3.5 rounded-xl border border-gray-800/80 bg-gray-950/90 text-xs text-gray-300 whitespace-pre-line font-mono max-h-40 overflow-y-auto leading-relaxed shadow-inner">
                     {ad.primaryText}
-                  </p>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-between text-xs pt-2 border-t border-gray-100 dark:border-gray-800">
-                  <span className="text-gray-500">CTA Button:</span>
-                  <span className="font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-md">
+                {/* CTA & Trust Strip */}
+                <div className="flex items-center justify-between text-xs pt-2 border-t border-gray-800/80">
+                  <span className="text-gray-400 font-medium">CTA Button:</span>
+                  <span className="font-black text-emerald-300 bg-emerald-950/80 border border-emerald-800/60 px-3 py-1 rounded-lg">
                     {ad.ctaButton}
                   </span>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-gray-100 dark:border-gray-800 space-y-2">
+              {/* Action Buttons Deck */}
+              <div className="space-y-2.5 pt-2 border-t border-gray-800/80">
                 <button
                   onClick={() => handleCopyAd(ad)}
-                  className="w-full py-2 px-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold text-xs rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full py-2.5 px-4 bg-gray-800 hover:bg-gray-700 active:scale-98 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
-                  {copiedId === ad.id ? '✓ Copied to Clipboard!' : 'Copy Ad Bundle 📋'}
+                  {copiedId === ad.id ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Copied to Clipboard!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Ad Bundle 📋</span>
+                    </>
+                  )}
                 </button>
 
                 <button
                   onClick={() => setDeployingAdId(deployingAdId === ad.id ? null : ad.id)}
-                  className="w-full py-2 px-4 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold text-xs rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-950 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full py-2.5 px-4 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 active:scale-98 text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/60 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
-                  {deployingAdId === ad.id ? 'Hide Deploy Form' : '🚀 Push to Meta Ads Manager'}
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{deployingAdId === ad.id ? 'Hide Deploy Drawer' : '🚀 Push to Meta Ads Manager'}</span>
                 </button>
 
                 {deployingAdId === ad.id && (

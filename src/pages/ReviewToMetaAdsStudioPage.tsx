@@ -2,9 +2,22 @@ import React, { useState } from 'react';
 import { ShopifyConnectCard } from '../features/shopify/components/ShopifyConnectCard';
 import { ReviewImportStudio } from '../features/reviews/components/ReviewImportStudio';
 import { MetaAdStudio } from '../features/meta-ads/components/MetaAdStudio';
+import { ParsedHighIntentReview } from '../features/reviews/types';
 
 export const ReviewToMetaAdsStudioPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'connect' | 'reviews' | 'ads'>('reviews');
+  const [selectedReviewText, setSelectedReviewText] = useState(
+    "Ordered on COD in Pune. The cotton kurti fabric is super soft and delivery took only 2 days! Fitting is flawless."
+  );
+  const [selectedCustomer, setSelectedCustomer] = useState("Sneha Kulkarni");
+  const [selectedProduct, setSelectedProduct] = useState("Handloom Cotton Kurti");
+
+  const handleReviewSelected = (rev: ParsedHighIntentReview) => {
+    setSelectedReviewText(rev.cleanedText);
+    setSelectedCustomer(rev.author);
+    setSelectedProduct(rev.productTitle || "Bestseller Product");
+    setActiveTab('ads');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white selection:bg-emerald-500 selection:text-white p-4 md:p-12">
@@ -68,8 +81,14 @@ export const ReviewToMetaAdsStudioPage: React.FC = () => {
         {/* Dynamic Content View with Smooth Fade-In */}
         <div className="transition-all duration-500 ease-out">
           {activeTab === 'connect' && <ShopifyConnectCard />}
-          {activeTab === 'reviews' && <ReviewImportStudio />}
-          {activeTab === 'ads' && <MetaAdStudio />}
+          {activeTab === 'reviews' && <ReviewImportStudio onSelectReview={handleReviewSelected} />}
+          {activeTab === 'ads' && (
+            <MetaAdStudio
+              sampleReviewText={selectedReviewText}
+              customerName={selectedCustomer}
+              productTitle={selectedProduct}
+            />
+          )}
         </div>
 
       </div>

@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MetaAdCreative } from '../types';
+import { Download, Sparkles, Check } from 'lucide-react';
 
 interface AdCanvasRendererProps {
   ad: MetaAdCreative;
@@ -8,6 +9,7 @@ interface AdCanvasRendererProps {
 
 export const AdCanvasRenderer: React.FC<AdCanvasRendererProps> = ({ ad, reviewQuote }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [downloaded, setDownloaded] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -15,7 +17,7 @@ export const AdCanvasRenderer: React.FC<AdCanvasRendererProps> = ({ ad, reviewQu
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set resolution based on format
+    // Set high-res canvas dimensions
     const width = 1080;
     const height = ad.format === '9:16' ? 1920 : ad.format === '4:5' ? 1350 : 1080;
     canvas.width = width;
@@ -27,13 +29,20 @@ export const AdCanvasRenderer: React.FC<AdCanvasRendererProps> = ({ ad, reviewQu
       grad.addColorStop(0, '#064e3b'); // Deep Emerald
       grad.addColorStop(1, '#022c22');
     } else if (ad.templateStyle === 'founder_quote_card') {
-      grad.addColorStop(0, '#111827'); // Slate Dark
-      grad.addColorStop(1, '#1f2937');
+      grad.addColorStop(0, '#0f172a'); // Slate / Obsidian Dark
+      grad.addColorStop(1, '#1e293b');
     } else {
-      grad.addColorStop(0, '#31102F'); // Deep Maroon/Plum for Indian Festive/D2C
-      grad.addColorStop(1, '#111827');
+      grad.addColorStop(0, '#4a044e'); // Deep Indian Festive Plum
+      grad.addColorStop(1, '#0f172a');
     }
     ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+
+    // Subtle atmospheric circular ambient light
+    const glowGrad = ctx.createRadialGradient(width * 0.8, height * 0.2, 50, width * 0.8, height * 0.2, 400);
+    glowGrad.addColorStop(0, 'rgba(52, 211, 153, 0.25)');
+    glowGrad.addColorStop(1, 'rgba(52, 211, 153, 0)');
+    ctx.fillStyle = glowGrad;
     ctx.fillRect(0, 0, width, height);
 
     // 2. Top Pattern-Interrupt Hook Pill
@@ -43,12 +52,12 @@ export const AdCanvasRenderer: React.FC<AdCanvasRendererProps> = ({ ad, reviewQu
     ctx.fill();
 
     ctx.fillStyle = '#34d399';
-    ctx.font = 'bold 34px sans-serif';
+    ctx.font = 'bold 36px sans-serif';
     ctx.textAlign = 'center';
     const hookHeadline = ad.hook?.headline || ad.headline || '';
     ctx.fillText(hookHeadline.slice(0, 48), width / 2, 180);
 
-    // 3. Central Review Card (WhatsApp Bubble or Clean White Card)
+    // 3. Central Review Card (Clean White Floating Proof Card)
     const cardY = height * 0.25;
     const cardHeight = height * 0.46;
     ctx.fillStyle = '#ffffff';
@@ -57,7 +66,7 @@ export const AdCanvasRenderer: React.FC<AdCanvasRendererProps> = ({ ad, reviewQu
     ctx.fill();
 
     // 5-Star Rating Row
-    ctx.fillStyle = '#fbbf24';
+    ctx.fillStyle = '#f59e0b';
     ctx.font = 'bold 48px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('★★★★★', 140, cardY + 90);
@@ -68,12 +77,12 @@ export const AdCanvasRenderer: React.FC<AdCanvasRendererProps> = ({ ad, reviewQu
     ctx.fillText('✓ VERIFIED INDIAN BUYER', 430, cardY + 85);
 
     // Wrap & Render Customer Review Quote
-    ctx.fillStyle = '#111827';
+    ctx.fillStyle = '#0f172a';
     ctx.font = 'italic 42px sans-serif';
     wrapText(ctx, `"${reviewQuote}"`, 140, cardY + 180, width - 280, 58);
 
     // Customer Attribution Footer inside Card
-    ctx.fillStyle = '#4b5563';
+    ctx.fillStyle = '#475569';
     ctx.font = 'bold 32px sans-serif';
     ctx.fillText(`— ${ad.customerAttribution}`, 140, cardY + cardHeight - 60);
 
@@ -87,7 +96,7 @@ export const AdCanvasRenderer: React.FC<AdCanvasRendererProps> = ({ ad, reviewQu
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 36px sans-serif';
     ctx.textAlign = 'center';
-    const cta = ad.ctaButton || 'SHOP NOW';
+    const cta = ad.ctaButton || 'ORDER NOW';
     ctx.fillText(
       `${ad.productTitle.toUpperCase()}  •  ${cta.toUpperCase()}`,
       width / 2,
@@ -103,22 +112,41 @@ export const AdCanvasRenderer: React.FC<AdCanvasRendererProps> = ({ ad, reviewQu
     a.href = url;
     a.download = `meta-ad-${ad.format.replace(':', 'x')}-${ad.id}.png`;
     a.click();
+    setDownloaded(true);
+    setTimeout(() => setDownloaded(false), 2500);
   };
 
   return (
-    <div className="space-y-2">
-      <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-black aspect-square flex items-center justify-center">
+    <div className="space-y-3">
+      {/* Canvas Viewport Box */}
+      <div className="relative rounded-2xl overflow-hidden border border-gray-800 bg-gray-950 aspect-square flex items-center justify-center shadow-xl group">
         <canvas
           ref={canvasRef}
-          className="max-h-full max-w-full object-contain"
+          className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
         />
+        <div className="absolute top-2 left-2 px-2.5 py-1 rounded-md bg-gray-950/80 backdrop-blur-md border border-gray-800 text-[10px] font-mono font-bold text-gray-300 flex items-center gap-1.5">
+          <Sparkles className="w-3 h-3 text-emerald-400" />
+          <span>{ad.format} Resolution</span>
+        </div>
       </div>
+
+      {/* High-Impact Download Button */}
       <button
         onClick={handleDownloadPng}
         type="button"
-        className="w-full py-2 px-3 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 font-semibold text-xs rounded-lg transition-colors cursor-pointer"
+        className="w-full py-2.5 px-3 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 active:scale-98 text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/60 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
       >
-        ⬇ Download Ready-to-Run PNG ({ad.format})
+        {downloaded ? (
+          <>
+            <Check className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Saved {ad.format} PNG!</span>
+          </>
+        ) : (
+          <>
+            <Download className="w-3.5 h-3.5" />
+            <span>Download PNG ({ad.format})</span>
+          </>
+        )}
       </button>
     </div>
   );
