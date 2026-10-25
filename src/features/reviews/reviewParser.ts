@@ -93,3 +93,22 @@ export function parseRawReviews(data: any[], source: ReviewSource = 'judge_me'):
     };
   });
 }
+
+/**
+ * Parses raw text input pasted directly from WhatsApp or Customer Reviews.
+ */
+export function parseReviewInput(text: string, id: string = `input_${Date.now()}`): RawReview {
+  const clean = text.trim().replace(/^["']|["']$/g, '');
+  return {
+    id,
+    source: 'direct_form',
+    authorName: 'Verified Customer',
+    rating: 5,
+    body: clean,
+    mediaType: 'text',
+    productTitle: 'Shopify Product',
+    verifiedBuyer: true,
+    createdAt: new Date().toISOString(),
+  };
+}
+

@@ -98,6 +98,8 @@ export function filterHighIntentReviews(reviews: RawReview[]): ParsedHighIntentR
     const normalizedScore = Math.max(0, Math.min(100, score));
     const isEligible = normalizedScore >= 60;
     const mediaUrl = rev.mediaUrls && rev.mediaUrls.length > 0 ? rev.mediaUrls[0] : undefined;
+    const isCodMentioned = /\b(cod|cash on delivery)\b/i.test(combinedText);
+    const intentCategory = matchedCategories.length > 0 ? matchedCategories[0].replace(/_/g, ' ') : 'Customer Praise';
 
     return {
       id: `intent_${rev.id}`,
@@ -106,6 +108,9 @@ export function filterHighIntentReviews(reviews: RawReview[]): ParsedHighIntentR
       authorCity: rev.authorCity,
       productTitle: rev.productTitle,
       originalBody: rev.body,
+      cleanedText: rev.body,
+      intentCategory,
+      isCodMentioned,
       mediaType: rev.mediaType,
       mediaUrl,
       intentScore: normalizedScore,
@@ -116,3 +121,11 @@ export function filterHighIntentReviews(reviews: RawReview[]): ParsedHighIntentR
     };
   }).sort((a, b) => b.intentScore - a.intentScore);
 }
+
+/**
+ * Filter and rank reviews alias for direct component usage.
+ */
+export function filterAndRankReviews(reviews: RawReview[]): ParsedHighIntentReview[] {
+  return filterHighIntentReviews(reviews);
+}
+

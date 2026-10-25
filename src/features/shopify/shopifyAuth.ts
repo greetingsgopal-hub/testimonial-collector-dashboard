@@ -32,6 +32,20 @@ export function buildShopifyAuthUrl(params: {
   return `https://${cleanDomain}/admin/oauth/authorize?${query.toString()}`;
 }
 
+export function generateShopifyOAuthUrl(
+  shopDomain: string,
+  clientId: string,
+  redirectUri: string,
+  state: string = 'pandapraise_shopify_auth'
+): string {
+  return buildShopifyAuthUrl({
+    shopDomain,
+    clientId,
+    redirectUri,
+    state,
+  });
+}
+
 /**
  * Validates a myshopify.com domain format.
  */

@@ -45,6 +45,9 @@ export interface ParsedHighIntentReview {
   authorCity?: string;
   productTitle: string;
   originalBody: string;
+  cleanedText: string;
+  intentCategory: string;
+  isCodMentioned?: boolean;
   mediaType: ReviewMediaType;
   mediaUrl?: string;
   intentScore: number; // 0 to 100
