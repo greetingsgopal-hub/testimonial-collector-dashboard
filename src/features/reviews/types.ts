@@ -1,58 +1,63 @@
-/**
- * Review Ingestion & High-Intent Parsing Types
- */
-
 export type ReviewSource = 
+  | 'judgeme' 
+  | 'loox' 
+  | 'whatsapp' 
+  | 'shopify_csv' 
+  | 'manual'
   | 'judge_me'
-  | 'loox'
-  | 'yotpo'
-  | 'okendo'
   | 'shopify_reviews'
-  | 'whatsapp'
   | 'direct_form';
 
-export type ReviewMediaType = 'text' | 'image' | 'video';
+export type ReviewIntentCategory =
+  | 'cod_trust'          // Overcomes Cash on Delivery / scam skepticism
+  | 'quality_proof'      // Fabric, build, authenticity, skin/health results
+  | 'fast_delivery'      // Speed of shipping, packaging safety
+  | 'value_for_money'    // "Worth every penny", "Paisa vasool", better than expensive brands
+  | 'gifting_emotion'    // Ordered for mom, wife, sister, festive wear
+  | 'general_praise';    // Low-intent generic praise
 
-export interface RawReview {
-  id: string;
-  source: ReviewSource;
-  authorName: string;
-  authorCity?: string;
-  authorPhone?: string;
-  rating: number; // 1 to 5
-  title?: string;
+export interface RawReviewInput {
+  id?: string;
   body: string;
-  mediaType: ReviewMediaType;
+  author?: string;
+  authorName?: string;
+  rating?: number;
+  productTitle?: string;
+  productHandle?: string;
+  buyerCity?: string;
+  authorCity?: string;
+  source?: ReviewSource;
+  verifiedBuyer?: boolean;
+  mediaType?: 'text' | 'image' | 'video';
+  mediaUrl?: string;
   mediaUrls?: string[];
-  productTitle: string;
-  productId?: string;
-  verifiedBuyer: boolean;
-  createdAt: string;
+  createdAt?: string;
 }
 
-export type ReviewIntentCategory = 
-  | 'before_after'          // e.g. "My acne cleared up in 14 days"
-  | 'skeptic_converted'     // e.g. "Was doubtful about buying from Insta, but wow"
-  | 'feature_delight'       // e.g. "Pockets are huge, fabric is breathable"
-  | 'social_compliments'    // e.g. "Everyone asked me where I got this kurta"
-  | 'repeat_buyer'          // e.g. "Bought 3 more colors immediately"
-  | 'problem_solved';       // e.g. "Fixed my lower back pain completely"
+// Backward compatible alias
+export type RawReview = RawReviewInput;
 
 export interface ParsedHighIntentReview {
   id: string;
-  rawReviewId: string;
-  authorName: string;
+  originalText: string;
+  cleanedText: string;
+  author: string;
+  authorName?: string;
+  buyerCity: string;
   authorCity?: string;
   productTitle: string;
-  originalBody: string;
-  cleanedText: string;
-  intentCategory: string;
-  isCodMentioned?: boolean;
-  mediaType: ReviewMediaType;
-  mediaUrl?: string;
+  rating: number;
+  source: ReviewSource;
   intentScore: number; // 0 to 100
-  categories: ReviewIntentCategory[];
-  extractedKeyPhrase: string;
-  suggestedAdAngles: string[];
-  isEligibleForMetaAd: boolean; // intentScore >= 60
+  intentCategory: ReviewIntentCategory;
+  isCodMentioned: boolean;
+  isDeliveryMentioned: boolean;
+  isRepeatBuyer: boolean;
+  extractedKeywords: string[];
+  extractedKeyPhrase?: string;
+  adAngleSuggestion: string;
+  suggestedAdAngles?: string[];
+  mediaType?: 'text' | 'image' | 'video';
+  mediaUrl?: string;
+  isEligibleForMetaAd?: boolean;
 }

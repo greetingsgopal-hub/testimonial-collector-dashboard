@@ -44,9 +44,13 @@ export function generateMetaAdCreative(
   ];
 
   // 2. Format High-Converting Meta Ad Copy
+  const keyPhrase = review.extractedKeyPhrase || 
+    (review.extractedKeywords && review.extractedKeywords.length > 0 ? review.extractedKeywords.join(', ') : '') ||
+    review.cleanedText?.slice(0, 48) || 'loved it';
+
   const copy: MetaAdCopy = {
-    primaryText: `"${review.extractedKeyPhrase}" — ${customer}${city}\n\nOver 10,000+ Indian shoppers upgraded to ${brandName}'s ${product}. Real results, premium quality, zero compromises.\n\n🚚 Cash on Delivery (COD) Available Pan-India\n⚡ Delivered in 3-5 Business Days\n🔄 7-Day Hassle-Free Exchange Policy`,
-    headline: `"${review.extractedKeyPhrase.slice(0, 48)}..." ⭐⭐⭐⭐⭐`,
+    primaryText: `"${keyPhrase}" — ${customer}${city}\n\nOver 10,000+ Indian shoppers upgraded to ${brandName}'s ${product}. Real results, premium quality, zero compromises.\n\n🚚 Cash on Delivery (COD) Available Pan-India\n⚡ Delivered in 3-5 Business Days\n🔄 7-Day Hassle-Free Exchange Policy`,
+    headline: `"${keyPhrase.slice(0, 48)}..." ⭐⭐⭐⭐⭐`,
     description: `Rated 4.9/5 by 12,400+ Verified Buyers across India`,
     callToAction: 'Shop Now',
     trustBadges: [

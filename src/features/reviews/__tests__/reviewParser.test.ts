@@ -1,69 +1,32 @@
 import { describe, it, expect } from 'vitest';
-import { parseRawReviews, filterHighIntentReviews } from '../index';
+import { parseReviewInput } from '../reviewParser';
+import { filterAndRankReviews } from '../intentFilter';
 
-describe('Review Parser & Intent Filter Pipeline', () => {
-  it('parses raw reviews from Judge.me export format', () => {
-    const rawData = [
-      {
-        id: 'jm_101',
-        reviewer_name: 'Rahul Sharma',
-        reviewer_location: 'Mumbai',
-        rating: 5,
-        title: 'Best fitting oversized tee!',
-        body: 'Was skeptical about buying from an Instagram ad, but the fabric is breathable pure cotton and the packaging was luxurious. Already ordered 2 more colors!',
-        product_title: 'Oversized Streetwear Tee',
-      },
-    ];
+describe('Phase 2: Indian D2C Review Parser & Intent Filter', () => {
+  it('strips WhatsApp timestamps, detects Indian city, and flags COD trust', () => {
+    const whatsappMsg =
+      '[11:45 AM, 25/10/2026] Anjali: Ordered first time on COD in Jaipur. Fabric is pure cotton and super comfortable!';
 
-    const parsed = parseRawReviews(rawData, 'judge_me');
-    expect(parsed).toHaveLength(1);
-    expect(parsed[0].authorName).toBe('Rahul Sharma');
-    expect(parsed[0].authorCity).toBe('Mumbai');
-    expect(parsed[0].rating).toBe(5);
-    expect(parsed[0].productTitle).toBe('Oversized Streetwear Tee');
+    const parsed = parseReviewInput(whatsappMsg, 'wa-1');
+
+    expect(parsed.cleanedText).not.toContain('[11:45 AM');
+    expect(parsed.buyerCity).toBe('Jaipur');
+    expect(parsed.isCodMentioned).toBe(true);
+    expect(parsed.intentScore).toBeGreaterThanOrEqual(75);
   });
 
-  it('accurately detects high-intent customer testimonials and scores them for Meta Ads', () => {
-    const reviews = [
-      {
-        id: '1',
-        source: 'whatsapp' as const,
-        authorName: 'Sneha Roy',
-        authorCity: 'Kolkata',
-        rating: 5,
-        body: 'I was hesitant at first, but everyone asked where I got this! Difference was visible in 7 days.',
-        mediaType: 'video' as const,
-        mediaUrls: ['https://cdn.pandapraise.com/ugc/sneha.mp4'],
-        productTitle: 'Brightening Vitamin C Serum',
-        verifiedBuyer: true,
-        createdAt: '2026-10-24T10:00:00Z',
-      },
-      {
-        id: '2',
-        source: 'shopify_reviews' as const,
-        authorName: 'Anonymous',
-        rating: 2,
-        body: 'Delivery took too long.',
-        mediaType: 'text' as const,
-        productTitle: 'Standard Tee',
-        verifiedBuyer: false,
-        createdAt: '2026-10-24T10:00:00Z',
-      },
+  it('filters out low-effort 2-word reviews and ranks high-intent reviews first', () => {
+    const rawInputs = [
+      'Nice product',
+      'Ordered this kurta for my mom in Mumbai on COD. Fast delivery in 2 days and stitching quality is worth every penny!',
+      'Okay item',
     ];
 
-    const scored = filterHighIntentReviews(reviews);
-    expect(scored).toHaveLength(2);
+    const parsed = rawInputs.map((text, i) => parseReviewInput(text, `rev-${i}`));
+    const ranked = filterAndRankReviews(parsed, { minScore: 55 });
 
-    // Sneha Roy's review should score high and be ad-eligible
-    const sneha = scored.find((s) => s.authorName === 'Sneha Roy')!;
-    expect(sneha.intentScore).toBeGreaterThanOrEqual(60);
-    expect(sneha.isEligibleForMetaAd).toBe(true);
-    expect(sneha.categories).toContain('before_after');
-    expect(sneha.categories).toContain('skeptic_converted');
-    expect(sneha.categories).toContain('social_compliments');
-
-    // Negative review should score low and not be eligible
-    const anon = scored.find((s) => s.authorName === 'Anonymous')!;
-    expect(anon.isEligibleForMetaAd).toBe(false);
+    expect(ranked.length).toBe(1);
+    expect(ranked[0].buyerCity).toBe('Mumbai');
+    expect(ranked[0].extractedKeywords.length).toBeGreaterThan(1);
   });
 });

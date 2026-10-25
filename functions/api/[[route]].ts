@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { handle } from 'hono/cloudflare-pages';
 import { handleShopifyOAuthCallback, ShopifyEnv } from '../../src/worker/handlers/shopifyOAuthHandler';
 import { processShopifyOrderWebhook, generateWhatsAppVerificationMessage } from '../../src/features/shopify/shopifyWebhookHandler';
+import { handleReviewIngestion } from '../../src/worker/handlers/reviewIngestionHandler';
 
 const app = new Hono<{ Bindings: ShopifyEnv }>().basePath('/api');
 
@@ -32,5 +33,9 @@ app.post('/webhooks/shopify/orders-fulfilled', async (c) => {
   }
 });
 
+// 3. Automated Review Ingestion & Scoring Route
+app.post('/reviews/ingest', handleReviewIngestion);
+
 export const onRequest = handle(app);
+
 export default app;

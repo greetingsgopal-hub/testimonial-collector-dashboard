@@ -1,114 +1,143 @@
-import { RawReview, ReviewSource, ReviewMediaType } from './types';
+import { RawReviewInput, ParsedHighIntentReview, ReviewIntentCategory, ReviewSource } from './types';
+
+const INDIAN_CITIES = [
+  'delhi', 'mumbai', 'bangalore', 'bengaluru', 'hyderabad', 'chennai', 'kolkata',
+  'pune', 'ahmedabad', 'jaipur', 'lucknow', 'surat', 'chandigarh', 'indore',
+  'noida', 'gurgaon', 'gurugram', 'kochi', 'patna', 'bhopal', 'ludhiana', 'agra'
+];
+
+const KEYWORD_DICTIONARY: Record<ReviewIntentCategory, string[]> = {
+  cod_trust: ['cod', 'cash on delivery', 'prepaid', 'trust', 'genuine', 'authentic', 'legit', 'no scam', 'first time ordered'],
+  quality_proof: ['fabric', 'cotton', 'material', 'stitching', 'results', 'glow', 'acne', 'fit', 'comfortable', 'soft', 'pure', 'original', 'finish'],
+  fast_delivery: ['fast delivery', 'quick', 'days', 'packaging', 'packed', 'arrived early', 'on time', 'courier', 'before festival'],
+  value_for_money: ['worth', 'paisa vasool', 'price', 'affordable', 'value for money', 'budget', 'deal', 'discount', 'cheaper than'],
+  gifting_emotion: ['mom', 'mother', 'wife', 'sister', 'husband', 'gift', 'gifted', 'birthday', 'anniversary', 'diwali', 'wedding', 'loved it'],
+  general_praise: ['good', 'nice', 'best', 'awesome', 'superb']
+};
 
 /**
- * Universal Review Parser for popular Shopify review platforms and WhatsApp UGC submissions.
+ * Normalizes any review input (string or object) into a scored, Meta-Ad-ready candidate
  */
-export function parseRawReviews(data: any[], source: ReviewSource = 'judge_me'): RawReview[] {
-  if (!Array.isArray(data)) return [];
+export function parseReviewInput(
+  input: string | RawReviewInput,
+  fallbackId: string = `rev-${Date.now()}`
+): ParsedHighIntentReview {
+  const raw: RawReviewInput = typeof input === 'string' ? { body: input } : input;
+  const bodyText = raw.body || (raw as any).originalBody || (raw as any).text || '';
 
-  return data.map((item, index) => {
-    const id = item.id ? String(item.id) : `rev_${Date.now()}_${index}`;
-    let authorName = 'Verified Buyer';
-    let authorCity: string | undefined = undefined;
-    let rating = 5;
-    let body = '';
-    let title: string | undefined = undefined;
-    let productTitle = 'Featured Product';
-    let mediaType: ReviewMediaType = 'text';
-    let mediaUrls: string[] = [];
-    let verifiedBuyer = true;
-    let createdAt = item.created_at || item.date || new Date().toISOString();
+  // Clean WhatsApp timestamps, quotes, and extra whitespace
+  const cleanedText = bodyText
+    .replace(/^\[.*?\]\s*.*?:\s*/, '') // Strip WhatsApp "[10:30 AM, 25/10/2026] Customer: "
+    .replace(/^["']|["']$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-    switch (source) {
-      case 'judge_me':
-        authorName = item.reviewer_name || item.name || authorName;
-        authorCity = item.reviewer_location || item.city || undefined;
-        rating = Number(item.rating) || 5;
-        title = item.title || undefined;
-        body = item.body || item.review || '';
-        productTitle = item.product_title || item.product_handle || productTitle;
-        if (item.pictures && item.pictures.length > 0) {
-          mediaType = 'image';
-          mediaUrls = item.pictures.map((p: any) => p.url || p);
-        }
-        break;
+  const lower = cleanedText.toLowerCase();
 
-      case 'loox':
-        authorName = item.author || item.name || authorName;
-        rating = Number(item.rating) || 5;
-        body = item.text || item.review || '';
-        productTitle = item.product_name || productTitle;
-        if (item.video_url) {
-          mediaType = 'video';
-          mediaUrls = [item.video_url];
-        } else if (item.img_url) {
-          mediaType = 'image';
-          mediaUrls = [item.img_url];
-        }
-        break;
-
-      case 'whatsapp':
-        authorName = item.customerName || item.author_name || authorName;
-        authorCity = item.city || undefined;
-        rating = Number(item.rating) || 5;
-        body = item.messageText || item.content || item.body || '';
-        productTitle = item.productTitle || item.product_name || productTitle;
-        if (item.videoUrl || item.video_url) {
-          mediaType = 'video';
-          mediaUrls = [item.videoUrl || item.video_url];
-        } else if (item.imageUrl || item.image_url) {
-          mediaType = 'image';
-          mediaUrls = [item.imageUrl || item.image_url];
-        }
-        break;
-
-      default:
-        authorName = item.authorName || item.author || item.name || authorName;
-        rating = Number(item.rating) || 5;
-        body = item.body || item.content || item.review || '';
-        productTitle = item.productTitle || item.product || productTitle;
-        if (item.videoUrl) {
-          mediaType = 'video';
-          mediaUrls = [item.videoUrl];
-        } else if (item.imageUrl) {
-          mediaType = 'image';
-          mediaUrls = [item.imageUrl];
-        }
-        break;
+  // Detect Indian City if mentioned in text or payload
+  let buyerCity = raw.buyerCity || raw.authorCity || 'India';
+  if (buyerCity === 'India') {
+    const foundCity = INDIAN_CITIES.find((city) => lower.includes(city));
+    if (foundCity) {
+      buyerCity = foundCity.charAt(0).toUpperCase() + foundCity.slice(1);
     }
+  }
 
-    return {
-      id,
-      source,
-      authorName,
-      authorCity,
-      rating,
-      title,
-      body: body.trim(),
-      mediaType,
-      mediaUrls,
-      productTitle,
-      verifiedBuyer,
-      createdAt,
-    };
+  // Extract Keywords & Determine Primary Intent Category
+  const extractedKeywords: string[] = [];
+  let bestCategory: ReviewIntentCategory = 'general_praise';
+  let maxMatches = 0;
+
+  (Object.keys(KEYWORD_DICTIONARY) as ReviewIntentCategory[]).forEach((category) => {
+    if (category === 'general_praise') return;
+    const matches = KEYWORD_DICTIONARY[category].filter((kw) => lower.includes(kw));
+    if (matches.length > 0) {
+      extractedKeywords.push(...matches);
+      if (matches.length > maxMatches) {
+        maxMatches = matches.length;
+        bestCategory = category;
+      }
+    }
   });
-}
 
-/**
- * Parses raw text input pasted directly from WhatsApp or Customer Reviews.
- */
-export function parseReviewInput(text: string, id: string = `input_${Date.now()}`): RawReview {
-  const clean = text.trim().replace(/^["']|["']$/g, '');
+  const isCodMentioned = KEYWORD_DICTIONARY.cod_trust.some((kw) => lower.includes(kw)) || lower.includes('cod');
+  const isDeliveryMentioned = KEYWORD_DICTIONARY.fast_delivery.some((kw) => lower.includes(kw));
+  const isRepeatBuyer = /second time|ordered again|repeat|3rd|another one/i.test(lower);
+
+  // Calculate Meta Ad Conversion Intent Score (0 - 100)
+  let score = 35; // Base score
+  if (cleanedText.length >= 50 && cleanedText.length <= 280) score += 20; // Ideal ad copy length
+  if (cleanedText.length > 280) score += 10;
+  score += Math.min(25, extractedKeywords.length * 8); // Specific D2C proof points
+  if (isCodMentioned) score += 10;
+  if (isRepeatBuyer) score += 10;
+  if (buyerCity !== 'India') score += 5; // Regional social proof boost
+
+  const intentScore = Math.min(100, score);
+  const author = raw.author || raw.authorName || 'Verified Buyer';
+
   return {
-    id,
-    source: 'direct_form',
-    authorName: 'Verified Customer',
-    rating: 5,
-    body: clean,
-    mediaType: 'text',
-    productTitle: 'Shopify Product',
-    verifiedBuyer: true,
-    createdAt: new Date().toISOString(),
+    id: raw.id || fallbackId,
+    originalText: bodyText,
+    cleanedText,
+    author,
+    authorName: author,
+    buyerCity,
+    authorCity: buyerCity,
+    productTitle: raw.productTitle || 'Featured Product',
+    rating: raw.rating ?? 5,
+    source: raw.source || 'manual',
+    intentScore,
+    intentCategory: bestCategory,
+    isCodMentioned,
+    isDeliveryMentioned,
+    isRepeatBuyer,
+    extractedKeywords: Array.from(new Set(extractedKeywords)).slice(0, 5),
+    extractedKeyPhrase: extractedKeywords.length > 0 ? extractedKeywords.join(', ') : cleanedText.slice(0, 50),
+    adAngleSuggestion: getAdAngleSuggestion(bestCategory, buyerCity, isCodMentioned),
+    suggestedAdAngles: [getAdAngleSuggestion(bestCategory, buyerCity, isCodMentioned)],
+    mediaType: raw.mediaType || (raw.mediaUrl ? 'video' : 'text'),
+    mediaUrl: raw.mediaUrl,
+    isEligibleForMetaAd: intentScore >= 50,
   };
 }
 
+function getAdAngleSuggestion(
+  category: ReviewIntentCategory,
+  city: string,
+  isCod: boolean
+): string {
+  if (isCod) return `Trust-Builder Hook: Highlight hassle-free COD & verified delivery to ${city}.`;
+  switch (category) {
+    case 'quality_proof':
+      return 'Product Close-Up + Quote Overlay: Focus on material/results skepticism.';
+    case 'gifting_emotion':
+      return 'Emotional/Festive Hook: Position as the #1 family-approved gift.';
+    case 'value_for_money':
+      return 'Price-Anchor Hook: Compare premium quality against overpriced alternatives.';
+    case 'fast_delivery':
+      return `Speed & Reliability Hook: Emphasize express dispatch across ${city}.`;
+    default:
+      return 'Social Proof Wall: Combine with 5-star rating badge for retargeting.';
+  }
+}
+
+/**
+ * Backward-compatible multi-review parser for Judge.me / Loox arrays
+ */
+export function parseRawReviews(data: any[], source: ReviewSource = 'judgeme'): ParsedHighIntentReview[] {
+  if (!Array.isArray(data)) return [];
+  return data.map((item, idx) => {
+    const rawInput: RawReviewInput = {
+      id: item.id ? String(item.id) : `rev-${idx}`,
+      body: item.body || item.review || item.text || item.messageText || '',
+      author: item.reviewer_name || item.author || item.name || item.authorName || 'Verified Buyer',
+      buyerCity: item.reviewer_location || item.city || undefined,
+      rating: Number(item.rating) || 5,
+      productTitle: item.product_title || item.product_name || item.productTitle || 'Featured Product',
+      source,
+      mediaUrl: item.video_url || item.videoUrl || (item.pictures?.[0]?.url) || item.img_url,
+    };
+    return parseReviewInput(rawInput, rawInput.id);
+  });
+}
