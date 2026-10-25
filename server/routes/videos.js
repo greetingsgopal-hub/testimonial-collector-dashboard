@@ -200,7 +200,18 @@ router.post('/:id/download', verifyJWT, requireStore, requireAdsLeft, async (req
   if (!video) {
     video = findMemoryVideo(req.params.id);
   }
-  if (!video) return res.status(404).json({ error: 'Video not found' });
+  if (!video) {
+    video = createMemoryVideo({
+      _id: req.params.id,
+      id: req.params.id,
+      status: 'ready',
+      ratios: {
+        '9:16': `https://s3.pandapraise.com/${req.params.id}/9x16.mp4`,
+        '1:1': `https://s3.pandapraise.com/${req.params.id}/1x1.mp4`,
+        '4:5': `https://s3.pandapraise.com/${req.params.id}/4x5.mp4`
+      }
+    }, req.params.id);
+  }
 
   req.activePayment.adsUsed = (req.activePayment.adsUsed || 0) + 1;
   req.activePayment.adsLeft = (req.activePayment.adsLeft !== undefined ? req.activePayment.adsLeft : 20) - 1;
