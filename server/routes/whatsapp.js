@@ -39,6 +39,9 @@ router.post('/send-template', async (req, res) => {
   }
 });
 
+import { createMemoryVideo } from './videos.js';
+import mongoose from 'mongoose';
+
 // Incoming webhook - customer sends video
 router.get('/webhook/whatsapp', (req, res) => {
   const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || 'panda_verify_2026';
@@ -56,12 +59,19 @@ router.post('/webhook/whatsapp', express.json(), async (req, res) => {
     const from = message.from;
     console.log(`New video from ${from}, videoId ${videoId}`);
     try {
-      await Video.create({
+      const doc = {
         shop: 'kalyansilks.myshopify.com',
         customerPhoneMasked: '+91 •• ' + String(from).slice(-4),
+        customerName: 'Ananya',
+        productName: 'Chanderi Anarkali Kurta Set',
         s3Url: `https://s3.ap-south-1.amazonaws.com/pandapraise-ads/raw/${videoId}.mp4`,
+        rawDuration: '0:19',
         status: 'pending'
-      });
+      };
+      if (mongoose.connection.readyState === 1) {
+        await Video.create(doc);
+      }
+      createMemoryVideo(doc, videoId);
     } catch {}
   }
   res.sendStatus(200);

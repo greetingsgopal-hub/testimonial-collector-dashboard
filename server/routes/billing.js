@@ -10,7 +10,7 @@ const router = express.Router();
 const rzp = new Razorpay({ key_id: config.razorpay.keyId, key_secret: config.razorpay.keySecret });
 
 // In-memory fallback if MongoDB connection is not established
-const memoryPayments = new Map();
+export const memoryPayments = new Map();
 
 const isDbConnected = () => mongoose.connection.readyState === 1;
 

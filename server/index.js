@@ -3,6 +3,8 @@ import { config } from './config/env.js';
 import { connectDB } from './config/db.js';
 import shopifyRouter from './routes/shopify.js';
 import billingRouter from './routes/billing.js';
+import whatsappRouter from './routes/whatsapp.js';
+import videosRouter from './routes/videos.js';
 
 const app = express();
 
@@ -11,6 +13,8 @@ app.use(express.json());
 // Mount routers
 app.use('/auth', shopifyRouter);
 app.use('/api/billing', billingRouter);
+app.use('/api/whatsapp', whatsappRouter);
+app.use('/api/videos', videosRouter);
 
 // Health check
 app.get('/health', (req, res) => {

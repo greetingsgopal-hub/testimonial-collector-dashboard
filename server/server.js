@@ -6,6 +6,7 @@ import billingRouter from './routes/billing.js';
 import billingWebhookRouter from './routes/billing.webhook.js';
 import authRouter from './routes/auth.js';
 import whatsappRouter from './routes/whatsapp.js';
+import videosRouter from './routes/videos.js';
 import { verifyJWT, requireRole, requireStore } from './middleware/auth.js';
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/billing', billingRouter);
 app.use('/api', billingWebhookRouter);
 app.use('/api/whatsapp', whatsappRouter);
+app.use('/api/videos', videosRouter);
 
 // Protected test routes
 app.get('/api/merchant/inbox', verifyJWT, requireStore, (req,res)=> res.json({ ok:true, store: req.effectiveStore, videos: 3 }));
@@ -36,6 +38,6 @@ app.get('/api/health', (req,res)=> res.json({ shopify:'ok', razorpay:'ok', whats
 export { app };
 
 const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, ()=> console.log(`API on ${PORT}`));
+export const server = app.listen(PORT, ()=> console.log(`API on ${PORT}`));
 
 export default server;
