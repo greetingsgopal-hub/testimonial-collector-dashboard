@@ -22,7 +22,7 @@ export const verifyJWT = (req, res, next) => {
         target: req.query.impersonate,
         ip: req.ip,
         description: `Impersonating ${req.query.impersonate}`
-      });
+      }).catch(err => console.warn('AuditLog write notice:', err.message));
     }
     next();
   } catch (e) {
@@ -40,6 +40,7 @@ export const requireRole = (roles) => (req, res, next) => {
 export const requireStore = (req, res, next) => {
   const store = req.query.shop || req.params.shop || req.body?.shop || req.user.storeDomain;
   const effectiveStore = req.user.impersonatedStore || req.user.storeDomain;
+  req.effectiveStore = effectiveStore;
   if (req.user.role === 'super_admin') return next();
   if (store && store !== effectiveStore && req.query.shop !== effectiveStore) {
     // Allow if querying own store
@@ -47,6 +48,5 @@ export const requireStore = (req, res, next) => {
       return res.status(403).json({ error: 'Store mismatch' });
     }
   }
-  req.effectiveStore = effectiveStore;
   next();
 };

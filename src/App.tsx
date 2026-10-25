@@ -43,6 +43,7 @@ const VideoStudioPage = React.lazy(() => import('./pages/VideoStudioPage').then(
 const ReviewToMetaAdsStudioPage = React.lazy(() => import('./pages/ReviewToMetaAdsStudioPage').then((m) => ({ default: m.ReviewToMetaAdsStudioPage })));
 const AccessSystemPage = React.lazy(() => import('./pages/AccessSystemPage'));
 const ShopifyRazorpayIntegrationPage = React.lazy(() => import('./pages/ShopifyRazorpayIntegrationPage'));
+const PhaseLogin = React.lazy(() => import('./pages/Login'));
 
 
 const AppLayout = React.lazy(() => import('./components/layouts/AppLayout'));
@@ -101,6 +102,9 @@ export function App() {
             <Route path="/alternatives/:slug" element={<AlternativePage />} />
             <Route path="/best-:slug-testimonial-tools" element={<UseCasePage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/login/os" element={<PhaseLogin />} />
+            <Route path="/merchant-os" element={<PhaseLogin />} />
+            <Route path="/auth/login" element={<PhaseLogin />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/pricing" element={<PricingPage />} />

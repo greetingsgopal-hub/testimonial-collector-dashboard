@@ -18,7 +18,7 @@ const auditSchema = new mongoose.Schema({
 auditSchema.pre('save', function(next) {
   const data = `${this.action}${this.actor}${this.target}${Date.now()}`;
   this.hash = crypto.createHash('sha256').update(data).digest('hex').substring(0,16);
-  next();
+  if (typeof next === 'function') next();
 });
 
 export const AuditLog = mongoose.model('AuditLog', auditSchema);
