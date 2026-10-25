@@ -41,6 +41,7 @@ const VideoCollectionDashboardPage = React.lazy(() => import('./pages/VideoColle
 const MetaAdsLibraryPage = React.lazy(() => import('./pages/MetaAdsLibraryPage').then((m) => ({ default: m.MetaAdsLibraryPage })));
 const VideoStudioPage = React.lazy(() => import('./pages/VideoStudioPage').then((m) => ({ default: m.VideoStudioPage })));
 const ReviewToMetaAdsStudioPage = React.lazy(() => import('./pages/ReviewToMetaAdsStudioPage').then((m) => ({ default: m.ReviewToMetaAdsStudioPage })));
+const AccessSystemPage = React.lazy(() => import('./pages/AccessSystemPage'));
 
 
 const AppLayout = React.lazy(() => import('./components/layouts/AppLayout'));
@@ -129,6 +130,8 @@ export function App() {
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/auth/action" element={<VerifyEmailPage />} />
             <Route path="/__/auth/action" element={<VerifyEmailPage />} />
+            <Route path="/access-system" element={<AccessSystemPage />} />
+            <Route path="/auth-system" element={<AccessSystemPage />} />
 
             {/* Protected Routes */}
             <Route

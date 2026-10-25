@@ -217,7 +217,7 @@ export const LoginPage: React.FC = () => {
           </form>
 
           {/* Welcoming bottom signup prompt */}
-          <div className="mt-8 pt-5 border-t border-gray-100 text-center">
+          <div className="mt-8 pt-5 border-t border-gray-100 text-center space-y-2">
             <p className="text-xs text-gray-600">
               Don't have an account?{' '}
               <Link
@@ -228,6 +228,14 @@ export const LoginPage: React.FC = () => {
                 Sign up for free →
               </Link>
             </p>
+            <div>
+              <Link
+                to="/access-system"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 text-[11px] font-mono text-[#FFE600] border border-slate-700 hover:border-[#FFE600]/60 transition-all hover:scale-[1.02]"
+              >
+                <span>⚡ Switch to PandaPraise Access System (Auth • RBAC • Impersonation)</span>
+              </Link>
+            </div>
           </div>
 
         </div>
