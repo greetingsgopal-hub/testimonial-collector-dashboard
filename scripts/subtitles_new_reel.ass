@@ -1,0 +1,31 @@
+[Script Info]
+Title: PandaPraise Meta Ad TXGloijJM14 Subtitles
+ScriptType: v4.00+
+PlayResX: 720
+PlayResY: 1280
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: HookBanner,Impact,44,&H00000000,&H00000000,&H0000E6FF,&HA0000000,-1,0,0,0,100,100,1,0,3,12,0,8,25,25,110,1
+Style: HormoziCaption,Impact,52,&H00FFFFFF,&H00000000,&H00000000,&H90000000,-1,0,0,0,100,100,1.5,0,1,5,3,2,40,40,220,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+; Hook at 0 to 3s
+Dialogue: 1,0:00:00.00,0:00:03.00,HookBanner,,0,0,0,,{\an8\bord12\c&H00000000&\3c&H0000E6FF&}POV: KURTA MEIN REAL POCKETS?!
+Dialogue: 0,0:00:00.50,0:00:03.60,HormoziCaption,,0,0,0,,WOW YAAR! KURTA MEIN {\c&H0000E6FF&}POCKETS!{\c&H00FFFFFF&} 🤯
+
+; Trending Hinglish/English Hormozi Subtitles (Matched to exact speech)
+Dialogue: 0,0:00:03.60,0:00:07.80,HormoziCaption,,0,0,0,,PURSE CARRY KARNE KA {\c&H0000E6FF&}NO JHANJHAT!{\c&H00FFFFFF&} 👜
+Dialogue: 0,0:00:07.80,0:00:11.80,HormoziCaption,,0,0,0,,DON'T WORRY... {\c&H0000E6FF&}PROBLEM SOLVED!{\c&H00FFFFFF&} ✨
+Dialogue: 0,0:00:11.80,0:00:16.20,HormoziCaption,,0,0,0,,DEEP POCKETS FOR {\c&H0000E6FF&}PHONE & KEYS!{\c&H00FFFFFF&} 📱
+Dialogue: 0,0:00:16.20,0:00:20.50,HormoziCaption,,0,0,0,,SUPER COMFORTABLE {\c&H0000E6FF&}T-SHIRT FABRIC!{\c&H00FFFFFF&} ☁️
+Dialogue: 0,0:00:20.50,0:00:25.00,HormoziCaption,,0,0,0,,JUST SEE THE {\c&H0000E6FF&}CRAZY STRETCH!{\c&H00FFFFFF&} 🔥
+Dialogue: 0,0:00:25.00,0:00:29.50,HormoziCaption,,0,0,0,,BREATHABLE & {\c&H0000E6FF&}FITS PERFECTLY!{\c&H00FFFFFF&} 😍
+Dialogue: 0,0:00:29.50,0:00:34.00,HormoziCaption,,0,0,0,,SLEEVES LENGTH IS {\c&H0000E6FF&}REALLY NICE!{\c&H00FFFFFF&} ✨
+Dialogue: 0,0:00:34.00,0:00:38.50,HormoziCaption,,0,0,0,,GORGEOUS {\c&H0000E6FF&}COLORS AVAILABLE!{\c&H00FFFFFF&} 🎨
+Dialogue: 0,0:00:38.50,0:00:43.00,HormoziCaption,,0,0,0,,PLUS SIZES {\c&H0000E6FF&}AVAILABLE TOO!{\c&H00FFFFFF&} 👗
+Dialogue: 0,0:00:43.00,0:00:48.00,HormoziCaption,,0,0,0,,FREE SIZE {\c&H0000E6FF&}EXCHANGE GUARANTEED!{\c&H00FFFFFF&} 🔄
+Dialogue: 0,0:00:48.00,0:00:53.00,HormoziCaption,,0,0,0,,MADE IN OUR {\c&H0000E6FF&}LUDHIANA FACTORY!{\c&H00FFFFFF&} 🏭
+Dialogue: 0,0:00:53.00,0:00:58.80,HormoziCaption,,0,0,0,,VISIT WEBSITE & {\c&H0000E6FF&}ORDER NOW!{\c&H00FFFFFF&} ⚡
