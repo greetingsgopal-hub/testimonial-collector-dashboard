@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 // 18 Continuous corners, 8 BlurHash, 13 Hit slop, 10 Swipe-to-dismiss, 11 Interruptible animations, 2 Optimistic updates
 export const TestimonialCard = ({ t, onApprove, onReject, onDelete }: any) => {
@@ -61,6 +62,14 @@ export const TestimonialCard = ({ t, onApprove, onReject, onDelete }: any) => {
         >
           Reject
         </button>
+        <Link 
+          to={`/editor/${t.id}`}
+          className="h-9 px-3.5 rounded-full bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[12px] font-medium transition-all flex items-center gap-1.5"
+          title="Open in Phase 13 Video Editor (Meta Ads quality locked)"
+        >
+          <span>✂️</span>
+          <span>Edit</span>
+        </Link>
         <button 
           onClick={() => onDelete(t.id)} 
           className="ml-auto h-9 w-9 rounded-full bg-white/[0.04] hover:bg-red-500/20 text-white/70 hover:text-red-400 grid place-items-center transition-colors text-[14px]"

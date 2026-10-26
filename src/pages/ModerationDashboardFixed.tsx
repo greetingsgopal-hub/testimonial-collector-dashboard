@@ -89,6 +89,13 @@ export const ModerationDashboardFixed = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              to="/editor/1"
+              className="h-9 px-4 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black text-[13px] font-bold shadow-lg shadow-amber-400/20 flex items-center gap-1.5 transition-all active:scale-95"
+            >
+              <span>🎬 Video Editor</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-black/20 text-black font-semibold uppercase">Phase 13</span>
+            </Link>
             <button 
               onClick={() => {
                 setLoading(true);

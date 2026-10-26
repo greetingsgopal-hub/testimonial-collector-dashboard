@@ -46,6 +46,7 @@ const ShopifyRazorpayIntegrationPage = React.lazy(() => import('./pages/ShopifyR
 const PhaseLogin = React.lazy(() => import('./pages/Login'));
 const BillingTest = React.lazy(() => import('./pages/BillingTest'));
 const ModerationDashboardFixed = React.lazy(() => import('./pages/ModerationDashboardFixed').then((m) => ({ default: m.ModerationDashboardFixed })));
+const VideoEditor = React.lazy(() => import('./pages/VideoEditor').then((m) => ({ default: m.VideoEditor })));
 
 
 const AppLayout = React.lazy(() => import('./components/layouts/AppLayout'));
@@ -110,6 +111,10 @@ export function App() {
             <Route path="/billing-test" element={<BillingTest />} />
             <Route path="/moderation" element={<ModerationDashboardFixed />} />
             <Route path="/dashboard/moderation" element={<ModerationDashboardFixed />} />
+            <Route path="/editor" element={<VideoEditor />} />
+            <Route path="/editor/:id" element={<VideoEditor />} />
+            <Route path="/dashboard/editor" element={<VideoEditor />} />
+            <Route path="/dashboard/editor/:id" element={<VideoEditor />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/pricing" element={<PricingPage />} />
