@@ -9,6 +9,30 @@ export function LandingPage() {
 
   const sliderContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+
+  const [isHeroMuted, setIsHeroMuted] = useState<boolean>(true);
+  const [isHeroPlaying, setIsHeroPlaying] = useState<boolean>(true);
+
+  const toggleHeroAudio = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (heroVideoRef.current) {
+      heroVideoRef.current.muted = !isHeroMuted;
+      setIsHeroMuted(!isHeroMuted);
+    }
+  };
+
+  const toggleHeroPlay = () => {
+    if (heroVideoRef.current) {
+      if (isHeroPlaying) {
+        heroVideoRef.current.pause();
+        setIsHeroPlaying(false);
+      } else {
+        heroVideoRef.current.play();
+        setIsHeroPlaying(true);
+      }
+    }
+  };
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -224,39 +248,69 @@ export function LandingPage() {
             </div>
 
             {/* META AD PREVIEW */}
-            <div className="relative bg-[#151518] border border-white/10 rounded-[18px] overflow-hidden aspect-[9/16] shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/70" />
-              <div className="absolute top-2 left-2 right-2 flex justify-between items-center">
-                <span className="text-[9px] tracking-widest font-bold bg-black/60 backdrop-blur px-2 py-1 rounded-full">
+            <div
+              onClick={toggleHeroPlay}
+              className="relative bg-[#151518] border border-white/10 rounded-[18px] overflow-hidden aspect-[9/16] shadow-2xl cursor-pointer group select-none"
+            >
+              {/* Actual Embedded Video */}
+              <video
+                ref={heroVideoRef}
+                src="/think_reel.mp4"
+                poster="/images/hero-reel-poster.jpg"
+                autoPlay
+                loop
+                muted={isHeroMuted}
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+
+              {/* Gradient overlays matching screenshot */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/85 pointer-events-none" />
+
+              {/* Top Badges */}
+              <div className="absolute top-2 left-2 right-2 flex justify-between items-center z-10 pointer-events-none">
+                <span className="text-[9px] tracking-widest font-bold bg-black/70 text-white backdrop-blur px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1.5 shadow-md">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
                   9:16 • 1080x1920
                 </span>
-                <span className="text-[9px] bg-[#FFE600] text-black font-bold px-2 py-1 rounded-full">
+                <span className="text-[9px] bg-[#FFE600] text-black font-extrabold px-2.5 py-1 rounded-full shadow-md">
                   META READY
                 </span>
               </div>
 
-              <div className="h-full w-full bg-[radial-gradient(circle_at_50%_30%,#2a2a2e,#121213)] grid place-items-center p-4">
-                <div className="text-center">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-white/10 grid place-items-center mb-3">
-                    ▶
-                  </div>
-                  <div className="text-[12px] text-white/30">
-                    Customer video <br />
-                    auto-cropped
-                  </div>
-                </div>
+              {/* Audio Mute/Unmute Toggle Button */}
+              <div className="absolute top-10 right-2 z-20">
+                <button
+                  type="button"
+                  onClick={toggleHeroAudio}
+                  aria-label={isHeroMuted ? 'Unmute video' : 'Mute video'}
+                  title={isHeroMuted ? 'Click to unmute sound' : 'Click to mute sound'}
+                  className="w-7 h-7 rounded-full bg-black/70 hover:bg-black/90 text-white backdrop-blur grid place-items-center text-[11px] border border-white/15 transition-all hover:scale-110 active:scale-95 shadow-lg"
+                >
+                  {isHeroMuted ? '🔇' : '🔊'}
+                </button>
               </div>
 
-              <div className="absolute bottom-0 left-0 right-0 p-3">
+              {/* Play Overlay when paused */}
+              {!isHeroPlaying && (
+                <div className="absolute inset-0 grid place-items-center bg-black/40 z-10 pointer-events-none">
+                  <div className="w-14 h-14 rounded-full bg-black/80 backdrop-blur border border-white/20 text-[#FFE600] grid place-items-center text-[22px] shadow-2xl pl-1">
+                    ▶
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom Hook & Subtitle Pills (Matches Screenshot) */}
+              <div className="absolute bottom-0 left-0 right-0 p-3 z-10 pointer-events-none">
                 <div className="bg-[#FFE600] text-black font-black text-[13px] leading-[1.1] tracking-[-0.01em] px-2.5 py-2 rounded-[8px] -rotate-[1deg] shadow-lg">
                   POV: Kurta with <br />
                   REAL POCKETS??
                 </div>
                 <div className="mt-2 flex gap-1.5">
-                  <span className="text-[8px] bg-white text-black font-bold px-2 py-1 rounded-full">
+                  <span className="text-[8px] bg-white text-black font-bold px-2 py-1 rounded-full shadow">
                     HOOK • 0-3s
                   </span>
-                  <span className="text-[8px] bg-white/15 text-white px-2 py-1 rounded-full">
+                  <span className="text-[8px] bg-white/20 backdrop-blur text-white font-medium px-2 py-1 rounded-full border border-white/10">
                     SUBTITLES • AUTO
                   </span>
                 </div>
