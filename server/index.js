@@ -18,6 +18,7 @@ app.use('/auth', shopifyRouter);
 app.use('/api/billing', billingRouter);
 app.use('/api/whatsapp', whatsappRouter);
 app.use('/api/videos', videosRouter);
+app.use('/api/video', videosRouter);
 app.use('/api/meta', metaAdsRouter);
 app.use('/api/payout', payoutRouter);
 

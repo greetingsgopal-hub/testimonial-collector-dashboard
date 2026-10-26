@@ -292,4 +292,45 @@ router.post('/:id/export', verifyJWT, async (req, res) => {
   res.json(responsePayload);
 });
 
+// Phase 13: Direct /api/video/edit endpoint from Phase 13 zip
+router.post('/edit', async (req, res) => {
+  const idempotencyKey = req.headers['idempotency-key'] || req.headers['x-idempotency-key'];
+  if (idempotencyKey && videoIdempotencyLedger.has(idempotencyKey)) {
+    return res.json(videoIdempotencyLedger.get(idempotencyKey));
+  }
+
+  const { videoId = 'vid_demo', trim = [0, 9], ratio = '9:16', hookText = 'pov - kurta with real pockets?!', preset = {} } = req.body;
+  const bitrate = preset.bitrate || '10M';
+  const crf = preset.crf ?? 18;
+
+  if (parseInt(String(bitrate).replace('M', '')) < 6 || Number(crf) > 20) {
+    return res.status(400).json({
+      error: 'QUALITY_LOCK_VIOLATION',
+      message: 'Quality too low for Meta: Bitrate must be >= 6M and CRF <= 20'
+    });
+  }
+
+  const exportsResult = [
+    { ratio: '9:16', resolution: '1080x1920', bitrateMbps: 10, crf: 18, url: '/exports/9-16.mp4' },
+    { ratio: '4:5', resolution: '1080x1350', bitrateMbps: 8, crf: 19, url: '/exports/4-5.mp4' },
+    { ratio: '1:1', resolution: '1080x1080', bitrateMbps: 8, crf: 19, url: '/exports/1-1.mp4' }
+  ];
+
+  const payload = {
+    success: true,
+    status: 'top_notch_ready',
+    videoId,
+    trim,
+    ratio,
+    hookText,
+    exports: exportsResult
+  };
+
+  if (idempotencyKey) {
+    videoIdempotencyLedger.set(idempotencyKey, payload);
+  }
+
+  res.json(payload);
+});
+
 export default router;

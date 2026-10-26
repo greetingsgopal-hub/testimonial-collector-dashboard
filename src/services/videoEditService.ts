@@ -38,6 +38,26 @@ export interface QualityAudit {
   message: string;
 }
 
+export const QUALITY_PRESETS = {
+  meta_reels: { width: 1080, height: 1920, bitrate: '10M', crf: 18, codec: 'libx264', preset: 'slow', audioBitrate: '128k' },
+  meta_feed_4_5: { width: 1080, height: 1350, bitrate: '8M', crf: 19 },
+  meta_feed_1_1: { width: 1080, height: 1080, bitrate: '8M', crf: 19 }
+};
+
+export async function editAndPush(videoId: string, opts: any) {
+  const idempotencyKey = `edit-${videoId}-${Date.now()}`;
+  const res = await fetch('/api/video/edit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
+    body: JSON.stringify({ videoId, ...opts, presets: QUALITY_PRESETS })
+  });
+  if (!res.ok) throw new Error('Edit failed');
+  const { exports } = await res.json();
+  // Quality gate
+  if (exports.some((e: any) => e.bitrateMbps < 6)) throw new Error('Quality too low for Meta');
+  return exports;
+}
+
 export const RATIO_SPECS: Record<AspectRatio, { width: number; height: number; label: string; useCase: string }> = {
   '9:16': { width: 1080, height: 1920, label: '9:16 Reels / Stories', useCase: 'Instagram & Facebook Reels (Full-screen)' },
   '4:5': { width: 1080, height: 1350, label: '4:5 Feed Ad', useCase: 'Instagram & Facebook Feed (Optimal real estate)' },
