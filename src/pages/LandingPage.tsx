@@ -13,6 +13,7 @@ export function LandingPage() {
 
   const [isHeroMuted, setIsHeroMuted] = useState<boolean>(true);
   const [isHeroPlaying, setIsHeroPlaying] = useState<boolean>(true);
+  const [heroTime, setHeroTime] = useState<number>(0);
 
   const toggleHeroAudio = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -261,6 +262,7 @@ export function LandingPage() {
                 loop
                 muted={isHeroMuted}
                 playsInline
+                onTimeUpdate={(e) => setHeroTime(e.currentTarget.currentTime)}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
 
@@ -300,17 +302,31 @@ export function LandingPage() {
                 </div>
               )}
 
-              {/* Bottom Hook & Subtitle Pills (Matches Screenshot) */}
+              {/* Bottom Hook & Subtitle Pills (Matches Screenshot & Syncs 0-3s Hook) */}
               <div className="absolute bottom-0 left-0 right-0 p-3 z-10 pointer-events-none">
-                <div className="bg-[#FFE600] text-black font-black text-[13px] leading-[1.1] tracking-[-0.01em] px-2.5 py-2 rounded-[8px] -rotate-[1deg] shadow-lg">
+                <div
+                  className={`bg-[#FFE600] text-black font-black text-[13px] leading-[1.1] tracking-[-0.01em] px-2.5 py-2 rounded-[8px] -rotate-[1deg] shadow-lg transition-all duration-500 origin-bottom-left ${
+                    heroTime <= 3.2
+                      ? 'opacity-100 translate-y-0 scale-100'
+                      : 'opacity-0 translate-y-2 scale-95 pointer-events-none'
+                  }`}
+                >
                   POV: Kurta with <br />
                   REAL POCKETS??
                 </div>
-                <div className="mt-2 flex gap-1.5">
-                  <span className="text-[8px] bg-white text-black font-bold px-2 py-1 rounded-full shadow">
+                <div className="mt-2 flex gap-1.5 items-center">
+                  <span
+                    className={`text-[8px] font-bold px-2 py-1 rounded-full shadow transition-all duration-300 flex items-center gap-1 ${
+                      heroTime <= 3.2
+                        ? 'bg-[#FFE600] text-black ring-2 ring-[#FFE600]/40'
+                        : 'bg-white/20 backdrop-blur text-white/70 border border-white/10'
+                    }`}
+                  >
+                    {heroTime <= 3.2 && <span className="w-1.5 h-1.5 rounded-full bg-black animate-ping" />}
                     HOOK • 0-3s
                   </span>
-                  <span className="text-[8px] bg-white/20 backdrop-blur text-white font-medium px-2 py-1 rounded-full border border-white/10">
+                  <span className="text-[8px] bg-black/60 backdrop-blur text-[#25D366] font-semibold px-2 py-1 rounded-full border border-[#25D366]/30 flex items-center gap-1 shadow">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
                     SUBTITLES • AUTO
                   </span>
                 </div>
