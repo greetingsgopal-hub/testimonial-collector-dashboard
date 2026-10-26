@@ -1,0 +1,40 @@
+[Script Info]
+Title: PandaPraise Viral Subtitles with Expressive End-of-Sentence Emojis
+ScriptType: v4.00+
+PlayResX: 720
+PlayResY: 1280
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: ViralHook,Impact,44,&H00000000,&H00000000,&H0000E6FF,&H90000000,-1,0,0,0,100,100,1,0,3,14,0,8,20,20,100,1
+Style: CapCutPop,Impact,42,&H00FFFFFF,&H00000000,&H00000000,&H90000000,-1,0,0,0,100,100,1.2,0,1,6,3,2,30,30,210,1
+Style: CapCutYellow,Impact,42,&H0000E6FF,&H00000000,&H00000000,&H90000000,-1,0,0,0,100,100,1.2,0,1,6,3,2,30,30,210,1
+Style: CapCutGreen,Impact,42,&H0044FF00,&H00000000,&H00000000,&H90000000,-1,0,0,0,100,100,1.2,0,1,6,3,2,30,30,210,1
+Style: CapCutRed,Impact,42,&H003322FF,&H00000000,&H00000000,&H90000000,-1,0,0,0,100,100,1.2,0,1,6,3,2,30,30,210,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+; Sticky Hook Banner at top
+Dialogue: 2,0:00:00.00,0:00:03.20,ViralHook,,0,0,0,,{\an8\t(0,100,\fscx110\fscy110)\t(100,200,\fscx100\fscy100)\bord14\c&H00000000&\3c&H0000E6FF&}POV: KURTA MEIN REAL POCKETS?!
+Dialogue: 1,0:00:00.30,0:00:01.80,CapCutPop,,0,0,0,,{\pos(326,1070)\c&H00FFFFFF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}WOW YAAR!
+Dialogue: 1,0:00:01.80,0:00:03.40,CapCutYellow,,0,0,0,,{\pos(326,1070)\c&H0000E6FF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}KURTA MEIN POCKETS?!
+Dialogue: 1,0:00:03.40,0:00:05.40,CapCutRed,,0,0,0,,{\pos(326,1070)\c&H003322FF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}PURSE CARRY KARNA?
+Dialogue: 1,0:00:05.40,0:00:07.80,CapCutGreen,,0,0,0,,{\pos(326,1070)\c&H0044FF00&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}NO JHANJHAT AT ALL!
+Dialogue: 1,0:00:07.80,0:00:10.00,CapCutPop,,0,0,0,,{\pos(326,1070)\c&H00FFFFFF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}DON'T WORRY...
+Dialogue: 1,0:00:10.00,0:00:12.50,CapCutYellow,,0,0,0,,{\pos(326,1070)\c&H0000E6FF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}PROBLEM SOLVED!
+Dialogue: 1,0:00:12.50,0:00:14.60,CapCutPop,,0,0,0,,{\pos(360,1070)\c&H00FFFFFF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}DEEP POCKETS FOR
+Dialogue: 1,0:00:14.60,0:00:17.00,CapCutYellow,,0,0,0,,{\pos(326,1070)\c&H0000E6FF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}PHONE + KEYS + CASH!
+Dialogue: 1,0:00:17.00,0:00:19.40,CapCutPop,,0,0,0,,{\pos(360,1070)\c&H00FFFFFF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}SUPER COMFORTABLE
+Dialogue: 1,0:00:19.40,0:00:21.80,CapCutPop,,0,0,0,,{\pos(326,1070)\c&H00FFFFFF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}PREMIUM FABRIC!
+Dialogue: 1,0:00:21.80,0:00:24.00,CapCutPop,,0,0,0,,{\pos(360,1070)\c&H00FFFFFF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}JUST SEE THIS...
+Dialogue: 1,0:00:24.00,0:00:27.20,CapCutYellow,,0,0,0,,{\pos(326,1070)\c&H0000E6FF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}CRAZY 4-WAY STRETCH!
+Dialogue: 1,0:00:27.20,0:00:30.20,CapCutGreen,,0,0,0,,{\pos(326,1070)\c&H0044FF00&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}FITS LIKE A GLOVE!
+Dialogue: 1,0:00:30.20,0:00:33.50,CapCutPop,,0,0,0,,{\pos(326,1070)\c&H00FFFFFF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}PERFECT SLEEVE LENGTH!
+Dialogue: 1,0:00:33.50,0:00:36.50,CapCutPop,,0,0,0,,{\pos(326,1070)\c&H00FFFFFF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}SO CLASSY & TRENDING!
+Dialogue: 1,0:00:36.50,0:00:40.00,CapCutYellow,,0,0,0,,{\pos(326,1070)\c&H0000E6FF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}TRENDING COLORS IN STOCK!
+Dialogue: 1,0:00:40.00,0:00:43.50,CapCutPop,,0,0,0,,{\pos(326,1070)\c&H00FFFFFF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}PLUS SIZES AVAILABLE TOO!
+Dialogue: 1,0:00:43.50,0:00:47.00,CapCutGreen,,0,0,0,,{\pos(326,1070)\c&H0044FF00&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}100% FREE SIZE EXCHANGE!
+Dialogue: 1,0:00:47.00,0:00:50.00,CapCutPop,,0,0,0,,{\pos(326,1070)\c&H00FFFFFF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}WRONG SIZE? NO PROBLEM!
+Dialogue: 1,0:00:50.00,0:00:53.50,CapCutYellow,,0,0,0,,{\pos(326,1070)\c&H0000E6FF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}DIRECT FROM FACTORY!
+Dialogue: 1,0:00:53.50,0:00:58.80,CapCutYellow,,0,0,0,,{\pos(326,1070)\c&H0000E6FF&\t(0,70,\fscx120\fscy120)\t(70,140,\fscx100\fscy100)}TAP LINK & ORDER NOW!
