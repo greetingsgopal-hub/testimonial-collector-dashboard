@@ -9,7 +9,15 @@ import { createMemoryAuditLog } from '../middleware/security.js';
 const router = express.Router();
 const rzpX = new Razorpay({ key_id: config.razorpay.keyId, key_secret: config.razorpay.keySecret });
 
+// Idempotency cache to prevent duplicate payouts
+const payoutIdempotencyLedger = new Map();
+
 router.post('/trigger-upi', verifyJWT, requireStore, async (req, res) => {
+  const idempotencyKey = req.headers['idempotency-key'] || req.headers['x-idempotency-key'];
+  if (idempotencyKey && payoutIdempotencyLedger.has(idempotencyKey)) {
+    return res.json(payoutIdempotencyLedger.get(idempotencyKey));
+  }
+
   const { customerUpi, amount = 200, videoId, orderId } = req.body;
 
   // Validate UPI format
@@ -57,7 +65,11 @@ router.post('/trigger-upi', verifyJWT, requireStore, async (req, res) => {
     }
     createMemoryAuditLog(auditData);
 
-    res.json({ success: true, payoutId: payout.id, status: payout.status, utr: payout.utr || 'pending' });
+    const responsePayload = { success: true, payoutId: payout.id, status: payout.status, utr: payout.utr || 'pending' };
+    if (idempotencyKey) {
+      payoutIdempotencyLedger.set(idempotencyKey, responsePayload);
+    }
+    res.json(responsePayload);
   } catch (e) {
     res.status(400).json({ error: e.error?.description || e.message });
   }

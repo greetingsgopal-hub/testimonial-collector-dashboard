@@ -188,8 +188,16 @@ router.post('/:id/approve', verifyJWT, requireStore, checkPermission('write:appr
   res.json(video);
 });
 
-// Download - decrement ads
+// Idempotency cache for video actions
+const videoIdempotencyLedger = new Map();
+
+// Download - decrement ads with idempotency
 router.post('/:id/download', verifyJWT, requireStore, requireAdsLeft, async (req, res) => {
+  const idempotencyKey = req.headers['idempotency-key'] || req.headers['x-idempotency-key'];
+  if (idempotencyKey && videoIdempotencyLedger.has(idempotencyKey)) {
+    return res.json(videoIdempotencyLedger.get(idempotencyKey));
+  }
+
   const { ratio = '9:16' } = req.body;
   let video;
   if (isDbConnected()) {
@@ -219,7 +227,13 @@ router.post('/:id/download', verifyJWT, requireStore, requireAdsLeft, async (req
     await req.activePayment.save();
   }
   const url = (video.ratios && video.ratios[ratio]) || `https://s3.pandapraise.com/${video._id}/${ratio.replace(':', 'x')}.mp4`;
-  res.json({ url, adsLeft: req.activePayment.adsLeft });
+  const responseData = { url, adsLeft: req.activePayment.adsLeft };
+
+  if (idempotencyKey) {
+    videoIdempotencyLedger.set(idempotencyKey, responseData);
+  }
+
+  res.json(responseData);
 });
 
 export default router;

@@ -20,7 +20,15 @@ const DROPS = {
   scale: { amount: 6999, ads: 50 },
 };
 
+// Idempotency cache for billing operations
+const billingIdempotencyLedger = new Map();
+
 router.post('/create-order', verifyJWT, requireStore, async (req, res) => {
+  const idempotencyKey = req.headers['idempotency-key'] || req.headers['x-idempotency-key'];
+  if (idempotencyKey && billingIdempotencyLedger.has(idempotencyKey)) {
+    return res.json(billingIdempotencyLedger.get(idempotencyKey));
+  }
+
   const { drop } = req.body; // starter/growth/scale
   if (!DROPS[drop]) return res.status(400).json({ error: 'Invalid drop' });
   const options = { amount: DROPS[drop].amount * 100, currency: 'INR', receipt: `drop_${Date.now()}` };
@@ -52,10 +60,20 @@ router.post('/create-order', verifyJWT, requireStore, async (req, res) => {
     Payment.create(paymentDoc).catch(() => {});
   }
 
-  res.json({ orderId: order.id, amount: options.amount, key: config.razorpay.keyId });
+  const responseData = { orderId: order.id, amount: options.amount, key: config.razorpay.keyId };
+  if (idempotencyKey) {
+    billingIdempotencyLedger.set(idempotencyKey, responseData);
+  }
+
+  res.json(responseData);
 });
 
 router.post('/verify', verifyJWT, requireStore, async (req, res) => {
+  const idempotencyKey = req.headers['idempotency-key'] || req.headers['x-idempotency-key'];
+  if (idempotencyKey && billingIdempotencyLedger.has(idempotencyKey)) {
+    return res.json(billingIdempotencyLedger.get(idempotencyKey));
+  }
+
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, drop } = req.body;
   const body = razorpay_order_id + '|' + razorpay_payment_id;
   const expected = crypto.createHmac('sha256', config.razorpay.keySecret).update(body).digest('hex');
@@ -88,7 +106,12 @@ router.post('/verify', verifyJWT, requireStore, async (req, res) => {
     payment = existing;
   }
 
-  res.json({ success: true, adsLeft: payment.adsLeft });
+  const verifyResponse = { success: true, adsLeft: payment.adsLeft };
+  if (idempotencyKey) {
+    billingIdempotencyLedger.set(idempotencyKey, verifyResponse);
+  }
+
+  res.json(verifyResponse);
 });
 
 router.get('/usage', verifyJWT, requireStore, async (req, res) => {
