@@ -60,7 +60,7 @@ function HeroReelCard() {
       <div className="absolute top-2.5 left-2.5 right-2.5 flex justify-between items-center z-10 pointer-events-none">
         <span className="text-[9px] tracking-widest font-bold bg-black/75 text-white backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15 flex items-center gap-1.5 shadow-lg">
           <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
-          9:16 • 1080x1920
+          9:16 • 720x1280
         </span>
         <div className="flex items-center gap-2 pointer-events-auto">
           <span className="text-[9px] bg-[#FFE600] text-black font-extrabold px-2.5 py-1 rounded-full shadow-md">
