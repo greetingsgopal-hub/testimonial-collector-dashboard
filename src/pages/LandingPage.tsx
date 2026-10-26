@@ -1,5 +1,108 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
+function HeroReelCard() {
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [isMuted, setIsMuted] = useState<boolean>(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        videoRef.current.play().catch(() => {});
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  const toggleAudio = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  return (
+    <div
+      onClick={togglePlay}
+      className="relative bg-[#0d0e11] border border-white/10 rounded-[20px] overflow-hidden aspect-[9/16] shadow-2xl cursor-pointer group select-none"
+      style={{
+        transform: 'translateZ(0)',
+        WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+        contain: 'paint',
+      }}
+    >
+      {/* 1080x1920 Video with Hardware Acceleration & Smooth Frame Flipping */}
+      <video
+        ref={videoRef}
+        src="/think_reel.mp4"
+        poster="/images/hero-reel-poster.jpg"
+        autoPlay
+        loop
+        muted={isMuted}
+        playsInline
+        preload="auto"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+        }}
+      />
+
+      {/* Subtle top/bottom vignette to enhance badges without obscuring the video or subtitles */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/25 pointer-events-none" />
+
+      {/* Top Header: Meta Ad Verified Badges + Audio Control */}
+      <div className="absolute top-2.5 left-2.5 right-2.5 flex justify-between items-center z-10 pointer-events-none">
+        <span className="text-[9px] tracking-widest font-bold bg-black/75 text-white backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15 flex items-center gap-1.5 shadow-lg">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
+          9:16 • 1080x1920
+        </span>
+        <div className="flex items-center gap-2 pointer-events-auto">
+          <span className="text-[9px] bg-[#FFE600] text-black font-extrabold px-2.5 py-1 rounded-full shadow-md">
+            META READY
+          </span>
+          <button
+            type="button"
+            onClick={toggleAudio}
+            aria-label={isMuted ? 'Unmute sound' : 'Mute sound'}
+            title={isMuted ? 'Click to unmute' : 'Click to mute'}
+            className="w-7 h-7 rounded-full bg-black/80 hover:bg-black text-white backdrop-blur-md grid place-items-center text-[12px] border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-lg"
+          >
+            {isMuted ? '🔇' : '🔊'}
+          </button>
+        </div>
+      </div>
+
+      {/* Play/Pause Center Indicator when paused */}
+      {!isPlaying && (
+        <div className="absolute inset-0 grid place-items-center bg-black/45 backdrop-blur-[2px] z-10 pointer-events-none">
+          <div className="w-14 h-14 rounded-full bg-black/85 backdrop-blur border border-white/20 text-[#FFE600] grid place-items-center text-[22px] shadow-2xl pl-1">
+            ▶
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Footer: Sleek Meta Ad Pipeline Pills (Completely unobstructive, lets trending subtitles shine) */}
+      <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between z-10 pointer-events-none">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[8px] bg-black/75 backdrop-blur-md text-[#FFE600] font-bold px-2 py-1 rounded-full border border-[#FFE600]/30 shadow-md">
+            HOOK • 0-3s
+          </span>
+          <span className="text-[8px] bg-black/75 backdrop-blur-md text-[#25D366] font-semibold px-2 py-1 rounded-full border border-[#25D366]/30 flex items-center gap-1 shadow-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
+            SUBTITLES • AUTO
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function LandingPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [slider, setSlider] = useState<number>(62);
@@ -9,31 +112,6 @@ export function LandingPage() {
 
   const sliderContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const heroVideoRef = useRef<HTMLVideoElement>(null);
-
-  const [isHeroMuted, setIsHeroMuted] = useState<boolean>(true);
-  const [isHeroPlaying, setIsHeroPlaying] = useState<boolean>(true);
-  const [heroTime, setHeroTime] = useState<number>(0);
-
-  const toggleHeroAudio = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (heroVideoRef.current) {
-      heroVideoRef.current.muted = !isHeroMuted;
-      setIsHeroMuted(!isHeroMuted);
-    }
-  };
-
-  const toggleHeroPlay = () => {
-    if (heroVideoRef.current) {
-      if (isHeroPlaying) {
-        heroVideoRef.current.pause();
-        setIsHeroPlaying(false);
-      } else {
-        heroVideoRef.current.play();
-        setIsHeroPlaying(true);
-      }
-    }
-  };
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -249,89 +327,7 @@ export function LandingPage() {
             </div>
 
             {/* META AD PREVIEW */}
-            <div
-              onClick={toggleHeroPlay}
-              className="relative bg-[#151518] border border-white/10 rounded-[18px] overflow-hidden aspect-[9/16] shadow-2xl cursor-pointer group select-none"
-            >
-              {/* Actual Embedded Video */}
-              <video
-                ref={heroVideoRef}
-                src="/think_reel.mp4"
-                poster="/images/hero-reel-poster.jpg"
-                autoPlay
-                loop
-                muted={isHeroMuted}
-                playsInline
-                onTimeUpdate={(e) => setHeroTime(e.currentTarget.currentTime)}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-
-              {/* Gradient overlays matching screenshot */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/85 pointer-events-none" />
-
-              {/* Top Badges */}
-              <div className="absolute top-2 left-2 right-2 flex justify-between items-center z-10 pointer-events-none">
-                <span className="text-[9px] tracking-widest font-bold bg-black/70 text-white backdrop-blur px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1.5 shadow-md">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
-                  9:16 • 1080x1920
-                </span>
-                <span className="text-[9px] bg-[#FFE600] text-black font-extrabold px-2.5 py-1 rounded-full shadow-md">
-                  META READY
-                </span>
-              </div>
-
-              {/* Audio Mute/Unmute Toggle Button */}
-              <div className="absolute top-10 right-2 z-20">
-                <button
-                  type="button"
-                  onClick={toggleHeroAudio}
-                  aria-label={isHeroMuted ? 'Unmute video' : 'Mute video'}
-                  title={isHeroMuted ? 'Click to unmute sound' : 'Click to mute sound'}
-                  className="w-7 h-7 rounded-full bg-black/70 hover:bg-black/90 text-white backdrop-blur grid place-items-center text-[11px] border border-white/15 transition-all hover:scale-110 active:scale-95 shadow-lg"
-                >
-                  {isHeroMuted ? '🔇' : '🔊'}
-                </button>
-              </div>
-
-              {/* Play Overlay when paused */}
-              {!isHeroPlaying && (
-                <div className="absolute inset-0 grid place-items-center bg-black/40 z-10 pointer-events-none">
-                  <div className="w-14 h-14 rounded-full bg-black/80 backdrop-blur border border-white/20 text-[#FFE600] grid place-items-center text-[22px] shadow-2xl pl-1">
-                    ▶
-                  </div>
-                </div>
-              )}
-
-              {/* Bottom Hook & Subtitle Pills (Matches Screenshot & Syncs 0-3s Hook) */}
-              <div className="absolute bottom-0 left-0 right-0 p-3 z-10 pointer-events-none">
-                <div
-                  className={`bg-[#FFE600] text-black font-black text-[13px] leading-[1.1] tracking-[-0.01em] px-2.5 py-2 rounded-[8px] -rotate-[1deg] shadow-lg transition-all duration-500 origin-bottom-left ${
-                    heroTime <= 3.2
-                      ? 'opacity-100 translate-y-0 scale-100'
-                      : 'opacity-0 translate-y-2 scale-95 pointer-events-none'
-                  }`}
-                >
-                  POV: Kurta with <br />
-                  REAL POCKETS??
-                </div>
-                <div className="mt-2 flex gap-1.5 items-center">
-                  <span
-                    className={`text-[8px] font-bold px-2 py-1 rounded-full shadow transition-all duration-300 flex items-center gap-1 ${
-                      heroTime <= 3.2
-                        ? 'bg-[#FFE600] text-black ring-2 ring-[#FFE600]/40'
-                        : 'bg-white/20 backdrop-blur text-white/70 border border-white/10'
-                    }`}
-                  >
-                    {heroTime <= 3.2 && <span className="w-1.5 h-1.5 rounded-full bg-black animate-ping" />}
-                    HOOK • 0-3s
-                  </span>
-                  <span className="text-[8px] bg-black/60 backdrop-blur text-[#25D366] font-semibold px-2 py-1 rounded-full border border-[#25D366]/30 flex items-center gap-1 shadow">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
-                    SUBTITLES • AUTO
-                  </span>
-                </div>
-              </div>
-            </div>
+            <HeroReelCard />
           </div>
 
           {/* SLA BADGE */}
