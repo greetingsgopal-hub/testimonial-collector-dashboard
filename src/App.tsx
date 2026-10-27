@@ -50,6 +50,7 @@ const VideoEditor = React.lazy(() => import('./pages/VideoEditor').then((m) => (
 const Workflow_01_02_03 = React.lazy(() => import('./pages/Workflow_01_02_03').then((m) => ({ default: m.Workflow_01_02_03 })));
 const ScreenshotWorkflow_Firebase = React.lazy(() => import('./pages/ScreenshotWorkflow_Firebase').then((m) => ({ default: m.ScreenshotWorkflow_Firebase })));
 const AutoWorkflow_Firebase = React.lazy(() => import('./pages/AutoWorkflow_Firebase').then((m) => ({ default: m.AutoWorkflow_Firebase })));
+const FinalWorkflow = React.lazy(() => import('./pages/FinalWorkflow').then((m) => ({ default: m.FinalWorkflow })));
 
 
 const AppLayout = React.lazy(() => import('./components/layouts/AppLayout'));
@@ -117,14 +118,17 @@ export function App() {
             <Route path="/editor" element={<VideoEditor />} />
             <Route path="/editor/:id" element={<VideoEditor />} />
             <Route path="/dashboard/editor" element={<VideoEditor />} />
-            <Route path="/workflow" element={<ScreenshotWorkflow_Firebase />} />
-            <Route path="/workflow/auto" element={<AutoWorkflow_Firebase />} />
+            <Route path="/workflow" element={<FinalWorkflow />} />
+            <Route path="/final" element={<FinalWorkflow />} />
+            <Route path="/final-workflow" element={<FinalWorkflow />} />
+            <Route path="/workflow/auto" element={<FinalWorkflow />} />
             <Route path="/auto-workflow" element={<AutoWorkflow_Firebase />} />
-            <Route path="/workflow/firebase" element={<ScreenshotWorkflow_Firebase />} />
+            <Route path="/workflow/firebase" element={<FinalWorkflow />} />
             <Route path="/screenshot-workflow" element={<ScreenshotWorkflow_Firebase />} />
-            <Route path="/workflow-01-02-03" element={<ScreenshotWorkflow_Firebase />} />
+            <Route path="/workflow/screenshot" element={<ScreenshotWorkflow_Firebase />} />
+            <Route path="/workflow-01-02-03" element={<FinalWorkflow />} />
             <Route path="/workflow/connect-collect" element={<Workflow_01_02_03 />} />
-            <Route path="/connect-collect" element={<ScreenshotWorkflow_Firebase />} />
+            <Route path="/connect-collect" element={<FinalWorkflow />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/pricing" element={<PricingPage />} />
