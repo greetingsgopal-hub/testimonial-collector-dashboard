@@ -9,7 +9,10 @@ import { KpiCard } from "../components/ui/KpiCard";
 // Final merged workflow - matches screenshot PNG 01-02-03 - AUTO + Firebase solid base
 export const FinalWorkflow: React.FC = () => {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] p-6 md:p-10" style={{ background: 'radial-gradient(1200px 600px at 50% -10%, rgba(255,255,255,0.06), transparent), #0A0A0A' }}>
+    <div 
+      className="min-h-screen bg-[#0A0A0A] p-6 sm:p-10 text-white selection:bg-amber-400 selection:text-black font-sans" 
+      style={{ background: 'radial-gradient(1200px 600px at 50% -10%, rgba(255,255,255,0.06), transparent), #0A0A0A' }}
+    >
       <div className="max-w-[1280px] mx-auto space-y-8">
         <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
           <div className="flex items-center gap-3">
@@ -32,17 +35,17 @@ export const FinalWorkflow: React.FC = () => {
         <div className="flex justify-between items-end">
           <div>
             <h1 className="text-[28px] font-semibold text-white tracking-tight tabular-nums">PandaPraise • Final • Firebase • AUTO</h1>
-            <p className="mt-1 text-[13px] text-white/40">01 CONNECT Shopify 47s • 02 COLLECT WhatsApp No App • 03 EDIT Auto Hooks+Ratios • Top Notch 10M</p>
+            <p className="mt-1 text-[13px] text-white/50">01 CONNECT Shopify 47s • 02 COLLECT WhatsApp No App • 03 EDIT Auto Hooks+Ratios • Top Notch 10M</p>
           </div>
           <div className="hidden md:flex gap-2">
             <KpiCard label="Flow" value="AUTO" sub="01→02→03" />
           </div>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           <ShopifyConnect_Firebase />
           <WhatsAppCollect_Firebase />
-          <AutoEditor videoUrl="https://firebasestorage.googleapis.com/v0/b/demo/o/whatsapp%2Ftest.mp4?alt=media" testimonialId="demo_123" />
+          <AutoEditor videoUrl="https://pandapraise.com/think_reel.mp4" testimonialId="demo_123" />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
