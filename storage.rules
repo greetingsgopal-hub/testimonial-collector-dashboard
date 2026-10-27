@@ -34,5 +34,22 @@ service firebase.storage {
       allow create, update: if isTenantOwner(tenantId) && isValidImage();
       allow delete: if isTenantOwner(tenantId);
     }
+
+    // WhatsApp incoming videos
+    match /whatsapp/{phone}/{videoId} {
+      allow read, write: if true;
+    }
+
+    // Edited exports - top notch (public for ad embeds)
+    match /edits/{testimonialId}/{ratio}.mp4 {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Avatars with BlurHash
+    match /avatars/{userId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
   }
 }

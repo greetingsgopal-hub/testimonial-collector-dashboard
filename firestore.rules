@@ -307,6 +307,31 @@ service cloud.firestore {
         allow read, write: if isStoreOwner(shopDomain);
       }
     }
+
+    // 12. Firebase Solid Base Workflow 01-02-03 collections
+    // 01 CONNECT - Shopify shops
+    match /shops/{shopId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    
+    // WhatsApp triggers - 7 day queue
+    match /whatsapp_triggers/{triggerId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // 02 COLLECT - WhatsApp incoming - real-time
+    match /whatsapp_incoming/{videoId} {
+      allow read: if isAuthenticated();
+      allow create: if true; // Webhook creates without auth
+      allow update, delete: if isAuthenticated();
+    }
+    
+    // 03 EDIT - Video exports - 3 ratios
+    match /video_exports/{exportId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
   }
 }
 
