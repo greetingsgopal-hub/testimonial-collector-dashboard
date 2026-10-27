@@ -49,6 +49,7 @@ const ModerationDashboardFixed = React.lazy(() => import('./pages/ModerationDash
 const VideoEditor = React.lazy(() => import('./pages/VideoEditor').then((m) => ({ default: m.VideoEditor })));
 const Workflow_01_02_03 = React.lazy(() => import('./pages/Workflow_01_02_03').then((m) => ({ default: m.Workflow_01_02_03 })));
 const ScreenshotWorkflow_Firebase = React.lazy(() => import('./pages/ScreenshotWorkflow_Firebase').then((m) => ({ default: m.ScreenshotWorkflow_Firebase })));
+const AutoWorkflow_Firebase = React.lazy(() => import('./pages/AutoWorkflow_Firebase').then((m) => ({ default: m.AutoWorkflow_Firebase })));
 
 
 const AppLayout = React.lazy(() => import('./components/layouts/AppLayout'));
@@ -117,6 +118,8 @@ export function App() {
             <Route path="/editor/:id" element={<VideoEditor />} />
             <Route path="/dashboard/editor" element={<VideoEditor />} />
             <Route path="/workflow" element={<ScreenshotWorkflow_Firebase />} />
+            <Route path="/workflow/auto" element={<AutoWorkflow_Firebase />} />
+            <Route path="/auto-workflow" element={<AutoWorkflow_Firebase />} />
             <Route path="/workflow/firebase" element={<ScreenshotWorkflow_Firebase />} />
             <Route path="/screenshot-workflow" element={<ScreenshotWorkflow_Firebase />} />
             <Route path="/workflow-01-02-03" element={<ScreenshotWorkflow_Firebase />} />

@@ -48,7 +48,11 @@ describe('PandaPraise 20 UI Tips Implementation Suite', () => {
     };
 
     act(() => {
-      root.render(<TestimonialCard t={item} onApprove={mockApprove} onReject={vi.fn()} onDelete={vi.fn()} />);
+      root.render(
+        <MemoryRouter>
+          <TestimonialCard t={item} onApprove={mockApprove} onReject={vi.fn()} onDelete={vi.fn()} />
+        </MemoryRouter>
+      );
     });
     
     expect(container.textContent).toContain('pending');

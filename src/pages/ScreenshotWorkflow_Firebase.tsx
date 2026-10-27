@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShopifyConnect_Firebase } from "../integrations/shopify/ShopifyConnect_Firebase";
 import { WhatsAppCollect_Firebase } from "../integrations/whatsapp/WhatsAppCollect_Firebase";
+import { AutoEditor } from "../components/AutoEditor";
 import { Edit_Firebase } from "../integrations/edit/Edit_Firebase";
 
 // Exact match to your screenshot PNG - Firebase solid base
 export const ScreenshotWorkflow_Firebase: React.FC = () => {
+  const [editorMode, setEditorMode] = useState<'auto' | 'interactive'>('auto');
+
   return (
     <div 
       className="min-h-screen bg-[#0A0A0A] p-6 sm:p-10 text-white selection:bg-amber-400 selection:text-black font-sans" 
@@ -25,12 +28,20 @@ export const ScreenshotWorkflow_Firebase: React.FC = () => {
             </Link>
             <span className="text-white/20">•</span>
             <Link to="/editor/1" className="text-[12px] font-mono text-white/50 hover:text-white uppercase">
-              Video Editor (Phase 13)
+              Studio Video Editor
             </Link>
           </div>
-          <span className="text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-            FIREBASE SOLID BASE
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setEditorMode(editorMode === 'auto' ? 'interactive' : 'auto')}
+              className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.10] text-white/70 border border-white/[0.10] font-mono transition-all"
+            >
+              Mode: {editorMode === 'auto' ? '⚡ Fully Auto' : '🎬 Interactive'}
+            </button>
+            <span className="text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+              FIREBASE SOLID BASE
+            </span>
+          </div>
         </div>
 
         {/* Header Title */}
@@ -47,7 +58,11 @@ export const ScreenshotWorkflow_Firebase: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           <ShopifyConnect_Firebase />
           <WhatsAppCollect_Firebase />
-          <Edit_Firebase />
+          {editorMode === 'auto' ? (
+            <AutoEditor videoUrl="https://pandapraise.com/think_reel.mp4" testimonialId="wa_priya_01" />
+          ) : (
+            <Edit_Firebase />
+          )}
         </div>
         
         {/* Firebase Architecture Details */}
