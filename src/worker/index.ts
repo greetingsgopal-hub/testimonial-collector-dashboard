@@ -48,6 +48,13 @@ import { handleContactSubmit } from './handlers/contactHandler';
 import { handleRadarScan } from './handlers/radarHandler';
 import { handleProspectResearch } from './handlers/prospectResearch';
 import {
+  handleShopifyAuth,
+  handleShopifyCallback,
+  handleShopifyWebhookFulfilled,
+  handleShopifyTriggerTest,
+  handleWhatsAppIncoming,
+} from './handlers/phase1_2_handlers';
+import {
   handleAdminGetWorkspaces,
   handleAdminUpdateWorkspacePlan,
   handleAdminManageWorkspace,
@@ -388,6 +395,26 @@ export default {
         case 'radar-scan':
         case 'scan':
           return await handleRadarScan(request, env);
+
+        // Phase 1: Shopify OAuth & 7-Day Delayed Trigger Handlers
+        case 'shopify/auth':
+          return await handleShopifyAuth(request, env);
+
+        case 'shopify/callback':
+          return await handleShopifyCallback(request, env);
+
+        case 'shopify/webhook/fulfilled':
+        case 'webhooks/shopify/orders-fulfilled':
+          return await handleShopifyWebhookFulfilled(request, env);
+
+        case 'shopify/trigger-test':
+          return await handleShopifyTriggerTest(request, env);
+
+        // Phase 2: WhatsApp Incoming Video Collector
+        case 'whatsapp/incoming':
+        case 'webhook/whatsapp':
+        case 'webhooks/whatsapp':
+          return await handleWhatsAppIncoming(request, env);
 
         default:
           return new Response(JSON.stringify({ error: `API route '${pathname}' not found.` }), {

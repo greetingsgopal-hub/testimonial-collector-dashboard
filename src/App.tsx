@@ -47,6 +47,7 @@ const PhaseLogin = React.lazy(() => import('./pages/Login'));
 const BillingTest = React.lazy(() => import('./pages/BillingTest'));
 const ModerationDashboardFixed = React.lazy(() => import('./pages/ModerationDashboardFixed').then((m) => ({ default: m.ModerationDashboardFixed })));
 const VideoEditor = React.lazy(() => import('./pages/VideoEditor').then((m) => ({ default: m.VideoEditor })));
+const Workflow_01_02_03 = React.lazy(() => import('./pages/Workflow_01_02_03').then((m) => ({ default: m.Workflow_01_02_03 })));
 
 
 const AppLayout = React.lazy(() => import('./components/layouts/AppLayout'));
@@ -115,6 +116,10 @@ export function App() {
             <Route path="/editor/:id" element={<VideoEditor />} />
             <Route path="/dashboard/editor" element={<VideoEditor />} />
             <Route path="/dashboard/editor/:id" element={<VideoEditor />} />
+            <Route path="/workflow" element={<Workflow_01_02_03 />} />
+            <Route path="/workflow-01-02-03" element={<Workflow_01_02_03 />} />
+            <Route path="/workflow/connect-collect" element={<Workflow_01_02_03 />} />
+            <Route path="/connect-collect" element={<Workflow_01_02_03 />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/pricing" element={<PricingPage />} />

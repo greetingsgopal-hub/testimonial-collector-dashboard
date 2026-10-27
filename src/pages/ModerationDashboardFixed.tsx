@@ -88,7 +88,14 @@ export const ModerationDashboardFixed = () => {
               Press <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-[11px]">⌘K</kbd> for command menu • <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-[11px]">A</kbd> Approve • <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-[11px]">R</kbd> Reject
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <Link
+              to="/workflow"
+              className="h-9 px-3.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-white text-[12px] font-medium flex items-center gap-1.5 transition-all border border-white/[0.08]"
+              title="View full 01 Connect → 02 Collect → 03 Edit workflow"
+            >
+              <span>⚡ Workflow 01→02→03</span>
+            </Link>
             <Link
               to="/editor/1"
               className="h-9 px-4 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black text-[13px] font-bold shadow-lg shadow-amber-400/20 flex items-center gap-1.5 transition-all active:scale-95"
