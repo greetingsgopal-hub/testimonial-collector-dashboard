@@ -20,3 +20,4 @@ export const saveWhatsAppVideo = async ({ bucket, db, FieldValue, phone, id, vid
 };
 
 export default { saveWhatsAppVideo };
+

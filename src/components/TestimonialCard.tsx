@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { getFreshUrl } from "../firebase-adapters/firebase";
 
 // 18 Continuous corners, 8 BlurHash, 13 Hit slop, 10 Swipe-to-dismiss, 11 Interruptible animations, 2 Optimistic updates
 export const TestimonialCard = ({ t, onApprove, onReject, onDelete }: any) => {
@@ -28,6 +29,17 @@ export const TestimonialCard = ({ t, onApprove, onReject, onDelete }: any) => {
             <img 
               src={t.avatar || `https://i.pravatar.cc/100?u=${t.id}`} 
               onLoad={() => setBlurLoaded(true)} 
+              onError={(e) => {
+                // 4xx -> token expired, refetch
+                if (e.currentTarget.src.includes('fbcdn.net') || e.currentTarget.src.includes('firebasestorage')) {
+                  const storagePath = t.storagePath || t.avatarPath || `avatars/${t.id}.jpg`;
+                  getFreshUrl(storagePath).then(newUrl => {
+                    e.currentTarget.src = newUrl;
+                  }).catch(() => {
+                    e.currentTarget.src = `https://i.pravatar.cc/100?u=${t.id}`;
+                  });
+                }
+              }}
               className="h-full w-full object-cover transition-opacity duration-300" 
               alt={t.name} 
             />

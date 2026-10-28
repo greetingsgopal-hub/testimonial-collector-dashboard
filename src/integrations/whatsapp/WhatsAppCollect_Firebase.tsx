@@ -135,7 +135,19 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
               }`}
             >
               <div className="relative h-12 w-12 rounded-[12px] overflow-hidden bg-black grid place-items-center text-[10px] text-white/40 font-mono shrink-0">
-                VIDEO
+                <img 
+                  src={msg.avatar || `https://firebasestorage.googleapis.com/v0/b/pandapraise.appspot.com/o/${encodeURIComponent(msg.storagePath || `whatsapp/${msg.id}.mp4`)}?alt=media`} 
+                  alt={msg.name}
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    // 4xx -> token expired, refetch
+                    if (e.currentTarget.src.includes('fbcdn.net') || e.currentTarget.src.includes('firebasestorage')) {
+                      getFreshUrl(msg.storagePath || `whatsapp/${msg.id}.mp4`).then(newUrl => {
+                        e.currentTarget.src = newUrl;
+                      }).catch(() => {});
+                    }
+                  }} 
+                />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-center">
