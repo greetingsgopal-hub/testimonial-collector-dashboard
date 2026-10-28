@@ -1,4 +1,3 @@
-
 // Cloudflare Worker + Firebase Admin - solid base for 01 02 03
 import { Hono } from 'hono';
 
@@ -68,31 +67,61 @@ app.post('/api/whatsapp/incoming', async (c) => {
   if (!message || message.type !== 'video') return c.json({ ok: true });
 
   const from = message.from;
-  const videoId = message.video.id;
+  const id = message.video.id;
+  const storagePath = `whatsapp/${from}/${id}.mp4`;
   
   // Download from Meta
-  const mediaUrl = await fetch(`https://graph.facebook.com/v20.0/${videoId}`, { headers: { Authorization: `Bearer ${c.env.WHATSAPP_TOKEN}` } }).then(r => r.json()).then(j => j.url);
-  const videoBuffer = await fetch(mediaUrl, { headers: { Authorization: `Bearer ${c.env.WHATSAPP_TOKEN}` } }).then(r => r.arrayBuffer());
-  void videoBuffer;
+  let videoBuffer: ArrayBuffer | null = null;
+  if (c.env.WHATSAPP_TOKEN) {
+    try {
+      const mediaUrl = await fetch(`https://graph.facebook.com/v20.0/${id}`, { headers: { Authorization: `Bearer ${c.env.WHATSAPP_TOKEN}` } }).then(r => r.json()).then((j: any) => j.url);
+      videoBuffer = await fetch(mediaUrl, { headers: { Authorization: `Bearer ${c.env.WHATSAPP_TOKEN}` } }).then(r => r.arrayBuffer());
+    } catch (err) {
+      console.warn('Meta media fetch notice:', err);
+    }
+  }
 
-  // Upload to Firebase Storage via Google Cloud Storage JSON API
-  // For simplicity using R2 in this example, replace with Firebase Storage upload
-  // await c.env.PANDA_R2.put(`whatsapp/${from}/${Date.now()}.mp4`, videoBuffer);
+  // Upload to Firebase Storage whatsapp/{phone}/{id}.mp4
+  const bucketName = c.env.FIREBASE_STORAGE_BUCKET || `${c.env.FIREBASE_PROJECT_ID}.appspot.com`;
+  const token = await getFirebaseToken(c.env);
+  if (token && videoBuffer) {
+    try {
+      await fetch(`https://firebasestorage.googleapis.com/v0/b/${bucketName}/o?name=${encodeURIComponent(storagePath)}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': message.video.mime_type || 'video/mp4',
+        },
+        body: videoBuffer,
+      });
+    } catch (err) {
+      console.warn('Firebase Storage upload notice:', err);
+    }
+  }
 
-  // Save to Firestore whatsapp_incoming
-  await fetch(`https://firestore.googleapis.com/v1/projects/${c.env.FIREBASE_PROJECT_ID}/databases/(default)/documents/whatsapp_incoming`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${await getFirebaseToken(c.env)}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fields: { phone: { stringValue: from }, videoId: { stringValue: videoId }, status: { stringValue: 'new' }, createdAt: { timestampValue: new Date().toISOString() } } })
+  // DON'T save download URL (expires)
+  // Save only path
+  await fetch(`https://firestore.googleapis.com/v1/projects/${c.env.FIREBASE_PROJECT_ID}/databases/(default)/documents/whatsapp_incoming/${id}`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      fields: { 
+        phone: { stringValue: from }, 
+        storagePath: { stringValue: storagePath }, // <-- save path, not URL
+        status: { stringValue: 'new' }, 
+        createdAt: { timestampValue: new Date().toISOString() }
+        // videoUrl: await getDownloadURL() // DELETE THIS LINE
+      } 
+    })
   });
 
-  return c.json({ ok: true });
+  return c.json({ ok: true, storagePath });
 });
 
 async function getFirebaseToken(env: any) {
   // In production, exchange service account JWT for OAuth token
   // Simplified: return env.FIREBASE_ID_TOKEN or use google-auth
-  return env.FIREBASE_ADMIN_TOKEN;
+  return env.FIREBASE_ADMIN_TOKEN || '';
 }
 
 export default app;

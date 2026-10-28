@@ -92,3 +92,61 @@ exports.verifyRazorpayPayment = functions.https.onRequest(async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+
+// 3. WhatsApp Incoming Webhook - Upload to Firebase Storage and save storagePath to Firestore
+exports.whatsappIncoming = functions.https.onRequest(async (req, res) => {
+  if (req.method === "GET") {
+    const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || "panda_verify_2026";
+    if (req.query["hub.verify_token"] === verifyToken) {
+      return res.status(200).send(req.query["hub.challenge"]);
+    }
+    return res.status(403).send("Forbidden");
+  }
+
+  try {
+    const entry = req.body.entry?.[0]?.changes?.[0]?.value;
+    const message = entry?.messages?.[0];
+
+    if (message?.type === "video") {
+      const id = message.video.id;
+      const phone = message.from;
+      const whatsappToken = process.env.WHATSAPP_TOKEN;
+
+      let videoBuffer = Buffer.from("");
+      if (whatsappToken) {
+        const mediaRes = await fetch(`https://graph.facebook.com/v20.0/${id}`, {
+          headers: { Authorization: `Bearer ${whatsappToken}` },
+        });
+        const { url } = await mediaRes.json();
+        const resMedia = await fetch(url, {
+          headers: { Authorization: `Bearer ${whatsappToken}` },
+        });
+        videoBuffer = Buffer.from(await resMedia.arrayBuffer());
+      }
+
+      // After uploading to Firebase Storage whatsapp/{phone}/{id}.mp4
+      const bucket = admin.storage().bucket();
+      const fileRef = bucket.file(`whatsapp/${phone}/${id}.mp4`);
+      if (videoBuffer.length > 0) {
+        await fileRef.save(videoBuffer, {
+          metadata: { contentType: message.video?.mime_type || "video/mp4" },
+        });
+      }
+
+      // DON'T save download URL (expires)
+      const storagePath = `whatsapp/${phone}/${id}.mp4`;
+      // Save only path
+      await db.collection('whatsapp_incoming').doc(id).set({
+        phone,
+        storagePath, // <-- save path, not URL
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        // videoUrl: await getDownloadURL() // DELETE THIS LINE
+      }, { merge: true });
+    }
+
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error("WhatsApp Incoming Webhook Error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});

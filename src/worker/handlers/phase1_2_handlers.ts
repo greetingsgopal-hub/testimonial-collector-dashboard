@@ -207,7 +207,7 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
     }
 
     const videoId = message.video?.id || 'demo_video';
-    const filename = `whatsapp/${from}/${Date.now()}.mp4`;
+    const storagePath = `whatsapp/${from}/${videoId}.mp4`;
 
     const testimonial = {
       id: `wa_${Date.now()}`,
@@ -216,7 +216,8 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
       phone: from,
       name: contact?.profile?.name || from,
       status: 'pending',
-      videoUrl: `https://r2.pandapraise.com/${filename}`,
+      storagePath, // <-- save path, not URL
+      // videoUrl: await getDownloadURL() // DELETE THIS LINE
       rating: 5,
       createdAt: Date.now(),
       shop: entry?.metadata?.display_phone_number || 'kalyan-silks.myshopify.com',

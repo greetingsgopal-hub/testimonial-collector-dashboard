@@ -33,7 +33,7 @@ app.post('/api/whatsapp/incoming', async (c) => {
   
   const videoId = message.video?.id || 'demo_video';
   const mime = message.video?.mime_type || 'video/mp4';
-  const filename = `whatsapp/${from}/${Date.now()}.mp4`;
+  const storagePath = `whatsapp/${from}/${videoId}.mp4`;
   
   // 1. Download video from Meta Cloud API (if configured)
   if (c.env?.WHATSAPP_TOKEN && videoId !== 'demo_video') {
@@ -41,7 +41,7 @@ app.post('/api/whatsapp/incoming', async (c) => {
       const mediaUrlRes = await fetch(`https://graph.facebook.com/v20.0/${videoId}`, {
         headers: { 'Authorization': `Bearer ${c.env.WHATSAPP_TOKEN}` }
       });
-      const { url } = await mediaUrlRes.json() as any;
+      const { url } = await mediaRes.json() as any;
       
       const videoBlob = await fetch(url, {
         headers: { 'Authorization': `Bearer ${c.env.WHATSAPP_TOKEN}` }
@@ -49,7 +49,7 @@ app.post('/api/whatsapp/incoming', async (c) => {
       
       // 2. Upload to Firebase Storage / R2
       if (c.env?.PANDA_R2) {
-        await c.env.PANDA_R2.put(filename, videoBlob, { httpMetadata: { contentType: mime } });
+        await c.env.PANDA_R2.put(storagePath, videoBlob, { httpMetadata: { contentType: mime } });
       }
     } catch (err) {
       console.warn('Meta WhatsApp media fetch warning:', err);
@@ -63,7 +63,8 @@ app.post('/api/whatsapp/incoming', async (c) => {
     phone: from,
     name: contact?.profile?.name || from,
     status: 'pending',
-    videoUrl: `https://r2.pandapraise.com/${filename}`,
+    storagePath, // <-- save path, not URL
+    // videoUrl: await getDownloadURL() // DELETE THIS LINE
     rating: 5,
     createdAt: Date.now(),
     shop: entry?.metadata?.display_phone_number || 'kalyan-silks.myshopify.com',
