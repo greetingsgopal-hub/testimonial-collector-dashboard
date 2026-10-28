@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { db } from "../firebase-adapters/firebase";
+import { db, getFreshUrl } from "../firebase-adapters/firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 // AUTO EDITOR - 03 EDIT HOOKS+RATIOS - Fully Auto, no manual trim
@@ -7,15 +7,26 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 interface AutoEditorProps {
   videoUrl?: string;
+  storagePath?: string;
   testimonialId?: string;
 }
 
 export const AutoEditor: React.FC<AutoEditorProps> = ({ 
   videoUrl = 'https://pandapraise.com/think_reel.mp4', 
+  storagePath,
   testimonialId = 'wa_priya_01' 
 }) => {
   const [state, setState] = useState<'idle' | 'analyzing' | 'cutting' | 'captioning' | 'exporting' | 'done'>('idle');
   const [result, setResult] = useState<any>(null);
+  const [activeUrl, setActiveUrl] = useState<string>(videoUrl);
+
+  useEffect(() => {
+    if (storagePath) {
+      getFreshUrl(storagePath).then(setActiveUrl).catch(console.warn);
+    } else if (videoUrl) {
+      setActiveUrl(videoUrl);
+    }
+  }, [storagePath, videoUrl]);
 
   const runAuto = async () => {
     setState('analyzing');
@@ -65,10 +76,10 @@ export const AutoEditor: React.FC<AutoEditorProps> = ({
   };
 
   useEffect(() => { 
-    if (videoUrl) {
+    if (activeUrl) {
       runAuto();
     } 
-  }, [videoUrl]);
+  }, [activeUrl]);
 
   return (
     <div className="rounded-[20px] bg-[#1C1C1F] border border-white/[0.06] p-6 w-full flex flex-col justify-between">

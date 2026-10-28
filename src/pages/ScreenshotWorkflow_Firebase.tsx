@@ -8,6 +8,7 @@ import { Edit_Firebase } from "../integrations/edit/Edit_Firebase";
 // Exact match to your screenshot PNG - Firebase solid base
 export const ScreenshotWorkflow_Firebase: React.FC = () => {
   const [editorMode, setEditorMode] = useState<'auto' | 'interactive'>('auto');
+  const [liveVideoUrl, setLiveVideoUrl] = useState<string>('');
 
   return (
     <div 
@@ -57,9 +58,9 @@ export const ScreenshotWorkflow_Firebase: React.FC = () => {
         {/* 3 Workflow Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           <ShopifyConnect_Firebase />
-          <WhatsAppCollect_Firebase />
+          <WhatsAppCollect_Firebase onVideoUrlChange={setLiveVideoUrl} />
           {editorMode === 'auto' ? (
-            <AutoEditor videoUrl="https://pandapraise.com/think_reel.mp4" testimonialId="wa_priya_01" />
+            <AutoEditor videoUrl={liveVideoUrl || "https://pandapraise.com/think_reel.mp4"} testimonialId="wa_priya_01" />
           ) : (
             <Edit_Firebase />
           )}

@@ -1,11 +1,47 @@
 import React, { useState, useEffect } from "react";
-import { db, storage } from "../../firebase-adapters/firebase";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { db } from "../../firebase-adapters/firebase";
 import { collection, query, onSnapshot, orderBy, doc, setDoc, serverTimestamp } from "firebase/firestore";
 
+export const getFreshUrl = async (path: string) => {
+  const storage = getStorage();
+  const urlRef = ref(storage, path);
+  // Always generate fresh — expires in 1 week, but we refresh on every load
+  return await getDownloadURL(urlRef);
+};
+
+export interface WhatsAppCollect_FirebaseProps {
+  doc?: { storagePath?: string; videoUrl?: string; [key: string]: any };
+  onVideoUrlChange?: (url: string) => void;
+}
+
 // 02 COLLECT - WHATSAPP UI • INCOMING - Firebase version
-export const WhatsAppCollect_Firebase: React.FC = () => {
+export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> = ({ 
+  doc: propDoc, 
+  onVideoUrlChange 
+}) => {
   const [incoming, setIncoming] = useState<any[]>([]);
   const [importedMap, setImportedMap] = useState<Record<string, boolean>>({});
+  const [selectedDoc, setSelectedDoc] = useState<any>(null);
+  const [videoUrl, setVideoUrl] = useState<string>('');
+
+  const docData = propDoc || selectedDoc;
+
+  // In WhatsAppCollect_Firebase.tsx
+  // WRONG (you have): setVideoUrl(doc.videoUrl) // cached 24h URL -> 4xx after
+  // RIGHT:
+  useEffect(() => {
+    if (docData?.storagePath) {
+      getFreshUrl(docData.storagePath)
+        .then((url) => {
+          setVideoUrl(url);
+          onVideoUrlChange?.(url);
+        })
+        .catch((err) => {
+          console.warn('Notice generating fresh URL:', err);
+        });
+    }
+  }, [docData?.storagePath]);
 
   useEffect(() => {
     // Real-time Firebase listener - solid base
@@ -36,7 +72,8 @@ export const WhatsAppCollect_Firebase: React.FC = () => {
       status: 'new', 
       type: 'video', 
       shop: 'kalyan-silks', 
-      rating: 5 
+      rating: 5,
+      storagePath: 'whatsapp/+919800000012/w1.mp4'
     },
     { 
       id: 'w2', 
@@ -47,22 +84,24 @@ export const WhatsAppCollect_Firebase: React.FC = () => {
       status: 'pending', 
       type: 'video', 
       shop: 'kalyan-silks', 
-      rating: 4 
+      rating: 4,
+      storagePath: 'whatsapp/+919800000045/w2.mp4'
     },
   ];
 
   const importToInbox = async (item: any) => {
     setImportedMap(prev => ({ ...prev, [item.id]: true }));
+    setSelectedDoc(item);
     // Move from whatsapp_incoming to testimonials - Firebase solid base
     if (db) {
       try {
-        const bucket = (storage as any)?.app?.options?.storageBucket || 'pandapraise.appspot.com';
+        const storagePath = item.storagePath || `whatsapp/${item.id}.mp4`;
         await setDoc(doc(db, 'testimonials', item.id), {
           ...item,
           source: 'whatsapp',
           status: 'pending',
+          storagePath,
           importedAt: serverTimestamp(),
-          videoUrl: item.videoUrl || `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/whatsapp%2F${item.id}.mp4?alt=media`
         }, { merge: true });
       } catch (err) {
         console.warn('Firestore import notice:', err);
@@ -88,7 +127,12 @@ export const WhatsAppCollect_Firebase: React.FC = () => {
           {displayData.map((msg: any) => (
             <div 
               key={msg.id} 
-              className="flex gap-3 p-3 rounded-[14px] bg-white/[0.04] border border-white/[0.04] hover:border-white/[0.08] transition-colors group items-center"
+              onClick={() => setSelectedDoc(msg)}
+              className={`flex gap-3 p-3 rounded-[14px] border transition-colors group items-center cursor-pointer ${
+                docData?.id === msg.id 
+                  ? 'bg-white/[0.08] border-amber-400/40' 
+                  : 'bg-white/[0.04] border-white/[0.04] hover:border-white/[0.08]'
+              }`}
             >
               <div className="relative h-12 w-12 rounded-[12px] overflow-hidden bg-black grid place-items-center text-[10px] text-white/40 font-mono shrink-0">
                 VIDEO
@@ -101,7 +145,10 @@ export const WhatsAppCollect_Firebase: React.FC = () => {
                 <div className="text-[11px] text-white/40 truncate">{msg.phone} • {msg.duration}</div>
                 <div className="mt-1 flex items-center gap-2">
                   <button 
-                    onClick={() => importToInbox(msg)} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      importToInbox(msg);
+                    }} 
                     className="text-[10px] px-2.5 py-0.5 rounded-full bg-white text-black font-semibold hover:bg-white/90 active:scale-95 transition-all shadow-sm"
                   >
                     {importedMap[msg.id] ? '✓ Imported' : 'Import →'}
@@ -114,6 +161,16 @@ export const WhatsAppCollect_Firebase: React.FC = () => {
             </div>
           ))}
         </div>
+
+        {videoUrl && (
+          <div className="mt-3 px-3 py-1.5 rounded-[10px] bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-mono flex items-center justify-between">
+            <div className="flex items-center gap-1.5 truncate">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+              <span className="truncate">Fresh Storage URL: {videoUrl.slice(0, 36)}...</span>
+            </div>
+            <span className="text-emerald-300 font-bold ml-2 shrink-0">Active</span>
+          </div>
+        )}
       </div>
       
       <div className="mt-4 text-[11px] text-white/30 font-mono leading-relaxed">
