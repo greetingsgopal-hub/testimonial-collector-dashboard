@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
+
 import { db } from "../../firebase-adapters/firebase";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { collection, query, onSnapshot, orderBy, doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export const getFreshUrl = async (path: string) => {
@@ -23,18 +24,15 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
   const [incoming, setIncoming] = useState<any[]>([]);
   const [importedMap, setImportedMap] = useState<Record<string, boolean>>({});
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
-  const [videoUrl, setVideoUrl] = useState<string>('');
+  const [freshUrl, setFreshUrl] = useState<string>('');
 
   const docData = propDoc || selectedDoc;
 
-  // In WhatsAppCollect_Firebase.tsx
-  // WRONG (you have): setVideoUrl(doc.videoUrl) // cached 24h URL -> 4xx after
-  // RIGHT:
   useEffect(() => {
     if (docData?.storagePath) {
       getFreshUrl(docData.storagePath)
         .then((url) => {
-          setVideoUrl(url);
+          setFreshUrl(url);
           onVideoUrlChange?.(url);
         })
         .catch((err) => {
@@ -142,7 +140,7 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
                   onError={(e) => {
                     // 4xx -> token expired, refetch
                     if (e.currentTarget.src.includes('fbcdn.net') || e.currentTarget.src.includes('firebasestorage')) {
-                      getFreshUrl(msg.storagePath || `whatsapp/${msg.id}.mp4`).then(newUrl => {
+                      getFreshUrl(msg.storagePath || `whatsapp/${msg.id}.mp4`).then((newUrl: string) => {
                         e.currentTarget.src = newUrl;
                       }).catch(() => {});
                     }
@@ -174,15 +172,19 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
           ))}
         </div>
 
-        {videoUrl && (
-          <div className="mt-3 px-3 py-1.5 rounded-[10px] bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-mono flex items-center justify-between">
-            <div className="flex items-center gap-1.5 truncate">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-              <span className="truncate">Fresh Storage URL: {videoUrl.slice(0, 36)}...</span>
-            </div>
-            <span className="text-emerald-300 font-bold ml-2 shrink-0">Active</span>
-          </div>
-        )}
+        {freshUrl && (
+        <div>
+          <div className="text-[9px] text-white/30 font-mono mt-3 mb-1">Fresh Storage URL</div>
+          <video
+            src={freshUrl}
+            controls
+            className="max-w-full h-auto"
+            onError={() => {
+              getFreshUrl(docData?.storagePath || '').then(setFreshUrl).catch(() => {});
+            }}
+          />
+        </div>
+      )}
       </div>
       
       <div className="mt-4 text-[11px] text-white/30 font-mono leading-relaxed">
