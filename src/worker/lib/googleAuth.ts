@@ -79,7 +79,7 @@ export async function getServiceAccountAccessToken(env: WorkerEnv): Promise<stri
     const header = JSON.stringify({ alg: 'RS256', typ: 'JWT' });
     const claimSet = JSON.stringify({
       iss: creds.client_email,
-      scope: 'https://www.googleapis.com/auth/datastore https://www.googleapis.com/auth/identitytoolkit',
+      scope: 'https://www.googleapis.com/auth/datastore https://www.googleapis.com/auth/identitytoolkit https://www.googleapis.com/auth/devstorage.read_write',
       aud: 'https://oauth2.googleapis.com/token',
       exp: nowSec + 3600,
       iat: nowSec,

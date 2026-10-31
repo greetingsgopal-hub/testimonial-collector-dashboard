@@ -25,6 +25,14 @@ export interface WorkerEnv {
   FIREBASE_SERVICE_ACCOUNT_KEY?: string;
   FIREBASE_CLIENT_EMAIL?: string;
   FIREBASE_PRIVATE_KEY?: string;
+  SHOPIFY_API_KEY?: string;
+  SHOPIFY_CLIENT_ID?: string;
+  SHOPIFY_API_SECRET?: string;
+  APP_URL?: string;
+  FIREBASE_STORAGE_BUCKET?: string;
+  WHATSAPP_VERIFY_TOKEN?: string;
+  WHATSAPP_TOKEN?: string;
+  WHATSAPP_PHONE_ID?: string;
   NODE_ENV?: string;
   // Razorpay subscription and one-time billing (India-first processor)
   RAZORPAY_KEY_ID?: string;

@@ -1,4 +1,6 @@
 import { WorkerEnv } from '../types';
+import { saveDocument } from '../lib/firestoreAdmin';
+import { getServiceAccountAccessToken } from '../lib/googleAuth';
 
 /**
  * Phase 1: Shopify OAuth & 7-Day Delayed Trigger Handlers
@@ -7,80 +9,100 @@ import { WorkerEnv } from '../types';
 // GET /api/shopify/auth?shop=...
 export async function handleShopifyAuth(request: Request, env: WorkerEnv): Promise<Response> {
   const url = new URL(request.url);
-  const shop = url.searchParams.get('shop');
-  if (!shop) {
+  const shop = url.searchParams.get('shop')?.trim().toLowerCase();
+  if (!shop || !/^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(shop)) {
     return new Response(JSON.stringify({ error: 'Shop domain required' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  const clientId = (env as any).SHOPIFY_API_KEY || (env as any).SHOPIFY_CLIENT_ID || 'mock_shopify_client';
-  const appUrl = (env as any).APP_URL || 'https://pandapraise.com';
+  const clientId = env.SHOPIFY_API_KEY || env.SHOPIFY_CLIENT_ID;
+  const appUrl = env.APP_URL?.replace(/\/+$/, '');
+  if (!clientId || !appUrl) {
+    return new Response(JSON.stringify({ error: 'Shopify OAuth is not configured on the server.' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const state = crypto.randomUUID();
   const redirectUri = `${appUrl}/api/shopify/callback`;
-  const authorizeUrl = `https://${shop}/admin/oauth/authorize?client_id=${clientId}&scope=read_orders,write_orders&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
+  const authorizeUrl = new URL(`https://${shop}/admin/oauth/authorize`);
+  authorizeUrl.search = new URLSearchParams({
+    client_id: clientId,
+    scope: 'read_orders,write_orders',
+    redirect_uri: redirectUri,
+    state,
+  }).toString();
 
-  return Response.redirect(authorizeUrl, 302);
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: authorizeUrl.toString(),
+      'Set-Cookie': `shopify_oauth_state=${state}; Max-Age=600; Path=/api/shopify/callback; HttpOnly; Secure; SameSite=Lax`,
+    },
+  });
 }
 
 // GET/POST /api/shopify/callback
 export async function handleShopifyCallback(request: Request, env: WorkerEnv): Promise<Response> {
   const url = new URL(request.url);
-  const appUrl = (env as any).APP_URL || 'https://pandapraise.com';
-
-  if (request.method === 'POST') {
-    try {
-      const body = await request.json() as any;
-      const shop = body.shop || 'kalyan-silks.myshopify.com';
-      const accessToken = body.accessToken || 'mock_access_token';
-
-      if (env.RATE_LIMIT_KV) {
-        await env.RATE_LIMIT_KV.put(
-          `shop:${shop}`,
-          JSON.stringify({ accessToken, connectedAt: Date.now(), status: 'connected_in_47s' })
-        );
-      }
-
-      return new Response(JSON.stringify({ success: true, shop, status: 'connected_in_47s' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    } catch {
-      return new Response(JSON.stringify({ success: true, status: 'mock_connected' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-  }
-
-  const shop = url.searchParams.get('shop') || 'kalyan-silks.myshopify.com';
+  const appUrl = env.APP_URL?.replace(/\/+$/, '');
+  const shop = url.searchParams.get('shop')?.trim().toLowerCase() || '';
   const code = url.searchParams.get('code');
+  const state = url.searchParams.get('state') || '';
+  const hmac = url.searchParams.get('hmac') || '';
+  const cookieState = request.headers.get('Cookie')?.match(/(?:^|;\s*)shopify_oauth_state=([^;]+)/)?.[1] || '';
+  const fail = (reason: string) => Response.redirect(`${appUrl || url.origin}/workflow?shopify_error=${encodeURIComponent(reason)}`, 302);
 
-  if (shop && code && (env as any).SHOPIFY_API_KEY && (env as any).SHOPIFY_API_SECRET) {
-    try {
-      const tokenRes = await fetch(`https://${shop}/admin/oauth/access_token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          client_id: (env as any).SHOPIFY_API_KEY,
-          client_secret: (env as any).SHOPIFY_API_SECRET,
-          code,
-        }),
-      });
-      const data = await tokenRes.json() as any;
-      if (env.RATE_LIMIT_KV && data.access_token) {
-        await env.RATE_LIMIT_KV.put(
-          `shop:${shop}`,
-          JSON.stringify({ access_token: data.access_token, connectedAt: Date.now() })
-        );
-      }
-    } catch (err) {
-      console.warn('Shopify OAuth code exchange failed:', err);
-    }
+  if (!appUrl || !env.SHOPIFY_API_KEY || !env.SHOPIFY_API_SECRET || !env.RATE_LIMIT_KV) {
+    return fail('Shopify OAuth is not configured on the server.');
+  }
+  if (!shop || !/^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(shop) || !code || !hmac || !state) {
+    return fail('Shopify returned incomplete authorization details.');
+  }
+  if (!cookieState || cookieState !== state) {
+    return fail('Shopify authorization state did not match. Please try again.');
   }
 
-  return Response.redirect(`${appUrl}/dashboard?connected=shopify&shop=${shop}`, 302);
+  const hmacParams = new URLSearchParams(url.search);
+  hmacParams.delete('hmac');
+  hmacParams.delete('signature');
+  const message = [...hmacParams.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => `${key}=${value}`).join('&');
+  const encoder = new TextEncoder();
+  const hmacKey = await crypto.subtle.importKey('raw', encoder.encode(env.SHOPIFY_API_SECRET), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const digest = new Uint8Array(await crypto.subtle.sign('HMAC', hmacKey, encoder.encode(message)));
+  const expectedHmac = [...digest].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+  if (hmac.length !== expectedHmac.length) return fail('Shopify authorization signature was invalid.');
+  // Web Crypto in Workers has no timingSafeEqual; compare fixed-length digests without early exit.
+  let mismatch = 0;
+  for (let i = 0; i < expectedHmac.length; i += 1) mismatch |= expectedHmac.charCodeAt(i) ^ (hmac[i] || '').toLowerCase().charCodeAt(0);
+  if (mismatch !== 0) return fail('Shopify authorization signature was invalid.');
+
+  const tokenRes = await fetch(`https://${shop}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ client_id: env.SHOPIFY_API_KEY, client_secret: env.SHOPIFY_API_SECRET, code }),
+  });
+  if (!tokenRes.ok) return fail('Shopify could not complete token exchange.');
+  const tokenData = await tokenRes.json() as { access_token?: string; scope?: string };
+  if (!tokenData.access_token) return fail('Shopify did not return an access token.');
+
+  await env.RATE_LIMIT_KV.put(`shop:${shop}`, JSON.stringify({
+    access_token: tokenData.access_token,
+    scope: tokenData.scope || '',
+    connectedAt: Date.now(),
+    status: 'connected',
+  }));
+
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: `${appUrl}/workflow?shopify_connected=${encodeURIComponent(shop)}`,
+      'Set-Cookie': 'shopify_oauth_state=; Max-Age=0; Path=/api/shopify/callback; HttpOnly; Secure; SameSite=Lax',
+    },
+  });
 }
 
 // POST /api/shopify/webhook/fulfilled
@@ -171,7 +193,7 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
     const mode = url.searchParams.get('hub.mode');
     const token = url.searchParams.get('hub.verify_token');
     const challenge = url.searchParams.get('hub.challenge') || '';
-    const verifyToken = (env as any).WHATSAPP_VERIFY_TOKEN || 'pandapraise_secret_token';
+    const verifyToken = env.WHATSAPP_VERIFY_TOKEN;
 
     if (mode === 'subscribe' && token === verifyToken) {
       return new Response(challenge, {
@@ -182,9 +204,35 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
     return new Response('Forbidden', { status: 403 });
   }
 
+  // Meta signs the raw webhook body. Reject unsigned payloads before parsing.
+  const appSecret = env.META_APP_SECRET;
+  const signature = request.headers.get('X-Hub-Signature-256') || '';
+  if (!appSecret || !signature.startsWith('sha256=')) {
+    return new Response(JSON.stringify({ error: 'WhatsApp webhook signature verification is not configured.' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const rawBody = await request.text();
+  let validSignature = false;
+  try {
+    const signatureBytes = Uint8Array.from(atob(signature.slice('sha256='.length)), (char) => char.charCodeAt(0));
+    const signatureKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(appSecret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
+    validSignature = await crypto.subtle.verify('HMAC', signatureKey, signatureBytes, new TextEncoder().encode(rawBody));
+  } catch {
+    validSignature = false;
+  }
+  if (!validSignature) {
+    return new Response(JSON.stringify({ error: 'Invalid WhatsApp webhook signature.' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   // Incoming customer message / video webhook
   try {
-    const body = await request.json() as any;
+    const body = JSON.parse(rawBody) as any;
     const entry = body.entry?.[0]?.changes?.[0]?.value;
     const message = entry?.messages?.[0];
     const contact = entry?.contacts?.[0];
@@ -206,31 +254,75 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
       });
     }
 
-    const videoId = message.video?.id || 'demo_video';
-    const storagePath = `whatsapp/${from}/${videoId}.mp4`;
+    const videoId = message.video?.id;
+    if (!videoId || !/^[A-Za-z0-9_-]+$/.test(videoId)) {
+      return new Response(JSON.stringify({ error: 'WhatsApp video message had an invalid media ID.' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    const safePhone = String(from || '').replace(/\D/g, '');
+    if (!safePhone) {
+      return new Response(JSON.stringify({ error: 'WhatsApp video message had no sender number.' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    const storagePath = `whatsapp/${safePhone}/${videoId}.mp4`;
+    const whatsappToken = env.WHATSAPP_ACCESS_TOKEN || env.WHATSAPP_TOKEN;
+    const bucket = env.FIREBASE_STORAGE_BUCKET;
+    const projectId = env.FIREBASE_PROJECT_ID || env.VITE_FIREBASE_PROJECT_ID;
+    if (!whatsappToken || !bucket || !projectId) {
+      return new Response(JSON.stringify({ error: 'WhatsApp media storage is not configured on the server.' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const mediaResponse = await fetch(`https://graph.facebook.com/v20.0/${videoId}`, {
+      headers: { Authorization: `Bearer ${whatsappToken}` },
+    });
+    if (!mediaResponse.ok) throw new Error(`Meta media lookup failed (${mediaResponse.status}).`);
+    const media = await mediaResponse.json() as { url?: string; mime_type?: string };
+    if (!media.url) throw new Error('Meta did not return a media download URL.');
+    const videoResponse = await fetch(media.url, { headers: { Authorization: `Bearer ${whatsappToken}` } });
+    if (!videoResponse.ok) throw new Error(`Meta media download failed (${videoResponse.status}).`);
+    const videoBytes = await videoResponse.arrayBuffer();
+
+    const firebaseToken = await getServiceAccountAccessToken(env);
+    if (!firebaseToken) throw new Error('Firebase service account is not configured for media uploads.');
+    const uploadUrl = new URL(`https://storage.googleapis.com/upload/storage/v1/b/${encodeURIComponent(bucket)}/o`);
+    uploadUrl.searchParams.set('uploadType', 'media');
+    uploadUrl.searchParams.set('name', storagePath);
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${firebaseToken}`,
+        'Content-Type': media.mime_type || message.video?.mime_type || 'video/mp4',
+      },
+      body: videoBytes,
+    });
+    if (!uploadResponse.ok) throw new Error(`Firebase Storage upload failed (${uploadResponse.status}).`);
 
     const testimonial = {
-      id: `wa_${Date.now()}`,
+      id: videoId,
       metaVideoId: videoId,
       source: 'whatsapp',
       phone: from,
       name: contact?.profile?.name || from,
       status: 'pending',
       storagePath, // <-- save path, not URL
-      // videoUrl: await getDownloadURL() // DELETE THIS LINE
-      rating: 5,
-      createdAt: Date.now(),
-      shop: entry?.metadata?.display_phone_number || 'kalyan-silks.myshopify.com',
-      content: message.video?.caption || 'Customer video review via WhatsApp',
+      type: 'video',
+      mimeType: media.mime_type || message.video?.mime_type || 'video/mp4',
+      createdAt: new Date().toISOString(),
+      shop: entry?.metadata?.display_phone_number || '',
+      content: message.video?.caption || '',
     };
 
-    if (env.RATE_LIMIT_KV) {
-      await env.RATE_LIMIT_KV.put(`testimonial:${testimonial.id}`, JSON.stringify(testimonial));
-    }
+    await saveDocument('whatsapp_incoming', videoId, testimonial, null, env);
 
     // Auto-reply thank you via WhatsApp
-    const whatsappToken = (env as any).WHATSAPP_TOKEN;
-    const phoneId = (env as any).WHATSAPP_PHONE_ID;
+    const phoneId = env.WHATSAPP_PHONE_ID || env.WHATSAPP_PHONE_NUMBER_ID;
     if (whatsappToken && phoneId) {
       try {
         await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
@@ -243,7 +335,7 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
             messaging_product: 'whatsapp',
             to: from,
             text: {
-              body: `Thanks ${testimonial.name}! Got your video 🎉 We'll feature it and send you ₹200 reward on UPI.`,
+              body: `Thanks ${testimonial.name}! We received your video review.`,
             },
           }),
         });
@@ -257,8 +349,9 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 400,
+    console.error('[WhatsApp] Video intake failed:', err?.constructor?.name || 'Error');
+    return new Response(JSON.stringify({ error: 'Could not save the WhatsApp video. Meta can retry this webhook.' }), {
+      status: 502,
       headers: { 'Content-Type': 'application/json' },
     });
   }

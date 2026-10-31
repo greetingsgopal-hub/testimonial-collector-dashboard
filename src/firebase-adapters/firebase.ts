@@ -1,13 +1,15 @@
 // Firebase solid base - uses your existing Firebase project configuration
-import { db, storage, auth } from '../lib/firebase';
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { db, storage, auth, getFirebaseStorage } from '../lib/firebase';
+import { ref, getDownloadURL } from "firebase/storage";
 
 export { db, storage, auth };
 
 export const getFreshUrl = async (path: string) => {
-  const storageInst = storage || getStorage();
-  const urlRef = ref(storageInst, path);
-  // Always generate fresh — expires in 1 week, but we refresh on every load
+  const cleanPath = path.trim().replace(/^\/+/, '');
+  if (!cleanPath) throw new Error('A Firebase Storage path is required.');
+  const storageInst = storage || getFirebaseStorage();
+  const urlRef = ref(storageInst, cleanPath);
+  // Resolve from the durable Storage path each time; never reuse a Meta CDN URL.
   return await getDownloadURL(urlRef);
 };
 

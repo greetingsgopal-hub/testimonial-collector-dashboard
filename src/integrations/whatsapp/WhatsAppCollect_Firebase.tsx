@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from "react";
 
 import { db } from "../../firebase-adapters/firebase";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { collection, query, onSnapshot, orderBy, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { getFreshUrl } from "../../firebase-adapters/firebase";
 
-export const getFreshUrl = async (path: string) => {
-  const storage = getStorage();
-  const urlRef = ref(storage, path);
-  // Always generate fresh — expires in 1 week, but we refresh on every load
-  return await getDownloadURL(urlRef);
-};
+export { getFreshUrl };
 
 export interface WhatsAppCollect_FirebaseProps {
   doc?: { storagePath?: string; videoUrl?: string; [key: string]: any };
-  onVideoUrlChange?: (url: string) => void;
+  onVideoUrlChange?: (url: string, testimonialId?: string) => void;
 }
 
 // 02 COLLECT - WHATSAPP UI • INCOMING - Firebase version
@@ -25,85 +20,73 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
   const [importedMap, setImportedMap] = useState<Record<string, boolean>>({});
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
   const [freshUrl, setFreshUrl] = useState<string>('');
+  const [mediaError, setMediaError] = useState('');
+  const [refreshAttempted, setRefreshAttempted] = useState(false);
+  const [listenerError, setListenerError] = useState('');
+  const [importError, setImportError] = useState('');
 
   const docData = propDoc || selectedDoc;
 
   useEffect(() => {
     if (docData?.storagePath) {
+      setFreshUrl('');
+      setMediaError('');
+      setRefreshAttempted(false);
       getFreshUrl(docData.storagePath)
         .then((url) => {
           setFreshUrl(url);
-          onVideoUrlChange?.(url);
+          onVideoUrlChange?.(url, docData.id);
         })
         .catch((err) => {
-          console.warn('Notice generating fresh URL:', err);
+          setMediaError(err instanceof Error ? err.message : 'Could not load this video from Firebase Storage.');
         });
+    } else {
+      setFreshUrl('');
+      if (docData?.videoUrl) {
+        setFreshUrl(docData.videoUrl);
+        onVideoUrlChange?.(docData.videoUrl, docData.id);
+      }
     }
-  }, [docData?.storagePath]);
+  }, [docData?.storagePath, docData?.videoUrl, onVideoUrlChange]);
 
   useEffect(() => {
     // Real-time Firebase listener - solid base
-    if (!db) return;
+    if (!db) {
+      setListenerError('Firebase is not configured. Add the VITE_FIREBASE_* settings to load incoming videos.');
+      return;
+    }
     try {
       const q = query(collection(db, 'whatsapp_incoming'), orderBy('createdAt', 'desc'));
       const unsub = onSnapshot(q, (snap) => {
-        if (!snap.empty) {
-          setIncoming(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-        }
+        setListenerError('');
+        setIncoming(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       }, (err) => {
-        console.warn('Real-time listener notice (resilient mode):', err);
+        setListenerError(err.message || 'Could not load incoming WhatsApp videos.');
       });
       return () => unsub();
     } catch {
-      // Fallback in test / offline environments
+      setListenerError('Could not subscribe to incoming WhatsApp videos.');
     }
   }, []);
 
-  // Mock data if empty (for instant demo matching screenshot)
-  const displayData = incoming.length > 0 ? incoming : [
-    { 
-      id: 'w1', 
-      name: 'Ananya S.', 
-      phone: '+91 98****12', 
-      duration: '0:09', 
-      time: '2m ago', 
-      status: 'new', 
-      type: 'video', 
-      shop: 'kalyan-silks', 
-      rating: 5,
-      storagePath: 'whatsapp/+919800000012/w1.mp4'
-    },
-    { 
-      id: 'w2', 
-      name: 'Rahul M.', 
-      phone: '+91 98****45', 
-      duration: '0:12', 
-      time: '12m ago', 
-      status: 'pending', 
-      type: 'video', 
-      shop: 'kalyan-silks', 
-      rating: 4,
-      storagePath: 'whatsapp/+919800000045/w2.mp4'
-    },
-  ];
-
   const importToInbox = async (item: any) => {
-    setImportedMap(prev => ({ ...prev, [item.id]: true }));
-    setSelectedDoc(item);
-    // Move from whatsapp_incoming to testimonials - Firebase solid base
-    if (db) {
-      try {
-        const storagePath = item.storagePath || `whatsapp/${item.id}.mp4`;
-        await setDoc(doc(db, 'testimonials', item.id), {
-          ...item,
-          source: 'whatsapp',
-          status: 'pending',
-          storagePath,
-          importedAt: serverTimestamp(),
-        }, { merge: true });
-      } catch (err) {
-        console.warn('Firestore import notice:', err);
-      }
+    if (!db) {
+      setImportError('Firebase is not configured. This item was not imported.');
+      return;
+    }
+    setImportError('');
+    try {
+      await setDoc(doc(db, 'testimonials', item.id), {
+        ...item,
+        source: 'whatsapp',
+        status: 'pending',
+        storagePath: item.storagePath?.trim() || null,
+        importedAt: serverTimestamp(),
+      }, { merge: true });
+      setImportedMap(prev => ({ ...prev, [item.id]: true }));
+      setSelectedDoc(item);
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Could not import this item.');
     }
   };
 
@@ -121,8 +104,11 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
           Customers reply with video on WhatsApp. No app, no link.
         </p>
         
+        {listenerError && <p role="alert" className="mt-3 text-xs text-red-300">{listenerError}</p>}
+        {importError && <p role="alert" className="mt-3 text-xs text-red-300">{importError}</p>}
         <div className="mt-5 space-y-2 max-h-[240px] overflow-y-auto">
-          {displayData.map((msg: any) => (
+          {incoming.length === 0 && !listenerError && <p className="rounded-xl border border-dashed border-white/10 p-4 text-center text-xs text-white/40">No WhatsApp videos have arrived yet.</p>}
+          {incoming.map((msg: any) => (
             <div 
               key={msg.id} 
               onClick={() => setSelectedDoc(msg)}
@@ -133,19 +119,7 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
               }`}
             >
               <div className="relative h-12 w-12 rounded-[12px] overflow-hidden bg-black grid place-items-center text-[10px] text-white/40 font-mono shrink-0">
-                <img 
-                  src={msg.avatar || `https://firebasestorage.googleapis.com/v0/b/pandapraise.appspot.com/o/${encodeURIComponent(msg.storagePath || `whatsapp/${msg.id}.mp4`)}?alt=media`} 
-                  alt={msg.name}
-                  className="h-full w-full object-cover"
-                  onError={(e) => {
-                    // 4xx -> token expired, refetch
-                    if (e.currentTarget.src.includes('fbcdn.net') || e.currentTarget.src.includes('firebasestorage')) {
-                      getFreshUrl(msg.storagePath || `whatsapp/${msg.id}.mp4`).then((newUrl: string) => {
-                        e.currentTarget.src = newUrl;
-                      }).catch(() => {});
-                    }
-                  }} 
-                />
+                {msg.avatar ? <img src={msg.avatar} alt={msg.name || 'Customer'} className="h-full w-full object-cover" /> : <span>VIDEO</span>}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-center">
@@ -154,7 +128,8 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
                 </div>
                 <div className="text-[11px] text-white/40 truncate">{msg.phone} • {msg.duration}</div>
                 <div className="mt-1 flex items-center gap-2">
-                  <button 
+                  <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       importToInbox(msg);
@@ -172,6 +147,7 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
           ))}
         </div>
 
+        {mediaError && <p role="alert" className="mt-3 text-xs text-red-300">{mediaError}</p>}
         {freshUrl && (
         <div>
           <div className="text-[9px] text-white/30 font-mono mt-3 mb-1">Fresh Storage URL</div>
@@ -179,8 +155,21 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
             src={freshUrl}
             controls
             className="max-w-full h-auto"
-            onError={() => {
-              getFreshUrl(docData?.storagePath || '').then(setFreshUrl).catch(() => {});
+            onError={async () => {
+              if (refreshAttempted) {
+                setMediaError('Firebase Storage could not play this video after refreshing its URL. Check the file and Storage permissions.');
+                return;
+              }
+              if (!docData?.storagePath) {
+                setMediaError('This video URL is unavailable.');
+                return;
+              }
+              try {
+                setRefreshAttempted(true);
+                setFreshUrl(await getFreshUrl(docData.storagePath));
+              } catch (err) {
+                setMediaError(err instanceof Error ? err.message : 'Could not refresh the Firebase Storage URL.');
+              }
             }}
           />
         </div>
