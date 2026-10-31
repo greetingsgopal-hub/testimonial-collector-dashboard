@@ -9,6 +9,7 @@ const { freshUrlMock } = vi.hoisted(() => ({
 
 vi.mock('../../firebase-adapters/firebase', () => ({
   db: { app: { options: { storageBucket: 'pandapraise.appspot.com' } } },
+  auth: { currentUser: { uid: 'user_1' } },
   storage: {},
   getFreshUrl: freshUrlMock,
 }));
@@ -21,6 +22,7 @@ const firestoreMocks = vi.hoisted(() => ({
   doc: vi.fn(),
   setDoc: vi.fn().mockResolvedValue(undefined),
   serverTimestamp: vi.fn(() => new Date()),
+  where: vi.fn(),
 }));
 
 vi.mock('firebase/firestore', () => ({ ...firestoreMocks }));
