@@ -309,29 +309,42 @@ service cloud.firestore {
     }
 
     // 12. Firebase Solid Base Workflow 01-02-03 collections
-    // 01 CONNECT - Shopify shops
+    // 01 CONNECT - Shopify shops (owner-scoped; worker OAuth callback uses Admin REST)
     match /shops/{shopId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      allow read: if isAuthenticated() && resource.data.ownerUid == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Meta linking credentials and reverse index are private Worker records.
+    match /whatsapp_meta_connections/{ownerUid} {
+      allow read, write: if false;
+    }
+    match /whatsapp_accounts/{wabaId} {
+      allow read: if isAuthenticated() && resource.data.ownerUid == request.auth.uid;
+      allow write: if false;
+    }
+    match /whatsapp_accounts_by_phone/{phoneId} {
+      allow read, write: if false;
     }
     
     // WhatsApp triggers - 7 day queue
     match /whatsapp_triggers/{triggerId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() && resource.data.ownerUid == request.auth.uid;
+      allow write: if false;
     }
     
     // 02 COLLECT - WhatsApp incoming - real-time
     match /whatsapp_incoming/{videoId} {
-      allow read: if isAuthenticated();
-      allow create: if true; // Webhook creates without auth
-      allow update, delete: if isAuthenticated();
+      allow read: if isAuthenticated() && resource.data.ownerUid == request.auth.uid;
+      allow create, update, delete: if false; // Worker Admin REST only
     }
     
     // 03 EDIT - Video exports - 3 ratios
     match /video_exports/{exportId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+      allow read: if isAuthenticated() && resource.data.ownerUid == request.auth.uid;
+      allow write: if false; // Worker Admin REST only
     }
   }
 }
+
 
