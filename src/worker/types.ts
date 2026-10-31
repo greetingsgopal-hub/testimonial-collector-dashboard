@@ -17,6 +17,7 @@ export interface WorkerEnv {
   GOOGLE_PLACES_API_KEY?: string;
   META_APP_ID?: string;
   META_APP_SECRET?: string;
+  META_REDIRECT_URI?: string;
   INSTAGRAM_REDIRECT_URI?: string;
   FACEBOOK_REDIRECT_URI?: string;
   META_WEBHOOK_VERIFY_TOKEN?: string;
@@ -91,3 +92,4 @@ export interface ExecutionContext {
   waitUntil(promise: Promise<any>): void;
   passThroughOnException(): void;
 }
+

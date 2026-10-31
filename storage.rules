@@ -35,15 +35,16 @@ service firebase.storage {
       allow delete: if isTenantOwner(tenantId);
     }
 
-    // WhatsApp incoming videos
-    match /whatsapp/{phone}/{videoId} {
-      allow read, write: if true;
+    // WhatsApp incoming videos are namespaced by Firebase owner UID.
+    match /whatsapp/{ownerUid}/{phone}/{videoId} {
+      allow read: if isTenantOwner(ownerUid);
+      allow write: if false; // Worker service account uploads only
     }
 
-    // Edited exports - top notch (public for ad embeds)
-    match /edits/{testimonialId}/{ratio}.mp4 {
-      allow read: if true;
-      allow write: if isAuthenticated();
+    // Edited exports are private until explicitly published through a separate flow.
+    match /edits/{ownerUid}/{testimonialId}/{ratio}.mp4 {
+      allow read: if isTenantOwner(ownerUid);
+      allow write: if false; // Worker service account writes only
     }
 
     // Avatars with BlurHash
@@ -53,3 +54,4 @@ service firebase.storage {
     }
   }
 }
+

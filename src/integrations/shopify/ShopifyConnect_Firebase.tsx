@@ -32,7 +32,7 @@ export const ShopifyConnect_Firebase: React.FC = () => {
         </div>
         <h3 className="text-[14px] font-bold tracking-[0.15em] text-white">CONNECT</h3>
         <p className="mt-2 text-[13px] text-white/50 leading-[1.6]">
-          Shopify in 47s. Auto-trigger WhatsApp 7 days after delivery.
+          Authorize your Shopify store. Order triggers become available after webhook setup.
         </p>
       </div>
       
@@ -67,3 +67,4 @@ export const ShopifyConnect_Firebase: React.FC = () => {
 };
 
 export default ShopifyConnect_Firebase;
+

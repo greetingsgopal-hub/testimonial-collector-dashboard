@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ShopifyConnect_Firebase } from "../integrations/shopify/ShopifyConnect_Firebase";
 import { WhatsAppCollect_Firebase } from "../integrations/whatsapp/WhatsAppCollect_Firebase";
 import { AutoEditor } from "../components/AutoEditor";
+import { WhatsAppAccountLink } from "../integrations/whatsapp/WhatsAppAccountLink";
 
 // Final auto workflow - 01 02 03 all auto - Firebase solid base
 export const AutoWorkflow_Firebase: React.FC = () => {
@@ -52,6 +53,8 @@ export const AutoWorkflow_Firebase: React.FC = () => {
           <AutoEditor videoUrl={activeVideoUrl} testimonialId={activeTestimonialId} />
         </div>
 
+        <WhatsAppAccountLink />
+
         {/* Architecture Badges */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
           <div className="rounded-[16px] bg-white/[0.04] border border-white/[0.06] p-4">
@@ -94,3 +97,4 @@ export const AutoWorkflow_Firebase: React.FC = () => {
 };
 
 export default AutoWorkflow_Firebase;
+

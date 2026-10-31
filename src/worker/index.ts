@@ -54,6 +54,7 @@ import {
   handleShopifyTriggerTest,
   handleWhatsAppIncoming,
 } from './handlers/phase1_2_handlers';
+import { handleWhatsAppMetaLink, handleWhatsAppMetaConfirm } from './handlers/whatsappAccountLink';
 import {
   handleAdminGetWorkspaces,
   handleAdminUpdateWorkspacePlan,
@@ -411,6 +412,12 @@ export default {
           return await handleShopifyTriggerTest(request, env);
 
         // Phase 2: WhatsApp Incoming Video Collector
+        case 'meta/link-whatsapp':
+          return await handleWhatsAppMetaLink(request, env);
+
+        case 'meta/confirm-whatsapp':
+          return await handleWhatsAppMetaConfirm(request, env);
+
         case 'whatsapp/incoming':
         case 'webhook/whatsapp':
         case 'webhooks/whatsapp':
@@ -461,3 +468,4 @@ export default {
     ctx.waitUntil(executeAutomatedBackgroundSync(event, env, ctx));
   },
 };
+

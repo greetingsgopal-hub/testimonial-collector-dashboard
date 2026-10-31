@@ -21,7 +21,7 @@ describe('PandaPraise - Firebase Solid Base Suite', () => {
     expect(container.textContent).toContain('01');
     expect(container.textContent).toContain('OAUTH • 1-CLICK');
     expect(container.textContent).toContain('CONNECT');
-    expect(container.textContent).toContain('Shopify in 47s');
+    expect(container.textContent).toContain('Authorize your Shopify store.');
     expect(container.textContent).toContain('Connect Shopify Store');
 
     root.unmount();
@@ -41,8 +41,9 @@ describe('PandaPraise - Firebase Solid Base Suite', () => {
     expect(container.textContent).toContain('WHATSAPP UI • INCOMING');
     expect(container.textContent).toContain('COLLECT');
     expect(container.textContent).toContain('Customers reply with video on WhatsApp. No app, no link.');
-    expect(container.textContent).toContain('Ananya S.');
-    expect(container.textContent).toContain('Rahul M.');
+    expect(container.textContent).toMatch(/No WhatsApp videos have arrived yet\.|Firebase is not configured/);
+    expect(container.textContent).not.toContain('Ananya S.');
+    expect(container.textContent).not.toContain('Rahul M.');
 
     root.unmount();
     container.remove();
@@ -91,3 +92,4 @@ describe('PandaPraise - Firebase Solid Base Suite', () => {
     container.remove();
   });
 });
+
