@@ -2,6 +2,7 @@ import { WorkerEnv } from '../types';
 import { getDocument, saveDocument } from '../lib/firestoreAdmin';
 import { getServiceAccountAccessToken } from '../lib/googleAuth';
 import { decryptToken } from '../lib/crypto';
+import { GRAPH_API_VERSION } from '../lib/facebookOAuth';
 
 /**
  * Phase 1: Shopify OAuth & 7-Day Delayed Trigger Handlers
@@ -230,6 +231,7 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
       headers: { 'Content-Type': 'application/json' },
     });
   }
+  console.log(JSON.stringify({ event: 'whatsapp.webhook', stage: 'signature', result: 'verified' }));
 
   // Incoming customer message / video webhook
   try {
@@ -278,6 +280,7 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
       // Acknowledge unlinked accounts to prevent Meta retry storms; no media is downloaded or persisted.
       return new Response(JSON.stringify({ ok: true, ignored: 'whatsapp_account_not_linked' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
+    console.log(JSON.stringify({ event: 'whatsapp.webhook', stage: 'ownership_mapping', result: 'verified' }));
     const connection = await getDocument('whatsapp_meta_connections', account.ownerUid, undefined, env);
     if (!connection || connection.ownerUid !== account.ownerUid || !connection.wabaIds?.includes(account.wabaId) || !connection.accessTokenEncrypted) {
       return new Response(JSON.stringify({ error: 'WhatsApp account authorization is no longer available.' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
@@ -295,7 +298,7 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
       });
     }
 
-    const mediaResponse = await fetch(`https://graph.facebook.com/v20.0/${videoId}`, {
+    const mediaResponse = await fetch(`https://graph.facebook.com/${GRAPH_API_VERSION}/${videoId}`, {
       headers: { Authorization: `Bearer ${whatsappToken}` },
     });
     if (!mediaResponse.ok) throw new Error(`Meta media lookup failed (${mediaResponse.status}).`);
@@ -304,6 +307,7 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
     const videoResponse = await fetch(media.url, { headers: { Authorization: `Bearer ${whatsappToken}` } });
     if (!videoResponse.ok) throw new Error(`Meta media download failed (${videoResponse.status}).`);
     const videoBytes = await videoResponse.arrayBuffer();
+    console.log(JSON.stringify({ event: 'whatsapp.webhook', stage: 'media_download', result: 'success', bytes: videoBytes.byteLength }));
 
     const firebaseToken = await getServiceAccountAccessToken(env);
     if (!firebaseToken) throw new Error('Firebase service account is not configured for media uploads.');
@@ -319,6 +323,7 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
       body: videoBytes,
     });
     if (!uploadResponse.ok) throw new Error(`Firebase Storage upload failed (${uploadResponse.status}).`);
+    console.log(JSON.stringify({ event: 'whatsapp.webhook', stage: 'storage_upload', result: 'success' }));
 
     const testimonial = {
       id: videoId,
@@ -344,7 +349,7 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
     const phoneId = phoneNumberId;
     if (whatsappToken && phoneId) {
       try {
-        await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
+        await fetch(`https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneId}/messages`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${whatsappToken}`,
