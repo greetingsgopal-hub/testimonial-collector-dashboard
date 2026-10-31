@@ -79,9 +79,11 @@ export async function handleWhatsAppMetaConfirm(request: Request, env: WorkerEnv
     headers: { Authorization: `Bearer ${metaToken}` },
   });
   if (!subscription.ok) return json({ error: 'Meta verified the number, but could not subscribe this app to the WABA webhook.' }, 502);
+  console.log(JSON.stringify({ event: 'whatsapp.account_link', stage: 'waba_subscription', result: 'success' }));
   const mapping = { ownerUid: user.uid, wabaId, phoneNumberId, displayPhoneNumber: phone.display_phone_number || '', verified: true, verifiedVia: 'per_user_meta_oauth', linkedAt: new Date().toISOString() };
   await saveDocument('whatsapp_accounts', wabaId, mapping, undefined, env);
   await saveDocument('whatsapp_accounts_by_phone', phoneNumberId, mapping, undefined, env);
+  console.log(JSON.stringify({ event: 'whatsapp.account_link', stage: 'owner_mapping', result: 'success' }));
   return json({ ok: true, account: { wabaId, phoneNumberId, displayPhoneNumber: mapping.displayPhoneNumber } }, 200);
 }
 
