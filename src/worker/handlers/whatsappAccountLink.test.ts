@@ -39,10 +39,21 @@ describe('per-user WhatsApp account linking', () => {
     verifyFirebaseToken.mockResolvedValueOnce({ uid: 'owner-2' });
     getDocument.mockResolvedValueOnce({ ownerUid: 'owner-2', wabaIds: ['123456789'], accessTokenEncrypted: 'encrypted-token' });
     vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: '987654321', display_phone_number: '+1 555 0100' }] }), { status: 200 }));
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({ success: true }), { status: 200 }));
     const response = await handleWhatsAppMetaConfirm(new Request('https://app.test/api/meta/confirm-whatsapp', { method: 'POST', headers: { Authorization: 'Bearer valid' }, body: JSON.stringify({ wabaId: '123456789', phoneNumberId: '987654321' }) }), env);
     expect(response.status).toBe(200);
     expect(saveDocument).toHaveBeenNthCalledWith(1, 'whatsapp_accounts', '123456789', expect.objectContaining({ ownerUid: 'owner-2', verified: true, verifiedVia: 'per_user_meta_oauth' }), undefined, env);
     expect(saveDocument).toHaveBeenNthCalledWith(2, 'whatsapp_accounts_by_phone', '987654321', expect.objectContaining({ ownerUid: 'owner-2', verified: true }), undefined, env);
+  });
+
+  it('does not persist a mapping when Meta cannot subscribe the WABA webhook', async () => {
+    verifyFirebaseToken.mockResolvedValueOnce({ uid: 'owner-3' });
+    getDocument.mockResolvedValueOnce({ ownerUid: 'owner-3', wabaIds: ['123456789'], accessTokenEncrypted: 'encrypted-token' });
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: '987654321' }] }), { status: 200 }));
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({ error: 'permission denied' }), { status: 403 }));
+    const response = await handleWhatsAppMetaConfirm(new Request('https://app.test/api/meta/confirm-whatsapp', { method: 'POST', headers: { Authorization: 'Bearer valid' }, body: JSON.stringify({ wabaId: '123456789', phoneNumberId: '987654321' }) }), env);
+    expect(response.status).toBe(502);
+    expect(saveDocument).not.toHaveBeenCalled();
   });
 });
 
