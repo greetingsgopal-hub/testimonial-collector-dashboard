@@ -105,7 +105,14 @@ Panda Praise is built on a unified, high-performance Cloudflare Workers architec
    npx wrangler secret put RAZORPAY_KEY_ID
    npx wrangler secret put RAZORPAY_KEY_SECRET
    npx wrangler secret put FIREBASE_API_KEY
+   npx wrangler secret put SHOPIFY_API_KEY
+   npx wrangler secret put SHOPIFY_API_SECRET
+   npx wrangler secret put WHATSAPP_TOKEN
+   npx wrangler secret put WHATSAPP_VERIFY_TOKEN
+   npx wrangler secret put META_APP_SECRET
+   npx wrangler secret put FIREBASE_SERVICE_ACCOUNT_KEY
    ```
+   Configure `APP_URL`, `FIREBASE_PROJECT_ID`, and `FIREBASE_STORAGE_BUCKET` as Worker variables. WhatsApp video intake needs a Firebase service account with Firestore and Storage object write access. The webhook validates Meta signatures, stores the video in Storage, and writes only its storage path to Firestore.
 
 ---
 
