@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
-import { db } from "../../firebase-adapters/firebase";
-import { collection, query, onSnapshot, orderBy, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db, auth } from "../../firebase-adapters/firebase";
+import { collection, query, onSnapshot, orderBy, doc, setDoc, serverTimestamp, where } from "firebase/firestore";
 import { getFreshUrl } from "../../firebase-adapters/firebase";
 
 export { getFreshUrl };
@@ -56,7 +56,12 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
       return;
     }
     try {
-      const q = query(collection(db, 'whatsapp_incoming'), orderBy('createdAt', 'desc'));
+      const ownerUid = auth?.currentUser?.uid;
+      if (!ownerUid) {
+        setListenerError('Sign in to view WhatsApp videos linked to your account.');
+        return;
+      }
+      const q = query(collection(db, 'whatsapp_incoming'), where('ownerUid', '==', ownerUid), orderBy('createdAt', 'desc'));
       const unsub = onSnapshot(q, (snap) => {
         setListenerError('');
         setIncoming(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -184,3 +189,4 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
 };
 
 export default WhatsAppCollect_Firebase;
+
