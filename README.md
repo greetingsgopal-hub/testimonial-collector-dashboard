@@ -118,3 +118,16 @@ Panda Praise is built on a unified, high-performance Cloudflare Workers architec
 
 ## 📜 License
 MIT License
+# WhatsApp ownership verification
+
+After deploying the per-user WhatsApp link flow and Firebase rules, configure a local `.env` with Firebase web settings plus two dedicated test accounts and a WABA/video pair. Start with `.env.example`; do not use production user credentials. Then run:
+
+```sh
+npm run verify:ownership
+```
+
+The script checks that the owner can read the mapped WABA and incoming record, that the video exists in owner-scoped Storage, and that a second signed-in test user is denied access. It prints check results only and never prints passwords or ID tokens. This is an online check against the Firebase project configured in `.env`, not a substitute for exercising the Meta OAuth and webhook flow with a real test WABA.
+
+To inspect sanitized Worker events during a test delivery, run `npx wrangler tail --format pretty`. The implementation emits JSON stages for `whatsapp.account_link` (`waba_subscription`, `owner_mapping`) and `whatsapp.webhook` (`signature`, `ownership_mapping`, `media_download`, `storage_upload`). It does not log user tokens, phone numbers, or owner UIDs.
+
+
