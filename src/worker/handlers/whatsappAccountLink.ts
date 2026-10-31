@@ -72,6 +72,13 @@ export async function handleWhatsAppMetaConfirm(request: Request, env: WorkerEnv
   const phoneData = await response.json() as { data?: Array<{ id: string; display_phone_number?: string }> };
   const phone = phoneData.data?.find(p => p.id === phoneNumberId);
   if (!phone) return json({ error: 'That phone number is not part of the authorized WABA.' }, 403);
+  // A verified mapping is useful only when Meta delivers this WABA's events to
+  // our already-configured app webhook. Subscribe before persisting the link.
+  const subscription = await fetch(`${GRAPH}/${encodeURIComponent(wabaId)}/subscribed_apps`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${metaToken}` },
+  });
+  if (!subscription.ok) return json({ error: 'Meta verified the number, but could not subscribe this app to the WABA webhook.' }, 502);
   const mapping = { ownerUid: user.uid, wabaId, phoneNumberId, displayPhoneNumber: phone.display_phone_number || '', verified: true, verifiedVia: 'per_user_meta_oauth', linkedAt: new Date().toISOString() };
   await saveDocument('whatsapp_accounts', wabaId, mapping, undefined, env);
   await saveDocument('whatsapp_accounts_by_phone', phoneNumberId, mapping, undefined, env);
