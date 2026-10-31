@@ -1,6 +1,7 @@
 import { WorkerEnv } from '../types';
-import { saveDocument } from '../lib/firestoreAdmin';
+import { getDocument, saveDocument } from '../lib/firestoreAdmin';
 import { getServiceAccountAccessToken } from '../lib/googleAuth';
+import { decryptToken } from '../lib/crypto';
 
 /**
  * Phase 1: Shopify OAuth & 7-Day Delayed Trigger Handlers
@@ -268,8 +269,23 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
         headers: { 'Content-Type': 'application/json' },
       });
     }
-    const storagePath = `whatsapp/${safePhone}/${videoId}.mp4`;
-    const whatsappToken = env.WHATSAPP_ACCESS_TOKEN || env.WHATSAPP_TOKEN;
+    const phoneNumberId = String(entry?.metadata?.phone_number_id || '');
+    if (!/^\d{5,30}$/.test(phoneNumberId)) {
+      return new Response(JSON.stringify({ error: 'WhatsApp webhook did not include a valid business phone number ID.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+    const account = await getDocument('whatsapp_accounts_by_phone', phoneNumberId, undefined, env);
+    if (!account || account.verified !== true || account.verifiedVia !== 'per_user_meta_oauth' || !account.ownerUid || !account.wabaId) {
+      // Acknowledge unlinked accounts to prevent Meta retry storms; no media is downloaded or persisted.
+      return new Response(JSON.stringify({ ok: true, ignored: 'whatsapp_account_not_linked' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    const connection = await getDocument('whatsapp_meta_connections', account.ownerUid, undefined, env);
+    if (!connection || connection.ownerUid !== account.ownerUid || !connection.wabaIds?.includes(account.wabaId) || !connection.accessTokenEncrypted) {
+      return new Response(JSON.stringify({ error: 'WhatsApp account authorization is no longer available.' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+    }
+    let whatsappToken: string;
+    try { whatsappToken = decryptToken(connection.accessTokenEncrypted, env); }
+    catch { return new Response(JSON.stringify({ error: 'WhatsApp account authorization could not be read.' }), { status: 503, headers: { 'Content-Type': 'application/json' } }); }
+    const storagePath = `whatsapp/${account.ownerUid}/${safePhone}/${videoId}.mp4`;
     const bucket = env.FIREBASE_STORAGE_BUCKET;
     const projectId = env.FIREBASE_PROJECT_ID || env.VITE_FIREBASE_PROJECT_ID;
     if (!whatsappToken || !bucket || !projectId) {
@@ -316,13 +332,16 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
       mimeType: media.mime_type || message.video?.mime_type || 'video/mp4',
       createdAt: new Date().toISOString(),
       shop: entry?.metadata?.display_phone_number || '',
+      ownerUid: account.ownerUid,
+      wabaId: account.wabaId,
+      phoneNumberId,
       content: message.video?.caption || '',
     };
 
-    await saveDocument('whatsapp_incoming', videoId, testimonial, null, env);
+    await saveDocument('whatsapp_incoming', `${account.ownerUid}_${videoId}`, testimonial, null, env);
 
     // Auto-reply thank you via WhatsApp
-    const phoneId = env.WHATSAPP_PHONE_ID || env.WHATSAPP_PHONE_NUMBER_ID;
+    const phoneId = phoneNumberId;
     if (whatsappToken && phoneId) {
       try {
         await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
@@ -356,3 +375,4 @@ export async function handleWhatsAppIncoming(request: Request, env: WorkerEnv): 
     });
   }
 }
+
