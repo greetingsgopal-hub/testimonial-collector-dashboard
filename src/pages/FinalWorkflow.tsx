@@ -9,6 +9,7 @@ import { KpiCard } from "../components/ui/KpiCard";
 // Final merged workflow - matches screenshot PNG 01-02-03 - AUTO + Firebase solid base
 export const FinalWorkflow: React.FC = () => {
   const [activeVideoUrl, setActiveVideoUrl] = React.useState<string>('');
+  const [activeTestimonialId, setActiveTestimonialId] = React.useState<string>('');
 
   return (
     <div 
@@ -46,8 +47,8 @@ export const FinalWorkflow: React.FC = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           <ShopifyConnect_Firebase />
-          <WhatsAppCollect_Firebase onVideoUrlChange={setActiveVideoUrl} />
-          <AutoEditor videoUrl={activeVideoUrl || "https://pandapraise.com/think_reel.mp4"} testimonialId="demo_123" />
+          <WhatsAppCollect_Firebase onVideoUrlChange={(url, id) => { setActiveVideoUrl(url); setActiveTestimonialId(id || ''); }} />
+          <AutoEditor videoUrl={activeVideoUrl} testimonialId={activeTestimonialId} />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
