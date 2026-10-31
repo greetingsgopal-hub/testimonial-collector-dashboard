@@ -6,6 +6,8 @@ import { AutoEditor } from "../components/AutoEditor";
 
 // Final auto workflow - 01 02 03 all auto - Firebase solid base
 export const AutoWorkflow_Firebase: React.FC = () => {
+  const [activeVideoUrl, setActiveVideoUrl] = React.useState('');
+  const [activeTestimonialId, setActiveTestimonialId] = React.useState('');
   return (
     <div 
       className="min-h-screen bg-[#0A0A0A] p-6 sm:p-10 text-white selection:bg-amber-400 selection:text-black font-sans"
@@ -46,8 +48,8 @@ export const AutoWorkflow_Firebase: React.FC = () => {
         {/* 3 Step Auto Workflow Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           <ShopifyConnect_Firebase />
-          <WhatsAppCollect_Firebase />
-          <AutoEditor videoUrl="https://pandapraise.com/think_reel.mp4" testimonialId="wa_priya_01" />
+          <WhatsAppCollect_Firebase onVideoUrlChange={(url, id) => { setActiveVideoUrl(url); setActiveTestimonialId(id || ''); }} />
+          <AutoEditor videoUrl={activeVideoUrl} testimonialId={activeTestimonialId} />
         </div>
 
         {/* Architecture Badges */}
