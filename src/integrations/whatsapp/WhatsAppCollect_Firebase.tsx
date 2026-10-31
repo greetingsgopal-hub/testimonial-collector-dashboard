@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { db, auth } from "../../firebase-adapters/firebase";
-import { collection, query, onSnapshot, orderBy, doc, setDoc, serverTimestamp, where } from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy, where } from "firebase/firestore";
 import { getFreshUrl } from "../../firebase-adapters/firebase";
 
 export { getFreshUrl };
@@ -17,13 +17,11 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
   onVideoUrlChange 
 }) => {
   const [incoming, setIncoming] = useState<any[]>([]);
-  const [importedMap, setImportedMap] = useState<Record<string, boolean>>({});
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
   const [freshUrl, setFreshUrl] = useState<string>('');
   const [mediaError, setMediaError] = useState('');
   const [refreshAttempted, setRefreshAttempted] = useState(false);
   const [listenerError, setListenerError] = useState('');
-  const [importError, setImportError] = useState('');
 
   const docData = propDoc || selectedDoc;
 
@@ -74,27 +72,6 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
     }
   }, []);
 
-  const importToInbox = async (item: any) => {
-    if (!db) {
-      setImportError('Firebase is not configured. This item was not imported.');
-      return;
-    }
-    setImportError('');
-    try {
-      await setDoc(doc(db, 'testimonials', item.id), {
-        ...item,
-        source: 'whatsapp',
-        status: 'pending',
-        storagePath: item.storagePath?.trim() || null,
-        importedAt: serverTimestamp(),
-      }, { merge: true });
-      setImportedMap(prev => ({ ...prev, [item.id]: true }));
-      setSelectedDoc(item);
-    } catch (err) {
-      setImportError(err instanceof Error ? err.message : 'Could not import this item.');
-    }
-  };
-
   return (
     <div className="rounded-[20px] bg-[#1C1C1F] border border-white/[0.06] p-6 w-full flex flex-col justify-between">
       <div>
@@ -110,7 +87,6 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
         </p>
         
         {listenerError && <p role="alert" className="mt-3 text-xs text-red-300">{listenerError}</p>}
-        {importError && <p role="alert" className="mt-3 text-xs text-red-300">{importError}</p>}
         <div className="mt-5 space-y-2 max-h-[240px] overflow-y-auto">
           {incoming.length === 0 && !listenerError && <p className="rounded-xl border border-dashed border-white/10 p-4 text-center text-xs text-white/40">No WhatsApp videos have arrived yet.</p>}
           {incoming.map((msg: any) => (
@@ -133,16 +109,6 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
                 </div>
                 <div className="text-[11px] text-white/40 truncate">{msg.phone} • {msg.duration}</div>
                 <div className="mt-1 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      importToInbox(msg);
-                    }} 
-                    className="text-[10px] px-2.5 py-0.5 rounded-full bg-white text-black font-semibold hover:bg-white/90 active:scale-95 transition-all shadow-sm"
-                  >
-                    {importedMap[msg.id] ? '✓ Imported' : 'Import →'}
-                  </button>
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.06] text-white/50 font-mono">
                     {msg.status}
                   </span>
@@ -182,7 +148,7 @@ export const WhatsAppCollect_Firebase: React.FC<WhatsAppCollect_FirebaseProps> =
       </div>
       
       <div className="mt-4 text-[11px] text-white/30 font-mono leading-relaxed">
-        Firestore: whatsapp_incoming → testimonials • Storage: whatsapp/&#123;id&#125;.mp4
+        Private inbox: whatsapp_incoming • Owner-scoped Storage: whatsapp/&#123;ownerUid&#125;/&#123;phone&#125;/&#123;id&#125;.mp4
       </div>
     </div>
   );
