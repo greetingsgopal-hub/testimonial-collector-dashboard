@@ -2,38 +2,37 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React, { act } from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { WhatsAppCollect_Firebase, getFreshUrl } from '../whatsapp/WhatsAppCollect_Firebase';
-import * as storageModule from 'firebase/storage';
 
-vi.mock('../../firebase-adapters/firebase', () => ({
-  db: {
-    app: { options: { storageBucket: 'pandapraise.appspot.com' } }
-  },
-  storage: {},
-  getFreshUrl: vi.fn(async (path: string) => `https://firebasestorage.googleapis.com/v0/b/demo/o/${encodeURIComponent(path)}?alt=media&token=fresh-token-123`)
+const { freshUrlMock } = vi.hoisted(() => ({
+  freshUrlMock: vi.fn(async (path: string) => `https://storage.example/${encodeURIComponent(path)}?token=fresh`),
 }));
 
-vi.mock('firebase/firestore', () => ({
+vi.mock('../../firebase-adapters/firebase', () => ({
+  db: { app: { options: { storageBucket: 'pandapraise.appspot.com' } } },
+  storage: {},
+  getFreshUrl: freshUrlMock,
+}));
+
+const firestoreMocks = vi.hoisted(() => ({
+  onSnapshot: vi.fn(() => () => {}),
   collection: vi.fn(),
   query: vi.fn(),
-  onSnapshot: vi.fn(() => () => {}),
   orderBy: vi.fn(),
   doc: vi.fn(),
   setDoc: vi.fn().mockResolvedValue(undefined),
-  serverTimestamp: vi.fn(() => new Date())
+  serverTimestamp: vi.fn(() => new Date()),
 }));
 
-vi.mock('firebase/storage', () => ({
-  getStorage: vi.fn(() => ({})),
-  ref: vi.fn((_storage, path) => ({ fullPath: path })),
-  getDownloadURL: vi.fn(async (urlRef) => `https://firebasestorage.googleapis.com/fresh/${urlRef.fullPath}?expires=1week`)
-}));
+vi.mock('firebase/firestore', () => ({ ...firestoreMocks }));
 
-describe('WhatsAppCollect_Firebase Fresh Storage URL Suite', () => {
+import { WhatsAppCollect_Firebase, getFreshUrl } from '../whatsapp/WhatsAppCollect_Firebase';
+
+describe('WhatsAppCollect_Firebase fresh Storage URL behavior', () => {
   let container: HTMLDivElement;
   let root: Root;
 
   beforeEach(() => {
+    (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -41,49 +40,43 @@ describe('WhatsAppCollect_Firebase Fresh Storage URL Suite', () => {
   });
 
   afterEach(() => {
-    act(() => {
-      root.unmount();
-    });
+    act(() => root.unmount());
     container.remove();
   });
 
-  it('getFreshUrl calls getStorage, ref, and getDownloadURL', async () => {
-    const freshUrl = await getFreshUrl('whatsapp/+919800000012/video.mp4');
-    expect(storageModule.getStorage).toHaveBeenCalled();
-    expect(storageModule.ref).toHaveBeenCalledWith(expect.anything(), 'whatsapp/+919800000012/video.mp4');
-    expect(storageModule.getDownloadURL).toHaveBeenCalled();
-    expect(freshUrl).toBe('https://firebasestorage.googleapis.com/fresh/whatsapp/+919800000012/video.mp4?expires=1week');
+  it('resolves a fresh URL from a Firebase Storage path', async () => {
+    const path = 'whatsapp/919800000012/video.mp4';
+    const url = await getFreshUrl(path);
+    expect(freshUrlMock).toHaveBeenCalledWith(path);
+    expect(url).toContain('?token=fresh');
   });
 
-  it('generates fresh URL when doc.storagePath changes instead of using stale cached URL', async () => {
+  it('loads media from storagePath instead of a stale videoUrl', async () => {
     const handleUrlChange = vi.fn();
+    const path = 'whatsapp/test_user/fresh_reel.mp4';
+    const freshUrl = `https://storage.example/${encodeURIComponent(path)}?token=fresh`;
 
     await act(async () => {
       root.render(
-        <WhatsAppCollect_Firebase 
-          doc={{ id: 'test_doc_1', storagePath: 'whatsapp/test_user/fresh_reel.mp4', videoUrl: 'https://expired-24h-url.com' }} 
+        <WhatsAppCollect_Firebase
+          doc={{ id: 'test_doc_1', storagePath: path, videoUrl: 'https://expired-24h-url.com' }}
           onVideoUrlChange={handleUrlChange}
         />
       );
     });
 
-    expect(storageModule.getDownloadURL).toHaveBeenCalled();
-    expect(handleUrlChange).toHaveBeenCalledWith(
-      'https://firebasestorage.googleapis.com/fresh/whatsapp/test_user/fresh_reel.mp4?expires=1week'
-    );
+    expect(freshUrlMock).toHaveBeenCalledWith(path);
+    expect(handleUrlChange).toHaveBeenCalledWith(freshUrl, 'test_doc_1');
     expect(container.textContent).toContain('Fresh Storage URL');
+    expect(container.querySelector('video')?.getAttribute('src')).toBe(freshUrl);
   });
 
-  it('renders 02 COLLECT step with WhatsApp UI details', async () => {
-    await act(async () => {
-      root.render(<WhatsAppCollect_Firebase />);
-    });
+  it('shows an honest empty state instead of fabricated incoming reviews', async () => {
+    await act(async () => root.render(<WhatsAppCollect_Firebase />));
 
-    expect(container.textContent).toContain('02');
-    expect(container.textContent).toContain('WHATSAPP UI • INCOMING');
-    expect(container.textContent).toContain('COLLECT');
-    expect(container.textContent).toContain('Ananya S.');
-    expect(container.textContent).toContain('Rahul M.');
+    expect(container.textContent).toContain('No WhatsApp videos have arrived yet.');
+    expect(container.textContent).not.toContain('Ananya S.');
+    expect(container.textContent).not.toContain('Rahul M.');
   });
 });
 
