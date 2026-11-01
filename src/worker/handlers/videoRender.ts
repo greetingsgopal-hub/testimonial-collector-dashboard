@@ -59,7 +59,7 @@ export async function handleVideoRender(request: Request, env: WorkerEnv): Promi
   if (sourceSize > MAX_SOURCE_BYTES) return json({ error: 'Source video exceeds the 100 MB render limit.' }, 413);
   if (!sourceResponse.body) return json({ error: 'Source video is empty.' }, 422);
 
-  const exports: Array<{ ratio: string; storagePath: string; bytes: number }> = [];
+  const exports: Array<{ id: string; ratio: string; storagePath: string; bytes: number }> = [];
   const written: Array<{ exportId: string; storagePath: string }> = [];
   const renderId = crypto.randomUUID();
   try {
@@ -134,7 +134,7 @@ export async function handleVideoRender(request: Request, env: WorkerEnv): Promi
         videoBitrate,
         createdAt: new Date().toISOString(),
       }, undefined, env);
-      exports.push({ ratio: output.ratio, storagePath: outputPath, bytes: renderedSize });
+      exports.push({ id: exportId, ratio: output.ratio, storagePath: outputPath, bytes: renderedSize });
     }
   } catch (error) {
     await Promise.all(written.map(async ({ exportId, storagePath: outputPath }) => {

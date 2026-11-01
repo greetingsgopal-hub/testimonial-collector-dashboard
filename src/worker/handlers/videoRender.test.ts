@@ -92,11 +92,12 @@ describe('POST /api/video/render', () => {
 
   it('renders three private owner-scoped exports for the owning account', async () => {
     const response = await handleVideoRender(request(), env());
-    const result = await response.json() as { ok: boolean; exports: Array<{ ratio: string; storagePath: string }> };
+    const result = await response.json() as { ok: boolean; exports: Array<{ id: string; ratio: string; storagePath: string }> };
 
     expect(response.status).toBe(200);
     expect(result.ok).toBe(true);
     expect(result.exports.map((item) => item.ratio)).toEqual(['9:16', '4:5', '1:1']);
+    expect(result.exports.every((item) => item.id.length > 0)).toBe(true);
     expect(result.exports.every((item) => item.storagePath.startsWith('edits/owner-uid/media123/'))).toBe(true);
     expect(mocks.saveDocument).toHaveBeenCalledTimes(3);
     expect(mocks.saveDocument).toHaveBeenCalledWith(

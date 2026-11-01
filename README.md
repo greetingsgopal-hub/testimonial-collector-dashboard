@@ -138,4 +138,14 @@ The Container transcodes at 1080p with H.264 CRF 18, slow preset, a 10 Mbps targ
 
 Containers require a Cloudflare Workers Paid plan and Docker for local image builds/deploys. Deploy with `npm run build` followed by `npx wrangler deploy`; Wrangler builds the `Dockerfile.ffmpeg-renderer` image. Keep `FIREBASE_STORAGE_BUCKET` and the service account configured as Worker secrets/vars, and grant that service account access to the Firebase Storage bucket and Firestore. No public Container URL or client-supplied Storage path is used.
 
+### Renderer end-to-end verification
+
+First link a test WABA and send a real video from a dedicated test sender to the linked WhatsApp number. After the webhook has created the owner-scoped `whatsapp_incoming` record and Storage object, set `RENDER_E2E_API_URL` in `.env` to the deployed `/api/video/render` URL and set `OWNERSHIP_TEST_VIDEO_ID` to the record's raw `id` value. Use the dedicated owner and other-user test accounts already configured for `verify:ownership`, then run:
+
+```sh
+npm run verify:render-e2e
+```
+
+The script does not fabricate WhatsApp intake or invoke an unauthenticated webhook. It verifies the real incoming record, requests all three renders as the owner, checks the output files and Firestore metadata, then confirms a second account cannot render or read the incoming video or exports. It prints check results only and does not print tokens, phone numbers, or playback URLs.
+
 
