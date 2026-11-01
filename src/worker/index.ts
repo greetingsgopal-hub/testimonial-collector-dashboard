@@ -55,6 +55,8 @@ import {
   handleWhatsAppIncoming,
 } from './handlers/phase1_2_handlers';
 import { handleWhatsAppMetaLink, handleWhatsAppMetaConfirm } from './handlers/whatsappAccountLink';
+import { handleVideoRender } from './handlers/videoRender';
+export { VideoRendererContainer } from './videoRendererContainer';
 import {
   handleAdminGetWorkspaces,
   handleAdminUpdateWorkspacePlan,
@@ -422,6 +424,9 @@ export default {
         case 'webhook/whatsapp':
         case 'webhooks/whatsapp':
           return await handleWhatsAppIncoming(request, env);
+
+        case 'video/render':
+          return await handleVideoRender(request, env);
 
         default:
           return new Response(JSON.stringify({ error: `API route '${pathname}' not found.` }), {
