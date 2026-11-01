@@ -6,6 +6,7 @@
   "scripts": {
     "test": "vitest run",
     "verify:ownership": "node --env-file=.env scripts/verify-ownership.mjs",
+    "verify:render-e2e": "node --env-file=.env scripts/verify-render-e2e.mjs",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"

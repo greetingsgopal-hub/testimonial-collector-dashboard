@@ -2,8 +2,14 @@ export interface Fetcher {
   fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 }
 
+export interface DurableObjectNamespaceLike {
+  idFromName(name: string): unknown;
+  get(id: unknown): Fetcher;
+}
+
 export interface WorkerEnv {
   ASSETS: Fetcher;
+  FFMPEG_RENDERER?: DurableObjectNamespaceLike;
   FIREBASE_API_KEY?: string;
   VITE_FIREBASE_API_KEY?: string;
   FIREBASE_PROJECT_ID?: string;
